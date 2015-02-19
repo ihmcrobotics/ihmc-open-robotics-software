@@ -23,6 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
+import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
@@ -60,7 +61,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.targetDeployment = targetDeployment;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
-      this.lidarDataFilter = new DepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
+      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
    }
 
    @Override

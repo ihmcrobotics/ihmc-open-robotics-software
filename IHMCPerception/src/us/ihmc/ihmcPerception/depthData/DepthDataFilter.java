@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
@@ -24,13 +23,11 @@ import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.RigidBody;
 
 public class DepthDataFilter
 {
-	private static final boolean USE_SIMPLIFIED_QUAD_TREE = true;
-	
+   private static final boolean USE_SIMPLIFIED_QUAD_TREE = true;
+
    public static final int OCTREE_MIN_BOXES = 20000;
    public static final int OCTREE_MAX_BOXES = 100000;
    public static final double QUAD_TREE_EXTENT = 200;
@@ -39,32 +36,25 @@ public class DepthDataFilter
    private final Octree octree;
    private final DecayingResolutionFilter nearScan;
 
-   private final RobotBoundingBoxes robotBoundingBoxes;
-   private final SDFFullRobotModel fullRobotModel;
 
-   private DepthDataFilterParameters parameters;
+
+   protected DepthDataFilterParameters parameters;
 
    // Adjustment which is applied to LIDAR points.  Must be applied while points are still in LIDAR frame.  Allows users correct for errors
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
    private final RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
-   public DepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel)
+   public DepthDataFilter(ReferenceFrame headFrame)
    {
-      this.robotBoundingBoxes = robotBoundingBoxes;
-      this.fullRobotModel = fullRobotModel;
-
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
-
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
-
-      RigidBody head = fullRobotModel.getHead();
-      ReferenceFrame headFrame = head == null ? ReferenceFrame.getWorldFrame() : head.getBodyFixedFrame();
       quadTree = getGroundOnlyQuadTree(headFrame);
       octree = getOctree(headFrame);
       quadTree.setOctree(octree);
    }
 
-   public void setWorldToCorrected(RigidBodyTransform adjustment) {
+   public void setWorldToCorrected(RigidBodyTransform adjustment)
+   {
       this.worldToCorrected.set(adjustment);
    }
 
@@ -78,14 +68,16 @@ public class DepthDataFilter
       if (USE_SIMPLIFIED_QUAD_TREE)
       {
          Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
-         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION, 
-               parameters.quadtreeHeightThreshold, parameters.quadTreeMaxMultiLevelZChangeToFilterNoise, parameters.maxSameHeightPointsPerNode, parameters.maxAllowableXYDistanceForAPointToBeConsideredClose);
+         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION,
+                                                             parameters.quadtreeHeightThreshold, parameters.quadTreeMaxMultiLevelZChangeToFilterNoise,
+                                                             parameters.maxSameHeightPointsPerNode,
+                                                             parameters.maxAllowableXYDistanceForAPointToBeConsideredClose);
 
          return new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
       }
 
       return new GroundOnlyQuadTree(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, DepthDataFilterParameters.GRID_RESOLUTION,
-            parameters.quadtreeHeightThreshold, 100000);
+                                    parameters.quadtreeHeightThreshold, 100000);
    }
 
    public Octree getOctree(ReferenceFrame headFrame)
@@ -93,18 +85,20 @@ public class DepthDataFilter
       if (parameters.USE_RESOLUTION_SPHERE)
       {
          SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
-               parameters.LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD, 0.0, 0.0), parameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS,
-               parameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION, parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS,
-               parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
+                                                                   parameters.LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD, 0.0,
+                                                                   0.0), parameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS,
+                                                                      parameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION,
+                                                                      parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS,
+                                                                      parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
 
-         return new Octree(new OneDimensionalBounds[] { new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-               new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT), new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT) },
-               resolutionProvider);
+         return new Octree(new OneDimensionalBounds[] {new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
+                 new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
+                 new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, resolutionProvider);
       }
 
-      return new Octree(new OneDimensionalBounds[] { new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-            new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT), new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT) },
-            DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
+      return new Octree(new OneDimensionalBounds[] {new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
+              new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
+              new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
    }
 
    public SparseLidarScanPacket filterPolarLidarScan(LidarScan lidarScan)
@@ -125,62 +119,52 @@ public class DepthDataFilter
    {
       Point3d lidarOrigin = new Point3d();
       lidarScan.getAverageTransform().transform(lidarOrigin);
-      boolean send = false;
 
       if (rayInRange(lidarScan.getRange(i)))
       {
          Point3d point = lidarScan.getPoint(i);
 
-         // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
-         if( DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE )
-            worldToCorrected.transform(point);
-
-         if (parameters.nearScan && isValidNearScan(point, lidarOrigin))
-         {
-            send = nearScan.add(point.x, point.y, point.z) || send;
-         }
-
-         if (isValidOctree(point, lidarOrigin))
-         {
-            if (isPossibleGround(point, lidarOrigin)) {
-               send = quadTree.addPoint(point.x, point.y, point.z) || send;
-            }
-            else {
-               send = quadTree.addPointToOctree(point.x, point.y, point.z) || send;
-            }
-         }
+         return addPoint(point, lidarOrigin);
       }
-
-      return send;
+      else
+         return false;
    }
-   
+
    public boolean addPoint(Point3d point, RigidBodyTransform transform)
    {
       Point3d sensorOrigin = new Point3d();
       transform.transform(sensorOrigin);
+      if (pointInRange(point, sensorOrigin))
+         return addPoint(point, sensorOrigin);
+      else
+         return false;
+
+   }
+
+   private boolean addPoint(Point3d point, Point3d sensorOrigin)
+   {
       boolean send = false;
 
-      if (pointInRange(point,sensorOrigin))
+      // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
+      if (DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE)
+         worldToCorrected.transform(point);
+
+      if (parameters.nearScan && isValidNearScan(point, sensorOrigin))
       {
-         // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
-         if( DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE )
-            worldToCorrected.transform(point);
+         send = nearScan.add(point.x, point.y, point.z) || send;
+      }
 
-         if (parameters.nearScan && isValidNearScan(point, sensorOrigin))
+      if (isValidOctree(point, sensorOrigin))
+      {
+         if (isPossibleGround(point, sensorOrigin))
          {
-            send = nearScan.add(point.x, point.y, point.z) || send;
+            send = quadTree.addPoint(point.x, point.y, point.z) || send;
          }
-
-         if (isValidOctree(point, sensorOrigin))
+         else
          {
-            if (isPossibleGround(point, sensorOrigin)) {
-               send = quadTree.addPoint(point.x, point.y, point.z) || send;
-            }
-            else {
-               send = quadTree.addPointToOctree(point.x, point.y, point.z) || send;
-            }
+            send = quadTree.addPointToOctree(point.x, point.y, point.z) || send;
          }
-      } 
+      }
 
       return send;
    }
@@ -188,89 +172,41 @@ public class DepthDataFilter
    public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
-      valid &= point.z > getMidFootPoint().z + parameters.nearScanZMinAboveFeet;
       valid &= point.z < lidarOrigin.z + parameters.nearScanZMaxAboveHead;
 
       Point3d center = new Point3d(lidarOrigin.x, lidarOrigin.y, point.z);
       valid &= point.distance(center) < parameters.nearScanRadius;
 
-      valid &= Math.abs(getAngleToPelvis(point, lidarOrigin)) < parameters.nearScanRadians;
-      valid &= parameters.nearScanCollisions || robotBoundingBoxes.isValidPoint(lidarOrigin, point);
 
       return valid;
    }
 
-   //TODO: isAheadOfPelvis must be commented out when debugging val currently
    public boolean isValidOctree(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
 
       valid &= point.getZ() < lidarOrigin.getZ() + parameters.octreeZMaxAboveHead;;
-      valid &= isAheadOfPelvis(point);
-      valid &= robotBoundingBoxes.isValidPoint(lidarOrigin, point);
 
       return valid;
    }
-   
-   public Point3d getMidFootPoint() 
+
+   public boolean isPossibleGround(Point3d point, Point3d lidarOrigin)
    {
-      RigidBodyTransform temp = new RigidBodyTransform();
-      Point3d left = new Point3d();
-      Point3d avg = new Point3d();
+      final double footZ = 0;
 
-      fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame().getTransformToDesiredFrame(temp, ReferenceFrame.getWorldFrame());
-      temp.transform(left);
-      fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame().getTransformToDesiredFrame(temp, ReferenceFrame.getWorldFrame());
-      temp.transform(avg);
-      
-      avg.add(left);
-      avg.scale(0.5);
-      return avg;
-   }
-   
-   public boolean isPossibleGround(Point3d point, Point3d lidarOrigin) {
-      Point3d footAvg = getMidFootPoint();
-      
-      double footZ = footAvg.z;
-      footAvg.setZ(point.z);
-      
-      double maxHeight = parameters.quadTreeZAboveFeet + point.distance(footAvg) * parameters.quadTreeZSlope;
-      if (maxHeight > parameters.quadTreeZMax) {
-         maxHeight = parameters.quadTreeZMax;
-      }
-      
-      return (point.z - footZ) < maxHeight;
-   }
-
-   public double getAngleToPelvis(Point3d point, Point3d lidarOrigin)
-   {
-      RigidBodyTransform tf = new RigidBodyTransform();
-      ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
-      Point3d tfPoint = new Point3d(point);
-      tf.transform(tfPoint);
-
-      return Math.atan2(tfPoint.y, tfPoint.x);
-   }
-
-   private boolean isAheadOfPelvis(Point3d point)
-   {
-      RigidBodyTransform tf = new RigidBodyTransform();
-      ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
-      Point3d tfPoint = new Point3d(point);
-      tf.transform(tfPoint);
-
-      return tfPoint.x > parameters.xCutoffPelvis;
+      return (point.z - footZ) < parameters.quadTreeZMax;
    }
 
    private boolean rayInRange(double rayLength)
    {
-      return rayLength > parameters.minRange && rayLength < parameters.maxRange;
+      return (rayLength > parameters.minRange) && (rayLength < parameters.maxRange);
    }
-   
+
    private boolean pointInRange(Point3d point, Point3d sensorOrigin)
    {
       double dist = sensorOrigin.distance(point);
-      return dist > parameters.minRange && dist < parameters.maxRange;
+
+      return (dist > parameters.minRange) && (dist < parameters.maxRange);
    }
 
    // TODO get rid of this and integrate with parameters
@@ -289,18 +225,21 @@ public class DepthDataFilter
    public void clearLidarData(DepthDataTree lidarTree)
    {
       nearScan.clear();
+
       switch (lidarTree)
       {
-      case OCTREE:
-         octree.clearTree();
-         break;
+         case OCTREE :
+            octree.clearTree();
 
-      case QUADTREE:
-         quadTree.clearTree();
-         break;
+            break;
 
-      default:
-         throw new RuntimeException("Unknown tree");
+         case QUADTREE :
+            quadTree.clearTree();
+
+            break;
+
+         default :
+            throw new RuntimeException("Unknown tree");
       }
    }
 
@@ -314,7 +253,6 @@ public class DepthDataFilter
 
       quadTree.setHeightThreshold(parameters.quadtreeHeightThreshold);
 
-      robotBoundingBoxes.setScale(parameters.boundingBoxScale);
    }
 
    public QuadTreeHeightMapInterface getQuadTree()
@@ -341,11 +279,12 @@ public class DepthDataFilter
    {
       Point3d[] points = pointCloud.getPoints();
       ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
-      
+
       for (int i = 0; i < points.length; i++)
       {
          transformToWorld.transform(points[i]);
-         if (addPoint(points[i],transformToWorld))
+
+         if (addPoint(points[i], transformToWorld))
          {
             filteredPoints.add(points[i]);
          }
