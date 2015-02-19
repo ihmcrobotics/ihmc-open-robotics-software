@@ -34,7 +34,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -293,7 +293,7 @@ public class FootstepDataTest
       netClassList.registerPacketField(Quat4d.class);
       netClassList.registerPacketField(PacketDestination.class);
       netClassList.registerPacketField(FootstepStatus.Status.class);
-      netClassList.registerPacketField(TrajectoryGenerationMethod.class);
+      netClassList.registerPacketField(TrajectoryType.class);
       netClassList.registerPacketField(RobotSide.class);
 
       return netClassList;

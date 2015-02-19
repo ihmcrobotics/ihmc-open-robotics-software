@@ -26,7 +26,7 @@ public class FootstepTools
              "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
       Footstep footstep = new Footstep(id, contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame,
                                        true, contactPoints);
-      footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
+      footstep.trajectoryType = footstepData.getTrajectoryType();
       footstep.swingHeight = footstepData.swingHeight;
 
       return footstep;
@@ -42,7 +42,7 @@ public class FootstepTools
              "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
       Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
                                        contactPoints);
-      footstep.trajectoryType = footstepData.getTrajectoryGenerationMethod();
+      footstep.trajectoryType = footstepData.getTrajectoryType();
       footstep.swingHeight = footstepData.swingHeight;
 
       return footstep;

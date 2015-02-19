@@ -31,7 +31,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
+import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
@@ -361,7 +361,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       double zClearHeight = desiredFootsteps.get(0).getLocation().getZ() + 0.07;
       double swingHeightForClear = zClearHeight - desiredFootsteps.get(2).getLocation().getZ(); //should really be the last height (height before swing), not step 2, but they're approximate.
       desiredFootsteps.get(1).setSwingHeight(swingHeightForClear);
-      desiredFootsteps.get(1).setTrajectoryGenerationMethod(TrajectoryGenerationMethod.OBSTACLE_CLEARANCE);
+      desiredFootsteps.get(1).setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
       return desiredFootsteps;
    }
    
