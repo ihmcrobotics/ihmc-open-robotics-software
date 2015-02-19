@@ -32,6 +32,6 @@ public class RotateHandAboutAxisTask extends BehaviorTask
    @Override
    protected void setBehaviorInput()
    {
-      rotateHandAboutAxisBehavior.setInput(robotSide, graspedObjectTransformToWorld, pinJointAxisInGraspedObjectFrame, turnAngleRad, trajectoryTime);
+      rotateHandAboutAxisBehavior.setInput(robotSide, pinJointAxisInGraspedObjectFrame, graspedObjectTransformToWorld, turnAngleRad, trajectoryTime);
    }
 }
