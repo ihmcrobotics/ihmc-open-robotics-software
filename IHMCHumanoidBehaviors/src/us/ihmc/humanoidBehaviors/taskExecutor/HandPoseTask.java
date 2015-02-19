@@ -26,6 +26,8 @@ public class HandPoseTask extends BehaviorTask
    private final double trajectoryTime;
    private final Vector3d desiredHandPoseOffsetFromCurrent;
 
+   private final boolean stopHandIfCollision;
+
    public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime)
    {
       this(robotSide, desiredArmJointAngles, yoTime, handPoseBehavior, trajectoryTime, 0.0);
@@ -34,23 +36,36 @@ public class HandPoseTask extends BehaviorTask
    public HandPoseTask(RobotSide robotSide, double[] desiredArmJointAngles, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime,
          double sleepTime)
    {
-      this(robotSide, new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles), handPoseBehavior, yoTime, sleepTime);
+      this(robotSide, new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles), handPoseBehavior, yoTime, sleepTime, false);
    }
 
    public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, RigidBodyTransform pose,
          double trajectoryTime)
    {
-      this(robotSide, PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), handPoseBehavior, yoTime);
+      this(robotSide, yoTime, handPoseBehavior, frame, pose, trajectoryTime, false);
+   }
+
+   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, RigidBodyTransform pose,
+         double trajectoryTime, boolean stopHandIfCollision)
+   {
+      this(robotSide, PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), handPoseBehavior, yoTime, stopHandIfCollision);
    }
 
    public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
    {
-      this(robotSide, handPosePacket, handPoseBehavior, yoTime, 0.0);
+      this(robotSide, handPosePacket, handPoseBehavior, yoTime, false);
    }
 
-   public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime, double sleepTime)
+   public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime,
+         boolean stopHandIfCollision)
    {
-      super(handPoseBehavior, yoTime,sleepTime);
+      this(robotSide, handPosePacket, handPoseBehavior, yoTime, 0.0, stopHandIfCollision);
+   }
+
+   public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime, double sleepTime,
+         boolean stopHandIfCollision)
+   {
+      super(handPoseBehavior, yoTime, sleepTime);
       this.handPoseBehavior = handPoseBehavior;
       this.handPosePacket = handPosePacket;
 
@@ -59,9 +74,17 @@ public class HandPoseTask extends BehaviorTask
       this.fullRobotModel = null;
       this.trajectoryTime = handPosePacket.getTrajectoryTime();
       this.desiredHandPoseOffsetFromCurrent = null;
+
+      this.stopHandIfCollision = stopHandIfCollision;
    }
 
    public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime)
+   {
+      this(robotSide, yoTime, handPoseBehavior, frame, pose, trajectoryTime, false);
+   }
+
+   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime,
+         boolean stopHandIfCollision)
    {
       super(handPoseBehavior, yoTime);
       this.handPoseBehavior = handPoseBehavior;
@@ -75,10 +98,18 @@ public class HandPoseTask extends BehaviorTask
       this.fullRobotModel = null;
       this.trajectoryTime = trajectoryTime;
       this.desiredHandPoseOffsetFromCurrent = null;
+
+      this.stopHandIfCollision = stopHandIfCollision;
    }
 
    public HandPoseTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
          HandPoseBehavior handPoseBehavior, double trajectoryTime)
+   {
+      this(robotSide, directionToMoveInWorld, distanceToMove, fullRobotModel, yoTime, handPoseBehavior, trajectoryTime, false);
+   }
+
+   public HandPoseTask(RobotSide robotSide, Vector3d directionToMoveInWorld, double distanceToMove, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
+         HandPoseBehavior handPoseBehavior, double trajectoryTime, boolean stopHandIfCollision)
    {
       super(handPoseBehavior, yoTime);
       this.handPoseBehavior = handPoseBehavior;
@@ -92,6 +123,8 @@ public class HandPoseTask extends BehaviorTask
       if (desiredHandPoseOffsetFromCurrent.length() > 0.0)
          desiredHandPoseOffsetFromCurrent.normalize();
       desiredHandPoseOffsetFromCurrent.scale(distanceToMove);
+
+      this.stopHandIfCollision = stopHandIfCollision;
    }
 
    @Override
@@ -105,11 +138,11 @@ public class HandPoseTask extends BehaviorTask
          RigidBodyTransform desiredHandTransformToWorld = new RigidBodyTransform();
          desiredHandPose.getPose(desiredHandTransformToWorld);
 
-         handPoseBehavior.setInput(Frame.WORLD, desiredHandTransformToWorld, robotSide, trajectoryTime);
+         handPoseBehavior.setInput(Frame.WORLD, desiredHandTransformToWorld, robotSide, trajectoryTime, stopHandIfCollision);
       }
       else
       {
-         handPoseBehavior.setInput(handPosePacket);
+         handPoseBehavior.setInput(handPosePacket, stopHandIfCollision);
       }
    }
 
