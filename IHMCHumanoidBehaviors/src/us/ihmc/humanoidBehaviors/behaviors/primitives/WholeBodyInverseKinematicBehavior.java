@@ -139,8 +139,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
    public void setPositionAndOrientationErrorTolerance(double positionErrorTolerance, double orientationErrorTolerance)
    {
-      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
-      wholeBodyIKSolver.taskEndEffectorPose.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorPosition.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorPosition.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      
+      wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
    }
 
    @Override

@@ -48,9 +48,18 @@ abstract public class WholeBodyIkSolver
    static public final double IGNORE = -66666.666;
 
 
-   static public enum ControlledDoF { DOF_NONE, DOF_3P, DOF_3P2R, DOF_3P3R }
+   static public enum ControlledDoF { 
+      DOF_NONE,  // don't control this end effector.
+      DOF_3P,    // control only the position of the end effector.
+      DOF_3P3R,  // control position and rotation (6 DoF) of the end effector.
+      DOF_3P2R  // Control 3 positions and only 2 rotations.
+       }
 
-   static public enum ComputeOption { RESEED, USE_ACTUAL_MODEL_JOINTS, USE_JOINTS_CACHE, RELAX };
+   static public enum ComputeOption { 
+      RESEED,  // create a random joint pose and search again a solution.
+      USE_ACTUAL_MODEL_JOINTS,  // use the actual position of the robot's joints as initial guess.
+      USE_JOINTS_CACHE,  // use the last computed position of the joints as initial guess.
+      RELAX };
 
    // I just like shorter names :/
    final private static RobotSide RIGHT = RobotSide.RIGHT;
@@ -59,8 +68,6 @@ abstract public class WholeBodyIkSolver
    ///--------------- Reference Frames and Transfoms --------------------------
    private final ReferenceFrames workingFrames;
 
-
-   //  private final SideDependentList<ReferenceFrame> actualSoleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
    //---------- robot models in different contexts and different formats ----------
@@ -71,7 +78,8 @@ abstract public class WholeBodyIkSolver
    //---------------  tasks assigned to this solver --------------------------------
    public HierarchicalTask_COM        taskComPosition;
    public HierarchicalTask_JointsPose taskJointsPose;
-   public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPose = new SideDependentList<HierarchicalTask_BodyPose>();
+   public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTask_BodyPose>();
+   public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTask_BodyPose>();
    public final HierarchicalTask_BodyPose taskLegPose;
 
    // ------------- Parameters that change the overall behavior ----------------------
@@ -127,7 +135,7 @@ abstract public class WholeBodyIkSolver
       return (jointNamesToIndex.get(jointName) != null);
    }
 
-   
+   // helper function to check if a certain robot state is self-colliding or not.
    public boolean checkCollisions(SDFFullRobotModel modelToCheck)
    {
       HashMap<String,RigidBodyTransform> bodyTransforms = new HashMap<String,RigidBodyTransform>();
@@ -148,7 +156,6 @@ abstract public class WholeBodyIkSolver
     * 1: show a resume of the errors.
     * 2: Lot of data...
     */
-
    public void setVerbosityLevel(int level)
    {
       hierarchicalSolver.setVerbosityLevel(level);
@@ -298,7 +305,9 @@ abstract public class WholeBodyIkSolver
       {
          int currentHandId = urdfModel.getBodyId(getGripperPalmLinkName(robotSide));
 
-         taskEndEffectorPose.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
+         taskEndEffectorPosition.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
+         taskEndEffectorRotation.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
+         
          int [] indexes = new  int[ getNumberDoFperArm()];
          urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , indexes);
          for (int i: indexes)
@@ -329,15 +338,25 @@ abstract public class WholeBodyIkSolver
 
       taskLegPose.setName( "left Leg Pose");
       taskComPosition.setName( "COM Position");
-      taskEndEffectorPose.get(RIGHT).setName( "Right Hand Pose" );
-      taskEndEffectorPose.get(LEFT).setName( "Left Hand Pose" );
+      
+      taskEndEffectorPosition.get(RIGHT).setName( "Right Hand Position" );
+      taskEndEffectorPosition.get(LEFT).setName( "Left Hand Position" );
+      
+      taskEndEffectorRotation.get(RIGHT).setName( "Right Hand Rotation" );
+      taskEndEffectorRotation.get(LEFT).setName( "Left Hand Rotation" );
+      
       taskJointsPose.setName( "Whole body Posture" );
 
       // the order is important!! first to be added have higher priority
       hierarchicalSolver.addTask(taskLegPose);
       hierarchicalSolver.addTask(taskComPosition);
-      hierarchicalSolver.addTask(taskEndEffectorPose.get(RIGHT));
-      hierarchicalSolver.addTask(taskEndEffectorPose.get(LEFT));
+      
+      hierarchicalSolver.addTask(taskEndEffectorPosition.get(RIGHT));
+      hierarchicalSolver.addTask(taskEndEffectorPosition.get(LEFT));
+      
+      hierarchicalSolver.addTask(taskEndEffectorRotation.get(RIGHT));
+      hierarchicalSolver.addTask(taskEndEffectorRotation.get(LEFT));
+      
       hierarchicalSolver.addTask(taskJointsPose);
 
       preferedJointPose = new Vector64F(numOfJoints);
@@ -369,8 +388,8 @@ abstract public class WholeBodyIkSolver
       {
          return;
       }
-      HierarchicalTask_BodyPose taskL = taskEndEffectorPose.get(LEFT);
-      HierarchicalTask_BodyPose taskR = taskEndEffectorPose.get(RIGHT);
+      HierarchicalTask_BodyPose taskL = taskEndEffectorPosition.get(LEFT);
+      HierarchicalTask_BodyPose taskR = taskEndEffectorPosition.get(RIGHT);
 
       double zL = taskL.getTarget().get(2);
       double zR = taskR.getTarget().get(2);
@@ -402,7 +421,9 @@ abstract public class WholeBodyIkSolver
    public void setGripperAttachmentTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-      taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
+     
+      taskEndEffectorPosition.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
+      taskEndEffectorRotation.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
 
       setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
    }
@@ -414,7 +435,9 @@ abstract public class WholeBodyIkSolver
    public void setGripperPalmTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
    {
       PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-      taskEndEffectorPose.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
+      
+      taskEndEffectorPosition.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
+      taskEndEffectorRotation.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
 
       setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
    }
@@ -423,7 +446,7 @@ abstract public class WholeBodyIkSolver
    {
       movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
 
-      final HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(endEffectorSide);
+      // HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(endEffectorSide);
 
       RigidBodyTransform ee_transform;
       ee_transform = endEffectorPose.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
@@ -432,13 +455,15 @@ abstract public class WholeBodyIkSolver
 
       RobotSide steadySide = endEffectorSide.getOppositeSide();
 
-      hierarchicalSolver.prioritizeTasks(taskEndEffectorPose.get(steadySide), handTask);
-
+      hierarchicalSolver.prioritizeTasks(taskEndEffectorPosition.get(steadySide), taskEndEffectorPosition.get(endEffectorSide));
+      hierarchicalSolver.prioritizeTasks(taskEndEffectorRotation.get(steadySide), taskEndEffectorRotation.get(endEffectorSide));
+      
       Quat4d quat = new Quat4d();
       Vector3d pos = new Vector3d();
       ee_transform.get(quat, pos);
 
-      handTask.setTarget( quat, pos); 
+      taskEndEffectorPosition.get(endEffectorSide).setTarget( quat, pos); 
+      taskEndEffectorRotation.get(endEffectorSide).setTarget( quat, pos);
    }
 
    private void enforceControlledDoF( ComputeOption opt )
@@ -447,41 +472,57 @@ abstract public class WholeBodyIkSolver
 
       for ( RobotSide side: RobotSide.values)
       {
-         HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(side);
+       //  HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(side);
 
          switch( controlledDoF.get(side) )
          {
          case DOF_NONE:
-            handTask.setEnabled(false);
+            taskEndEffectorPosition.get(side).setEnabled(false);
+            taskEndEffectorRotation.get(side).setEnabled(false);
             break;
 
          case DOF_3P:
-            handTask.setEnabled(true);
+            taskEndEffectorPosition.get(side).setEnabled(true);
+            taskEndEffectorRotation.get(side).setEnabled(false);
 
-            if( opt == null || opt != ComputeOption.RESEED)
-               handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.05, 0.05, 0.05) );
-            else
-               handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.0, 0.0, 0.0) );
+            taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.01, 0.01, 0.01) );
+            taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,    0, 0, 0) );
 
-            handTask.setWeightError( new Vector64F(6, 1, 1, 1,  0,0,0) );
+            taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
+            taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   0, 0, 0) );
             break;
 
-         case DOF_3P2R:
-            handTask.setEnabled(true);
-            handTask.setWeightError( new Vector64F(6, 1,1,1,  1,1,1 ) );
 
-            Vector64F target = handTask.getTarget();
+         case DOF_3P3R:
+            taskEndEffectorPosition.get(side).setEnabled(true);
+            taskEndEffectorRotation.get(side).setEnabled(true);
+
+            taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );
+            taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1, 1, 1) );
+
+            taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
+            taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
+            
+            break;   
+            
+         case DOF_3P2R:
+            
+            taskEndEffectorPosition.get(side).setEnabled(true);
+            taskEndEffectorRotation.get(side).setEnabled(true);
+
+            taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );
+            taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1, 1, 1) );
+
+            taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
+            taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
+            
+            Vector64F target = taskEndEffectorRotation.get(side).getTarget();
             Matrix3d rot = new Matrix3d();
             rot.set( new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) ) );
             
-            handTask.disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21));  
+            taskEndEffectorRotation.get(side).disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21));  
             
             break;
-         case DOF_3P3R:
-            handTask.setEnabled(true);
-            handTask.setWeightError( new Vector64F(6, 1,1,1,  1,1,1 ) );
-            handTask.setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, rotationWeight, rotationWeight, rotationWeight) ); 
-            break;   
          }
       }
    }
@@ -528,20 +569,19 @@ abstract public class WholeBodyIkSolver
       taskLegPose.setEnabled(!lockLegs);
 
       double val = lockLegs ? 0 : 1;
-      
-      Vector64F weightsJoints    =  taskJointsPose.getWeightsJointSpace();
-      Vector64F weightsCollision =  getHierarchicalSolver().collisionAvoidance.getJointWeights();
-      Vector64F weightsEE_Left   =  taskEndEffectorPose.get(LEFT).getWeightsJointSpace();
-      Vector64F weightsEE_Right  =  taskEndEffectorPose.get(RIGHT).getWeightsJointSpace();
-      
+        
       for (RobotSide side: RobotSide.values)
       {
          for (int index : legJointIds.get(side) )
          {
-            weightsEE_Left.set(index, val);
-            weightsEE_Right.set(index, val);
-            weightsJoints.set(index, val);
-            weightsCollision.set(index, val);
+            taskJointsPose.getWeightsJointSpace().set(index, val);
+            getHierarchicalSolver().collisionAvoidance.getJointWeights().set(index, val);
+            
+            taskEndEffectorPosition.get(LEFT).getWeightsJointSpace().set(index, val);
+            taskEndEffectorPosition.get(RIGHT).getWeightsJointSpace().set(index, val);
+            
+            taskEndEffectorRotation.get(LEFT).getWeightsJointSpace().set(index, val);
+            taskEndEffectorRotation.get(RIGHT).getWeightsJointSpace().set(index, val);
          }
       }     
    }
@@ -582,6 +622,10 @@ abstract public class WholeBodyIkSolver
 
       HashMap<String,Double> suggestedQ = getSuggestedAnglesForReseed();
 
+      System.out.println("\n" + cachedAnglesQ );
+      
+      System.out.println( newQ );
+      
       for( Map.Entry<String,Double> entry: suggestedQ.entrySet())
       {
          int index = jointNamesToIndex.get(entry.getKey());
@@ -595,7 +639,7 @@ abstract public class WholeBodyIkSolver
 
          for(RobotSide robotSide: RobotSide.values())
          {
-            if( keepArmQuiet.get(robotSide).isTrue() &&  armJointIds.get(robotSide).contains(i))
+            if( controlledDoF.get(robotSide) == ControlledDoF.DOF_NONE &&  armJointIds.get(robotSide).contains(i))
             {
                partOfQuietArm = true;
             }
@@ -609,6 +653,7 @@ abstract public class WholeBodyIkSolver
             cachedAnglesQ.set(i, newQ.get(i));
          }
       }
+      System.out.println( cachedAnglesQ );
    }
 
 
@@ -618,6 +663,19 @@ abstract public class WholeBodyIkSolver
       {
          throw new Exception(" the output of compute should not be a reference to actual_sdf_model");
       }
+      
+      // use actual angles if you are not controlling the arm
+      for (int i = 0; i < getNumberOfJoints(); i++)
+      {
+         for(RobotSide robotSide: RobotSide.values())
+         {
+            if( controlledDoF.get(robotSide) == ControlledDoF.DOF_NONE &&  armJointIds.get(robotSide).contains(i))
+            {
+               OneDoFJoint joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(i));
+               cachedAnglesQ.set(i, joint.getQ());
+            }
+         }
+      }   
 
       switch(opt)
       {
@@ -658,8 +716,8 @@ abstract public class WholeBodyIkSolver
 
       if(opt != ComputeOption.RESEED)
       {
-         keepArmQuiet.get(LEFT).setValue(true);
-         keepArmQuiet.get(RIGHT).setValue(true);
+       //  keepArmQuiet.get(LEFT).setValue(true);
+       //  keepArmQuiet.get(RIGHT).setValue(true);
       }
 
       return ret;

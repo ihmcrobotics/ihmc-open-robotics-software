@@ -215,8 +215,8 @@ public class WholeBodyIkSolverTestHelper
 
                   System.out.println(" actual sole\n" + actualRobotModel.getSoleFrame(side).getTransformToWorldFrame());
 
-                  System.out.println("\n desired (local B)\n" + hikSolver.taskEndEffectorPose.get(side).getTarget());
-                  System.out.println(" calculated (local)\n" + hikSolver.taskEndEffectorPose.get(side).getCurrent() + "\n\n");
+                  System.out.println("\n desired (local B)\n" + hikSolver.taskEndEffectorPosition.get(side).getTarget());
+                  System.out.println(" calculated (local)\n" + hikSolver.taskEndEffectorPosition.get(side).getCurrent() + "\n\n");
                }
 
                if (hikSolutionExists == ComputeResult.SUCCEEDED)

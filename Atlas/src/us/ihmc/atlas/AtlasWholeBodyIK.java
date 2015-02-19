@@ -128,10 +128,6 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       RobotSide LEFT = RobotSide.LEFT;
       RobotSide RIGHT = RobotSide.RIGHT;
 
-      HierarchicalTask_BodyPose task_ee_pose_R = taskEndEffectorPose.get(RIGHT);
-      HierarchicalTask_BodyPose task_ee_pose_L = taskEndEffectorPose.get(LEFT);
-
-
       int rleg_akx = jointNamesToIndex.get("r_leg_akx");
       int rleg_aky = jointNamesToIndex.get("r_leg_aky");
       int rleg_kny = jointNamesToIndex.get("r_leg_kny");
@@ -153,10 +149,13 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       int larm_elx = jointNamesToIndex.get("l_arm_elx");
       int rarm_elx = jointNamesToIndex.get("r_arm_elx");
 
-      task_ee_pose_L.setMaximumError(0.3);
-      task_ee_pose_R.setMaximumError(0.3);
+     /* taskEndEffectorPosition.get(RIGHT).setMaximumError(0.3);
+      taskEndEffectorPosition.get(LEFT).setMaximumError(0.3);
+      
+      taskEndEffectorRotation.get(RIGHT).setMaximumError(0.5);
+      taskEndEffectorRotation.get(LEFT).setMaximumError(0.5);
 
-      taskJointsPose.setMaximumError(0.6);
+      taskJointsPose.setMaximumError(0.6);*/
 
       this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
       this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_3P);
@@ -203,8 +202,9 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       for (int armJointIndex: armJointIds.get(RobotSide.RIGHT))
          joint_weights.set(armJointIndex, 0 );
-      
-      task_ee_pose_L.setWeightsJointSpace(joint_weights);
+       
+      taskEndEffectorPosition.get(LEFT).setWeightsJointSpace(joint_weights);
+      taskEndEffectorRotation.get(LEFT).setWeightsJointSpace(joint_weights);
       
     //-------------------
       for (int armJointIndex: armJointIds.get(RobotSide.LEFT)) 
@@ -213,7 +213,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       for (int armJointIndex: armJointIds.get(RobotSide.RIGHT))
          joint_weights.set(armJointIndex, 1 );
       
-      task_ee_pose_R.setWeightsJointSpace(joint_weights);
+      taskEndEffectorPosition.get(RIGHT).setWeightsJointSpace(joint_weights);
+      taskEndEffectorRotation.get(RIGHT).setWeightsJointSpace(joint_weights);
 
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
@@ -267,7 +268,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskJointsPose.setWeightsJointSpace(joint_weights);
       taskJointsPose.setCoupledJointWeights(coupledJointWeights);
 
-      taskJointsPose.setErrorTolerance( 3 );
+      taskJointsPose.setErrorTolerance( 0.9 );
       taskJointsPose.setTarget(preferedJointPose);
    }
    
@@ -282,14 +283,14 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       suggestedAnglesForReseed.put("l_leg_akx", 0.0);
       suggestedAnglesForReseed.put("r_leg_akx", 0.0);
       
-      suggestedAnglesForReseed.put("l_leg_aky", -1.1);
-      suggestedAnglesForReseed.put("r_leg_aky", -1.1);
+      suggestedAnglesForReseed.put("l_leg_aky", -0.8);
+      suggestedAnglesForReseed.put("r_leg_aky", -0.8);
       
-      suggestedAnglesForReseed.put("l_leg_kny", 2.2);
-      suggestedAnglesForReseed.put("r_leg_kny", 2.2);
+      suggestedAnglesForReseed.put("l_leg_kny", 1.6);
+      suggestedAnglesForReseed.put("r_leg_kny", 1.6);
       
-      suggestedAnglesForReseed.put("l_leg_hpy", -1.1);
-      suggestedAnglesForReseed.put("r_leg_hpy", -1.1);
+      suggestedAnglesForReseed.put("l_leg_hpy", -0.8);
+      suggestedAnglesForReseed.put("r_leg_hpy", -0.8);
       
       suggestedAnglesForReseed.put("l_leg_hpx", 0.0);
       suggestedAnglesForReseed.put("r_leg_hpx", 0.0);
