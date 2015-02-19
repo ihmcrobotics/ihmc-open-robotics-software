@@ -102,7 +102,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
       this.depthDataProcessor = new DepthDataProcessor(sensorSuitePacketCommunicator, lidarDataFilter);
-      RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "darpaRoboticsChallange/networkProcessor", true);
+      RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
       if (RosNativeNetworkProcessor.hasNativeLibrary())
