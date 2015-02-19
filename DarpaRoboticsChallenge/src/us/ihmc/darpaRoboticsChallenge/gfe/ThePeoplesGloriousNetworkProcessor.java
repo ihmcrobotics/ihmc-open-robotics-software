@@ -22,7 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
-import us.ihmc.ihmcPerception.footstepGenerator.TimestampedPoseFootStepGenerator;
+import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;

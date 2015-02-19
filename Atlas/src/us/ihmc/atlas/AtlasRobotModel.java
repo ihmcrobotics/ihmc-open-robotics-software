@@ -1,7 +1,5 @@
 package us.ihmc.atlas;
 
-import java.net.URI;
-
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -36,7 +34,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPP
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
-import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;

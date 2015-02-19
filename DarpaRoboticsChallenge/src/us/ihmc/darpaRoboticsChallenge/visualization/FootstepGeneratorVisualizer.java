@@ -12,7 +12,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.ihmcPerception.footstepGenerator.TurningThenStraightFootstepGenerator;
+import us.ihmc.pathGeneration.footstepGenerator.TurningThenStraightFootstepGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Pair;
