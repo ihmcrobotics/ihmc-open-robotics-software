@@ -131,7 +131,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       HARD_WARMUP,
       STEPS_SHORT,
       STEPS_LONG,
-      STEPS_IN_PLACE
+      STEPS_IN_PLACE,
+      GO_HOME
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -316,7 +317,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
 
-      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.3, 0.8);
+      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.1, 0.7);
       
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
@@ -339,19 +340,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
 
+      submitChestHomeCommand(false);
       submitPelvisHomeCommand(false);
    }
    
    private void sequenceHardWarmup()
    {
-      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequenceSquats();
-      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequenceChestRotations();
-      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequencePelvisRotations();
-      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequenceShiftWeight();
+      
    }
 
    private void sequenceUpperBody()
@@ -391,7 +386,14 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
    }
-
+   
+   private void sequenceGoHome()
+   {
+      submitPelvisHomeCommand(true);
+      submitHandPoseHomeCommand(true);
+      submitChestHomeCommand(true);
+   }
+   
    private void sequenceChestRotations()
    {
       double percentOfJointLimit = 0.55;
@@ -550,7 +552,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesShort(robotSide);
       }
       
-      submitHandPoseHomeCommand();
+      submitHandPoseHomeCommand(false);
    }
    
    private void submitFootPosesShort(RobotSide robotSide)
@@ -610,7 +612,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitFootPosesLong(robotSide);
       }
       
-      submitHandPoseHomeCommand();
+      submitHandPoseHomeCommand(false);
    }
 
    private void submitFootPosesLong(RobotSide robotSide)
@@ -844,7 +846,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       //turn in place
       submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
       
-      submitHandPoseHomeCommand();
+      submitHandPoseHomeCommand(false);
       
       /////////// chest bending backward///////////
       submitDesiredChestOrientation(false, 0.0, Math.toRadians(-10.0), 0.0);
@@ -1204,13 +1206,16 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
-   private void submitHandPoseHomeCommand()
+   private void submitHandPoseHomeCommand(boolean parallelize)
    {
       for(RobotSide robotSide : RobotSide.values())
       {
          HandPosePacket handPosePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime.getDoubleValue());
          HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
-         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+         if (parallelize)
+            pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
+         else
+            pipeLine.submitSingleTaskStage(new HandPoseTask(robotSide, handPosePacket, handPoseBehavior, yoTime));
       }
    }
    
@@ -1501,6 +1506,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                break;
             case STEPS_IN_PLACE:
                sequenceStepsInPlace();
+               break;
+            case GO_HOME:
+               sequenceGoHome();
                break;
             default:
                break;
