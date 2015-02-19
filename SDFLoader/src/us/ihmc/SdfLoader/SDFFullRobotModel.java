@@ -78,10 +78,18 @@ public class SDFFullRobotModel implements FullRobotModel
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
    private final String[] sensorLinksToTrack;
+   
+   private final SDFLinkHolder rootLink;
 
+   // copy constructor
+   public SDFFullRobotModel(SDFFullRobotModel modelToCopy)
+   {
+      this( modelToCopy.rootLink, modelToCopy.sdfJointNameMap, modelToCopy.sensorLinksToTrack );
+   }
 
    public SDFFullRobotModel(SDFLinkHolder rootLink, SDFJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
+      this.rootLink = rootLink;
       this.sdfJointNameMap = sdfJointNameMap;
       this.sensorLinksToTrack = sensorLinksToTrack;
 
