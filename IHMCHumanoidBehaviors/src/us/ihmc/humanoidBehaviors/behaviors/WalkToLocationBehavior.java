@@ -8,7 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;

@@ -46,7 +46,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptEngineSettings;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
-import us.ihmc.ihmcPerception.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;

@@ -72,17 +72,21 @@ public class SwingTrajectoryHeightCalculator
 
       return getSwingHeight(startPose, endPose, heightMap);
    }
-
    public double getSwingHeight(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)
    {
-      List<FramePoint> trajectoryPoints = new ArrayList<FramePoint>();
-
       FramePoint startFramePoint = startPose.getFramePointCopy();
       FramePoint endFramePoint = endPose.getFramePointCopy();
       Point3d startPoint = startFramePoint.getPointCopy();
       Point3d endPoint = endFramePoint.getPointCopy();
+      return getSwingHeight(startPoint, endPoint, groundProfile);
+   }
 
-      double horizonalDistance = startFramePoint.getXYplaneDistance(endFramePoint);
+   public double getSwingHeight(Point3d startPoint, Point3d endPoint, HeightMapWithPoints groundProfile)
+   {
+      Vector3d startToEnd2d = new Vector3d(endPoint);
+      startToEnd2d.sub(startPoint);
+      startToEnd2d.setZ(0);
+      double horizonalDistance = startToEnd2d.length();
 
       // search for points in area between the foot positions (range decreased by horizontal buffer size)
       Point2d startPoint2d = new Point2d(startPoint.x, startPoint.y);

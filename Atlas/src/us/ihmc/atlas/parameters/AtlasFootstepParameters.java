@@ -4,8 +4,8 @@ package us.ihmc.atlas.parameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.ihmcPerception.footstepPlanner.FootstepParameters;
-import us.ihmc.ihmcPerception.footstepPlanner.FootstepPlanState;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanState;
 
 public class AtlasFootstepParameters extends FootstepParameters
 {
