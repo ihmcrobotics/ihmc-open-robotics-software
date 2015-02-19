@@ -127,6 +127,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       SQUATS,
       SQUATATHON,
       SIMPLE_WARMUP,
+      MEDIUM_WARMUP,
+      HARD_WARMUP,
       STEPS_SHORT,
       STEPS_LONG,
       STEPS_IN_PLACE
@@ -299,6 +301,26 @@ public class DiagnosticBehavior extends BehaviorInterface
    }
 
    private void sequenceSimpleWarmup()
+   {
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+         sequenceSquats();
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+         sequenceChestRotations();
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+         sequencePelvisRotations();
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+         sequenceShiftWeight();
+   }
+   
+   private void sequenceMediumWarmup()
+   {
+      
+         sequenceSquats();
+         sequenceChestRotations();
+         sequencePelvisRotations();
+   }
+   
+   private void sequenceHardWarmup()
    {
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
          sequenceSquats();
@@ -1448,6 +1470,12 @@ public class DiagnosticBehavior extends BehaviorInterface
                break;
             case SIMPLE_WARMUP:
                sequenceSimpleWarmup();
+               break;
+            case MEDIUM_WARMUP:
+               sequenceMediumWarmup();
+               break;
+            case HARD_WARMUP:
+               sequenceHardWarmup();
                break;
             case STEPS_IN_PLACE:
                sequenceStepsInPlace();
