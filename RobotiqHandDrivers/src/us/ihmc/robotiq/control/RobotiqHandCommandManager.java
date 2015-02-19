@@ -1,14 +1,22 @@
 package us.ihmc.robotiq.control;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {
@@ -18,10 +26,10 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
 	public RobotiqHandCommandManager()
 	{
-		super(RobotiqControlThreadManager.class);
-		
-			setupOutboundPacketListeners();
-			setupInboundPacketListeners();
+	   super(RobotiqControlThreadManager.class);
+	   
+	   setupOutboundPacketListeners();
+	   setupInboundPacketListeners();
 	}
 
    protected void setupInboundPacketListeners()
@@ -58,5 +66,26 @@ public class RobotiqHandCommandManager extends HandCommandManager
    public PacketCommunicator getCommunicator()
    {
       return handManagerPacketCommunicator;
+   }
+   
+   public static void main(String[] args)
+   {
+      RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager();
+      JFrame frame = new JFrame();
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      
+      JButton button = new JButton("Calibrate");
+      button.addActionListener(new ActionListener()
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.LEFT, FingerState.CALIBRATE));
+         }
+      });
+      
+      frame.getContentPane().add(button);
+      frame.pack();
+      frame.setVisible(true);
    }
 }
