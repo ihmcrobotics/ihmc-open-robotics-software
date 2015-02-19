@@ -35,6 +35,7 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.setControllerCommunicator(realRobotControllerConnection);
       networkModuleParams.setUseUiModule(true);
       networkModuleParams.setUseBehaviorModule(true);
+      networkModuleParams.setUseBehaviorVisualizer(true);
       
       new DRCNetworkProcessor(model, networkModuleParams);
    }
