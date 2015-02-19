@@ -2,11 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
@@ -33,6 +30,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
  */
 public class RotateHandAboutAxisBehavior extends BehaviorInterface
 {
+   private final double radiansToRotateBetweenHandPoses = Math.toRadians(18.0);
+
    private static final boolean DEBUG = false;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
@@ -65,139 +64,113 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       }
    }
 
-   public void setInput(RobotSide robotSide, RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad,
-         double trajectoryTime)
+   public void setInput(RobotSide robotSide, Axis axisOrientationInGraspedObjectFrame, RigidBodyTransform graspedObjectTransformToWorld,
+         double totalRotationInRadians, double trajectoryTime)
    {
-      FramePose currentHandPose = new FramePose();
-      currentHandPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-      currentHandPose.changeFrame(world);
+      FramePose currentHandPoseInWorld = new FramePose();
+      currentHandPoseInWorld.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      currentHandPoseInWorld.changeFrame(world);
 
-      setInput(robotSide, graspedObjectTransformToWorld, pinJointAxisInGraspedObjectFrame, currentHandPose, turnAngleRad, trajectoryTime);
+      setInput(robotSide, currentHandPoseInWorld, axisOrientationInGraspedObjectFrame, graspedObjectTransformToWorld, totalRotationInRadians, trajectoryTime);
    }
 
-   public void setInput(RobotSide robotSide, RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame,
-         FramePose initialHandPoseInWorld, double turnAngleRad, double trajectoryTime)
+   private RigidBodyTransform afterToBeforeRotationTransform;
+   private PoseReferenceFrame graspedObjectFrame;
+
+   public void setInput(RobotSide robotSide, FramePose currentHandPoseInWorld, Axis axisOrientationInGraspedObjectFrame,
+         RigidBodyTransform graspedObjectTransformToWorld, double totalRotationInRadians, double trajectoryTime)
    {
-      PoseReferenceFrame initialGraspedObjectFrame = new PoseReferenceFrame("graspedObjectFrameBeforeRotation", world);
-      initialGraspedObjectFrame.setPoseAndUpdate(graspedObjectTransformToWorld);
+      graspedObjectFrame = new PoseReferenceFrame("graspedObjectFrameBeforeRotation", world);
+      graspedObjectFrame.setPoseAndUpdate(graspedObjectTransformToWorld);
 
       if (DEBUG)
       {
-         SysoutTool.println("Current Hand Pose in World: " + initialHandPoseInWorld);
+         SysoutTool.println("Current Hand Pose in World: " + currentHandPoseInWorld);
          SysoutTool.println("Grasped Object Transform To World: " + graspedObjectTransformToWorld);
-         SysoutTool.println("Initial Grasped Object Frame: " + initialGraspedObjectFrame);
+         SysoutTool.println("Grasped Object Reference Frame: " + graspedObjectFrame);
       }
 
-      double radiansPerHandPose = Math.toRadians(18.0);
-      int numberOfHandPoses = (int) Math.round(turnAngleRad/radiansPerHandPose);
-      ArrayList<FramePose> desiredHandPoses = createMultipleHandposesAlongCurvedTrajectory(pinJointAxisInGraspedObjectFrame, initialHandPoseInWorld,
-            turnAngleRad, initialGraspedObjectFrame, numberOfHandPoses);
+      int numberOfDiscreteHandPosesToUse = (int) Math.round(totalRotationInRadians / radiansToRotateBetweenHandPoses);
+      afterToBeforeRotationTransform = createAxisRotationTransform(axisOrientationInGraspedObjectFrame, radiansToRotateBetweenHandPoses);
 
-      for (FramePose desiredHandPose : desiredHandPoses)
+      ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, numberOfDiscreteHandPosesToUse);
+
+      for (FramePose desiredHandPose : handPosesTangentToSemiCircularPath)
       {
-         taskExecutor.submit(new HandPoseTask(robotSide, createHandPosePacket(robotSide, trajectoryTime / numberOfHandPoses, desiredHandPose),
-               handPoseBehavior, yoTime));
+         Frame packetFrame;
+         if (desiredHandPose.getReferenceFrame().isWorldFrame())
+         {
+            packetFrame = Frame.WORLD;
+         }
+         else
+         {
+            throw new RuntimeException("Hand Pose must be defined in World reference frame.");
+         }
+         taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, packetFrame, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse));
       }
 
       hasInputBeenSet.set(true);
    }
 
-   private ArrayList<FramePose> createMultipleHandposesAlongCurvedTrajectory(Axis pinJointAxisInGraspedObjectFrame, FramePose initialHandPoseInWorld,
-         double turnAngleRad, PoseReferenceFrame initialGraspedObjectFrame, int numberOfHandPoses)
+
+   private ArrayList<FramePose> copyHandPoseAndRotateAboutAxisRecursively(FramePose handPoseInWorld, int numberOfHandPoses)
    {
-      double turnAnglePerPose = turnAngleRad / numberOfHandPoses;
       ArrayList<FramePose> desiredHandPoses = new ArrayList<FramePose>(numberOfHandPoses);
 
-      //TODO: Reduce number of objects created in methods below
-      desiredHandPoses.add(copyCurrentPoseAndRotateAboutPinJointAxis(initialHandPoseInWorld, initialGraspedObjectFrame, pinJointAxisInGraspedObjectFrame,
-            turnAnglePerPose));
+      desiredHandPoses.add(copyHandPoseAndRotateAboutAxis(handPoseInWorld));
 
       for (int i = desiredHandPoses.size(); i < numberOfHandPoses; i++)
       {
          FramePose previousDesiredHandPose = desiredHandPoses.get(i - 1);
-         FramePose nextDesiredHandPose = copyCurrentPoseAndRotateAboutPinJointAxis(previousDesiredHandPose, initialGraspedObjectFrame,
-               pinJointAxisInGraspedObjectFrame, turnAnglePerPose);
+         FramePose nextDesiredHandPose = copyHandPoseAndRotateAboutAxis(previousDesiredHandPose);
          desiredHandPoses.add(i, nextDesiredHandPose);
       }
       return desiredHandPoses;
    }
 
-   private FramePose copyCurrentPoseAndRotateAboutPinJointAxis(FramePose initialHandPoseInWorld, ReferenceFrame initialGraspedObjectFrame,
-         Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad)
+   private Vector3d desiredGraspedObjectToHandVector = new Vector3d();
+
+   private FramePose copyHandPoseAndRotateAboutAxis(FramePose handPoseInWorld)
    {
-      RigidBodyTransform initialHandToGraspedObjectTransform = getHandToGraspedObjectTransform(initialHandPoseInWorld, initialGraspedObjectFrame);
-      RigidBodyTransform pinJointRotation = createPinJointRotationTransform(pinJointAxisInGraspedObjectFrame, turnAngleRad);
-      RigidBodyTransform desiredHandToGraspedObjectTransform = new RigidBodyTransform(initialHandToGraspedObjectTransform);
-      desiredHandToGraspedObjectTransform.multiply(pinJointRotation);
-      FramePose desiredHandPoseInWorld = new FramePose(initialGraspedObjectFrame, desiredHandToGraspedObjectTransform);
+      FramePose ret = new FramePose(handPoseInWorld);
+      ret.changeFrame(graspedObjectFrame);
+      RigidBodyTransform handToGraspedObjectTransformBeforeRotation = new RigidBodyTransform();
+      ret.getPose(handToGraspedObjectTransformBeforeRotation);
 
-      setTranslationDueToOffsetRotationAxis(initialHandToGraspedObjectTransform, pinJointRotation, desiredHandPoseInWorld);
+      RigidBodyTransform handToGraspedObjectTransformAfterRotation = new RigidBodyTransform(handToGraspedObjectTransformBeforeRotation);
+      handToGraspedObjectTransformAfterRotation.multiply(afterToBeforeRotationTransform);
 
-      desiredHandPoseInWorld.changeFrame(world);
+      ret.setPoseIncludingFrame(graspedObjectFrame, handToGraspedObjectTransformAfterRotation);
 
-      return desiredHandPoseInWorld;
+      handToGraspedObjectTransformBeforeRotation.get(desiredGraspedObjectToHandVector);
+      afterToBeforeRotationTransform.transform(desiredGraspedObjectToHandVector);
+      ret.setPosition(desiredGraspedObjectToHandVector);
+
+      ret.changeFrame(world);
+
+      return ret;
    }
 
-   private void setTranslationDueToOffsetRotationAxis(RigidBodyTransform initialHandToGraspedObjectTransform, RigidBodyTransform pinJointRotation,
-         FramePose desiredHandPoseInWorld)
+   private RigidBodyTransform createAxisRotationTransform(Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad)
    {
-      Vector3d desiredGraspedObjectToHandVector = new Vector3d();
-      initialHandToGraspedObjectTransform.get(desiredGraspedObjectToHandVector);
-      pinJointRotation.transform(desiredGraspedObjectToHandVector);
-      desiredHandPoseInWorld.setPosition(desiredGraspedObjectToHandVector);
-   }
+      RigidBodyTransform ret = new RigidBodyTransform();
 
-   private RigidBodyTransform getHandToGraspedObjectTransform(FramePose handPoseInWorld, ReferenceFrame graspedObjectFrame)
-   {
-      FramePose initialHandPoseInGraspedObjectFrame = new FramePose(handPoseInWorld);
-      initialHandPoseInGraspedObjectFrame.changeFrame(graspedObjectFrame);
-
-      RigidBodyTransform initialHandToGraspedObjectTransform = new RigidBodyTransform();
-      initialHandPoseInGraspedObjectFrame.getPose(initialHandToGraspedObjectTransform);
-
-      return initialHandToGraspedObjectTransform;
-   }
-
-   private RigidBodyTransform createPinJointRotationTransform(Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad)
-   {
-      RigidBodyTransform pinJointRotation = new RigidBodyTransform();
       if (pinJointAxisInGraspedObjectFrame == Axis.X)
       {
-         pinJointRotation.rotX(turnAngleRad);
+         ret.rotX(turnAngleRad);
       }
       else if (pinJointAxisInGraspedObjectFrame == Axis.Y)
       {
-         pinJointRotation.rotY(turnAngleRad);
+         ret.rotY(turnAngleRad);
       }
       else
       {
-         pinJointRotation.rotZ(turnAngleRad);
+         ret.rotZ(turnAngleRad);
       }
 
-      return pinJointRotation;
-   }
-
-   private HandPosePacket createHandPosePacket(RobotSide robotSideOfHandToUse, double trajectoryTime, FramePose desiredHandPoseInWorld)
-   {
-      Point3d position = new Point3d();
-      Quat4d orientation = new Quat4d();
-
-      desiredHandPoseInWorld.getPosition(position);
-      desiredHandPoseInWorld.getOrientation(orientation);
-
-      Frame packetFrame;
-      ReferenceFrame referenceFrame = desiredHandPoseInWorld.getReferenceFrame();
-      if (referenceFrame.isWorldFrame())
-      {
-         packetFrame = Frame.WORLD;
-      }
-      else
-      {
-         throw new RuntimeException("Hand Pose must be defined in World reference frame.");
-      }
-      HandPosePacket ret = new HandPosePacket(robotSideOfHandToUse, packetFrame, position, orientation, trajectoryTime);
       return ret;
    }
+
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)

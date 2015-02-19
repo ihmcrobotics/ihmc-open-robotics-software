@@ -139,7 +139,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       double trajectoryTime = 2.0;
 
       rotateHandBehavior.initialize();
-      rotateHandBehavior.setInput(robotSide, valveTransformToWorld, pinJointAxisInGraspedObjectFrame, initialHandPoseInWorld, turnAngleRad, trajectoryTime);
+      rotateHandBehavior.setInput(robotSide, initialHandPoseInWorld, pinJointAxisInGraspedObjectFrame, valveTransformToWorld, turnAngleRad, trajectoryTime);
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateHandBehavior);
 
