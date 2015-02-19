@@ -9,8 +9,8 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
@@ -46,6 +46,7 @@ public class PacketsForwardedToTheUi
       HandPosePacket.class,
       SparseLidarScanPacket.class,
       DepthDataClearCommand.class,
+      IntrinsicCameraParametersPacket.class,
 //      HeadPosePacket.class,
 //      RawIMUPacket.class,
       

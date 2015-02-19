@@ -30,7 +30,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements PacketC
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
 
       scsCameraInfoReceiver = new SCSCameraInfoReceiver(outgoingSensorDataCommunicator, logger);
-      scsSensorsCommunicator.attachListener(CameraInformationPacket.class, scsCameraInfoReceiver);
+      outgoingSensorDataCommunicator.attachListener(CameraInformationPacket.class, scsCameraInfoReceiver);
    }
 
    public void receivedPacket(LocalVideoPacket object)
@@ -117,6 +117,8 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
 
    public void receivedPacket(CameraInformationPacket object)
    {
+      
+      System.out.println("YO DOG*************************************");
       processInformationRequest(object);
    }
 }
