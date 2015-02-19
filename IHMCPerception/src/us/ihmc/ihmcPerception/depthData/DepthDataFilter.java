@@ -216,10 +216,6 @@ public class DepthDataFilter
       {
          quadTree.setUpdateOctree(true);
       }
-      else if (lidarState == LidarState.ENABLE_QUAD_TREE_ONLY)
-      {
-         quadTree.setUpdateOctree(false);
-      }
    }
 
    public void clearLidarData(DepthDataTree lidarTree)
