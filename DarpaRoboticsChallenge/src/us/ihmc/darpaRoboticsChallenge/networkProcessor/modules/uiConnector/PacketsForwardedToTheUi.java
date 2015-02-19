@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.sensing.AtlasWristFeetSensorPacket;
+
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
@@ -57,7 +57,6 @@ public class PacketsForwardedToTheUi
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HandJointAnglePacket.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
-      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(AtlasWristFeetSensorPacket.class, UI_WRIST_FEET_SENSORS_UPDATE_MILLIS);
    }
    
    

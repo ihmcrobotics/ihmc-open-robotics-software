@@ -86,10 +86,10 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
-import us.ihmc.utilities.AsyncContinuousExecutor;
+
 import us.ihmc.utilities.GraphicsUpdatable;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.TimerTaskScheduler;
+
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
@@ -1205,8 +1205,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       ThreadTools.interruptLiveThreadsExceptThisOneContaining("LWJGL Timer"); // This kills the silly LWJGL sleeping thread which just sleeps and does nothing else...
       
       GlobalTimer.clearTimers();
-      TimerTaskScheduler.cancelAndReset();
-      AsyncContinuousExecutor.cancelAndReset();
+      
+      
    }
 
    /**

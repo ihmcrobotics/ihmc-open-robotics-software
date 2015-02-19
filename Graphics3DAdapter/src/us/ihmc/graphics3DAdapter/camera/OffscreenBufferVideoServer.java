@@ -34,7 +34,7 @@ public class OffscreenBufferVideoServer
       CameraUpdater cameraUpdater = new CameraUpdater();
       this.videoDataServer = videoDataServer;
       this.timestampProvider = timestampProvider;
-      
+      System.out.println("STarting vidoe stream");
       viewport.getCaptureDevice().streamTo(cameraUpdater, framesPerSecond);
 
    }

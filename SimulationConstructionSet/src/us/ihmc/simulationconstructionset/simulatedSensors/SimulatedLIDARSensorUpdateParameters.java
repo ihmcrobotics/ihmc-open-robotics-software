@@ -5,7 +5,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 public class SimulatedLIDARSensorUpdateParameters
 {
    private boolean alwaysOn;
-   private double updateRate;
+   private int updatePEriod;
 
    private PacketCommunicator objectCommunicator;
 
@@ -19,14 +19,14 @@ public class SimulatedLIDARSensorUpdateParameters
       this.alwaysOn = alwaysOn;
    }
 
-   public double getUpdateRate()
+   public int getUpdatePeriodInMillis()
    {
-      return updateRate;
+      return updatePEriod;
    }
 
-   public void setUpdateRate(double updateRate)
+   public void setUpdatePeriodInMillis(int updatePeriod)
    {
-      this.updateRate = updateRate;
+      this.updatePEriod = updatePeriod;
    }
 
    public void setObjectCommunicator(PacketCommunicator objectCommunicator)

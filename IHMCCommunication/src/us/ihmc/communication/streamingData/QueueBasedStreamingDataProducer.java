@@ -4,22 +4,22 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import us.ihmc.communication.packetCommunicator.PacketProducer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.utilities.AsyncContinuousExecutor;
 
 /**
  * User: Matt
  * Date: 1/10/13
  */
-public class QueueBasedStreamingDataProducer<T extends Packet> extends PacketProducer<T>
+public class QueueBasedStreamingDataProducer<T extends Packet<?>> extends PacketProducer<T> implements Runnable
 {
    private final LinkedBlockingQueue<T> queuedData = new LinkedBlockingQueue<T>();
-   private final String name;
-   
+
+   private final Thread thread;
+   private volatile boolean running;
+
    public QueueBasedStreamingDataProducer(String name)
    {
-      this.name = name;
+      thread = new Thread(this, name);
    }
-
 
    public void notifyConsumers(T dataObject)
    {
@@ -31,30 +31,38 @@ public class QueueBasedStreamingDataProducer<T extends Packet> extends PacketPro
       queuedData.add(dataObject);
    }
 
+   public void run()
+   {
+      while(running)
+      {
+         T dataObject = null;
+   
+         try
+         {
+            dataObject = queuedData.take();
+         }
+         catch (InterruptedException e)
+         {
+            // do nothing
+         }
+   
+         //               System.out.println("Notifying consumers " + data.getValue());
+         if (dataObject != null)
+         {
+            notifyConsumers(dataObject);
+         }
+      }
+   }
+
    public void startProducingData()
    {
-      Runnable runnable = new Runnable()
-      {
-         public void run()
-         {
-               T dataObject = null;
-
-               try
-               {
-                  dataObject = queuedData.take();
-               }
-               catch (InterruptedException e)
-               {
-                  // do nothing
-               }
-
-               //               System.out.println("Notifying consumers " + data.getValue());
-               if (dataObject != null)
-               {
-                  notifyConsumers(dataObject);
-               }
-         }
-      };
-      AsyncContinuousExecutor.executeContinuously(runnable, name + "Queued Streaming Data Producer");
+      running = true;
+      thread.start();
+   }
+   
+   public void stopProducingData()
+   {
+      running = false;
+      thread.interrupt();
    }
 }
