@@ -360,15 +360,15 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
       createRobotiqHandPalmContactPoints(robotSide, nameOfJointBeforeHand, useHighResolutionGrid);
 
-      Vector3d fingersJoint1ContactPoint = new Vector3d(-0.011, robotSide.negateIfRightSide(0.032),0.0);
-      Vector3d fingersJoint2ContactPoint1 = new Vector3d( 0.005, robotSide.negateIfRightSide(0.005),0.0);
-      Vector3d fingersJoint2ContactPoint2 = new Vector3d(-0.007, robotSide.negateIfRightSide(0.027),0.0);
-      Vector3d fingersJoint3ContactPoint = new Vector3d(0.006, robotSide.negateIfRightSide(0.025) ,0.0);
-
-      Vector3d thumbJoint1ContactPoint = new Vector3d (0.0105, robotSide.negateIfRightSide(0.033),0.0 );
-      Vector3d thumbJoint2ContactPoint1 = new Vector3d(-0.005, robotSide.negateIfRightSide(0.005),0.0 );
-      Vector3d thumbJoint2ContactPoint2 = new Vector3d(0.007 , robotSide.negateIfRightSide(0.027),0.0 );
-      Vector3d thumbJoint3ContactPoint = new Vector3d (-0.006, robotSide.negateIfRightSide(0.025),0.0 );
+      Vector3d fingersJoint1ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.032), 0.011);
+      Vector3d fingersJoint2ContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.005), -0.005);
+      Vector3d fingersJoint2ContactPoint2 = new Vector3d(0.0, robotSide.negateIfRightSide(0.027), 0.007);
+      Vector3d fingersJoint3ContactPoint = new Vector3d(0.0, robotSide.negateIfRightSide(0.025), -0.006);
+      
+      Vector3d thumbJoint1ContactPoint = new Vector3d (0.0, robotSide.negateIfRightSide(0.033), -0.0105);
+      Vector3d thumbJoint2ContactPoint1 = new Vector3d(0.0, robotSide.negateIfRightSide(0.005), 0.005);
+      Vector3d thumbJoint2ContactPoint2 = new Vector3d(0.0, robotSide.negateIfRightSide(0.027), -0.007);
+      Vector3d thumbJoint3ContactPoint = new Vector3d (0.0, robotSide.negateIfRightSide(0.025), 0.006);
 
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_1, fingersJoint1ContactPoint));
       jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(finger_1_joint_2, fingersJoint2ContactPoint1));
@@ -388,7 +388,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    
    private void createRobotiqHandPalmContactPoints(RobotSide robotSide, String nameOfJointBeforeHand, boolean useHighResolutionPointGrid)
    {
-      double offsetFromWristToPalmPlane = 0.239;
+      double offsetFromWristToPalmPlane = 0.24;
       Point3d palmCenter = new Point3d(.002, robotSide.negateIfRightSide(offsetFromWristToPalmPlane), .015);  
       double palmWidth = 0.07;
       double palmHeight = 0.075;
@@ -404,7 +404,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
       Vector3d palmContactPoint4 = new Vector3d(palmCenter.x, palmCenter.y, palmCenter.z + palmHeight / 2.0); 
       Vector3d palmContactPoint4b = new Vector3d(palmCenter.x, palmCenter.y, palmCenter.z + palmHeight / 4.0); 
 
-      // Two pads that sandwich middle finger
+      // Two pads that sandwich the center thumb
       Vector3d palmContactPoint5 = new Vector3d(palmContactPoint3.x, palmCenter.y, palmCenter.z - palmHeight / 2.0);
       Vector3d palmContactPoint5b = new Vector3d(palmContactPoint3.x, palmCenter.y, palmCenter.z - palmHeight / 4.0);
       Vector3d palmContactPoint6 = new Vector3d(palmContactPoint1.x, palmCenter.y, palmContactPoint5.z);
