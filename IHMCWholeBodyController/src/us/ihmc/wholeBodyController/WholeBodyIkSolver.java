@@ -86,7 +86,15 @@ abstract public class WholeBodyIkSolver
 
    protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
    private final SideDependentList<ControlledDoF>  controlledDoF = new SideDependentList<ControlledDoF>();
-   private boolean lockLegs = false;
+  
+   static public enum LockLevel{
+      USE_WHOLE_BODY,
+      LOCK_LEGS,
+      LOCK_LEGS_AND_WAIST_X_Y,
+      LOCK_LEGS_AND_WAIST
+   }
+   
+   private LockLevel lockLevel = LockLevel.USE_WHOLE_BODY;
    private boolean suggestKneeAngle = true;
 
    // --------------------- Miscellaneous -------------------------------------
@@ -94,6 +102,7 @@ abstract public class WholeBodyIkSolver
    protected final OneDoFJoint[] workingJointsInUrdfOrder;
    protected final SideDependentList<HashSet<Integer>> armJointIds = new SideDependentList<HashSet<Integer>>();
    protected final SideDependentList<HashSet<Integer>> legJointIds = new SideDependentList<HashSet<Integer>>();
+   protected final int[] waistJointId;
 
    protected final DenseMatrix64F coupledJointWeights;
    protected final Vector64F      preferedJointPose;
@@ -118,6 +127,8 @@ abstract public class WholeBodyIkSolver
    abstract protected void configureTasks();
 
    abstract public ReferenceFrame  getRootFrame( SDFFullRobotModel model);
+   
+   abstract public int[] getWaistJointId();
 
    //---------------------------------------------------------------------------------
 
@@ -362,6 +373,8 @@ abstract public class WholeBodyIkSolver
       preferedJointPose = new Vector64F(numOfJoints);
       preferedJointPose.zero();
       coupledJointWeights = new DenseMatrix64F(numOfJoints, numOfJoints);
+      
+      waistJointId = getWaistJointId();
 
       //code moved there for esthetic reasons :|
       configureTasks();
@@ -563,18 +576,44 @@ abstract public class WholeBodyIkSolver
       taskJointsPose.setTarget(preferedJointPose);
    }
 
-   private void checkIfLegsNeedToBeLocked()
+   private void checkIfLegsAndWaistNeedToBeLocked(SDFFullRobotModel actualSdfModel)
    {
-      taskComPosition.setEnabled(!lockLegs);
-      taskLegPose.setEnabled(!lockLegs);
+      boolean enableLeg   = true;
+      boolean enableWaistZ  = true;
+      boolean enableWaistXY = true;
+      
+      switch( lockLevel )
+      {
+      case USE_WHOLE_BODY:break;
+      
+      case LOCK_LEGS:  
+         enableLeg = false;
+         break;
+         
+      case LOCK_LEGS_AND_WAIST_X_Y:
+         enableLeg = false;
+         enableWaistXY = false;
+         break;
+         
+      case LOCK_LEGS_AND_WAIST:
+         enableLeg = false;
+         enableWaistZ = false;
+         enableWaistXY = false;
+         break;
+      }
 
-      double val = lockLegs ? 0 : 1;
-        
+      taskComPosition.setEnabled( enableLeg  );
+      taskLegPose.setEnabled( enableLeg );
+
+      OneDoFJoint joint;
+     
       for (RobotSide side: RobotSide.values)
       {
+         double val = enableLeg ? 1 : 0;
          for (int index : legJointIds.get(side) )
          {
             taskJointsPose.getWeightsJointSpace().set(index, val);
+            taskJointsPose.getWeightsError().set( index, val );
             getHierarchicalSolver().collisionAvoidance.getJointWeights().set(index, val);
             
             taskEndEffectorPosition.get(LEFT).getWeightsJointSpace().set(index, val);
@@ -582,8 +621,40 @@ abstract public class WholeBodyIkSolver
             
             taskEndEffectorRotation.get(LEFT).getWeightsJointSpace().set(index, val);
             taskEndEffectorRotation.get(RIGHT).getWeightsJointSpace().set(index, val);
+            
+            if( !enableLeg ) {
+               joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(index));
+               cachedAnglesQ.set(index, joint.getQ());
+            }
          }
-      }     
+      }  
+      
+      for (int i=0; i< waistJointId.length; i++)
+      {
+         int index = waistJointId[i];
+         
+         boolean enableWaist = enableWaistZ;
+         
+      // the first element must be Z. sorry about the hidden assumption
+         if( i > 0 ) enableWaist = enableWaistXY;
+         
+         double val = enableWaist ? 1.0 : 0.0;
+         
+         taskJointsPose.getWeightsJointSpace().set(index, val);
+         getHierarchicalSolver().collisionAvoidance.getJointWeights().set(index, val);
+         
+         taskEndEffectorPosition.get(LEFT).getWeightsJointSpace().set(index, val);
+         taskEndEffectorPosition.get(RIGHT).getWeightsJointSpace().set(index, val);
+         
+         taskEndEffectorRotation.get(LEFT).getWeightsJointSpace().set(index, val);
+         taskEndEffectorRotation.get(RIGHT).getWeightsJointSpace().set(index, val);
+         
+         if( !enableWaist ){
+            joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(index));
+            cachedAnglesQ.set(index, joint.getQ());
+         }
+      }
+   
    }
 
 
@@ -632,6 +703,7 @@ abstract public class WholeBodyIkSolver
       {
          boolean partOfQuietArm = false;
          boolean partOfQuietLeg = false;
+         boolean partOfQuietWaist = false;
 
          for(RobotSide robotSide: RobotSide.values())
          {
@@ -639,15 +711,21 @@ abstract public class WholeBodyIkSolver
             {
                partOfQuietArm = true;
             }
-            if( lockLegs &&  legJointIds.get(robotSide).contains(i))
+                    
+            if( lockLevel == LockLevel.LOCK_LEGS_AND_WAIST &&  waistJointId[0] == i )  
             {
-               partOfQuietLeg = true;
+               partOfQuietWaist = true;
+            }
+            if( lockLevel != LockLevel.LOCK_LEGS_AND_WAIST || lockLevel != LockLevel.LOCK_LEGS_AND_WAIST_X_Y ) 
+            {
+               if( waistJointId[1] == i || waistJointId[2] == i )
+                  partOfQuietWaist = true;
             }
          }
-
-         if( !partOfQuietArm && !partOfQuietLeg) {
+         
+         if( !partOfQuietArm && !partOfQuietLeg && !partOfQuietWaist) {
             cachedAnglesQ.set(i, newQ.get(i));
-         }
+         } 
       }
    }
 
@@ -791,7 +869,7 @@ abstract public class WholeBodyIkSolver
 
       try{
          adjustDesiredCOM(actualSdfModel);
-         checkIfLegsNeedToBeLocked();
+         checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
          setPreferedKneeAngle();
          adjustOtherFoot(actualSdfModel);
 
@@ -934,14 +1012,14 @@ abstract public class WholeBodyIkSolver
       enforceControlledDoF( null );
    }
 
-   public boolean isLowerBodyLocked()
+   public LockLevel isLowerBodyLocked()
    {
-      return lockLegs;
+      return lockLevel;
    }
 
-   public void lockLowerBody(boolean lockLowerBody)
+   public void lockLowerBody(LockLevel lockLevel)
    {
-      this.lockLegs = lockLowerBody;
+      this.lockLevel = lockLevel;
    }
 
 
