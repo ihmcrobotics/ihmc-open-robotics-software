@@ -89,7 +89,8 @@ public class PointCloudDataReceiver implements NetStateListener
 
    protected void updatePointCloud(PointCloudPacket pointCloud)
    {
-      if (pendingScans.size() > 40)
+      final int numberOfScansPerSecond = 40;
+      if (pendingScans.size() > numberOfScansPerSecond)
       {
          pendingScans.poll();
       }
