@@ -314,10 +314,32 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private void sequenceMediumWarmup()
    {
+      FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
+
+      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.3, 0.8);
       
+      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
+      supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
+
+      FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
+
+      for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
+      {
+         desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
+         desiredPelvisOffset.sub(center);
+         submitDesiredPelvisPositionOffset(false, shiftScaleVector.getX() * desiredPelvisOffset.getX(), shiftScaleVector.getY()
+               * desiredPelvisOffset.getY(), 0.0);
          sequenceSquats();
          sequenceChestRotations();
          sequencePelvisRotations();
+      }
+      // Get back to the first vertex again
+      desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
+            pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
+
+      submitPelvisHomeCommand(false);
    }
    
    private void sequenceHardWarmup()
