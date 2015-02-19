@@ -22,6 +22,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.ibeo.IbeoPointCloudDataReceiver;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
+import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -51,7 +52,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, DRCHandType.VALKYRIE, sdfFullRobotModel);
-      this.lidarDataFilter = new DepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
+      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
    }
 
    @Override
