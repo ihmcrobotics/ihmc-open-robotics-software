@@ -246,4 +246,3 @@ root.atlas.DRCSimulation.SimulatedRobotiqHandsController.rightIndividualRobotiqH
 root.atlas.PIDLidarTorqueController*false*false
 root.atlas.SimulatedDRCRobotTimeProvider*false*false
 root.atlas.LinearGroundContactModel*false*false
-root.atlas.DRCSimulatedSpindleCommunicator*false*false

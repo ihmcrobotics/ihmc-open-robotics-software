@@ -8,9 +8,12 @@ import org.ros.time.WallTimeProvider;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigurationData>
 {
@@ -19,8 +22,10 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   
+   private final int jointNameHash;
 
-   public RosRobotJointStatePublisher(PacketCommunicator fieldComputer, final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public RosRobotJointStatePublisher(FullRobotModel fullRobotModel, PacketCommunicator fieldComputer, final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          String rosNameSpace)
    {
       this.rosMainNode = rosMainNode;
@@ -28,6 +33,14 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
       this.jointStatePublisher = new RosJointStatePublisher(false);
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
 
+      OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
+      for(int i = 0; i < joints.length; i++)
+      {
+         nameList.add(joints[i].getName());
+      }
+      
+      jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, fullRobotModel.getForceSensorDefinitions());
+      
       rosMainNode.attachPublisher("/" + rosNameSpace + "/joint_states", jointStatePublisher);
       fieldComputer.attachListener(RobotConfigurationData.class, this);
    }
@@ -37,31 +50,15 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
    {
       if (rosMainNode.isStarted())
       {
-
          long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getSimTime());
          Time t = Time.fromNano(timeStamp);//wallTime.getCurrentTime());
 
-         updateNameList(object);
-
+         if(object.jointNameHash != jointNameHash)
+         {
+            throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+         }
+         
          jointStatePublisher.publish(nameList, object.getJointAngles(), null, null, t);
-      }
-   }
-
-   private void updateNameList(RobotConfigurationData object)
-   {
-      String[] jointNames = object.getJointNames();
-      for (int i = 0; i < jointNames.length; i++)
-      {
-         if (i >= nameList.size())
-            nameList.add(jointNames[i]);
-         else
-            nameList.set(i, jointNames[i]);
-      }
-      
-      // Shrink the list to the size of jointNames which shouldn't change
-      for (int i = jointNames.length; i > nameList.size(); i--)
-      {
-         nameList.remove(i);
       }
    }
 }
