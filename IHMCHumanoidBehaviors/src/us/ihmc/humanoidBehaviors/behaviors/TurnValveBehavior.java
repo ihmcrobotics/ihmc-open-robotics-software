@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packets.behaviors.TurnValvePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
+import us.ihmc.communication.util.PacketControllerTools;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTurnAndUnGraspTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -30,25 +33,22 @@ public class TurnValveBehavior extends BehaviorInterface
    private static final boolean DEBUG = false;
 
    private static final boolean graspValveRim = true;
-   private static final ValveType valveType = ValveType.BIG_VALVE;
-   private static final Vector3d valvePinJointAxisInValveFrame = new Vector3d(1, 0, 0);
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
    public static final double howFarToStandToTheRightOfValve = robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
    public static final double howFarToStandBackFromValve = 0.64; //0.64
-
-   public static final Vector3d graspApproachDirectionInValveFrame = new Vector3d(valvePinJointAxisInValveFrame);
-   public static final double turnValveAngle = Math.toRadians(180.0);
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final ArrayList<BehaviorInterface> childBehaviors;
+   private final HandPoseBehavior handPoseBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final GraspValveTurnAndUnGraspBehavior graspValveTurnAndUnGraspBehavior;
    private final ScriptBehavior scriptBehavior;
 
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
+   private final ConcurrentListeningQueue<TurnValvePacket> turnValvePacketListener;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable tippingDetected;
@@ -68,6 +68,8 @@ public class TurnValveBehavior extends BehaviorInterface
       this.walkingControllerParameters = walkingControllerParameters;
 
       childBehaviors = new ArrayList<BehaviorInterface>();
+      handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(handPoseBehavior);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       childBehaviors.add(walkToLocationBehavior);
       graspValveTurnAndUnGraspBehavior = new GraspValveTurnAndUnGraspBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
@@ -77,6 +79,7 @@ public class TurnValveBehavior extends BehaviorInterface
       childBehaviors.add(scriptBehavior);
 
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<ScriptBehaviorInputPacket>();
+      turnValvePacketListener = new ConcurrentListeningQueue<TurnValvePacket>();
 
       this.tippingDetected = tippingDetectedBoolean;
       this.yoTime = yoTime;
@@ -86,6 +89,7 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior.setYawAngleThreshold(minYawDeltaForWalkingBetweenTurns);
 
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
+      super.attachNetworkProcessorListeningQueue(turnValvePacketListener, TurnValvePacket.class);
    }
 
    @Override
@@ -96,12 +100,17 @@ public class TurnValveBehavior extends BehaviorInterface
          setInput(scriptBehaviorInputPacketListener.getNewestPacket());
       }
 
+      if (turnValvePacketListener.isNewPacketAvailable() && !hasInputBeenSet.getBooleanValue())
+      {
+         setInput(turnValvePacketListener.getNewestPacket());
+      }
+
       pipeLine.doControl();
 
-      //      if (!currentBehavior.equals(walkToLocationBehavior))
-      //      {
-      //         pauseIfCapturePointErrorIsTooLarge();
-      //      }
+      if (walkToLocationBehavior.isDone())
+      {
+         pauseIfCapturePointErrorIsTooLarge();
+      }
    }
 
    private void pauseIfCapturePointErrorIsTooLarge()
@@ -114,41 +123,47 @@ public class TurnValveBehavior extends BehaviorInterface
       }
    }
 
-   public void setInput(RigidBodyTransform valveTransformToWorld, double turnValveAngle)
+   public void setInput(TurnValvePacket turnValvePacket)
    {
-      pipeLine.submitSingleTaskStage(createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength()));
+      setInput(turnValvePacket.getValveTransformToWorld(), turnValvePacket.getGraspApproachDirectionInValveFrame(), turnValvePacket.getValveRadius(),
+            turnValvePacket.getTurnValveAngle(), Math.toRadians(90.0));
+   }
 
+   public void setInput(RigidBodyTransform valveTransformToWorld, Vector3d graspApproachDirectionInValveFrame, double valveRadius,
+         double totalAngleToRotateValve, double angleToRotatePerGraspUngraspCycle)
+   {
       SysoutTool.println("Not using script behavior.", DEBUG);
 
-      double turnValveAnglePerGraspUngraspCycle = Math.toRadians(90.0);
-      GraspValveTurnAndUnGraspTask graspValveTurnAndUnGraspTask = new GraspValveTurnAndUnGraspTask(graspValveTurnAndUnGraspBehavior, valveType,
-            valveTransformToWorld, graspApproachDirectionInValveFrame, Axis.X, graspValveRim, turnValveAnglePerGraspUngraspCycle, yoTime);
+      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
+            handPoseBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength()));
 
-      int numberOfGraspUngraspCycles = (int) Math.ceil(turnValveAngle / turnValveAnglePerGraspUngraspCycle);
+      GraspValveTurnAndUnGraspTask graspValveTurnAndUnGraspTask = new GraspValveTurnAndUnGraspTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
+            graspApproachDirectionInValveFrame, Axis.X, valveRadius, graspValveRim, angleToRotatePerGraspUngraspCycle, yoTime);
+
+      int numberOfGraspUngraspCycles = (int) Math.ceil(totalAngleToRotateValve / angleToRotatePerGraspUngraspCycle);
 
       for (int i = 0; i < numberOfGraspUngraspCycles; i++)
       {
          pipeLine.submitSingleTaskStage(graspValveTurnAndUnGraspTask);
       }
 
+      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
+            handPoseBehavior, yoTime));
+
+      hasInputBeenSet.set(true);
    }
 
    public void setInput(ScriptBehaviorInputPacket scriptBehaviorInputPacket)
    {
-      String scriptName = scriptBehaviorInputPacket.getScriptName();
       RigidBodyTransform valveTransformToWorld = scriptBehaviorInputPacket.getReferenceTransform();
 
-      if (scriptName == null)
-      {
-         setInput(valveTransformToWorld, turnValveAngle);
-      }
-      else
-      {
-         SysoutTool.println("New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName(), DEBUG);
+      SysoutTool.println("New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName(), DEBUG);
 
-         pipeLine.submitSingleTaskStage(createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength()));
-         pipeLine.submitSingleTaskStage(new ScriptTask(scriptBehavior, scriptBehaviorInputPacket, yoTime));
-      }
+      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
+            handPoseBehavior, yoTime));
+      pipeLine.submitSingleTaskStage(createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength()));
+      pipeLine.submitSingleTaskStage(new ScriptTask(scriptBehavior, scriptBehaviorInputPacket, yoTime));
 
       hasInputBeenSet.set(true);
    }

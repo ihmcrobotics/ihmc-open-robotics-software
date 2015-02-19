@@ -14,7 +14,6 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
-import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -30,8 +29,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class GraspValveBehavior extends BehaviorInterface
 {
    private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 0.3;
-   private final double WRIST_OFFSET_FROM_HAND = 0.11; // 0.05
-   private final double HAND_POSE_TRAJECTORY_TIME = 1.0;//2.0;
+   private final double WRIST_OFFSET_FROM_HAND = 0.11 * 0.75; // 0.11
+   private final double HAND_POSE_TRAJECTORY_TIME = 2.0;//2.0;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame pelvisFrame;
@@ -73,13 +72,13 @@ public class GraspValveBehavior extends BehaviorInterface
       reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);
    }
 
-   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d approachDirectionInValveFrame, boolean graspValveRim)
+   public void setGraspPose(RigidBodyTransform valveTransformToWorld, Vector3d approachDirectionInValveFrame, double valveRadius, boolean graspValveRim)
    {
-      setGraspPose(valveType, valveTransformToWorld, approachDirectionInValveFrame, MIDPOSE_OFFSET_FROM_FINALPOSE, graspValveRim);
+      setGraspPose(valveTransformToWorld, approachDirectionInValveFrame, MIDPOSE_OFFSET_FROM_FINALPOSE, valveRadius, graspValveRim);
    }
 
-   public void setGraspPose(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d approachDirectionInValveFrame,
-         double midPoseOffsetFromGraspPose, boolean graspValveRim)
+   public void setGraspPose(RigidBodyTransform valveTransformToWorld, Vector3d approachDirectionInValveFrame,
+         double midPoseOffsetFromGraspPose, double valveRadius, boolean graspValveRim)
    {
       Vector3d worldToValveVec = new Vector3d();
       valveTransformToWorld.getTranslation(worldToValveVec);
@@ -88,7 +87,6 @@ public class GraspValveBehavior extends BehaviorInterface
 
       if (graspValveRim)
       {
-         double valveRadius = valveType.getValveRadius();
          Vector3d valveCenterToRimVecInValveFrame = new Vector3d(0, -valveRadius, 0);
          Vector3d valveCenterToRimVecInWorldFrame = TransformTools.getTransformedVector(valveCenterToRimVecInValveFrame, valveTransformToWorld);
 
@@ -134,7 +132,8 @@ public class GraspValveBehavior extends BehaviorInterface
       taskExecutor.submit(new CoMHeightTask(comHeightDesired, yoTime, comHeightBehavior, 1.0));
       taskExecutor.submit(new HandPoseTask(robotSideOfGraspingHand, yoTime, handPoseBehavior, Frame.WORLD, midGrabTransform, HAND_POSE_TRAJECTORY_TIME));
       taskExecutor.submit(new FingerStateTask(robotSideOfGraspingHand, FingerState.OPEN, fingerStateBehavior, yoTime));
-      taskExecutor.submit(new HandPoseTask(robotSideOfGraspingHand, yoTime, handPoseBehavior, Frame.WORLD, finalGraspTransform, HAND_POSE_TRAJECTORY_TIME));
+      boolean stopHandIfCollision = false;
+      taskExecutor.submit(new HandPoseTask(robotSideOfGraspingHand, yoTime, handPoseBehavior, Frame.WORLD, finalGraspTransform, HAND_POSE_TRAJECTORY_TIME, stopHandIfCollision));
       taskExecutor.submit(new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime));
 
       haveInputsBeenSet.set(true);
@@ -162,7 +161,7 @@ public class GraspValveBehavior extends BehaviorInterface
       handFrameBeforeRotation.setPoseAndUpdate(valveTransformToWorld);
 
       FramePose handPose = new FramePose(handFrameBeforeRotation);
-      handPose.setOrientation(0.0, 0.0, Math.PI);
+      handPose.setOrientation(0.0, 0.0, -0.5 * Math.PI);
       handPose.changeFrame(handFrameBeforeGrasping);
 
       handPose.changeFrame(worldFrame);

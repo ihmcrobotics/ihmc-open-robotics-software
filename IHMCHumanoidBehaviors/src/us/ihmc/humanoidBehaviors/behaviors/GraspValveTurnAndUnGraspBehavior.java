@@ -93,11 +93,11 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
       }
    }
 
-   public void setInput(ValveType valveType, RigidBodyTransform valveTransformToWorld, Vector3d graspApproachDirectionInValveFrame,
-         Axis valvePinJointAxisInValveFrame, boolean graspValveRim, double turnValveAngle)
+   public void setInput(RigidBodyTransform valveTransformToWorld, Vector3d graspApproachDirectionInValveFrame,
+         Axis valvePinJointAxisInValveFrame, double valveRadius, boolean graspValveRim, double turnValveAngle)
    {
-      pipeLine.submitSingleTaskStage(new GraspValveTask(graspValveBehavior, valveType, valveTransformToWorld, graspApproachDirectionInValveFrame,
-            graspValveRim, yoTime));
+      pipeLine.submitSingleTaskStage(new GraspValveTask(graspValveBehavior, valveTransformToWorld, graspApproachDirectionInValveFrame,
+            graspValveRim, valveRadius, yoTime));
 
       double trajectoryTime = 2.0;
       RobotSide robotSideOfHandToUse = RobotSide.RIGHT;

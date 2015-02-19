@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -22,6 +23,7 @@ public class HandPoseBehavior extends BehaviorInterface
    private final boolean DEBUG = false;
 
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
+   private final ConcurrentListeningQueue<HandCollisionDetectedPacket> collisionListeningQueue = new ConcurrentListeningQueue<HandCollisionDetectedPacket>();
    private Status status;
 
    private HandPosePacket outgoingHandPosePacket;
@@ -31,12 +33,11 @@ public class HandPoseBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable trajectoryTimeElapsed;
-   
+
    private final BooleanYoVariable hasInputBeenSet;
-
    private final BooleanYoVariable hasStatusBeenReceived;
-
    private final BooleanYoVariable isDone;
+   private final BooleanYoVariable stopHandIfCollision;
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -59,18 +60,31 @@ public class HandPoseBehavior extends BehaviorInterface
       hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
+      stopHandIfCollision = new BooleanYoVariable(behaviorNameFirstLowerCase + "StopIfCollision", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
-   }
-
-   public void setInput(HandPosePacket handPosePacket)
-   {
-      this.outgoingHandPosePacket = handPosePacket;
-      hasInputBeenSet.set(true);
+      this.attachControllerListeningQueue(collisionListeningQueue, HandCollisionDetectedPacket.class);
    }
 
    public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime)
    {
-      setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime));
+      setInput(frame, pose, robotSide, trajectoryTime, false);
+   }
+
+   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime, boolean stopHandIfCollision)
+   {
+      setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), stopHandIfCollision);
+   }
+
+   public void setInput(HandPosePacket handPosePacket)
+   {
+      setInput(handPosePacket, false);
+   }
+
+   public void setInput(HandPosePacket handPosePacket, boolean stopHandIfCollision)
+   {
+      this.stopHandIfCollision.set(stopHandIfCollision);
+      this.outgoingHandPosePacket = handPosePacket;
+      hasInputBeenSet.set(true);
    }
 
    @Override
@@ -79,6 +93,13 @@ public class HandPoseBehavior extends BehaviorInterface
       if (inputListeningQueue.isNewPacketAvailable())
       {
          consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
+      }
+
+      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable() && trajectoryTimeElapsed.getDoubleValue() > 0.1)
+      {
+         SysoutTool.println("COLLISION DETECTED!  STOPPING HAND.");
+         stop();
+         isDone.set(true);
       }
 
       trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
