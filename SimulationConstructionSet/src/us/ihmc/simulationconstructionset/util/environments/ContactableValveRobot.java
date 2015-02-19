@@ -268,7 +268,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       // TODO Auto-generated method stub
 
    }
-
+   
    @Override
    public PinJoint getPinJoint()
    {
@@ -281,6 +281,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       transformToWorld.set(originalValvePose);
    }
 
+   public double getValveRadius()
+   {
+      return valveRadius;
+   }
+   
    public double getClosePercentage()
    {
       return valveClosePercentage.getDoubleValue();
