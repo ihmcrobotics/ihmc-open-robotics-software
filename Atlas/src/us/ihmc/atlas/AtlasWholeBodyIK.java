@@ -51,6 +51,17 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    public RobotSide getSideOfTheFootRoot(){
       return RobotSide.RIGHT;
    }
+   
+   int[] waitstJointId;
+   
+   public int[] getWaistJointId()
+   {
+      int back_bkz = jointNamesToIndex.get("back_bkz");
+      int back_bky = jointNamesToIndex.get("back_bky");
+      int back_bkx = jointNamesToIndex.get("back_bkx");
+      
+      return new int[]{ back_bkz, back_bky, back_bkx };
+   }
 
    @Override 
    public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
