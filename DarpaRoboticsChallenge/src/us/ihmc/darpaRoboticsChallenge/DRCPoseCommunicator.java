@@ -24,6 +24,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 // fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
@@ -32,7 +33,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
 
    private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
-   
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame rootFrame;
    private ReferenceFrame[] pointCloudFrames;
@@ -63,8 +64,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       setupForceSensorMassCompensators(estimatorModel);
 
       rootFrame = estimatorModel.getRootJoint().getFrameAfterJoint();
-      stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getNumberOfJoints(),
-            jointConfigurationGathererAndProducer.getNumberOfForceSensors()), 16);
+      stateRingBuffer = new ConcurrentRingBuffer<State>(new State.Builder(jointConfigurationGathererAndProducer.getJoints(), jointConfigurationGathererAndProducer.getForceSensorDefinitions()), 16);
       setupSensorFrames(sensorInformation, estimatorModel);
       startWriterThread();
    }
@@ -200,7 +200,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          }
 
       }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
-      
+
    }
 
    @Override
@@ -266,31 +266,32 @@ public class DRCPoseCommunicator implements RawOutputWriter
       public final RobotPoseData poseData;
       public final RobotConfigurationData jointData;
 
-      public State(int numberOfJoints, int numberOfForceSensors)
+      public State(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions)
       {
          poseData = new RobotPoseData();
-         jointData = new RobotConfigurationData(numberOfJoints, numberOfForceSensors);
+         jointData = new RobotConfigurationData(joints, forceSensorDefinitions);
       }
 
       public static class Builder implements us.ihmc.concurrent.Builder<State>
       {
-         private final int numberOfJoints, numberOfForceSensors;
+         private final OneDoFJoint[] joints;
+         private final ForceSensorDefinition[] forceSensorDefinitions;
 
-         public Builder(int numberOfJoints, int numberOfForceSensors)
+         public Builder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions)
          {
-            this.numberOfJoints = numberOfJoints;
-            this.numberOfForceSensors = numberOfForceSensors;
+            this.joints = joints;
+            this.forceSensorDefinitions = forceSensorDefinitions;
          }
 
          @Override
          public State newInstance()
          {
-            return new State(numberOfJoints, numberOfForceSensors);
+            return new State(joints, forceSensorDefinitions);
          }
 
       }
    }
-   
+
    public void stop()
    {
       writeExecutor.shutdown();

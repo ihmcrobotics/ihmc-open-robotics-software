@@ -12,10 +12,8 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 public class JointConfigurationGatherer
@@ -26,6 +24,7 @@ public class JointConfigurationGatherer
    private final Vector3d rootTranslation = new Vector3d();
    private final Quat4d rootOrientation = new Quat4d();
 
+   private final ForceSensorDefinition[] forceSensorDefinitions;
    private final ArrayList<String> forceSensorNameList = new ArrayList<String>();
    private final ArrayList<ForceSensorData> forceSensorDataList = new ArrayList<>();
 
@@ -39,22 +38,10 @@ public class JointConfigurationGatherer
    {
       this.rootJoint = estimatorModel.getRootJoint();
 
-      estimatorModel.getOneDoFJoints(joints);
+      FullRobotModelUtils.getAllJointsExcludingHands(joints, estimatorModel);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody hand = estimatorModel.getHand(robotSide);
-         if (hand != null)
-         {
-            OneDoFJoint[] fingerJoints = ScrewTools.filterJoints(ScrewTools.computeSubtreeJoints(hand), OneDoFJoint.class);
-            for (OneDoFJoint fingerJoint : fingerJoints)
-            {
-               joints.remove(fingerJoint);
-            }
-         }
-      }
-
-      for (ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      forceSensorDefinitions = forceSensorDataHolderForEstimator.getForceSensorDefinitions().toArray(new ForceSensorDefinition[forceSensorDataHolderForEstimator.getForceSensorDefinitions().size()]);
+      for (ForceSensorDefinition definition : forceSensorDefinitions)
       {
          String sensorName = definition.getSensorName();
          forceSensorNameList.add(sensorName);
@@ -97,11 +84,18 @@ public class JointConfigurationGatherer
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         String sensorName = forceSensorNameList.get(sensorNumber);
-         jointConfigurationData.getForceSensorNames()[sensorNumber] = sensorName;
-
          DenseMatrix64F forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
          forceSensorDataList.get(sensorNumber).packWrench(forceAndMomentVector);
       }
+   }
+
+   public OneDoFJoint[] getJoints()
+   {
+      return joints.toArray(new OneDoFJoint[joints.size()]);
+   }
+   
+   public ForceSensorDefinition[] getForceSensorDefinitions()
+   {
+      return forceSensorDefinitions;
    }
 }

@@ -95,7 +95,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
       new RosRobotPosePublisher(controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, namespace,
             tfPublisher);
-      new RosRobotJointStatePublisher(controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace);
+      new RosRobotJointStatePublisher(fullRobotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace);
 
       if(scsSensorCommunicationBridge != null)
       {

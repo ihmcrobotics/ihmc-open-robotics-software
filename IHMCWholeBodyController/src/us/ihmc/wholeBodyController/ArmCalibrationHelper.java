@@ -122,17 +122,19 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
          PrintWriter qWriter = new PrintWriter(q);
 //         PrintWriter qoutWriter = new PrintWriter(qout);
 
-         String[] jointNames = lastJointConfigurationData.getJointNames();
-         for (int i = 0; i < jointNames.length; i++)
-         {
-            qWriter.print(jointNames[i]);
-            qWriter.print("=");
-            qWriter.println(lastJointConfigurationData.getJointAngles()[i]);
-
-//            qoutWriter.print(jointNames[i]);
-//            qoutWriter.print("=");
-//            qoutWriter.println(lastJointConfigurationData.getJointOutAngles()[i]);
-         }
+         
+         System.err.println("TODO: Reimplement ArmCalibrationManager to write joint names from SDF");
+//         String[] jointNames = lastJointConfigurationData.getJointNames();
+//         for (int i = 0; i < jointNames.length; i++)
+//         {
+//            qWriter.print(jointNames[i]);
+//            qWriter.print("=");
+//            qWriter.println(lastJointConfigurationData.getJointAngles()[i]);
+//
+////            qoutWriter.print(jointNames[i]);
+////            qoutWriter.print("=");
+////            qoutWriter.println(lastJointConfigurationData.getJointOutAngles()[i]);
+//         }
 
          qWriter.close();
 //         qoutWriter.close();
