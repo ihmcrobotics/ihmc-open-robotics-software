@@ -68,6 +68,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
+   private final DRCPoseCommunicator poseCommunicator;
    
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
 		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
@@ -114,8 +115,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          PacketCommunicator objectCommunicator = dataProducer.getObjectCommunicator();
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel, forceSensorDataHolderForEstimator);
          
-         estimatorController.setRawOutputWriter(new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-               objectCommunicator, sensorOutputMapReadOnly, sensorInformation));
+         poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
+               objectCommunicator, sensorOutputMapReadOnly, sensorInformation);
+         estimatorController.setRawOutputWriter(poseCommunicator);
+      }
+      else
+      {
+         poseCommunicator = null;
       }
       
       firstTick.set(true);
@@ -259,6 +265,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public  List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
    {
 	   return sensorOutputMapReadOnly.getIMUProcessedOutputs();
+   }
+
+   public void dispose()
+   {
+      if(poseCommunicator != null)
+      {
+         poseCommunicator.stop();
+      }
    }
    
 }

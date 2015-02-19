@@ -599,7 +599,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
          double sdfGaussianStdDev = 0.0;
          double sdfGaussianMean = 0.0;
-         double sdfUpdateRate = Double.parseDouble(sensor.getUpdateRate());
+         int sdfUpdateRate = (int) (1000.0 / Double.parseDouble(sensor.getUpdateRate()));
 
          Noise sdfNoise = sdfRay.getNoise();
          if (sdfNoise != null)
@@ -640,7 +640,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
          SimulatedLIDARSensorUpdateParameters updateParameters = new SimulatedLIDARSensorUpdateParameters();
          updateParameters.setAlwaysOn(sdfAlwaysOn);
-         updateParameters.setUpdateRate(sdfUpdateRate);
+         updateParameters.setUpdatePeriodInMillis(sdfUpdateRate);
 
          LidarMount lidarMount = new LidarMount(linkToSensorInZUp, polarDefinition, sensor.getName());
          scsJoint.addSensor(lidarMount);

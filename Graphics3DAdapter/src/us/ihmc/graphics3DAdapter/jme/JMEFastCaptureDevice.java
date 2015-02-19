@@ -1,37 +1,36 @@
 package us.ihmc.graphics3DAdapter.jme;
 
 /*
-* Copyright (c) 2009-2012 jMonkeyEngine
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are
-* met:
-*
-* * Redistributions of source code must retain the above copyright
-*   notice, this list of conditions and the following disclaimer.
-*
-* * Redistributions in binary form must reproduce the above copyright
-*   notice, this list of conditions and the following disclaimer in the
-*   documentation and/or other materials provided with the distribution.
-*
-* * Neither the name of 'jMonkeyEngine' nor the names of its contributors
-*   may be used to endorse or promote products derived from this software
-*   without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-* "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-* TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-* PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-* CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-* EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-* PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-* PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-* LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-* NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-* SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (c) 2009-2012 jMonkeyEngine
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met:
+ *
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ *
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ *
+ * * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+ *   may be used to endorse or promote products derived from this software
+ *   without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ * TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 
 import static org.lwjgl.opengl.EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT;
 import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
@@ -55,6 +54,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Point3d;
@@ -62,7 +64,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.camera.CameraStreamer;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.utilities.TimerTaskScheduler;
+import us.ihmc.utilities.ThreadTools;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -95,6 +97,7 @@ import com.jme3.util.BufferUtils;
  */
 public class JMEFastCaptureDevice extends AbstractAppState implements SceneProcessor, CaptureDevice
 {
+   private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("JMEFastCaptureDevice"));
    private final static boolean USE_PBO = JMERenderer.USE_PBO;
    private final static boolean CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME = true;
 
@@ -110,16 +113,15 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    private int bufferId;
 
-// private int gpuToVram = 0, vramToSys = 1;
+   // private int gpuToVram = 0, vramToSys = 1;
    private int dataSize;
-
 
    private boolean captureFrame = true;
    private Object syncObject = new Object();
    private Object captureHolder = new Object();
 
    private CameraStreamer cameraStreamer;
-   private TimerTask graphicsUpdaterTimerTask;
+   private Runnable graphicsUpdaterTimerTask;
 
    public JMEFastCaptureDevice(ViewPort viewport)
    {
@@ -143,7 +145,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       this.renderManager = rm;
       reshape(vp, vp.getCamera().getWidth(), vp.getCamera().getHeight());
 
-
    }
 
    @Override
@@ -163,23 +164,21 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       systemRam = BufferUtils.createByteBuffer(dataSize);
       cpuArray = new byte[dataSize];
 
-
       if (USE_PBO)
       {
          // Get two PBO buffers, put their indices in buffer
          IntBuffer buffer = BufferUtils.createIntBuffer(1);
          glGenBuffers(buffer);
 
-
          // Map both PBO buffers, and put the indices in bufferIds
-//       for(int i = 0; i < 2; i++)
-//       {
+         //       for(int i = 0; i < 2; i++)
+         //       {
          bufferId = buffer.get(0);
          glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferId);
          glBufferData(GL_PIXEL_PACK_BUFFER, dataSize, GL_STATIC_READ);
 
-//       bufferIds = bufferId;
-//         }
+         //       bufferIds = bufferId;
+         //         }
 
          // Unbind PBO buffers
          glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -196,8 +195,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void postFrame(FrameBuffer out)
    {
-      if (alreadyClosing) return;
-      
+      if (alreadyClosing)
+         return;
+
       synchronized (syncObject)
       {
          if (captureFrame)
@@ -209,7 +209,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             int viewWidth = (int) ((curCamera.getViewPortRight() - curCamera.getViewPortLeft()) * curCamera.getWidth());
             int viewHeight = (int) ((curCamera.getViewPortTop() - curCamera.getViewPortBottom()) * curCamera.getHeight());
             renderer.setViewPort(0, 0, width, height);
-
 
             if (USE_PBO)
             {
@@ -225,9 +224,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
                glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferId);
                glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
-
                // Select vramToSys PBO, bind it to systemRam and copy the data over
-//             glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferIds[vramToSys]);
+               //             glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferIds[vramToSys]);
                systemRam = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY, null);
                if (systemRam != null)
                {
@@ -255,14 +253,10 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             // Return to previous settings
             renderer.setViewPort(viewX, viewY, viewWidth, viewHeight);
 
-            
-
-
             // Swap indices
-//          int previousGpuToVram = gpuToVram;
-//          gpuToVram = vramToSys;
-//          vramToSys = previousGpuToVram;
-
+            //          int previousGpuToVram = gpuToVram;
+            //          gpuToVram = vramToSys;
+            //          vramToSys = previousGpuToVram;
 
             // Notify waiting thread
 
@@ -278,8 +272,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    }
 
-
-   private class GraphicsUpdater extends TimerTask
+   private class GraphicsUpdater implements Runnable
    {
       public long timeStamp = 0;
       public Point3d position = new Point3d();
@@ -288,7 +281,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       public void run()
       {
-         if (alreadyClosing) return;
+         if (alreadyClosing)
+            return;
 
          if (!cameraStreamer.isReadyForNewData())
          {
@@ -299,7 +293,6 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          {
             startCaptureOfVideoFrame();
          }
-
 
          synchronized (syncObject)
          {
@@ -316,8 +309,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             }
          }
 
-         if (alreadyClosing) return;
-         
+         if (alreadyClosing)
+            return;
+
          convertScreenShot();
 
          cameraStreamer.updateImage(bufferedImage, timeStamp, position, orientation, fov);
@@ -331,8 +325,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       private void startCaptureOfVideoFrame()
       {
-         if (alreadyClosing) return;
-         
+         if (alreadyClosing)
+            return;
+
          synchronized (syncObject)
          {
             captureFrame = true;
@@ -344,14 +339,13 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       }
    }
 
-
    public void convertScreenShot()
    {
-      if (alreadyClosing) return;
+      if (alreadyClosing)
+         return;
 
       WritableRaster wr = bufferedImage.getRaster();
       DataBufferByte db = (DataBufferByte) wr.getDataBuffer();
-
 
       int width = wr.getWidth();
       int height = wr.getHeight();
@@ -378,8 +372,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public BufferedImage exportSnapshotAsBufferedImage()
    {
-      if (alreadyClosing) return bufferedImage;
-      
+      if (alreadyClosing)
+         return bufferedImage;
+
       synchronized (captureHolder)
       {
          synchronized (syncObject)
@@ -396,7 +391,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
                {
                }
             }
-            while (captureFrame &!alreadyClosing);
+            while (captureFrame & !alreadyClosing);
          }
 
          convertScreenShot();
@@ -441,33 +436,32 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       }
 
       this.cameraStreamer = cameraStreamer;
-      
+
       graphicsUpdaterTimerTask = new GraphicsUpdater();
-      
-      TimerTaskScheduler.scheduleAtFixedRate(graphicsUpdaterTimerTask, 0, 1000 / framesPerSecond);
+
+      executor.scheduleAtFixedRate(graphicsUpdaterTimerTask, 0, 1000000 / framesPerSecond, TimeUnit.MICROSECONDS);
    }
 
    private boolean alreadyClosing = false;
-   
+
    public void closeAndDispose()
    {
-      if (alreadyClosing) return;
-      
+      if (alreadyClosing)
+         return;
+
       alreadyClosing = true;
-      
-      if (graphicsUpdaterTimerTask != null)
-      {
-         graphicsUpdaterTimerTask.cancel();
-         graphicsUpdaterTimerTask = null;
-      }
-      
+
       // Wake up the graphics updater task...
-      synchronized(syncObject)
+      synchronized (syncObject)
       {
          syncObject.notifyAll();
       }
-//      syncObject = null;
+      //      syncObject = null;
 
+      
+      executor.shutdown();
+      executor = null;
+      
       renderer = null;
       renderManager = null;
       viewport = null;

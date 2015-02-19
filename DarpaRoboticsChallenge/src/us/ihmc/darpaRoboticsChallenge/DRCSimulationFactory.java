@@ -294,6 +294,7 @@ public class DRCSimulationFactory
    {
       multiThreadedRobotController.stop();
       if (globalDataProducer != null) globalDataProducer.stop();
+      drcEstimatorThread.dispose();
       drcEstimatorThread = null;
       drcControllerThread = null;
       multiThreadedRobotController = null;
