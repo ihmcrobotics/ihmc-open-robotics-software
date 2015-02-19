@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.*;
@@ -65,13 +66,12 @@ public class SwingTrajectoryHeightCalculator
    {
       FramePose startPose = new FramePose();
       initialFootstep.getSolePose(startPose);
-
-
       FramePose endPose = new FramePose();
       endFootstep.getSolePose(endPose);
 
       return getSwingHeight(startPose, endPose, heightMap);
    }
+
    public double getSwingHeight(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)
    {
       FramePoint startFramePoint = startPose.getFramePointCopy();
@@ -79,6 +79,11 @@ public class SwingTrajectoryHeightCalculator
       Point3d startPoint = startFramePoint.getPointCopy();
       Point3d endPoint = endFramePoint.getPointCopy();
       return getSwingHeight(startPoint, endPoint, groundProfile);
+   }
+
+   public double getSwingHeight(FootstepData initialFootstep, FootstepData endFootstep, HeightMapWithPoints heightMap)
+   {
+      return getSwingHeight(initialFootstep.getLocation(), endFootstep.getLocation(), heightMap);
    }
 
    public double getSwingHeight(Point3d startPoint, Point3d endPoint, HeightMapWithPoints groundProfile)

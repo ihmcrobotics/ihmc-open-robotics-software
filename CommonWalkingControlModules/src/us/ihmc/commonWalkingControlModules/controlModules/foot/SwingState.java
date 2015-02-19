@@ -2,10 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
@@ -17,8 +13,8 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryGeneratorParameters;
-import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 import us.ihmc.utilities.math.trajectories.providers.ConstantVectorProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentAngularVelocityProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
@@ -36,7 +32,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.TwoViaPointTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedOrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WrapperForMultiplePositionTrajectoryGenerators;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoSE3ConfigurationProvider;
@@ -201,11 +196,11 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters.getMinimumHeightDifferenceForStepOnOrOff();
 
       if (usePushRecoveryTrajectory){
-         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryGenerationMethod.PUSH_RECOVERY));
+         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.PUSH_RECOVERY));
       }
       else if (worldFrameDeltaZAboveThreshold)
       {
-         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryGenerationMethod.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
+         trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.OBSTACLE_CLEARANCE, footstep.getSwingHeight()));
       }else{
          trajectoryParametersProvider.set(new TrajectoryParameters(footstep.getTrajectoryType(), footstep.getSwingHeight()));
       }

@@ -16,7 +16,6 @@ import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptFileLoader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.trajectories.TrajectoryGenerationMethod;
 
 public class CommandPlayer implements TimestampListener
 {
