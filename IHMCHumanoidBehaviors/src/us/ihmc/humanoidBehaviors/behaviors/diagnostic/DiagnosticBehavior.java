@@ -306,9 +306,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
          sequenceSquats();
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequenceChestRotations();
+         sequenceChestRotations(0.55);
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequencePelvisRotations();
+         sequencePelvisRotations(0.3);
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
          sequenceShiftWeight();
    }
@@ -331,8 +331,8 @@ public class DiagnosticBehavior extends BehaviorInterface
          submitDesiredPelvisPositionOffset(false, shiftScaleVector.getX() * desiredPelvisOffset.getX(), shiftScaleVector.getY()
                * desiredPelvisOffset.getY(), 0.0);
          sequenceSquats();
-         sequenceChestRotations();
-         sequencePelvisRotations();
+         sequenceChestRotations(0.55); //TODO increase/decrease limit?
+         sequencePelvisRotations(0.3); //TODO increase/decrease limit?
       }
       // Get back to the first vertex again
       desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
@@ -346,7 +346,13 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private void sequenceHardWarmup()
    {
+      //harder squats??
       
+      //chest rotation closer to the limits
+      
+      //pelvis rotations closer to the limits
+      
+      //combinations of doom
    }
 
    private void sequenceUpperBody()
@@ -356,32 +362,32 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       
       submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
-      sequenceChestRotations();
-      sequencePelvisRotations();
+      sequenceChestRotations(0.55);
+      sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_FAR_FORWARD);
-      sequenceChestRotations();
-      sequencePelvisRotations();
+      sequenceChestRotations(0.55);
+      sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_FAR_BACK);
-      sequenceChestRotations();
-      sequencePelvisRotations();
+      sequenceChestRotations(0.55);
+      sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, Math.PI / 2.0);
       submitHandPose(RobotSide.LEFT, desiredUpperArmOrientation, 0.0, null);
       submitHumanoidArmPose(RobotSide.RIGHT, HumanoidArmPose.ARM_STRAIGHT_DOWN);
-      sequenceChestRotations();
-      sequencePelvisRotations();
+      sequenceChestRotations(0.55);
+      sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
       submitHumanoidArmPose(RobotSide.LEFT, HumanoidArmPose.ARM_STRAIGHT_DOWN);
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, -Math.PI / 2.0);
       submitHandPose(RobotSide.RIGHT, desiredUpperArmOrientation, 0.0, null);
-      sequenceChestRotations();
-      sequencePelvisRotations();
+      sequenceChestRotations(0.55);
+      sequencePelvisRotations(0.3);
       sequenceMovingChestAndPelvisOnly();
 
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
@@ -394,9 +400,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitChestHomeCommand(true);
    }
    
-   private void sequenceChestRotations()
+   private void sequenceChestRotations(double percentOfJointLimit)
    {
-      double percentOfJointLimit = 0.55;
       double roll = percentOfJointLimit * minMaxRoll;
       submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
       if (doPelvisAndChestYaw.getBooleanValue())
@@ -422,9 +427,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitDesiredChestOrientation(false, 0.0, 0.0, 0.0);
    }
 
-   private void sequencePelvisRotations()
+   private void sequencePelvisRotations(double percentOfJointLimit)
    {
-      double percentOfJointLimit = 0.3;
       double roll = percentOfJointLimit * minMaxRoll;
       double yaw = percentOfJointLimit * minMaxYaw;
       submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * maxPitchForward, 0.0);
@@ -1447,10 +1451,10 @@ public class DiagnosticBehavior extends BehaviorInterface
                sequenceArmPose();
                break;
             case CHEST_ROTATIONS:
-               sequenceChestRotations();
+               sequenceChestRotations(0.55);
                break;
             case PELVIS_ROTATIONS:
-               sequencePelvisRotations();
+               sequencePelvisRotations(0.3);
                break;
             case COMBINED_CHEST_PELVIS:
                sequenceMovingChestAndPelvisOnly();
