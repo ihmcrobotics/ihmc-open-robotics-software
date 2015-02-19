@@ -70,7 +70,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
    public static void main(String[] args)
    {
-      RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager();
+      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager();
       JFrame frame = new JFrame();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
