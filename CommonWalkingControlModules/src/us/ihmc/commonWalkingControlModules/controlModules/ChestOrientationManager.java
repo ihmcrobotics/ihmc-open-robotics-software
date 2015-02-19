@@ -124,6 +124,8 @@ public class ChestOrientationManager
 
       if (chestOrientationProvider.checkForHomeOrientation())
       {
+         receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
+
          simpleOrientationTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          simpleOrientationTrajectoryGenerator.get(desiredOrientation);
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
