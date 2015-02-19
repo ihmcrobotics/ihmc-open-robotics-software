@@ -621,10 +621,6 @@ abstract public class WholeBodyIkSolver
       Vector64F newQ = getHierarchicalSolver().getRandomQ();
 
       HashMap<String,Double> suggestedQ = getSuggestedAnglesForReseed();
-
-      System.out.println("\n" + cachedAnglesQ );
-      
-      System.out.println( newQ );
       
       for( Map.Entry<String,Double> entry: suggestedQ.entrySet())
       {
@@ -653,7 +649,6 @@ abstract public class WholeBodyIkSolver
             cachedAnglesQ.set(i, newQ.get(i));
          }
       }
-      System.out.println( cachedAnglesQ );
    }
 
 
