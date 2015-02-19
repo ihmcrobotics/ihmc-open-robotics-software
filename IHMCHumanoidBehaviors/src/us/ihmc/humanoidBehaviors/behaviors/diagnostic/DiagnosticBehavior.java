@@ -484,7 +484,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       double footPoseHeight = maxFootPoseHeight.getDoubleValue();
       
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
-      //foot remains flas
+      //foot remains flat
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
@@ -501,7 +501,13 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       
       //footOrientation changes
-//      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, footPoseHeight, yaw, pitch, roll);
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPose(robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPose(robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
       
       
       //put the foot back on the ground
@@ -539,7 +545,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       double higherFootPoseHeight = maxFootPoseHeight.getDoubleValue();
       double midFootPoseHeight = 0.5 * maxFootPoseHeight.getDoubleValue();
       
-      
       ///////////////////     good     ////////////////////////////
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));    
@@ -566,6 +571,15 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));    
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       ////////////////////////////////////////////////////////
+      
+      //footOrientation changes
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPose(robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
+      submitFootPose(robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
+      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPose(robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));    
       
       //put the foot back on the ground
       submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
