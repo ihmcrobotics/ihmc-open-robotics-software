@@ -6,6 +6,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
@@ -56,6 +58,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTestTools;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.taskExecutor.NullTask;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -98,15 +101,35 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final YoFrameVector2d pelvisShiftScaleFactor;
-   
+
+   private  final SideDependentList<OneDoFJoint[]> upperArmJoints = new SideDependentList<OneDoFJoint[]>();
+   private  final SideDependentList<OneDoFJoint[]> lowerArmJoints = new SideDependentList<OneDoFJoint[]>();
+
    private  final SideDependentList<OneDoFJoint[]> upperArmJointsClone = new SideDependentList<OneDoFJoint[]>();
    private  final SideDependentList<OneDoFJoint[]> lowerArmJointsClone = new SideDependentList<OneDoFJoint[]>();
    
    private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
-   
+
    private enum DiagnosticTask
    {
-      CHEST_ROTATIONS, PELVIS_ROTATIONS, SHIFT_WEIGHT, COMBINED_CHEST_PELVIS, ARM_MOTIONS, UPPER_BODY, FOOT_POSES_SHORT, FOOT_POSES_LONG, RUNNING_MAN, BOW, KARATE_KID, WHOLE_SCHEBANG, STEPS_SHORT,STEPS_LONG,SQUATATHON, SIMPLE_WARMUP, STEPS_IN_PLACE
+      CHEST_ROTATIONS,
+      PELVIS_ROTATIONS,
+      SHIFT_WEIGHT,
+      COMBINED_CHEST_PELVIS,
+      ARM_MOTIONS,
+      UPPER_BODY,
+      FOOT_POSES_SHORT,
+      FOOT_POSES_LONG,
+      RUNNING_MAN,
+      BOW,
+      KARATE_KID,
+      WHOLE_SCHEBANG,
+      SQUATS,
+      SQUATATHON,
+      SIMPLE_WARMUP,
+      STEPS_SHORT,
+      STEPS_LONG,
+      STEPS_IN_PLACE
    };
 
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
@@ -235,6 +258,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       double maxStepSize = 1.0;
       double minRandomSearchScalar = -0.5;
       double maxRandomSearchScalar = 1.0;
+      DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
+      angularSelectionMatrix.set(0, 0, 1.0);
+      angularSelectionMatrix.set(1, 1, 1.0);
+      angularSelectionMatrix.set(2, 2, 1.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -255,18 +282,18 @@ public class DiagnosticBehavior extends BehaviorInterface
          upperArmsFrames.put(robotSide, upperArmBody.getBodyFixedFrame());
          lowerArmsFrames.put(robotSide, lowerArmBody.getBodyFixedFrame());
 
-         OneDoFJoint[] upperArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class);
-         upperArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints), OneDoFJoint.class));
+         upperArmJoints.put(robotSide, ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class));
+         upperArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints.get(robotSide)), OneDoFJoint.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide), upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
          NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         inverseKinematicsForUpperArm.solveForPosition(false);
+         inverseKinematicsForUpperArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
-         OneDoFJoint[] lowerArmJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJoint.class);
-         lowerArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints), OneDoFJoint.class));
+         lowerArmJoints.put(robotSide, ScrewTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJoint.class));
+         lowerArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints.get(robotSide)), OneDoFJoint.class));
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide), lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
          NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         inverseKinematicsForLowerArm.solveForPosition(false);
+         inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
       }
    }
@@ -325,28 +352,28 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       double percentOfJointLimit = 0.55;
       double roll = percentOfJointLimit * minMaxRoll;
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, 0.0));
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, 0.0);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, minMaxYaw, percentOfJointLimit * minPitch, 0.0));
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, -minMaxYaw, percentOfJointLimit * minPitch, 0.0));
+         submitDesiredChestOrientation(false, minMaxYaw, percentOfJointLimit * minPitch, 0.0);
+         submitDesiredChestOrientation(false, -minMaxYaw, percentOfJointLimit * minPitch, 0.0);
       }
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, roll));
+      submitDesiredChestOrientation(false, 0.0, 0.0, roll);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, minMaxYaw, 0.0, roll));
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, -minMaxYaw, 0.0, roll));
+         submitDesiredChestOrientation(false, minMaxYaw, 0.0, roll);
+         submitDesiredChestOrientation(false, -minMaxYaw, 0.0, roll);
       }
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, -roll));
+      submitDesiredChestOrientation(false, 0.0, 0.0, -roll);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, minMaxYaw, 0.0, -roll));
-         submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, -minMaxYaw, 0.0, -roll));
+         submitDesiredChestOrientation(false, minMaxYaw, 0.0, -roll);
+         submitDesiredChestOrientation(false, -minMaxYaw, 0.0, -roll);
       }
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, roll));
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, -roll));
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, roll);
+      submitDesiredChestOrientation(false, 0.0, percentOfJointLimit * minPitch, -roll);
 
-      submitDesiredChestOrientation(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0));
+      submitDesiredChestOrientation(false, 0.0, 0.0, 0.0);
    }
 
    private void sequencePelvisRotations()
@@ -354,28 +381,28 @@ public class DiagnosticBehavior extends BehaviorInterface
       double percentOfJointLimit = 0.3;
       double roll = percentOfJointLimit * minMaxRoll;
       double yaw = percentOfJointLimit * minMaxYaw;
-      submitDesiredPelvisOrientation(0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, 0.0);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredPelvisOrientation(yaw, percentOfJointLimit * minPitch, 0.0);
-         submitDesiredPelvisOrientation(-yaw, percentOfJointLimit * minPitch, 0.0);
+         submitDesiredPelvisOrientation(false, yaw, percentOfJointLimit * minPitch, 0.0);
+         submitDesiredPelvisOrientation(false, -yaw, percentOfJointLimit * minPitch, 0.0);
       }
-      submitDesiredPelvisOrientation(0.0, 0.0, roll);
+      submitDesiredPelvisOrientation(false, 0.0, 0.0, roll);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredPelvisOrientation(yaw, 0.0, roll);
-         submitDesiredPelvisOrientation(-yaw, 0.0, roll);
+         submitDesiredPelvisOrientation(false, yaw, 0.0, roll);
+         submitDesiredPelvisOrientation(false, -yaw, 0.0, roll);
       }
-      submitDesiredPelvisOrientation(0.0, 0.0, -roll);
+      submitDesiredPelvisOrientation(false, 0.0, 0.0, -roll);
       if (doPelvisAndChestYaw.getBooleanValue())
       {
-         submitDesiredPelvisOrientation(yaw, 0.0, -roll);
-         submitDesiredPelvisOrientation(-yaw, 0.0, -roll);
+         submitDesiredPelvisOrientation(false, yaw, 0.0, -roll);
+         submitDesiredPelvisOrientation(false, -yaw, 0.0, -roll);
       }
-      submitDesiredPelvisOrientation(0.0, percentOfJointLimit * minPitch, roll);
-      submitDesiredPelvisOrientation(0.0, percentOfJointLimit * minPitch, -roll);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, roll);
+      submitDesiredPelvisOrientation(false, 0.0, percentOfJointLimit * minPitch, -roll);
 
-      submitPelvisHomeCommand();
+      submitPelvisHomeCommand(false);
    }
 
    private void sequenceShiftWeight()
@@ -391,40 +418,46 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          desiredPelvisOffset.set(supportPolygon.getFrameVertex(i));
          desiredPelvisOffset.sub(center);
-         submitDesiredPelvisPositionOffset(pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(), pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
+         submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(), pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
       }
       // Get back to the first vertex again
       desiredPelvisOffset.set(supportPolygon.getFrameVertex(0));
       desiredPelvisOffset.sub(center);
-      submitDesiredPelvisPositionOffset(pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(), pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
+      submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(), pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
 
-      submitPelvisHomeCommand();
+      submitPelvisHomeCommand(false);
    }
 
    private void sequenceMovingChestAndPelvisOnly()
    {
       double percentOfJointLimit = 0.8;
       double percentOfJointLimitForPelvis = 0.5;
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * minPitch, 0.0);
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * maxPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * maxPitch, 0.0);
-
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, percentOfJointLimit * minMaxRoll), 0.0, 0.0,
-            percentOfJointLimitForPelvis * minMaxRoll);
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, -percentOfJointLimit * minMaxRoll), 0.0, 0.0,
-            -percentOfJointLimitForPelvis * minMaxRoll);
-
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * minPitch, percentOfJointLimitForPelvis * minMaxRoll);
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * minPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * minPitch, -percentOfJointLimitForPelvis * minMaxRoll);
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * maxPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * maxPitch, -percentOfJointLimitForPelvis * minMaxRoll);
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, percentOfJointLimit * maxPitch, 0.0), 0.0,
-            percentOfJointLimitForPelvis * maxPitch, percentOfJointLimitForPelvis * minMaxRoll);
-
-      submitDesiredChestAndPelvisOrientationsParallel(new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0), 0.0, 0.0, 0.0);
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, 0.0);
+      
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, 0.0);
+      
+      submitDesiredChestOrientation(true, 0.0, 0.0, percentOfJointLimit * minMaxRoll);
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitDesiredChestOrientation(true, 0.0, 0.0, -percentOfJointLimit * minMaxRoll);
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, -percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * minPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * minPitch, -percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, -percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitch, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitch, percentOfJointLimitForPelvis * minMaxRoll);
+      
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
    }
 
    private void sequenceArmPose()
@@ -485,34 +518,35 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
       //foot remains flat
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      boolean parallelize = false;
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
       
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       
       //footOrientation changes
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPose(robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPose(robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
       
       
       //put the foot back on the ground
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
    }
    
    private void sequenceFootPoseLong()
@@ -546,44 +580,45 @@ public class DiagnosticBehavior extends BehaviorInterface
       double midFootPoseHeight = 0.5 * maxFootPoseHeight.getDoubleValue();
       
       ///////////////////     good     ////////////////////////////
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, midFootPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
+      boolean parallelize = false;
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, midFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, 0.0, higherFootPoseHeight));
       
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
       
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
       
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));    
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), higherFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(-insideFootDisplacement), midFootPoseHeight));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
       ////////////////////////////////////////////////////////
       
       //footOrientation changes
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
-      submitFootPose(robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
-      submitFootPose(robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
-      submitFootPose(robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));    
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));    
       
       //put the foot back on the ground
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, higherFootPoseHeight));
+      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
       
    }
 
@@ -596,33 +631,26 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void runningMan(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
+      boolean mirrorOrientationsForRightSide = true;
+
       // First Lift up the foot
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), 0.1));
 
       // Go to running man pose:
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI/2.0, 0.3);
-      submitHandPose(robotSide,desiredUpperArmOrientation, -Math.PI / 2.0, null);
-      
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI/2.0, 0.3);
-      submitHandPose(robotSide.getOppositeSide(),desiredUpperArmOrientation, -Math.PI / 2.0, null);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.3);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
+
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
       
       FramePose footPose = new FramePose(ankleZUpFrame);
       footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
       footPose.setOrientation(0.0, 0.8 * Math.PI / 2.0, 0.0);
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(20.0), 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(10.0), 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredChestOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(10.0), 0.0);
 
       pipeLine.submitSingleTaskStage(new NullTask());
 
@@ -633,18 +661,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.1);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
-      desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(25.0)));
-      desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
+      submitChestHomeCommand(true);
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(25.0));
+
 
       pipeLine.submitSingleTaskStage(new NullTask());
 
@@ -654,18 +674,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
       footPose.setOrientation(0.0, 0.0, 0.0);
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
-      desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, 0.0);
 
       // Put the foot back on the ground
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
    private void sequenceBow()
@@ -673,81 +687,66 @@ public class DiagnosticBehavior extends BehaviorInterface
       bow(RobotSide.LEFT);
    }
 
-   private void bow(RobotSide LEFTSide)
+   private void bow(RobotSide robotSide)
    {
-      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(LEFTSide.getOppositeSide());
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      boolean mirrorOrientationForRightSide = true;
       
       //put the foot forward and prepare the arms
       FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
-      Point3d position = new Point3d(0.2, LEFTSide.negateIfRightSide(0.25), 0.0);
+      Point3d position = new Point3d(0.2, robotSide.negateIfRightSide(0.25), 0.0);
       Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
-      submitFootstepPosition(LEFTSide, desiredFootstepPosition);
+      submitFootstepPose(false, robotSide, desiredFootstepPosition);
 
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.5235, 0.3);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
       pipeLine.requestNewStage();
 
       desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
       pipeLine.requestNewStage();
 
       //bend forward and arms
       desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
 
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(30), 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-
-      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(35.0), 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredChestOrientation(true, 0.0, Math.toRadians(35.0), 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(30), 0.0);
 
       pipeLine.requestNewStage();
 
       //back to normal stance
-      desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-
-      desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
 
       pipeLine.requestNewStage();
 
       desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
 
       desiredFootstepPosition = new FramePose(ankleZUpFrame);
-      position = new Point3d(0., LEFTSide.negateIfRightSide(0.25), 0.0);
+      position = new Point3d(0., robotSide.negateIfRightSide(0.25), 0.0);
       orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
-      submitFootstepPosition(LEFTSide, desiredFootstepPosition);
+      submitFootstepPose(false, robotSide, desiredFootstepPosition);
 
       pipeLine.requestNewStage();
 
@@ -755,18 +754,18 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Put the foot back on the ground
       //arms at good spot
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -0.2, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.2, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -0.2, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.2, null, mirrorOrientationForRightSide);
 
       pipeLine.requestNewStage();
 
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(LEFTSide, desiredUpperArmOrientation, -Math.PI / 2.0, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
       
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(LEFTSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0 , null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0 , null, mirrorOrientationForRightSide);
 
       pipeLine.requestNewStage();
    }
@@ -779,46 +778,44 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       /////////// normal stance ///////////
       // forward
-      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, 0.0,0.0);
       //backward
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI); // Math.PI
       //sideWalk
-      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI / 2.0);
       //turn in place
-      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
       
       /////////// arms out ///////////
       submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
       
       // forward
-      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, 0.0,0.0);
       //backward
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI); // Math.PI
       //sideWalk
-      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI / 2.0);
       //turn in place
-      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
       
       submitHandPoseHomeCommand();
       
       /////////// chest bending backward///////////
-      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame);
-      desiredChestOrientation.setYawPitchRoll(0.0, Math.toRadians(-10.0), 0.0);
-      submitDesiredChestOrientation(desiredChestOrientation);
+      submitDesiredChestOrientation(false, 0.0, Math.toRadians(-10.0), 0.0);
       
       // forward
-      submitWalkToLocation(distanceToWalk, 0.0, 0.0,0.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, 0.0,0.0);
       //backward
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI); // Math.PI
       //sideWalk
-      submitWalkToLocation(distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
-      submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+      submitWalkToLocation(false, distanceToWalk, 0.0, -Math.PI / 2.0, -Math.PI / 2.0); 
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI / 2.0);
       //turn in place
-      submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
       
-      submitChestHomeCommand();
+      submitChestHomeCommand(false);
    }
 
    private void sequenceStepsShort()
@@ -828,25 +825,28 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
       {
          // forward
-         submitWalkToLocation(0.5, 0.0, 0.0, 0.0);
+         submitWalkToLocation(false, 0.5, 0.0, 0.0, 0.0);
          //backward
-         submitWalkToLocation(0.0, 0.0, 0.0, Math.PI); // Math.PI
+         submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI); // Math.PI
          //sideWalk
-         submitWalkToLocation(0.5, 0.0, -Math.PI / 2.0, -Math.PI / 2.0);
-         submitWalkToLocation(0.0, 0.0, 0.0, Math.PI / 2.0);
+         submitWalkToLocation(false, 0.5, 0.0, -Math.PI / 2.0, -Math.PI / 2.0);
+         submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI / 2.0);
          //turn in place
-         submitWalkToLocation(0.0, 0.0, 0.0, 0.0);
+         submitWalkToLocation(false, 0.0, 0.0, 0.0, 0.0);
       }
    }
 
-   private void submitWalkToLocation(double x, double y, double robotYaw,double angleRelativeToPath)
+   private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw,double angleRelativeToPath)
    {
       FramePose2d targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue(),
-            yoTime));
-      pipeLine.requestNewStage();
+      
+      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue(), yoTime);
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToLocationTask);
+      else
+         pipeLine.submitSingleTaskStage(walkToLocationTask);
    }
 
    private void sequenceStepsInPlace()
@@ -874,12 +874,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
       pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
    }
-   
+
    private void karateKid(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
       // First Lift up the foot
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
 
       // Put the arm down
       double halfPi = Math.PI / 2.0;
@@ -891,19 +891,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation upperArmIntermediateOnWayDown   = new FrameOrientation(chestFrame, 0.0, -0.7853, halfPi );
       FrameOrientation upperArmDown1                   = new FrameOrientation(chestFrame, 0.7443, -0.2789, 0.2905 );
 
-      SideDependentList<double[]> armsDown2 = computeSymmetricArmJointAngles(upperArmDown2, 0.0, null);
-      SideDependentList<double[]> armsIntermediateOnWayUp = computeSymmetricArmJointAngles(upperArmIntermediateOnWayUp, -halfPi / 2.0, null);
-      SideDependentList<double[]> armsUp1 = computeSymmetricArmJointAngles(upperArmUp1, 0.0, null);
-      SideDependentList<double[]> armsUp2 = computeSymmetricArmJointAngles(upperArmUp2, 0.0, null);
-      SideDependentList<double[]> armsIntermediateOnWayDown = computeSymmetricArmJointAngles(upperArmIntermediateOnWayDown, -halfPi / 2.0, null);
-      SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null);
-      
-//      double[] armDown2 = com; // Equivalent yawPitchRoll upperArm/Chest: -0.7443, 0.2789, 0.2905
-//      double[] armIntermediateOnWayUp = ensureJointAnglesSize(new double[] { 0.0, -halfPi, halfPi / 2.0, -halfPi / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, 0.7853, halfPi
-//      double[] armUp1 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.6154, 0.5235, 2.5261
-//      double[] armUp2 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, -halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: -0.6154, -0.5235, 2.5261
-//      double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.0, -0.7853, halfPi
-//      double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 }); // Equivalent yawPitchRoll upperArm/Chest: 0.7443, -0.2789, 0.2905
+      SideDependentList<double[]> armsDown2 = computeSymmetricArmJointAngles(upperArmDown2, 0.0, null, true);
+      SideDependentList<double[]> armsIntermediateOnWayUp = computeSymmetricArmJointAngles(upperArmIntermediateOnWayUp, -halfPi / 2.0, null, true);
+      SideDependentList<double[]> armsUp1 = computeSymmetricArmJointAngles(upperArmUp1, 0.0, null, true);
+      SideDependentList<double[]> armsUp2 = computeSymmetricArmJointAngles(upperArmUp2, 0.0, null, true);
+      SideDependentList<double[]> armsIntermediateOnWayDown = computeSymmetricArmJointAngles(upperArmIntermediateOnWayDown, -halfPi / 2.0, null, true);
+      SideDependentList<double[]> armsDown1 = computeSymmetricArmJointAngles(upperArmDown1, 0.0, null, true);
 
       int numberOfHandPoses = 10;
       SideDependentList<double[][]> armFlyingSequence = new SideDependentList<>(new double[numberOfArmJoints][numberOfHandPoses], new double[numberOfArmJoints][numberOfHandPoses]);
@@ -965,69 +958,44 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
       footPose.setOrientation(0.0, -halfPi / 2.0, 0.0);
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(-5.0), 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(-15.0), 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredChestOrientation(true, 0.0, Math.toRadians(-5.0), 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(-15.0), 0.0);
 
       pipeLine.requestNewStage();
 
       // Supa powerful back kick!!!!!
       desiredUpperArmOrientation.setYawPitchRoll(-0.7566, -0.9980, 0.9947);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.3, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.3, null, true);
       
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 1.2566, 0.3);
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.3, null);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.3, null, true);
       
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
       footPose.setOrientation(0.0, 0.8 * halfPi, 0.0);
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, Math.toRadians(30.0), 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      desiredPelvisOrientation.setIncludingFrame(findFixedFrameForPelvisOrientation(), 0.0, Math.toRadians(20.0), 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredChestOrientation(true, 0.0, Math.toRadians(30.0), 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
 
       pipeLine.requestNewStage();
 
       // Supa powerful side kick!!!!!
       desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.4, halfPi);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, true);
       
-      desiredUpperArmOrientation.setYawPitchRoll(-1.2707, 0.0, 0.0);
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, null);
+      desiredUpperArmOrientation.setYawPitchRoll(-1.2707, 0.0, halfPi);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, null, true);
       
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.85), 0.3);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(30.0)));
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      desiredPelvisOrientation.setIncludingFrame(findFixedFrameForPelvisOrientation(), 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(20.0)));
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredChestOrientation(true, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(30.0)));
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(20.0)));
 
       pipeLine.requestNewStage();
 
@@ -1037,62 +1005,38 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setToZero(ankleZUpFrame);
       footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
       footPose.setOrientation(0.0, 0.0, 0.0);
-      footPose.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, new FootPoseTask(robotSide, footPose, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(true, robotSide, footPose);
 
-      desiredChestOrientation.setIncludingFrame(pelvisZUpFrame, 0.0, 0.0, 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      desiredPelvisOrientation.setToZero(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
 
       // Put the foot back on the ground
-      submitFootPosition(robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
 
    private void sequenceSquats()
    {
-	   FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-	      desiredPelvisOrientation.setYawPitchRoll(0.0, Math.toRadians(15), 0.0);
-	      desiredPelvisOrientation.changeFrame(worldFrame);
-	      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
-	            sleepTimeBetweenPoses.getDoubleValue()));
+      submitDesiredCoMHeightOffset(false, minCoMHeightOffset.getDoubleValue());
+      submitDesiredCoMHeightOffset(false, maxCoMHeightOffset.getDoubleValue());
+   }
 
-	      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, Math.toRadians(15.0), 0.0);
-	      desiredChestOrientation.changeFrame(worldFrame);
-	      pipeLine.submitTaskForPallelPipesStage(
-	            chestOrientationBehavior,
-	            new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
-	                  .getDoubleValue()));
-	      
-	      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_FORWARD);
-	      
-	      pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, new CoMHeightTask(minCoMHeightOffset.getDoubleValue(), yoTime, comHeightBehavior, 
-	    		  trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      
-	      pipeLine.requestNewStage();
-	      
-      desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, 0.0, 0.0, 0.0);
-      desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(
-            chestOrientationBehavior,
-            new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
-                  .getDoubleValue()));
+   private void sequenceSquatathon()
+   {
+      boolean parallelize = true;
+      submitDesiredPelvisOrientation(parallelize, 0.0, Math.toRadians(15), 0.0);
+      submitDesiredChestOrientation(parallelize, 0.0, Math.toRadians(15.0), 0.0);
 
-      desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation());
-      desiredPelvisOrientation.setYawPitchRoll(0.0, 0.0, 0.0);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
-      
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_FORWARD);
+      submitDesiredCoMHeightOffset(parallelize, minCoMHeightOffset.getDoubleValue());
+
+      pipeLine.requestNewStage();
+
+      submitChestHomeCommand(parallelize);
+      submitPelvisHomeCommand(parallelize);
+
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
-      
-      pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, new CoMHeightTask(maxCoMHeightOffset.getDoubleValue(), yoTime, comHeightBehavior, 
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+
+      submitDesiredCoMHeightOffset(parallelize, maxCoMHeightOffset.getDoubleValue());
    }
 
    private ReferenceFrame findFixedFrameForPelvisOrientation()
@@ -1103,60 +1047,67 @@ public class DiagnosticBehavior extends BehaviorInterface
          return ankleZUpFrames.get(supportLeg.getEnumValue());
    }
 
-   private void submitDesiredChestOrientation(FrameOrientation desiredChestOrientation)
+   private void submitChestHomeCommand(boolean parallelize)
    {
-      desiredChestOrientation.checkReferenceFrameMatch(pelvisZUpFrame);
+      ChestOrientationPacket homeChestPacket = PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime.getDoubleValue());
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(homeChestPacket, yoTime, chestOrientationBehavior, sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+      else
+         pipeLine.submitSingleTaskStage(chestOrientationTask);
+   }
+
+   private void submitDesiredChestOrientation(boolean parallelize, double yaw, double pitch, double roll)
+   {
+      FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, chestOrientationTask);
+      else
+         pipeLine.submitSingleTaskStage(chestOrientationTask);
    }
    
-   private void submitChestHomeCommand()
+   private void submitDesiredCoMHeightOffset(boolean parallelize, double offsetHeight)
    {
-      ChestOrientationPacket chestHomeOrientationPacket =  PacketControllerTools.createGoToHomeChestOrientationPacket(trajectoryTime.getDoubleValue());
-      pipeLine.submitSingleTaskStage(new ChestOrientationTask(chestHomeOrientationPacket, yoTime, chestOrientationBehavior));
+      CoMHeightTask comHeightTask = new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, comHeightTask);
+      else
+         pipeLine.submitSingleTaskStage(comHeightTask);
    }
 
-   private void submitDesiredCoMHeightOffset(double offsetHeight)
-   {
-      pipeLine.submitSingleTaskStage(new CoMHeightTask(offsetHeight, yoTime, comHeightBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses
-            .getDoubleValue()));
-   }
-
-   private void submitPelvisHomeCommand()
+   private void submitPelvisHomeCommand(boolean parallelize)
    {
       PelvisPosePacket homePelvisPacket = PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime.getDoubleValue());
-      pipeLine.submitSingleTaskStage(new PelvisPoseTask(homePelvisPacket, yoTime, pelvisPoseBehavior, sleepTimeBetweenPoses.getDoubleValue()));
+      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(homePelvisPacket, yoTime, pelvisPoseBehavior, sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+      else
+         pipeLine.submitSingleTaskStage(pelvisPoseTask);
    }
 
-   private void submitDesiredPelvisOrientation(double yaw, double pitch, double roll)
+   private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
+      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+      else
+         pipeLine.submitSingleTaskStage(pelvisPoseTask);
    }
 
-   private void submitDesiredPelvisPositionOffset(double dx, double dy, double dz)
+   private void submitDesiredPelvisPositionOffset(boolean parallelize, double dx, double dy, double dz)
    {
       SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint, dx, dy, dz);
       desiredPelvisPosition.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new PelvisPoseTask(desiredPelvisPosition, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(),
-            sleepTimeBetweenPoses.getDoubleValue()));
-   }
-
-   private void submitDesiredChestAndPelvisOrientationsParallel(FrameOrientation desiredChestOrientation, double pelvisYaw, double pelvisPitch,
-         double pelvisRoll)
-   {
-      desiredChestOrientation.checkReferenceFrameMatch(pelvisZUpFrame);
-      desiredChestOrientation.changeFrame(worldFrame);
-      FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), pelvisYaw, pelvisPitch, pelvisRoll);
-      desiredPelvisOrientation.changeFrame(worldFrame);
-      pipeLine.submitTaskForPallelPipesStage(chestOrientationBehavior, new ChestOrientationTask(desiredChestOrientation, yoTime, chestOrientationBehavior,
-            trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
-      pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior,
-            new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisPosition, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
+      else
+         pipeLine.submitSingleTaskStage(pelvisPoseTask);
    }
 
    public void submitSymmetricHumanoidArmPose(HumanoidArmPose armPose)
@@ -1219,15 +1170,29 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
    
-   private FrameOrientation computeUpperArmOrientationForRightSideGivenLeft(FrameOrientation leftOrientation)
+   public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
-      if (leftOrientation == null) return null;
-      double[] yawPitchRollForRightSide = leftOrientation.getYawPitchRoll();
-      yawPitchRollForRightSide[0] = -yawPitchRollForRightSide[0];
-      yawPitchRollForRightSide[2] = -yawPitchRollForRightSide[2];
-   
-      FrameOrientation rightOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame(), yawPitchRollForRightSide);
-      return rightOrientation;
+      if (mirrorOrientationForRightSide && robotSide == RobotSide.RIGHT)
+      {
+         FrameOrientation mirroredUpperArmOrientation = new FrameOrientation(desiredUpperArmOrientation);
+         double[] mirroredYawPitchRollForUpperArm = mirroredUpperArmOrientation.getYawPitchRoll();
+         mirroredYawPitchRollForUpperArm[0] = - mirroredYawPitchRollForUpperArm[0];
+         mirroredYawPitchRollForUpperArm[2] = - mirroredYawPitchRollForUpperArm[2];
+         mirroredUpperArmOrientation.setYawPitchRoll(mirroredYawPitchRollForUpperArm);
+         desiredUpperArmOrientation = mirroredUpperArmOrientation;
+
+         if (desiredHandOrientation != null)
+         {
+            FrameOrientation mirroredHandOrientation = new FrameOrientation(desiredHandOrientation);
+            double[] mirroredYawPitchRollForHand = mirroredHandOrientation.getYawPitchRoll();
+            mirroredYawPitchRollForHand[0] = - mirroredYawPitchRollForHand[0];
+            mirroredYawPitchRollForHand[2] = - mirroredYawPitchRollForHand[2];
+            mirroredHandOrientation.setYawPitchRoll(mirroredYawPitchRollForHand);
+            desiredHandOrientation = mirroredHandOrientation;
+         }
+      }
+
+      submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation);
    }
 
    public void submitHandPose(RobotSide robotSide, FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation)
@@ -1238,11 +1203,32 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
    }
 
-   private SideDependentList<double[]> computeSymmetricArmJointAngles(FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation)
+   public SideDependentList<double[]> computeSymmetricArmJointAngles(FrameOrientation desiredUpperArmOrientation, double elbowAngle, FrameOrientation desiredHandOrientation, boolean mirrorOrientationForRightSide)
    {
       SideDependentList<double[]> desiredSymmetricJointAngles = new SideDependentList<>();
-      desiredSymmetricJointAngles.put(RobotSide.LEFT, computeArmJointAngles(RobotSide.LEFT, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation));
-      desiredSymmetricJointAngles.put(RobotSide.RIGHT, computeArmJointAngles(RobotSide.RIGHT, computeUpperArmOrientationForRightSideGivenLeft(desiredUpperArmOrientation), elbowAngle, computeUpperArmOrientationForRightSideGivenLeft(desiredHandOrientation)));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (mirrorOrientationForRightSide && robotSide == RobotSide.RIGHT)
+         {
+            FrameOrientation mirroredUpperArmOrientation = new FrameOrientation(desiredUpperArmOrientation);
+            double[] mirroredYawPitchRollForUpperArm = mirroredUpperArmOrientation.getYawPitchRoll();
+            mirroredYawPitchRollForUpperArm[0] = -mirroredYawPitchRollForUpperArm[0];
+            mirroredYawPitchRollForUpperArm[2] = -mirroredYawPitchRollForUpperArm[2];
+            mirroredUpperArmOrientation.setYawPitchRoll(mirroredYawPitchRollForUpperArm);
+            desiredUpperArmOrientation = mirroredUpperArmOrientation;
+
+            if (desiredHandOrientation != null)
+            {
+               FrameOrientation mirroredHandOrientation = new FrameOrientation(desiredHandOrientation);
+               double[] mirroredYawPitchRollForHand = mirroredHandOrientation.getYawPitchRoll();
+               mirroredYawPitchRollForHand[0] = -mirroredYawPitchRollForHand[0];
+               mirroredYawPitchRollForHand[2] = -mirroredYawPitchRollForHand[2];
+               mirroredHandOrientation.setYawPitchRoll(mirroredYawPitchRollForHand);
+               desiredHandOrientation = mirroredHandOrientation;
+            }
+         }
+         desiredSymmetricJointAngles.put(robotSide, computeArmJointAngles(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation));
+      }
       return desiredSymmetricJointAngles;
    }
 
@@ -1345,45 +1331,46 @@ public class DiagnosticBehavior extends BehaviorInterface
       return desiredLowerArmJointAngles;
    }
 
-   private void submitFootPosition(RobotSide robotSide, FramePoint desiredFootPosition)
+   private void submitFootstepPose(boolean parallelize, RobotSide robotSide, FramePose desiredFootstepPose)
+   {
+      FramePose footPose = new FramePose(desiredFootstepPose);
+
+      FootstepTask footstepTask = new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime);
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(footstepListBehavior, footstepTask);
+      else
+         pipeLine.submitSingleTaskStage(footstepTask);
+   }
+
+   private void submitFootPosition(boolean parallelize, RobotSide robotSide, FramePoint desiredFootPosition)
    {
       FrameOrientation desiredFootOrientation = new FrameOrientation(desiredFootPosition.getReferenceFrame());
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
-      submitFootPose(robotSide, desiredFootPose);
+      submitFootPose(parallelize, robotSide, desiredFootPose);
    }
-   
-   private void submitFootPose(RobotSide robotSide, FramePose desiredFootPose)
+
+   private void submitFootPose(boolean parallelize, RobotSide robotSide, FramePose desiredFootPose)
    {
-      //      desiredFootPose.checkReferenceFrameMatch(ankleZUpFrames.get(robotSide));
       desiredFootPose.changeFrame(worldFrame);
       Point3d desiredFootPosition = new Point3d();
       Quat4d desiredFootOrientation = new Quat4d();
       desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      pipeLine.submitSingleTaskStage(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime
-            .getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      FootPoseTask footPoseTask = new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      
+      if (parallelize)
+         pipeLine.submitTaskForPallelPipesStage(footPoseBehavior, footPoseTask);
+      else
+         pipeLine.submitSingleTaskStage(footPoseTask);
    }
-   
-   private void submitFootPose(RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch, double roll)
+
+   private void submitFootPose(boolean parallelize, RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch, double roll)
    {
       FramePoint framePosition = new FramePoint(referenceFrame, x, y, z);
       FrameOrientation frameOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
       FramePose desiredFootPose = new FramePose(framePosition, frameOrientation);
-      desiredFootPose.changeFrame(worldFrame);
-      Point3d desiredFootPosition = new Point3d();
-      Quat4d desiredFootOrientation = new Quat4d();
-      desiredFootPose.getPose(desiredFootPosition, desiredFootOrientation);
-      pipeLine.submitSingleTaskStage(new FootPoseTask(robotSide, desiredFootPosition, desiredFootOrientation, yoTime, footPoseBehavior, trajectoryTime
-            .getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue()));
+      submitFootPose(parallelize, robotSide, desiredFootPose);
    }
    
-   private void submitFootstepPosition(RobotSide robotSide, FramePose desiredFootstepPosition)
-   {
-
-      FramePose footPose = new FramePose(desiredFootstepPosition);
-
-      pipeLine.submitSingleTaskStage(new FootstepTask(fullRobotModel, robotSide, footstepListBehavior, footPose, yoTime));
-   }
-
    @Override
    public void initialize()
    {
@@ -1449,9 +1436,12 @@ public class DiagnosticBehavior extends BehaviorInterface
                karateKid(activeSideForFootControl.getEnumValue());
                sequenceBow();
                break;
-            case SQUATATHON:
+            case SQUATS:
                for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
                   sequenceSquats();
+            case SQUATATHON:
+               for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+                  sequenceSquatathon();
                break;
             case SHIFT_WEIGHT:
                sequenceShiftWeight();
