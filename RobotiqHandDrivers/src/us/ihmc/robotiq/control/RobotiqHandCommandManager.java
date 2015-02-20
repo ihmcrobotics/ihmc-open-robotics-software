@@ -21,8 +21,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 public class RobotiqHandCommandManager extends HandCommandManager
 {
    private final KryoLocalPacketCommunicator handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.HAND_MANAGER.ordinal(), "iRobotHandCommunicator");
-   
+         PacketDestination.HAND_MANAGER.ordinal(), "RobotiqHandCommunicator");
    
 	public RobotiqHandCommandManager()
 	{
@@ -80,7 +79,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.LEFT, FingerState.CALIBRATE));
+            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.RIGHT, FingerState.CALIBRATE));
          }
       });
       
