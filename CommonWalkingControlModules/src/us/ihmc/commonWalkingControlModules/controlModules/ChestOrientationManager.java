@@ -115,6 +115,11 @@ public class ChestOrientationManager
          {
             orientationTrajectoryGenerator.compute(deltaTime);  
             orientationTrajectoryGenerator.get(desiredOrientation);
+            
+            if( orientationTrajectoryGenerator.isDone() )
+            {
+               isTrackingOrientation.set( false );
+            }
          }
          else{
             simpleOrientationTrajectoryGenerator.compute(deltaTime);
@@ -126,6 +131,7 @@ public class ChestOrientationManager
                isTrackingOrientation.set( false );
             }
          }    
+         
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
       }
 
