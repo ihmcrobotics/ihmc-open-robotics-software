@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -7,6 +9,7 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -22,39 +25,41 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
-   private HandJointAnglePacket currentPacket;
 
    public HandJointAngleCommunicator(RobotSide side, PacketCommunicator networkProcessorCommunicator)
    {
       this.side = side;
       this.networkProcessorCommunicator = networkProcessorCommunicator;
       packetRingBuffer = new ConcurrentRingBuffer<HandJointAnglePacket>(HandJointAngleCommunicator.builder, 8);
-//      startWriterThread();
+      startWriterThread();
    }
 
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
-//   private void startWriterThread()
-//   {
-//      AsyncContinuousExecutor.executeContinuously(new Runnable()
-//      {
-//         @Override
-//         public void run()
-//         {
-//            if (packetRingBuffer.poll())
-//            {
-//               while ((currentPacket = packetRingBuffer.read()) != null)
-//               {
-//                  if (networkProcessorCommunicator == null)
-//                  {
-//                     System.out.println("Net Proc Comm");
-//                  }
-//                  networkProcessorCommunicator.send(currentPacket);
-//               }
-//               packetRingBuffer.flush();
-//            }
-//         }
-//      }, WORKER_SLEEP_TIME_MILLIS, "Hand Joint Angle Communicator");
-//   }
+   private void startWriterThread()
+   {
+      ExecutorService executor = Executors.newSingleThreadExecutor();
+      executor.execute(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            while (true)
+            {
+               if (packetRingBuffer.poll())
+               {
+                  while (packetRingBuffer.peek() != null)
+                  {
+                     if (networkProcessorCommunicator != null)
+                        networkProcessorCommunicator.send(packetRingBuffer.read());
+                  }
+                  packetRingBuffer.flush();
+               }
+               
+               ThreadTools.sleep(WORKER_SLEEP_TIME_MILLIS);
+            }
+         }
+      });
+   }
 
    @Override
    public void initialize()
@@ -90,13 +95,13 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    @Override
    public void write()
    {
-//      HandJointAnglePacket packet = packetRingBuffer.next();
-//      if (packet == null)
-//      {
-//         return;
-//      }
-//      packet.setAll(side, connected.get(), fingers[0], fingers[1], fingers[2]);
-//      packetRingBuffer.commit();
+      HandJointAnglePacket packet = packetRingBuffer.next();
+      if (packet == null)
+      {
+         return;
+      }
+      packet.setAll(side, connected.get(), fingers[0], fingers[1], fingers[2]);
+      packetRingBuffer.commit();
    }
 
    public static final Builder<HandJointAnglePacket> builder = new Builder<HandJointAnglePacket>()
