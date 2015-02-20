@@ -68,7 +68,7 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
       }
    }
    
-   protected void registerClassList(NetClassList classList, Kryo kryo)
+   protected void registerClassList(NetClassList classList)
    {
 	   if(!listeners.containsKey(Object.class))
 	   {
@@ -77,14 +77,8 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 	   
 	   for(Class<?> clazz : classList.getPacketClassList())
 	   {
-	      kryo.register(clazz);
 		   listeners.put(clazz, new ArrayList<ObjectConsumer<?>>());
 		   listenerExecutors.put(clazz, Executors.newFixedThreadPool(1, ThreadTools.getNamedThreadFactory("Kryo" + clazz.getSimpleName() + "Listener")));
-	   }
-	   
-	   for(Class<?> type : classList.getPacketFieldList())
-	   {
-		   kryo.register(type);
 	   }
    }
    

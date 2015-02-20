@@ -2,6 +2,8 @@ package us.ihmc.communication.net;
 
 import java.util.ArrayList;
 
+import com.esotericsoftware.kryo.Kryo;
+
 public class NetClassList
 {
    private final ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
@@ -28,12 +30,12 @@ public class NetClassList
          registerPacketClass(clazz);
       }
    }
-   
+
    public void registerPacketField(Class<?> type)
    {
       typeList.add(type);
    }
-   
+
    public void registerPacketFields(Class<?>... types)
    {
       for (Class<?> type : types)
@@ -41,7 +43,7 @@ public class NetClassList
          registerPacketField(type);
       }
    }
-   
+
    public void getPacketClassList(ArrayList<Class<?>> listToPack)
    {
       listToPack.addAll(classList);
@@ -55,5 +57,18 @@ public class NetClassList
    public ArrayList<Class<?>> getPacketFieldList()
    {
       return typeList;
+   }
+
+   public void registerWithKryo(Kryo kryo)
+   {
+      for (Class<?> clazz : getPacketClassList())
+      {
+         kryo.register(clazz);
+      }
+
+      for (Class<?> type : getPacketFieldList())
+      {
+         kryo.register(type);
+      }
    }
 }
