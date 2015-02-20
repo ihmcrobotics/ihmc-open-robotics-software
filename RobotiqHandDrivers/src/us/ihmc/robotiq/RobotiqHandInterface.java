@@ -353,14 +353,9 @@ public final class RobotiqHandInterface
 	
 	private RobotiqHandSensorData handData = new RobotiqHandSensorData();
 	
-	public RobotiqHandInterface()
+	public RobotiqHandInterface(String handIP)
 	{
-		this(RobotSide.LEFT);
-	}
-	
-	public RobotiqHandInterface(RobotSide robotSide)
-	{
-		this.address = robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand);
+		this.address = handIP;
 		
 		if(connect())
 		{
