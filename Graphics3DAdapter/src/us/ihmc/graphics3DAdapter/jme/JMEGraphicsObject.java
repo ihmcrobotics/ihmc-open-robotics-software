@@ -1,24 +1,30 @@
 package us.ihmc.graphics3DAdapter.jme;
 
-import com.jme3.app.Application;
-import com.jme3.asset.AssetManager;
-import com.jme3.material.Material;
-import com.jme3.math.Quaternion;
-import com.jme3.math.Vector3f;
-import com.jme3.renderer.queue.RenderQueue.Bucket;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
-import com.jme3.scene.Node;
-import com.jme3.scene.Spatial;
+import java.awt.image.BufferedImage;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import jme3tools.optimize.GeometryBatchFactory;
+
 import org.jmonkeyengine.tralala.ShapeUtilities;
+
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
-import us.ihmc.graphics3DAdapter.graphics.instructions.*;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddExtrusionInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddHeightMapInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddMeshDataInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.AppearanceChangedListener;
 import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.ExtrusionChangedListener;
 import us.ihmc.graphics3DAdapter.graphics.instructions.listeners.MeshChangedListener;
@@ -30,12 +36,16 @@ import us.ihmc.graphics3DAdapter.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
+import com.jme3.app.Application;
+import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.renderer.queue.RenderQueue.Bucket;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 {
@@ -262,6 +272,9 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 		   YoAppearanceRGBColor color = new YoAppearanceRGBColor(0.5, 0.5, 0.5, 0.5);
 		   jmeAppearance = JMEAppearanceMaterial.createMaterialFromYoAppearanceRGBColor(jmeAssetLocator, color);
 		   System.err.println("JMEGraphicsObject: Couldn't load appearance.");
+         StringWriter writer = new StringWriter();
+         e.printStackTrace(new PrintWriter(writer));
+         printIfDebugAndBamboo("Showing stack trace string:\n" + writer.toString());
 	   }
 
       geometry.setMaterial(jmeAppearance);
