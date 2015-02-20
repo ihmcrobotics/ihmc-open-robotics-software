@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.diagnostic;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.AxisAngle4d;
@@ -366,7 +367,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void sequenceMediumWarmup()
    {
       FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
-
       FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.1, 0.7);
       
       FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
@@ -396,13 +396,335 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private void sequenceHardWarmup()
    {
-      //harder squats??
-      
       //chest rotation closer to the limits
+      sequenceChestRotations(0.80);
       
       //pelvis rotations closer to the limits
+      sequencePelvisRotations(0.55);
+
+      //get the 4 corners of the double support polygon (the feet are supposedly aligned)
+      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
+      supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
+      int numberOfVertices = supportPolygon.getNumberOfVertices();
+      ArrayList<FramePoint2d> supportCornerPoints = new ArrayList<>();
       
-      //combinations of doom
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         FramePoint2d frameVertexBefore = supportPolygon.getFrameVertex(i);
+         FramePoint2d frameVertexCurrentlyChecked = supportPolygon.getFrameVertex((i+1) % numberOfVertices);
+         FramePoint2d frameVertexAfter = supportPolygon.getFrameVertex((i+2) % numberOfVertices);
+         
+         FrameVector2d frameVector1 = new FrameVector2d(midFeetZUpFrame);
+         frameVector1.sub(frameVertexCurrentlyChecked, frameVertexBefore);
+         frameVector1.normalize();
+         
+         FrameVector2d frameVector2 = new FrameVector2d(midFeetZUpFrame);
+         frameVector2.sub(frameVertexAfter, frameVertexCurrentlyChecked);
+         frameVector2.normalize();
+         
+         if(Math.abs(frameVector1.angle(frameVector2)) > Math.PI / 2.0 -0.2 && Math.abs(frameVector1.angle(frameVector2)) < Math.PI / 2.0 +0.2 )
+            supportCornerPoints.add(frameVertexCurrentlyChecked);
+      }
+
+      // scale the rectangle so that the center of pressure does not go too far on the support polygon sides
+      FrameVector2d shiftScaleVector = new FrameVector2d(midFeetZUpFrame, 0.1, 0.7);
+      for (int i = 0; i< supportCornerPoints.size();i++)
+         supportCornerPoints.get(i).scale(shiftScaleVector.getX(), shiftScaleVector.getY());
+      
+      ///////////   combinations of doom   ////////////
+      //shiftWeight + pelvisOrientation
+      FrameVector2d desiredPelvisOffset = new FrameVector2d(midFeetZUpFrame);
+      FramePoint2d center = new FramePoint2d(midFeetZUpFrame);
+      
+      double yawPercentage = 0.3;
+      double pitchPercentage = 0.3;
+      double rollPercentage = 0.3;
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(false, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(false, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(false, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(false, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      
+      submitPelvisHomeCommand(false);
+      
+      //shiftWeight + CoMHeight
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();
+      
+      submitPelvisHomeCommand(true);
+      submitCoMHomeCommand(true);
+      
+      //shiftWeight + chestOrientation
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      pipeLine.requestNewStage();   
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      pipeLine.requestNewStage();     
+      
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
+      
+      //shiftWeight + arms
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
+      pipeLine.requestNewStage();     
+
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_OUT_EXTENDED);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.SMALL_CHICKEN_WINGS);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffset(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      pipeLine.requestNewStage();     
+      
+      submitPelvisHomeCommand(true);
+      submitHandPoseHomeCommand(true);
+      
+      //Mean stuff  (shiftWeight + CoM + chestOrientation + PelvisOrientation)
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      pipeLine.requestNewStage();     
+      
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
+      submitDesiredCoMHeightOffset(true, 0.0);
+
+      //really mean stuff (arms + CoM + shiftWeight + chestOrientation + PelvisOrientation)
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      pipeLine.requestNewStage();     
+
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_STRAIGHT_DOWN);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(1));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPER_CHICKEN_WINGS);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(2));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGER_CHICKEN_WINGS);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(0));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, -yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchForward, rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, yawPercentage * minMaxYaw, pitchPercentage * maxPitchBackward, rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, minCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP3);
+      pipeLine.requestNewStage();     
+      
+      desiredPelvisOffset.set(supportCornerPoints.get(3));
+      desiredPelvisOffset.sub(center);
+      submitDesiredPelvisPositionOffsetAndOrientation(true, desiredPelvisOffset.getX(), desiredPelvisOffset.getY(), 0.0, yawPercentage * minMaxYaw,
+            pitchPercentage * maxPitchBackward, -rollPercentage * minMaxRoll);
+      submitDesiredChestOrientation(true, -yawPercentage * minMaxYaw, pitchPercentage * maxPitchForward, -rollPercentage * minMaxRoll);
+      submitDesiredCoMHeightOffset(true, maxCoMHeightOffset.getDoubleValue());
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      pipeLine.requestNewStage();         
+      
+      
+      
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
+      submitCoMHomeCommand(true);
+      submitHandPoseHomeCommand(true);
    }
 
    private void sequenceUpperBody()
@@ -1179,6 +1501,11 @@ public class DiagnosticBehavior extends BehaviorInterface
          pipeLine.submitSingleTaskStage(comHeightTask);
    }
 
+   private void submitCoMHomeCommand(boolean parallelize)
+   {
+      submitDesiredCoMHeightOffset(parallelize, 0.0);
+   }
+   
    private void submitPelvisHomeCommand(boolean parallelize)
    {
       PelvisPosePacket homePelvisPacket = PacketControllerTools.createGoToHomePelvisPosePacket(trajectoryTime.getDoubleValue());
@@ -1202,8 +1529,15 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void submitDesiredPelvisPositionOffset(boolean parallelize, double dx, double dy, double dz)
    {
+      submitDesiredPelvisPositionOffsetAndOrientation(parallelize, dx, dy, dz, 0.0, 0.0, 0.0);
+   }
+
+   private void submitDesiredPelvisPositionOffsetAndOrientation(boolean parallelize, double dx, double dy, double dz, double yaw, double pitch, double roll)
+   {
       SixDoFJointReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
-      FramePoint desiredPelvisPosition = new FramePoint(frameAfterRootJoint, dx, dy, dz);
+      FramePose desiredPelvisPosition = new FramePose(frameAfterRootJoint);
+      desiredPelvisPosition.setPosition(dx, dy, dz);
+      desiredPelvisPosition.setOrientation(yaw, pitch, roll);
       desiredPelvisPosition.changeFrame(worldFrame);
       PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisPosition, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
       if (parallelize)
