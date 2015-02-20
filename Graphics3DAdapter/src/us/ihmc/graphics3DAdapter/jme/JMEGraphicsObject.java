@@ -60,7 +60,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
    private boolean optimizeGraphicsObject = false;
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    public JMEGraphicsObject(Application application, JMEAssetLocator jmeAssetLocator, Graphics3DObject graphics3dObject)
    {
@@ -272,9 +272,12 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 		   YoAppearanceRGBColor color = new YoAppearanceRGBColor(0.5, 0.5, 0.5, 0.5);
 		   jmeAppearance = JMEAppearanceMaterial.createMaterialFromYoAppearanceRGBColor(jmeAssetLocator, color);
 		   System.err.println("JMEGraphicsObject: Couldn't load appearance.");
-         StringWriter writer = new StringWriter();
-         e.printStackTrace(new PrintWriter(writer));
-         printIfDebugAndBamboo("Showing stack trace string:\n" + writer.toString());
+         if(DEBUG)
+         {
+            StringWriter writer = new StringWriter();
+            e.printStackTrace(new PrintWriter(writer));
+            printIfDebug("Showing stack trace string:\n" + writer.toString());
+         }
 	   }
 
       geometry.setMaterial(jmeAppearance);
@@ -452,10 +455,9 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       }
    }
 
-   private static void printIfDebugAndBamboo(String string)
+   private static void printIfDebug(String string)
    {
-      String bambooMoviesProperty = System.getProperty("create.scs.movies");
-      if(bambooMoviesProperty != null && bambooMoviesProperty.equals("true") && DEBUG)
+      if(DEBUG)
       {
          System.out.println(string);
       }
