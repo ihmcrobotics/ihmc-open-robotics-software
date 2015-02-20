@@ -8,7 +8,8 @@ import us.ihmc.communication.packets.PacketDestination;
 public abstract class HandControlThreadManager
 {
    private final int TCP_PORT = 4270; // should match port in HandCommandManager
-   protected KryoPacketCommunicator packetCommunicator = new KryoPacketServer(TCP_PORT, new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(), "HandCommandManagerServerCommunicator");
+   protected KryoPacketCommunicator packetCommunicator = new KryoPacketServer(TCP_PORT, new IHMCCommunicationKryoNetClassList(),
+         PacketDestination.HAND_MANAGER.ordinal(), "HandThreadManagerServerCommunicator");
 	
    public abstract void start();
 	

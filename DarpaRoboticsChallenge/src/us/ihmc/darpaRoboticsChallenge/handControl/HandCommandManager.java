@@ -7,6 +7,7 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 //TODO: rename and create interface for sending hand command
 public abstract class HandCommandManager //implements HandCommandInterface

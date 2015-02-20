@@ -26,6 +26,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
 	public RobotiqHandCommandManager()
 	{
 	   super(RobotiqControlThreadManager.class);
+//	   super(RobotiqControlThread.class);
 	   
 	   setupOutboundPacketListeners();
 	   setupInboundPacketListeners();
