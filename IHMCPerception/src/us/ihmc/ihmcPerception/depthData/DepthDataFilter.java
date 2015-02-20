@@ -3,13 +3,13 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
-import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
@@ -101,21 +101,26 @@ public class DepthDataFilter
               new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
    }
 
-   public SparseLidarScanPacket filterPolarLidarScan(LidarScan lidarScan)
+   public PointCloudPacket filterPolarLidarScan(LidarScan lidarScan)
    {
-      ArrayList<Integer> indexes = new ArrayList<Integer>();
+      ArrayList<Point3d> points = new ArrayList<>();
       for (int i = 0; i < lidarScan.size(); i++)
       {
-         if (addPoint(lidarScan, i))
-         {
-            indexes.add(i);
-         }
+         addPoint(lidarScan, i, points);
       }
-
-      return new SparseLidarScanPacket(lidarScan, indexes);
+      Point3d origin = new Point3d();
+      Vector3d worldVector = new Vector3d();
+      lidarScan.getAverageTransform().get(worldVector);
+      origin.set(worldVector);
+      return new PointCloudPacket(origin, points.toArray(new Point3d[points.size()]), lidarScan.params.timestamp);
    }
 
-   public boolean addPoint(LidarScan lidarScan, int i)
+   public void addPoint(Point3d point)
+   {
+      
+   }
+   
+   public void addPoint(LidarScan lidarScan, int i, ArrayList<Point3d> points)
    {
       Point3d lidarOrigin = new Point3d();
       lidarScan.getAverageTransform().transform(lidarOrigin);
@@ -124,10 +129,11 @@ public class DepthDataFilter
       {
          Point3d point = lidarScan.getPoint(i);
 
-         return addPoint(point, lidarOrigin);
+         if(addPoint(point, lidarOrigin))
+         {
+            points.add(point);
+         }
       }
-      else
-         return false;
    }
 
    public boolean addPoint(Point3d point, RigidBodyTransform transform)
@@ -141,7 +147,7 @@ public class DepthDataFilter
 
    }
 
-   private boolean addPoint(Point3d point, Point3d sensorOrigin)
+   public boolean addPoint(Point3d point, Point3d sensorOrigin)
    {
       boolean send = false;
 
@@ -286,6 +292,6 @@ public class DepthDataFilter
          }
       }
 
-      return new FilteredPointCloudPacket(filteredPoints, transformToWorld, pointCloud.getTimeStamp());
+      return new FilteredPointCloudPacket(pointCloud.origin, filteredPoints, transformToWorld, pointCloud.getTimeStamp());
    }
 }
