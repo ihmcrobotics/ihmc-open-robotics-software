@@ -117,8 +117,6 @@ class SCSCameraInfoReceiver implements CameraInfoReceiver
 
    public void receivedPacket(CameraInformationPacket object)
    {
-      
-      System.out.println("YO DOG*************************************");
       processInformationRequest(object);
    }
 }
