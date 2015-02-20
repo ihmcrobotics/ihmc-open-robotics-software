@@ -83,6 +83,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       PacketConsumer<StopArmMotionPacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
+      PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryHandPoseListConsumer = handPoseProvider.getWholeBodyTrajectoryHandPoseListConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
       
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -137,7 +138,10 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
-            
+      
+      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, wholeBodyTrajectoryHandPoseListConsumer);
+
+      
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, handstepProvider,

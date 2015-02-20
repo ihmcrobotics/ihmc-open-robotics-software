@@ -115,6 +115,8 @@ public class ChestOrientationManager
          {
             orientationTrajectoryGenerator.compute(deltaTime);  
             orientationTrajectoryGenerator.get(desiredOrientation);
+            
+            System.out.println(desiredOrientation);
          }
          else{
             simpleOrientationTrajectoryGenerator.compute(deltaTime);

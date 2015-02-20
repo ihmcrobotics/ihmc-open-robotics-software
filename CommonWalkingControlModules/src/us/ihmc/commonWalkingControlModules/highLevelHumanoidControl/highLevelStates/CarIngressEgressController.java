@@ -365,7 +365,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       doChestControl();
       doCoMControl();
       doPelvisControl();
-      doJointPositionControl();
+    //  doJointPositionControl();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
@@ -378,9 +378,20 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPosition() )
       {
+//         System.out.println(getClass().getSimpleName() + ": trajectory packet received. <<<<<<<<<<<");
+//
+//         ArrayList<Double> time = new ArrayList<Double>();
+//         ArrayList<FramePoint> position  = new ArrayList<FramePoint>();  
+//         ArrayList<FrameVector> velocity = new ArrayList<FrameVector>();  
+
          //read from here
+//         pelvisPoseProvider.getDesiredPelvisPositionTrajectory(time, position, velocity);
+
          FramePointWaypoint[] desiredPelvisPosition = pelvisPoseProvider.getDesiredPelvisPosition(worldFrame);
          //write here
+//         pelvisPositionTrajectoryGenerator.initializeTrajectory( time, position, velocity );
+//         // once you copied it, delete it
+//         pelvisPoseProvider.removeLastTrajectory();
          pelvisPositionTrajectoryGenerator.initializeTrajectory( desiredPelvisPosition );
 
          pelvisTrajectoryStartTime = yoTime.getDoubleValue();
@@ -464,6 +475,12 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
          oldChestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
       }
 
+      // @DAVIDE fixme
+//      System.out.println(desiredOrientation);
+//      desiredAngularVelocity.set(0,0,0);
+//      desiredAngularAcceleration.set(0,0,0);
+      // @
+      
       chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       super.doChestControl();

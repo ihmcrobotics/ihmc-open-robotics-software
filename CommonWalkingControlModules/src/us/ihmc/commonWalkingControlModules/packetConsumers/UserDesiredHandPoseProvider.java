@@ -176,4 +176,40 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    {
       return null;
    }
+
+   @Override
+   public boolean checkForNewWholeBodyPoseList(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public double[] getDesiredWholeBodyTrajectoryTimeArray()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public double[][] getDesiredWholeBodyTrajectoryPositionArray(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public double[][] getDesiredWholeBodyTrajectoryVelocityArray(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public void setWholeBodyTrajectoryPacketAtomicReferenceToNull(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
 }

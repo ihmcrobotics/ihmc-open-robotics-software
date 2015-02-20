@@ -135,6 +135,26 @@ public class UserDesiredPelvisPoseProvider extends PelvisPoseProvider
       return null;
    }
 
+//   @Override
+//   public ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity)
+//   {
+//      if (!isNewPelvisOrientationInformationAvailable.getBooleanValue())
+//         return null;
+//
+//      isNewPelvisOrientationInformationAvailable.set(false);
+//
+//      frameOrientation.setIncludingFrame(desiredReferenceFrame, desiredQuat);
+//
+//      return new FrameOrientationWaypoint[]{  new FrameOrientationWaypoint( userPelvisTrajectoryTime.getDoubleValue(),frameOrientation ) };
+//   }
+//
+//   @Override
+//   public void getDesiredPelvisPositionTrajectory(ArrayList<Double> time, ArrayList<FramePoint> position, ArrayList<FrameVector> velocity)
+//   {
+//      // TODO Auto-generated method stub
+//      
+//   }
+
    @Override
    public FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredReferenceFrame)
    {
@@ -145,8 +165,7 @@ public class UserDesiredPelvisPoseProvider extends PelvisPoseProvider
 
       frameOrientation.setIncludingFrame(desiredReferenceFrame, desiredQuat);
 
-      return new FrameOrientationWaypoint[]{  new FrameOrientationWaypoint( userPelvisTrajectoryTime.getDoubleValue(),frameOrientation ) };
+      return new FrameOrientationWaypoint[]{  new FrameOrientationWaypoint( userPelvisTrajectoryTime.getDoubleValue() ,frameOrientation ) };
    }
-
 
 }

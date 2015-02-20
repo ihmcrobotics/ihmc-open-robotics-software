@@ -14,15 +14,16 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
@@ -40,7 +41,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
    private final SDFFullRobotModel actualRobotModel;
    private final PacketCommunicator fieldObjectCommunicator;
-   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
+   //   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
    private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
    private final boolean USE_INGRESS_ONLY = true;
@@ -48,24 +49,27 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
    private final YoGraphicShape yoGraphicsShapeDesired;
-   private final boolean random = false;
-   private final double ERROR_DISTANCE_TOLERANCE = 0.005;
+   private final boolean useRandom = false;
+   //   private final double ERROR_DISTANCE_TOLERANCE = 0.005;
    private final SDFFullRobotModel desiredFullRobotModel;
-   private YoGraphicShape yoGraphicsShapeActual;
-   private YoFramePoint framePoint2;
-   private YoFrameOrientation frameOrientation2;
-   private final double trajectoryTime = 2.0;
-   private ComputeResult success;
+   //   private YoGraphicShape yoGraphicsShapeActual;
+   //   private YoFramePoint framePoint2;
+   //   private YoFrameOrientation frameOrientation2;
+   //   private final double trajectoryTime = 2.0;
+   //   private ComputeResult success;
+
+   private AtlasRobotModel robotModel;
+   private int numberOfArmJoints = 6;
 
    public AtlasWholeBodyTrajectoryPacketDevelopmentSim() throws Exception
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      this.robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getSimulationConstructionSet().getRootRegistry();
       Graphics3DObject linkGraphicsDesired = new Graphics3DObject();
-//      URL fileURL = new URL(null);
-//      linkGraphicsDesired.addModelFile(fileURL);
+      //      URL fileURL = new URL(null);
+      //      linkGraphicsDesired.addModelFile(fileURL);
       linkGraphicsDesired.addSphere(0.05);
       framePoint = new YoFramePoint("dontCarePoint", ReferenceFrame.getWorldFrame(), registry);
       frameOrientation = new YoFrameOrientation("orientiation", ReferenceFrame.getWorldFrame(), registry);
@@ -103,22 +107,129 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       }
    }
 
-   private void executeTest(){
-      WholeBodyTrajectoryDevelopmentPacket packet = new WholeBodyTrajectoryDevelopmentPacket(5);
-      System.out.println(getClass().getSimpleName()+": Sending trajectory packet");
+   //      private double[][] generateArmTrajectory(RobotSide side, int waypoints)
+   //      {
+   //   	   double[][] trajectoryAnglesToReturn = new double[6][waypoints];
+   //   	   for(int w = 0; w<waypoints; w++){
+   //   	      int joints = -1;
+   //   	      for (ArmJointName armJointName : actualRobotModel.getRobotSpecificJointNames().getArmJointNames()){
+   //   //		   for(ArmJointName armJointName : robotModel.getJointMap().getArmJointNames()){
+   //   			   OneDoFJoint armJoint = actualRobotModel.getOneDoFJointByName(robotModel.getJointMap().getArmJointName(side, armJointName));
+   //   			   double q = armJoint.getJointLimitLower() +  w*(armJoint.getJointLimitUpper() - armJoint.getJointLimitLower()) / waypoints;
+   //   			   trajectoryAnglesToReturn[++joints][w] = q;
+   //   		   }
+   //   	   }
+   //   	   return trajectoryAnglesToReturn;
+   //      }
+
+   private double[][] generateArmTrajectory(RobotSide robotSide, int waypoints)
+   {
+      // Put the arm down
+      //waypoints isnt used in this function
+      double halfPi = Math.PI / 2.0;
+      double[] armDown2 = ensureJointAnglesSize(new double[] { 0.0, -0.4, halfPi / 2.0, 0.0 });
+      double[] armIntermediateOnWayUp = ensureJointAnglesSize(new double[] { 0.0, -halfPi, halfPi / 2.0, -halfPi / 2.0 });
+      double[] armUp1 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, halfPi / 2.0, 0.0 });
+      double[] armUp2 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, -halfPi / 2.0, 0.0 });
+      double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 });
+      double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 });
+
+      int numberOfHandPoses = 10;
+      double[][] armFlyingSequence = new double[numberOfArmJoints][numberOfHandPoses];
+
+      for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
+      {
+         for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
+         {
+            double desiredJointAngle;
+            switch (poseIndex % 6)
+            {
+            case 0:
+               desiredJointAngle = armDown1[jointIndex];
+               break;
+            case 1:
+               desiredJointAngle = armDown2[jointIndex];
+               break;
+            case 2:
+               desiredJointAngle = armIntermediateOnWayUp[jointIndex];
+               break;
+            case 3:
+               desiredJointAngle = armUp1[jointIndex];
+               break;
+            case 4:
+               desiredJointAngle = armUp2[jointIndex];
+               break;
+            case 5:
+               desiredJointAngle = armIntermediateOnWayDown[jointIndex];
+               break;
+            default:
+               throw new RuntimeException("Should not get there!");
+            }
+
+            armFlyingSequence[jointIndex][poseIndex] = desiredJointAngle;
+         }
+      }
+      return armFlyingSequence;
+   }
+
+   private double[] ensureJointAnglesSize(double[] desiredJointAngles)
+   {
+      double[] ret;
+      double[] src = desiredJointAngles;
+      if (numberOfArmJoints > src.length)
+      {
+         ret = new double[numberOfArmJoints];
+         System.arraycopy(src, 0, ret, 0, src.length);
+      }
+      else
+         ret = src;
+      return ret;
+   }
+
+   private double[][] transposeDoubleArrayMatrix(double[][] doubleArrayToTranspose)
+   {
+      double[][] doubleArrayToReturn = new double[doubleArrayToTranspose[0].length][doubleArrayToTranspose.length];
+      for (int i = 0; i < doubleArrayToTranspose.length; i++)
+      {
+         for (int j = 0; j < doubleArrayToTranspose[0].length; j++)
+         {
+            doubleArrayToReturn[j][i] = doubleArrayToTranspose[i][j];
+         }
+      }
+      return doubleArrayToReturn;
+   }
+
+   private void executeTest()
+   {
+      int waypoints = 10;
+      WholeBodyTrajectoryDevelopmentPacket packet = new WholeBodyTrajectoryDevelopmentPacket(waypoints);
+      try
+      {
+         double[][] leftArmAngles = generateArmTrajectory(RobotSide.LEFT, waypoints);
+         double[][] rightArmAngles = generateArmTrajectory(RobotSide.RIGHT, waypoints);
+//         double[][] leftArmAngles = transposeDoubleArrayMatrix(generateArmTrajectory(RobotSide.LEFT, waypoints));
+//         double[][] rightArmAngles = transposeDoubleArrayMatrix(generateArmTrajectory(RobotSide.RIGHT, waypoints));
+         packet.setArmJointAngles(leftArmAngles, RobotSide.LEFT);
+         packet.setArmJointAngles(rightArmAngles, RobotSide.RIGHT);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      System.out.println(getClass().getSimpleName() + ": Sending trajectory packet");
       fieldObjectCommunicator.send(packet);
    }
-   
-//   private void executeTest()
-//   {
-//      for (int i = 0; i < desiredPelvisFrameList.size(); i++)
-//      {
-//         ThreadTools.sleep(1000);
-//         doControl(i);
-//         ThreadTools.sleep((long) (3 * trajectoryTime * 1000.0));
-//         checkIfTargetWasReached(i);
-//      }
-//   }
+
+   //   private void executeTest()
+   //   {
+   //      for (int i = 0; i < desiredPelvisFrameList.size(); i++)
+   //      {
+   //         ThreadTools.sleep(1000);
+   //         doControl(i);
+   //         ThreadTools.sleep((long) (3 * trajectoryTime * 1000.0));
+   //         checkIfTargetWasReached(i);
+   //      }
+   //   }
 
    public static void main(String[] args) throws Exception
    {
@@ -139,7 +250,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private FramePose getNextDesiredPelvisFrame(int index)
    {
       FramePose desiredPose;
-      if (random)
+      if (useRandom)
       {
          Random random = new Random();
          Point3d randomPoint = RandomTools.generateRandomPoint(random, -0.2, -0.2, 0.2, 0.2, 1.0, 1.5);
@@ -196,7 +307,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       {
          System.out.println(getClass().getName() + ":(" + index + ") SUCCESS - position reached.");
       }
-   };
+   }
 
    private boolean ingressEgressModeActivated()
    {
