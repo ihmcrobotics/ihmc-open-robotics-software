@@ -85,4 +85,10 @@ public class UserDesiredChestOrientationProvider extends ChestOrientationProvide
       return chestOrientationFrame;
    }
 
+   @Override
+   public double getTrajectoryTimeForHomeOrientation()
+   {
+      return chestTrajectoryTime.getDoubleValue();
+   }
+
 }
