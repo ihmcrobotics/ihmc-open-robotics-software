@@ -41,6 +41,11 @@ public class PacketCommunicatorMock
    {
       return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port, netClassList), netClassList.getPacketClassList());
    }
+   
+   public static PacketCommunicatorMock createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
+   {
+      return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
+   }
 
    private PacketCommunicatorMock(NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
    {

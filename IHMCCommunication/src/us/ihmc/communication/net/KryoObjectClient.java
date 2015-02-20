@@ -8,7 +8,9 @@ import us.ihmc.utilities.ThreadTools;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Serialization;
 
 public class KryoObjectClient extends KryoObjectCommunicator
 {
@@ -22,7 +24,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
 
    private final Client client;
 
-   private static InetAddress getByName(String host)
+   public static InetAddress getByName(String host)
    {
       try
       {
@@ -41,12 +43,18 @@ public class KryoObjectClient extends KryoObjectCommunicator
 
    public KryoObjectClient(InetAddress host, int tcpPort, NetClassList netClassList, int writeBufferSize, int receiveBufferSize)
    {
+      this(host, tcpPort, netClassList, writeBufferSize, receiveBufferSize, new KryoSerialization());
+      netClassList.registerWithKryo(client.getKryo());
+   }
+
+   public KryoObjectClient(InetAddress host, int tcpPort, NetClassList netClassList, int writeBufferSize, int receiveBufferSize,Serialization serialization)
+   {
       super();
-      this.client = new Client(writeBufferSize, receiveBufferSize);
+      this.client = new Client(writeBufferSize, receiveBufferSize, serialization);
       this.host = host;
       this.tcpPort = tcpPort;
 
-      registerClassList(netClassList, client.getKryo());
+      registerClassList(netClassList);
       createConnectionListener(client);
       createReconnectListener();
 
@@ -128,7 +136,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
                }
                catch (IOException e)
                {
-//                  System.err.println("Failed to connect KryoClient to SCS at ip: " + host + " at port: " + tcpPort + ". retrying...");
+                  //                  System.err.println("Failed to connect KryoClient to SCS at ip: " + host + " at port: " + tcpPort + ". retrying...");
                   ThreadTools.sleep(reconnectDelay);
                }
             }
