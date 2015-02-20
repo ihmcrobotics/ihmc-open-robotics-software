@@ -1123,74 +1123,45 @@ public class DiagnosticBehavior extends BehaviorInterface
       Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
-      submitFootstepPose(false, robotSide, desiredFootstepPosition);
+      submitFootstepPose(true, robotSide, desiredFootstepPosition);
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.5235, 0.3);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-      
+      desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, 0.20);//0.0,0.523,0.3
+      submitHandPose(robotSide, desiredUpperArmOrientation, 0.0, null, mirrorOrientationForRightSide);
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-      
       pipeLine.requestNewStage();
 
-      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-      
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-      
       pipeLine.requestNewStage();
 
       //bend forward and arms
-      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
-      
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
-
-      submitDesiredChestOrientation(true, 0.0, Math.toRadians(35.0), 0.0);
-      submitDesiredPelvisOrientation(true, 0.0, Math.toRadians(30), 0.0);
-
+      submitDesiredChestOrientation(true, 0.0, 0.7 * maxPitchForward, 0.0);
+      submitDesiredPelvisOrientation(true, 0.0, 0.5 * maxPitchForward, 0.0);
       pipeLine.requestNewStage();
 
       //back to normal stance
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
-
       pipeLine.requestNewStage();
 
-      desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       
-      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
-
+      submitHandPoseHomeCommand(true);
+      pipeLine.requestNewStage();
+      
+      //square up the feet
       desiredFootstepPosition = new FramePose(ankleZUpFrame);
       position = new Point3d(0., robotSide.negateIfRightSide(0.25), 0.0);
       orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
       desiredFootstepPosition.setPose(position, orientation);
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(false, robotSide, desiredFootstepPosition);
-
       pipeLine.requestNewStage();
 
-      // Put the foot back on the ground
-      // Put the foot back on the ground
-      //arms at good spot
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -0.2, null, mirrorOrientationForRightSide);
-      
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.2, null, mirrorOrientationForRightSide);
-
-      pipeLine.requestNewStage();
-
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
-      
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.0, 0.3);
-      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0 , null, mirrorOrientationForRightSide);
-
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
       pipeLine.requestNewStage();
    }
 
