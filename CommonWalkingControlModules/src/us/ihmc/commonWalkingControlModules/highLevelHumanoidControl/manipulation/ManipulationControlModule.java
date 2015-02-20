@@ -147,8 +147,9 @@ public class ManipulationControlModule
 
    private void handleDefaultState(RobotSide robotSide)
    {
-      if (handPoseProvider == null) return;
-      
+      if (handPoseProvider == null)
+         return;
+
       if (handPoseProvider.checkForHomePosition(robotSide))
       {
          goToDefaultState(robotSide, handPoseProvider.getTrajectoryTime());
@@ -157,8 +158,9 @@ public class ManipulationControlModule
 
    private void handleHandPoses(RobotSide robotSide)
    {
-      if (handPoseProvider == null) return;
-      
+      if (handPoseProvider == null)
+         return;
+
       if (handPoseProvider.checkForNewPose(robotSide))
       {
          if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
@@ -174,13 +176,23 @@ public class ManipulationControlModule
       }
       else if (handPoseProvider.checkForNewPoseList(robotSide))
       {
-         handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide), handPoseProvider.getTrajectoryTime());
+         handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide),
+               handPoseProvider.getTrajectoryTime());
+      }
+      else if (handPoseProvider.checkForNewWholeBodyPoseList(robotSide))
+      {
+         double[] timeArray = handPoseProvider.getDesiredWholeBodyTrajectoryTimeArray();
+         double[][] jointPositionArray = handPoseProvider.getDesiredWholeBodyTrajectoryPositionArray(robotSide);
+         double[][] jointVelocityArray = handPoseProvider.getDesiredWholeBodyTrajectoryVelocityArray(robotSide);
+         handControlModules.get(robotSide).moveJointspaceWithWaypointsForWholeBodyTrajectory(robotSide, timeArray, jointPositionArray, jointVelocityArray);
+         handPoseProvider.setWholeBodyTrajectoryPacketAtomicReferenceToNull(robotSide);
       }
    }
 
    private void handleHandPauses(RobotSide robotSide)
    {
-      if (handPoseProvider == null) return;
+      if (handPoseProvider == null)
+         return;
 
       if (handPoseProvider.checkForNewPauseCommand(robotSide))
       {

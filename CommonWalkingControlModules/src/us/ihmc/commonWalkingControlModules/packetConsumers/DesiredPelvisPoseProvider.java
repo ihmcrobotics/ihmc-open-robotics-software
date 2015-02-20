@@ -167,6 +167,22 @@ public class DesiredPelvisPoseProvider extends  PelvisPoseProvider
       return pelvisPacketConsumer;
    }
 
+//   @Override
+//   public void getDesiredPelvisPositionTrajectory(
+//         ArrayList<Double> time,
+//         ArrayList<FramePoint> position, 
+//         ArrayList<FrameVector> velocity ) 
+//   {     
+//      int N = lastWholeBodyPacket.getNumberOfWaypoints();
+//        
+//      for(int i=0; i<N; i++)
+//      {
+//         time.add( lastWholeBodyPacket.absTime[i] );
+//         position.add( new FramePoint(ReferenceFrame.getWorldFrame(), lastWholeBodyPacket.pelvisWorldPosition[i]));
+//         velocity.add( new FrameVector(ReferenceFrame.getWorldFrame(), lastWholeBodyPacket.pelvisWorldVelocity[i]));
+//      }
+//   }
+
    @Override
    public FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredFrame)
    {
@@ -185,7 +201,7 @@ public class DesiredPelvisPoseProvider extends  PelvisPoseProvider
       }
       return output;
    }
-
+   
    @Override
    public FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredFrame )
    {

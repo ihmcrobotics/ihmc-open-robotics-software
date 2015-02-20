@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.FramePointWaypoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public abstract class PelvisPoseProvider
@@ -13,14 +14,29 @@ public abstract class PelvisPoseProvider
    public abstract boolean checkForHomePosition();
 
    public abstract boolean checkForHomeOrientation();
-   
+
    public abstract Double getTrajectoryTimeToHome();
       
    public abstract FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredReferenceFrame);
 
    public abstract FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredReferenceFrame);
-   
-   
+
+
+//   public abstract void getDesiredPelvisPositionTrajectory(ArrayList<Double> time, ArrayList<FramePoint> position, ArrayList<FrameVector> velocity);
+//
+//   public abstract FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame);
+//   
+//   // to be used by those interpolators which expect only one desired position
+//   public FramePointWaypoint getFinalPelvisPosition(ReferenceFrame desiredReferenceFrame)
+//   {
+//      FramePointWaypoint[] waypoints = getDesiredPelvisPosition(desiredReferenceFrame);
+//      if(waypoints == null ) return null;
+//      
+//      int last = waypoints.length -1;
+//      for (int i=0; i< last; i++ ) waypoints[last].timeSincePreviousWaypoint += waypoints[i].timeSincePreviousWaypoint;
+//      return waypoints[last];
+//   }
+
    // to be used by those interpolators which expect only one desired position
    public FramePointWaypoint getFinalPelvisPosition(ReferenceFrame desiredReferenceFrame)
    {
@@ -42,5 +58,5 @@ public abstract class PelvisPoseProvider
       for (int i=0; i< last; i++ ) waypoints[last].timeSincePreviousWaypoint += waypoints[i].timeSincePreviousWaypoint;
       return waypoints[last];
    }
-   
+
 }
