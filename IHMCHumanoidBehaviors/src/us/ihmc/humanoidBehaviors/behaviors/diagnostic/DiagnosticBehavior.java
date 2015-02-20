@@ -77,6 +77,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class DiagnosticBehavior extends BehaviorInterface
 {
    private static final boolean FAST_MOTION = true;
+   private static final boolean CAN_ARMS_REACH_FAR_BEHIND = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
@@ -1064,8 +1065,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -Math.PI / 2.0, 0.3);
       submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.3); // Normal Running man
-//      desiredUpperArmOrientation.setYawPitchRoll(0.78, 1.43, Math.PI / 2.0); // Running man for Atlas
+      if(CAN_ARMS_REACH_FAR_BEHIND)
+         desiredUpperArmOrientation.setYawPitchRoll(0.0, Math.PI / 2.0, 0.3); // Normal Running man
+      else
+         desiredUpperArmOrientation.setYawPitchRoll(0.78, 1.43, Math.PI / 2.0); // Running man for Atlas
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
       
       FramePose footPose = new FramePose(ankleZUpFrame);
@@ -1125,28 +1128,57 @@ public class DiagnosticBehavior extends BehaviorInterface
       desiredFootstepPosition.changeFrame(worldFrame);
       submitFootstepPose(true, robotSide, desiredFootstepPosition);
 
-      desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, 0.20);//0.0,0.523,0.3
+      if (CAN_ARMS_REACH_FAR_BEHIND)
+         desiredUpperArmOrientation.setYawPitchRoll(0.2, -0.05, 0.20);
+      else
+         desiredUpperArmOrientation.setYawPitchRoll(0.0, 0.523, 0.3);
       submitHandPose(robotSide, desiredUpperArmOrientation, 0.0, null, mirrorOrientationForRightSide);
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
+      if (CAN_ARMS_REACH_FAR_BEHIND)
+      {
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
+      }
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
       pipeLine.requestNewStage();
 
       //bend forward and arms
+      if (CAN_ARMS_REACH_FAR_BEHIND)
+      {
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         submitHandPose(robotSide, desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
+      }
       desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationForRightSide);
       submitDesiredChestOrientation(true, 0.0, 0.7 * maxPitchForward, 0.0);
       submitDesiredPelvisOrientation(true, 0.0, 0.5 * maxPitchForward, 0.0);
       pipeLine.requestNewStage();
 
+      if (CAN_ARMS_REACH_FAR_BEHIND)
+      {
+         desiredUpperArmOrientation.setYawPitchRoll(-1.7242, 0.2588, -0.5436);
+         submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
+      }
+      pipeLine.requestNewStage();
+      
       //back to normal stance
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
       pipeLine.requestNewStage();
+      
+      desiredUpperArmOrientation.setYawPitchRoll(-1.4173, 0.2588, 0.5436);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
+      pipeLine.requestNewStage();
 
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.523, 0.3);
+      submitHandPose(robotSide, desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.5235, 0.3);
+      submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.1, null, mirrorOrientationForRightSide);
+      pipeLine.requestNewStage();
       
       submitHandPoseHomeCommand(true);
       pipeLine.requestNewStage();
@@ -1342,12 +1374,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(chestFrame);
       desiredUpperArmOrientation.setYawPitchRoll(0.0, -0.0, 0.6);
       submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
-      
       pipeLine.requestNewStage();
 
       desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, 0.7473);
-      submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
-
+      submitSymmetricHandPose(desiredUpperArmOrientation, -1.40, null);
+      
       // Supa powerful front kick!!!!!
       FramePose footPose = new FramePose();
       footPose.setToZero(ankleZUpFrame);
@@ -1385,7 +1416,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, null, true);
       
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.85), 0.3);
+      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.2);
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
 
@@ -1407,6 +1438,11 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       // Put the foot back on the ground
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+      
+      //
+      submitHandPoseHomeCommand(true);
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
    }
 
    private void sequenceSquats()
