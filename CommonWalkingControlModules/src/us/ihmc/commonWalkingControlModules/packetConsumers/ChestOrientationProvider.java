@@ -10,6 +10,8 @@ public abstract class ChestOrientationProvider
    public abstract boolean checkForNewChestOrientation();
    
    public abstract boolean checkForHomeOrientation();
+   
+   public abstract double getTrajectoryTimeForHomeOrientation();
 
    public abstract FrameOrientationWaypoint[] getDesiredChestOrientations();
    

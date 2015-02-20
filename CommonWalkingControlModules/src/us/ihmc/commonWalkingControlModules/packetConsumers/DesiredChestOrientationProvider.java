@@ -21,7 +21,8 @@ public class DesiredChestOrientationProvider extends ChestOrientationProvider
    private final ReferenceFrame chestOrientationFrame;
    private final PacketConsumer<ChestOrientationPacket> packetConsumer;
    private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
-
+   private double homeTrajectoryTime = 0;
+   
    public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime)
    {
       this.chestOrientationFrame = chestOrientationFrame;
@@ -89,6 +90,11 @@ public class DesiredChestOrientationProvider extends ChestOrientationProvider
       chestOrientationWaypoints.set( chestWaypoints );
    }
    
+   public double getTrajectoryTimeForHomeOrientation()
+   {
+      return homeTrajectoryTime;
+   }
+   
    public void receivedPacketImplementation(ChestOrientationPacket packet)
    {
       if (packet == null) return;
@@ -97,6 +103,7 @@ public class DesiredChestOrientationProvider extends ChestOrientationProvider
       if (packet.isToHomeOrientation())
       {
          goToHomeOrientation.set(true);
+         homeTrajectoryTime = packet.getTrajectoryTime();
          return;
       }
 

@@ -164,7 +164,7 @@ public class ChestOrientationManager
          if (chestOrientationProvider.checkForHomeOrientation())
          {
             FrameOrientationWaypoint pelvisHome = new FrameOrientationWaypoint(
-                  defaultTrajectoryTime,
+                  chestOrientationProvider.getTrajectoryTimeForHomeOrientation(),
                   new FrameOrientation( pelvisZUpFrame ) );
 
             orientationTrajectoryGenerator.initializeTrajectory(pelvisHome);
