@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -9,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
-public class UserDesiredChestOrientationProvider implements ChestOrientationProvider
+public class UserDesiredChestOrientationProvider extends ChestOrientationProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -68,15 +69,14 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
       return false;
    }
 
-   @Override
-   public FrameOrientation getDesiredChestOrientation()
+   public FrameOrientationWaypoint[] getDesiredChestOrientations()
    {
       if (!isNewChestOrientationInformationAvailable.getBooleanValue())
          return null;
 
       isNewChestOrientationInformationAvailable.set(false);
-
-      return frameOrientation;
+      
+      return new FrameOrientationWaypoint[]{ new FrameOrientationWaypoint( chestTrajectoryTime.getDoubleValue(), frameOrientation ) };
    }
 
    @Override
@@ -85,9 +85,4 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
       return chestOrientationFrame;
    }
 
-   @Override
-   public double getTrajectoryTime()
-   {
-      return chestTrajectoryTime.getDoubleValue();
-   }
 }
