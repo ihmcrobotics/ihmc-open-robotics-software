@@ -12,8 +12,8 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
-import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
@@ -44,7 +44,7 @@ public class PacketsForwardedToTheUi
       SnapFootstepPacket.class,
       VideoPacket.class,
       HandPosePacket.class,
-      SparseLidarScanPacket.class,
+      PointCloudPacket.class,
       DepthDataClearCommand.class,
       IntrinsicCameraParametersPacket.class,
 //      HeadPosePacket.class,

@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -15,7 +16,7 @@ import org.junit.Test;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.communication.packets.sensing.SparseLidarScanPacket;
+import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
@@ -23,7 +24,6 @@ import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 {
@@ -57,7 +57,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       DRCSimulationNetworkTestHelper drcSimulationTestHelper = new DRCSimulationNetworkTestHelper(getRobotModel(),
             new DRCWallAtDistanceEnvironment(WALL_DISTANCE),"",true,true);
       drcSimulationTestHelper.setupCamera(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
-      drcSimulationTestHelper.addConsumer(SparseLidarScanPacket.class, new LidarConsumer());
+      drcSimulationTestHelper.addConsumer(PointCloudPacket.class, new LidarConsumer());
       
       drcSimulationTestHelper.connect();
       
@@ -88,19 +88,18 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       }
    }
 
-   private class LidarConsumer implements PacketConsumer<SparseLidarScanPacket>
+   private class LidarConsumer implements PacketConsumer<PointCloudPacket>
    {
       @Override
-      public void receivedPacket(SparseLidarScanPacket sparseLidarScanPacket)
+      public void receivedPacket(PointCloudPacket pointCloud)
       {
          numberOfLidarScansConsumed++;
-         SparseLidarScan sparseLidarScan = sparseLidarScanPacket.createFullSparseLidarScan();
-         jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
-         jmeLidarScanVisualizer.addPointCloud(sparseLidarScan.getAllPoints3f());
+//         jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
+         jmeLidarScanVisualizer.addPointCloud(Arrays.asList(pointCloud.getPoints3f()));
 
          try
          {
-            List<Point3d> lidarWorldPoints = sparseLidarScan.getAllPoints();
+            List<Point3d> lidarWorldPoints = Arrays.asList(pointCloud.getPoints());
             numberOfLidarPointsConsumed += lidarWorldPoints.size();
             
             for (Point3d lidarWorldPoint : lidarWorldPoints)

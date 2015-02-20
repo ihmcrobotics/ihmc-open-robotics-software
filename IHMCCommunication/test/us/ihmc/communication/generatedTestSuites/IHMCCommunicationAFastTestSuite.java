@@ -24,7 +24,6 @@ import org.junit.runners.Suite;
    us.ihmc.communication.serializers.manipulation.SpigotPosePacketSerializerTest.class,
    us.ihmc.communication.serializers.manipulation.TorusPosePacketSerializerTest.class,
    us.ihmc.communication.serializers.NChooseKSerializerTest.class,
-   us.ihmc.communication.serializers.sensing.DRCLidarScanSerializerTest.class,
    us.ihmc.communication.serializers.sensing.IntrinsicCameraParametersPacketTest.class,
    us.ihmc.communication.serializers.sensing.LidarClearCommandSerializerTest.class,
    us.ihmc.communication.serializers.sensing.LidarStateSerializerTest.class,

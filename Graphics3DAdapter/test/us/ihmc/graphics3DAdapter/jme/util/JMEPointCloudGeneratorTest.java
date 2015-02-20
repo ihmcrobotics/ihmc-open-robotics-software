@@ -7,7 +7,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.lidar.polarLidar.SparseLidarScan;
+import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -39,25 +39,17 @@ public class JMEPointCloudGeneratorTest
       
       float[] ranges = RandomTools.generateRandomFloatArray(random, numPoints, 5.0f);
       
-      int[] indexes = new int[numPoints];
-      
-      for (int i = 0; i < indexes.length; i++)
-      {
-         indexes[i] = i;
-      }
-      
       LidarScanParameters lidarScanParameters = new LidarScanParameters(numPoints, 2* Math.PI, 0, Double.POSITIVE_INFINITY);
       
       RigidBodyTransform startTransform = new RigidBodyTransform();
       RigidBodyTransform endTransform = new RigidBodyTransform();
       
       endTransform.rotX(Math.PI / 4);
-      
-      SparseLidarScan sparseLidarScan = new SparseLidarScan(1, lidarScanParameters, startTransform, endTransform, indexes, ranges);
+      LidarScan lidarScan = new LidarScan(lidarScanParameters, startTransform, endTransform, ranges, 1);
       
       JMEPointCloudGenerator jmePointCloudGenerator = new JMEPointCloudGenerator(jmeGraphics3DAdapter.getRenderer().getAssetManager());
       
-      Node pointCloudNode = jmePointCloudGenerator.generatePointCloudGraph(sparseLidarScan.getAllPoints3f());
+      Node pointCloudNode = jmePointCloudGenerator.generatePointCloudGraph(lidarScan.getAllPoints3f());
       
       jmeGraphics3DAdapter.getRenderer().getZUpNode().attachChild(pointCloudNode);
       
