@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -138,14 +139,19 @@ public class PelvisICPBasedTranslationManager
          }
          else if (desiredPelvisPoseProvider.checkForNewPosition())
          {
+            FramePointWaypoint pelvisPosition = desiredPelvisPoseProvider.getFinalPelvisPosition(supportFrame);
+            
+            double trajectoryTime = pelvisPosition.timeSincePreviousWaypoint;
+            
             initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            if (desiredPelvisPoseProvider.getTrajectoryTime() < minTrajectoryTime)
-               pelvisPositionTrajectoryTime.set(minTrajectoryTime);
-            else
-               pelvisPositionTrajectoryTime.set(desiredPelvisPoseProvider.getTrajectoryTime());
+            
+            if ( trajectoryTime < minTrajectoryTime)  trajectoryTime = minTrajectoryTime;
+            
+            pelvisPositionTrajectoryTime.set(trajectoryTime);
+            
             tempPosition.setToZero(pelvisZUpFrame);
             initialPelvisPosition.setAndMatchFrame(tempPosition);
-            finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
+            finalPelvisPosition.setAndMatchFrame( pelvisPosition.point );
             pelvisPositionTrajectoryGenerator.initialize();
             isRunning.set(true);
          }

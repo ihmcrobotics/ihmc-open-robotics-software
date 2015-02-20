@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
@@ -92,7 +93,7 @@ public class VariousWalkingProviders
       }
       if (desiredChestOrientationProvider != null)
       {
-         desiredChestOrientationProvider.getDesiredChestOrientation();
+         desiredChestOrientationProvider.getDesiredChestOrientations();
       }
 
       for (RobotSide robotSide : RobotSide.values)

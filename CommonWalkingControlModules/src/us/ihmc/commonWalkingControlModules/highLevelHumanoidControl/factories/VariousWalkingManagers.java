@@ -85,7 +85,8 @@ public class VariousWalkingManagers
 
          chestOrientationControlModule = new ChestOrientationControlModule(chestOrientationExpressedInFrame, chest, twistCalculator, controlDT, chestControlGains, registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, desiredChestOrientationProvider,
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, 
+               chestOrientationControlModule, desiredChestOrientationProvider,
                walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
       }
 

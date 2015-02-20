@@ -7,7 +7,9 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -17,7 +19,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
+public class UserDesiredPelvisPoseProvider extends PelvisPoseProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -89,18 +91,6 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       return isNewPelvisOrientationInformationAvailable.getBooleanValue();
    }
 
-   @Override
-   public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
-   {
-      if (!isNewPelvisOrientationInformationAvailable.getBooleanValue())
-         return null;
-
-      isNewPelvisOrientationInformationAvailable.set(false);
-
-      frameOrientation.setIncludingFrame(desiredPelvisFrame, desiredQuat);
-
-      return frameOrientation;
-   }
 
    @Override
    public boolean checkForNewPosition()
@@ -108,24 +98,6 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
       return isNewPelvisPositionInformationAvailable.getBooleanValue();
    }
 
-   @Override
-   public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
-   {
-      if (!isNewPelvisPositionInformationAvailable.getBooleanValue())
-         return null;
-
-      isNewPelvisPositionInformationAvailable.set(false);
-
-      framePoint.setIncludingFrame(supportFrame, desiredPoint);
-
-      return framePoint;
-   }
-
-   @Override
-   public double getTrajectoryTime()
-   {
-      return userPelvisTrajectoryTime.getDoubleValue();
-   }
 
    @Override
    public boolean checkForHomePosition()
@@ -150,31 +122,31 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    }
 
    @Override
-   public boolean checkForNewTrajectory()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   @Override
-   public void removeLastTrajectory()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public ReferenceFrame getDesiredPelvisPositionTrajectory(ArrayList<Double> time, ArrayList<Point3d> position, ArrayList<Vector3d> velocity)
+   public Double getTrajectoryTimeToHome()
    {
       // TODO Auto-generated method stub
       return null;
    }
 
    @Override
-   public ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity)
+   public FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredReferenceFrame)
    {
       // TODO Auto-generated method stub
       return null;
    }
+
+   @Override
+   public FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredReferenceFrame)
+   {
+      if (!isNewPelvisOrientationInformationAvailable.getBooleanValue())
+         return null;
+
+      isNewPelvisOrientationInformationAvailable.set(false);
+
+      frameOrientation.setIncludingFrame(desiredReferenceFrame, desiredQuat);
+
+      return new FrameOrientationWaypoint[]{  new FrameOrientationWaypoint( userPelvisTrajectoryTime.getDoubleValue(),frameOrientation ) };
+   }
+
 
 }

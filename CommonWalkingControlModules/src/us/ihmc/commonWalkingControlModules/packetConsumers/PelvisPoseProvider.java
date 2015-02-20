@@ -1,15 +1,10 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import java.util.ArrayList;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
+import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public interface PelvisPoseProvider
+public abstract class PelvisPoseProvider
 {
    public abstract boolean checkForNewPosition();
 
@@ -19,21 +14,33 @@ public interface PelvisPoseProvider
 
    public abstract boolean checkForHomeOrientation();
    
-   public abstract boolean checkForNewTrajectory();
-   
-   public abstract void removeLastTrajectory();
+   public abstract Double getTrajectoryTimeToHome();
+      
+   public abstract FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredReferenceFrame);
 
-   public abstract FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame);
+   public abstract FrameOrientationWaypoint[] getDesiredPelvisOrientation(ReferenceFrame desiredReferenceFrame);
    
-   public abstract ReferenceFrame getDesiredPelvisPositionTrajectory(
-         ArrayList<Double> time,
-         ArrayList<Point3d> position, 
-         ArrayList<Vector3d> velocity);
-
-   public abstract FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame);
    
-   public abstract ReferenceFrame getDesiredPelvisOrientationTrajectory(double[] time, Point3d[] position, Vector3d[] velocity);
-
-   public abstract double getTrajectoryTime();
+   // to be used by those interpolators which expect only one desired position
+   public FramePointWaypoint getFinalPelvisPosition(ReferenceFrame desiredReferenceFrame)
+   {
+      FramePointWaypoint[] waypoints = getDesiredPelvisPosition(desiredReferenceFrame);
+      if(waypoints == null ) return null;
+      
+      int last = waypoints.length -1;
+      for (int i=0; i< last; i++ ) waypoints[last].timeSincePreviousWaypoint += waypoints[i].timeSincePreviousWaypoint;
+      return waypoints[last];
+   }
+   
+   // to be used by those interpolators which expect only one desired position
+   public FrameOrientationWaypoint getFinalPelvisOrientation(ReferenceFrame desiredReferenceFrame)
+   {
+      FrameOrientationWaypoint[] waypoints = getDesiredPelvisOrientation(desiredReferenceFrame);
+      if(waypoints == null ) return null;
+      
+      int last = waypoints.length -1;
+      for (int i=0; i< last; i++ ) waypoints[last].timeSincePreviousWaypoint += waypoints[i].timeSincePreviousWaypoint;
+      return waypoints[last];
+   }
    
 }
