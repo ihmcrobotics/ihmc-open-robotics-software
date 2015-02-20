@@ -21,12 +21,12 @@ Point2dMessage[] predictedContactPoints
 # STEP_ON_OR_OFF gives a higher-arched trajectory meant for stepping onto or off obstacles
 # BY_BOX gives a square-wave type trajectory according to the parameters of trajectoryBoxData
 # NO_STEP results in a null footstep. This probably should not be used outside of IHMC source
-#Options for trajectoryGenerationMethod
+#Options for trajectoryType
 # uint8 DEFAULT = 0
-# uint8 LOW_HEIGHT = 1
-# uint8 STEP_ON_OR_OFF = 2
-# uint8 BY_BOX = 3
-uint8 trajectoryGenerationMethod
+# uint8 BASIC = 1
+# uint8 PUSH_RECOVERY = 2
+# uint8 OBSTACLE_CLEARANCE = 3
+uint8 trajectoryType
 
 # Contains information on how high the robot should step
 float64 swingHeight
