@@ -136,4 +136,14 @@ public class DRCNetworkModuleParameters
       useSimulatedSensors = true;
       useController = true;
    }
+
+   @Override
+   public String toString()
+   {
+      return "DRCNetworkModuleParameters [useController=" + useController + "\n useSensorModule=" + useSensorModule + "\n useSimulatedSensors="
+            + useSimulatedSensors + "\n useUiModule=" + useUiModule + "\n useBehaviorModule=" + useBehaviorModule + "\n useBehaviorVisualizer="
+            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
+            + "\n controllerCommunicator=" + controllerCommunicator + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
+            + "]";
+   }
 }
