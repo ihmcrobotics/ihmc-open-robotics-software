@@ -42,7 +42,7 @@ public class ChestOrientationManager
 
    private double defaultTrajectoryTime = 0;
    
-   private final boolean USE_NEW_IMPLEMENTATION = true;
+   private final boolean USE_NEW_IMPLEMENTATION = false;
 
    public ChestOrientationManager(MomentumBasedController momentumBasedController, 
          ChestOrientationControlModule chestOrientationControlModule,
