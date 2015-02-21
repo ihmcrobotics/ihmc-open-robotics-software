@@ -122,7 +122,7 @@ public class UserDesiredPelvisPoseProvider extends PelvisPoseProvider
    }
 
    @Override
-   public Double getTrajectoryTimeToHome()
+   public Double getTrajectoryTime()
    {
       // TODO Auto-generated method stub
       return null;

@@ -59,7 +59,7 @@ public class DesiredPelvisPoseProvider extends  PelvisPoseProvider
    }
 
    @Override
-   public Double getTrajectoryTimeToHome()
+   public Double getTrajectoryTime()
    {
       double out = trajectoryTimeToHomePosition.getAndSet( -1 );
       if( out >=0 )

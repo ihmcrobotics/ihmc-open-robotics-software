@@ -15,7 +15,7 @@ public abstract class PelvisPoseProvider
 
    public abstract boolean checkForHomeOrientation();
 
-   public abstract Double getTrajectoryTimeToHome();
+   public abstract Double getTrajectoryTime();
       
    public abstract FramePointWaypoint[] getDesiredPelvisPosition(ReferenceFrame desiredReferenceFrame);
 
