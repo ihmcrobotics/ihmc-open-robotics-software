@@ -74,7 +74,7 @@ public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
                   break;
 
                case XYZRGB :
-                  assertArrayEquals(testColor, super.pointColor);
+                  assertArrayEquals(testColor, super.pointColors);
                   break;
             }
 

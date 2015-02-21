@@ -1,5 +1,8 @@
 package us.ihmc.utilities.ros;
 
+import geometry_msgs.Quaternion;
+import geometry_msgs.Vector3;
+
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
@@ -14,6 +17,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import javax.imageio.ImageIO;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.ros.node.NodeConfiguration;
 
@@ -91,4 +96,20 @@ public class RosTools
       }
    }
 
-}
+   
+   public static void packRosQuaternionToQuat4d(Quaternion rosQuat, Quat4d quat)
+   {
+      quat.setX(rosQuat.getX());
+      quat.setY(rosQuat.getY());
+      quat.setZ(rosQuat.getZ());
+      quat.setW(rosQuat.getW());
+      
+   }
+
+   public static void packRosVector3dToVector3d(Vector3 rosVector, Vector3d vector)
+   {
+      vector.setX(rosVector.getX());
+      vector.setY(rosVector.getY());
+      vector.setZ(rosVector.getZ());
+   }
+ }

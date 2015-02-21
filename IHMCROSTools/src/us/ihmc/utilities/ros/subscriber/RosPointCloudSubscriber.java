@@ -92,7 +92,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
    protected Point3d[] points = null;
    protected float[] intensities = null;
-   protected Color3f[] pointColor = null;
+   protected Color3f[] pointColors = null;
    protected PointType pointType = null;
 
    protected void unpackPointsAndIntensities(PointCloud2 pointCloud)
@@ -109,7 +109,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
             break;
 
          case XYZRGB :
-            pointColor = new Color3f[numberOfPoints];
+            pointColors = new Color3f[numberOfPoints];
 
             break;
       }
@@ -139,11 +139,11 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
                break;
 
             case XYZRGB :
-               int r = (int) byteBuffer.get();
-               int g = (int) byteBuffer.get();
                int b = (int) byteBuffer.get();
+               int g = (int) byteBuffer.get();
+               int r = (int) byteBuffer.get();
                byte dummy = byteBuffer.get();
-               pointColor[i] = new Color3f(r, g, b);
+               pointColors[i] = new Color3f(r, g, b);
          }
       }
    }
