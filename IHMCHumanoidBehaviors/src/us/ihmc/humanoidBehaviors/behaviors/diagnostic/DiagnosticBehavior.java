@@ -125,6 +125,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       COMBINED_CHEST_PELVIS,
       ARM_MOTIONS,
       UPPER_BODY,
+      FOOT_LIFT,
       FOOT_POSES_SHORT,
       FOOT_POSES_LONG,
       RUNNING_MAN,
@@ -1748,7 +1749,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose desiredFootPose = new FramePose(desiredFootPosition, desiredFootOrientation);
       submitFootPose(parallelize, robotSide, desiredFootPose);
    }
-
+   
    private void submitFootPose(boolean parallelize, RobotSide robotSide, FramePose desiredFootPose)
    {
       desiredFootPose.changeFrame(worldFrame);
@@ -1762,7 +1763,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       else
          pipeLine.submitSingleTaskStage(footPoseTask);
    }
-
+   
    private void submitFootPose(boolean parallelize, RobotSide robotSide, ReferenceFrame referenceFrame, double x, double y, double z, double yaw, double pitch, double roll)
    {
       FramePoint framePosition = new FramePoint(referenceFrame, x, y, z);
@@ -1819,6 +1820,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                break;
             case UPPER_BODY:
                sequenceUpperBody();
+               break;
+            case FOOT_LIFT:
+               sequenceFootLift();
                break;
             case FOOT_POSES_SHORT:
                sequenceFootPoseShort();
@@ -1877,6 +1881,15 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
          requestedDiagnostic.set(null);
       }
+   }
+
+   private void sequenceFootLift()
+   {
+      RobotSide robotSide = activeSideForFootControl.getEnumValue();
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+      
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame,0.0,0.0,maxFootPoseHeight.getDoubleValue()));
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame,0.0,0.0,-0.1));
    }
 
    private void handleRequestedArmPose()
