@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -737,7 +736,7 @@ abstract public class WholeBodyIkSolver
          enforceControlledDoF( opt );
 
          ComputeResult ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
-
+         
          int reseedLeft = maxNumberOfAutomaticReseeds;
 
          while( reseedLeft > 0 && ret != ComputeResult.SUCCEEDED)
@@ -836,7 +835,7 @@ abstract public class WholeBodyIkSolver
 
             q_out.set(cachedAnglesQ);
             ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
-
+            
          }
          catch (Exception e)
          {
@@ -976,9 +975,13 @@ abstract public class WholeBodyIkSolver
          return lockLevel;
       }
 
-      public void lockLowerBody(LockLevel lockLevel)
+      public void setLockLevel(LockLevel lockLevel)
       {
          this.lockLevel = lockLevel;
+      }
+      public LockLevel getLockLevel()
+      {
+         return  this.lockLevel;
       }
 
 
