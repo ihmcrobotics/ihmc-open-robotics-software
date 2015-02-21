@@ -31,6 +31,7 @@ import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsOrientationTraject
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoQuaternionProvider;
+import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class PelvisOrientationManager
 {
@@ -57,10 +58,16 @@ public class PelvisOrientationManager
    private final DoubleYoVariable initialPelvisOrientationOffsetTime = new DoubleYoVariable("initialPelvisOrientationOffsetTime", registry);
    private final YoFrameQuaternion desiredPelvisOrientationOffset;
 
-//   private final DoubleYoVariable offsetTrajectoryTime = new DoubleYoVariable("offsetTrajectoryTime", registry);
+   private final boolean USE_NEW_TRAJECTORY = false;
+
+   private final DoubleYoVariable offsetTrajectoryTime = new DoubleYoVariable("offsetTrajectoryTime", registry);
    private final YoFrameQuaternion initialPelvisOrientationOffset;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator pelvisOrientationOffsetTrajectoryGenerator;
+
+   private final YoFrameQuaternion finalPelvisOrientationOffset;
+   private final OrientationTrajectoryGenerator simplePelvisOrientationOffsetTrajectoryGenerator;
+
    private final BooleanYoVariable prepareForLocomotion = new BooleanYoVariable(getClass().getSimpleName() + "PrepareForLocomotion", registry);
 
    private final YoFrameQuaternion desiredPelvisOrientationWithOffset = new YoFrameQuaternion("desiredPelvisOrientationWithOffset", worldFrame, registry);
@@ -97,7 +104,7 @@ public class PelvisOrientationManager
             registry);
       OrientationProvider initialPelvisOrientationProvider = new YoQuaternionProvider(initialPelvisOrientation);
       OrientationProvider finalPelvisOrientationProvider = new YoQuaternionProvider(finalPelvisOrientation);
-      
+
       pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
             initialPelvisOrientationProvider, finalPelvisOrientationProvider, registry);
 
@@ -118,17 +125,29 @@ public class PelvisOrientationManager
 
       desiredPelvisOrientationOffset = new YoFrameQuaternion("desiredPelvis", "Offset", desiredPelvisFrame, registry);
 
-    // offsetTrajectoryTime.set(defaultTrajectoryTime);
+      offsetTrajectoryTime.set(defaultTrajectoryTime);
       initialPelvisOrientationOffset = new YoFrameQuaternion("initialPelvis", "Offset", desiredPelvisFrame, registry);
-    // finalPelvisOrientationOffset = new YoFrameQuaternion("finalPelvis", "Offset", desiredPelvisFrame, registry);
+      finalPelvisOrientationOffset = new YoFrameQuaternion("finalPelvis", "Offset", desiredPelvisFrame, registry);
+
       YoQuaternionProvider initialPelvisOrientationOffsetProvider = new YoQuaternionProvider(initialPelvisOrientationOffset);
-   
+      OrientationProvider finalPelvisOrientationOffsetProvider = new YoQuaternionProvider(finalPelvisOrientationOffset);
+      DoubleProvider offsetTrajectoryTimeProvider = new YoVariableDoubleProvider(offsetTrajectoryTime);
+
       CurrentOrientationProvider currentPelvisOrientationOffsetProvider = new CurrentOrientationProvider( initialPelvisOrientationOffsetProvider.getReferenceFrame() );
-      
-      pelvisOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset",
-            currentPelvisOrientationOffsetProvider, registry);
-      
-      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+
+      if(USE_NEW_TRAJECTORY)
+      {
+         pelvisOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisOffset",
+               currentPelvisOrientationOffsetProvider, registry);
+         simplePelvisOrientationOffsetTrajectoryGenerator = null;
+         pelvisOrientationOffsetTrajectoryGenerator.initialize();
+      }
+      else{
+         pelvisOrientationOffsetTrajectoryGenerator = null;
+         simplePelvisOrientationOffsetTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvisOffset", desiredPelvisFrame, offsetTrajectoryTimeProvider,
+               initialPelvisOrientationOffsetProvider, finalPelvisOrientationOffsetProvider, registry); 
+         simplePelvisOrientationOffsetTrajectoryGenerator.initialize();
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -162,47 +181,94 @@ public class PelvisOrientationManager
       desiredPelvisAngularVelocity.set(tempAngularVelocity);
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
-      
+
       if (pelvisPoseProvider != null)
       {
-         if (pelvisPoseProvider.checkForHomeOrientation())
+         if(USE_NEW_TRAJECTORY)
          {
-            FrameOrientationWaypoint pelvisHome = new FrameOrientationWaypoint(
-                  pelvisPoseProvider.getTrajectoryTimeToHome(),
-                  new FrameOrientation( ReferenceFrame.getWorldFrame() ) );
-            
-            pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory(pelvisHome);
-            initialPelvisOrientationOffsetTime.set( yoTime.getDoubleValue() );
+            if (pelvisPoseProvider.checkForHomeOrientation())
+            {
+               FrameOrientationWaypoint pelvisHome = new FrameOrientationWaypoint(
+                     pelvisPoseProvider.getTrajectoryTime(),
+                     new FrameOrientation( ReferenceFrame.getWorldFrame() ) );
+
+               pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory(pelvisHome);
+               initialPelvisOrientationOffsetTime.set( yoTime.getDoubleValue() );
+            }
+            else if (pelvisPoseProvider.checkForNewOrientation())
+            {
+               FrameOrientationWaypoint[] pelvisTargets = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
+
+               pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory(pelvisTargets);
+               initialPelvisOrientationOffsetTime.set( yoTime.getDoubleValue() );
+            }
          }
-         else if (pelvisPoseProvider.checkForNewOrientation())
-         {
-            FrameOrientationWaypoint[] pelvisTargets = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
-              
-            pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory(pelvisTargets);
-            initialPelvisOrientationOffsetTime.set( yoTime.getDoubleValue() );
+         else{
+            if (pelvisPoseProvider.checkForHomeOrientation())
+            {
+               initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+               offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
+               simplePelvisOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+               initialPelvisOrientationOffset.set(tempOrientation);
+               finalPelvisOrientationOffset.set(0.0, 0.0, 0.0);
+               simplePelvisOrientationOffsetTrajectoryGenerator.initialize();
+            }
+            else if (pelvisPoseProvider.checkForNewOrientation())
+            {
+               initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue() );
+               offsetTrajectoryTime.set( pelvisPoseProvider.getTrajectoryTime() );
+               simplePelvisOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+               initialPelvisOrientationOffset.set(tempOrientation);
+               
+               FrameOrientationWaypoint[] pelvisTargets = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
+               FrameOrientation pelvisOrientationProvided = pelvisTargets[0].orientation;
+               
+               pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
+               tempOrientation.setIncludingFrame(pelvisOrientationProvided);
+               finalPelvisOrientationOffset.set(tempOrientation);
+               simplePelvisOrientationOffsetTrajectoryGenerator.initialize();
+            }
          }
       }
 
       if (prepareForLocomotion.getBooleanValue())
       {      
-         tempOrientation.setToZero(desiredPelvisFrame);
-         
-         FrameOrientationWaypoint pelvisHome = new FrameOrientationWaypoint(
-               TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION,
-               tempOrientation );
-         
-         pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory( pelvisHome );
+         if(USE_NEW_TRAJECTORY)
+         {
+            tempOrientation.setToZero(desiredPelvisFrame);
+
+            FrameOrientationWaypoint pelvisHome = new FrameOrientationWaypoint(
+                  TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION,
+                  tempOrientation );
+            
+            pelvisOrientationOffsetTrajectoryGenerator.initializeTrajectory( pelvisHome );
+         }
+         else{
+            initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+            offsetTrajectoryTime.set(TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION);
+            tempOrientation.setToZero(desiredPelvisFrame);
+            initialPelvisOrientationOffset.set(finalPelvisOrientationOffset);
+            finalPelvisOrientationOffset.set(tempOrientation);
+            simplePelvisOrientationOffsetTrajectoryGenerator.initialize();
+         }
          prepareForLocomotion.set(false);
-         
+
          initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
       }
 
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
-      pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
-      pelvisOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
- 
+      if(USE_NEW_TRAJECTORY)
+      {
+         pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
+         pelvisOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+      }
+      else{
+         simplePelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
+         simplePelvisOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration); 
+      }
+
       desiredPelvisOrientationOffset.set(tempOrientation);
-     
+
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
       tempAngularAcceleration.changeFrame(worldFrame);
@@ -214,7 +280,7 @@ public class PelvisOrientationManager
       desiredPelvisOrientationWithOffset.getFrameOrientationIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.getFrameTupleIncludingFrame(tempAngularVelocity);
       desiredPelvisAngularAcceleration.getFrameTupleIncludingFrame(tempAngularAcceleration); 
-      
+
       orientationTrajectoryData.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
    }
 
