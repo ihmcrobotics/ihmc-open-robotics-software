@@ -125,7 +125,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       else if (scriptObject instanceof PelvisPosePacket)
       {
          PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
-         desiredPelvisPoseProvider.getSingleTargetConsumer().receivedPacket(pelvisPosePacket);
+         desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
          
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
