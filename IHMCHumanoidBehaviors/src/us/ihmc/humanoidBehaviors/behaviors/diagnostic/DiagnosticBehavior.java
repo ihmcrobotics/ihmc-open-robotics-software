@@ -76,7 +76,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class DiagnosticBehavior extends BehaviorInterface
 {
-   private static final boolean FAST_MOTION = true;
+   private static final boolean FAST_MOTION = false;
    private static final boolean CAN_ARMS_REACH_FAR_BEHIND = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
@@ -358,9 +358,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
          sequenceSquats();
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequenceChestRotations(0.55);
+         sequenceChestRotations(0.35); //55);
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
-         sequencePelvisRotations(0.3);
+         sequencePelvisRotations(0.2); //3);
       for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
          sequenceShiftWeight();
    }
