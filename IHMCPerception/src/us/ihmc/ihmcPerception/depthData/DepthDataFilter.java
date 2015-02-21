@@ -44,11 +44,12 @@ public class DepthDataFilter
    // See DRCManualLidarTransform and DRCLidarVisualizationManager. This is a bit of a hack but less likely to have unintended consequences.
    private final RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
+
    public DepthDataFilter(ReferenceFrame headFrame)
    {
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
-      quadTree = getGroundOnlyQuadTree(headFrame);
+      quadTree = getGroundOnlyQuadTree();
       octree = getOctree(headFrame);
       quadTree.setOctree(octree);
    }
@@ -58,7 +59,7 @@ public class DepthDataFilter
       this.worldToCorrected.set(adjustment);
    }
 
-   public QuadTreeHeightMapInterface getGroundOnlyQuadTree(ReferenceFrame headFrame)
+   public QuadTreeHeightMapInterface getGroundOnlyQuadTree()
    {
       // SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
@@ -113,11 +114,7 @@ public class DepthDataFilter
       lidarScan.getAverageTransform().get(worldVector);
       origin.set(worldVector);
       return new PointCloudPacket(origin, points.toArray(new Point3d[points.size()]), lidarScan.params.timestamp);
-   }
 
-   public void addPoint(Point3d point)
-   {
-      
    }
    
    public void addPoint(LidarScan lidarScan, int i, ArrayList<Point3d> points)
