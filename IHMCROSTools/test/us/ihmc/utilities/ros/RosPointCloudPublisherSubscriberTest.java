@@ -16,11 +16,13 @@ import org.junit.Test;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.types.PointType;
 
-
+@BambooPlan(planType=BambooPlanType.Flaky)
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
    @AverageDuration

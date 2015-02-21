@@ -7,7 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class
+   us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
+   us.ihmc.utilities.ros.RosPointCloudPublisherSubscriberTest.class,
+   us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class
 })
 
 public class IHMCROSToolsAFlakyTestSuite
