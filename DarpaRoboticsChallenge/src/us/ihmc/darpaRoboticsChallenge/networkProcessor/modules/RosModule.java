@@ -1,90 +1,119 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
+import us.ihmc.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.communication.producers.RobotPoseBuffer;
+import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
+import us.ihmc.ihmcPerception.RosLocalizationUpdateSubscriber;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPathPlannerService;
+import us.ihmc.pathGeneration.footstepPlanner.RosFootstepServiceClient;
+import us.ihmc.pathGeneration.footstepPlanner.aDStar.ADStarPathPlannerService;
+import us.ihmc.pathGeneration.terrainAnalysis.BasicFootstepParameters;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.utilities.ros.RosMainNode;
 
 
 public class RosModule
 {
+   private static final String ROS_NAMESPACE = "networkProcessor/rosModule";
+
    private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.ROS_MODULE.ordinal(), "RosModule");
    
-   public RosModule()
+   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
+   private final RosMainNode rosMainNode;
+   private final SDFFullRobotModel sdfFullRobotModel;
+   private final RobotPoseBuffer robotPoseBuffer;
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final DRCRobotSensorInformation sensorInformation;
+   private final RobotDataReceiver robotDataReceiver;
+   private final DRCRobotPhysicalProperties physicalProperties;
+
+   
+   
+   public RosModule(DRCRobotModel robotModel, URI rosCoreURI)
    {
-    
-//      RosMainNode rosMainNode;
-//      RosTfPublisher tfPublisher;
-//      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-//      {
-//         RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
-//         RosRobotPosePublisher robotPosePublisher = new RosRobotPosePublisher(sensorSuitePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
-//         new RosLocalizationUpdateSubscriber(rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
-//         multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
-//         new RosRobotJointStatePublisher(sensorSuitePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,"atlas");
-//      }
-//      
+      rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
+      
+      physicalProperties = robotModel.getPhysicalProperties();
+      robotPoseBuffer = new RobotPoseBuffer(rosModulePacketCommunicator, 10000, timestampProvider);
+      sdfFullRobotModel = robotModel.createFullRobotModel();
+      ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
+      sensorInformation = robotModel.getSensorInformation();
+      
+      List<ForceSensorDefinition> forceSensorDefinitions = Arrays.asList(sdfFullRobotModel.getForceSensorDefinitions());
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(forceSensorDefinitions);
+      robotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, forceSensorDataHolder);
+      rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      
+      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
+      new RosRobotPosePublisher(rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
+      new RosRobotJointStatePublisher(sdfFullRobotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,"atlas");
+      
+//      multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
+      
 //      if (sensorInformation.getLidarParameters().length > 0)
 //      {
-//        SCSLidarDataReceiver scsLidarDataReceiver = new SCSLidarDataReceiver(depthDataProcessor, robotPoseBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, sdfFullRobotModel,
-//               sensorInformation.getLidarParameters());
-//        Thread lidarThread = new Thread(scsLidarDataReceiver, "scsLidarDataReceiver");
-//        lidarThread.start();
-//         
-//         if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-//         {
-//            new RosSCSLidarPublisher(sensorSuitePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
-//         }
+//         new RosSCSLidarPublisher(rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
 //      }
-//      
-//      if (DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-//      {
-//         rosMainNode = new RosMainNode(rosCoreURI,
-//               "darpaRoboticsChallange/networkProcessor", true);
-//
-//         RosNativeNetworkProcessor rosNativeNetworkProcessor;
-//         if (RosNativeNetworkProcessor.hasNativeLibrary())
-//         {
-//            rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-//            rosNativeNetworkProcessor.connect();
-//         } else
-//         {
-//            rosNativeNetworkProcessor = null;
-//         }
-//
-//         ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(sensorURI);
-//         rosTransformProvider.connect();
-//         tfPublisher = new RosTfPublisher(rosMainNode);
-//         new RosRobotPosePublisher(sensorSuitePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, "atlas", tfPublisher);
-//         new RosRobotJointStatePublisher(sensorSuitePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, "atlas");
-//         new RosLocalizationUpdateSubscriber(rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
-//
-//         
-//         RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(sensorSuitePacketCommunicator, rosMainNode, physicalProperties.getAnkleHeight());
-//         sensorSuitePacketCommunicator.attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-//         RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-//         sensorSuitePacketCommunicator.attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-//         
-//         FootstepPathPlannerService footstepPathPlannerService;
-////         footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-////         footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
-//         footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), sensorSuitePacketCommunicator);
-//         sensorSuitePacketCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
-//         
-//         
-////       RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(networkingManager, rosMainNode, physicalProperties);
-////       networkingManager.getControllerCommandHandler().attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
-//       
-//       if(sensorInformation.setupROSLocationService())
-//       {
-//          RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-//          sensorSuitePacketCommunicator.attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
-//       }
-//         
-//         rosMainNode.execute();
-//      }
+      
+      if(sensorInformation.setupROSLocationService())
+      {
+         setupRosLocalization();
+      }
+
+//      setupFootstepServiceClient();
+//      setupFootstepPathPlannerService();
+      
+      rosMainNode.execute();
+      System.out.println("created ros module");
    }
+
+   private void setupRosLocalization()
+   {
+      new RosLocalizationUpdateSubscriber(rosMainNode, rosModulePacketCommunicator, ppsTimestampOffsetProvider);
+      RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
+      rosModulePacketCommunicator.attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
+   }
+
+   private void setupFootstepServiceClient()
+   {
+      RosFootstepServiceClient rosFootstepServiceClient = new RosFootstepServiceClient(rosModulePacketCommunicator, rosMainNode, physicalProperties.getAnkleHeight());
+      rosModulePacketCommunicator.attachListener(SnapFootstepPacket.class, rosFootstepServiceClient);
+   }
+
+   private void setupFootstepPathPlannerService()
+   {
+      FootstepParameters footstepParameters = new BasicFootstepParameters();
+      FootstepPathPlannerService footstepPathPlannerService;
+//    footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+//    footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
+      footstepPathPlannerService = new ADStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), rosModulePacketCommunicator);
+      rosModulePacketCommunicator.attachListener(FootstepPlanRequestPacket.class, footstepPathPlannerService);
+   }
+
 
    public PacketCommunicator getCommunicator()
    {

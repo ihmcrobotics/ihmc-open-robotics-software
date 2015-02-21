@@ -388,19 +388,19 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       request.getConfig().getStrs().add(resolutionParam);
       }
       
-      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-            {
-
-               public void onSuccess(ReconfigureResponse response)
-               {
-                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-               }
-
-               public void onFailure(RemoteException e)
-               {
-                  e.printStackTrace();
-               }
-            });
+//      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+//            {
+//
+//               public void onSuccess(ReconfigureResponse response)
+//               {
+//                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+//               }
+//
+//               public void onFailure(RemoteException e)
+//               {
+//                  e.printStackTrace();
+//               }
+//            });
    }
 
    public void receivedPacket(MultisenseParameterPacket object)
@@ -417,18 +417,18 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       motorSpeedParam.setValue(motorSpeed);
       request.getConfig().getDoubles().add(motorSpeedParam);
       
-      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-      {
-
-         public void onSuccess(ReconfigureResponse response)
-         {
-            System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-         }
-
-         public void onFailure(RemoteException e)
-         {
-            e.printStackTrace();
-         }
-      });
+//      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+//      {
+//
+//         public void onSuccess(ReconfigureResponse response)
+//         {
+//            System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+//         }
+//
+//         public void onFailure(RemoteException e)
+//         {
+//            e.printStackTrace();
+//         }
+//      });
    }
 }
