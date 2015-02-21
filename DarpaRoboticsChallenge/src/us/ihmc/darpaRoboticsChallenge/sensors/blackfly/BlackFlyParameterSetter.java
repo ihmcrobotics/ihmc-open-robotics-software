@@ -158,19 +158,19 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
          }
          
           
-      blackFlyClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-            {
-
-               public void onSuccess(ReconfigureResponse response)
-               {
-                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-               }
-
-               public void onFailure(RemoteException e)
-               {
-                  e.printStackTrace();
-               }
-            });
+//      blackFlyClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+//            {
+//
+//               public void onSuccess(ReconfigureResponse response)
+//               {
+//                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+//               }
+//
+//               public void onFailure(RemoteException e)
+//               {
+//                  e.printStackTrace();
+//               }
+//            });
    }
 
    

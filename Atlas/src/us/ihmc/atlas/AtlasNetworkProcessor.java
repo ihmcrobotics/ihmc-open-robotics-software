@@ -59,6 +59,11 @@ public class AtlasNetworkProcessor
        
        networkModuleParams.setUseUiModule(true);
        networkModuleParams.setUseBehaviorModule(true);
+       networkModuleParams.setUseSensorModule(true);
+       networkModuleParams.setUseRosModule(true);
+       networkModuleParams.setUseBehaviorVisualizer(true);
+//       networkModuleParams.setUseHandModule(true);
+//       networkModuleParams.setUsePerceptionModule(true);
     	  
     	  try
     	  {
@@ -88,6 +93,7 @@ public class AtlasNetworkProcessor
     	  System.out.println("Using the " + model + " model");
     	  
     	  URI rosMasterURI = NetworkParameters.getROSURI();
+    	  networkModuleParams.setRosUri(rosMasterURI);
 
     	  if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
     	  {

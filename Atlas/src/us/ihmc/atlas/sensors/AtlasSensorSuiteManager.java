@@ -14,8 +14,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
-import us.ihmc.communication.util.DRCSensorParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FishEyeDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataReceiver;
@@ -127,8 +125,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             sensorSuitePacketCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
 
-      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator,
-            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
+//      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator,
+//            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
@@ -142,26 +140,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
       rosMainNode.execute();
-   }
-
-   public PacketCommunicator createSensorModule(URI sensorURI)
-   {
-      KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.SENSOR_MANAGER.ordinal(), "ATLAS_SENSOR_MANAGER");
-
-      switch (targetDeployment)
-      {
-      case GAZEBO:
-         System.out.println("Not sure what to do about gazebo sensors!!!");
-         break;
-      case REAL_ROBOT:
-         initializePhysicalSensors(sensorURI);
-         break;
-      case SIM:
-         //         initializeSimulatedSensors(sensorSuitePacketCommunicator);
-         break;
-      }
-      return sensorSuitePacketCommunicator;
    }
 
    @Override

@@ -88,7 +88,7 @@ public class MultiSenseSensorManager
       if(multiSenseParamaterSetter != null)
       {
          multiSenseParamaterSetter.initializeParameterListeners(); 
-         multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
+//         multiSenseParamaterSetter.setLidarSpindleSpeed(lidarParamaters.getLidarSpindleVelocity());
       }
    }
 

@@ -52,7 +52,7 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useSimulatedController" + simulatedControllerCommunicator.getName() + " " + simulatedControllerCommunicator.getId());
+            PrintTools.debug(this, "useSimulatedController " + simulatedControllerCommunicator.getName() + " " + simulatedControllerCommunicator.getId());
          }
       }
 
@@ -63,7 +63,7 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useSensorModule" + uiModuleCommunicator.getName() + " " + uiModuleCommunicator.getId());
+            PrintTools.debug(this, "useUiModule " + uiModuleCommunicator.getName() + " " + uiModuleCommunicator.getId());
          }
       }
 
@@ -74,7 +74,7 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useSensorModule" + sensorModuleCommunicator.getName() + " " + sensorModuleCommunicator.getId());
+            PrintTools.debug(this, "useSensorModule " + sensorModuleCommunicator.getName() + " " + sensorModuleCommunicator.getId());
          }
       }
 
@@ -85,18 +85,18 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "usePerceptionModule" + perceptionModuleCommunicator.getName() + " " + perceptionModuleCommunicator.getId());
+            PrintTools.debug(this, "usePerceptionModule " + perceptionModuleCommunicator.getName() + " " + perceptionModuleCommunicator.getId());
          }
       }
 
       if (params.useRosModule())
       {
-         PacketCommunicator rosModuleCommunicator = createRosModule(robotModel);
+         PacketCommunicator rosModuleCommunicator = createRosModule(robotModel, params);
          communicators.add(rosModuleCommunicator);
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useRosModule" + rosModuleCommunicator.getName() + " " + rosModuleCommunicator.getId());
+            PrintTools.debug(this, "useRosModule " + rosModuleCommunicator.getName() + " " + rosModuleCommunicator.getId());
          }
       }
 
@@ -107,7 +107,7 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useBehaviorModule" + behaviorModuleCommunicator.getName() + " " + behaviorModuleCommunicator.getId());
+            PrintTools.debug(this, "useBehaviorModule " + behaviorModuleCommunicator.getName() + " " + behaviorModuleCommunicator.getId());
          }
       }
 
@@ -118,7 +118,7 @@ public class DRCNetworkProcessor
 
          if (DEBUG)
          {
-            PrintTools.debug(this, "useHandModule" + handModuleCommunicator.getName() + " " + handModuleCommunicator.getId());
+            PrintTools.debug(this, "useHandModule " + handModuleCommunicator.getName() + " " + handModuleCommunicator.getId());
          }
       }
 
@@ -134,9 +134,9 @@ public class DRCNetworkProcessor
       return behaviorManager.getCommunicator();
    }
 
-   private PacketCommunicator createRosModule(DRCRobotModel robotModel)
+   private PacketCommunicator createRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      RosModule rosModule = new RosModule();
+      RosModule rosModule = new RosModule(robotModel, params.getRosUri());
 
       return rosModule.getCommunicator();
    }
