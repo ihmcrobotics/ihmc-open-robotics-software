@@ -25,14 +25,11 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePointWaypoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.ConstantDoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.CurrentOrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -45,8 +42,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
-import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
@@ -70,21 +65,13 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    private final TaskspaceConstraintData pelvisTaskspaceConstraintData = new TaskspaceConstraintData();
    private final YoFramePoint initialDesiredPelvisPosition;
    private final YoFramePoint finalDesiredPelvisPosition;
-
-   private final StraightLinePositionTrajectoryGenerator oldPelvisPositionTrajectoryGenerator;
-   private final MultipleWaypointsPositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
-
-   private final OrientationInterpolationTrajectoryGenerator oldChestOrientationTrajectoryGenerator;
-   private final MultipleWaypointsOrientationTrajectoryGenerator chestOrientationTrajectoryGenerator;
-
-   private boolean USE_NEW_TRAJECTORY_INTEPOLATOR = true;
-
+   private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
    private double pelvisTrajectoryStartTime = 0.0;
 
    private final ChestOrientationProvider chestOrientationProvider;
    private final ReferenceFrame chestPositionControlFrame;
    private final YoQuaternionProvider finalDesiredChestOrientation, initialDesiredChestOrientation;
-
+   private final OrientationInterpolationTrajectoryGenerator chestOrientationTrajectoryGenerator;
    private double chestTrajectoryStartTime = 0.0;
 
    private final BooleanYoVariable l_footDoToeOff = new BooleanYoVariable("l_footDoToeOff", registry);
@@ -122,8 +109,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final YoFrameVector yoPelvisLinearAcceleration = new YoFrameVector("pelvisLinearAcceleration", worldFrame, registry);
 
-   // private final ArrayList<FramePoint> desiredPelvisPositionsArray = new ArrayList<FramePoint>();
-
    public CarIngressEgressController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters)
    {
@@ -153,8 +138,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       carIngressPelvisPositionKp.set(100.0);
       carIngressPelvisPositionZeta.set(1.0);
-      carIngressPelvisOrientationKp.set(250.0);
-      carIngressPelvisOrientationZeta.set(2.0);
+      carIngressPelvisOrientationKp.set(100.0);
+      carIngressPelvisOrientationZeta.set(1.0);
 
       VariableChangedListener pelvisGainsChangedListener = createPelvisGainsChangedListener();
 
@@ -168,36 +153,16 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
       PositionProvider initialPelvisPositionProvider = new YoPositionProvider(initialDesiredPelvisPosition);
       PositionProvider finalPelvisPositionProvider = new YoPositionProvider(finalDesiredPelvisPosition);
+      pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
+            initialPelvisPositionProvider, finalPelvisPositionProvider, registry);
 
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();
       chestPositionControlFrame = fullRobotModel.getChest().getParentJoint().getFrameAfterJoint();
       initialDesiredChestOrientation = new YoQuaternionProvider("initialDesiredChest", worldFrame, registry);
       finalDesiredChestOrientation = new YoQuaternionProvider("finalDesiredChest", worldFrame, registry);
-
-      CurrentOrientationProvider currentChestOrientation = new CurrentOrientationProvider(initialDesiredChestOrientation.getReferenceFrame() );
-
-      if( USE_NEW_TRAJECTORY_INTEPOLATOR )
-      {
-         pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 
-               trajectoryTimeProvider, initialPelvisPositionProvider, registry);
-
-         chestOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chest",  
-               currentChestOrientation, registry);
-
-         oldPelvisPositionTrajectoryGenerator   = null;
-         oldChestOrientationTrajectoryGenerator = null;
-      }
-      else{
-         pelvisPositionTrajectoryGenerator   = null;
-         chestOrientationTrajectoryGenerator = null;
-
-         oldPelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame,
-               trajectoryTimeProvider, initialPelvisPositionProvider, finalPelvisPositionProvider, registry);
-
-         oldChestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame,
-               trajectoryTimeProvider, initialDesiredChestOrientation, finalDesiredChestOrientation, registry);
-      }
+      chestOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("chest", worldFrame, trajectoryTimeProvider,
+            initialDesiredChestOrientation, finalDesiredChestOrientation, registry);
 
       VariableChangedListener heelOffVariableChangedListener = new ToeOffYoVariableChangedListener();
       for (RobotSide robotSide : RobotSide.values)
@@ -365,7 +330,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       doChestControl();
       doCoMControl();
       doPelvisControl();
-    //  doJointPositionControl();
+      doJointPositionControl();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
@@ -376,41 +341,35 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
    {
       super.doPelvisControl();
 
-      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPosition() )
+      if (pelvisPoseProvider != null && pelvisPoseProvider.checkForNewPosition())
       {
-//         System.out.println(getClass().getSimpleName() + ": trajectory packet received. <<<<<<<<<<<");
-//
-//         ArrayList<Double> time = new ArrayList<Double>();
-//         ArrayList<FramePoint> position  = new ArrayList<FramePoint>();  
-//         ArrayList<FrameVector> velocity = new ArrayList<FrameVector>();  
+         double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
+         pelvisPositionTrajectoryGenerator.compute(time);
 
-         //read from here
-//         pelvisPoseProvider.getDesiredPelvisPositionTrajectory(time, position, velocity);
+         FramePoint previousDesiredPosition = new FramePoint(pelvisPositionControlFrame);
+         pelvisPositionTrajectoryGenerator.get(previousDesiredPosition);
+         initialDesiredPelvisPosition.setAndMatchFrame(previousDesiredPosition);
 
-         FramePointWaypoint[] desiredPelvisPosition = pelvisPoseProvider.getDesiredPelvisPosition(worldFrame);
-         //write here
-//         pelvisPositionTrajectoryGenerator.initializeTrajectory( time, position, velocity );
-//         // once you copied it, delete it
-//         pelvisPoseProvider.removeLastTrajectory();
-         pelvisPositionTrajectoryGenerator.initializeTrajectory( desiredPelvisPosition );
-
+         finalDesiredPelvisPosition.setAndMatchFrame(pelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame()));
          pelvisTrajectoryStartTime = yoTime.getDoubleValue();
+
+         pelvisPositionTrajectoryGenerator.initialize();
       }
 
       double time = yoTime.getDoubleValue() - pelvisTrajectoryStartTime;
-
       pelvisPositionTrajectoryGenerator.compute(time);
 
-      FramePoint desiredPosition = new FramePoint();
-      FrameVector desiredVelocity = new FrameVector();
-      FrameVector desiredPelvisAcceleration = new FrameVector();
+      FramePoint desiredPosition = new FramePoint(pelvisPositionControlFrame);
+      FrameVector desiredVelocity = new FrameVector(pelvisPositionControlFrame);
+      FrameVector desiredPelvisAcceleration = new FrameVector(pelvisPositionControlFrame);
 
       pelvisPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredPelvisAcceleration);
 
       FrameVector pelvisLinearAcceleration = new FrameVector();
       pelvisController.doPositionControl(pelvisLinearAcceleration, desiredPosition, desiredVelocity, desiredPelvisAcceleration, fullRobotModel.getElevator());
 
-      yoPelvisLinearAcceleration.setAndMatchFrame(pelvisLinearAcceleration);      
+      yoPelvisLinearAcceleration.setAndMatchFrame(pelvisLinearAcceleration);
+      
       pelvisLinearAcceleration.changeFrame(pelvis.getBodyFixedFrame());
 
       if (!requestedPelvisLoadBearing.getBooleanValue())
@@ -429,58 +388,32 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       momentumBasedController.setDesiredSpatialAcceleration(pelvisJacobianId, pelvisTaskspaceConstraintData);
    }
 
-
    protected void doChestControl()
    {
+      if (chestOrientationProvider != null)
+      {
+         if (chestOrientationProvider.checkForNewChestOrientation())
+         {
+            chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
+            FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
+            chestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
+            initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
+
+            finalDesiredChestOrientation.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+            chestTrajectoryStartTime = yoTime.getDoubleValue();
+
+            chestOrientationTrajectoryGenerator.initialize();
+         }
+      }
+
+      chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
       FrameOrientation desiredOrientation = new FrameOrientation(chestPositionControlFrame);
       FrameVector desiredAngularVelocity = new FrameVector(chestPositionControlFrame);
       FrameVector desiredAngularAcceleration = new FrameVector(chestPositionControlFrame);
+      chestOrientationTrajectoryGenerator.get(desiredOrientation);
+      chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
+      chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
 
-      if( USE_NEW_TRAJECTORY_INTEPOLATOR)
-      {
-         if (chestOrientationProvider != null && chestOrientationProvider.checkForNewChestOrientation())
-         {
-            FrameOrientationWaypoint[] desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientations();
-            
-            chestOrientationTrajectoryGenerator.initializeTrajectory( desiredChestOrientation );
-            
-            chestTrajectoryStartTime = yoTime.getDoubleValue();
-            chestOrientationTrajectoryGenerator.initialize();
-         }
-         
-         chestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
-         chestOrientationTrajectoryGenerator.get(desiredOrientation);
-         chestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
-         chestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
-      }
-      else{
-
-         if (chestOrientationProvider != null && chestOrientationProvider.checkForNewChestOrientation())
-         {
-            oldChestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
-            FrameOrientation previousDesiredChestOrientation = new FrameOrientation(chestPositionControlFrame);
-            oldChestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
-            initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
-
-            FrameOrientationWaypoint desiredChestOrientation = chestOrientationProvider.getFinalChestOrientation();
-
-            finalDesiredChestOrientation.setOrientation( desiredChestOrientation.orientation );
-            chestTrajectoryStartTime = yoTime.getDoubleValue();
-            oldChestOrientationTrajectoryGenerator.initialize();
-         }
-
-         oldChestOrientationTrajectoryGenerator.compute(yoTime.getDoubleValue() - chestTrajectoryStartTime);
-         oldChestOrientationTrajectoryGenerator.get(desiredOrientation);
-         oldChestOrientationTrajectoryGenerator.packAngularVelocity(desiredAngularVelocity);
-         oldChestOrientationTrajectoryGenerator.packAngularAcceleration(desiredAngularAcceleration);
-      }
-
-      // @DAVIDE fixme
-//      System.out.println(desiredOrientation);
-//      desiredAngularVelocity.set(0,0,0);
-//      desiredAngularAcceleration.set(0,0,0);
-      // @
-      
       chestOrientationManager.setDesireds(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       super.doChestControl();

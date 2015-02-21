@@ -3,53 +3,32 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.apache.commons.lang.mutable.MutableDouble;
+import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
-import us.ihmc.utilities.math.geometry.FrameOrientationWaypoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
-public class DesiredChestOrientationProvider extends ChestOrientationProvider
+import com.google.common.util.concurrent.AtomicDouble;
+
+public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrientationPacket>, ChestOrientationProvider
 {
-   double defaultTrajectoryTime;
-   private AtomicReference<FrameOrientationWaypoint[]> chestOrientationWaypoints = new AtomicReference<FrameOrientationWaypoint[]>(null);
-   
+   private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
+   private final AtomicDouble trajectoryTime = new AtomicDouble();
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
    private final ReferenceFrame chestOrientationFrame;
-   private final PacketConsumer<ChestOrientationPacket> packetConsumer;
-   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
-   private double homeTrajectoryTime = 0;
-   
+
    public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime)
    {
       this.chestOrientationFrame = chestOrientationFrame;
-      this.defaultTrajectoryTime = defaultTrajectoryTime;
-      //trajectoryTime.set(defaultTrajectoryTime);
-
-      packetConsumer = new PacketConsumer<ChestOrientationPacket>()
-            {
-         @Override public void receivedPacket(ChestOrientationPacket packet)
-         {
-            if (packet != null){ receivedPacketImplementation(packet);  }
-         }
-            };  
-            
-      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
-            {
-         @Override public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
-         {
-            if (packet != null){ receivedPacketImplementation(packet);  }
-         }
-            };  
+      trajectoryTime.set(defaultTrajectoryTime);
    }
 
    @Override
    public boolean checkForNewChestOrientation()
    {
-      return chestOrientationWaypoints.get() != null;
+      return desiredOrientation.get() != null;
    }
 
    @Override
@@ -59,59 +38,30 @@ public class DesiredChestOrientationProvider extends ChestOrientationProvider
    }
 
    @Override
-   public FrameOrientationWaypoint[] getDesiredChestOrientations()
+   public FrameOrientation getDesiredChestOrientation()
    {
-      FrameOrientationWaypoint[] waypoints = chestOrientationWaypoints.getAndSet(null);
-      if( waypoints == null )
-      {
-         return null;
-      }
-      
-      for (int i=0; i<waypoints.length; i++ ) {
-         waypoints[i].orientation.changeFrame(chestOrientationFrame);
-      }
+      Quat4d orientation = desiredOrientation.getAndSet(null);
+      if (orientation == null) return null;
 
-      return waypoints;
+      FrameOrientation frameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation);
+      frameOrientation.changeFrame(chestOrientationFrame);
+      return frameOrientation;
    }
-   
-   public void receivedPacketImplementation(WholeBodyTrajectoryDevelopmentPacket packet)
+
+   public void receivedPacket(ChestOrientationPacket object)
    {
-      if (packet == null) return;
-      int N = packet.getNumberOfWaypoints();
-      
-      FrameOrientationWaypoint[]  chestWaypoints = new FrameOrientationWaypoint[N]; 
-            
-      for (int i=0; i<N; i++)
-      {
-         chestWaypoints[i] = new FrameOrientationWaypoint( 
-               packet.timeSincePrevious[i], 
-               new FrameOrientation( ReferenceFrame.getWorldFrame(), packet.chestOrientation[i] ) );
-      }
-      chestOrientationWaypoints.set( chestWaypoints );
-   }
-   
-   public double getTrajectoryTimeForHomeOrientation()
-   {
-      return homeTrajectoryTime;
-   }
-   
-   public void receivedPacketImplementation(ChestOrientationPacket packet)
-   {
-      if (packet == null) return;
-  
+      if (object == null) return;
+
+      trajectoryTime.set(object.getTrajectoryTime());
+
       // If go to home orientation requested, ignore the other commands.
-      if (packet.isToHomeOrientation())
+      if (object.isToHomeOrientation())
       {
          goToHomeOrientation.set(true);
-         homeTrajectoryTime = packet.getTrajectoryTime();
          return;
       }
 
-      FrameOrientationWaypoint singleWaypoint = new FrameOrientationWaypoint(
-            packet.getTrajectoryTime(),  
-            new FrameOrientation(ReferenceFrame.getWorldFrame(), packet.getOrientation() ) );
-      
-      chestOrientationWaypoints.set( new FrameOrientationWaypoint[] { singleWaypoint } );
+      desiredOrientation.set(object.getOrientation());
    }
 
    @Override
@@ -120,13 +70,9 @@ public class DesiredChestOrientationProvider extends ChestOrientationProvider
       return chestOrientationFrame;
    }
 
-   public PacketConsumer<ChestOrientationPacket> getConsumer()
+   @Override
+   public double getTrajectoryTime()
    {
-      return packetConsumer;
-   }
-   
-   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getTrajectoryConsumer()
-   {
-      return wholeBodyTrajectoryPacketConsumer;
+      return trajectoryTime.get();
    }
 }

@@ -48,7 +48,6 @@ import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -83,7 +82,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
       PacketConsumer<StopArmMotionPacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
-      PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryHandPoseListConsumer = handPoseProvider.getWholeBodyTrajectoryHandPoseListConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
       
       LinkedHashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters = new LinkedHashMap<Footstep, TrajectoryParameters>();
@@ -104,7 +102,6 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(fullRobotModel.getChest().getBodyFixedFrame());
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider();
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-
       DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(ReferenceFrame.getWorldFrame(), walkingControllerParameters.getTrajectoryTimeHeadOrientation());
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime());
    
@@ -122,24 +119,17 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HeadOrientationPacket.class, headOrientationProvider.getHeadOrientationPacketConsumer());
       objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider.getComHeightPacketConsumer());
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
-
+      objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(HandPoseListPacket.class, handPoseProvider.getHandPoseListConsumer());
       objectCommunicator.attachListener(StopArmMotionPacket.class, handPauseCommandConsumer);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
-  
-      objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider.getConsumer() );
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, chestOrientationProvider.getTrajectoryConsumer() );
-      
-      objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider.getSingleTargetConsumer());
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, pelvisPoseProvider.getTrajectoryConsumer());
+      objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
     
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);
       objectCommunicator.attachListener(BumStatePacket.class, pelvisLoadBearingProvider);
-      
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, wholeBodyTrajectoryHandPoseListConsumer);
 
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
