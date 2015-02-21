@@ -10,7 +10,7 @@ import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
 
