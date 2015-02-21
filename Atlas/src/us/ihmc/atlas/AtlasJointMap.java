@@ -51,6 +51,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -67,7 +68,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
       {
-         System.err.println("Running with torque and velocity limits disabled, do not check in !!");
+         PrintTools.warn(AtlasJointMap.class, "Running with torque and velocity limits disabled.");
       }
    }
 
