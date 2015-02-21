@@ -15,15 +15,17 @@ public enum PointType
 
    public static PointType fromFromFieldNames(List<sensor_msgs.PointField> fields)
    {
-      switch (fields.get(3).getName())
+      final String thirdFieldName =fields.get(3).getName();
+      switch (thirdFieldName)
       {
          case "luminance" :
+         case "intensity" :
             return XYZI;
 
          case "rgb" :
             return XYZRGB;
       }
-      throw new RuntimeException("unknown PointType");
+      throw new RuntimeException("unknown PointType: " + thirdFieldName);
    }
 
    PointType()
