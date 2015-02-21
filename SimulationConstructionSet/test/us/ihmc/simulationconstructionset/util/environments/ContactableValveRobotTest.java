@@ -18,7 +18,6 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
@@ -46,9 +45,6 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   SimulationConstructionSetParameters simulationParameters = new SimulationConstructionSetParameters();
-   SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
-
    @AverageDuration
    @Test(timeout = 300000)
    public void testValveIsClosing()
@@ -62,7 +58,8 @@ public class ContactableValveRobotTest
 
       createContactPoints(robots[0]);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationParameters);
+      SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationTestingParameters);
 
       scs.addYoVariableRegistry(valveTestRegistry);
 
@@ -87,7 +84,8 @@ public class ContactableValveRobotTest
       {
          ThreadTools.sleepForever();
       }
-
+      
+      blockingSimulationRunner.destroySimulation();
    }
 
    @AverageDuration
