@@ -266,7 +266,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       doPelvisAndChestYaw.set(true);
 
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
-      pelvisShiftScaleFactor.set(0.6, 0.8);
+      pelvisShiftScaleFactor.set(0.4, 0.7);
 
       double tolerance = 1e-8;
       int maxIterations = 500;
