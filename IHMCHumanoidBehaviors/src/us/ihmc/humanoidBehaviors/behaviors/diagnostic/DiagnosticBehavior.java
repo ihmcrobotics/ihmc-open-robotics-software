@@ -1888,8 +1888,19 @@ public class DiagnosticBehavior extends BehaviorInterface
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
       
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame,0.0,0.0,maxFootPoseHeight.getDoubleValue()));
-      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame,0.0,0.0,-0.1));
+      if(robotSide == null)
+      {
+         for (RobotSide side : RobotSide.values())
+         {
+            submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+            submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+         }
+      }
+      else
+      {
+         submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+         submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      }
    }
 
    private void handleRequestedArmPose()
