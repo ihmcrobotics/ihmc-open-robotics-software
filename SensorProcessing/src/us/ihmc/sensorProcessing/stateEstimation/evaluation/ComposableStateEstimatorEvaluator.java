@@ -77,6 +77,7 @@ public class ComposableStateEstimatorEvaluator
 
             sensorProcessing.addJointPositionAlphaFilter(alphaFilter, false);
             sensorProcessing.addJointVelocityAlphaFilter(alphaFilter, false);
+            sensorProcessing.addJointAccelerationAlphaFilterWithJointsToIgnore(alphaFilter);
             sensorProcessing.addIMUOrientationAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMUAngularVelocityAlphaFilter(alphaFilter, false);
             sensorProcessing.addIMULinearAccelerationAlphaFilter(alphaFilter, false);

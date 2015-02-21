@@ -72,6 +72,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
       sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+      sensorProcessing.addJointAccelerationAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter);
 
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
