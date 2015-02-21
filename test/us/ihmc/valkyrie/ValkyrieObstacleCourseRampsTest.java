@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
 {
 
