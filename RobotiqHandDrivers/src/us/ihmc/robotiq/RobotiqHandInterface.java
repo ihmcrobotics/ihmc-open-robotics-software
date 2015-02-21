@@ -3,8 +3,6 @@ package us.ihmc.robotiq;
 import java.io.IOException;
 import java.util.Arrays;
 
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.robotiq.communication.ModbusTCPConnection;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
@@ -29,69 +27,69 @@ public final class RobotiqHandInterface
    }
    
 	/*---LOCATION DATA---*/
-	private static final int REGISTER_START = 0x0000;
+	private final int REGISTER_START = 0x0000;
 	
 	
 	/*---FUNCTION CODES---*/
-	private static final byte SET_REGISTERS = 0x10;
-	private static final byte READ_REGISTERS = 0x04;
+	private final byte SET_REGISTERS = 0x10;
+	private final byte READ_REGISTERS = 0x04;
 	
 	/*---CONTROL PARAMETER INDEX---*/
-	private static final int FINGER_A = 0;
-	private static final int FINGER_B = 1;
-	private static final int FINGER_C = 2;
-	private static final int SCISSOR = 3;
+	private final int FINGER_A = 0;
+	private final int FINGER_B = 1;
+	private final int FINGER_C = 2;
+	private final int SCISSOR = 3;
 	
 	
 	/*---CONTROL PARAMETERS---*/
-	public static final byte MAX_SPEED = (byte) 0xFF;
-	public static final byte MIN_SPEED = 0x00;
-	public static final byte MAX_FORCE = (byte) 0xFF;
-	public static final byte DEFAULT_FORCE = (byte) 0x7F; //half of MAX_FORCE
-	public static final byte MIN_FORCE = 0x00;
+	public final byte MAX_SPEED = (byte) 0xFF;
+	public final byte MIN_SPEED = 0x00;
+	public final byte MAX_FORCE = (byte) 0xFF;
+	public final byte DEFAULT_FORCE = (byte) 0x7F; //half of MAX_FORCE
+	public final byte MIN_FORCE = 0x00;
 	
-	public static final byte[] BASIC_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x8C};
-	public static final byte[] BASIC_MODE_FULLY_CLOSED = new byte[]{(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x8C};
-	public static final byte[] PINCH_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0xDC};
-	public static final byte[] PINCH_MODE_FULLY_CLOSED = new byte[]{(byte)0x78, (byte)0x78, (byte)0x78, (byte)0xDC};
-	public static final byte[] WIDE_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x19};
-	public static final byte[] WIDE_MODE_FULLY_CLOSED = new byte[]{(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x19};
-	public static final byte[] SCISSOR_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
-	public static final byte[] SCISSOR_MODE_FULLY_CLOSED = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0xFF};
+	public final byte[] BASIC_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x8C};
+	public final byte[] BASIC_MODE_FULLY_CLOSED = new byte[]{(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x8C};
+	public final byte[] PINCH_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0xDC};
+	public final byte[] PINCH_MODE_FULLY_CLOSED = new byte[]{(byte)0x78, (byte)0x78, (byte)0x78, (byte)0xDC};
+	public final byte[] WIDE_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x19};
+	public final byte[] WIDE_MODE_FULLY_CLOSED = new byte[]{(byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0x19};
+	public final byte[] SCISSOR_MODE_FULLY_OPEN = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00};
+	public final byte[] SCISSOR_MODE_FULLY_CLOSED = new byte[]{(byte)0x00, (byte)0x00, (byte)0x00, (byte)0xFF};
 	
 	/*---DATA INDICES---*/
 	//status response index (from hand start register) 
-	private static final int FUNCTION_CODE = 0;
-	private static final int DATA_BYTES = 1;
-	private static final int GRIPPER_STATUS = 2;
-	private static final int OBJECT_DETECTION = 3;
-	private static final int FAULT_STATUS = 4;
-	private static final int FINGER_A_REQUESTED_POSITION = 5;
-	private static final int FINGER_A_POSITION = 6;
-	private static final int FINGER_A_CURRENT = 7;
-	private static final int FINGER_B_REQUESTED_POSITION = 8;
-	private static final int FINGER_B_POSITION = 9;
-	private static final int FINGER_B_CURRENT = 10;
-	private static final int FINGER_C_REQUESTED_POSITION = 11;
-	private static final int FINGER_C_POSITION = 12;
-	private static final int FINGER_C_CURRENT = 13;
-	private static final int SCISSOR_REQUESTED_POSITION = 14;
-	private static final int SCISSOR_POSITION = 15;
-	private static final int SCISSOR_CURRENT = 16;
+	private final int FUNCTION_CODE = 0;
+	private final int DATA_BYTES = 1;
+	private final int GRIPPER_STATUS = 2;
+	private final int OBJECT_DETECTION = 3;
+	private final int FAULT_STATUS = 4;
+	private final int FINGER_A_REQUESTED_POSITION = 5;
+	private final int FINGER_A_POSITION = 6;
+	private final int FINGER_A_CURRENT = 7;
+	private final int FINGER_B_REQUESTED_POSITION = 8;
+	private final int FINGER_B_POSITION = 9;
+	private final int FINGER_B_CURRENT = 10;
+	private final int FINGER_C_REQUESTED_POSITION = 11;
+	private final int FINGER_C_POSITION = 12;
+	private final int FINGER_C_CURRENT = 13;
+	private final int SCISSOR_REQUESTED_POSITION = 14;
+	private final int SCISSOR_POSITION = 15;
+	private final int SCISSOR_CURRENT = 16;
 	
 	/*---FUNCTIONALITY REGISTER BITMASKS---*/
 	//byte 0 (action request)
-	private static final byte INITIALIZATON_MASK =		0b00000001;
-	private static final byte OPERATION_MODE_MASK =		0b00000110;
-	private static final byte GO_TO_REQUESTED_MASK =	0b00001000;
-	private static final byte AUTOMATIC_RELEASE_MASK = 	0b00010000;
+	private final byte INITIALIZATON_MASK =		0b00000001;
+	private final byte OPERATION_MODE_MASK =		0b00000110;
+	private final byte GO_TO_REQUESTED_MASK =	0b00001000;
+	private final byte AUTOMATIC_RELEASE_MASK = 	0b00010000;
 	//last three bits reserved
 	
 	//byte 1 (gripper options 1)
-	private static final byte GLOVE_MODE_MASK = 				0b00000001;
+	private final byte GLOVE_MODE_MASK = 				0b00000001;
 	//bit 1 reserved
-	private static final byte INDIVIDUAL_FINGER_CONTROL_MASK = 	0b00000100;
-	private static final byte INDIVIDUAL_SCISSOR_CONTROL_MASK =	0b00001000;
+	private final byte INDIVIDUAL_FINGER_CONTROL_MASK = 	0b00000100;
+	private final byte INDIVIDUAL_SCISSOR_CONTROL_MASK =	0b00001000;
 	//bits 4 to 7 reserved
 	
 	//bytes 2 to 14 do not require masks
@@ -100,18 +98,18 @@ public final class RobotiqHandInterface
 	/*---STATUS REGISTER BITMASKS---*/
 	//byte 0 (gripper status 
 	/*
-//	private static final byte INITIALIZATON_MASK =		0b00000001; //same as functionality mask
-	private static final byte OPERATION_MODE_MASK =		0b00000110; //same as functionality mask
-	private static final byte GO_TO_REQUESTED_MASK =	0b00001000; //same as functionality mask
+//	private final byte INITIALIZATON_MASK =		0b00000001; //same as functionality mask
+	private final byte OPERATION_MODE_MASK =		0b00000110; //same as functionality mask
+	private final byte GO_TO_REQUESTED_MASK =	0b00001000; //same as functionality mask
 	 */
-	private static final byte INIT_MODE_STATUS_MASK =	 0b00110000;
-	private static final byte MOTION_STATUS_MASK = (byte)0b11000000;
+	private final byte INIT_MODE_STATUS_MASK =	 0b00110000;
+	private final byte MOTION_STATUS_MASK = (byte)0b11000000;
 	
 	//byte 1 (object status)
-	private static final byte OBJECT_DETECTION_A_MASK = 	  0b00000011;
-	private static final byte OBJECT_DETECTION_B_MASK = 	  0b00001100;
-	private static final byte OBJECT_DETECTION_C_MASK =       0b00110000;
-	private static final byte OBJECT_DETECTION_S_MASK =	(byte)0b11000000;
+	private final byte OBJECT_DETECTION_A_MASK = 	  0b00000011;
+	private final byte OBJECT_DETECTION_B_MASK = 	  0b00001100;
+	private final byte OBJECT_DETECTION_C_MASK =       0b00110000;
+	private final byte OBJECT_DETECTION_S_MASK =	(byte)0b11000000;
 	
 	//bytes 2 to 14 do not require masks
 	
@@ -119,29 +117,29 @@ public final class RobotiqHandInterface
 	/*---Robot output registers & functionalities (data going TO the hand)---*/
 	//byte 0 (action request)
 	//bit 0
-	private static final byte RESET = 			0b00000000;
-	private static final byte INITIALIZE = 		0b00000001;
+	private final byte RESET = 			0b00000000;
+	private final byte INITIALIZE = 		0b00000001;
 	//bits 1 and 2
-	private static final byte BASIC_MODE = 		0b00000000;
-	private static final byte PINCH_MODE = 		0b00000010;
-	private static final byte WIDE_MODE = 		0b00000100;
-	private static final byte SCISSOR_MODE = 	0b00000110;
+	private final byte BASIC_MODE = 		0b00000000;
+	private final byte PINCH_MODE = 		0b00000010;
+	private final byte WIDE_MODE = 		0b00000100;
+	private final byte SCISSOR_MODE = 	0b00000110;
 	//bit 3
-	private static final byte STANDBY = 		0b00000000;
-	private static final byte GO_TO_REQUESTED =	0b00001000;
+	private final byte STANDBY = 		0b00000000;
+	private final byte GO_TO_REQUESTED =	0b00001000;
 	//bit 4
-	private static final byte AUTO_RELEASE_DISABLED =	0b00000000;
-	private static final byte AUTO_RELEASE_ENABLED =	0b00010000;
+	private final byte AUTO_RELEASE_DISABLED =	0b00000000;
+	private final byte AUTO_RELEASE_ENABLED =	0b00010000;
 	//bits 5 to 7 reserved
 	
 	//byte 1 (gripper options 1)
 	//bits 0 & 1 reserved
 	//bit 2
-//	private static final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
-	private static final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
+//	private final byte CONCURRENT_FINGER_CONTROL = 	0b00000000;
+	private final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
 	//bit 3
-	private static final byte CONCURRENT_SCISSOR_CONTROL = 	0b00000000;
-//	private static final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
+	private final byte CONCURRENT_SCISSOR_CONTROL = 	0b00000000;
+//	private final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
 	//bits 4 to 7 reserved
 	
 	//byte 2 (gripper options 2)
@@ -212,56 +210,56 @@ public final class RobotiqHandInterface
 	//byte 0 (gripper status)
 	//bit 0
 	/*
-	private static final byte RESET = 		0b00000000;  //same as function value
+	private final byte RESET = 		0b00000000;  //same as function value
 	 */
-	private static final byte INITIALIZED = 	0b00000001;
+	private final byte INITIALIZED = 	0b00000001;
 	//bits 1 and 2
 	/*
-	private static final byte BASIC_MODE = 		0b00000000;  //same as function value
-	private static final byte WIDE_MODE = 		0b00000010;  //same as function value
-	private static final byte PINCH_MODE = 		0b00000100;  //same as function value
-	private static final byte SCISSOR_MODE = 	0b00000110;   //same as function value
+	private final byte BASIC_MODE = 		0b00000000;  //same as function value
+	private final byte WIDE_MODE = 		0b00000010;  //same as function value
+	private final byte PINCH_MODE = 		0b00000100;  //same as function value
+	private final byte SCISSOR_MODE = 	0b00000110;   //same as function value
 	 */
 	//bit 3
 	/*
-	private static final byte STANDBY = 			0b00000000;  //same as function value
-	private static final byte GO_TO_REQUESTED =		0b00001000;  //same as function value
+	private final byte STANDBY = 			0b00000000;  //same as function value
+	private final byte GO_TO_REQUESTED =		0b00001000;  //same as function value
 	 */
 	//bits 4 and 5
-	private static final byte RESET_STATE = 	0b00000000;
-	private static final byte ACTIVATING = 		0b00010000;
-	private static final byte CHANGING_MODE = 	0b00100000;
-	private static final byte COMPLETED = 		0b00110000;
+	private final byte RESET_STATE = 	0b00000000;
+	private final byte ACTIVATING = 		0b00010000;
+	private final byte CHANGING_MODE = 	0b00100000;
+	private final byte COMPLETED = 		0b00110000;
 	//bits 6 and 7
-	private static final byte IN_MOTION = 				0b00000000;
-	private static final byte STOPPED_SOME_EARLY = 		0b01000000; //1 or 2 fingers stopped before desired position
-	private static final byte STOPPED_ALL_EARLY = (byte)0b10000000; //all fingers stopped before the desired position
-	private static final byte STOPPED_AT_DESIRED =(byte)0b11000000;
+	private final byte IN_MOTION = 				0b00000000;
+	private final byte STOPPED_SOME_EARLY = 		0b01000000; //1 or 2 fingers stopped before desired position
+	private final byte STOPPED_ALL_EARLY = (byte)0b10000000; //all fingers stopped before the desired position
+	private final byte STOPPED_AT_DESIRED =(byte)0b11000000;
 	
 	//byte 1 (object status)
 	//bits 0 and 1
-	private static final byte A_IN_MOTION = 		0b00000000;
-	private static final byte A_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
-	private static final byte A_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
-	private static final byte A_AT_DESIRED = 		0b00000011;
+	private final byte A_IN_MOTION = 		0b00000000;
+	private final byte A_STOPPED_OPEN = 		0b00000001; //stopped from contact while opening
+	private final byte A_STOPPED_CLOSED = 	0b00000010; //stopped from contact while closing
+	private final byte A_AT_DESIRED = 		0b00000011;
 	//bits 2 and 3
-	private static final byte B_IN_MOTION = 		0b00000000;
-	private static final byte B_STOPPED_OPEN = 		0b00000100; //stopped from contact while opening
-	private static final byte B_STOPPED_CLOSED = 	0b00001000; //stopped from contact while closing
-	private static final byte B_AT_DESIRED = 		0b00001100;
+	private final byte B_IN_MOTION = 		0b00000000;
+	private final byte B_STOPPED_OPEN = 		0b00000100; //stopped from contact while opening
+	private final byte B_STOPPED_CLOSED = 	0b00001000; //stopped from contact while closing
+	private final byte B_AT_DESIRED = 		0b00001100;
 	//bits 4 and 5
-	private static final byte C_IN_MOTION = 		0b00000000;
-	private static final byte C_STOPPED_OPEN = 		0b00010000; //stopped from contact while opening
-	private static final byte C_STOPPED_CLOSED = 	0b00100000; //stopped from contact while closing
-	private static final byte C_AT_DESIRED = 		0b00110000;
+	private final byte C_IN_MOTION = 		0b00000000;
+	private final byte C_STOPPED_OPEN = 		0b00010000; //stopped from contact while opening
+	private final byte C_STOPPED_CLOSED = 	0b00100000; //stopped from contact while closing
+	private final byte C_AT_DESIRED = 		0b00110000;
 	//bits 6 and 7
-	private static final byte S_IN_MOTION = 		0b00000000;
-	private static final byte S_STOPPED_OPEN = 		0b01000000; //stopped from contact while opening
-	private static final byte S_STOPPED_CLOSED = 	(byte)0b10000000; //stopped from contact while closing
-	private static final byte S_AT_DESIRED = 		(byte)0b11000000;
+	private final byte S_IN_MOTION = 		0b00000000;
+	private final byte S_STOPPED_OPEN = 		0b01000000; //stopped from contact while opening
+	private final byte S_STOPPED_CLOSED = 	(byte)0b10000000; //stopped from contact while closing
+	private final byte S_AT_DESIRED = 		(byte)0b11000000;
 	
 	//byte 2 (fault status)
-	private static final byte NO_FAULT = 0x00;
+	private final byte NO_FAULT = 0x00;
 	/* Fault Codes:
 	 * 0x00: No Fault.
 	 * 0x05: Priority Fault: Action delayed, activation must be completed prior to action.
@@ -334,7 +332,7 @@ public final class RobotiqHandInterface
 	/* Value:
 	 * 0x00 to 0xFF (0.1*Current[mA])
 	 */
-	private static final int[] fingers = {FINGER_A, FINGER_B, FINGER_C, SCISSOR};
+	private final int[] fingers = {FINGER_A, FINGER_B, FINGER_C, SCISSOR};
 	private ModbusTCPConnection connection;
 	private byte initializedStatus;
 	private byte operationMode;

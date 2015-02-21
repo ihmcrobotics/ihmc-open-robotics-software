@@ -148,84 +148,79 @@ class RobotiqControlThread implements Runnable
             if (handStatus.hasError())
                handStatus.printError();
 
-            //					System.out.println("Current:");
-            //					System.out.println(handStatus.getFingerPositions()[0]);
-            //					System.out.println(handStatus.getFingerPositions()[1]);
-            //					System.out.println(handStatus.getFingerPositions()[2]);
-         }
-
-         if (fingerStateProvider.isNewFingerStateAvailable())
-         {
-            FingerStatePacket packet = fingerStateProvider.pullPacket();
-            FingerState state = packet.getFingerState();
-            if (!robotiqHand.isConnected())
+            if (fingerStateProvider.isNewFingerStateAvailable())
             {
-               if (state.equals(FingerState.CALIBRATE))
+               FingerStatePacket packet = fingerStateProvider.pullPacket();
+               FingerState state = packet.getFingerState();
+               if (!robotiqHand.isConnected())
                {
-                  this.initialize();
+                  if (state.equals(FingerState.CALIBRATE))
+                  {
+                     this.initialize();
+                  }
+                  else
+                  {
+                     System.out.println(robotSide.toString() + " Hand Not Connected");
+                     continue;
+                  }
                }
-               else
+               
+               switch (state)
                {
-                  System.out.println(robotSide.toString() + " Hand Not Connected");
+               case CALIBRATE:
+                  robotiqHand.initialize();
+                  break;
+               case STOP:
+                  robotiqHand.stop();
+                  break;
+               case OPEN:
+                  robotiqHand.open();
+                  break;
+               case CLOSE:
+                  robotiqHand.close();
+                  break;
+               case CRUSH:
+                  robotiqHand.crush();
+                  break;
+               case HOOK:
+                  robotiqHand.hook(robotSide);
+                  break;
+               case BASIC_GRIP:
+                  robotiqHand.normalGrip();
+                  break;
+               case PINCH_GRIP:
+                  robotiqHand.pinchGrip();
+                  break;
+               case WIDE_GRIP:
+                  robotiqHand.wideGrip();
+                  break;
+               case SCISSOR_GRIP:
+                  robotiqHand.scissorGrip();
+                  break;
+               case RESET:
+               {
+                  robotiqHand.reset();
+                  initialize();
+               }
+               break;
+               default:
+                  break;
+               }
+            }
+            
+            if (manualHandControlProvider.isNewPacketAvailable()) // send manual hand control packet to hand
+            {
+               ManualHandControlPacket packet = manualHandControlProvider.pullPacket();
+               if (!robotiqHand.isConnected() || !packet.getRobotSide().equals(robotSide))
                   continue;
+               if (packet.getControlType() == ManualHandControlPacket.POSITION)
+               {
+                  robotiqHand.positionControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
                }
-            }
-
-            switch (state)
-            {
-            case CALIBRATE:
-               robotiqHand.initialize();
-               break;
-            case STOP:
-               robotiqHand.stop();
-               break;
-            case OPEN:
-               robotiqHand.open();
-               break;
-            case CLOSE:
-               robotiqHand.close();
-               break;
-            case CRUSH:
-               robotiqHand.crush();
-               break;
-            case HOOK:
-               robotiqHand.hook(robotSide);
-               break;
-            case BASIC_GRIP:
-               robotiqHand.normalGrip();
-               break;
-            case PINCH_GRIP:
-               robotiqHand.pinchGrip();
-               break;
-            case WIDE_GRIP:
-               robotiqHand.wideGrip();
-               break;
-            case SCISSOR_GRIP:
-               robotiqHand.scissorGrip();
-               break;
-            case RESET:
-            {
-               robotiqHand.reset();
-               initialize();
-            }
-               break;
-            default:
-               break;
-            }
-         }
-
-         if (manualHandControlProvider.isNewPacketAvailable()) // send manual hand control packet to hand
-         {
-            ManualHandControlPacket packet = manualHandControlProvider.pullPacket();
-            if (!robotiqHand.isConnected() || !packet.getRobotSide().equals(robotSide))
-               continue;
-            if (packet.getControlType() == ManualHandControlPacket.POSITION)
-            {
-               robotiqHand.positionControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
-            }
-            else if (packet.getControlType() == ManualHandControlPacket.VELOCITY)
-            {
-               robotiqHand.velocityControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
+               else if (packet.getControlType() == ManualHandControlPacket.VELOCITY)
+               {
+                  robotiqHand.velocityControl(packet.getCommands(ManualHandControlPacket.HandType.ROBOTIQ), this.robotSide);
+               }
             }
          }
 
