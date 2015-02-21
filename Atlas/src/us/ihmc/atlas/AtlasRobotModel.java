@@ -17,17 +17,20 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
+import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
@@ -279,15 +282,15 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public PPSTimestampOffsetProvider getPPSTimestampOffsetProvider()
    {
-//      if (target == AtlasTarget.REAL_ROBOT)
-//      {
-//         return new AtlasPPSTimestampOffsetProvider(sensorInformation);
-//      }
-//
-//      if (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
-//      {
-//         return new SimulationRosClockPPSTimestampOffsetProvider();
-//      }
+      if (target == AtlasTarget.REAL_ROBOT)
+      {
+         return new AtlasPPSTimestampOffsetProvider(sensorInformation);
+      }
+
+      if (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
+      {
+         return new SimulationRosClockPPSTimestampOffsetProvider();
+      }
 
       return new AlwaysZeroOffsetPPSTimestampOffsetProvider();
    }
