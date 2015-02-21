@@ -1,7 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -9,7 +10,6 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -20,7 +20,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final PacketCommunicator networkProcessorCommunicator;
+   private final PacketCommunicator packetCommunicator;
    private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
@@ -29,7 +29,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    public HandJointAngleCommunicator(RobotSide side, PacketCommunicator networkProcessorCommunicator)
    {
       this.side = side;
-      this.networkProcessorCommunicator = networkProcessorCommunicator;
+      this.packetCommunicator = networkProcessorCommunicator;
       packetRingBuffer = new ConcurrentRingBuffer<HandJointAnglePacket>(HandJointAngleCommunicator.builder, 8);
       startWriterThread();
    }
@@ -37,28 +37,23 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
-      ExecutorService executor = Executors.newSingleThreadExecutor();
-      executor.execute(new Runnable()
+      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+      executor.scheduleAtFixedRate(new Runnable()
       {
          @Override
          public void run()
          {
-            while (true)
+            if (packetRingBuffer.poll())
             {
-               if (packetRingBuffer.poll())
+               while (packetRingBuffer.peek() != null)
                {
-                  while (packetRingBuffer.peek() != null)
-                  {
-                     if (networkProcessorCommunicator != null)
-                        networkProcessorCommunicator.send(packetRingBuffer.read());
-                  }
-                  packetRingBuffer.flush();
+                  if (packetCommunicator != null)
+                     packetCommunicator.send(packetRingBuffer.read());
                }
-               
-               ThreadTools.sleep(WORKER_SLEEP_TIME_MILLIS);
+               packetRingBuffer.flush();
             }
          }
-      });
+      },  0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
    }
 
    @Override
