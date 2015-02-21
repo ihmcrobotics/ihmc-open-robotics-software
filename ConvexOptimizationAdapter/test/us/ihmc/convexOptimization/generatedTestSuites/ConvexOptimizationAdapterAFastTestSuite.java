@@ -8,7 +8,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.convexOptimization.experimental.ExperimentalSOCPSolverUsingJOptimizerTest.class,
-   us.ihmc.convexOptimization.jOptimizer.JOptimizerConvexOptimizationAdapterTest.class,
    us.ihmc.convexOptimization.jOptimizer.SimpleJOptimizerTest.class,
    us.ihmc.convexOptimization.quadraticProgram.GenericActiveSetQPSolverTest.class,
    us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverTest.class,
