@@ -287,8 +287,6 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          if (!forVizOnly)
             outputJointVelocities.put(oneDoFJoint, jointVelocity);
       }
-      
-      computeJointAccelerations(alphaFilter, jointsToIgnore);
    }
 
    
@@ -411,7 +409,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @param alphaFilter
     * @param jointsToIgnore
     */
-   private void computeJointAccelerations(DoubleYoVariable alphaFilter, String... jointsToIgnore)
+   public void addJointAccelerationAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
