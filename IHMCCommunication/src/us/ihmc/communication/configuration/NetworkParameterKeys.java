@@ -16,8 +16,8 @@ public enum NetworkParameterKeys
    onboard2(false, "IP of second onboard computer"),
    onboard3(false, "IP of third onboard computer"),
    
-   packetShaperServer(false, "IP of the packet shaper server"),
-   packetShaperClient(false, "IP of the packet shaper client");
+   packetShaperServer(false, "IP of the packet shaper Field server"),
+   packetShaperClient(false, "IP of the packet shaper OCU client");
    
    
    
