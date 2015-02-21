@@ -19,14 +19,12 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ContactableDoorRobotTest
-{
-   private boolean showGUI = true;
-   
+{   
    private YoVariableRegistry doorTestRegistry;
    
    private Robot[] robots;
    
-   private final SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+   private final SimulationConstructionSetParameters parameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
    private final SimulationTestingParameters testingParams = new SimulationTestingParameters();
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
@@ -55,7 +53,6 @@ public class ContactableDoorRobotTest
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {
-      parameters.setCreateGUI(showGUI);
       doorTestRegistry = new YoVariableRegistry("doorTestRegistry");
       robots = new Robot[1];
       
