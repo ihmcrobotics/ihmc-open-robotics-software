@@ -2,23 +2,36 @@ package us.ihmc.ihmcPerception.depthData;
 
 import static org.junit.Assert.*;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.LocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class PointCloudWorldPacketGeneratorTest
 {
-   @Test
-   public void testGeneratePointCloudWorldPacket()
+   
+   @AverageDuration
+   @Test(timeout = 10000)
+   public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {
+      final CountDownLatch latch = new CountDownLatch(3);
+      PacketCommunicator sender= new LocalPacketCommunicator(1, "sender");
+      LocalPacketCommunicator receiver = new LocalPacketCommunicator(2, "receiver");
+      sender.attacthGlobalSendListener(receiver);
       DepthDataFilter depthDataFilter = new DepthDataFilter(ReferenceFrame.getWorldFrame());
-      PointCloudWorldPacketGenerator generator = new PointCloudWorldPacketGenerator(depthDataFilter);
+      PointCloudWorldPacketGenerator generator = new PointCloudWorldPacketGenerator(depthDataFilter,sender);
       
 
       RigidBodyTransform sensorOrigin = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(0.0,0.0,1.6));
@@ -33,11 +46,23 @@ public class PointCloudWorldPacketGeneratorTest
       
       PointCloudWorldPacket packet=generator.getPointCloudWorldPacket();
       
-      System.out.println(packet.getGroundQuadTreeSupport().length);
-      System.out.println(packet.getGroundQuadTreeSupport().length);
       assertTrue(packet.getGroundQuadTreeSupport().length>0);
       assertTrue(packet.getDecayingWorldScan().length>0);
+      
+      
+      
+      receiver.attachListener(PointCloudWorldPacket.class, new PacketConsumer<PointCloudWorldPacket>()
+      {
+         @Override
+         public void receivedPacket(PointCloudWorldPacket packet)
+         {
+            latch.countDown();
+            //System.out.println(packet.timestamp);
+         }
+      });
 
+      
+      latch.await(10, TimeUnit.SECONDS);
    }
 
 }

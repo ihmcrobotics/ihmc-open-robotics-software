@@ -1,20 +1,31 @@
 package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.vecmath.Point3d;
 
-import com.google.gdata.client.youtube.YouTubeQuery.Time;
-
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.userInterface.util.TimestampedPoint;
 
-public class PointCloudWorldPacketGenerator 
+public class PointCloudWorldPacketGenerator extends TimerTask
 {
    DepthDataFilter depthDataFilter;
+   PacketCommunicator packetCommunicator;
    public PointCloudWorldPacketGenerator(DepthDataFilter depthDataFilter)
    {
+      this(depthDataFilter, null);
+   }
+
+   public PointCloudWorldPacketGenerator(DepthDataFilter depthDataFilter, PacketCommunicator packetCommunicator)
+   {
       this.depthDataFilter = depthDataFilter;
+      this.packetCommunicator= packetCommunicator;
+      Timer timer = new Timer("pointCloudSenderTime");
+      int publishRateHz = 1;
+      timer.scheduleAtFixedRate(this, 0, 1000/publishRateHz);
    }
    
    public PointCloudWorldPacket getPointCloudWorldPacket()
@@ -31,8 +42,15 @@ public class PointCloudWorldPacketGenerator
          nearScanPoints.add(new Point3d(point.x, point.y,point.z));
       }
       packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3d[nearScanPoints.size()]));
-      
+      packet.timestamp = System.nanoTime();
       return packet;
+   }
+
+   @Override
+   public void run()
+   {
+      if(packetCommunicator!=null)
+         packetCommunicator.send(getPointCloudWorldPacket());
    }
 }
 
