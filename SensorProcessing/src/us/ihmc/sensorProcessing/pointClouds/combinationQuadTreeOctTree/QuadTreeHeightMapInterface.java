@@ -1,5 +1,9 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
+import java.util.Collection;
+
+import javax.vecmath.Point3d;
+
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundListener;
@@ -24,4 +28,6 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 	public abstract boolean addToQuadtree(double x, double y, double z);
 
 	public abstract void setUpdateQuadtree(boolean update);
+	
+   public void getStoredPoints(Collection<Point3d> points);
 }

@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -22,7 +23,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       super(bounds, quadTreeParameters);
    }
    
-   public void addQuadTreeForGroundReaderAndWriter(QuadTreeForGroundReaderAndWriter readerAndWriter)
+   public void setupTreeForGroundReaderAndWriter(QuadTreeForGroundReaderAndWriter readerAndWriter)
    {
       this.readerAndWriter = readerAndWriter;
    }
@@ -171,4 +172,5 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    {
       // TODO Auto-generated method stub
    }
+
 }

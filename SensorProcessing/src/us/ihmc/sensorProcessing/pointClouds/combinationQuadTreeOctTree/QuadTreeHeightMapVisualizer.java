@@ -62,7 +62,7 @@ public class QuadTreeHeightMapVisualizer
       if (heightMap instanceof QuadTreeForGroundHeightMap)
       {
          ArrayList<Point3d> points = new ArrayList<Point3d>();
-         ((QuadTreeForGroundHeightMap) heightMap).getAllPoints(points);
+         ((QuadTreeForGroundHeightMap) heightMap).getStoredPoints(points);
 
          return drawPoints(scs, points, resolution, appearance);
       }
