@@ -117,6 +117,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    
    private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
 
+   private final WalkingControllerParameters walkingControllerParameters;
+   
    private enum DiagnosticTask
    {
       CHEST_ROTATIONS,
@@ -140,6 +142,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       STEPS_SHORT,
       STEPS_LONG,
       STEPS_IN_PLACE,
+      FEET_SQUARE_UP,
       GO_HOME
    };
 
@@ -181,7 +184,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;
-
+      this.walkingControllerParameters = walkingControllerParameters;
+      
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -1303,6 +1307,36 @@ public class DiagnosticBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
    }
 
+   private void sequenceSquareUp()
+   {
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      FramePose footstepPose = new FramePose();
+      
+      RobotSide robotSide = activeSideForFootControl.getEnumValue();
+      
+      if(robotSide == null)
+         System.out.println("choose a foot to be squared up");
+      else
+      {
+         footstepPose.setToZero(fullRobotModel.getEndEffectorFrame(robotSide.getOppositeSide(), LimbName.LEG));
+         footstepPose.setY(robotSide.getOppositeSide().negateIfLeftSide(walkingControllerParameters.getInPlaceWidth()));
+         footstepPose.changeFrame(worldFrame);
+         
+         Point3d footLocation = new Point3d();
+         Quat4d footOrientation = new Quat4d();
+
+         footstepPose.getPosition(footLocation);
+         footstepPose.getOrientation(footOrientation);
+
+         FootstepData footstepData = new FootstepData(robotSide, footLocation, footOrientation);
+
+         footstepDataList.add(footstepData);
+         pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList, yoTime));
+      }
+      
+   }
+
+   
    private void karateKid(RobotSide robotSide)
    {
       ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
@@ -1872,6 +1906,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                break;
             case STEPS_IN_PLACE:
                sequenceStepsInPlace();
+               break;
+            case FEET_SQUARE_UP:
+               sequenceSquareUp();
                break;
             case GO_HOME:
                sequenceGoHome();
