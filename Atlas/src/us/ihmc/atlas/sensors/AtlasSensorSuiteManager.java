@@ -20,6 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSLidarDataRec
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
+import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
@@ -48,6 +49,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final AtlasTarget targetDeployment;
    private RobotPoseBuffer robotPoseBuffer;
    private DepthDataProcessor depthDataProcessor;
+   private PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
 
    public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepParameters footstepParameters, SDFFullRobotModel sdfFullRobotModel,
@@ -60,6 +62,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
       this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
+      this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(lidarDataFilter, getProcessedSensorsCommunicator());
    }
 
    @Override
