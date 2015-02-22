@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
-import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
@@ -50,7 +49,7 @@ public class DepthDataFilter
    {
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
-      quadTree = getGroundOnlyQuadTree(parameters);
+      quadTree = setupGroundOnlyQuadTree();
       octree = setupOctree(headFrame);
       quadTree.setOctree(octree);
    }
@@ -60,7 +59,7 @@ public class DepthDataFilter
       this.worldToCorrected.set(adjustment);
    }
 
-   public static QuadTreeHeightMapInterface getGroundOnlyQuadTree(DepthDataFilterParameters parameters)
+   private QuadTreeHeightMapInterface setupGroundOnlyQuadTree()
    {
       // SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
