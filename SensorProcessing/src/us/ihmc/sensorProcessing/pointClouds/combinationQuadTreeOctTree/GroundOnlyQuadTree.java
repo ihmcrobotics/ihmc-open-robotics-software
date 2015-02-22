@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -477,5 +478,19 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    @Override
    public void addQuadTreeListener(QuadTreeForGroundListener jmeGroundONlyQuadTreeVisualizer)
    {      
+   }
+
+   @Override
+   /**
+    * Get points filtered by the Quadtree
+    */
+   public void getStoredPoints(Collection<Point3d> points)
+   {
+      List<RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData>> leaves =listAllLeafNodes();
+      for(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> leaf :leaves)
+      {
+         HyperCubeLeaf<GroundAirDescriptor> leafData = leaf.getLeaf();
+         points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
+      }
    }
 }

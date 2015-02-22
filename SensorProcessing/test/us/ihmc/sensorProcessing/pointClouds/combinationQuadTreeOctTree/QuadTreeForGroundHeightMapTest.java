@@ -365,7 +365,7 @@ public class QuadTreeForGroundHeightMapTest
       public ArrayList<Point3d> getAllPointsInQuadTree()
       {
          ArrayList<Point3d> pointsToReturn = new ArrayList<Point3d>();
-         ((QuadTreeForGroundHeightMap) heightMap).getAllPoints(pointsToReturn);
+         ((QuadTreeForGroundHeightMap) heightMap).getStoredPoints(pointsToReturn);
          return pointsToReturn;
          
       }
