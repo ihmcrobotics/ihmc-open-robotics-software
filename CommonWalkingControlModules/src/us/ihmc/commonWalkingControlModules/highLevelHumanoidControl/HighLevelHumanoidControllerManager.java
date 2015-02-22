@@ -2,12 +2,14 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -15,7 +17,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
@@ -55,6 +56,18 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.momentumBasedController = momentumBasedController;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.registry.addChild(momentumBasedController.getYoVariableRegistry());
+   }
+
+   public void setupControllerForFailure(final HighLevelState fallbackController)
+   {
+      momentumBasedController.attachHighLevelControllerFailureListener(new HighLevelControllerFailureListener()
+      {
+         @Override
+         public void controllerFailed()
+         {
+            requestedHighLevelState.set(fallbackController);
+         }
+      });
    }
 
    private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)

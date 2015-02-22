@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
@@ -30,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
@@ -45,7 +47,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class MomentumBasedControllerFactory
 {
@@ -215,6 +216,7 @@ public class MomentumBasedControllerFactory
       // the different controllers (walking, multi-contact, driving, etc.)
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(initialBehavior, highLevelBehaviors, momentumBasedController,
             variousWalkingProviders, centerOfPressureDataHolderForEstimator);
+      highLevelHumanoidControllerManager.setupControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(this.registry);
 
       createRegisteredControllers();
@@ -293,6 +295,11 @@ public class MomentumBasedControllerFactory
          boolean transitionToBehaviorRequested = highLevelBehaviorFactory.isTransitionToBehaviorRequested();
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionToBehaviorRequested);
       }
+   }
+
+   public void attachHighLevelControllerFailureListener(HighLevelControllerFailureListener listener)
+   {
+      momentumBasedController.attachHighLevelControllerFailureListener(listener);
    }
 
    public YoVariableRegistry getRegistry()
