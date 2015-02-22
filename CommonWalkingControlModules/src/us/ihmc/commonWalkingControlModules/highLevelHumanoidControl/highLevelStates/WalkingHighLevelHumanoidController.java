@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -13,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModu
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule.IsFallingFromDoubleSupportCondition;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
@@ -41,6 +41,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.SysoutTool;
@@ -53,7 +55,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -65,8 +66,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
@@ -199,6 +198,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable icpProjectionTimeOffset = new DoubleYoVariable("icpProjectionTimeOffset", registry);
 
    private final FootExplorationControlModule footExplorationControlModule;
+   private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -212,6 +212,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(true);
+
+      failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
 
       if (yoGraphicsListRegistry == null)
       {
@@ -1396,6 +1398,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    // FIXME: don't override
    private void doMotionControlInternal()
    {
+      failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
+      if (failureDetectionControlModule.isRobotFalling())
+         momentumBasedController.reportControlFailureToListeners();
+
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 

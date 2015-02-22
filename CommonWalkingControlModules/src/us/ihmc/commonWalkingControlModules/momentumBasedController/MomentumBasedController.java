@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
@@ -33,6 +34,8 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.utilities.frictionModels.FrictionModel;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -65,8 +68,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
@@ -187,6 +188,8 @@ public class MomentumBasedController
    private final AntiGravityJointTorquesVisualizer antiGravityJointTorquesVisualizer;
 
    private final double totalMass;
+
+   private final ArrayList<HighLevelControllerFailureListener> highLevelControllerFailureListeners = new ArrayList<>();
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -1219,5 +1222,18 @@ public class MomentumBasedController
    public InverseDynamicsJoint[] getControlledJoints()
    {
       return controlledJoints;
+   }
+
+   public void attachHighLevelControllerFailureListener(HighLevelControllerFailureListener listener)
+   {
+      this.highLevelControllerFailureListeners.add(listener);
+   }
+
+   public void reportControlFailureToListeners()
+   {
+      for (int i = 0; i < highLevelControllerFailureListeners.size(); i++)
+      {
+         highLevelControllerFailureListeners.get(i).controllerFailed();
+      }
    }
 }
