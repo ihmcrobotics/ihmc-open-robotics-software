@@ -12,7 +12,8 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class,
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class
+   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
+   us.ihmc.atlas.WholeBodyIkSolverTest.class
 })
 
 public class AtlasIInDevelopmentTestSuite
