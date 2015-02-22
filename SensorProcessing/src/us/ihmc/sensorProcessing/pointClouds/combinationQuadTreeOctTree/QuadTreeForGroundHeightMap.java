@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.vecmath.Point3d;
 
@@ -16,6 +16,8 @@ import us.ihmc.utilities.math.geometry.InclusionFunction;
 
 public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements QuadTreeHeightMapInterface
 {
+   private final ReentrantLock lock = new ReentrantLock();
+   
    private QuadTreeForGroundReaderAndWriter readerAndWriter = null;
    
    public QuadTreeForGroundHeightMap(Box bounds, QuadTreeForGroundParameters quadTreeParameters)
@@ -31,6 +33,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    @Override
    public boolean addPoint(double x, double y, double z)
    {
+      lock();
       if (readerAndWriter != null) readerAndWriter.writePoint(x, y, z);
       
       // Set the default height to the first point you see. 
@@ -43,6 +46,8 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       
       
       QuadTreeForGroundPutResult result = put(x, y, z);
+      
+      unlock();
       return result.treeChanged;
    }
 
@@ -55,8 +60,8 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    @Override
    public boolean containsPoint(double x, double y)
    {
-      Double zValue = getHeightAtPoint(x, y);
-      if ((zValue != null) && (Double.isNaN(zValue)))
+      double zValue = getHeightAtPoint(x, y);
+      if ((Double.isNaN(zValue)))
          return true;
 
       return false;
@@ -153,12 +158,14 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    @Override
    public void clearTree()
    {
+      lock();
       for (HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> listener : this.hyperCubeTreeListeners)
       {
          listener.treeCleared();
       }
       
       this.clear();
+      unlock();
    }
 
    @Override
@@ -171,6 +178,18 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    public void setUpdateQuadtree(boolean update)
    {
       // TODO Auto-generated method stub
+   }
+
+   @Override
+   public void lock()
+   {
+      lock.lock();
+   }
+
+   @Override
+   public void unlock()
+   {
+      lock.unlock();
    }
 
 }

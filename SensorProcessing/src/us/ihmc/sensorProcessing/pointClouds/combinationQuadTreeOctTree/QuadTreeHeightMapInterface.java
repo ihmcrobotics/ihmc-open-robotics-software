@@ -30,4 +30,8 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 	public abstract void setUpdateQuadtree(boolean update);
 	
    public void getStoredPoints(Collection<Point3d> points);
+
+   public abstract void lock();
+
+   public abstract void unlock();
 }
