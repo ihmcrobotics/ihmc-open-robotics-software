@@ -139,6 +139,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       SIMPLE_WARMUP,
       MEDIUM_WARMUP,
       HARD_WARMUP,
+      STEPS_FORWARD_BACKWARD,
       STEPS_SHORT,
       STEPS_LONG,
       STEPS_IN_PLACE,
@@ -1274,17 +1275,31 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
-   private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw,double angleRelativeToPath)
+   private void sequenceWalkForwardBackward(double percentOfMaxFootstepLength)
+   {
+      // forward
+      submitWalkToLocation(false, 1.0, 0.0, 0.0, 0.0, percentOfMaxFootstepLength);
+      //backward
+      submitWalkToLocation(false, 0.0, 0.0, 0.0, Math.PI, percentOfMaxFootstepLength);
+   }
+
+   
+   private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw,double angleRelativeToPath, double percentOfMaxFootstepLength)
    {
       FramePose2d targetPoseInWorld = new FramePose2d();
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
       
-      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue(), yoTime);
+      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue() * percentOfMaxFootstepLength, yoTime);
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToLocationTask);
       else
          pipeLine.submitSingleTaskStage(walkToLocationTask);
+   }
+   
+   private void submitWalkToLocation(boolean parallelize, double x, double y, double robotYaw,double angleRelativeToPath)
+   {
+      submitWalkToLocation(parallelize, x, y, robotYaw, angleRelativeToPath, 1.0);
    }
 
    private void sequenceStepsInPlace()
@@ -1889,6 +1904,11 @@ public class DiagnosticBehavior extends BehaviorInterface
             case KARATE_KID:
                lastDiagnosticTask.set(DiagnosticTask.KARATE_KID);
                karateKid(activeSideForFootControl.getEnumValue());
+               break;
+            case STEPS_FORWARD_BACKWARD:
+               lastDiagnosticTask.set(DiagnosticTask.STEPS_FORWARD_BACKWARD);
+               sequenceWalkForwardBackward(0.5);
+               sequenceWalkForwardBackward(1.0);
                break;
             case STEPS_SHORT:
                lastDiagnosticTask.set(DiagnosticTask.STEPS_SHORT);
