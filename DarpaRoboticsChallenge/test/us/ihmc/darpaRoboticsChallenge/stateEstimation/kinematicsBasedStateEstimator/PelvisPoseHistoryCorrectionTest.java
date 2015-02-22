@@ -46,6 +46,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -75,6 +76,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private BlockingSimulationRunner blockingSimulationRunner;
+   private DRCFlatGroundWalkingTrack flatGroundWalkingTrack;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -95,6 +98,18 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
+      }
+
+      if (flatGroundWalkingTrack != null)
+      {
+         flatGroundWalkingTrack.destroySimulation();
+         flatGroundWalkingTrack = null;
+      }
+
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+         blockingSimulationRunner = null;
       }
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -439,40 +454,40 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      setupWalkingSim();
+      flatGroundWalkingTrack = setupWalkingSim();
       setupYoVariables(registry, "PelvisPoseHistoryCorrection");
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 1);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 1);
       activatePelvisPoseHistoryCorrector(registry, true);
 
-      drcSimulationTestHelper.simulateAndBlock(1.0);
+      blockingSimulationRunner = new BlockingSimulationRunner(simulationConstructionSet, 60.0 * 10.0);
+      blockingSimulationRunner.simulateAndBlock(1.0);
 
-      assertTrue(walkForwardAndLocalizeInFrontOfFoot());
-      sendPelvisCorrectionPackets = false;
+      boolean success = true;
 
-      BambooTools.reportTestFinishedMessage();
-   }
-
-   private boolean walkForwardAndLocalizeInFrontOfFoot()
-   {
       DoubleYoVariable transferTime = (DoubleYoVariable) registry.getVariable("swingTime");
       DoubleYoVariable swingTime = (DoubleYoVariable) registry.getVariable("transferTime");
 
       try
       {
-         drcSimulationTestHelper.simulateAndBlock(1.0);
+         blockingSimulationRunner.simulateAndBlock(1.0);
          transferTime.set(1.2);
          swingTime.set(1.2);
          manualTranslationOffsetX.set(-.5);
          maxVelocityClip.set(.1);
          manuallyTriggerLocalizationUpdate.set(true);
-         drcSimulationTestHelper.simulateAndBlock(20.0);
+         blockingSimulationRunner.simulateAndBlock(20.0);
       }
       catch (SimulationExceededMaximumTimeException e)
       {
-         return false;
+         success = false;
       }
-      return true;
+   
+      
+      assertTrue(success);
+      sendPelvisCorrectionPackets = false;
+
+      BambooTools.reportTestFinishedMessage();
    }
 
    private boolean yawBigInDoubleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
@@ -695,7 +710,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       setupCameraForWalkingUpToRamp();
    }
 
-   private void setupWalkingSim()
+   private DRCFlatGroundWalkingTrack setupWalkingSim()
    {
       DRCRobotModel robotModel = getRobotModel();
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
@@ -716,6 +731,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       drcSimulationFactory.setExternelPelvisCorrectorSubscriber(externalPelvisPosePublisher);
       BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
       walk.set(true);
+      return drcFlatGroundWalkingTrack;
    }
 
    private Runnable setupSimulationWithFeetPertuberAndCreateExternalPelvisThread()
