@@ -3,6 +3,10 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Point3d;
 
@@ -10,7 +14,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.userInterface.util.TimestampedPoint;
 
-public class PointCloudWorldPacketGenerator extends TimerTask
+public class PointCloudWorldPacketGenerator implements Runnable
 {
    DepthDataFilter depthDataFilter;
    PacketCommunicator packetCommunicator;
@@ -23,9 +27,9 @@ public class PointCloudWorldPacketGenerator extends TimerTask
    {
       this.depthDataFilter = depthDataFilter;
       this.packetCommunicator= packetCommunicator;
-      Timer timer = new Timer("pointCloudSenderTime");
+      ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
       int publishRateHz = 1;
-      timer.scheduleAtFixedRate(this, 0, 1000/publishRateHz);
+      service.scheduleAtFixedRate(this, 0, 1000/publishRateHz, TimeUnit.MILLISECONDS);
    }
    
    public PointCloudWorldPacket getPointCloudWorldPacket()
