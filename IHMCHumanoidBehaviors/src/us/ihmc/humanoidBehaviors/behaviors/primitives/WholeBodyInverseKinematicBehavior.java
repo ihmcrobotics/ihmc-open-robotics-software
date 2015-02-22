@@ -64,7 +64,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    {
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, controlledDofs);
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
-      wholeBodyIKSolver.maxNumberOfAutomaticReseeds = numberOfReseeds;
+      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds( numberOfReseeds );
       trajectoryTime.set(trajectoryDuration);
       wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
 
