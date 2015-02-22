@@ -143,9 +143,12 @@ public class DiagnosticBehavior extends BehaviorInterface
       STEPS_LONG,
       STEPS_IN_PLACE,
       FEET_SQUARE_UP,
-      GO_HOME
+      GO_HOME,
+      REDO_LAST_TASK
    };
 
+   private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
+   
    private final EnumYoVariable<DiagnosticTask> requestedDiagnostic;
    private final EnumYoVariable<HumanoidArmPose> requestedSymmetricArmPose;
    private final EnumYoVariable<HumanoidArmPose> requestedSingleArmPose;
@@ -251,6 +254,9 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
+      
+      lastDiagnosticTask = new EnumYoVariable<>("lastDiagnosticTask", registry, DiagnosticTask.class, true);
+      lastDiagnosticTask.set(null);
 
       requestedSymmetricArmPose = new EnumYoVariable<>("requestedSymmetricArmPose", registry, HumanoidArmPose.class, true);
       requestedSymmetricArmPose.set(null);
@@ -1841,77 +1847,107 @@ public class DiagnosticBehavior extends BehaviorInterface
          switch (requestedDiagnostic.getEnumValue())
          {
             case ARM_MOTIONS:
+               lastDiagnosticTask.set(DiagnosticTask.ARM_MOTIONS);
                sequenceArmPose();
                break;
             case CHEST_ROTATIONS:
+               lastDiagnosticTask.set(DiagnosticTask.CHEST_ROTATIONS);
                sequenceChestRotations(0.55);
                break;
             case PELVIS_ROTATIONS:
+               lastDiagnosticTask.set(DiagnosticTask.PELVIS_ROTATIONS);
                sequencePelvisRotations(0.3);
                break;
             case COMBINED_CHEST_PELVIS:
+               lastDiagnosticTask.set(DiagnosticTask.COMBINED_CHEST_PELVIS);
                sequenceMovingChestAndPelvisOnly();
                break;
             case UPPER_BODY:
+               lastDiagnosticTask.set(DiagnosticTask.UPPER_BODY);
                sequenceUpperBody();
                break;
             case FOOT_LIFT:
+               lastDiagnosticTask.set(DiagnosticTask.FOOT_LIFT);
                sequenceFootLift();
                break;
             case FOOT_POSES_SHORT:
+               lastDiagnosticTask.set(DiagnosticTask.FOOT_POSES_SHORT);
                sequenceFootPoseShort();
                break;
             case FOOT_POSES_LONG:
+               lastDiagnosticTask.set(DiagnosticTask.FOOT_POSES_LONG);
                sequenceFootPoseLong();
                break;
             case RUNNING_MAN:
+               lastDiagnosticTask.set(DiagnosticTask.RUNNING_MAN);
                sequenceRunningMan();
                break;
             case BOW:
+               lastDiagnosticTask.set(DiagnosticTask.BOW);
                sequenceBow();
                break;
             case KARATE_KID:
+               lastDiagnosticTask.set(DiagnosticTask.KARATE_KID);
                karateKid(activeSideForFootControl.getEnumValue());
                break;
             case STEPS_SHORT:
+               lastDiagnosticTask.set(DiagnosticTask.STEPS_SHORT);
                sequenceStepsShort();
                break;
             case STEPS_LONG:
+               lastDiagnosticTask.set(DiagnosticTask.STEPS_LONG);
                sequenceStepsLong();
                break;
             case WHOLE_SCHEBANG:
+               lastDiagnosticTask.set(DiagnosticTask.WHOLE_SCHEBANG);
                sequenceStepsLong();
                sequenceRunningMan();
                karateKid(activeSideForFootControl.getEnumValue());
                sequenceBow();
                break;
             case SQUATS:
+               lastDiagnosticTask.set(DiagnosticTask.SQUATS);
                for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
                   sequenceSquats();
             case SQUATATHON:
+               lastDiagnosticTask.set(DiagnosticTask.SQUATATHON);
                for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
                   sequenceSquatathon();
                break;
             case SHIFT_WEIGHT:
+               lastDiagnosticTask.set(DiagnosticTask.SHIFT_WEIGHT);
                sequenceShiftWeight();
                break;
             case SIMPLE_WARMUP:
+               lastDiagnosticTask.set(DiagnosticTask.SIMPLE_WARMUP);
                sequenceSimpleWarmup();
                break;
             case MEDIUM_WARMUP:
+               lastDiagnosticTask.set(DiagnosticTask.MEDIUM_WARMUP);
                sequenceMediumWarmup();
                break;
             case HARD_WARMUP:
+               lastDiagnosticTask.set(DiagnosticTask.HARD_WARMUP);
                sequenceHardWarmup();
                break;
             case STEPS_IN_PLACE:
+               lastDiagnosticTask.set(DiagnosticTask.STEPS_IN_PLACE);
                sequenceStepsInPlace();
                break;
             case FEET_SQUARE_UP:
+               lastDiagnosticTask.set(DiagnosticTask.FEET_SQUARE_UP);
                sequenceSquareUp();
                break;
             case GO_HOME:
+               lastDiagnosticTask.set(DiagnosticTask.GO_HOME);
                sequenceGoHome();
+               break;
+            case REDO_LAST_TASK:
+               if(lastDiagnosticTask.getEnumValue() != null)
+               {
+                  requestedDiagnostic.set(lastDiagnosticTask.getEnumValue());
+                  handleRequestedDiagnostic();
+               }
                break;
             default:
                break;
