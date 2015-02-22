@@ -45,7 +45,7 @@ public class WholeBodyTrajectory
    {
       int N = wbSolver.getNumberOfJoints();
 
-      maxDistanceInTaskSpaceBetweenWaypoints = 0.3;
+     // maxDistanceInTaskSpaceBetweenWaypoints = 0.4;
 
       SDFFullRobotModel currentRobotModel = new SDFFullRobotModel( initialRobotState );
       InverseDynamicsJointStateCopier copier = new InverseDynamicsJointStateCopier(
@@ -135,7 +135,7 @@ public class WholeBodyTrajectory
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
 
-      numSegments = 3;
+      //numSegments = 4;
 
       Vector64F thisWaypointAngles = new Vector64F(N);
       HashMap<String,Double> thisWaypointAnglesByName = new HashMap<String,Double>();
@@ -166,12 +166,15 @@ public class WholeBodyTrajectory
 
                double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
                double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ(); 
+               double currentAngle = currentRobotModel.getOneDoFJointByName(jointName).getQ(); 
+               
+               //double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
                double interpolatedAngle = initialAngle*(1.0 -alpha) + finalAngle*alpha ;
+               
                thisWaypointAngles.set(index,interpolatedAngle );
                thisWaypointAnglesByName.put( jointName, interpolatedAngle  );
             }
-            System.out.println( thisWaypointAngles );
-            
+  
             currentRobotModel.updateJointsAngleButKeepOneFootFixed(thisWaypointAnglesByName, RobotSide.RIGHT);
             
             for (RobotSide side: RobotSide.values)
@@ -191,13 +194,6 @@ public class WholeBodyTrajectory
                   target.getRigidBodyTransform( targetTrans );
                }
             }
- /*
-            for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
-           {
-               final String jointName = entry.getKey();
-               final int index = entry.getValue();        
-               anglesToUseAsInitialState.put( jointName, thisWaypointAngles.get(index) );
-            }*/
 
             if( s < numSegments )
             {
@@ -218,8 +214,10 @@ public class WholeBodyTrajectory
                   }
                }
                else{
+                  System.out.println("OOOOPS");
                   for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
+                     
                      String jointName = entry.getKey();
                      int index = entry.getValue();
                      double alpha = 1.0 / (double) ( numSegments + 1 -s ); 
