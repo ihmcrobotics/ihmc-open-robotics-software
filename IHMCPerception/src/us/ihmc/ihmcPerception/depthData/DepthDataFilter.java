@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
+import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
@@ -49,17 +50,17 @@ public class DepthDataFilter
    {
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
-      quadTree = getGroundOnlyQuadTree();
-      octree = getOctree(headFrame);
+      quadTree = setupGroundOnlyQuadTree();
+      octree = setupOctree(headFrame);
       quadTree.setOctree(octree);
    }
 
-   public void setWorldToCorrected(RigidBodyTransform adjustment)
+   private void setWorldToCorrected(RigidBodyTransform adjustment)
    {
       this.worldToCorrected.set(adjustment);
    }
 
-   public QuadTreeHeightMapInterface getGroundOnlyQuadTree()
+   private QuadTreeHeightMapInterface setupGroundOnlyQuadTree()
    {
       // SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
@@ -81,7 +82,7 @@ public class DepthDataFilter
                                     parameters.quadtreeHeightThreshold, 100000);
    }
 
-   public Octree getOctree(ReferenceFrame headFrame)
+   private Octree setupOctree(ReferenceFrame headFrame)
    {
       if (parameters.USE_RESOLUTION_SPHERE)
       {
@@ -117,7 +118,7 @@ public class DepthDataFilter
 
    }
    
-   public void addPoint(LidarScan lidarScan, int i, ArrayList<Point3d> points)
+   private void addPoint(LidarScan lidarScan, int i, ArrayList<Point3d> points)
    {
       Point3d lidarOrigin = new Point3d();
       lidarScan.getAverageTransform().transform(lidarOrigin);
@@ -172,7 +173,7 @@ public class DepthDataFilter
       return send;
    }
 
-   public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
+   protected boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
       valid &= point.z < lidarOrigin.z + parameters.nearScanZMaxAboveHead;
@@ -184,7 +185,7 @@ public class DepthDataFilter
       return valid;
    }
 
-   public boolean isValidOctree(Point3d point, Point3d lidarOrigin)
+   protected boolean isValidOctree(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
 
@@ -193,7 +194,7 @@ public class DepthDataFilter
       return valid;
    }
 
-   public boolean isPossibleGround(Point3d point, Point3d lidarOrigin)
+   protected boolean isPossibleGround(Point3d point, Point3d lidarOrigin)
    {
       final double footZ = 0;
 
@@ -268,7 +269,7 @@ public class DepthDataFilter
    {
       return nearScan;
    }
-
+   
    public DepthDataFilterParameters getParameters()
    {
       return parameters;
