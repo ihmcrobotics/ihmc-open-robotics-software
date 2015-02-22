@@ -55,7 +55,7 @@ public class DepthDataFilter
       quadTree.setOctree(octree);
    }
 
-   private void setWorldToCorrected(RigidBodyTransform adjustment)
+   public void setWorldToCorrected(RigidBodyTransform adjustment)
    {
       this.worldToCorrected.set(adjustment);
    }
