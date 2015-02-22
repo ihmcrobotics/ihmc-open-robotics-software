@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.InclusionFunction;
 
 public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, GroundOnlyQuadTreeData> implements QuadTreeHeightMapInterface
 {
+   
    private final ResolutionProvider constantResolution;
    private Octree octree;
 
@@ -94,10 +95,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       
       checkDimensionality(location);
       HyperCubeLeaf<GroundAirDescriptor> leaf = new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor(value, null), location);
-      synchronized (synchronizationObject)
-      {
-         return this.putRecursively(this.getRootNode(), leaf);
-      }
+      lock();
+      boolean success = this.putRecursively(this.getRootNode(), leaf);
+      unlock();
+      return success;
    }
    
    //================================================================================
@@ -493,4 +494,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
          points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
       }
    }
+
+
 }
