@@ -34,6 +34,9 @@ import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
+/*
+ * This class is a front-end to the HierarchicalIKSolver.
+ */
 abstract public class WholeBodyIkSolver
 {
    static{
@@ -41,10 +44,15 @@ abstract public class WholeBodyIkSolver
       NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
    }
 
-   public enum ComputeResult { FAILED_INVALID, FAILED_NOT_CONVERGED, SUCCEEDED };
+   public enum ComputeResult { 
+      FAILED_INVALID,         // calculated solution is completely wrong
+      FAILED_NOT_CONVERGED,   // calculated solution is not good enough, but you might want to double check the error to see if it is acceptable.
+      SUCCEEDED               // calculated solution is good.
+      };
 
    ///--------------- Constants -----------------------------------------
-   static public final double IGNORE = -66666.666;
+   // just a number
+   static public final double IGNORE = -66666.66654321;
 
 
    static public enum ControlledDoF { 
@@ -87,10 +95,10 @@ abstract public class WholeBodyIkSolver
       private final SideDependentList<ControlledDoF>  controlledDoF = new SideDependentList<ControlledDoF>();
 
       static public enum LockLevel{
-         USE_WHOLE_BODY,
-         LOCK_LEGS,
-         LOCK_LEGS_AND_WAIST_X_Y,
-         LOCK_LEGS_AND_WAIST
+         USE_WHOLE_BODY,           // can move the entire body
+         LOCK_LEGS,                // will lock just the leg to the position given bu actualRobotModel. Note that COM position is NOT controlled.
+         LOCK_LEGS_AND_WAIST_X_Y,  // lock waist and legs but keep wait yaw free to move.
+         LOCK_LEGS_AND_WAIST       // lock waist and legs
       }
 
       private LockLevel lockLevel = LockLevel.USE_WHOLE_BODY;
@@ -106,11 +114,13 @@ abstract public class WholeBodyIkSolver
       protected final DenseMatrix64F coupledJointWeights;
       protected final Vector64F      preferedJointPose;
 
+      // this is used to store the initial position that is sent to the Hierarchical solver
       protected final Vector64F cachedAnglesQ;
 
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
-      public int maxNumberOfAutomaticReseeds = 3;
+      
+      protected int maxNumberOfAutomaticReseeds = 3;
 
       //------- Abstract method that provide robot-specific information and configuration  -------------
 
@@ -131,19 +141,6 @@ abstract public class WholeBodyIkSolver
 
       //---------------------------------------------------------------------------------
 
-      public void activateAutomaticPreferredHipHeight(boolean enable)
-      {
-         suggestKneeAngle = enable;
-      }
-
-      public ReferenceFrame getRootFrame(){
-         return getRootFrame(workingSdfModel);
-      }
-
-      public boolean hasJoint(String jointName)
-      {
-         return (jointNamesToIndex.get(jointName) != null);
-      }
 
       // helper function to check if a certain robot state is self-colliding or not.
       public boolean checkCollisions(SDFFullRobotModel modelToCheck)
@@ -163,7 +160,7 @@ abstract public class WholeBodyIkSolver
       /*
        * Verbosity levels:
        * 0: none
-       * 1: show a resume of the errors.
+       * 1: show a resume.
        * 2: Lot of data...
        */
       public void setVerbosityLevel(int level)
@@ -176,6 +173,29 @@ abstract public class WholeBodyIkSolver
          return urdfModel;
       }
 
+      public void activateAutomaticPreferredHipHeight(boolean enable)
+      {
+         suggestKneeAngle = enable;
+      }
+
+      /*
+       * Sometimes the solver gest stacked in a local minimum and fails.
+       * Setting the maximum number of reseed > 0 you can automatically try to find a solution.
+       */
+      public void setNumberOfMaximumAutomaticReseeds(int maxReseeds )
+      {
+         if( maxReseeds < 0 ) maxReseeds = 0;
+         maxNumberOfAutomaticReseeds = maxReseeds;
+      }
+      
+      public ReferenceFrame getRootFrame(){
+         return getRootFrame(workingSdfModel);
+      }
+
+      public boolean hasJoint(String jointName)
+      {
+         return (jointNamesToIndex.get(jointName) != null);
+      }
 
       /* Note. The after/before direction is reversed between the SDF and HIK models for the right leg.
        * This method uses the direction specified by the WB (reversed).
@@ -659,7 +679,7 @@ abstract public class WholeBodyIkSolver
       public abstract HashMap<String,Double> getSuggestedAnglesForReseed();
 
 
-      public void reseedCachedModel()
+      private void reseedCachedModel()
       {
          Vector64F newQ = getHierarchicalSolver().getRandomQ();
 
@@ -970,10 +990,6 @@ abstract public class WholeBodyIkSolver
          enforceControlledDoF( null );
       }
 
-      public LockLevel isLowerBodyLocked()
-      {
-         return lockLevel;
-      }
 
       public void setLockLevel(LockLevel lockLevel)
       {
