@@ -1886,18 +1886,19 @@ public class DiagnosticBehavior extends BehaviorInterface
    private void sequenceFootLift()
    {
       RobotSide robotSide = activeSideForFootControl.getEnumValue();
-      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
       
       if(robotSide == null)
       {
          for (RobotSide side : RobotSide.values())
          {
+            ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(side);
             submitFootPosition(false, side, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
             submitFootPosition(false, side, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
          }
       }
       else
       {
+         ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
          submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
          submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
       }
