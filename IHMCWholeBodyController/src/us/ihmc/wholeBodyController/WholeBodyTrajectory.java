@@ -15,11 +15,13 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
 
 
 public class WholeBodyTrajectory
@@ -27,83 +29,51 @@ public class WholeBodyTrajectory
    private double maxJointVelocity;
    private double maxJointAcceleration;
    private double maxDistanceInTaskSpaceBetweenWaypoints;
-   
+
    public WholeBodyTrajectory(double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
    {
       this.maxJointVelocity = maxJointVelocity;
       this.maxJointAcceleration = maxJointAcceleration;
       this.maxDistanceInTaskSpaceBetweenWaypoints = maxDistanceInTaskSpaceBetweenWaypoints;
    }
-/*   static public TrajectoryND createJointSpaceTrajectory(
-         final WholeBodyIkSolver wbSolver,  
-         final OneDoFJoint[] initialState, 
-         final OneDoFJoint[] finalState ) throws Exception
-   {  
-      int N = initialState.length;
 
-      double[] deltaQ = new double[N];
-      double[] wpQ = new double[N];
-
-      double max = -1e10;
-
-      for (int j=0; j<N; j++)
-      {
-         OneDoFJoint jointI = initialState[j];
-         OneDoFJoint jointF = finalState[j];
-         deltaQ[j] = jointF.getQ() - jointI.getQ();
-
-         if(max < Math.abs(deltaQ[j])) {
-            max = Math.abs(deltaQ[j]);
-         }
-      }
-
-      double maxDeltaQ = 0.2;
-
-      int segments = (int) Math.round(max/maxDeltaQ);
-
-      TrajectoryND wb_trajectory = new TrajectoryND(N, 0.5, 10 );
-
-      for (int s=0; s <= segments; s++ )
-      {
-         for (int j=0; j<N; j++)
-         {
-            OneDoFJoint jointI = initialState[j];
-            wpQ[j] = jointI.getQ() + s*( deltaQ[j] / segments);
-         }
-         wb_trajectory.addWaypoint(wpQ);
-      }
-
-      wb_trajectory.buildTrajectory();
-      return wb_trajectory;
-   }
-
-*/
    public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
-         final SDFFullRobotModel actualRobotModel,
-         final SDFFullRobotModel finalRobotModel
+         final SDFFullRobotModel initialRobotState,
+         final SDFFullRobotModel finalRoboState
          ) throws Exception
    {
       int N = wbSolver.getNumberOfJoints();
+
+      maxDistanceInTaskSpaceBetweenWaypoints = 0.3;
+
+      SDFFullRobotModel currentRobotModel = new SDFFullRobotModel( initialRobotState );
+      InverseDynamicsJointStateCopier copier = new InverseDynamicsJointStateCopier(
+            initialRobotState.getElevator(), currentRobotModel.getElevator() );
+      
+      copier.copy();
       
       int oldMaxReseed = wbSolver.maxNumberOfAutomaticReseeds;
       wbSolver.maxNumberOfAutomaticReseeds = 0;
 
       HashMap<String,Integer> nameToIndex = new HashMap<String,Integer>();
-  
+
       SideDependentList<ControlledDoF> previousOption = new SideDependentList<ControlledDoF>();
       SideDependentList<RigidBodyTransform> initialTransform  = new SideDependentList<RigidBodyTransform>();
       SideDependentList<RigidBodyTransform> finalTransform    = new SideDependentList<RigidBodyTransform>();
+      LockLevel previousLockLimit = wbSolver.getLockLevel();
+      
+      wbSolver.setLockLevel( LockLevel.LOCK_LEGS_AND_WAIST );
 
       for (RobotSide side: RobotSide.values)
       {
-         ReferenceFrame initialTargetFrame = actualRobotModel.getHandControlFrame( side );
-         ReferenceFrame finalTargetFrame   = finalRobotModel.getHandControlFrame( side );
+         ReferenceFrame initialTargetFrame = initialRobotState.getHandControlFrame( side );
+         ReferenceFrame finalTargetFrame   = finalRoboState.getHandControlFrame( side );
 
          ReferenceFrame attachment = wbSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
          ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame() );
-
          RigidBodyTransform attachmentToPalm = palm.getTransformToDesiredFrame( attachment );
+         
          previousOption.set( side, wbSolver.getNumberOfControlledDoF(side) );
 
          RigidBodyTransform transform =  initialTargetFrame.getTransformToWorldFrame();
@@ -120,18 +90,18 @@ public class WholeBodyTrajectory
          }
       }
 
-      HashMap<String, Double> anglesToUseAsInitialState = new HashMap<String, Double> ();
+
       HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
 
 
       ArrayList<String> jointNames = new ArrayList<String>();
-      
-      for (OneDoFJoint joint: actualRobotModel.getOneDoFJoints() )
+
+      for (OneDoFJoint joint: initialRobotState.getOneDoFJoints() )
       {
          if( wbSolver.hasJoint( joint.getName())  )
          {
             nameToIndex.put( joint.getName(), nameToIndex.size() );
-            jointNames.add(  joint.getName() );
+            jointNames.add( joint.getName() );
          }    
       }
 
@@ -165,69 +135,74 @@ public class WholeBodyTrajectory
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
 
-      Vector64F thisWaypointAngles = new Vector64F(N);
+      numSegments = 3;
 
+      Vector64F thisWaypointAngles = new Vector64F(N);
+      HashMap<String,Double> thisWaypointAnglesByName = new HashMap<String,Double>();
 
       for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
       {
          String jointName = entry.getKey();
-         int index = entry.getValue();
-
-         double initialAngle = actualRobotModel.getOneDoFJointByName(jointName).getQ();
-         thisWaypointAngles.set( index, initialAngle );   
+         double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
+         thisWaypointAngles.set( entry.getValue(), initialAngle );  
+         thisWaypointAnglesByName.put( jointName, initialAngle );   
       }
 
-
       TrajectoryND wb_trajectory = new TrajectoryND(N, maxJointVelocity,  maxJointAcceleration );
-      
+
       wb_trajectory.addNames( jointNames );
 
       for (int s=0; s <= numSegments; s++ )
       {
-         for (RobotSide side: RobotSide.values)
-         {
-            RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
 
-            double alpha = ((double)s)/numSegments;
-            interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
-
-            FramePose target =  new FramePose( ReferenceFrame.getWorldFrame(), interpolatedTransform );
-
-            wbSolver.setGripperPalmTarget( actualRobotModel,  side, target );
-
-            if( side == RobotSide.RIGHT )
-            {
-               RigidBodyTransform targetTrans = new RigidBodyTransform();
-               target.getRigidBodyTransform( targetTrans );
-            }
-         }
-
-         if( s > 0 /* && s!= numSegments */ )
+         if( s > 0  )
          {
             for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
             {
                String jointName = entry.getKey();
                int index = entry.getValue();
 
-               double currentAngle = thisWaypointAngles.get(index);
-               double finalAngle   = finalRobotModel.getOneDoFJointByName(jointName).getQ();  
-               double alpha = 1.0 / (double) ( 1  + numSegments - s  );
-              if( alpha < 1.0) alpha = 0;
+               double alpha = ((double)s) / (double) ( numSegments  ); 
 
-               thisWaypointAngles.set(index, currentAngle*(1.0 -alpha) + finalAngle*alpha );   
+               double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
+               double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ(); 
+               double interpolatedAngle = initialAngle*(1.0 -alpha) + finalAngle*alpha ;
+               thisWaypointAngles.set(index,interpolatedAngle );
+               thisWaypointAnglesByName.put( jointName, interpolatedAngle  );
             }
-
-            for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+            System.out.println( thisWaypointAngles );
+            
+            currentRobotModel.updateJointsAngleButKeepOneFootFixed(thisWaypointAnglesByName, RobotSide.RIGHT);
+            
+            for (RobotSide side: RobotSide.values)
             {
+               RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
+
+               double alpha = ((double)s)/(numSegments);
+               interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
+
+               FramePose target =  new FramePose( ReferenceFrame.getWorldFrame(), interpolatedTransform );
+               
+               wbSolver.setGripperPalmTarget( initialRobotState,  side, target );
+
+               if( side == RobotSide.RIGHT )
+               {
+                  RigidBodyTransform targetTrans = new RigidBodyTransform();
+                  target.getRigidBodyTransform( targetTrans );
+               }
+            }
+ /*
+            for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+           {
                final String jointName = entry.getKey();
                final int index = entry.getValue();        
                anglesToUseAsInitialState.put( jointName, thisWaypointAngles.get(index) );
-            }
+            }*/
 
-            if( s< numSegments )
+            if( s < numSegments )
             {
                //---------------------------------
-               ComputeResult ret =  wbSolver.compute(actualRobotModel,  anglesToUseAsInitialState, outputAngles);
+                ComputeResult ret =  wbSolver.compute(currentRobotModel,  thisWaypointAnglesByName, outputAngles);
                //---------------------------------
 
                // note: use also the failed one that didn't converge... better than nothing.
@@ -235,10 +210,26 @@ public class WholeBodyTrajectory
                {
                   for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
-                     final String jointName = entry.getKey();
-                     final int index = entry.getValue();  
+                     String jointName = entry.getKey();
+                     int index = entry.getValue();
                      Double angle = outputAngles.get( jointName );
-                     thisWaypointAngles.set(index, angle ); 
+                     thisWaypointAngles.set(index, angle );
+                     thisWaypointAnglesByName.put( jointName, angle );  
+                  }
+               }
+               else{
+                  for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+                  {
+                     String jointName = entry.getKey();
+                     int index = entry.getValue();
+                     double alpha = 1.0 / (double) ( numSegments + 1 -s ); 
+   
+                     double currentAngle = thisWaypointAnglesByName.get(jointName);
+                     double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ();  
+                     
+                     double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
+                     thisWaypointAngles.set(index, interpolatedAngle );
+                     thisWaypointAnglesByName.put( jointName, interpolatedAngle );  
                   }
                }
             }
@@ -254,6 +245,9 @@ public class WholeBodyTrajectory
       wb_trajectory.buildTrajectory();
 
       wbSolver.maxNumberOfAutomaticReseeds = oldMaxReseed;
+      
+      wbSolver.setLockLevel( previousLockLimit );
+      
       return wb_trajectory;
    }
 
