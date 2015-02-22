@@ -50,7 +50,7 @@ public class DepthDataFilter
    {
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
-      quadTree = setupGroundOnlyQuadTree();
+      quadTree = getGroundOnlyQuadTree(parameters);
       octree = setupOctree(headFrame);
       quadTree.setOctree(octree);
    }
@@ -60,7 +60,7 @@ public class DepthDataFilter
       this.worldToCorrected.set(adjustment);
    }
 
-   private QuadTreeHeightMapInterface setupGroundOnlyQuadTree()
+   public static QuadTreeHeightMapInterface getGroundOnlyQuadTree(DepthDataFilterParameters parameters)
    {
       // SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
       // 0.0, 0.0, -2.0), DRCConfigParameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS*3,
