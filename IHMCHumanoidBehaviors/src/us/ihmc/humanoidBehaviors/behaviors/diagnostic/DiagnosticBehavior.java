@@ -77,7 +77,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class DiagnosticBehavior extends BehaviorInterface
 {
    private static final boolean FAST_MOTION = false;
-   private static final boolean CAN_ARMS_REACH_FAR_BEHIND = true;
+   private static final boolean CAN_ARMS_REACH_FAR_BEHIND = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;
 
