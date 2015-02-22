@@ -49,7 +49,9 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    private static final boolean DO_ASSERTS = true;
 
 
-   @Test
+   @AverageDuration
+   @Ignore
+   @Test(timeout = 10000)
    public void testGetStoredPoints()
    {
       double resolution = 0.01;
