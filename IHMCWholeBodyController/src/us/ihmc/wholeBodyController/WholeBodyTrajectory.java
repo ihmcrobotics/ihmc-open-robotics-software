@@ -45,7 +45,8 @@ public class WholeBodyTrajectory
    {
       int N = wbSolver.getNumberOfJoints();
 
-     // maxDistanceInTaskSpaceBetweenWaypoints = 0.4;
+      // TODO this is for debug purpose only
+      maxDistanceInTaskSpaceBetweenWaypoints = 0.15;
 
       SDFFullRobotModel currentRobotModel = new SDFFullRobotModel( initialRobotState );
       InverseDynamicsJointStateCopier copier = new InverseDynamicsJointStateCopier(
@@ -109,7 +110,7 @@ public class WholeBodyTrajectory
       int segmentsRot = 1;
 
       double maxDeltaPos = maxDistanceInTaskSpaceBetweenWaypoints;
-      double maxDeltaRot = maxDistanceInTaskSpaceBetweenWaypoints;
+   //   double maxDeltaRot = maxDistanceInTaskSpaceBetweenWaypoints;
 
       for (RobotSide side: RobotSide.values)
       {
@@ -123,19 +124,19 @@ public class WholeBodyTrajectory
 
             segmentsPos = (int) Math.max(segmentsPos, Math.round( distance / maxDeltaPos) );
          }
-         if( numberOfDoF == ControlledDoF.DOF_3P2R || numberOfDoF ==  ControlledDoF.DOF_3P3R )
+      /*   if( numberOfDoF == ControlledDoF.DOF_3P2R || numberOfDoF ==  ControlledDoF.DOF_3P3R )
          {
             double distance = RigidBodyTransform.getRotationDifference(
                   initialTransform.get(side), 
                   finalTransform.get(side) ).length();
 
             segmentsRot = (int)  Math.max(segmentsPos, Math.round( distance/ maxDeltaRot) );
-         }
+         }*/
       }
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
 
-      //numSegments = 4;
+      //numSegments = 6;
 
       Vector64F thisWaypointAngles = new Vector64F(N);
       HashMap<String,Double> thisWaypointAnglesByName = new HashMap<String,Double>();
@@ -151,10 +152,9 @@ public class WholeBodyTrajectory
       TrajectoryND wb_trajectory = new TrajectoryND(N, maxJointVelocity,  maxJointAcceleration );
 
       wb_trajectory.addNames( jointNames );
-
+   //   System.out.println("-----");
       for (int s=0; s <= numSegments; s++ )
       {
-
          if( s > 0  )
          {
             for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
@@ -202,8 +202,10 @@ public class WholeBodyTrajectory
                //---------------------------------
 
                // note: use also the failed one that didn't converge... better than nothing.
-               if( ret != ComputeResult.FAILED_INVALID)
+              // if( ret != ComputeResult.FAILED_INVALID)
+                if( ret == ComputeResult.SUCCEEDED)
                {
+                 //  System.out.println(" SUCCEEDED ");
                   for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
                      String jointName = entry.getKey();
@@ -212,10 +214,11 @@ public class WholeBodyTrajectory
                      thisWaypointAngles.set(index, angle );
                      thisWaypointAnglesByName.put( jointName, angle );  
                   }
+                  wb_trajectory.addWaypoint(thisWaypointAngles.data);
                }
                else{
-                  System.out.println("OOOOPS");
-                  for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+                 /*  System.out.println("OOOOPS");
+                 for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
                      
                      String jointName = entry.getKey();
@@ -228,11 +231,12 @@ public class WholeBodyTrajectory
                      double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
                      thisWaypointAngles.set(index, interpolatedAngle );
                      thisWaypointAnglesByName.put( jointName, interpolatedAngle );  
-                  }
+                  }*/
                }
             }
          }
-         wb_trajectory.addWaypoint(thisWaypointAngles.data);
+         if( s==0 || s==numSegments )
+            wb_trajectory.addWaypoint(thisWaypointAngles.data);
       }
 
       for (RobotSide side: RobotSide.values)
