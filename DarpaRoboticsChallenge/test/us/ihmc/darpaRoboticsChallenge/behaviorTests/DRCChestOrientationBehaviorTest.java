@@ -27,11 +27,9 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -108,7 +106,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
    {
       BambooTools.reportTestStartedMessage();
 
-      Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
+      Quat4d desiredChestQuat = new Quat4d(RandomTools.generateRandomQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
       ChestOrientationPacket chestOrientationPacket = new ChestOrientationPacket(desiredChestQuat, false, 1.0);
 
       ChestOrientationBehavior chestOrientationBehavior = testChestOrientationBehavior(chestOrientationPacket);
