@@ -27,7 +27,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean VISUALIZE = false;
 
 	@AverageDuration(duration = 0.1)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {
       Random random = new Random(1255L);
@@ -49,7 +49,6 @@ public class ComparePushRodTransmissionsTest
    }
 
    @Ignore
-
 	@AverageDuration
 	@Test(timeout=300000)
    public void testTiming()
@@ -73,7 +72,7 @@ public class ComparePushRodTransmissionsTest
    }
 
 	@AverageDuration(duration = 0.0)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
       Random random = new Random(1255L);
