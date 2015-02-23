@@ -480,7 +480,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
 
-         assertEquals(q_desired, q_actual, JOINT_POSITION_THRESHOLD);
+         assertEquals(armJointName + " position error exceeds threshold.", q_desired, q_actual, JOINT_POSITION_THRESHOLD);
       }
    }
 

@@ -52,11 +52,9 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -696,7 +694,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
 
-         assertEquals(q_desired, q_actual, jointPositionThreshold);
+         assertEquals(armJointName + " position error exceeds threshold.", q_desired, q_actual, jointPositionThreshold);
       }
    }
 
