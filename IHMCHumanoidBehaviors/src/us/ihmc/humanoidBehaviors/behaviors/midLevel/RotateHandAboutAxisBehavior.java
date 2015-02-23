@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
@@ -17,8 +18,10 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.TaskExecutor;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -30,7 +33,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
  */
 public class RotateHandAboutAxisBehavior extends BehaviorInterface
 {
-   private final double radiansToRotateBetweenHandPoses = Math.toRadians(18.0);
+   private double radiansToRotateBetweenHandPoses = Math.toRadians(18.0);
 
    private static final boolean DEBUG = false;
 
@@ -40,17 +43,19 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
    private final TaskExecutor taskExecutor;
    private final HandPoseBehavior handPoseBehavior;
+//   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable hasInputBeenSet;
 
-   public RotateHandAboutAxisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime)
+   public RotateHandAboutAxisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
       this.taskExecutor = new TaskExecutor();
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+//      this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
    }
@@ -74,7 +79,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       setInput(robotSide, currentHandPoseInWorld, axisOrientationInGraspedObjectFrame, graspedObjectTransformToWorld, totalRotationInRadians, trajectoryTime);
    }
 
-   private RigidBodyTransform afterToBeforeRotationTransform;
+   private RigidBodyTransform afterToBeforeRotationTransform = new RigidBodyTransform();
    private PoseReferenceFrame graspedObjectFrame;
 
    public void setInput(RobotSide robotSide, FramePose currentHandPoseInWorld, Axis axisOrientationInGraspedObjectFrame,
@@ -90,8 +95,9 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          SysoutTool.println("Grasped Object Reference Frame: " + graspedObjectFrame);
       }
 
+      radiansToRotateBetweenHandPoses = Math.abs(radiansToRotateBetweenHandPoses) * Math.signum(totalRotationInRadians);
       int numberOfDiscreteHandPosesToUse = (int) Math.round(totalRotationInRadians / radiansToRotateBetweenHandPoses);
-      afterToBeforeRotationTransform = createAxisRotationTransform(axisOrientationInGraspedObjectFrame, radiansToRotateBetweenHandPoses);
+      TransformTools.rotate(afterToBeforeRotationTransform, radiansToRotateBetweenHandPoses, axisOrientationInGraspedObjectFrame);
 
       ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, numberOfDiscreteHandPosesToUse);
 
@@ -107,6 +113,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
             throw new RuntimeException("Hand Pose must be defined in World reference frame.");
          }
          taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, packetFrame, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse));
+//         taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse, 0, ControlledDoF.DOF_3P2R, true));
       }
 
       hasInputBeenSet.set(true);
@@ -128,7 +135,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       return desiredHandPoses;
    }
 
-   private Vector3d desiredGraspedObjectToHandVector = new Vector3d();
+   private Vector3d graspedObjectToHandVector = new Vector3d();
 
    private FramePose copyHandPoseAndRotateAboutAxis(FramePose handPoseInWorld)
    {
@@ -142,35 +149,14 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
       ret.setPoseIncludingFrame(graspedObjectFrame, handToGraspedObjectTransformAfterRotation);
 
-      handToGraspedObjectTransformBeforeRotation.get(desiredGraspedObjectToHandVector);
-      afterToBeforeRotationTransform.transform(desiredGraspedObjectToHandVector);
-      ret.setPosition(desiredGraspedObjectToHandVector);
+      handToGraspedObjectTransformBeforeRotation.get(graspedObjectToHandVector);
+      afterToBeforeRotationTransform.transform(graspedObjectToHandVector);
+      ret.setPosition(graspedObjectToHandVector);
 
       ret.changeFrame(world);
 
       return ret;
    }
-
-   private RigidBodyTransform createAxisRotationTransform(Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad)
-   {
-      RigidBodyTransform ret = new RigidBodyTransform();
-
-      if (pinJointAxisInGraspedObjectFrame == Axis.X)
-      {
-         ret.rotX(turnAngleRad);
-      }
-      else if (pinJointAxisInGraspedObjectFrame == Axis.Y)
-      {
-         ret.rotY(turnAngleRad);
-      }
-      else
-      {
-         ret.rotZ(turnAngleRad);
-      }
-
-      return ret;
-   }
-
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
