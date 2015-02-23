@@ -31,6 +31,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
    private int numberOfNodes = 0;
    private boolean octreeChanged = false;
+   
+   private  double defaultHeightWhenNoPoints=Double.NaN;
 
    //================================================================================
    // Constructors
@@ -494,6 +496,17 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
          points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
       }
    }
+   
 
+   public void clearTree(double defaultGroundHeight)
+   {
+      super.clearTree();
+      this.defaultHeightWhenNoPoints = defaultGroundHeight;
+   }
+   
+   public double getDefaultHeightWhenNoPoints()
+   {
+      return defaultHeightWhenNoPoints;
+   }
 
 }

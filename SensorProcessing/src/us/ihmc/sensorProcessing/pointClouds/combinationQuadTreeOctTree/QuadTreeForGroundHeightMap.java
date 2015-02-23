@@ -36,10 +36,8 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       lock();
       if (readerAndWriter != null) readerAndWriter.writePoint(x, y, z);
       
-      // Set the default height to the first point you see. 
-      // TODO: Should probably change this later to allow the user to select a point somewhere and 
-      // Set that to be the default height...
-      if (super.isEmpty())
+      // Set the default height to the first point you see if it were not set (ie NaN)
+      if (super.isEmpty() && Double.isNaN(super.getDefaultHeightWhenNoPoints()))
       {
          super.setDefaultHeightWhenNoPoints(z);
       }
@@ -162,7 +160,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    ArrayList<HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData>> hyperCubeTreeListeners = new ArrayList<HyperCubeTreeListener<GroundAirDescriptor,GroundOnlyQuadTreeData>>();
    
    @Override
-   public void clearTree()
+   public void clearTree(double defaultGroundHeight)
    {
       lock();
       for (HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> listener : this.hyperCubeTreeListeners)
@@ -171,7 +169,14 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       }
       
       this.clear();
+      this.setDefaultHeightWhenNoPoints(defaultGroundHeight);
       unlock();
+   }
+   
+   @Override
+   public double getDefaultHeightWhenNoPoints()
+   {
+      return super.getDefaultHeightWhenNoPoints();
    }
 
    @Override

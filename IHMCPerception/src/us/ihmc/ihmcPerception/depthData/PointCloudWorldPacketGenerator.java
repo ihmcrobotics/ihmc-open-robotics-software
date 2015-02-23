@@ -45,6 +45,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
       }
       packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3d[nearScanPoints.size()]));
       packet.timestamp = System.nanoTime();
+      packet.defaultGroundHeight = (float) depthDataFilter.getQuadTree().getDefaultHeightWhenNoPoints();
       return packet;
    }
 

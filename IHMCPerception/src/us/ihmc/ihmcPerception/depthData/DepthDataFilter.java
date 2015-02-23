@@ -222,7 +222,7 @@ public class DepthDataFilter
             break;
 
          case QUADTREE :
-            quadTree.clearTree();
+            quadTree.clearTree(Double.NaN); 
 
             break;
 
