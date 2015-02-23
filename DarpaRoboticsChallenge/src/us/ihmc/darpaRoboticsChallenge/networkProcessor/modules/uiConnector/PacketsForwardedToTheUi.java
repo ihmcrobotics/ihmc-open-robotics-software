@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
+import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
@@ -47,6 +48,7 @@ public class PacketsForwardedToTheUi
       PointCloudPacket.class,
       DepthDataClearCommand.class,
       IntrinsicCameraParametersPacket.class,
+      PointCloudWorldPacket.class
 //      HeadPosePacket.class,
 //      RawIMUPacket.class,
       
