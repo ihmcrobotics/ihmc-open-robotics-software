@@ -80,19 +80,23 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       ArrayList<Point3d> pointsWithinBoundsToPack = new ArrayList<Point3d>();
       ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
 
+      lock();
       Box bounds = new Box(xCenter - xExtent, yCenter - yExtent, xCenter + xExtent, yCenter + yExtent);
       super.getAllPointsWithinBounds(bounds, pointsWithinBoundsToPack);
       maskList(pointsWithinBoundsToPack, maskFunctionAboutCenter, filteredPoints);
 
       // TODO: Magic number 10. Get rid of it somehow...
       if (filteredPoints.size() > 10)
+      {
+         unlock();
          return filteredPoints;
+      }
 
       // If not enough raw points, then use the heightAt function to do the best you can
       filteredPoints.clear();
       ArrayList<Point3d> pointsAtGridResolution = getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
       maskList(pointsAtGridResolution, maskFunctionAboutCenter, filteredPoints);
-
+      unlock();
       return filteredPoints;
    }
 
@@ -100,6 +104,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    {
       ArrayList<Point3d> points = new ArrayList<Point3d>();
 
+      lock();
       for (double x = centerX - extentX; x <= centerX + extentX; x += getQuadTreeParameters().getResolution())
       {
          for (double y = centerY - extentY; y <= centerY + extentY; y += getQuadTreeParameters().getResolution())
@@ -111,11 +116,12 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
             }
          }
       }
+      unlock();
 
       return points;
    }
 
-   private void maskList(ArrayList<Point3d> originalPoints, InclusionFunction<Point3d> maskFunctionAboutCenter, ArrayList<Point3d> maskedPointsToPack)
+   private static void maskList(ArrayList<Point3d> originalPoints, InclusionFunction<Point3d> maskFunctionAboutCenter, ArrayList<Point3d> maskedPointsToPack)
    {
       if (maskFunctionAboutCenter == null)
       {
@@ -171,7 +177,9 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    @Override
    public void addListener(HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData> listener)
    {
+      lock();
       hyperCubeTreeListeners.add(listener);
+      unlock();
    }
 
    @Override

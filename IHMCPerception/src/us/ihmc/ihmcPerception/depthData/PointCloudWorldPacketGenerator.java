@@ -1,9 +1,6 @@
 package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +15,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
 {
    DepthDataFilter depthDataFilter;
    PacketCommunicator packetCommunicator;
+
    public PointCloudWorldPacketGenerator(DepthDataFilter depthDataFilter)
    {
       this(depthDataFilter, null);
@@ -26,24 +24,24 @@ public class PointCloudWorldPacketGenerator implements Runnable
    public PointCloudWorldPacketGenerator(DepthDataFilter depthDataFilter, PacketCommunicator packetCommunicator)
    {
       this.depthDataFilter = depthDataFilter;
-      this.packetCommunicator= packetCommunicator;
+      this.packetCommunicator = packetCommunicator;
       ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
       int publishRateHz = 1;
-      service.scheduleAtFixedRate(this, 0, 1000/publishRateHz, TimeUnit.MILLISECONDS);
+      service.scheduleAtFixedRate(this, 0, 1000 / publishRateHz, TimeUnit.MILLISECONDS);
    }
-   
+
    public PointCloudWorldPacket getPointCloudWorldPacket()
    {
       PointCloudWorldPacket packet = new PointCloudWorldPacket();
       ArrayList<Point3d> groundPoints = new ArrayList<>();
       depthDataFilter.getQuadTree().getStoredPoints(groundPoints);
       packet.setGroundQuadTreeSupport(groundPoints.toArray(new Point3d[groundPoints.size()]));
-      
+
       ArrayList<TimestampedPoint> nearScanTimestampedPoints = depthDataFilter.getNearScan().getPointsCopy();
       ArrayList<Point3d> nearScanPoints = new ArrayList<>();
-      for(TimestampedPoint point:nearScanTimestampedPoints)
+      for (TimestampedPoint point : nearScanTimestampedPoints)
       {
-         nearScanPoints.add(new Point3d(point.x, point.y,point.z));
+         nearScanPoints.add(new Point3d(point.x, point.y, point.z));
       }
       packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3d[nearScanPoints.size()]));
       packet.timestamp = System.nanoTime();
@@ -53,8 +51,9 @@ public class PointCloudWorldPacketGenerator implements Runnable
    @Override
    public void run()
    {
-      if(packetCommunicator!=null)
+      if (packetCommunicator != null)
+      {
          packetCommunicator.send(getPointCloudWorldPacket());
+      }
    }
 }
-
