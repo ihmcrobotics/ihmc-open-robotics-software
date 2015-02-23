@@ -15,6 +15,15 @@ public class WalkToLocationTask extends BehaviorTask
    private double footstepLength;
 
    public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double walkingYawOrientationAngle,
+         double footstepLength, DoubleYoVariable yoTime, double sleepTime)
+   {
+      super(walkToLocationBehavior, yoTime , sleepTime);
+      this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
+      this.walkToLocationBehavior = walkToLocationBehavior;
+      this.walkingYawOrientationAngle = walkingYawOrientationAngle;
+      this.footstepLength = footstepLength;
+   }
+   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double walkingYawOrientationAngle,
          double footstepLength, DoubleYoVariable yoTime)
    {
       super(walkToLocationBehavior, yoTime);
