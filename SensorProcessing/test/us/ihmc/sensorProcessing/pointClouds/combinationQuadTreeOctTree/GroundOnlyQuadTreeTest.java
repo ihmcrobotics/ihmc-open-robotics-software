@@ -27,6 +27,7 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.dataStructures.AbstractHeightMapTest;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -50,7 +51,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
    @AverageDuration
-   @Ignore
+   @QuarantinedTest
    @Test(timeout = 10000)
    public void testGetStoredPoints()
    {
