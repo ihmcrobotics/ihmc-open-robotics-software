@@ -20,6 +20,8 @@ public class FingerStateBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime; // hardcoded, to be determined
    private final BooleanYoVariable trajectoryTimeElapsed;
+   
+   private final boolean DEBUG = false;
 
    public FingerStateBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridgeInterface, DoubleYoVariable yoTime)
    {
@@ -41,6 +43,9 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       this.outgoingFingerStatePacket = fingerStatePacket;
       hasInputBeenSet.set(true);
+      
+      if (DEBUG)
+         SysoutTool.println("Input has been set: " + outgoingFingerStatePacket);
    }
 
    @Override
@@ -60,6 +65,9 @@ public class FingerStateBehavior extends BehaviorInterface
          sendPacketToNetworkProcessor(outgoingFingerStatePacket);
          hasPacketBeenSet.set(true);
          startTime.set(yoTime.getDoubleValue());
+         
+         if (DEBUG)
+            SysoutTool.println("Sending FingerState Packet to Controller: " + outgoingFingerStatePacket);
       }
    }
 
@@ -102,6 +110,9 @@ public class FingerStateBehavior extends BehaviorInterface
          sendPacketToNetworkProcessor(stopFingerStatePacket);
       }
       isPaused.set(true);
+      
+      if (DEBUG)
+         SysoutTool.println("Pausing Behavior");
    }
 
    @Override
@@ -113,6 +124,8 @@ public class FingerStateBehavior extends BehaviorInterface
       {
          sendFingerStateToController();
       }
+      if (DEBUG)
+         SysoutTool.println("Resuming Behavior");
    }
 
    @Override
@@ -131,7 +144,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       if (hasInputBeenSet())
       {
-         SysoutTool.println("Re-Initializing");
+         SysoutTool.println("Re-Initializing Behavior");
       }
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);
