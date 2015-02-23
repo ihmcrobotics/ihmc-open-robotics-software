@@ -2,11 +2,11 @@ package us.ihmc.darpaRoboticsChallenge.maxwellPro;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators.ConstantBlackoutGenerator;
-import us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators.TimeDependentStepFunctionBlackoutGenerator;
 
 public class MaxwellProBlackoutScheduleFileGenerator
 {
@@ -15,7 +15,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
    
    public MaxwellProBlackoutScheduleFileGenerator(String outputFile) throws IOException
    {
-         writer = Files.newBufferedWriter(Paths.get(outputFile));
+         writer = Files.newBufferedWriter(Paths.get(outputFile), StandardCharsets.UTF_8);
    }
    
    public void generateScheduleFile(int runLengthInSeconds, MaxwellProBlackoutGenerator blackoutGenerator) throws IOException
