@@ -12,6 +12,7 @@ import java.util.Random;
 
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Ignore;
@@ -51,32 +52,55 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
    @AverageDuration
-   @QuarantinedTest
-   @Test(timeout = 10000)
+   @Test //(timeout = 10000)
    public void testGetStoredPoints()
    {
       double resolution = 0.01;
-      GroundOnlyQuadTree tree = new GroundOnlyQuadTree(new BoundingBox2d(-1, -1, 1, 1), resolution, 1.0, Integer.MAX_VALUE);
+      GroundOnlyQuadTree tree = new GroundOnlyQuadTree(new BoundingBox2d(-1, -1, 1, 1), resolution, resolution/10, Integer.MAX_VALUE);
 
       Collection<Point3d> points = new ArrayList<>();
 
       // ensure
+      double z=0;
       for (double x = -0.5; x < 0.5; x += resolution * 2)
       {
          for (double y = -0.5; y < 0.5; y += resolution * 2)
          {
-            Point3d p = new Point3d(x, y, x+y);
+            Point3d p = new Point3d(x, y, z);
             points.add(p);
             tree.addPoint(p.x, p.y,p.z); //create significant Z difference so points won't be filtered.
+            z+=0.1;
          }
       }
 
+      //make sure retrievedPoins
       ArrayList<Point3d> retrievedPoints = new ArrayList<>();
       tree.getStoredPoints(retrievedPoints);
-      System.out.println(retrievedPoints);
-      System.out.println(points);
-      assertTrue(points.containsAll(retrievedPoints));
-
+      assertSameCollection(points, retrievedPoints);
+   }
+   
+   private void assertSameCollection(Collection<? extends Tuple3d>pointsA, Collection<? extends Tuple3d> pointsB)
+   {
+      for(Tuple3d pointA:pointsA)
+      {
+         double minError = Double.MAX_VALUE;
+         Tuple3d minPoint=null;
+         for(Tuple3d pointB: pointsB)
+         {
+            double err = Math.abs(pointA.x-pointB.x) + Math.abs(pointA.y-pointB.y)+Math.abs(pointA.z-pointB.z);
+            if(err<minError)
+            {
+               minError=err;
+               minPoint=pointB;
+            }
+            minError = Math.min(err, minError);
+         }
+//         System.out.println(pointA);
+//         System.out.println(minPoint);
+//         System.out.println(minError);
+         assertTrue(minError<1e-5);
+      }
+      
    }
 
    @AverageDuration
