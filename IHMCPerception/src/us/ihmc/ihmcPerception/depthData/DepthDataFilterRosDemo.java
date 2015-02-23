@@ -2,13 +2,10 @@ package us.ihmc.ihmcPerception.depthData;
 
 import java.net.URISyntaxException;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.apps.RosPointCloudFilterRepublisher;
 
 /*
@@ -17,7 +14,7 @@ import us.ihmc.utilities.ros.apps.RosPointCloudFilterRepublisher;
 public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
 {
    private DepthDataFilter depthDataFilter;
-   private RigidBodyTransform sensorTransform = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(0.0, 0.0, 1.0));
+   private Point3d sensorOrigin = new Point3d(0.0,0.0,1.0);
 
 
    public DepthDataFilterRosDemo()
@@ -37,7 +34,7 @@ public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
    @Override
    protected boolean includePoint(Point3d point, float intensity)
    {
-      return depthDataFilter.addPoint(point, sensorTransform);
+      return depthDataFilter.addPoint(point, sensorOrigin);
    }
 
 
