@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -30,6 +31,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCValveEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
@@ -38,18 +40,16 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -226,7 +226,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
    
-   @Ignore
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
@@ -239,6 +238,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
 
+      RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
@@ -246,11 +246,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
-      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
+      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
 
-      Vector3d graspApproachDirectionInValveFrame = new Vector3d(1,0,0);
       graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(valveTransformToWorld, graspApproachDirectionInValveFrame, ValveType.BIG_VALVE.getValveRadius(), true);
+      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, ValveType.BIG_VALVE.getValveRadius(), ValveGraspLocation.SIX_O_CLOCK);
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, valveTransformToWorld, RobotSide.RIGHT, 2.0);
@@ -266,16 +265,17 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    private TurnValveBehavior createNewTurnValveBehavior()
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       CapturePointUpdatable capturePointUpdatable = drcBehaviorTestHelper.getCapturePointUpdatable();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       BooleanYoVariable yoTippingDetected = capturePointUpdatable.getTippingDetectedBoolean();
+      WholeBodyControllerParameters wholeBodyControllerParameters = getRobotModel();
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 
       final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
-            yoTippingDetected, walkingControllerParams);
+            yoTippingDetected, wholeBodyControllerParameters, walkingControllerParams);
       return turnValveBehavior;
    }
 

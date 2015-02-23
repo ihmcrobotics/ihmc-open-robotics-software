@@ -18,26 +18,60 @@ public class WholeBodyInverseKinematicTask extends BehaviorTask
    private final double trajectoryTime;
    private final ControlledDoF controlledDofs;
    private final int numberOfReseeds;
+   private final boolean setPalmTarget;
+   private final double offsetHandPoseAlongPalmNormalByThisMuch;
 
    public WholeBodyInverseKinematicTask(RobotSide robotSide, DoubleYoVariable yoTime, WholeBodyInverseKinematicBehavior wholeBodyIKBehavior,
-         FramePose desiredHandPose, double trajectoryTime, int numberOfReseeds, ControlledDoF controlledDofs)
+         FramePose desiredHandPose, double trajectoryTime, int numberOfReseeds, ControlledDoF controlledDofs, boolean setPalmTarget)
    {
       super(wholeBodyIKBehavior, yoTime);
       this.wholeBodyIKBehavior = wholeBodyIKBehavior;
       this.robotSide = robotSide;
       this.trajectoryTime = trajectoryTime;
       desiredHandPose.checkReferenceFrameMatch(worldFrame);
-      this.desiredHandPose = desiredHandPose;
+      this.desiredHandPose = new FramePose(desiredHandPose);
       this.numberOfReseeds = numberOfReseeds;
       this.controlledDofs = controlledDofs;
+      this.setPalmTarget = setPalmTarget;
+      this.offsetHandPoseAlongPalmNormalByThisMuch = 0.0;
+   }
+
+   public WholeBodyInverseKinematicTask(RobotSide robotSide, DoubleYoVariable yoTime, WholeBodyInverseKinematicBehavior wholeBodyIKBehavior,
+         FramePose desiredHandPoseBeforeOffset, double offsetHandPoseAlongPalmNormalByThisMuch, double trajectoryTime, int numberOfReseeds)
+   {
+      super(wholeBodyIKBehavior, yoTime);
+      this.wholeBodyIKBehavior = wholeBodyIKBehavior;
+      this.robotSide = robotSide;
+      this.trajectoryTime = trajectoryTime;
+      desiredHandPoseBeforeOffset.checkReferenceFrameMatch(worldFrame);
+      this.desiredHandPose = new FramePose(desiredHandPoseBeforeOffset);
+      this.numberOfReseeds = numberOfReseeds;
+      this.controlledDofs = ControlledDoF.DOF_3P2R;
+      this.setPalmTarget = true;
+      this.offsetHandPoseAlongPalmNormalByThisMuch = offsetHandPoseAlongPalmNormalByThisMuch;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs);
-      wholeBodyIKBehavior.computeSolution();      
-   }
+      if (offsetHandPoseAlongPalmNormalByThisMuch != 0.0)
+      {
+         wholeBodyIKBehavior.initialize();
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, 0, ControlledDoF.DOF_3P2R, true);
+         wholeBodyIKBehavior.computeSolution();
 
+         desiredHandPose.setToZero(wholeBodyIKBehavior.getDesiredFullRobotModel().getHandControlFrame(robotSide));
+         desiredHandPose.translate(-offsetHandPoseAlongPalmNormalByThisMuch, 0.0, 0.0);
+         desiredHandPose.changeFrame(worldFrame);
+
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs, setPalmTarget);
+         wholeBodyIKBehavior.computeSolution();
+      }
+      else
+      {
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs, setPalmTarget);
+         wholeBodyIKBehavior.computeSolution(); 
+      }
+   }
 
 }
