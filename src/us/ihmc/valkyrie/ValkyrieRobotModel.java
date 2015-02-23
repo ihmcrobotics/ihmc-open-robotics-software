@@ -324,7 +324,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager()
+   public SideDependentList<HandCommandManager> createHandCommandManager()
    {
 	   return null;
    }
