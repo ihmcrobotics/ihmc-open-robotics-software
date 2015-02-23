@@ -4,8 +4,10 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -30,6 +32,9 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCHandType;
@@ -61,7 +66,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.targetDeployment = targetDeployment;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
-      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
+      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(lidarDataFilter, getProcessedSensorsCommunicator());
    }
 

@@ -1,23 +1,32 @@
 package us.ihmc.ihmcPerception.depthData;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class RobotDepthDataFilter extends DepthDataFilter
 {
    private final RobotBoundingBoxes robotBoundingBoxes;
    private final SDFFullRobotModel fullRobotModel;
+   private final SideDependentList<ArrayList<Point2d>> contactPoints;
 
-   public RobotDepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel)
+
+   public RobotDepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super((fullRobotModel.getHead() == null) ? ReferenceFrame.getWorldFrame() : fullRobotModel.getHead().getBodyFixedFrame());
       this.robotBoundingBoxes = robotBoundingBoxes;
       this.fullRobotModel = fullRobotModel;
+      this.contactPoints = contactPoints;
    }
 
    @Override
@@ -95,6 +104,36 @@ public class RobotDepthDataFilter extends DepthDataFilter
 
       return Math.atan2(tfPoint.y, tfPoint.x);
    }
+
+   public synchronized void clearLidarData(DepthDataTree lidarTree)
+   {
+      super.clearLidarData(lidarTree);
+      //getQuadTree().clearTree(getMidFootPoint().z);
+      addPointsUnderFeet();
+   }
+
+   private void addPointsUnderFeet()
+   {
+      final double QuadTreePointUnderFeetScaling = 1.1;
+      for (RobotSide side : RobotSide.values)
+      {
+         ReferenceFrame soleFrame = fullRobotModel.getFoot(side).getBodyFixedFrame();
+         for (Point2d point : contactPoints.get(side))
+         {
+            FramePoint footContactPoint = new FramePoint(soleFrame, point.getX(), point.getY(), 0.0);
+            footContactPoint.scale(QuadTreePointUnderFeetScaling);
+            footContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            getQuadTree().addPoint(footContactPoint.getX(), footContactPoint.getY(), footContactPoint.getZ());
+         }
+
+         FramePoint footCenter = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         footCenter.changeFrame(ReferenceFrame.getWorldFrame());
+            getQuadTree().addPoint(footCenter.getX(), footCenter.getY(), footCenter.getZ());
+
+      }
+
+   }
+
 
    @Override
    public void setParameters(DepthDataFilterParameters parameters)
