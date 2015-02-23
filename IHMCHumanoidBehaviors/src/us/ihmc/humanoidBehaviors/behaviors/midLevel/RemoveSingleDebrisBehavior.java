@@ -49,7 +49,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
    private final ReferenceFrame midZupFrame;
 
-   private final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.75; //0.85
+   private final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.80; //0.85
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
@@ -83,7 +83,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    {
       calculateLocation(graspPosition);
       if (isObjectTooFar.getBooleanValue())
-         taskExecutor.submit(new WalkToLocationTask(targetPose2dInWorld, walkCloseToObjectBehavior, 0.0, walkingControllerParameters.getMaxStepLength(), yoTime));
+         taskExecutor.submit(new WalkToLocationTask(targetPose2dInWorld, walkCloseToObjectBehavior, 0.0, walkingControllerParameters.getMaxStepLength(), yoTime, 1.0));
 
       robotSide = determineSideToUse(graspPosition);
 
@@ -104,23 +104,26 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
          return RobotSide.LEFT;
    }
 
+   public RobotSide getSideToUse()
+   {
+      return robotSide;
+   }
+   
    private void calculateLocation(Point3d graspPosition)
    {
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-
       //
-      FramePoint graspPositionInChestFame = new FramePoint(worldFrame);
-      graspPositionInChestFame.set(graspPosition);
-      graspPositionInChestFame.changeFrame(chestFrame);
+      FramePoint graspPositionInMidZUpFrame = new FramePoint(worldFrame);
+      graspPositionInMidZUpFrame.set(graspPosition);
+      graspPositionInMidZUpFrame.changeFrame(midZupFrame);
       //      
-
-      if (!(graspPositionInChestFame.getX() >= OPTIMAL_DISTANCE_TO_GRAB_OBJECT))
+      
+      if (!(graspPositionInMidZUpFrame.getX() > OPTIMAL_DISTANCE_TO_GRAB_OBJECT))
          return;
 
       isObjectTooFar.set(true);
 
       targetPose2dInWorld.changeFrame(midZupFrame);
-      targetPose2dInWorld.setX(graspPositionInChestFame.getX() - OPTIMAL_DISTANCE_TO_GRAB_OBJECT);
+      targetPose2dInWorld.setX(graspPositionInMidZUpFrame.getX() - OPTIMAL_DISTANCE_TO_GRAB_OBJECT);
       targetPose2dInWorld.setY(0.0);
       FrameOrientation2d frameOrientation2d = new FrameOrientation2d(midZupFrame);
       frameOrientation2d.setYaw(0.0);
