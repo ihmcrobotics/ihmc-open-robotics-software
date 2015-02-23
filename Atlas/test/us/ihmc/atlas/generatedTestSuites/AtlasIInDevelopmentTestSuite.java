@@ -10,11 +10,11 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasWholeBodyInverseKinematicBehaviorTest.class,
    us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
    us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
+   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasWallWorldTest.class,
    us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.WholeBodyIkSolverTest.class,
-   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
+   us.ihmc.atlas.WholeBodyIkSolverTest.class
 })
 
 public class AtlasIInDevelopmentTestSuite
