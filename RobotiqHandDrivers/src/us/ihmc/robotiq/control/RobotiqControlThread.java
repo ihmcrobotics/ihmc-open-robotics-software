@@ -5,14 +5,10 @@ import java.io.IOException;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoPacketServer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.robotiq.RobotiqHandInterface;
@@ -20,7 +16,7 @@ import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
-class RobotiqControlThread implements Runnable
+class RobotiqControlThread extends HandControlThread
 {
    private final RobotSide robotSide;
    private final RobotiqHandInterface robotiqHand;
@@ -29,28 +25,20 @@ class RobotiqControlThread implements Runnable
    private final HandJointAngleCommunicator jointAngleCommunicator;
    private int errorCount = 0;
    private RobotiqHandSensorData handStatus;
-   private final PacketCommunicator packetCommunicator;
 
    public RobotiqControlThread(RobotSide robotSide)
    {
-      this(robotSide, new KryoPacketServer(robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
-                                           new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(),
-                                           "RobotiqControlThreadServerCommunicator"));
-   }
-
-   public RobotiqControlThread(RobotSide robotSide, PacketCommunicator packetCommunicator)
-   {
+      super(robotSide);
       this.robotSide = robotSide;
-      this.packetCommunicator = packetCommunicator;
       robotiqHand = new RobotiqHandInterface(robotSide.equals(RobotSide.LEFT) ? NetworkParameters.getHost(NetworkParameterKeys.leftHand) : NetworkParameters.getHost(NetworkParameterKeys.rightHand));
       fingerStateProvider = new FingerStateProvider(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator);
-
+      
       packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
-   
+
    public void connect()
    {
       try

@@ -4,14 +4,19 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.utilities.robotSide.RobotSide;
 
-public abstract class HandControlThread
+public abstract class HandControlThread implements Runnable
 {
-   private final int TCP_PORT = 4270; // should match port in HandCommandManager
-   protected KryoPacketCommunicator packetCommunicator = new KryoPacketServer(TCP_PORT, new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.HAND_MANAGER.ordinal(), "HandThreadManagerServerCommunicator");
+   protected KryoPacketCommunicator packetCommunicator;
 	
-   public abstract void start();
-	
+   public HandControlThread(RobotSide robotSide)
+   {
+      packetCommunicator = new KryoPacketServer(robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
+                                                new IHMCCommunicationKryoNetClassList(),
+                                                PacketDestination.HAND_MANAGER.ordinal(), robotSide.getCamelCaseNameForStartOfExpression() + "HandControlThreadServerCommunicator");
+   }
+   
    public abstract void connect();
 }
