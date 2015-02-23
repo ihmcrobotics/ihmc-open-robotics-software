@@ -688,13 +688,13 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
          double q_desired = desiredArmPose[i];
          double q_actual = actualArmPose[i];
+         double error = Math.abs(q_actual - q_desired);
 
          if (DEBUG)
          {
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
-
-         assertEquals(armJointName + " position error exceeds threshold.", q_desired, q_actual, jointPositionThreshold);
+         assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(jointPositionThreshold) + " degrees.", q_desired, q_actual, jointPositionThreshold);
       }
    }
 

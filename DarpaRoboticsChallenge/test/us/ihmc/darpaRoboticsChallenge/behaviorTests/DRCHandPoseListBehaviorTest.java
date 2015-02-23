@@ -79,7 +79,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private static final boolean DEBUG = false;
 
-   private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = 0.007;
+   private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = Math.toRadians(1.0);
    private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 25.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -200,7 +200,6 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       
       for (RobotSide robotSide : RobotSide.values)
       {
-
          assertRobotAchievedFinalDesiredArmPose(armPosesLeftAndRightSide.get(robotSide), robotSide);
          assertTrue(behaviors.get(robotSide.ordinal()).isDone());
       }
@@ -351,8 +350,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          {
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
          }
-
-         assertEquals(armJointName + " position error exceeds threshold.", q_desired, q_actual, jointPositionThreshold);
+         assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(jointPositionThreshold) + " degrees.", q_desired, q_actual, jointPositionThreshold);
       }
    }
 
