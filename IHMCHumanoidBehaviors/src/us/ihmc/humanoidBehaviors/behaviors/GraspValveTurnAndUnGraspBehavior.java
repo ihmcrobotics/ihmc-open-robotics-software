@@ -4,17 +4,18 @@ import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
-import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -22,6 +23,7 @@ import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -37,6 +39,7 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
 
    private final GraspValveBehavior graspValveBehavior;
    private final HandPoseBehavior handPoseBehavior;
+   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
    private final RotateHandAboutAxisBehavior rotateGraspedValveBehavior;
    private final FingerStateBehavior fingerStateBehavior;
 
@@ -47,22 +50,26 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
    private final double maxObservedWristForce = 0.0;
    private final double maxObservedCapturePointError = 0.0;
 
-   public GraspValveTurnAndUnGraspBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable tippingDetectedBoolean)
+   public GraspValveTurnAndUnGraspBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
+         BooleanYoVariable tippingDetectedBoolean)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
 
       childBehaviors = new ArrayList<BehaviorInterface>();
 
-      graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
+      graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
       childBehaviors.add(graspValveBehavior);
-      rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime);
+      rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters,
+            yoTime);
       childBehaviors.add(rotateGraspedValveBehavior);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(handPoseBehavior);
+      wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel,
+            yoTime);
 
       this.tippingDetected = tippingDetectedBoolean;
       this.yoTime = yoTime;
@@ -76,43 +83,32 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
       {
          pipeLine.doControl();
       }
-
-      //      if (!currentBehavior.equals(walkToLocationBehavior))
-      //      {
-      //         pauseIfCapturePointErrorIsTooLarge();
-      //      }
    }
 
-   private void pauseIfCapturePointErrorIsTooLarge()
+   public void setInput(RigidBodyTransform valveTransformToWorld, Vector3d graspApproachDirectionInValveFrame, Axis valvePinJointAxisInValveFrame,
+         double valveRadius, boolean graspValveRim, double turnValveAngle)
    {
-      if (tippingDetected.getBooleanValue() && !isPaused.getBooleanValue())
-      {
-         this.pause();
-         if (DEBUG)
-            SysoutTool.println("TurnValveBehavior: Tipping detected! Pausing behavior.");
-      }
-   }
-
-   public void setInput(RigidBodyTransform valveTransformToWorld, Vector3d graspApproachDirectionInValveFrame,
-         Axis valvePinJointAxisInValveFrame, double valveRadius, boolean graspValveRim, double turnValveAngle)
-   {
-      pipeLine.submitSingleTaskStage(new GraspValveTask(graspValveBehavior, valveTransformToWorld, graspApproachDirectionInValveFrame,
-            graspValveRim, valveRadius, yoTime));
-
-      double trajectoryTime = 2.0;
       RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
-      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior, valveTransformToWorld,
-            valvePinJointAxisInValveFrame, turnValveAngle, trajectoryTime));
-
-      pipeLine.submitSingleTaskStage(new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime));
-
-      RigidBodyTransform valveTransformToWorldRotationOnly = new RigidBodyTransform(valveTransformToWorld);
-      valveTransformToWorldRotationOnly.setTranslation(new Vector3d());
+      double trajectoryTimeRotateValve = 2.0;
+      double trajectoryTimeMoveHandAwayFromValve = 2.0;
       Vector3d graspApproachDirectionInWorld = new Vector3d(graspApproachDirectionInValveFrame);
-      valveTransformToWorldRotationOnly.transform(graspApproachDirectionInWorld);
+      valveTransformToWorld.transform(graspApproachDirectionInWorld);
+      
+      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, graspApproachDirectionInValveFrame, graspValveRim,
+            valveRadius, yoTime);
 
-      pipeLine.submitSingleTaskStage(new HandPoseTask(robotSideOfHandToUse, graspApproachDirectionInWorld, -0.3, fullRobotModel, yoTime, handPoseBehavior,
-            trajectoryTime));
+      RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
+            valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, trajectoryTimeRotateValve);
+
+      FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime);
+
+      HandPoseTask moveHandAwayFromValveTask = new HandPoseTask(robotSideOfHandToUse, graspApproachDirectionInWorld, -0.3, fullRobotModel, yoTime,
+            handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);
+
+      pipeLine.submitSingleTaskStage(graspValveTask);
+      pipeLine.submitSingleTaskStage(rotateGraspedValveTask);
+      pipeLine.submitSingleTaskStage(openHandTask);
+      pipeLine.submitSingleTaskStage(moveHandAwayFromValveTask);
 
       hasInputBeenSet.set(true);
    }

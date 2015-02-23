@@ -22,13 +22,10 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicB
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ExcludedTest;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -151,7 +148,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
          System.out.println(desiredHandPose);
          System.out.println("  ");
       }
-      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration , 5, ControlledDoF.DOF_3P3R);
+      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration , 5, ControlledDoF.DOF_3P3R, false);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
 
       wholeBodyIKBehavior.computeSolution();

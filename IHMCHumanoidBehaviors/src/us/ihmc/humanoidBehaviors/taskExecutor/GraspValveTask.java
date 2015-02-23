@@ -3,7 +3,9 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspLocation;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspValveTask extends BehaviorTask
@@ -30,6 +32,6 @@ public class GraspValveTask extends BehaviorTask
    @Override
    protected void setBehaviorInput()
    {
-      graspValveBehavior.setGraspPose(valveTransformToWorld, approachDirection, valveRadius, graspValveRim);
+      graspValveBehavior.setGraspPose(RobotSide.RIGHT, valveTransformToWorld, valveRadius, ValveGraspLocation.TWELVE_O_CLOCK);
    }
 }

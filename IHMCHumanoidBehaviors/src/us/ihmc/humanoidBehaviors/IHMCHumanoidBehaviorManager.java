@@ -163,7 +163,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
 
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
-            tippingDetectedBoolean, yoDoubleSupport, walkingControllerParameters);
+            tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters, walkingControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
 
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,

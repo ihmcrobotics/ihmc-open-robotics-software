@@ -134,7 +134,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       prepareToDropPose.setOrientation(rotationToBePerformedInWorldFrame);
 
       pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyIKBehavior, prepareToDropPose, trajectoryTime, 0,
-            ControlledDoF.DOF_3P2R));
+            ControlledDoF.DOF_3P2R, false));
 
       pipeLine.requestNewStage();
 
