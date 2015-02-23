@@ -10,25 +10,11 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
-public interface WalkingControllerParameters extends HeadOrientationControllerParameters
+public interface WalkingControllerParameters extends HeadOrientationControllerParameters, StepingParameters
 {
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
-
-   public abstract double getFootForwardOffset();
-
-   public abstract double getFootBackwardOffset();
-
-   public abstract double getFootWidth();
-
-   public abstract double getToeWidth();
-
-   public abstract double getFootLength();
-   
-   public abstract double getActualFootWidth();
-
-   public abstract double getActualFootLength();
 
    public abstract double getAnkleHeight();
 
@@ -62,17 +48,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getHeelTouchdownAngle();
 
-   public abstract double getInPlaceWidth();
-
-   public abstract double getDesiredStepForward();
-
-   public abstract double getMaxStepLength();
-
-   public abstract double getMinStepWidth();
-
-   public abstract double getMaxStepWidth();
-
-   public abstract double getStepPitch();
 
    public abstract double getCaptureKpParallelToMotion();
 

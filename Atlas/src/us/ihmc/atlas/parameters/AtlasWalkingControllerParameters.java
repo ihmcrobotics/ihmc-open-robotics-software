@@ -295,6 +295,36 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getDefaultStepLength()
+   {
+      return 0.6;
+   }
+
+   @Override
+   public double getMaxStepUp()
+   {
+      return 0.25;
+   }
+
+   @Override
+   public double getMaxStepDown()
+   {
+      return 0.2;
+   }
+
+   @Override
+   public double getMaxAngleTurnOutwards()
+   {
+      return Math.PI/4.0;
+   }
+
+   @Override
+   public double getMaxAngleTurnInwards()
+   {
+      return 0;
+   }
+
+   @Override
    public double getCaptureKpParallelToMotion()
    {
       if (!(target == AtlasTarget.REAL_ROBOT))
