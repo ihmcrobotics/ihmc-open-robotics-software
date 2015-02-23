@@ -49,12 +49,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private RigidBodyTransform robotPose = new RigidBodyTransform();
 
    private DoubleYoVariable confidenceFactor; // target for alpha filter
-   private DoubleYoVariable interpolationAlphaFilterBreakFrequency;
-   private DoubleYoVariable interpolationAlphaFilterAlphaValue;
-   private DoubleYoVariable interpolationAlphaFilter;
+   private DoubleYoVariable interpolationTranslationAlphaFilterBreakFrequency;
+   private DoubleYoVariable interpolationTranslationAlphaFilterAlphaValue;
+   private DoubleYoVariable interpolationTranslationAlphaFilter;
    private LongYoVariable seNonProcessedPelvisTimeStamp;
-   private DoubleYoVariable maxVelocityClip;
-   private DoubleYoVariable clippedAlphaValue;
+   private DoubleYoVariable maxTranslationVelocityClip;
+   private DoubleYoVariable translationClippedAlphaValue;
 
    private DoubleYoVariable nonCorrectedPelvis_x;
    private DoubleYoVariable nonCorrectedPelvis_y;
@@ -134,13 +134,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
    private void setupYoVariables(YoVariableRegistry registry, String nameSpace)
    {
-      interpolationAlphaFilter = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisErrorCorrectionAlphaFilter");
-      interpolationAlphaFilterAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationAlphaFilterAlphaValue");
-      interpolationAlphaFilterBreakFrequency = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationAlphaFilterBreakFrequency");
+      interpolationTranslationAlphaFilter = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisTranslationErrorCorrectionAlphaFilter");
+      interpolationTranslationAlphaFilterAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterAlphaValue");
+      interpolationTranslationAlphaFilterBreakFrequency = (DoubleYoVariable) registry.getVariable(nameSpace, "interpolationTranslationAlphaFilterBreakFrequency");
       confidenceFactor = (DoubleYoVariable) registry.getVariable(nameSpace, "PelvisErrorCorrectionConfidenceFactor");
       seNonProcessedPelvisTimeStamp = (LongYoVariable) registry.getVariable(nameSpace, "seNonProcessedPelvis_timestamp");
-      maxVelocityClip = (DoubleYoVariable) registry.getVariable(nameSpace, "maxVelocityClip");
-      clippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "clippedAlphaValue");
+      maxTranslationVelocityClip = (DoubleYoVariable) registry.getVariable(nameSpace, "maxTranslationVelocityClip");
+      translationClippedAlphaValue = (DoubleYoVariable) registry.getVariable(nameSpace, "translationClippedAlphaValue");
 
       nonCorrectedPelvis_x = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_x");
       nonCorrectedPelvis_y = (DoubleYoVariable) registry.getVariable(nameSpace, "nonCorrectedPelvis_y");
@@ -304,12 +304,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
-         while (clippedAlphaValue.getDoubleValue() > 0.2)
+         while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          }
 
-         while (clippedAlphaValue.getDoubleValue() < 0.9999999)
+         while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
             ;
@@ -373,12 +373,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
-         while (clippedAlphaValue.getDoubleValue() > 0.2)
+         while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          }
 
-         while (clippedAlphaValue.getDoubleValue() < 0.9999999)
+         while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
             ;
@@ -443,12 +443,12 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
 
-         while (clippedAlphaValue.getDoubleValue() > 0.2)
+         while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 3);
          }
 
-         while (clippedAlphaValue.getDoubleValue() < 0.9999999)
+         while (translationClippedAlphaValue.getDoubleValue() < 0.9999999)
          {
             success &= simulateAndBlockAndCatchExceptions(TimeTools.nanoSecondstoSeconds(1000000) * 100);
             ;
@@ -482,13 +482,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    private void setPelvisPoseHistoryCorrectorAlphaBreakFreq(YoVariableRegistry registry, double breakFrequency)
    {
       DoubleYoVariable pelvisCorrectorAlphaFilterBF = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection",
-            "interpolationAlphaFilterBreakFrequency");
+            "interpolationTranslationAlphaFilterBreakFrequency");
       pelvisCorrectorAlphaFilterBF.set(breakFrequency);
    }
 
    private void setPelvisPoseHistoryCorrectorMaxVelocity(YoVariableRegistry registry, double maxVel)
    {
-      DoubleYoVariable maxVelocityCap = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection", "maxVelocityClip");
+      DoubleYoVariable maxVelocityCap = (DoubleYoVariable) registry.getVariable("PelvisPoseHistoryCorrection", "maxTranslationVelocityClip");
       maxVelocityCap.set(maxVel);
    }
 

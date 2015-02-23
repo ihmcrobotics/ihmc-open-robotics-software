@@ -68,17 +68,17 @@ public class PelvisPoseHistoryCorrection
 
    private final LongYoVariable seNonProcessedPelvisTimeStamp;
 
-   private final AlphaFilteredYoVariable interpolationAlphaFilter;
+   private final AlphaFilteredYoVariable interpolationTranslationAlphaFilter;
    private final DoubleYoVariable confidenceFactor; // target for alpha filter
-   private final DoubleYoVariable interpolationAlphaFilterBreakFrequency;
+   private final DoubleYoVariable interpolationTranslationAlphaFilterBreakFrequency;
    private final DoubleYoVariable distanceToTravel;
    private final DoubleYoVariable distanceTraveled;
-   private final DoubleYoVariable previousClippedAlphaValue;
-   private final DoubleYoVariable clippedAlphaValue;
-   private final DoubleYoVariable maxVelocityClip;
-   private final DoubleYoVariable maxAlpha;
+   private final DoubleYoVariable previousTranslationClippedAlphaValue;
+   private final DoubleYoVariable translationClippedAlphaValue;
+   private final DoubleYoVariable maxTranslationVelocityClip;
+   private final DoubleYoVariable maxTranslationAlpha;
 
-   private final DoubleYoVariable interpolationAlphaFilterAlphaValue;
+   private final DoubleYoVariable interpolationTranslationAlphaFilterAlphaValue;
 
    private final BooleanYoVariable manuallyTriggerLocalizationUpdate;
    private final DoubleYoVariable manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
@@ -139,31 +139,31 @@ public class PelvisPoseHistoryCorrection
       orientationCorrection = new YoReferencePose("orientationCorrection", nonCorrectedPelvis, registry);
       correctedPelvis = new YoReferencePose("correctedPelvis", worldFrame, registry);
 
-      interpolationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationAlphaFilterAlphaValue", registry);
-      interpolationAlphaFilterBreakFrequency = new DoubleYoVariable("interpolationAlphaFilterBreakFrequency", registry);
-      interpolationAlphaFilter = new AlphaFilteredYoVariable("PelvisErrorCorrectionAlphaFilter", registry, interpolationAlphaFilterAlphaValue);
+      interpolationTranslationAlphaFilterAlphaValue = new DoubleYoVariable("interpolationTranslationAlphaFilterAlphaValue", registry);
+      interpolationTranslationAlphaFilterBreakFrequency = new DoubleYoVariable("interpolationTranslationAlphaFilterBreakFrequency", registry);
+      interpolationTranslationAlphaFilter = new AlphaFilteredYoVariable("PelvisTranslationErrorCorrectionAlphaFilter", registry, interpolationTranslationAlphaFilterAlphaValue);
 
-      interpolationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      interpolationTranslationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationAlphaFilterBreakFrequency.getDoubleValue(), estimatorDT);
-            interpolationAlphaFilter.setAlpha(alpha);
+            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(), estimatorDT);
+            interpolationTranslationAlphaFilter.setAlpha(alpha);
          }
       });
 
-      interpolationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
+      interpolationTranslationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
       confidenceFactor = new DoubleYoVariable("PelvisErrorCorrectionConfidenceFactor", registry);
 
       seNonProcessedPelvisTimeStamp = new LongYoVariable("seNonProcessedPelvis_timestamp", registry);
 
-      clippedAlphaValue = new DoubleYoVariable("clippedAlphaValue", registry);
+      translationClippedAlphaValue = new DoubleYoVariable("translationClippedAlphaValue", registry);
       distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
-      maxVelocityClip = new DoubleYoVariable("maxVelocityClip", registry);
-      maxVelocityClip.set(0.01);
-      previousClippedAlphaValue = new DoubleYoVariable("previousClippedAlphaValue", registry);
-      maxAlpha = new DoubleYoVariable("maxAlpha", registry);
+      maxTranslationVelocityClip = new DoubleYoVariable("maxTranslationVelocityClip", registry);
+      maxTranslationVelocityClip.set(0.01);
+      previousTranslationClippedAlphaValue = new DoubleYoVariable("previousTranslationClippedAlphaValue", registry);
+      maxTranslationAlpha = new DoubleYoVariable("maxTranslationAlpha", registry);
       distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
       //      distanceError = new DoubleYoVariable("distanceError", registry);
 
@@ -189,7 +189,7 @@ public class PelvisPoseHistoryCorrection
          checkForManualTrigger();
          checkForNewPacket();
 
-         interpolationAlphaFilter.update(confidenceFactor.getDoubleValue());
+         interpolationTranslationAlphaFilter.update(confidenceFactor.getDoubleValue());
 
          pelvisReferenceFrame.getTransformToParent(pelvisPose);
          addPelvisePoseToPelvisBuffer(pelvisPose, timestamp);
@@ -245,9 +245,9 @@ public class PelvisPoseHistoryCorrection
    private void correctPelvisPose(RigidBodyTransform pelvisPose)
    {
       updateTranslationalMaxVelocityClip();
-      interpolatedRotationCorrectionFrame.interpolate(interpolationRotationStartFrame, totalRotationErrorFrame, clippedAlphaValue.getDoubleValue());
+      interpolatedRotationCorrectionFrame.interpolate(interpolationRotationStartFrame, totalRotationErrorFrame, translationClippedAlphaValue.getDoubleValue());
 
-      interpolatedTranslationCorrectionFrame.interpolate(interpolationTranslationStartFrame, totalTranslationErrorFrame, clippedAlphaValue.getDoubleValue());
+      interpolatedTranslationCorrectionFrame.interpolate(interpolationTranslationStartFrame, totalTranslationErrorFrame, translationClippedAlphaValue.getDoubleValue());
 
       interpolatedRotationCorrectionFrame.getTransformToParent(interpolatedRotationError);
       orientationCorrection.setAndUpdate(interpolatedRotationError);
@@ -266,9 +266,9 @@ public class PelvisPoseHistoryCorrection
       interpolatedTranslationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, worldFrame);
       errorBetweenCurrentPositionAndCorrected.getTranslation(distanceToTravelVector);
       distanceToTravel.set(distanceToTravelVector.length());
-      maxAlpha.set((estimatorDT * maxVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousClippedAlphaValue.getDoubleValue());
-      clippedAlphaValue.set(MathTools.clipToMinMax(interpolationAlphaFilter.getDoubleValue(), 0.0, maxAlpha.getDoubleValue()));
-      previousClippedAlphaValue.set(clippedAlphaValue.getDoubleValue());
+      maxTranslationAlpha.set((estimatorDT * maxTranslationVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue()) + previousTranslationClippedAlphaValue.getDoubleValue());
+      translationClippedAlphaValue.set(MathTools.clipToMinMax(interpolationTranslationAlphaFilter.getDoubleValue(), 0.0, maxTranslationAlpha.getDoubleValue()));
+      previousTranslationClippedAlphaValue.set(translationClippedAlphaValue.getDoubleValue());
    }
 
    /**
@@ -305,8 +305,8 @@ public class PelvisPoseHistoryCorrection
     */
    private void addNewExternalPose(TimeStampedTransform3D newPelvisPoseWithTime)
    {
-      previousClippedAlphaValue.set(0.0);
-      interpolationAlphaFilter.set(0.0);
+      previousTranslationClippedAlphaValue.set(0.0);
+      interpolationTranslationAlphaFilter.set(0.0);
       distanceTraveled.set(0.0);
       calculateAndStoreErrorInPast(newPelvisPoseWithTime);
       interpolationRotationStartFrame.setAndUpdate(interpolatedRotationCorrectionFrame.getTransformToParent());
@@ -374,7 +374,7 @@ public class PelvisPoseHistoryCorrection
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
 
-      double maxCorrectionVelocity = maxVelocityClip.getDoubleValue();
+      double maxCorrectionVelocity = maxTranslationVelocityClip.getDoubleValue();
       PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected, maxCorrectionVelocity);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
