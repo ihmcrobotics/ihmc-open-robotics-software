@@ -45,7 +45,6 @@ public class PacketsForwardedToTheUi
       SnapFootstepPacket.class,
       VideoPacket.class,
       HandPosePacket.class,
-      PointCloudPacket.class,
       DepthDataClearCommand.class,
       IntrinsicCameraParametersPacket.class,
       PointCloudWorldPacket.class
