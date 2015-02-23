@@ -27,6 +27,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -156,6 +157,44 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
+   
+   @AverageDuration(duration = 30.0)
+   @Test(timeout = 90137)
+   public void testWristRoll() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
+
+      double swingTrajectoryTime = 2.0;
+      int numberOfArmPoses = 2;
+      RobotSide robotSide = RobotSide.LEFT;
+
+      double[][] armPoses = createArmPosesInitializedToRobot(numberOfArmPoses, robotSide);
+
+      ArmJointName randomArmJoint = ArmJointName.WRIST_ROLL;
+      int poseNumber = 1;
+      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, Math.PI / 2, true);
+
+      HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+      handPoseListBehavior.initialize();
+      handPoseListBehavior.setInput(handPoseListPacket);
+      assertTrue(handPoseListBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper
+            .executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseListBehavior, swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
+
+      assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
+      assertTrue(success);
+      assertTrue(handPoseListBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
    @AverageDuration(duration = 65.4)
    @Test(timeout = 196338)
    public void testMultipleArmPoses() throws SimulationExceededMaximumTimeException
@@ -338,6 +377,12 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       double[] desiredArmPose = getDesiredArmPose(armPoses, poseNumber);
       double[] actualArmPose = getCurrentArmPose(robotSide);
 
+      LinkedHashMap<Double, ArmJointName> jointAngleErrors = new LinkedHashMap<Double, ArmJointName>(numberOfArmJoints);
+      double maxJointAngleError = 0.0;
+      
+      if (DEBUG)
+         System.out.println("\n");
+      
       for (int i = 0; i < numberOfArmJoints; i++)
       {
          ArmJointName armJointName = armJointNames[i];
@@ -345,13 +390,19 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          double q_desired = desiredArmPose[i];
          double q_actual = actualArmPose[i];
          double error = Math.abs(q_actual - q_desired);
-
-         if (DEBUG)
-         {
-            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
-         }
+         jointAngleErrors.put(error, armJointName);
+         
          assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(jointPositionThreshold) + " degrees.", q_desired, q_actual, jointPositionThreshold);
+      
+         if (DEBUG)
+            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
+         
+         if (error > maxJointAngleError)
+            maxJointAngleError = error;
       }
+
+      if (DEBUG)
+         SysoutTool.println("Maximum Position Error: " + Math.toDegrees(maxJointAngleError) + " degrees in " + jointAngleErrors.get(maxJointAngleError) );
    }
 
    private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)
