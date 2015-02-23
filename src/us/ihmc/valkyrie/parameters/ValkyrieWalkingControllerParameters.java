@@ -264,6 +264,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getDefaultStepLength()
+   {
+      return 0.5;
+   }
+
+   @Override
    public double getMinStepWidth()
    {
       return 0.15;
@@ -279,6 +285,30 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getStepPitch()
    {
       return 0.0;
+   }
+
+   @Override
+   public double getMaxStepUp()
+   {
+      return 0.3;
+   }
+
+   @Override
+   public double getMaxStepDown()
+   {
+      return 0.25;
+   }
+
+   @Override
+   public double getMaxAngleTurnOutwards()
+   {
+      return Math.PI/4.0;
+   }
+
+   @Override
+   public double getMaxAngleTurnInwards()
+   {
+      return 0;
    }
 
    @Override
