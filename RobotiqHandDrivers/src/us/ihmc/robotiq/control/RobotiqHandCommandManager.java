@@ -23,10 +23,15 @@ public class RobotiqHandCommandManager extends HandCommandManager
    private final KryoLocalPacketCommunicator handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.HAND_MANAGER.ordinal(), "RobotiqHandCommunicator");
    
-	public RobotiqHandCommandManager()
+   public RobotiqHandCommandManager()
+   {
+      this(RobotSide.RIGHT);
+   }
+   
+	public RobotiqHandCommandManager(RobotSide robotSide)
 	{
-	   super(RobotiqControlThreadManager.class);
-//	   super(RobotiqControlThread.class);
+	   super(RobotiqControlThreadManager.class, robotSide);
+//	   super(RobotiqControlThread.class, robotSide);
 	   
 	   setupOutboundPacketListeners();
 	   setupInboundPacketListeners();
@@ -70,7 +75,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
    public static void main(String[] args)
    {
-      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager();
+      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(RobotSide.RIGHT);
       JFrame frame = new JFrame();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       

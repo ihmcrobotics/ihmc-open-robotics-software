@@ -7,27 +7,29 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
-//TODO: rename and create interface for sending hand command
-public abstract class HandCommandManager //implements HandCommandInterface
+import us.ihmc.utilities.robotSide.RobotSide;
+
+public abstract class HandCommandManager
 {
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
 	private final String SERVER_ADDRESS = "localhost";
-	private final int TCP_PORT = 4270; // should match port in HandControlThreadManager
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 	
 	protected KryoPacketClientEndPointCommunicator packetCommunicator;
 	
-	public HandCommandManager(Class<? extends Object> clazz)
+	public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
 	{
 	   // decided to decouple the comms startup process for the hands
 	   // HandCommandManager should only spawn a HndControlThreadManager when debugging
 	   if(DEBUG)
 	      spawnHandControllerThreadManager(clazz);
 		
-		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS, TCP_PORT,
-	         new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(), "HandCommandManagerClient");
+		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
+		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
+		                                                              new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(), "HandCommandManagerClient");
 		packetCommunicator.setReconnectAutomatically(true);
 		
 		try

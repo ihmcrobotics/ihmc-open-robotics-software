@@ -15,6 +15,8 @@ import us.ihmc.ihmcPerception.IHMCPerceptionManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class DRCNetworkProcessor
 {
@@ -113,13 +115,17 @@ public class DRCNetworkProcessor
 
       if (params.useHandModule())
       {
-         PacketCommunicator handModuleCommunicator = createHandModule(robotModel);
-         communicators.add(handModuleCommunicator);
-
-         if (DEBUG)
+         SideDependentList<PacketCommunicator> handModuleCommunicator = createHandModule(robotModel);
+         for(RobotSide robotSide : RobotSide.values)
          {
-            PrintTools.debug(this, "useHandModule " + handModuleCommunicator.getName() + " " + handModuleCommunicator.getId());
+            communicators.add(handModuleCommunicator.get(robotSide));
+            
+            if (DEBUG)
+            {
+               PrintTools.debug(this, "useHandModule " + handModuleCommunicator.get(robotSide).getName() + " " + handModuleCommunicator.get(robotSide).getId());
+            }
          }
+         
       }
 
       return communicators;
@@ -172,12 +178,13 @@ public class DRCNetworkProcessor
       return uiConnectionModule.getPacketCommunicator();
    }
 
-   private PacketCommunicator createHandModule(DRCRobotModel robotModel)
+   private SideDependentList<PacketCommunicator> createHandModule(DRCRobotModel robotModel)
    {
-      HandCommandManager handCommandModule = robotModel.createHandCommandManager();
+      SideDependentList<? extends HandCommandManager> handCommandModule = robotModel.createHandCommandManager();
       if (handCommandModule != null)
       {
-         return handCommandModule.getCommunicator();
+         return new SideDependentList<PacketCommunicator>(handCommandModule.get(RobotSide.LEFT).getCommunicator(),
+                                                          handCommandModule.get(RobotSide.RIGHT).getCommunicator());
       }
 
       return null;
