@@ -13,8 +13,8 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -23,7 +23,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -38,7 +37,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactPosition;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -62,7 +60,7 @@ public class PelvisLinearStateUpdater
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final CenterOfMassCalculator centerOfMassCalculator;
-   private final CenterOfMassJacobian centerOfMassJacobianBody;
+   private final CenterOfMassJacobian centerOfMassJacobianWorld;
 
    private final YoFramePoint yoRootJointPosition = new YoFramePoint("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector yoRootJointVelocity = new YoFrameVector("estimatedRootJointVelocity", worldFrame, registry);
@@ -144,8 +142,7 @@ public class PelvisLinearStateUpdater
       
       RigidBody elevator = inverseDynamicsStructure.getElevator();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
-      this.centerOfMassJacobianBody = new CenterOfMassJacobian(ScrewTools.computeSupportAndSubtreeSuccessors(elevator),
-              ScrewTools.computeSubtreeJoints(rootBody), rootJointFrame);
+      this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator);
 
       setupBunchOfVariables();
       
@@ -312,6 +309,7 @@ public class PelvisLinearStateUpdater
       defaultActionOutOfStates();
 
       updateRootJoint();
+      updateCoMState();
    }
 
    private void defaultActionIntoStates()
@@ -363,8 +361,6 @@ public class PelvisLinearStateUpdater
          yoRootJointPosition.set(rootJointPosition);
          yoRootJointVelocity.set(rootJointVelocity);
       }
-
-      updateCoMState();
    }
    
    private Twist rootJointTwist = new Twist();
@@ -565,12 +561,11 @@ public class PelvisLinearStateUpdater
       centerOfMassCalculator.packCenterOfMass(centerOfMassPosition);
       centerOfMassPosition.changeFrame(worldFrame);
       yoCenterOfMassPosition.set(centerOfMassPosition);
-
-      centerOfMassJacobianBody.compute();
-      centerOfMassVelocity.setToZero(rootJointFrame);
-      centerOfMassJacobianBody.packCenterOfMassVelocity(centerOfMassVelocity);
-      centerOfMassVelocity.changeFrame(worldFrame);
-      centerOfMassVelocity.add(rootJointVelocity);
+      
+      centerOfMassJacobianWorld.compute();
+      centerOfMassVelocity.setToZero(ReferenceFrame.getWorldFrame());
+      centerOfMassJacobianWorld.packCenterOfMassVelocity(centerOfMassVelocity);
+      centerOfMassVelocity.changeFrame(ReferenceFrame.getWorldFrame());
       yoCenterOfMassVelocity.set(centerOfMassVelocity);
    }
 
