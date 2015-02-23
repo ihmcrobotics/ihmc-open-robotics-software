@@ -12,6 +12,8 @@ public class NetworkConfigParameters
    public static final int NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5000;
    public static final int CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT = 5002;
    public static final int DEFAULT_YOVARIABLE_SERVER_PORT = 5555;
+   public static final int LEFT_HAND_PORT = 1234;
+   public static final int RIGHT_HAND_PORT = 1235;
 //   public static final int NETWORK_PROCESSOR_TO_BEHAVIOR_MODULE_TCP_PORT = 4900;
 //   public static final int BEHAVIOR_MODULE_TO_CONTROLLER_TCP_PORT = 4901;
    

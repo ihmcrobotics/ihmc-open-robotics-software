@@ -24,7 +24,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
@@ -42,6 +41,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -300,21 +300,25 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager()
+   public SideDependentList<HandCommandManager> createHandCommandManager()
    {
       if (target == AtlasTarget.REAL_ROBOT)
       {
-         switch (getHandType())
+         SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
+         switch (selectedVersion)
          {
-         case IROBOT:
-            return new IRobotHandCommandManager();
-
-         case ROBOTIQ:
-            return new RobotiqHandCommandManager();
-
+         case ATLAS_DUAL_ROBOTIQ:
+            handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
+            handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
+            return handCommandManagers;
+         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+            break;
+         case DRC_NO_HANDS:
+            break;
+         case GAZEBO_ATLAS_NO_HANDS:
+            break;
          default:
             break;
-
          }
       }
 

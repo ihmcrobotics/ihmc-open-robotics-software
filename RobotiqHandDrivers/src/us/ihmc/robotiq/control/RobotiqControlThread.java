@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
+import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.robotiq.RobotiqHandInterface;
@@ -30,10 +31,11 @@ class RobotiqControlThread implements Runnable
    private RobotiqHandSensorData handStatus;
    private final PacketCommunicator packetCommunicator;
 
-   public RobotiqControlThread(RobotSide robotSide, int tcpPort)
+   public RobotiqControlThread(RobotSide robotSide)
    {
-      this(robotSide, new KryoPacketServer(tcpPort, new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(),
-            "RobotiqControlThreadServerCommunicator"));
+      this(robotSide, new KryoPacketServer(robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
+                                           new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(),
+                                           "RobotiqControlThreadServerCommunicator"));
    }
 
    public RobotiqControlThread(RobotSide robotSide, PacketCommunicator packetCommunicator)
@@ -230,7 +232,7 @@ class RobotiqControlThread implements Runnable
    
    public static void main(String[] args)
    {
-      RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.RIGHT, 4270);
+      RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.RIGHT);
       controlThread.connect();
       controlThread.run();
    }
