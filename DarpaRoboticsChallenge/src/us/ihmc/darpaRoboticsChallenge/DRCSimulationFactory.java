@@ -78,7 +78,7 @@ public class DRCSimulationFactory
       
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
-      
+
       if(drcRobotModel.getLogSettings().isLog())
       {
          yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
@@ -97,6 +97,9 @@ public class DRCSimulationFactory
       
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
+      SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot);
+      simulatedRobot.setController(simulatedRobotCenterOfMassVisualizer);
+      
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());
 
       scsInitialSetup.initializeSimulation(scs);
