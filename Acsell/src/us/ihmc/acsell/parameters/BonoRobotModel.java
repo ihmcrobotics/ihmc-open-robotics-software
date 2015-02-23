@@ -26,7 +26,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
@@ -283,7 +283,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FootstepParameters getFootstepParameters()
+   public FootstepPlanningParameterization getFootstepParameters()
    {
       return null;
    }
