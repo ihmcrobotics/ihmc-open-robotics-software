@@ -52,7 +52,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
    @AverageDuration
-   @Test //(timeout = 10000)
+   @Test (timeout = 10000)
    public void testGetStoredPoints()
    {
       double resolution = 0.01;
