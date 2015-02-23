@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.wholeBodyController.DRCHandType;
 
@@ -45,14 +46,14 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private DepthDataProcessor depthDataProcessor;
    
 
-   public ValkyrieSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, SDFFullRobotModel sdfFullRobotModel, DRCRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
+   public ValkyrieSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, SDFFullRobotModel sdfFullRobotModel, DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, boolean runningOnRealRobot)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.sdfFullRobotModel = sdfFullRobotModel;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, DRCHandType.VALKYRIE, sdfFullRobotModel);
-      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel);
+      this.lidarDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, sdfFullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
    }
 
    @Override
