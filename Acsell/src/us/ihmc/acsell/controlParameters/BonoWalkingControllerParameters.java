@@ -224,6 +224,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getDefaultStepLength()
+   {
+      return 0.4;
+   }
+
+   @Override
    public double getMinStepWidth()
    {
       return 0.35;
@@ -239,6 +245,30 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getStepPitch()
    {
       return 0.0;
+   }
+
+   @Override
+   public double getMaxStepUp()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getMaxStepDown()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getMaxAngleTurnOutwards()
+   {
+      return Math.PI/4.0;
+   }
+
+   @Override
+   public double getMaxAngleTurnInwards()
+   {
+      return 0;
    }
 
    @Override
