@@ -1,6 +1,9 @@
 package us.ihmc.robotiq.control;
 
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
@@ -15,6 +18,11 @@ import us.ihmc.robotiq.RobotiqHandInterface;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
+
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 
 class RobotiqControlThread extends HandControlThread
 {
@@ -213,15 +221,32 @@ class RobotiqControlThread extends HandControlThread
                }
             }
          }
-
+         
          ThreadTools.sleep(50);
       }
    }
    
    public static void main(String[] args)
    {
-      RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.RIGHT);
-      controlThread.connect();
-      controlThread.run();
+      JSAP jsap = new JSAP();
+      
+      FlaggedOption robotSide = new FlaggedOption("robotSide").setRequired(true).setLongFlag("robotSide").setShortFlag('r').setStringParser(JSAP.STRING_PARSER);
+      
+      try
+      {
+         jsap.registerParameter(robotSide);
+         JSAPResult config = jsap.parse(args);
+         
+         if(config.success())
+         {
+            RobotiqControlThread controlThread = new RobotiqControlThread(RobotSide.valueOf(config.getString("robotSide").toUpperCase()));
+            controlThread.connect();
+            controlThread.run();
+         }
+      }
+      catch (JSAPException e)
+      {
+         e.printStackTrace();
+      }
    }
 }

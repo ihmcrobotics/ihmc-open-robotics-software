@@ -43,7 +43,7 @@ public class RobotiqHandTesting
 	
 	private void init()
 	{
-		manager = new RobotiqHandCommandManager();
+		manager = new RobotiqHandCommandManager(RobotSide.RIGHT);
 
 		//		setupSliderListeners();
 		

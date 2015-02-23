@@ -23,11 +23,6 @@ public class RobotiqHandCommandManager extends HandCommandManager
    private final KryoLocalPacketCommunicator handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.HAND_MANAGER.ordinal(), "RobotiqHandCommunicator");
    
-   public RobotiqHandCommandManager()
-   {
-      this(RobotSide.RIGHT);
-   }
-   
 	public RobotiqHandCommandManager(RobotSide robotSide)
 	{
 	   super(RobotiqControlThread.class, robotSide);
