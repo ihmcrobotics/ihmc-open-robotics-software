@@ -30,8 +30,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
 	public RobotiqHandCommandManager(RobotSide robotSide)
 	{
-	   super(RobotiqControlThreadManager.class, robotSide);
-//	   super(RobotiqControlThread.class, robotSide);
+	   super(RobotiqControlThread.class, robotSide);
 	   
 	   setupOutboundPacketListeners();
 	   setupInboundPacketListeners();
