@@ -48,7 +48,7 @@ public class AtlasROSAPISimulator
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
-         simulationStarter.startOpertorInterface();
+         simulationStarter.startOpertorInterfaceUsingProcessSpawner();
    }
    
    public static void main(String[] args) throws JSAPException, IOException

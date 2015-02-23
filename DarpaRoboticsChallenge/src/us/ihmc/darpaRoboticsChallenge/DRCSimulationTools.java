@@ -67,8 +67,16 @@ public abstract class DRCSimulationTools
       if (modulesToStart.contains(Modules.SIMULATION))
          simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
 
+      if(modulesToStart.contains(Modules.OPERATOR_INTERFACE))
+      {
+         if(!modulesToStart.contains(Modules.SIMULATION))
+         {
+            simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
+         } 
+         simulationStarter.startOpertorInterfaceUsingProcessSpawner();
+      }
+      
       if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
-         simulationStarter.startOpertorInterface();
 
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
          simulationStarter.startBehaviorVisualizer();
