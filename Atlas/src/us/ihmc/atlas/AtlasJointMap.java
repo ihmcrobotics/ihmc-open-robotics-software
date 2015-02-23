@@ -310,7 +310,8 @@ public class AtlasJointMap implements DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      if (atlasVersion.getHandModel() != DRCHandType.ROBOTIQ)
+      
+      if(!atlasVersion.getHandModel().isHandSimulated())
       {
          for (RobotSide robotSide : RobotSide.values)
             lastSimulatedJoints.add(armJointStrings.get(robotSide).get(WRIST_ROLL));
