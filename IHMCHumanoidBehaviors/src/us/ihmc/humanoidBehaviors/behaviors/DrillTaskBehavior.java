@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -12,7 +11,6 @@ import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
@@ -49,35 +47,30 @@ public class DrillTaskBehavior extends BehaviorInterface
    private final FramePose2d pickUpPoseToWalkTo;
    
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-   private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
    private final FingerStateBehavior fingerStateBehavior;
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
    
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    
-   private final RobotSide grabSide = RobotSide.RIGHT;
+   public RobotSide grabSide = RobotSide.RIGHT;
    private final double standingDistance = 0.7;
    private final double comHeightTrajectoryTime = 1.0;
    private final double handPoseTrajectoryTime = 1.0;
-   private final double wristHandDistance = 0.17;
-   private final double drillOffsetInZ = -0.15;
+   public final double wristHandDistance = 0.17;
+   public final double drillOffsetInZ = 0.15;
    
    public DrillTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime,
-         SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
-         WholeBodyControllerParameters wholeBodyControllerParameters)
+         SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
       drillTaskBehaviorInputPacketListener = new ConcurrentListeningQueue<DrillTaskPacket>();
       this.yoTime = yoTime;
       
-      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
+            wholeBodyControllerParameters.getWalkingControllerParameters());
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
       behaviors.add(walkToLocationBehavior);
-      
-      wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
-      registry.addChild(wholeBodyIKBehavior.getYoVariableRegistry());
-      behaviors.add(wholeBodyIKBehavior);
       
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(fingerStateBehavior.getYoVariableRegistry());
@@ -141,10 +134,10 @@ public class DrillTaskBehavior extends BehaviorInterface
       walkingDirection.set(drillPosition2d);
       walkingDirection.sub(robotPosition);
       walkingDirection.normalize();
-      double yaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
+      double walkingYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
       double x = drillPosition2d.getX() - walkingDirection.getX() * standingDistance;
       double y = drillPosition2d.getY() - walkingDirection.getY() * standingDistance;
-      pickUpPoseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, yaw);
+      pickUpPoseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, walkingYaw);
       
       pipeLine.submitSingleTaskStage(new WalkToLocationTask(pickUpPoseToWalkTo, walkToLocationBehavior, 0.0, 0.3, yoTime));
       pipeLine.requestNewStage();      
@@ -159,16 +152,15 @@ public class DrillTaskBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
       
       // stage: bring hand in position close to drill
-      FrameVector approachDirection = new FrameVector(midZupFrame, 0.0, 1.0, 0.0);
-      double approachYaw = Math.atan2(approachDirection.getY(), approachDirection.getX());
+      double approachYaw = walkingYaw + (grabSide == RobotSide.RIGHT ? 1.0 : -1.0) * Math.PI / 4;
+      FrameVector approachDirection = new FrameVector(worldFrame, Math.cos(approachYaw), Math.sin(approachYaw), 0.0);
       
       FramePoint handPosition = offsetPosition(drillPosition, approachDirection, 0.3 + wristHandDistance);
       FramePose handPose = new FramePose(worldFrame);
       handPose.setPosition(handPosition);
       
-      FrameOrientation handOrientation = new FrameOrientation(midZupFrame);
-      handOrientation.setYawPitchRoll(approachYaw, 0.0, -Math.PI/2);
-      handOrientation.changeFrame(worldFrame);
+      FrameOrientation handOrientation = new FrameOrientation(worldFrame);
+      handOrientation.setYawPitchRoll(approachYaw, 0.0, - (grabSide == RobotSide.RIGHT ? 1.0 : -1.0) * Math.PI/2);
       handPose.setOrientation(handOrientation);
       
       RigidBodyTransform initialGrabTransform = new RigidBodyTransform();
@@ -247,7 +239,7 @@ public class DrillTaskBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      return defaultIsDone() && pipeLine.isDone();
+      return hasInputBeenSet() && defaultIsDone() && pipeLine.isDone();
    }
 
    @Override
