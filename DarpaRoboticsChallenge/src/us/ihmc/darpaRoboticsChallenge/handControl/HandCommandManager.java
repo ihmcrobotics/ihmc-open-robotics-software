@@ -25,7 +25,7 @@ public abstract class HandCommandManager
 	   // decided to decouple the comms startup process for the hands
 	   // HandCommandManager should only spawn a HndControlThreadManager when debugging
 	   if(DEBUG)
-	      spawnHandControllerThreadManager(clazz);
+	      spawner.spawn(clazz, new String[]{"-r", robotSide.getLowerCaseName()});
 		
 		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
 		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
@@ -42,11 +42,6 @@ public abstract class HandCommandManager
 		}
 	}
 	
-	private void spawnHandControllerThreadManager(Class<? extends Object> clazz)
-	{
-		spawner.spawn(clazz);
-	}
-   
 	public void sendHandCommand(Packet packet)
 	{
 	   packetCommunicator.send(packet);
