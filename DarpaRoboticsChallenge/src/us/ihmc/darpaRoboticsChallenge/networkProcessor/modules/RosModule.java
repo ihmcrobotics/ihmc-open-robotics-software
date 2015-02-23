@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -23,11 +24,11 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.ihmcPerception.RosLocalizationUpdateSubscriber;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPathPlannerService;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.pathGeneration.footstepPlanner.RosFootstepServiceClient;
 import us.ihmc.pathGeneration.footstepPlanner.aDStar.ADStarPathPlannerService;
-import us.ihmc.pathGeneration.terrainAnalysis.BasicFootstepParameters;
+import us.ihmc.pathGeneration.terrainAnalysis.BasicFootstepPlanningParameterization;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -106,7 +107,7 @@ public class RosModule
 
    private void setupFootstepPathPlannerService()
    {
-      FootstepParameters footstepParameters = new BasicFootstepParameters();
+      FootstepPlanningParameterization footstepParameters = new BasicFootstepPlanningParameterization();
       FootstepPathPlannerService footstepPathPlannerService;
 //    footstepPathPlannerService = new AStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);
 //    footstepPathPlannerService = new DStarPathPlannerService(rosMainNode, footstepParameters, physicalProperties.getAnkleHeight(), fieldObjectCommunicator);

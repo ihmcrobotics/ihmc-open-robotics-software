@@ -25,7 +25,7 @@ import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -57,7 +57,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
 
    public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepParameters footstepParameters, SDFFullRobotModel sdfFullRobotModel,
+         DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, SDFFullRobotModel sdfFullRobotModel,
          DRCHandType handType, AtlasTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;

@@ -7,7 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -31,7 +31,7 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
 //   public abstract boolean isRunningOnRealRobot();
    
-   public abstract FootstepParameters getFootstepParameters();
+   public abstract FootstepPlanningParameterization getFootstepParameters();
 
    public abstract WalkingControllerParameters getDrivingControllerParameters();
 

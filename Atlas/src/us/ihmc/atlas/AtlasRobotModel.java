@@ -5,17 +5,8 @@ import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
-import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
-import us.ihmc.atlas.parameters.AtlasDrivingControllerParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -36,7 +27,7 @@ import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.iRobot.control.IRobotHandCommandManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
@@ -350,10 +341,10 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FootstepParameters getFootstepParameters()
+   public FootstepPlanningParameterization getFootstepParameters()
    {
       // TODO Auto-generated method stub
-      return new AtlasFootstepParameters();
+      return new AtlasFootstepPlanningParameterization();
    }
 
    @Override

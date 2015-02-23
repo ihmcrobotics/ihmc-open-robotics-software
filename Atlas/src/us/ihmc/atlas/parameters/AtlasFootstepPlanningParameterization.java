@@ -4,10 +4,10 @@ package us.ihmc.atlas.parameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.pathGeneration.footstepPlanner.FootstepParameters;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanState;
 
-public class AtlasFootstepParameters extends FootstepParameters
+public class AtlasFootstepPlanningParameterization extends FootstepPlanningParameterization
 {
    private static final double goalRadius = 0.25;
    private final double baseOffset = 0.3;
@@ -18,7 +18,7 @@ public class AtlasFootstepParameters extends FootstepParameters
 
    private double yawCostGain = 1;
 
-   public AtlasFootstepParameters()
+   public AtlasFootstepPlanningParameterization()
    {
       initialize();
    }
