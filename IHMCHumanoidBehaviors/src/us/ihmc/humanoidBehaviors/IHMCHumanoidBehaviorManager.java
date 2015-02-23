@@ -179,7 +179,7 @@ public class IHMCHumanoidBehaviorManager
       if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
             DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
-               walkingControllerParameters, wholeBodyControllerParameters);
+               wholeBodyControllerParameters);
          dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK, drillTaskBehavior);
       }
    }

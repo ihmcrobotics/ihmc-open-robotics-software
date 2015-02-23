@@ -22,13 +22,17 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final ArrayList<ContactableRobot> robots = new ArrayList<ContactableRobot>();  
+   private final ArrayList<ContactableRobot> robots = new ArrayList<ContactableRobot>();
+   private final ContactableCylinderRobot drillRobot;
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
    
-   private final Vector3d tableCenter = new Vector3d(1.0, 0.0, 0.7);
+   private final double tableHeight = 1.4;
+   private final Vector3d tableCenter = new Vector3d(1.0, 0.0, tableHeight / 2.0);
    private final Vector2d wallPosition = new Vector2d(0.0, -2.05);
+   
+   private final RigidBodyTransform initialDrillTransform;
    
    public DRCDrillEnvironment()
    {
@@ -36,25 +40,27 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
 
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground", tableCenter, 0.1));
+      
+      initialDrillTransform = new RigidBodyTransform(new AxisAngle4d(), tableCenter);
 
       double radius = 0.03;
-      final ContactableCylinderRobot robot = new ContactableCylinderRobot("drill", new RigidBodyTransform(new AxisAngle4d(), tableCenter), radius, 0.30, 1.5, "models/drill.obj");
+      drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform , radius, 0.30, 1.5, "models/drill.obj");
       final int groundContactGroupIdentifier = 0;
-      robot.createAvailableContactPoints(groundContactGroupIdentifier, 30, forceVectorScale, true);
+      drillRobot.createAvailableContactPoints(groundContactGroupIdentifier, 30, forceVectorScale, true);
       for (int i = 0; i < 4; i++)
       {
          double angle = i * 2.0 * Math.PI / 4.0;
          double x = 1.5 * radius * Math.cos(angle);
          double y = 1.5 * radius * Math.sin(angle);
-         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_drill_" + i, new Vector3d(x, y, 0.0), robot);
-         robot.getRootJoints().get(0).addGroundContactPoint(groundContactPoint);
+         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_drill_" + i, new Vector3d(x, y, 0.0), drillRobot);
+         drillRobot.getRootJoints().get(0).addGroundContactPoint(groundContactPoint);
       }
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(robot, groundContactGroupIdentifier,1422.0, 150.6, 50.0, 600.0, robot.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(drillRobot, groundContactGroupIdentifier,1422.0, 150.6, 50.0, 600.0, drillRobot.getRobotsYoVariableRegistry());
       groundContactModel.setGroundProfile3D(combinedTerrainObject);
-      robot.setGroundContactModel(groundContactModel);
+      drillRobot.setGroundContactModel(groundContactModel);
       
-      robots.add(robot);
+      robots.add(drillRobot);
    }
    
    private CombinedTerrainObject3D setUpGround(String name, Vector3d tableCenter, double tableLength)
@@ -66,6 +72,11 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addBox(wallPosition.x - 1.0, wallPosition.y - 0.05, wallPosition.x + 1.0, wallPosition.y + 0.05, 2.0);
       
       return combinedTerrainObject;
+   }
+   
+   public ContactableCylinderRobot getDrillRobot()
+   {
+      return drillRobot;
    }
 
    @Override
