@@ -18,7 +18,13 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 
 	public abstract void setUpdateOctree(boolean b);
 
-	public abstract void clearTree();
+	/**
+	 * 
+	 * @param defaultGroundHeight, set to Double.NaN so it would take the value from first point.z
+	 */
+	public abstract void clearTree(double defaultGroundHeight); 
+   public abstract double getDefaultHeightWhenNoPoints();
+
 
 	public abstract void setHeightThreshold(double quadtreeHeightThreshold);
 

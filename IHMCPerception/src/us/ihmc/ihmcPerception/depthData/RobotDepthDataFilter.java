@@ -108,7 +108,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    public synchronized void clearLidarData(DepthDataTree lidarTree)
    {
       super.clearLidarData(lidarTree);
-      //getQuadTree().clearTree(getMidFootPoint().z);
+      getQuadTree().clearTree(getMidFootPoint().z);
       addPointsUnderFeet();
    }
 
