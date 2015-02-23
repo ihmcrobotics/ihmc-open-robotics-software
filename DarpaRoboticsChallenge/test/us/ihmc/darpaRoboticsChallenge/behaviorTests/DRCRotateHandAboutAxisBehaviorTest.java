@@ -90,7 +90,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
    private int numberOfArmJoints;
    private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    @Before
    public void setUp()
