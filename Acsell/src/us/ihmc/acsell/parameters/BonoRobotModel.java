@@ -40,6 +40,7 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
@@ -258,7 +259,7 @@ public class BonoRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HandCommandManager createHandCommandManager()
+   public SideDependentList<HandCommandManager> createHandCommandManager()
    {
       return null;
    }
