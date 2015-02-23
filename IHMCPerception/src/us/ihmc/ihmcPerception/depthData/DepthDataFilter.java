@@ -107,7 +107,7 @@ public class DepthDataFilter
       ArrayList<Point3d> points = new ArrayList<>();
       for (int i = 0; i < lidarScan.size(); i++)
       {
-         addPoint(lidarScan, i, points);
+         addLidarScan(lidarScan, i, points);
       }
       Point3d origin = new Point3d();
       Vector3d worldVector = new Vector3d();
@@ -117,36 +117,25 @@ public class DepthDataFilter
 
    }
    
-   private void addPoint(LidarScan lidarScan, int i, ArrayList<Point3d> points)
+   private void addLidarScan(LidarScan lidarScan, int i, ArrayList<Point3d> points)
    {
       Point3d lidarOrigin = new Point3d();
       lidarScan.getAverageTransform().transform(lidarOrigin);
 
-      if (rayInRange(lidarScan.getRange(i)))
-      {
+  
          Point3d point = lidarScan.getPoint(i);
-
          if(addPoint(point, lidarOrigin))
          {
             points.add(point);
          }
-      }
    }
 
-   public boolean addPoint(Point3d point, RigidBodyTransform transform)
-   {
-      Point3d sensorOrigin = new Point3d();
-      transform.transform(sensorOrigin);
-      if (pointInRange(point, sensorOrigin))
-         return addPoint(point, sensorOrigin);
-      else
-         return false;
-
-   }
 
    public boolean addPoint(Point3d point, Point3d sensorOrigin)
    {
       boolean send = false;
+      if(!pointInRange(point, sensorOrigin))
+         return false;
 
       // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
       if (DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE)
@@ -277,13 +266,15 @@ public class DepthDataFilter
    public FilteredPointCloudPacket filterAndTransformPointCloud(PointCloudPacket pointCloud, RigidBodyTransform transformToWorld)
    {
       Point3d[] points = pointCloud.getPoints();
+      Point3d origin = new Point3d();
+      transformToWorld.transform(origin);
       ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
 
       for (int i = 0; i < points.length; i++)
       {
          transformToWorld.transform(points[i]);
 
-         if (addPoint(points[i], transformToWorld))
+         if (addPoint(points[i], origin))
          {
             filteredPoints.add(points[i]);
          }

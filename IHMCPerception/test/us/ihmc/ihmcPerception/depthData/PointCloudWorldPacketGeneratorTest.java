@@ -1,13 +1,11 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
@@ -17,7 +15,6 @@ import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class PointCloudWorldPacketGeneratorTest
 {
@@ -34,7 +31,7 @@ public class PointCloudWorldPacketGeneratorTest
       PointCloudWorldPacketGenerator generator = new PointCloudWorldPacketGenerator(depthDataFilter,sender);
       
 
-      RigidBodyTransform sensorOrigin = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(0.0,0.0,1.6));
+      Point3d sensorOrigin = new Point3d(0,0,1.0); 
       for(double x=-10;x<10;x+=0.01)
       {
          for(double y=-10;y<10;y+=0.01)
