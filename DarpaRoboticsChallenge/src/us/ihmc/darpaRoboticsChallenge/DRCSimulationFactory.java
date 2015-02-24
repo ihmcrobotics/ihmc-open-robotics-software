@@ -36,6 +36,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.utilities.TimestampProvider;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
@@ -331,5 +332,11 @@ public class DRCSimulationFactory
    {
       return threadDataSynchronizer;
    }
+   
+   public FullRobotModel getEstimatorFullRobotModel()
+   {
+      return threadDataSynchronizer.getEstimatorFullRobotModel();
+   }
+   
    
 }
