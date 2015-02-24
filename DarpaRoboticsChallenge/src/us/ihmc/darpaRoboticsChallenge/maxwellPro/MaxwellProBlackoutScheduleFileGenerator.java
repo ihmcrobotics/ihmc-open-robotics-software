@@ -27,7 +27,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
       {
          String output = time.toString() + ",";
 
-         int blackoutLength = blackoutGenerator.calculateNextBlackoutLength(time.inSeconds());
+         long blackoutLength = blackoutGenerator.calculateNextBlackoutLength(time.inSeconds());
          
          output += blackoutLength + ",";
          time.addSeconds(1);
