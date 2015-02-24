@@ -113,7 +113,17 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       this.fullRobotModel = robotModel.createFullRobotModel();
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
 
-      this.mockUIPacketCommunicator = networkObjectCommunicator;
+      
+      if(networkObjectCommunicator == null)
+      {
+         this.mockUIPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.UI.ordinal(),
+               "mockUiCommunicator");
+      }
+      else 
+      {
+         this.mockUIPacketCommunicator = networkObjectCommunicator;
+      }
+      
       this.controllerCommunicator = controllerCommunicator;
 
       behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(),
@@ -128,7 +138,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      networkObjectCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
