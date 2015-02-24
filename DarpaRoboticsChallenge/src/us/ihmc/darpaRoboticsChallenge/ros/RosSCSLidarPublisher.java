@@ -77,7 +77,7 @@ public class RosSCSLidarPublisher implements PacketConsumer<LidarScanPacket>
          return;
       }
       
-      String targetFrame = lidarParameters[sensorId].getPoseFrameForSdf();
+      String targetFrame = lidarParameters[sensorId].getEndFrameForRosTransform();
       String sourceFrame = lidarParameters[sensorId].getBaseFrameForRosTransform();
       tfPublisher.publish(spindleRotationTransform, timestamp, sourceFrame, targetFrame);
    }

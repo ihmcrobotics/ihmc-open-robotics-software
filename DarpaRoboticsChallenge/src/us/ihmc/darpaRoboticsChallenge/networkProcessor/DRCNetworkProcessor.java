@@ -142,7 +142,7 @@ public class DRCNetworkProcessor
 
    private PacketCommunicator createRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      RosModule rosModule = new RosModule(robotModel, params.getRosUri());
+      RosModule rosModule = new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
 
       return rosModule.getCommunicator();
    }
