@@ -75,7 +75,7 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   @Test
+   @Test(timeout = 120000)
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
