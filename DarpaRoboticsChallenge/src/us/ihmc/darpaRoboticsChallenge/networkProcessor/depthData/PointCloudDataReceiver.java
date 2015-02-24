@@ -59,7 +59,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          try
          {
             PointCloudData data = dataQueue.take();
-            if (data != null)
+            if (data != null && sendData.get())
             {
                readWriteLock.writeLock().lock();
                for (int i = 0; i < data.points.size(); i++)
@@ -197,7 +197,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    public void start()
    {
-      System.out.println("Starting thread");
       super.start();
       this.pointCloudWorldPacketGenerator.start();
    }
