@@ -83,8 +83,6 @@ public class PelvisLinearStateUpdater
    private final ReferenceFrame rootJointFrame;
    private final SideDependentList<ReferenceFrame> footFrames;
    
-   private final RigidBody rootBody;
-   
    private final double estimatorDT;
       
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
@@ -135,8 +133,6 @@ public class PelvisLinearStateUpdater
       twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       rootJoint = inverseDynamicsStructure.getRootJoint();
       rootJointFrame = rootJoint.getFrameAfterJoint();
-      
-      rootBody = inverseDynamicsStructure.getRootJoint().getSuccessor();
       
       footFrames = new SideDependentList<ReferenceFrame>();
       
