@@ -76,8 +76,7 @@ public abstract class DRCSimulationTools
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
       }
       
-      if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
-         if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
+      if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
             simulationStarter.startBehaviorVisualizer();
    }
 
