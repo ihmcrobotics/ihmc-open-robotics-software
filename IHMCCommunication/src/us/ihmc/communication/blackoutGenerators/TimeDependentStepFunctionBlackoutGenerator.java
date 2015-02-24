@@ -4,25 +4,25 @@ import java.util.Random;
 
 public class TimeDependentStepFunctionBlackoutGenerator implements CommunicationBlackoutGenerator
 {
-   private int maxBlackoutLength;
-   private int runLength;
+   private long maxBlackoutLength;
+   private long runLength;
    
    private Random random = new Random(System.currentTimeMillis());
    
-   public TimeDependentStepFunctionBlackoutGenerator(int maxBlackoutLength, int runLength)
+   public TimeDependentStepFunctionBlackoutGenerator(long maxBlackoutLength, long runLength)
    {
       this.maxBlackoutLength = maxBlackoutLength;
       this.runLength = runLength;
    }
    
    @Override
-   public int calculateNextBlackoutLength(int currentTime)
+   public long calculateNextBlackoutLength(long currentTime)
    {
-      int blackoutLength = 0;
+      long blackoutLength = 0;
       double runCompletionRatio = (double)currentTime/(double)runLength;
       if(runCompletionRatio <= (1.0/3.0))
       {
-         blackoutLength = random.nextInt(maxBlackoutLength);
+         blackoutLength = Math.abs(random.nextLong()) & maxBlackoutLength;
       }
       else if(runCompletionRatio <= (2.0/3.0))
       {

@@ -3,15 +3,15 @@ package us.ihmc.communication.blackoutGenerators;
 
 public class ConstantBlackoutGenerator implements CommunicationBlackoutGenerator
 {
-   private final int blackoutLength;
+   private final long blackoutLength;
    
-   public ConstantBlackoutGenerator(int blackoutLength)
+   public ConstantBlackoutGenerator(long blackoutLength)
    {
       this.blackoutLength = blackoutLength;
    }
 
    @Override
-   public int calculateNextBlackoutLength(int currentTime)
+   public long calculateNextBlackoutLength(long currentTime)
    {
       return blackoutLength;
    }

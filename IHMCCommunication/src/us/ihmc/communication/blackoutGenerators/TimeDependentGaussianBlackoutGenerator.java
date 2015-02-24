@@ -4,13 +4,13 @@ import java.util.Random;
 
 public class TimeDependentGaussianBlackoutGenerator implements CommunicationBlackoutGenerator
 {
-   private int maxBlackoutLength;
-   private int runLength;
-   private int blackoutSlopeOffset;
+   private long maxBlackoutLength;
+   private long runLength;
+   private long blackoutSlopeOffset;
    
    private Random random = new Random(System.currentTimeMillis());
    
-   public TimeDependentGaussianBlackoutGenerator(int maxBlackoutLength, int runLength, int blackoutSlopeOffset)
+   public TimeDependentGaussianBlackoutGenerator(long maxBlackoutLength, long runLength, long blackoutSlopeOffset)
    {
       this.maxBlackoutLength = maxBlackoutLength;
       this.runLength = runLength;
@@ -18,13 +18,13 @@ public class TimeDependentGaussianBlackoutGenerator implements CommunicationBlac
    }
 
    @Override
-   public int calculateNextBlackoutLength(int currentTime)
+   public long calculateNextBlackoutLength(long currentTime)
    {
       double m = (double)((2 * blackoutSlopeOffset) - maxBlackoutLength)/(double)runLength;
-      int y0 = maxBlackoutLength - blackoutSlopeOffset;
+      long y0 = maxBlackoutLength - blackoutSlopeOffset;
       double gaussianOffset = 0.1;
-      int blackoutLength = (int)Math.round(m * currentTime + y0);
-      int gaussian = (int) (random.nextGaussian() * (maxBlackoutLength/8) - gaussianOffset);
+      long blackoutLength = Math.round(m * currentTime + y0);
+      long gaussian = (long) (random.nextGaussian() * (maxBlackoutLength/8) - gaussianOffset);
       
       blackoutLength += gaussian;
       

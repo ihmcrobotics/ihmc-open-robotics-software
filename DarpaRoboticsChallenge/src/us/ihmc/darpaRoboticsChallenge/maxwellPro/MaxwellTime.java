@@ -72,13 +72,13 @@ public class MaxwellTime
       stringRepresentation = hoursString + ":" + minutesString + ":" + secondsString;
    }
    
-   public void addSeconds(int seconds)
+   public void addSeconds(long seconds)
    {
       this.seconds += seconds;
       updateTime();
    }
    
-   public int inSeconds()
+   public long inSeconds()
    {
       return (3600 * hours) + (60 * minutes) + seconds;
    }
