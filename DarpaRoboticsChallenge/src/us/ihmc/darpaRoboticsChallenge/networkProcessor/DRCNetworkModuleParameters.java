@@ -117,7 +117,7 @@ public class DRCNetworkModuleParameters
    public void setUseRosModule(boolean b)
    {
       useRosModule = b;
-      if(rosUri ==null)
+      if(useRosModule && rosUri ==null)
          try
          {
             rosUri = new URI("http://localhost:11311");
