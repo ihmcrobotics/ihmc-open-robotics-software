@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.maxwellPro;
 
-public interface MaxwellProBlackoutGenerator
+public interface CommunicationBlackoutGenerator
 {
    public int calculateNextBlackoutLength(int currentTime);
 }

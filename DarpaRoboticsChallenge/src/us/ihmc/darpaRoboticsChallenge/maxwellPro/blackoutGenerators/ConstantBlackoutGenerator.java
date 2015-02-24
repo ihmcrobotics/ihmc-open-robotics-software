@@ -1,8 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators;
 
-import us.ihmc.darpaRoboticsChallenge.maxwellPro.MaxwellProBlackoutGenerator;
+import us.ihmc.darpaRoboticsChallenge.maxwellPro.CommunicationBlackoutGenerator;
 
-public class ConstantBlackoutGenerator implements MaxwellProBlackoutGenerator
+public class ConstantBlackoutGenerator implements CommunicationBlackoutGenerator
 {
    private final int blackoutLength;
    

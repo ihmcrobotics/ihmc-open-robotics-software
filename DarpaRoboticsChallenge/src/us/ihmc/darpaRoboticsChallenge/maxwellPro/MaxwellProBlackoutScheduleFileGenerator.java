@@ -18,7 +18,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
          writer = Files.newBufferedWriter(Paths.get(outputFile), StandardCharsets.UTF_8);
    }
    
-   public void generateScheduleFile(int runLengthInSeconds, MaxwellProBlackoutGenerator blackoutGenerator) throws IOException
+   public void generateScheduleFile(int runLengthInSeconds, CommunicationBlackoutGenerator blackoutGenerator) throws IOException
    {
       writer.write("good interval  start time,blackout  length (sec),Blackout start time\n");
       writer.flush();
@@ -44,7 +44,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
       int runLength = 3600;
       String outputFileName = "constantBlackoutSchedule.csv";
       
-      MaxwellProBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3);
+      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3);
       
       try
       {
