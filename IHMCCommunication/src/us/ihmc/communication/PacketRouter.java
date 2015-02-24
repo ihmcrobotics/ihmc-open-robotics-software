@@ -22,6 +22,14 @@ public class PacketRouter
    private final TIntObjectHashMap<PacketCommunicator> communicators = new TIntObjectHashMap<PacketCommunicator>();
    private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
    private final TIntIntHashMap redirects = new TIntIntHashMap();
+   
+   public PacketRouter()
+   {
+      if(DEBUG)
+      {
+         System.out.println("Creating Packet Router");
+      }
+   }
 
    public void attachPacketCommunicator(final PacketCommunicator packetCommunicator)
    {
@@ -62,9 +70,15 @@ public class PacketRouter
    
    private void checkCommunicatorId(final PacketCommunicator packetCommunicator)
    {
-      if(packetCommunicator.getId() == BROADCAST)
+      int communicatorId = packetCommunicator.getId();
+      
+      if(communicatorId == BROADCAST)
       {
-         throw new IllegalArgumentException("packetCommunicator cannot have an id of zero hommie, it's reserved for broadcast!!");
+         throw new IllegalArgumentException("packetCommunicator cannot have an id of zero, it's reserved for broadcast!!");
+      }
+      if(communicators.containsKey(communicatorId))
+      {
+         throw new IllegalArgumentException("Tried to register " + packetCommunicator.getName() + " with id of " + communicatorId + " but " + communicators.get(communicatorId).getName() + " already registered with that id!");
       }
    }
    
