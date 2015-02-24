@@ -13,12 +13,15 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.DepthDataProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.ArmCalibrationHelper;
@@ -40,7 +43,7 @@ public class MultiSenseSensorManager
    private final DRCRobotCameraParameters cameraParamaters;
    private final DRCRobotLidarParameters lidarParamaters;
 
-   private final DepthDataProcessor depthDataProcessor;
+   private final PointCloudDataReceiver pointCloudDataReceiver;
 
    private final ROSNativeTransformTools rosTransformProvider;
 
@@ -48,16 +51,16 @@ public class MultiSenseSensorManager
 
    private ParameterTree params;
 
-   private MultisenseLidarDataReceiver multisenseLidarDataReceiver;
+   private RosPointCloudReceiver multisenseLidarDataReceiver;
 
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
-   public MultiSenseSensorManager(DepthDataProcessor depthDataProcessor, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
+   public MultiSenseSensorManager(PointCloudDataReceiver pointCloudDataReceiver, ROSNativeTransformTools rosTransformProvider, RobotPoseBuffer sharedRobotPoseBuffer,
          RosMainNode rosMainNode, PacketCommunicator packetCommunicator, RosNativeNetworkProcessor rosNativeNetworkProcessor,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
-      this.depthDataProcessor = depthDataProcessor;
+      this.pointCloudDataReceiver = pointCloudDataReceiver;
       this.rosTransformProvider = rosTransformProvider;
       this.lidarParamaters = lidarParamaters;
       this.stereoParamaters = stereoParamaters;
@@ -111,10 +114,7 @@ public class MultiSenseSensorManager
 
    private void registerLidarReceivers()
    { 
-      this.multisenseLidarDataReceiver = new MultisenseLidarDataReceiver(depthDataProcessor, rosTransformProvider, ppsTimestampOffsetProvider,
-            sharedRobotPoseBuffer, rosMainNode, lidarParamaters);
-      Thread lidarThread = new Thread(multisenseLidarDataReceiver, "MultisenseLidarDataReceiver");
-      lidarThread.start();
+      this.multisenseLidarDataReceiver = new RosPointCloudReceiver(lidarParamaters, rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
    }
 
    private void registerCameraReceivers()
@@ -136,7 +136,7 @@ public class MultiSenseSensorManager
 
    public void setRobotPosePublisher(RosRobotPosePublisher robotPosePublisher)
    {
-      multisenseLidarDataReceiver.setRobotPosePublisher(robotPosePublisher);
+//      multisenseLidarDataReceiver.setRobotPosePublisher(robotPosePublisher);
       cameraReceiver.setRobotPosePublisher(robotPosePublisher);
    }
 }

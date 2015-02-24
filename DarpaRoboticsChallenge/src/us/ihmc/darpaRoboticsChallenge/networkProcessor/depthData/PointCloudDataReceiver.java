@@ -1,9 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
+
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -12,198 +17,212 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
-import us.ihmc.communication.packets.sensing.PointCloudPacket;
-import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
+import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
+import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class PointCloudDataReceiver implements NetStateListener
+public class PointCloudDataReceiver extends Thread implements NetStateListener
 {
-
-   protected ConcurrentLinkedQueue<PointCloudPacket> pendingScans = new ConcurrentLinkedQueue<PointCloudPacket>();
-   protected volatile AtomicBoolean sendData = new AtomicBoolean(false);
-   private final Object commandLock = new Object();
-   private final DepthDataFilter lidarDataFilter;
-   private final PacketCommunicator packetCommunicator;
-   protected LidarStateCommandListener lidarStateCommandListener;
+   private final DepthDataFilter depthDataFilter;
+   private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
    private final RobotPoseBuffer robotPoseBuffer;
 
-   public PointCloudDataReceiver(RobotPoseBuffer robotPoseBuffer, PacketCommunicator packetCommunicator, SDFFullRobotModel fullRobotModel,
-         DepthDataFilter lidarDataFilter)
-   {
-      this.robotPoseBuffer = robotPoseBuffer;
-      this.packetCommunicator = packetCommunicator;
-      this.lidarDataFilter = lidarDataFilter;
-      
-      lidarStateCommandListener = new LidarStateCommandListener(packetCommunicator);
+   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+   private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();
 
+   private final AtomicBoolean sendData = new AtomicBoolean(false);
+
+   private volatile boolean running = true;
+
+   public PointCloudDataReceiver(RobotBoundingBoxes robotBoundingBoxes, FullRobotModel fullRobotModel, DRCRobotJointMap jointMap,
+         RobotPoseBuffer robotPoseBuffer, PacketCommunicator packetCommunicator)
+   {
+      this.depthDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
+      this.robotPoseBuffer = robotPoseBuffer;
+      this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
+
+      setupListeners(packetCommunicator);
       packetCommunicator.attachStateListener(this);
+
+   }
+
+   @Override
+   public void run()
+   {
+      while (running)
+      {
+         try
+         {
+            PointCloudData data = dataQueue.take();
+            if (data != null)
+            {
+               readWriteLock.writeLock().lock();
+               for (int i = 0; i < data.points.size(); i++)
+               {
+                  Point3d pointInWorld = robotPoseBuffer.transformToWorld(data.scanFrame, data.timestamps[i], data.points.get(i));
+                  depthDataFilter.addPoint(pointInWorld, data.originInWorld);
+               }
+               readWriteLock.writeLock().unlock();
+            }
+         }
+         catch (InterruptedException e)
+         {
+            continue;
+         }
+
+      }
+   }
+
+   /**
+    * Receive new data. Data is stored in a queue, so do not reuse!
+    * @param scanFrame
+    * @param originInWorld
+    * @param timestamps
+    * @param points
+    */
+   public void receivedPointCloudData(ReferenceFrame scanFrame, Point3d originInWorld, long[] timestamps, ArrayList<Point3d> points)
+   {
+      if (timestamps.length != points.size())
+      {
+         throw new RuntimeException("Number of timestamps does not match number of points");
+      }
+
+      try
+      {
+         dataQueue.put(new PointCloudData(scanFrame, originInWorld, timestamps, points));
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+
    }
 
    @Override
    public void connected()
    {
-      synchronized (commandLock)
+      readWriteLock.writeLock().lock();
       {
-         DepthDataClearCommand clearQuadTreeCommand = new DepthDataClearCommand(DepthDataTree.QUADTREE);
-         DepthDataClearCommand clearOctTreeCommand = new DepthDataClearCommand(DepthDataTree.OCTREE);
-
          setLidarState(LidarState.DISABLE);
-         lidarDataFilter.clearLidarData(DepthDataTree.QUADTREE);
-         lidarDataFilter.clearLidarData(DepthDataTree.OCTREE);
-
-         packetCommunicator.send(clearQuadTreeCommand);
-         packetCommunicator.send(clearOctTreeCommand);
+         depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
+         depthDataFilter.clearLidarData(DepthDataTree.OCTREE);
       }
+      readWriteLock.writeLock().unlock();
    }
 
    @Override
    public void disconnected()
    {
-      synchronized (commandLock)
-      {
-         sendData.set(false);
-      }
+      sendData.set(false);
    }
 
    public void setLidarState(LidarState lidarState)
    {
-      synchronized (commandLock)
-      {
-         lidarDataFilter.setLidarState(lidarState);
+      readWriteLock.writeLock().lock();
+      depthDataFilter.setLidarState(lidarState);
+      readWriteLock.writeLock().unlock();
 
-         if (lidarState != LidarState.DISABLE)
-         {
-            sendData.set(true);
-         }
-         else
-         {
-            sendData.set(false);
-         }
-
-         packetCommunicator.send(new DepthDataStateCommand(lidarState));
-      }
+      sendData.set(lidarState != LidarState.DISABLE);
    }
 
-   protected void updatePointCloud(PointCloudPacket pointCloud)
+   private void setupListeners(PacketCommunicator packetCommunicator)
    {
-      final int numberOfScansPerSecond = 40;
-      if (pendingScans.size() > numberOfScansPerSecond)
+
+      packetCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
       {
-         pendingScans.poll();
-      }
-      pendingScans.add(pointCloud);
-      synchronizeScanWithPoseAndPublish();
+         public void receivedPacket(DepthDataStateCommand object)
+         {
+            setLidarState(object.getLidarState());
+         }
+      });
+
+      packetCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
+      {
+         public void receivedPacket(DepthDataClearCommand object)
+         {
+            clearLidar(object);
+         }
+      });
+
+      packetCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
+      {
+         public void receivedPacket(DepthDataFilterParameters object)
+         {
+            setFilterParameters(object);
+         }
+      });
    }
 
-   private boolean isNewScanAvailable()
+   public void clearLidar(DepthDataClearCommand object)
    {
-      PointCloudPacket cloud;
-      if ((cloud = pendingScans.peek()) != null)
+      readWriteLock.writeLock().lock();
       {
-         long adjustedTimeStamp = cloud.getTimeStamp();
-         return !robotPoseBuffer.isPending(adjustedTimeStamp);
+         depthDataFilter.clearLidarData(object.getDepthDataTree());
       }
+      readWriteLock.writeLock().unlock();
 
-      return false;
    }
 
-   private void synchronizeScanWithPoseAndPublish()
+   public void setFilterParameters(DepthDataFilterParameters parameters)
    {
-      while (isNewScanAvailable())
+      readWriteLock.writeLock().lock();
       {
-         PointCloudPacket pointCloud = pendingScans.poll();
-         RigidBodyTransform transformToWorld = getPointCloudTransform(pointCloud.getTimeStamp());
-         if (transformToWorld == null)
-         {
-            System.out.println("PointCloudDataReceiver: Transform to world start was null");
-            return;
-         }
-         if (sendData.get())
-         {
-            synchronized (commandLock)
-            {
-               FilteredPointCloudPacket rosPointCloud = lidarDataFilter.filterAndTransformPointCloud(pointCloud,transformToWorld);
-
-               if (rosPointCloud.getNumberOfPoints() > 0)
-               {
-                  packetCommunicator.send(rosPointCloud);
-               }
-            }
-         }
+         depthDataFilter.setParameters(parameters);
       }
+      readWriteLock.writeLock().unlock();
+
    }
 
-   private RigidBodyTransform getPointCloudTransform(long timeStamp)
+   public List<Point3d> getQuadTreePoints()
    {
-      RobotPoseData robotPoseData = robotPoseBuffer.interpolate(timeStamp);
-      if (robotPoseData == null)
-      {
-         System.out.println("LidarDataReceiver: Robot Pose Data Null");
-         return null;
-      }
-
-      RigidBodyTransform transform = new RigidBodyTransform(robotPoseData.getLidarPoses()[0]);
-
-      return transform;
+      readWriteLock.readLock().lock();
+      ArrayList<Point3d> groundPoints = new ArrayList<>();
+      depthDataFilter.getQuadTree().getStoredPoints(groundPoints);
+      readWriteLock.readLock().unlock();
+      return groundPoints;
    }
 
-   public class LidarStateCommandListener implements DepthDataStateCommandListenerInterface
+   public Point3f[] getDecayingPointCloudPoints()
    {
-      public LidarStateCommandListener(PacketCommunicator packetCommunicator)
-      {
-         packetCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
-         {
-            public void receivedPacket(DepthDataStateCommand object)
-            {
-               setLidarState(object);
-            }
-         });
-         
-         packetCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
-         {
-            public void receivedPacket(DepthDataClearCommand object)
-            {
-               clearLidar(object);
-            }
-         });
-         
-         packetCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
-         {
-            public void receivedPacket(DepthDataFilterParameters object)
-            {
-               setFilterParameters(object);
-            }
-         });
-      }
-      
-      public void setLidarState(DepthDataStateCommand lidarStateCommand)
-      {
-         synchronized (commandLock)
-         {
-            PointCloudDataReceiver.this.setLidarState(lidarStateCommand.getLidarState());
-         }
-      }
-
-      public void clearLidar(DepthDataClearCommand object)
-      {
-         synchronized (commandLock)
-         {
-            lidarDataFilter.clearLidarData(object.getDepthDataTree());
-            packetCommunicator.send(object);
-         }
-      }
-
-      public void setFilterParameters(DepthDataFilterParameters parameters)
-      {
-         synchronized (commandLock)
-         {
-            lidarDataFilter.setParameters(parameters);
-            packetCommunicator.send(parameters);
-         }
-      }
+      readWriteLock.readLock().lock();
+      Point3f[] points = depthDataFilter.getNearScan().getPoints3f();
+      readWriteLock.readLock().unlock();
+      return points;
    }
 
+   public void start()
+   {
+      System.out.println("Starting thread");
+      super.start();
+      this.pointCloudWorldPacketGenerator.start();
+   }
+
+   public void close()
+   {
+      running = false;
+      interrupt();
+      this.pointCloudWorldPacketGenerator.stop();
+   }
+   
+   private static class PointCloudData
+   {
+      private ReferenceFrame scanFrame;
+      private Point3d originInWorld;
+      private long[] timestamps;
+      private ArrayList<Point3d> points;
+
+      public PointCloudData(ReferenceFrame scanFrame, Point3d originInWorld, long[] timestamps, ArrayList<Point3d> points)
+      {
+         this.scanFrame = scanFrame;
+         this.originInWorld = originInWorld;
+         this.timestamps = timestamps;
+         this.points = points;
+      }
+
+   }
 }

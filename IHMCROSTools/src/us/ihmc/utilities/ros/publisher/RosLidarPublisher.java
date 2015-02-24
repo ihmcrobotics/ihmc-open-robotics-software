@@ -3,7 +3,7 @@ package us.ihmc.utilities.ros.publisher;
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import us.ihmc.communication.packets.sensing.LidarScanPacket;
+import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
 
 public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
@@ -24,7 +24,7 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
    
    private float[] fakeIntensities = null;
 
-   public void publish(LidarScanPacket lidarScan, String frameId, Time timestamp)
+   public void publish(SimulatedLidarScanPacket lidarScan, String frameId, Time timestamp)
    {
       sensor_msgs.LaserScan message = getMessage();
       
