@@ -68,7 +68,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       if (!ENABLE_JOINT_VELOCITY_TORQUE_LIMITS)
       {
-         PrintTools.warn(AtlasJointMap.class, "Running with torque and velocity limits disabled.");
+         PrintTools.info(AtlasJointMap.class, "Running with torque and velocity limits disabled.");
       }
    }
 
