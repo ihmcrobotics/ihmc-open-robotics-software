@@ -51,6 +51,7 @@ class Mapper
 	
 	// Publisher
 	ros::Publisher mapPub;
+	ros::Publisher mapDeltaPub;
 	ros::Publisher outlierPub;
 	ros::Publisher odomPub;
 	ros::Publisher icpCorrectionPub;
@@ -260,6 +261,7 @@ Mapper::Mapper(ros::NodeHandle& n, ros::NodeHandle& pn):
 	if (getParam<bool>("subscribe_cloud", true))
 		cloudSub = n.subscribe("cloud_in", inputQueueSize, &Mapper::gotCloud, this);
 	mapPub = n.advertise<sensor_msgs::PointCloud2>("point_map", 2, true);
+	mapDeltaPub = n.advertise<sensor_msgs::PointCloud2>("point_map_delta", 2, true);
 	outlierPub = n.advertise<sensor_msgs::PointCloud2>("outliers", 2, true);
 	odomPub = n.advertise<nav_msgs::Odometry>("icp_odom", 50, true);
 	icpCorrectionPub = n.advertise<geometry_msgs::PoseStamped>("icp_correction", 50, true);
@@ -521,6 +523,11 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		{
 			//DP outliers = PM::extractOutliers(transformation->compute(*newPointCloud, Ticp), *mapPointCloud, 0.6);
 			//outlierPub.publish(PointMatcher_ros::pointMatcherCloudToRosMsg<float>(outliers, mapFrame, mapCreationTime));
+		}
+		
+		if (mapDeltaPub.getNumSubscribers())
+		{
+			mapDeltaPub.publish(PointMatcher_ros::pointMatcherCloudToRosMsg<float>(*newPointCloud, mapFrame, mapCreationTime));
 		}
 
 		// check if news points should be added to the map
