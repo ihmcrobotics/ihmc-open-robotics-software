@@ -37,8 +37,8 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
    // Testing parameters:
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final Vector3d initialRobotPosition = new Vector3d(0.0, 0.5, 0.0);
-   private static final double initialRobotYaw = Math.PI / 4.0;
+   private static final Vector3d initialRobotPosition = new Vector3d(0.0, 0.0, 0.0);
+   private static final double initialRobotYaw = 0.0;
    private static final double epsilon = 0.01;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
@@ -79,7 +79,11 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
+      simulationTestingParameters.setKeepSCSUp(true);
 
+//      Transform wristHand = getRobotModel().getJmeTransformWristToHand(RobotSide.RIGHT);
+//      System.out.println(wristHand);
+      
       testEnvironment = new DRCDrillEnvironment();
       ContactableCylinderRobot drillRobot = testEnvironment.getDrillRobot();
       
@@ -111,7 +115,7 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
       drcBehaviorTestHelper.executeBehaviorUntilDoneUsingBehaviorDispatcher(drillTaskBehavior);
       
       ReferenceFrame finalHandFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(drillTaskBehavior.grabSide);
-      FramePoint finalHandPosition = new FramePoint(finalHandFrame, new Vector3d(drillTaskBehavior.wristHandDistance, 0.0, 0.0));
+      FramePoint finalHandPosition = new FramePoint(finalHandFrame, new Vector3d(0.16, 0.0, 0.0));
       finalHandPosition.changeFrame(worldFrame);
       
       RigidBodyTransform finalDrillTransform = new RigidBodyTransform();
@@ -119,7 +123,7 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
       
       Vector3d drillPoint = new Vector3d();
       finalDrillTransform.getTranslation(drillPoint);
-      drillPoint.add(new Vector3d(0.0, 0.0, drillTaskBehavior.drillOffsetInZ));
+      drillPoint.add(new Vector3d(0.0, 0.0, drillTaskBehavior.drillHeight / 2.0));
       FramePoint finalDrillPosition = new FramePoint(worldFrame, drillPoint);
       
       System.out.println(finalHandPosition);

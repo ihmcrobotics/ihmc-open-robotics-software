@@ -32,6 +32,9 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
    private final Vector3d tableCenter = new Vector3d(1.0, 0.0, tableHeight / 2.0);
    private final Vector2d wallPosition = new Vector2d(0.0, -2.05);
    
+   private final double drillHeight = 0.3;
+   private final double drillRadius = 0.03;
+   
    private final RigidBodyTransform initialDrillTransform;
    
    public DRCDrillEnvironment()
@@ -42,16 +45,14 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground", tableCenter, 0.1));
       
       initialDrillTransform = new RigidBodyTransform(new AxisAngle4d(), tableCenter);
-
-      double radius = 0.03;
-      drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform , radius, 0.30, 1.5, "models/drill.obj");
+      drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform , drillRadius, drillHeight, 1.5, "models/drill.obj");
       final int groundContactGroupIdentifier = 0;
       drillRobot.createAvailableContactPoints(groundContactGroupIdentifier, 30, forceVectorScale, true);
       for (int i = 0; i < 4; i++)
       {
          double angle = i * 2.0 * Math.PI / 4.0;
-         double x = 1.5 * radius * Math.cos(angle);
-         double y = 1.5 * radius * Math.sin(angle);
+         double x = 1.5 * drillRadius * Math.cos(angle);
+         double y = 1.5 * drillRadius * Math.sin(angle);
          GroundContactPoint groundContactPoint = new GroundContactPoint("gc_drill_" + i, new Vector3d(x, y, 0.0), drillRobot);
          drillRobot.getRootJoints().get(0).addGroundContactPoint(groundContactPoint);
       }

@@ -42,11 +42,10 @@ public class DrillTaskBehavior extends BehaviorInterface
    private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
    
    private FramePose drillPose;
-   
-   private final WalkToLocationBehavior walkToLocationBehavior;
-   private final FramePose2d pickUpPoseToWalkTo;
+   private final FramePose2d pickUpPoseToWalkTo = new FramePose2d(worldFrame);;
    
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
+   private final WalkToLocationBehavior walkToLocationBehavior;
    private final FingerStateBehavior fingerStateBehavior;
    private final ComHeightBehavior comHeightBehavior;
    private final HandPoseBehavior handPoseBehavior;
@@ -57,36 +56,36 @@ public class DrillTaskBehavior extends BehaviorInterface
    private final double standingDistance = 0.7;
    private final double comHeightTrajectoryTime = 1.0;
    private final double handPoseTrajectoryTime = 1.0;
-   public final double wristHandDistance = 0.17;
-   public final double drillOffsetInZ = 0.15;
+   public final double wristHandDistance = 0.16;
+   public final double drillHeight = 0.3;
    
    public DrillTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime,
          SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      drillTaskBehaviorInputPacketListener = new ConcurrentListeningQueue<DrillTaskPacket>();
       this.yoTime = yoTime;
+      midZupFrame = referenceFrames.getMidFeetZUpFrame();
       
+      // create sub-behaviors:
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
             wholeBodyControllerParameters.getWalkingControllerParameters());
-      registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
       behaviors.add(walkToLocationBehavior);
       
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(fingerStateBehavior.getYoVariableRegistry());
       behaviors.add(fingerStateBehavior);
       
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(comHeightBehavior.getYoVariableRegistry());
       behaviors.add(comHeightBehavior);
       
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      registry.addChild(handPoseBehavior.getYoVariableRegistry());
       behaviors.add(handPoseBehavior);
       
-      midZupFrame = referenceFrames.getMidFeetZUpFrame();
-      pickUpPoseToWalkTo = new FramePose2d(worldFrame);
+      for (BehaviorInterface behavior : behaviors)
+      {
+         registry.addChild(behavior.getYoVariableRegistry());
+      }
       
+      drillTaskBehaviorInputPacketListener = new ConcurrentListeningQueue<DrillTaskPacket>();
       super.attachNetworkProcessorListeningQueue(drillTaskBehaviorInputPacketListener, DrillTaskPacket.class);
    }
 
@@ -139,12 +138,12 @@ public class DrillTaskBehavior extends BehaviorInterface
       double y = drillPosition2d.getY() - walkingDirection.getY() * standingDistance;
       pickUpPoseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, walkingYaw);
       
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(pickUpPoseToWalkTo, walkToLocationBehavior, 0.0, 0.3, yoTime));
+//      pipeLine.submitSingleTaskStage(new WalkToLocationTask(pickUpPoseToWalkTo, walkToLocationBehavior, 0.0, 0.3, yoTime));
       pipeLine.requestNewStage();      
       
       // stage: move center of mass and open hand
       FramePoint drillPosition = drillPose.getFramePointCopy();
-      drillPosition.add(0.0, 0.0, drillOffsetInZ);
+      drillPosition.add(0.0, 0.0, drillHeight / 2.0);
       double desiredCom = drillPosition.getZ() - 1.15;
       
       pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, new CoMHeightTask(desiredCom, yoTime, comHeightBehavior, comHeightTrajectoryTime));
