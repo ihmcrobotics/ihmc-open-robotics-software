@@ -114,7 +114,7 @@ public class DRCSimulationTestHelper
       }
       networkProcessorParameters.setUseBehaviorVisualizer(false); // Needs to be false for bamboo.
       
-//      simulationStarter.setControllerPacketCommunicator(networkObjectCommunicator);
+      simulationStarter.setControllerPacketCommunicator(packetCommunicator);
       simulationStarter.startSimulation(networkProcessorParameters, false);
       
       if (packetCommunicator != null)
