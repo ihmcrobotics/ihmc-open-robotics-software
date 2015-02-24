@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
+import static org.junit.Assert.assertTrue;
+
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -28,18 +30,26 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
+
+import com.jme3.math.Vector3f;
 
 public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterface
 {
    // Testing parameters:
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final Vector3d initialRobotPosition = new Vector3d(0.0, 0.0, 0.0);
-   private static final double initialRobotYaw = 0.0;
-   private static final double epsilon = 0.01;
+   private static final Vector3d initialRobotPosition = new Vector3d(-0.5, 0.5, 0.0);
+   private static final double initialRobotYaw = Math.PI / 3.0;
+   private static final RobotSide grabSide = RobotSide.LEFT;
+   
+   static
+   {
+      simulationTestingParameters.setKeepSCSUp(false);
+   }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private DRCDrillEnvironment testEnvironment;
@@ -75,14 +85,13 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
+   /**
+    * @throws SimulationExceededMaximumTimeException
+    */
    @Test(timeout = 120000)
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-//      simulationTestingParameters.setKeepSCSUp(true);
-
-//      Transform wristHand = getRobotModel().getJmeTransformWristToHand(RobotSide.RIGHT);
-//      System.out.println(wristHand);
       
       testEnvironment = new DRCDrillEnvironment();
       ContactableCylinderRobot drillRobot = testEnvironment.getDrillRobot();
@@ -110,25 +119,17 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
               simulationTestingParameters, getRobotModel(), controllerCommunicator);
       DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(),
                                                drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getReferenceFrames(), getRobotModel());
-
+      drillTaskBehavior.setGrabSide(grabSide);
+      
       drcBehaviorTestHelper.getDRCSimulationFactory().getRobot().setController(new DrillTaskUser());
       drcBehaviorTestHelper.executeBehaviorUntilDoneUsingBehaviorDispatcher(drillTaskBehavior);
       
-      ReferenceFrame finalHandFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(drillTaskBehavior.grabSide);
-      FramePoint finalHandPosition = new FramePoint(finalHandFrame, new Vector3d(0.16, 0.0, 0.0));
+      // check if drill is in hand:
+      Vector3f wristHandOffset = getRobotModel().getJmeTransformWristToHand(grabSide).getTranslation();
+      ReferenceFrame finalHandFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(grabSide);
+      FramePoint finalHandPosition = new FramePoint(finalHandFrame, wristHandOffset.x, wristHandOffset.y, wristHandOffset.z);
       finalHandPosition.changeFrame(worldFrame);
-      
-      RigidBodyTransform finalDrillTransform = new RigidBodyTransform();
-      drillRobot.getBodyTransformToWorld(finalDrillTransform);
-      
-      Vector3d drillPoint = new Vector3d();
-      finalDrillTransform.getTranslation(drillPoint);
-      drillPoint.add(new Vector3d(0.0, 0.0, drillTaskBehavior.drillHeight / 2.0));
-      FramePoint finalDrillPosition = new FramePoint(worldFrame, drillPoint);
-      
-      System.out.println(finalHandPosition);
-      System.out.println(finalDrillPosition);
-//      assertTrue(finalDrillPosition.epsilonEquals(finalHandPosition, epsilon));
+      assertTrue(drillRobot.isPointOnOrInside(finalHandPosition.getPoint()));
 
       BambooTools.reportTestFinishedMessage();
    }
