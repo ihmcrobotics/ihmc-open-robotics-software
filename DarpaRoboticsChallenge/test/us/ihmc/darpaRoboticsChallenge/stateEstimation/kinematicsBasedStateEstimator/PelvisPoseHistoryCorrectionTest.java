@@ -841,7 +841,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
          script = simpleFlatGroundScriptName;
       }
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, kryoLocalObjectCommunicator, "PelvisCorrectionTest", script,
-            startingLocation, simulationTestingParameters, false, getRobotModel());
+            startingLocation, simulationTestingParameters, false, getRobotModel(), true);
       simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       robot = drcSimulationTestHelper.getRobot();
       registry = robot.getRobotsYoVariableRegistry();
