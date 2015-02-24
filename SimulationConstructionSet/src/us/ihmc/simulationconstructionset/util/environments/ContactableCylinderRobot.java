@@ -73,7 +73,7 @@ public class ContactableCylinderRobot extends ContactableRobot
       link.setMomentOfInertia(inertia);
 
       linkGraphics = new Graphics3DObject();
-      linkGraphics.addCoordinateSystem(0.2);
+      //linkGraphics.addCoordinateSystem(0.2);
       linkGraphics.addCylinder(frameCylinder.getHeight(), frameCylinder.getRadius(), YoAppearance.Gold());
       if(modelName!=null)
          linkGraphics.addModelFile(modelName);
