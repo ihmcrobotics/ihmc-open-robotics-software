@@ -63,6 +63,7 @@ public abstract class DRCSimulationTools
       networkProcessorParameters.setUseBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
       networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
       networkProcessorParameters.setUsePerceptionModule(true);
+      networkProcessorParameters.setUseRosModule(modulesToStart.contains(Modules.ROS_MODULE));
       
       if (modulesToStart.contains(Modules.SIMULATION))
          simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
@@ -195,7 +196,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE;
 
       public String getPropertyName()
       {
