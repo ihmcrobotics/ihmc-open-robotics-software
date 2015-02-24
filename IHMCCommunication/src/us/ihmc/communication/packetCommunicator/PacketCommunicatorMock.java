@@ -18,7 +18,8 @@ import us.ihmc.communication.packets.Packet;
 
 public class PacketCommunicatorMock
 {
-
+   public static final int BUFFER_SIZE = 2097152 * 4;
+   
    private final NetworkedObjectCommunicator communicator;
    private final HashMap<Class<?>, HashMap<PacketConsumer<?>, ObjectConsumer<?>>> consumers = new HashMap<>();
    private final HashMap<GlobalPacketConsumer, GlobalObjectConsumer> globalConsumers = new HashMap<>();
@@ -27,14 +28,14 @@ public class PacketCommunicatorMock
    
    public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, int port, NetClassList netClassList)
    {
-      KryoObjectClient objectCommunicator = new KryoObjectClient(host, port, netClassList);
+      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port, netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(true);
       return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList), netClassList.getPacketClassList());
+      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList, BUFFER_SIZE, BUFFER_SIZE), netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createInterprocessPacketCommunicator(int port, NetClassList netClassList)
