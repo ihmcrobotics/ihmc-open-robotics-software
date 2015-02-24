@@ -109,6 +109,11 @@ public class MomentumBasedControllerFactory
       this.updatables.add(updatable);
    }
 
+   public HighLevelHumanoidControllerManager getHighLevelHumanoidControllerManager()
+   {
+      return highLevelHumanoidControllerManager;
+   }
+   
    public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
          ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)

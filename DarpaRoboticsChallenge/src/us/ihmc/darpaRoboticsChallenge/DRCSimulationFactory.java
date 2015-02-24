@@ -57,7 +57,8 @@ public class DRCSimulationFactory
 
    private final SimulationConstructionSet scs;
    private final SDFRobot simulatedRobot;
-
+   private final MomentumBasedControllerFactory controllerFactory;
+   
    private DRCEstimatorThread drcEstimatorThread;
    private DRCControllerThread drcControllerThread;
    private AbstractThreadedRobotController multiThreadedRobotController;
@@ -78,6 +79,8 @@ public class DRCSimulationFactory
       
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
       simulatedRobot = drcRobotModel.createSdfRobot(false);
+
+      this.controllerFactory = controllerFactory;
 
       if(drcRobotModel.getLogSettings().isLog())
       {
@@ -278,6 +281,11 @@ public class DRCSimulationFactory
       return scs;
    }
 
+   public MomentumBasedControllerFactory getControllerFactory()
+   {
+      return controllerFactory;
+   }
+   
    public void start()
    {
       if(yoVariableServer != null)
