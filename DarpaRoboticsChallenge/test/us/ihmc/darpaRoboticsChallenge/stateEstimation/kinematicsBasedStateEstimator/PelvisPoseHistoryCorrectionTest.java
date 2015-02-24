@@ -12,7 +12,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -841,7 +840,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
          script = simpleFlatGroundScriptName;
       }
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, kryoLocalObjectCommunicator, "PelvisCorrectionTest", script,
-            startingLocation, simulationTestingParameters, false, getRobotModel(), true);
+            startingLocation, simulationTestingParameters, false, getRobotModel());
       simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       robot = drcSimulationTestHelper.getRobot();
       registry = robot.getRobotsYoVariableRegistry();

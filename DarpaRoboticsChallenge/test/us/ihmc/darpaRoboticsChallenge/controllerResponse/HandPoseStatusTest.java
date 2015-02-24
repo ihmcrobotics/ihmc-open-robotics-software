@@ -112,8 +112,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
       KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
+      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
+      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), mockUiCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel(), false);
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
       
 
       statusStartedCounter = 0;
@@ -152,8 +156,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
       KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
+      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
+      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), mockUiCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel(), false);
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
@@ -217,8 +225,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
       final KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
+      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
+      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), mockUiCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel(), false);
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
@@ -271,8 +283,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
       final KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
+      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
+      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
+      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), mockUiCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel(), false);
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
 
       leftStatusStartedCounter = 0;
       leftStatusCompletedCounter = 0;
