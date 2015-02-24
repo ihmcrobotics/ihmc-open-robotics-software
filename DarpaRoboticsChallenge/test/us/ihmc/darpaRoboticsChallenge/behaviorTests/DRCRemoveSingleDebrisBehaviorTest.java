@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -27,12 +28,10 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ExcludedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -47,21 +46,16 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTestInterface
 {
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final double ROBOT_POSITION_TOLERANCE = 0.05;
-   private final double POSITION_ERROR_MARGIN = 0.025;
+   private final double POSITION_ERROR_MARGIN = 0.05;
    private final double ANGLE_ERROR_MARGIN = 0.05;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
-
-   private void showMemoryUsageBeforeTest()
-   {
-      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-   }
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -92,6 +86,8 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
    private SDFFullRobotModel fullRobotModel;
    private DRCRobotModel drcRobotModel;
 
+   private ReferenceFrame midFeetZUpFrame;
+
    @Before
    public void setUp()
    {
@@ -99,8 +95,15 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       {
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
 
-      showMemoryUsageBeforeTest();
+   private void setUpDrcTestHelper()
+   {
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
@@ -114,13 +117,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
          }
       };
 
-      testEnvironment.addStandingDebris(1.0, -0.35, 0.0);
       testEnvironment.createDebrisContactController();
-
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null, startingLocation,
             simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -128,16 +125,13 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       yoTime = drcBehaviorTestHelper.getRobot().getYoTime();
 
       robot = drcBehaviorTestHelper.getRobot();
-      fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       drcRobotModel = getRobotModel();
+      fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      midFeetZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getMidFeetZUpFrame();
    }
-
-   @AverageDuration(duration = 90.0)
-   @Test(timeout = 300000)
-   public void testRemovingDebrisOnRightSide() throws SimulationExceededMaximumTimeException
+   
+   private void putArmsAtCompactHomePositionAndPrepareSimulation() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-
       //angles in AtlasDefaultArmConfigurations
       //right arm
       robot.getOneDegreeOfFreedomJoint("r_arm_shz").setQ(-0.1);
@@ -154,9 +148,9 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       robot.getOneDegreeOfFreedomJoint("l_arm_wry").setQ(0.0);
       robot.getOneDegreeOfFreedomJoint("l_arm_wrx").setQ(-0.55);
 
-      double[] rightArmDefaultConfigurationJointAngles = drcRobotModel.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
+      double[] rightArmDefaultConfigurationJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
             ArmConfigurations.COMPACT_HOME, RobotSide.RIGHT);
-      double[] leftArmDefaultConfigurationJointAngles = drcRobotModel.getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
+      double[] leftArmDefaultConfigurationJointAngles = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(
             ArmConfigurations.COMPACT_HOME, RobotSide.LEFT);
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.2));
@@ -166,16 +160,93 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       drcBehaviorTestHelper.updateRobotModel();
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
       drcBehaviorTestHelper.updateRobotModel();
+   }
+   
+   private void assertHandsAreAtHomePosition()
+   {
+      //Right wrist Position
+      ReferenceFrame rightHandReferenceFrame = fullRobotModel.getEndEffector(RobotSide.RIGHT, LimbName.ARM).getBodyFixedFrame();
+      FramePose rightHandPose = new FramePose(rightHandReferenceFrame);
+      rightHandPose.changeFrame(midFeetZUpFrame);
+      if (DEBUG)
+      {
+         System.out.println("right hand pose");
+         System.out.println(rightHandPose);
+      }
+      FramePose rightHandExpectedPose = new FramePose(midFeetZUpFrame);
+      rightHandExpectedPose.setPosition(0.39, -0.24, 1.02);
+      rightHandExpectedPose.setOrientation(1.80, 0.0, 0.0);
+      assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
 
-      final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+      //Left wrist Position
+      ReferenceFrame leftHandReferenceFrame = fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame();
+      FramePose leftHandPose = new FramePose(leftHandReferenceFrame);
+      leftHandPose.changeFrame(midFeetZUpFrame);
+      if (DEBUG)
+      {
+         System.out.println("left hand pose");
+         System.out.println(leftHandPose);
+      }
+      FramePose leftHandExpectedPose = new FramePose(midFeetZUpFrame);
+      leftHandExpectedPose.setPosition(0.39, 0.24, 1.02);
+      leftHandExpectedPose.setOrientation(-1.80, 0.0, 0.0);
+      assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+   }
 
-      removeSingleDebrisBehavior.initialize();
+   private void assertTheDebrisIsNoMoreInFrontOfTheRobot(ContactableSelectableBoxRobot debrisRobot, double safeDistance)
+   {
+      //check debris Position in world
+      RigidBodyTransform debrisTransformAfterRemove = new RigidBodyTransform();
+      debrisRobot.getBodyTransformToWorld(debrisTransformAfterRemove);
+      FramePose debrisPoseAfterRemove = new FramePose(worldFrame, debrisTransformAfterRemove);
+      assertTrue(debrisPoseAfterRemove.getY() < safeDistance);
+   }
 
-      // from DebrisTaskBehaviorPanel.storeDebrisDataInList
-      ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
+   private void assertRobotMovedCloserToTheDebris(RigidBodyTransform debrisTransformBeforeRemove)
+   {
+      //check that the robot got closer to the debris before it was removed
+      FramePose debrisPoseBeforeRemove = new FramePose(worldFrame, debrisTransformBeforeRemove);
+      debrisPoseBeforeRemove.changeFrame(midFeetZUpFrame);
+      assertTrue(debrisPoseBeforeRemove.getX() <= (0.80 + ROBOT_POSITION_TOLERANCE));
+   }
 
+   private void assertPelvisAndChestAreAtHomePosition()
+   {
+      //Chest orientation
+      ReferenceFrame chestReferenceFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      FramePose chestPose = new FramePose(chestReferenceFrame);
+      chestPose.changeFrame(midFeetZUpFrame);
+      if (DEBUG)
+      {
+         System.out.println("chest pose");
+         System.out.println(chestPose);
+      }
+      FramePose chestExpectedPose = new FramePose(midFeetZUpFrame);
+      chestExpectedPose.setPosition(-0.11, 0.0, 1.25);
+      chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
+      assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+
+      //pelvis pose
+      ReferenceFrame pelvisReferenceFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      FramePose pelvisPose = new FramePose(pelvisReferenceFrame);
+      pelvisPose.changeFrame(midFeetZUpFrame);
+      if (DEBUG)
+      {
+         System.out.println("pelvis pose");
+         System.out.println(pelvisPose);
+      }
+
+      FramePose pelvisExpectedPose = new FramePose(midFeetZUpFrame);
+      pelvisExpectedPose.setPosition(-0.04, 0.0, 0.76);
+      pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
+      assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+   }
+
+   private RigidBodyTransform getDebrisPoseInWorldAndSetBehaviorInput(final RemoveSingleDebrisBehavior removeSingleDebrisBehavior,
+         ContactableSelectableBoxRobot debrisRobot)
+   {
       //this offset is very important because debrisTransform sent from the UI have the origin at the bottom of the debris, whereas here the robots have their origin at the center of the debris
       double zOffsetToHaveOriginAtDebrisBottom = testEnvironment.getDebrisLength() / 2.0;
 
@@ -194,90 +265,142 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       graspVector.changeFrame(worldFrame);
 
       FramePoint graspVectorPosition = new FramePoint(debrisReferenceFrame);
-      graspVectorPosition.setZ(0.8 - zOffsetToHaveOriginAtDebrisBottom);
+      graspVectorPosition.setZ(0.7 - zOffsetToHaveOriginAtDebrisBottom);
       graspVectorPosition.changeFrame(worldFrame);
 
       debrisPose.getRigidBodyTransform(debrisTransformBeforeRemove);
 
       removeSingleDebrisBehavior.setInputs(debrisTransformBeforeRemove, graspVectorPosition.getPointCopy(), graspVector.getVectorCopy());
 
-      assertTrue(removeSingleDebrisBehavior.hasInputBeenSet());
+      return debrisTransformBeforeRemove;
+   }
+   
+   @AverageDuration(duration = 90.0)
+   @Test(timeout = 300000)
+   public void testRemovingStandingDebris() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      testEnvironment.addStandingDebris(1.0, -0.2, Math.toRadians(-20.0));
+      
+      setUpDrcTestHelper();
+      
+      putArmsAtCompactHomePositionAndPrepareSimulation();
+      
+      final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
 
-      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(removeSingleDebrisBehavior, 34.0);
+      removeSingleDebrisBehavior.initialize();
+
+      ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
+
+      RigidBodyTransform debrisTransformBeforeRemove = getDebrisPoseInWorldAndSetBehaviorInput(removeSingleDebrisBehavior, debrisRobot);
+
+      assertTrue(removeSingleDebrisBehavior.hasInputBeenSet());
+      
+      RobotSide graspingSide = removeSingleDebrisBehavior.getSideToUse();
+      
+      assertTrue(graspingSide == RobotSide.RIGHT);
+      
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(removeSingleDebrisBehavior, 35.0);
       fullRobotModel.updateFrames();
 
       assertTrue(removeSingleDebrisBehavior.isDone());
 
-      RigidBodyTransform debrisTransformAfterRemove = new RigidBodyTransform();
-      debrisRobot.getBodyTransformToWorld(debrisTransformAfterRemove);
 
-      //check that the robot got closer to the debris before it was removed
-      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      FramePose debrisPoseBeforeRemove = new FramePose(worldFrame, debrisTransformBeforeRemove);
-      debrisPoseBeforeRemove.changeFrame(chestFrame);
-      assertTrue(debrisPoseBeforeRemove.getX() <= (0.75 + ROBOT_POSITION_TOLERANCE));
+      assertRobotMovedCloserToTheDebris(debrisTransformBeforeRemove);
 
-      //check debris Position in world
-      FramePose debrisPoseAfterRemove = new FramePose(worldFrame, debrisTransformAfterRemove);
-      assertTrue(debrisPoseAfterRemove.getY() < -0.80);
+      double safeDistance = -0.70;
+      assertTheDebrisIsNoMoreInFrontOfTheRobot(debrisRobot, safeDistance);
 
-      //Right wrist Position
-      ReferenceFrame rightHandReferenceFrame = fullRobotModel.getEndEffector(RobotSide.RIGHT, LimbName.ARM).getBodyFixedFrame();
-      FramePose rightHandPose = new FramePose(rightHandReferenceFrame);
-      rightHandPose.changeFrame(worldFrame);
-      if (DEBUG)
-      {
-         System.out.println("right hand pose");
-         System.out.println(rightHandPose);
-      }
-      FramePose rightHandExpectedPose = new FramePose(worldFrame);
-      rightHandExpectedPose.setPosition(0.73, -0.24, 1.05);
-      rightHandExpectedPose.setOrientation(1.80, 0.0, 0.0);
-      assertTrue(rightHandPose.epsilonEquals(rightHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+      assertHandsAreAtHomePosition();
 
-      //Left wrist Position
-      ReferenceFrame leftHandReferenceFrame = fullRobotModel.getEndEffector(RobotSide.LEFT, LimbName.ARM).getBodyFixedFrame();
-      FramePose leftHandPose = new FramePose(leftHandReferenceFrame);
-      leftHandPose.changeFrame(worldFrame);
-      if (DEBUG)
-      {
-         System.out.println("left hand pose");
-         System.out.println(leftHandPose);
-      }
-      FramePose leftHandExpectedPose = new FramePose(worldFrame);
-      leftHandExpectedPose.setPosition(0.73, 0.24, 1.05);
-      leftHandExpectedPose.setOrientation(-1.80, 0.0, 0.0);
-      assertTrue(leftHandPose.epsilonEquals(leftHandExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+      assertPelvisAndChestAreAtHomePosition();
 
-      //Chest orientation
-      ReferenceFrame chestReferenceFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      FramePose chestPose = new FramePose(chestReferenceFrame);
-      chestPose.changeFrame(worldFrame);
-      if (DEBUG)
-      {
-         System.out.println("chest pose");
-         System.out.println(chestPose);
-      }
-      FramePose chestExpectedPose = new FramePose(worldFrame);
-      chestExpectedPose.setPosition(0.22, 0.0, 1.29);
-      chestExpectedPose.setOrientation(0.0, 0.0, 0.0);
-      assertTrue(chestPose.epsilonEquals(chestExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
-
-      //pelvis pose
-      ReferenceFrame pelvisReferenceFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      FramePose pelvisPose = new FramePose(pelvisReferenceFrame);
-      pelvisPose.changeFrame(worldFrame);
-      if (DEBUG)
-      {
-         System.out.println("pelvis pose");
-         System.out.println(pelvisPose);
-      }
-
-      FramePose pelvisExpectedPose = new FramePose(worldFrame);
-      pelvisExpectedPose.setPosition(0.30, 0.0, 0.79);
-      pelvisExpectedPose.setOrientation(0.0, 0.0, 0.0);
-      assertTrue(pelvisPose.epsilonEquals(pelvisExpectedPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
-
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration(duration = 90.0)
+   @Test(timeout = 300000)
+   public void testRemovingHorizontalDebris() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      testEnvironment.addHorizontalDebrisLeaningOnTwoBoxes(new Point3d(1.0, 0.0, 0.6), Math.toRadians(0.0), Math.toRadians(90.0));      
+      setUpDrcTestHelper();
+      
+      putArmsAtCompactHomePositionAndPrepareSimulation();
+      
+      final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+      
+      removeSingleDebrisBehavior.initialize();
+      
+      ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
+      
+      RigidBodyTransform debrisTransformBeforeRemove = getDebrisPoseInWorldAndSetBehaviorInput(removeSingleDebrisBehavior, debrisRobot);
+      
+      assertTrue(removeSingleDebrisBehavior.hasInputBeenSet());
+      
+      RobotSide graspingSide = removeSingleDebrisBehavior.getSideToUse();
+      
+      assertTrue(graspingSide == RobotSide.RIGHT);
+      
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(removeSingleDebrisBehavior, 35.0);
+      fullRobotModel.updateFrames();
+      
+      assertTrue(removeSingleDebrisBehavior.isDone());
+      
+      
+      assertRobotMovedCloserToTheDebris(debrisTransformBeforeRemove);
+      
+      double safeDistance = -0.80;
+      assertTheDebrisIsNoMoreInFrontOfTheRobot(debrisRobot, safeDistance);
+      
+      assertHandsAreAtHomePosition();
+      
+      assertPelvisAndChestAreAtHomePosition();
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration(duration = 90.0)
+   @Test(timeout = 300000)
+   public void testRemovingLeaningOnAWallDebris() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      testEnvironment.addVerticalDebrisLeaningAgainstAWall(1.0, -0.35, Math.toRadians(-20.0), Math.toRadians(22.0));      
+      setUpDrcTestHelper();
+      
+      putArmsAtCompactHomePositionAndPrepareSimulation();
+      
+      final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+      
+      removeSingleDebrisBehavior.initialize();
+      
+      ContactableSelectableBoxRobot debrisRobot = testEnvironment.getEnvironmentRobots().get(0);
+      
+      RigidBodyTransform debrisTransformBeforeRemove = getDebrisPoseInWorldAndSetBehaviorInput(removeSingleDebrisBehavior, debrisRobot);
+      
+      assertTrue(removeSingleDebrisBehavior.hasInputBeenSet());
+      
+      RobotSide graspingSide = removeSingleDebrisBehavior.getSideToUse();
+      
+      assertTrue(graspingSide == RobotSide.RIGHT);
+      
+      drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(removeSingleDebrisBehavior, 35.0);
+      fullRobotModel.updateFrames();
+      
+      assertTrue(removeSingleDebrisBehavior.isDone());
+      
+      assertRobotMovedCloserToTheDebris(debrisTransformBeforeRemove);
+      
+      double safeDistance = -0.80;
+      assertTheDebrisIsNoMoreInFrontOfTheRobot(debrisRobot, safeDistance);
+      
+      assertHandsAreAtHomePosition();
+      
+      assertPelvisAndChestAreAtHomePosition();
+      
       BambooTools.reportTestFinishedMessage();
    }
 }
