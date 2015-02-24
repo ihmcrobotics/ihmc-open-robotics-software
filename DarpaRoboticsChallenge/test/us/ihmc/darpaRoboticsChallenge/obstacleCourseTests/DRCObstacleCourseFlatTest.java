@@ -115,7 +115,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       setupCameraForWalkingUpToRamp();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);    // 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       ThreadTools.sleep(2000);
 
