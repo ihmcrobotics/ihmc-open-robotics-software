@@ -235,7 +235,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    }
 
    /**
-    * Compute the joint velocities by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * Compute the joint velocities by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -246,7 +246,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -258,7 +258,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    }
 
    /**
-    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions. It is then automatically low-pass filtered.
+    * Compute the joint velocities (for a specific subset of joints) by calculating finite-difference on joint positions using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
     * This is not cumulative and has the effect of ignoring the velocity signal provided by the robot.
     * @param alphaFilter low-pass filter parameter.
     * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
@@ -402,14 +402,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
       
    }
-   
-   
+
    /**
-    * Computes the joint accelerations from the joint velocity variables using a FilteredVelocityYoVariable.
-    * @param alphaFilter
-    * @param jointsToIgnore
+    * Compute the joint accelerations by calculating finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
     */
-   public void addJointAccelerationAlphaFilterWithJointsToIgnore(DoubleYoVariable alphaFilter, String... jointsToIgnore)
+   public void computeJointAccelerationFromFiniteDifference(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   {
+      computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(alphaFilter, forVizOnly);
+   }
+
+   /**
+    * Compute the joint accelerations (for a specific subset of joints) by calculating finite-difference on joint velocities using {@link FilteredVelocityYoVariable}. It is then automatically low-pass filtered.
+    * @param alphaFilter low-pass filter parameter.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void computeJointAccelerationFromFiniteDifferenceWithJointsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -425,15 +435,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
          DoubleYoVariable intermediateJointVelocity = outputJointVelocities.get(oneDoFJoint);
          List<ProcessingYoVariable> processors = processedJointAccelerations.get(oneDoFJoint);
-         String suffix = ""; //"_sp" + processors.size();
+         String suffix = "_sp" + processors.size();
          FilteredVelocityYoVariable jointAcceleration = new FilteredVelocityYoVariable("filt_qdd_" + jointName + suffix, "", alphaFilter, intermediateJointVelocity, updateDT, registry);
          processors.add(jointAcceleration);
 
-         //         if (!forVizOnly)
-         outputJointAccelerations.put(oneDoFJoint, jointAcceleration);
+         if (!forVizOnly)
+            outputJointAccelerations.put(oneDoFJoint, jointAcceleration);
       }
    }
-   
 
    /**
     * Add a low-pass filter stage on the orientations provided by the IMU sensors.
