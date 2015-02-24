@@ -1,8 +1,6 @@
-package us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators;
+package us.ihmc.communication.blackoutGenerators;
 
 import java.util.Random;
-
-import us.ihmc.darpaRoboticsChallenge.maxwellPro.CommunicationBlackoutGenerator;
 
 public class TimeDependentStepFunctionBlackoutGenerator implements CommunicationBlackoutGenerator
 {

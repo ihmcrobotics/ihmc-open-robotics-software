@@ -1,4 +1,4 @@
-package us.ihmc.darpaRoboticsChallenge.maxwellPro;
+package us.ihmc.communication.blackoutGenerators;
 
 public interface CommunicationBlackoutGenerator
 {
