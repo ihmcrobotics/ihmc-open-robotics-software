@@ -87,13 +87,8 @@ public class AtlasRobotModel implements DRCRobotModel
    
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
    {
-      this(0.0, atlasVersion, target, headless);
-   }
-   
-   public AtlasRobotModel(double footZWobbleForTests, AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
-   {
       selectedVersion = atlasVersion;
-      jointMap = new AtlasJointMap(footZWobbleForTests, selectedVersion);
+      jointMap = new AtlasJointMap(selectedVersion);
       this.target = target;
 
       if (!headless)
