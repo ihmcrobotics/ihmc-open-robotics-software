@@ -21,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotPhysicalProperties;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.ihmcPerception.RosLocalizationUpdateSubscriber;
@@ -54,7 +55,7 @@ public class RosModule
 
    
    
-   public RosModule(DRCRobotModel robotModel, URI rosCoreURI)
+   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator simulatedSensorCommunicator)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
       
@@ -62,6 +63,7 @@ public class RosModule
       robotPoseBuffer = new RobotPoseBuffer(rosModulePacketCommunicator, 10000, timestampProvider);
       sdfFullRobotModel = robotModel.createFullRobotModel();
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
+      ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       sensorInformation = robotModel.getSensorInformation();
       
       List<ForceSensorDefinition> forceSensorDefinitions = Arrays.asList(sdfFullRobotModel.getForceSensorDefinitions());
@@ -75,10 +77,10 @@ public class RosModule
       
 //      multiSenseSensorManager.setRobotPosePublisher(robotPosePublisher);
       
-//      if (sensorInformation.getLidarParameters().length > 0)
-//      {
-//         new RosSCSLidarPublisher(rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
-//      }
+      if (sensorInformation.getLidarParameters().length > 0)
+      {
+         new RosSCSLidarPublisher(simulatedSensorCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
+      }
       
       if(sensorInformation.setupROSLocationService())
       {
