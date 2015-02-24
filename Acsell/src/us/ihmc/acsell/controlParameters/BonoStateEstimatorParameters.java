@@ -74,7 +74,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
 
       sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, true); //vizonly
       sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
-      sensorProcessing.addJointAccelerationAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter);
+      sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
 //      sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
