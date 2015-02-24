@@ -152,6 +152,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
       if (transitionRequested)
          requestedHighLevelState.set(highLevelBehavior.getStateEnum());
    }
+   
+   public HighLevelState getCurrentHighLevelState()
+   {
+      return stateMachine.getCurrentStateEnum();
+   }
 
    public YoVariableRegistry getYoVariableRegistry()
    {

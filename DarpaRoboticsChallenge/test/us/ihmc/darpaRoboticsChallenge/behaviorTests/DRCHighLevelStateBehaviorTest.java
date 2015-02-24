@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -23,10 +25,9 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -57,8 +58,6 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -83,14 +82,16 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-	@AverageDuration(duration = 21.5)
+   @AverageDuration(duration = 21.5)
    @Test(timeout = 64580)
    public void testDoNothingBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -100,11 +101,12 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
 
       double trajectoryTime = 2.0;
+      HighLevelState desiredState = HighLevelState.DO_NOTHING_BEHAVIOR;
 
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
       highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStatePacket(HighLevelState.DO_NOTHING_BEHAVIOR));
+      highLevelStateBehavior.setInput(new HighLevelStatePacket(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
@@ -125,7 +127,48 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
             assertTrue(tau == 0.0);
          }
       }
+      
+      HighLevelState actualState = getCurrentHighLevelState();
+
+      assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
+            desiredState.equals(actualState));
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 21.5)
+   @Test(timeout = 64580)
+   public void testRandomState() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      double trajectoryTime = 2.0;
+      HighLevelState[] highLevelStates = HighLevelState.values();
+      HighLevelState desiredState = highLevelStates[RandomTools.generateRandomInt(new Random(), 0, highLevelStates.length - 1)];
+
+      final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+
+      highLevelStateBehavior.initialize();
+      highLevelStateBehavior.setInput(new HighLevelStatePacket(desiredState));
+      assertTrue(highLevelStateBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);
+      assertTrue(success);
+
+      HighLevelState actualState = getCurrentHighLevelState();
+
+      assertTrue(highLevelStateBehavior.isDone());
+      assertTrue("Actual high level state: " + actualState + ", does not match desired high level state: " + desiredState + ".",
+            desiredState.equals(actualState));
 
       BambooTools.reportTestFinishedMessage();
+   }
+
+   private HighLevelState getCurrentHighLevelState()
+   {
+      return drcBehaviorTestHelper.getDRCSimulationFactory().getControllerFactory().getHighLevelHumanoidControllerManager().getCurrentHighLevelState();
    }
 }
