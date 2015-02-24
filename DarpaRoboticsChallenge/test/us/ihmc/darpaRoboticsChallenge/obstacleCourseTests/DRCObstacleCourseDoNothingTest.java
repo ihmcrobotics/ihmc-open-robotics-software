@@ -87,7 +87,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
 //      createMovie, false, robotModel
       
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
-      PacketCommunicator networkObjectCommunicator = null;
+      PacketCommunicator packetCommunicator = null;
       String name = "DRCDoNothingTest";
       String scriptFileName = "";
       
@@ -95,7 +95,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       boolean startNetworkProcessor = false;
       DRCRobotModel robotModel = getRobotModel();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, startNetworkProcessor, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, packetCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, startNetworkProcessor, robotModel);
 //      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie,
 //            getRobotModel());
 

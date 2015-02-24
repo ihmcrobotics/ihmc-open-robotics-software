@@ -78,10 +78,10 @@ public class DRCSimulationTestHelper
    }
    
          
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator mockUiObjectCommunicator, String name, 
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator packetCommunicator, String name, 
          String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
-      this.mockUiObjectCommunicator = mockUiObjectCommunicator;
+      this.mockUiObjectCommunicator = packetCommunicator;
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -116,7 +116,9 @@ public class DRCSimulationTestHelper
       
 //      simulationStarter.setControllerPacketCommunicator(networkObjectCommunicator);
       simulationStarter.startSimulation(networkProcessorParameters, false);
-      simulationStarter.addPacketCommunicatorToNetworkProcessor(mockUiObjectCommunicator);
+      
+      if (packetCommunicator != null)
+         simulationStarter.addPacketCommunicatorToNetworkProcessor(packetCommunicator);
 
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();
