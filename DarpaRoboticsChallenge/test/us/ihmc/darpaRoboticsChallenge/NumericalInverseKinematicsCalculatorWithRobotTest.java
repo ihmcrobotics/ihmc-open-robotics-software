@@ -95,7 +95,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
-      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.TWAN_SOLVER;
+//      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.TWAN_SOLVER;
+      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
       DRCRobotModel robotModel = getRobotModel();
 
       sdfRobot = robotModel.createSdfRobot(false);
@@ -134,7 +135,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       {
          case PETER_SOLVER :
          {
-            int maxIterations = 60;
+            int maxIterations = 500;
             double orientationDiscount = 0.2;    // 1.0;
             boolean solveOrientation = true;
             double convergeTolerance = 1e-12;    // 0.02;
@@ -161,7 +162,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
                                                                                            lambdaLeastSquares, tolerance, maxIterations, maxStepSize,
                                                                                            minRandomSearchScalar, maxRandomSearchScalar);
 
-            int maxRestarts = 6;
+            int maxRestarts = 10;
             double restartTolerance = 0.006;
 
             inverseKinematicsCalculator = new RandomRestartInverseKinematicsCalculator(maxRestarts, restartTolerance, leftHandJacobian,
@@ -218,7 +219,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    @Test(timeout = 120000)
    public void testRandomFeasibleRobotPoses()
    {
-      int numberOfTests = 10000;    // 100;
+      int numberOfTests = 5000;
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
@@ -238,7 +239,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
             inverseKinematicsStepListener.didAnInverseKinemticsStep(-1.0);
          }
 
-         double errorThreshold = 0.015;
+         double errorThreshold = 0.01;
          boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
          if (success)
             numberPassed++;
@@ -258,10 +259,14 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          System.out.println("Maximal Solving Time: " + maximumTimeMillis + " ms");
       }
 
-      assertTrue(averageTimeMillis < 0.04);
-      assertTrue(maximumTimeMillis < 16.0);
+      assertTrue(averageTimeMillis < 4.0);
+      assertTrue(maximumTimeMillis < 40.0);
+      
+      //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
+//      assertTrue(averageTimeMillis < 0.04);
+//      assertTrue(maximumTimeMillis < 16.0);
 
-      assertTrue(percentPassed > 0.99);
+      assertTrue(percentPassed > 0.96);
    }
 
    public boolean testAPose(FramePoint handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,

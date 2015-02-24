@@ -1,5 +1,8 @@
 package us.ihmc.atlas.utilities.kinematics;
 
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -27,6 +30,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    }
 
    
+   @Ignore
    @AverageDuration(duration = 0.0)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
@@ -37,34 +41,8 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = true;
       double errorThreshold = 10.01;
-      testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
-   }
-   
-   
-   @AverageDuration(duration = 0.0)
-   @Test(timeout = 120000)
-   public void testTroublesomeCaseTwo()
-   {
-      FramePoint handEndEffectorPositionFK = new FramePoint(ReferenceFrame.getWorldFrame(), 0.18130806649724554, 0.7967773573901059, 0.276698651134076);
-      FrameOrientation handEndEffectorOrientationFK = new FrameOrientation(ReferenceFrame.getWorldFrame(), 0.15265286381059076, 0.924566404254703, -0.28046474049745834, -0.20787880274729206);
-
-      InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
-      boolean updateListenersEachStep = true;
-      double errorThreshold = 10.05;
-      testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
-   }
-   
-   @AverageDuration(duration = 0.0)
-   @Test(timeout = 120000)
-   public void testTroublesomeCaseThree()
-   {
-      FramePoint handEndEffectorPositionFK = new FramePoint(ReferenceFrame.getWorldFrame(), -0.10254835947815027, 0.6517466729645752, 0.9280845746516916);
-      FrameOrientation handEndEffectorOrientationFK = new FrameOrientation(ReferenceFrame.getWorldFrame(), 0.5776739129060986, -0.1634942070310197, 0.10343384134468007, 0.7930094167661181);
-
-      InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
-      boolean updateListenersEachStep = true;
-      double errorThreshold = 10.05;
-      testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
+      boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
+      assertTrue(success);
    }
    
 }
