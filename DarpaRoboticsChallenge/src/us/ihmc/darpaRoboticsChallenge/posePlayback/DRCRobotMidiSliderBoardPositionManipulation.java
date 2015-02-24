@@ -226,6 +226,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
       
+      double lambdaLeastSquares = 0.0009;
       double tolerance = 1e-8;
       double maxStepSize = 1.0;
       double minRandomSearchScalar = -0.5;
@@ -240,8 +241,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          GeometricJacobian legJacobian = new GeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
          GeometricJacobian armJacobian = new GeometricJacobian(chest, hand, hand.getBodyFixedFrame());
          
-         NumericalInverseKinematicsCalculator legInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(legJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         NumericalInverseKinematicsCalculator armInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(armJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         NumericalInverseKinematicsCalculator legInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(legJacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         NumericalInverseKinematicsCalculator armInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(armJacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          
          legInverseKinematicsCalculators.put(robotSide, legInverseKinematicsCalculator);
          armInverseKinematicsCalculators.put(robotSide, armInverseKinematicsCalculator);

@@ -6,17 +6,25 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Random;
 
-import org.junit.Ignore;
+import javax.vecmath.AxisAngle4d;
+
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.JointAnglesWriter;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
+import us.ihmc.utilities.kinematics.InverseKinematicsStepListener;
 import us.ihmc.utilities.kinematics.KinematicSolver;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.utilities.kinematics.RandomRestartInverseKinematicsCalculator;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -25,10 +33,21 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.test.JUnitTools;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
-   private static final long seed = 1391091L;
+   private boolean PRINT_OUT_TROUBLESOME = false;
+   private boolean VISUALIZE = false;
+
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private static final long seed = 1493091L;
    private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
@@ -36,25 +55,38 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    private static final ArrayList<Double> shoulderYawLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowPitchLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristPitchLimits = new ArrayList<Double>();
+   private static final boolean DEBUG = true;
+
    private final EnumMap<JointNames, OneDoFJoint> oneDoFJoints = new EnumMap<JointNames, OneDoFJoint>(JointNames.class);
    private final EnumMap<JointNames, ArrayList<Double>> jointLimits = new EnumMap<JointNames, ArrayList<Double>>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAngles = new EnumMap<JointNames, Double>(JointNames.class);
    private final EnumMap<JointNames, Double> jointAnglesInitial = new EnumMap<JointNames, Double>(JointNames.class);
-   private boolean successfulSolve = true;
+
    private final ArrayList<Long> solvingTime = new ArrayList<Long>();
-   private final ArrayList<Integer> numbIteration = new ArrayList<Integer>();
    private final SDFFullRobotModel fullRobotModel;
    private final ReferenceFrame worldFrame;
-   private final double tolerance, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar;
-   private int maxIterations;
    private GeometricJacobian leftHandJacobian;
    private InverseKinematicsCalculator inverseKinematicsCalculator;
-   private double bruteForceResolution;
-   
-   private enum InverseKinematicsSolver
-   {
-      TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;
-   }
+   private InverseKinematicsStepListener inverseKinematicsStepListener;
+
+   private SimulationConstructionSet scs;
+   private SDFRobot sdfRobot;
+   private JointAnglesWriter jointAnglesWriter;
+
+   private final YoFramePoint testPositionForwardKinematics = new YoFramePoint("testPositionForwardKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameOrientation testOrientationForwardKinematics = new YoFrameOrientation("testOrientationForwardKinematics",
+                                                                          ReferenceFrame.getWorldFrame(), registry);
+   private final DoubleYoVariable yoErrorScalar = new DoubleYoVariable("errorScalar", registry);
+   private final DoubleYoVariable positionError = new DoubleYoVariable("positionError", registry);
+   private final DoubleYoVariable orientationError = new DoubleYoVariable("orientationError", registry);
+
+   private final DoubleYoVariable numberOfIterations = new DoubleYoVariable("numberOfIterations", registry);
+
+   private final YoFramePoint testPositionInverseKinematics = new YoFramePoint("testPositionInverseKinematics", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameOrientation testOrientationInverseKinematics = new YoFrameOrientation("testOrientationInverseKinematics",
+                                                                          ReferenceFrame.getWorldFrame(), registry);
+
+   private enum InverseKinematicsSolver {TWAN_SOLVER, PETER_SOLVER, MAARTEN_SOLVER;}
 
    private enum JointNames
    {
@@ -63,102 +95,215 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    public NumericalInverseKinematicsCalculatorWithRobotTest()
    {
-      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.PETER_SOLVER;
-      fullRobotModel = getRobotModel().createFullRobotModel();
-      
-      worldFrame = ReferenceFrame.getWorldFrame();
-      tolerance = 1e-5;
-      maxStepSize = 1.0;
-      minRandomSearchScalar = -0.05;
-      maxRandomSearchScalar = 1.0;
-      maxIterations = 140000;
+      InverseKinematicsSolver inverseKinameticSolverToUse = InverseKinematicsSolver.TWAN_SOLVER;
+      DRCRobotModel robotModel = getRobotModel();
 
+      sdfRobot = robotModel.createSdfRobot(false);
+
+      if (VISUALIZE)
+      {
+         scs = new SimulationConstructionSet(sdfRobot);
+         scs.addYoVariableRegistry(registry);
+
+         YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+         double positionVizSize = 0.06;
+         YoGraphicPosition testPositionForwardKinematicsViz = new YoGraphicPosition("testPositionForwardKinematics", testPositionForwardKinematics,
+                                                                 positionVizSize, YoAppearance.Green());
+         yoGraphicsListRegistry.registerYoGraphic("InverseKinematicsCalculatorTest", testPositionForwardKinematicsViz);
+
+         YoGraphicPosition testPositionInverseKinematicsViz = new YoGraphicPosition("testPositionInverseKinematicsViz", testPositionInverseKinematics,
+                                                                 positionVizSize, YoAppearance.Red());
+         yoGraphicsListRegistry.registerYoGraphic("InverseKinematicsCalculatorTest", testPositionInverseKinematicsViz);
+
+
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         scs.startOnAThread();
+      }
+
+      fullRobotModel = robotModel.createFullRobotModel();
+      jointAnglesWriter = new JointAnglesWriter(sdfRobot, fullRobotModel);
+
+      worldFrame = ReferenceFrame.getWorldFrame();
       populateEnumMaps();
 
-      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT), fullRobotModel.getHand(RobotSide.LEFT)
-            .getBodyFixedFrame());
+      leftHandJacobian = new GeometricJacobian(fullRobotModel.getChest(), fullRobotModel.getHand(RobotSide.LEFT),
+              fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame());
 
       switch (inverseKinameticSolverToUse)
       {
-      case PETER_SOLVER:
-         inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, 1, maxIterations, true, 0.02, 0.02, 0.02, 0.0);
-         break;
+         case PETER_SOLVER :
+         {
+            int maxIterations = 60;
+            double orientationDiscount = 0.2;    // 1.0;
+            boolean solveOrientation = true;
+            double convergeTolerance = 1e-12;    // 0.02;
+            double acceptTolLoc = 0.005;    // 0.02;
+            double acceptTolAngle = 0.02;
+            double parameterChangePenalty = 0.0;
+            inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, orientationDiscount, maxIterations, solveOrientation,
+                    convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
 
-      case TWAN_SOLVER:
-         inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar,
-               maxRandomSearchScalar);
-         break;
-      case MAARTEN_SOLVER:
-         inverseKinematicsCalculator = new KinematicSolver(leftHandJacobian, tolerance, maxIterations);
+            break;
+         }
+
+         case TWAN_SOLVER :
+         {
+            // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
+            int maxIterations = 60;
+            double lambdaLeastSquares = 0.0009;
+            double tolerance = 0.0025;
+            double maxStepSize = 0.2;
+            double minRandomSearchScalar = 0.01;
+            double maxRandomSearchScalar = 0.8;
+
+            NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(leftHandJacobian,
+                                                                                           lambdaLeastSquares, tolerance, maxIterations, maxStepSize,
+                                                                                           minRandomSearchScalar, maxRandomSearchScalar);
+
+            int maxRestarts = 6;
+            double restartTolerance = 0.006;
+
+            inverseKinematicsCalculator = new RandomRestartInverseKinematicsCalculator(maxRestarts, restartTolerance, leftHandJacobian,
+                    numericalInverseKinematicsCalculator);
+
+            break;
+         }
+
+         case MAARTEN_SOLVER :
+         {
+            int maxIterations = 60;
+            double tolerance = 1e-5;
+            inverseKinematicsCalculator = new KinematicSolver(leftHandJacobian, tolerance, maxIterations);
+         }
+      }
+
+      if (VISUALIZE)
+      {
+         inverseKinematicsStepListener = new InverseKinematicsStepListener()
+         {
+            @Override
+            public void didAnInverseKinemticsStep(double errorScalar)
+            {
+               yoErrorScalar.set(errorScalar);
+               jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+               scs.tickAndUpdate();
+            }
+         };
+
+         inverseKinematicsCalculator.attachInverseKinematicsStepListener(inverseKinematicsStepListener);
       }
    }
 
-	@AverageDuration(duration = 17.0)
-	@Test(timeout = 51041)
-   public void generateRandomFeasibleRobotPoses()
-   {
-      int nTests = 10;
 
-      for (int i = 0; i < nTests; i++)
+   @AverageDuration(duration = 0.5)
+   @Test(timeout = 120000)
+   public void testSimpleCase()
+   {
+      generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(0.5);
+
+      FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
+      FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
+
+      InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
+      boolean updateListenersEachStep = false;
+      double errorThreshold = 0.005;
+      boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+      assertTrue(success);
+   }
+
+
+
+   @AverageDuration(duration = 17.0)
+   @Test(timeout = 120000)
+   public void testRandomFeasibleRobotPoses()
+   {
+      int numberOfTests = 10000;    // 100;
+
+      InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
+      boolean updateListenersEachStep = false;
+
+      int numberPassed = 0;
+
+      for (int i = 0; i < numberOfTests; i++)
       {
-         System.out.println("iteration number " + i);
-         randomArmPoseWithForwardKinematics();
+         generateRandomArmPoseWithForwardKinematics();
+         fullRobotModel.updateFrames();
+
          FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
          FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
 
-         armPoseWithInverseKinematics(handEndEffectorOrientationFK, handEndEffectorPositionFK);
+         if (VISUALIZE)
+         {
+            inverseKinematicsStepListener.didAnInverseKinemticsStep(-1.0);
+         }
 
-         FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
-         FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
-
-         JUnitTools.assertFramePointEquals(handEndEffectorPositionFK, handEndEffectorPositionIK, 0.25);
-         JUnitTools.assertFrameOrientationEquals(handEndEffectorOrientationFK, handEndEffectorOrientationIK, 0.2);
+         double errorThreshold = 0.015;
+         boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+         if (success)
+            numberPassed++;
       }
 
-      System.out.println("Average Solving Time: " + getAvarageArray(solvingTime) + " ms");
-      System.out.println("Maximal Solving Time: " + getMaximumArray(solvingTime) + " ms");
-   }
+      double percentPassed = ((double) numberPassed) / ((double) numberOfTests);
+      double averageTimeMillis = getAvarageArray(solvingTime);
+      double maximumTimeMillis = getMaximumArray(solvingTime);
 
-   private boolean checkIfPotionsIsEqual(FramePoint pos1, FramePoint pos2, double d)
-   {
-      boolean equal = true;
-      if (Math.abs(pos1.getX() - pos2.getX()) > d)
-         equal = false;
-      if (Math.abs(pos1.getY() - pos2.getY()) > d)
-         equal = false;
-      if (Math.abs(pos1.getZ() - pos2.getZ()) > d)
-         equal = false;
-      return equal;
-   }
-
-   private boolean checkIfRotationisEqual(FrameOrientation orien1, FrameOrientation orien2, double d)
-   {
-      boolean equal = true;
-      for (int i = 0; i < orien1.getYawPitchRoll().length; i++)
+      if (DEBUG)
       {
-         if (Math.abs(orien1.getYawPitchRoll()[i] - orien2.getYawPitchRoll()[i]) > d)
-            equal = false;
+         System.out.println("numberPassed = " + numberPassed);
+         System.out.println("nTests = " + numberOfTests);
+         System.out.println("percentPassed = " + percentPassed);
 
+         System.out.println("Average Solving Time: " + averageTimeMillis + " ms");
+         System.out.println("Maximal Solving Time: " + maximumTimeMillis + " ms");
       }
-      return equal;
+
+      assertTrue(averageTimeMillis < 0.04);
+      assertTrue(maximumTimeMillis < 16.0);
+
+      assertTrue(percentPassed > 0.99);
    }
 
-	@AverageDuration(duration = 0.0)
-	@Test(timeout = 3000)
-   public void generateRandomDoubleInRangeTest()
+   public boolean testAPose(FramePoint handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
+                            double errorThreshold, boolean updateListenersEachStep)
    {
-      double min = -randomNumberGenerator.nextDouble();
-      double max = randomNumberGenerator.nextDouble();
+      testPositionForwardKinematics.set(handEndEffectorPositionFK);
+      testOrientationForwardKinematics.set(handEndEffectorOrientationFK);
 
-      for (int i = 0; i < 100000; i++)
+      solveForArmPoseWithInverseKinematics(handEndEffectorOrientationFK, handEndEffectorPositionFK, initialGuessForTests, updateListenersEachStep);
+
+      FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
+      FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
+
+      testPositionInverseKinematics.set(handEndEffectorPositionIK);
+      testOrientationInverseKinematics.set(handEndEffectorOrientationIK);
+
+      positionError.set(handEndEffectorPositionFK.distance(handEndEffectorPositionIK));
+
+      FrameOrientation errorOrientation = new FrameOrientation();
+      errorOrientation.setOrientationFromOneToTwo(handEndEffectorOrientationFK, handEndEffectorOrientationIK);
+
+      AxisAngle4d axisAngle = new AxisAngle4d();
+      errorOrientation.getAxisAngle(axisAngle);
+      orientationError.set(axisAngle.getAngle());
+
+      if (PRINT_OUT_TROUBLESOME && (positionError.getDoubleValue() > errorThreshold))
       {
-         double randomNumber = generateRandomDoubleInRange(max, min);
-
-         assertTrue((randomNumber <= max) && (randomNumber >= min));
+         System.err.println("Troublesome position: " + handEndEffectorPositionFK + ", orientation = " + handEndEffectorOrientationFK);
       }
+
+      jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
+      if (scs != null)
+         scs.tickAndUpdate();
+
+      boolean positionErrorAcceptable = (positionError.getDoubleValue() < errorThreshold);
+      boolean orientationErrorAcceptable = (orientationError.getDoubleValue() < errorThreshold);
+
+      return positionErrorAcceptable && orientationErrorAcceptable;
    }
 
-   private void armPoseWithInverseKinematics(FrameOrientation desiredOrientation, FramePoint desiredPosition)
+   private void solveForArmPoseWithInverseKinematics(FrameOrientation desiredOrientation, FramePoint desiredPosition,
+           InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
    {
       FramePose handPose = new FramePose(worldFrame);
 
@@ -169,7 +314,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       RigidBodyTransform transform = new RigidBodyTransform();
 
       handPose.getPose(transform);
-      randomArmPoseWithForwardKinematics();
+
+      createInitialGuess(initialGuessForTests);
+
+      if (VISUALIZE && updateListenersEachStep)
+      {
+         inverseKinematicsStepListener.didAnInverseKinemticsStep(0.0);
+      }
 
       long start = System.nanoTime();
 
@@ -177,28 +328,43 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       long end = System.nanoTime();
 
-      solvingTime.add((long) ((end - start) / 10E6));
+      solvingTime.add((long) (((double) (end - start)) * 1e-6));
    }
 
-   private void solve(RigidBodyTransform transform)
+   private void createInitialGuess(InitialGuessForTests initialGuessForTests)
    {
-      successfulSolve = inverseKinematicsCalculator.solve(transform);
+      switch (initialGuessForTests)
+      {
+         case PREVIOUS :
+         {
+            break;
+         }
 
-//      if (successfulSolve)
-//      {
-//         numbIteration.add(inverseKinematicsCalculator.getNumberOfIterations());
-//
-//         OneDoFJoint[] oneDoFJoints = ScrewTools.filterJoints(leftHandJacobian.getJointsInOrder(), OneDoFJoint.class);
-//
-//         for (int i = 0; i < oneDoFJoints.length; i++)
-//         {
-//            OneDoFJoint oneDoFJoint = oneDoFJoints[i];
-//            double q = oneDoFJoint.getQ();
-//
-//            assertTrue("Failed joint limit", q >= oneDoFJoint.getJointLimitLower());
-//            assertTrue("Failed joint limit", q <= oneDoFJoint.getJointLimitUpper());
-//         }
-//      }
+         case MIDRANGE :
+         {
+            generateArmPoseAtMidRangeWithForwardKinematics();
+
+            break;
+         }
+
+         case RANDOM :
+         {
+            generateRandomArmPoseWithForwardKinematics();
+         }
+
+         default :
+         {
+            throw new RuntimeException("Shouldn't get here!");
+         }
+      }
+   }
+
+   private boolean solve(RigidBodyTransform transform)
+   {
+      boolean successfulSolve = inverseKinematicsCalculator.solve(transform);
+      numberOfIterations.set(inverseKinematicsCalculator.getNumberOfIterations());
+
+      return successfulSolve;
    }
 
    private FrameOrientation getHandEndEffectorOrientation()
@@ -221,31 +387,54 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return handEndEffectorPosition;
    }
 
-   private void initialArmPose()
+   private void generateRandomArmPoseWithForwardKinematics()
    {
       for (JointNames name : JointNames.values())
       {
-         oneDoFJoints.get(name).setQ(jointAnglesInitial.get(name));
+         double bufferAwayFromJointLimits = 0.05;    // 0.2; //0.0;
 
-         // oneDoFJoints.get(name).setQ(randomNumberGenerator.nextDouble()/10);
-      }
-   }
+         double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
+         double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
 
-   private void randomArmPoseWithForwardKinematics()
-   {
-      for (JointNames name : JointNames.values())
-      {
-         double def = 0.0;
-
-         jointAngles.put(name, generateRandomDoubleInRange(jointLimits.get(name).get(0) - def, jointLimits.get(name).get(1) + def));
+         double randomJointAngle = RandomTools.generateRandomDouble(randomNumberGenerator, minRange, maxRange);
+         jointAngles.put(name, randomJointAngle);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
    }
 
-   private double generateRandomDoubleInRange(double max, double min)
+   private void generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(double maxAngleDeviationFromMidRange)
    {
-      return min + (max - min) * randomNumberGenerator.nextDouble();
+      for (JointNames name : JointNames.values())
+      {
+         double bufferAwayFromJointLimits = 0.2;    // 0.0;
+
+         double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
+         double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
+
+         double middleRangeJointAngle = (minRange + maxRange) / 2.0;
+
+         double deviation = RandomTools.generateRandomDouble(randomNumberGenerator, maxAngleDeviationFromMidRange);
+
+         jointAngles.put(name, middleRangeJointAngle + deviation);
+         oneDoFJoints.get(name).setQ(jointAngles.get(name));
+      }
    }
+
+   private void generateArmPoseAtMidRangeWithForwardKinematics()
+   {
+      for (JointNames name : JointNames.values())
+      {
+         double bufferAwayFromJointLimits = 0.2;    // 0.0;
+
+         double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
+         double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
+
+         double middleRangeJointAngle = (minRange + maxRange) / 2.0;
+         jointAngles.put(name, middleRangeJointAngle);
+         oneDoFJoints.get(name).setQ(jointAngles.get(name));
+      }
+   }
+
 
    private void populateEnumMaps()
    {
@@ -309,4 +498,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       return sum / array.size();
    }
+
+   protected enum InitialGuessForTests {RANDOM, PREVIOUS, MIDRANGE;}
 }
