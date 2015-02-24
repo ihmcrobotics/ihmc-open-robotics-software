@@ -26,6 +26,11 @@ public class AtlasRobotModelFactory
          AvailableRobotModels[version.ordinal()] = version.toString();
       }
    }
+   
+   public static AtlasRobotModel createDefaultRobotModel()
+   {
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ.toString(), AtlasRobotModel.AtlasTarget.SIM, false);
+   }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, AtlasTarget runningOnRealRobot, boolean headless)
    {
