@@ -2,9 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators;
 
 import java.util.Random;
 
-import us.ihmc.darpaRoboticsChallenge.maxwellPro.MaxwellProBlackoutGenerator;
+import us.ihmc.darpaRoboticsChallenge.maxwellPro.CommunicationBlackoutGenerator;
 
-public class TimeDependentGaussianBlackoutGenerator implements MaxwellProBlackoutGenerator
+public class TimeDependentGaussianBlackoutGenerator implements CommunicationBlackoutGenerator
 {
    private int maxBlackoutLength;
    private int runLength;
