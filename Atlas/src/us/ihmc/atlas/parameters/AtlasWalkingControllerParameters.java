@@ -325,6 +325,18 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getMinAreaPercentForValidFootstep()
+   {
+      return 0.5;
+   }
+
+   @Override
+   public double getDangerAreaPercentForValidFootstep()
+   {
+      return 0.75;
+   }
+
+   @Override
    public double getCaptureKpParallelToMotion()
    {
       if (!(target == AtlasTarget.REAL_ROBOT))
@@ -727,6 +739,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getActualFootLength()
    {
       return AtlasPhysicalProperties.actualFootLength;
+   }
+
+   @Override
+   public double getFootstepArea()
+   {
+      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
    }
 
    @Override
