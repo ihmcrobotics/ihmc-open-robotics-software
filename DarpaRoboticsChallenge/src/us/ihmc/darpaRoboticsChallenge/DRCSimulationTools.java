@@ -77,9 +77,8 @@ public abstract class DRCSimulationTools
       }
       
       if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
-
-      if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
-         simulationStarter.startBehaviorVisualizer();
+         if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
+            simulationStarter.startBehaviorVisualizer();
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes" })
