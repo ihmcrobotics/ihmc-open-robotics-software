@@ -25,8 +25,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoQuaternionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
@@ -58,6 +60,10 @@ public class PelvisOrientationManager
    private final DoubleYoVariable offsetTrajectoryTime = new DoubleYoVariable("offsetTrajectoryTime", registry);
    private final YoFrameQuaternion initialPelvisOrientationOffset;
    private final YoFrameQuaternion finalPelvisOrientationOffset;
+
+   private final BooleanYoVariable isUsingWaypointTrajectory;
+   private OrientationTrajectoryGenerator activeOrientationOffsetTrajectoryGenerator;
+   private final MultipleWaypointsOrientationTrajectoryGenerator pelvisWaypointsOrientationOffsetTrajectoryGenerator;
    private final OrientationTrajectoryGenerator pelvisOrientationOffsetTrajectoryGenerator;
    private final BooleanYoVariable prepareForLocomotion = new BooleanYoVariable(getClass().getSimpleName() + "PrepareForLocomotion", registry);
 
@@ -91,8 +97,7 @@ public class PelvisOrientationManager
 
 
       YoOrientationPIDGains pelvisOrientationControlGains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
-      rootJointAngularAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, pelvisOrientationControlGains,
-            registry);
+      rootJointAngularAccelerationControlModule = new RootJointAngularAccelerationControlModule(momentumBasedController, pelvisOrientationControlGains, registry);
       OrientationProvider initialPelvisOrientationProvider = new YoQuaternionProvider(initialPelvisOrientation);
       OrientationProvider finalPelvisOrientationProvider = new YoQuaternionProvider(finalPelvisOrientation);
       pelvisOrientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider,
@@ -121,15 +126,27 @@ public class PelvisOrientationManager
       OrientationProvider initialPelvisOrientationOffsetProvider = new YoQuaternionProvider(initialPelvisOrientationOffset);
       OrientationProvider finalPelvisOrientationOffsetProvider = new YoQuaternionProvider(finalPelvisOrientationOffset);
       DoubleProvider offsetTrajectoryTimeProvider = new YoVariableDoubleProvider(offsetTrajectoryTime);
+
+      isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
+      isUsingWaypointTrajectory.set(false);
+
       pelvisOrientationOffsetTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("pelvisOffset", desiredPelvisFrame, offsetTrajectoryTimeProvider,
             initialPelvisOrientationOffsetProvider, finalPelvisOrientationOffsetProvider, registry);
       pelvisOrientationOffsetTrajectoryGenerator.initialize();
+      activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+
+      boolean doVelocityAtWaypoints = false;
+      boolean allowMultipleFrames = false;
+      pelvisWaypointsOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 10, doVelocityAtWaypoints, allowMultipleFrames, desiredPelvisFrame, registry);
 
       parentRegistry.addChild(registry);
    }
 
    private void initialize()
    {
+      isUsingWaypointTrajectory.set(false);
+      activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+
       initialPelvisOrientationTime.set(yoTime.getDoubleValue());
 
       pelvisOrientationTrajectoryGenerator.initialize();
@@ -142,6 +159,14 @@ public class PelvisOrientationManager
 
    public void compute()
    {
+      if (isUsingWaypointTrajectory != null)
+      {
+         if (isUsingWaypointTrajectory.getBooleanValue())
+            activeOrientationOffsetTrajectoryGenerator = pelvisWaypointsOrientationOffsetTrajectoryGenerator;
+         else
+            activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+      }
+      
       updateDesireds();
 
       rootJointAngularAccelerationControlModule.doControl(orientationTrajectoryData);
@@ -164,22 +189,39 @@ public class PelvisOrientationManager
          {
             initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
             offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
-            pelvisOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);
             finalPelvisOrientationOffset.set(0.0, 0.0, 0.0);
             pelvisOrientationOffsetTrajectoryGenerator.initialize();
+            isUsingWaypointTrajectory.set(false);
+            activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
          }
          else if (pelvisPoseProvider.checkForNewOrientation())
          {
             initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
             offsetTrajectoryTime.set(pelvisPoseProvider.getTrajectoryTime());
-            pelvisOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
             initialPelvisOrientationOffset.set(tempOrientation);
             FrameOrientation pelvisOrientationProvided = pelvisPoseProvider.getDesiredPelvisOrientation(desiredPelvisFrame);
             pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
             tempOrientation.setIncludingFrame(pelvisOrientationProvided);
             finalPelvisOrientationOffset.set(tempOrientation);
             pelvisOrientationOffsetTrajectoryGenerator.initialize();
+            isUsingWaypointTrajectory.set(false);
+            activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+         }
+         else if (pelvisPoseProvider.checkForNewOrientationWithWaypoints())
+         {
+            initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
+            activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+            pelvisWaypointsOrientationOffsetTrajectoryGenerator.clear();
+            pelvisWaypointsOrientationOffsetTrajectoryGenerator.appendWaypoint(0.0, tempOrientation);
+            WaypointOrientationTrajectoryData trajectoryData = pelvisPoseProvider.getDesiredPelvisOrientationWithWaypoints();
+            trajectoryData.changeFrame(desiredPelvisFrame);
+            pelvisWaypointsOrientationOffsetTrajectoryGenerator.appendWaypoints(trajectoryData);
+            pelvisWaypointsOrientationOffsetTrajectoryGenerator.initialize();
+            isUsingWaypointTrajectory.set(true);
+            activeOrientationOffsetTrajectoryGenerator = pelvisWaypointsOrientationOffsetTrajectoryGenerator;
          }
       }
 
@@ -187,16 +229,19 @@ public class PelvisOrientationManager
       {
          initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
          offsetTrajectoryTime.set(TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION);
+         activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
+         initialPelvisOrientationOffset.set(tempOrientation);
          tempOrientation.setToZero(desiredPelvisFrame);
-         initialPelvisOrientationOffset.set(finalPelvisOrientationOffset);
          finalPelvisOrientationOffset.set(tempOrientation);
          pelvisOrientationOffsetTrajectoryGenerator.initialize();
+         isUsingWaypointTrajectory.set(false);
+         activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
          prepareForLocomotion.set(false);
       }
 
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
-      pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
-      pelvisOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+      activeOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
+      activeOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
 
       desiredPelvisOrientationOffset.set(tempOrientation);
 
