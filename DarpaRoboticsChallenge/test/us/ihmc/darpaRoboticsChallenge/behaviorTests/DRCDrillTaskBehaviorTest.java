@@ -79,7 +79,7 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      simulationTestingParameters.setKeepSCSUp(true);
+//      simulationTestingParameters.setKeepSCSUp(true);
 
 //      Transform wristHand = getRobotModel().getJmeTransformWristToHand(RobotSide.RIGHT);
 //      System.out.println(wristHand);
