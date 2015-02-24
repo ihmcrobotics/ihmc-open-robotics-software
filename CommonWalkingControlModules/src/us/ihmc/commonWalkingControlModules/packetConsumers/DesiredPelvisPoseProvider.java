@@ -3,11 +3,18 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
+import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
 /**
  * User: Matt
@@ -17,15 +24,42 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
+
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
-   private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint(ReferenceFrame.getWorldFrame()));
-   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation(
-         ReferenceFrame.getWorldFrame()));
+   private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint());
+   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation());
+   private final AtomicReference<WaypointPositionTrajectoryData> desiredPelvisPositionWithWaypoints = new AtomicReference<>(null);
+   private final AtomicReference<WaypointOrientationTrajectoryData> desiredPelvisOrientationWithWaypoints = new AtomicReference<>(null);
    private double trajectoryTime = Double.NaN;
 
    public DesiredPelvisPoseProvider()
    {
+      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
+      {
+         @Override
+         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
+         {
+            if (packet != null)
+            {
+               double[] timeAtWaypoints = packet.timeSincePrevious;
+               Point3d[] positions = packet.pelvisWorldPosition;
+               Vector3d[] velocities = packet.pelvisWorldVelocity;
+               WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(worldFrame, timeAtWaypoints, positions, velocities);
+               desiredPelvisPositionWithWaypoints.set(positionTrajectoryData);
+
+               Quat4d[] orientations = packet.pelvisOrientation;
+               WaypointOrientationTrajectoryData orientationTrajectoryData = new WaypointOrientationTrajectoryData(worldFrame, timeAtWaypoints, orientations, null);
+               desiredPelvisOrientationWithWaypoints.set(orientationTrajectoryData);
+            }
+         }
+      };
+   }
+
+   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryPacketConsumer()
+   {
+      return wholeBodyTrajectoryPacketConsumer;
    }
 
    @Override
@@ -41,6 +75,12 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
+   public boolean checkForNewOrientationWithWaypoints()
+   {
+      return desiredPelvisOrientationWithWaypoints.get() != null;
+   }
+
+   @Override
    public boolean checkForHomePosition()
    {
       return goToHomePosition.getAndSet(false);
@@ -53,9 +93,21 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    }
 
    @Override
+   public boolean checkForNewPositionWithWaypoints()
+   {
+      return desiredPelvisPositionWithWaypoints.get() != null;
+   }
+
+   @Override
    public FramePoint getDesiredPelvisPosition(ReferenceFrame supportFrame)
    {
       return desiredPelvisPosition.getAndSet(null);
+   }
+
+   @Override
+   public WaypointPositionTrajectoryData getDesiredPelvisPositionWithWaypoints()
+   {
+      return desiredPelvisPositionWithWaypoints.getAndSet(null);
    }
 
    @Override
@@ -67,6 +119,12 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 
       ret.changeFrame(desiredPelvisFrame);
       return ret;
+   }
+
+   @Override
+   public WaypointOrientationTrajectoryData getDesiredPelvisOrientationWithWaypoints()
+   {
+      return desiredPelvisOrientationWithWaypoints.getAndSet(null);
    }
 
    @Override

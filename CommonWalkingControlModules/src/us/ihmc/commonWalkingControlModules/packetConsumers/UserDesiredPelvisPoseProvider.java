@@ -13,6 +13,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
+import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
 public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
 {
@@ -144,5 +146,29 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
          return true;
       }
       return false;
+   }
+
+   @Override
+   public boolean checkForNewPositionWithWaypoints()
+   {
+      return false;
+   }
+
+   @Override
+   public WaypointPositionTrajectoryData getDesiredPelvisPositionWithWaypoints()
+   {
+      return null;
+   }
+
+   @Override
+   public boolean checkForNewOrientationWithWaypoints()
+   {
+      return false;
+   }
+
+   @Override
+   public WaypointOrientationTrajectoryData getDesiredPelvisOrientationWithWaypoints()
+   {
+      return null;
    }
 }
