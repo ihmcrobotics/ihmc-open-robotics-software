@@ -75,9 +75,8 @@ public class AtlasRobotModelFactory
 
       JLabel userMessageLabel = new JLabel("What robot?");
 
-      @SuppressWarnings({ "rawtypes", "unchecked" })
-      JComboBox robotTypeComboBox = new JComboBox(AvailableRobotModels);
-      robotTypeComboBox.setSelectedItem(defaultOption);
+      JComboBox<String> robotTypeComboBox = new JComboBox<>(AvailableRobotModels);
+      robotTypeComboBox.setSelectedItem(defaultOption.toString());
 
       comboBoxPanel.add(robotTypeComboBox, BorderLayout.NORTH);
 
