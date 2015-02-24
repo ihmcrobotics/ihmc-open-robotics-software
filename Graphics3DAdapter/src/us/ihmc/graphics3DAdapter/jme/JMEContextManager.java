@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.graphics3DAdapter.ContextManager;
 
-import com.jme3.math.ColorRGBA;
-
 /**
  * User: Matt
  * Date: 1/11/13
@@ -68,18 +66,6 @@ public abstract class JMEContextManager implements ContextManager
       for (InputMapSetter inputMapSetter : inputMapSetters)
       {
          inputMapSetter.setDefaultInputMappings();
-      }
-      
-      for (JMEViewportAdapter viewport : viewports)
-      {
-         if (viewport == currentViewport)
-         {
-            viewport.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 1f, 1f));
-         }
-         else
-         {
-            viewport.getViewPort().setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 0.8f, 1f));
-         }
       }
    }
    

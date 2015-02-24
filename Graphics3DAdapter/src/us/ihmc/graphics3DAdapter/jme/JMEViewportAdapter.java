@@ -1,6 +1,7 @@
 package us.ihmc.graphics3DAdapter.jme;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 
@@ -21,7 +22,6 @@ import us.ihmc.utilities.time.Timer;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.DirectionalLight;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
@@ -69,10 +69,15 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType)
    {
-      this(jmeRenderer, rootNode, isMainViewport, viewportType, false);
+      this(jmeRenderer, rootNode, isMainViewport, viewportType, false, Color.LIGHT_GRAY);
+   }
+   
+   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals)
+   {
+      this(jmeRenderer, rootNode, isMainViewport, viewportType, addExtraVisuals, Color.LIGHT_GRAY);
    }
 
-   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals)
+   public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType, boolean addExtraVisuals, Color backgroundColor)
    {
       this.assetManager = jmeRenderer.getAssetManager();
       this.stateManager = jmeRenderer.getStateManager();
@@ -84,7 +89,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       viewPort = renderManager.createMainView("JMEViewport", jmeCamera);
       viewPort.attachScene(rootNode);
       viewPort.setClearFlags(true, true, true);
-      viewPort.setBackgroundColor(new ColorRGBA(0.7f, 0.8f, 0.8f, 1f));
+      viewPort.setBackgroundColor(JMEDataTypeUtils.colorToColorRGBA(backgroundColor));
       viewPort.addProcessor(this);
       screenShotHelper = new JMEFastCaptureDevice(viewPort);
       stateManager.attach(screenShotHelper);
