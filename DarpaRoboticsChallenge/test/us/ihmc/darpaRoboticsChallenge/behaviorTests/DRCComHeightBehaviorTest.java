@@ -193,6 +193,6 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
          SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
       }
 
-      assertEquals(desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);
+      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);;
    }
 }

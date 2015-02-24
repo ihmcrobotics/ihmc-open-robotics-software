@@ -659,12 +659,12 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       double[] currentArmPose = getCurrentArmPose(robotSide);
       double[] desiredArmPose = handPosePacket.getJointAngles();
 
-      double armPoseChangeFromInitial = computeTotalArmJointError(initialArmPose, currentArmPose);
-      double armPoseChangeToHandPosePacket = computeTotalArmJointError(desiredArmPose, currentArmPose);
+      double armPoseDistanceFromInitial = computeTotalArmJointError(initialArmPose, currentArmPose);
+      double armPoseDistanceToHandPosePacket = computeTotalArmJointError(desiredArmPose, currentArmPose);
 
-      boolean armPoseIsCloserToInitalThanToHandPosePacketTarget = armPoseChangeFromInitial < armPoseChangeToHandPosePacket;
+      boolean closerToInitalThanToHandPosePacket = armPoseDistanceFromInitial < armPoseDistanceToHandPosePacket;
 
-      assertTrue(armPoseIsCloserToInitalThanToHandPosePacketTarget);
+      assertTrue("HandPose behavior must have executed when it shouldn't have.", closerToInitalThanToHandPosePacket);
    }
 
    private double computeTotalArmJointError(double[] desiredArmPose, double[] actualArmPose)
@@ -735,7 +735,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
          SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
       }
 
-      assertEquals(desiredHeightOffset, actualHeightOffset, DRCComHeightBehaviorTest.POSITION_THRESHOLD);
+      assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + DRCComHeightBehaviorTest.POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, DRCComHeightBehaviorTest.POSITION_THRESHOLD);
    }
 
    private void assertOrientationsAreWithinThresholds(Quat4d desiredQuat, ReferenceFrame frameToCheck)
@@ -762,7 +762,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
 
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 
    private void assertPosesAreWithinThresholds(FramePose framePose1, FramePose framePose2)
@@ -772,8 +772,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       SysoutTool.println("positionDistance=" + positionDistance, DEBUG);
       SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
-
-      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 }

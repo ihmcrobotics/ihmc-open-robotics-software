@@ -261,8 +261,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
 
       if (!Double.isNaN(POSITION_THRESHOLD))
       {
-         assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
+         assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
       }
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 }

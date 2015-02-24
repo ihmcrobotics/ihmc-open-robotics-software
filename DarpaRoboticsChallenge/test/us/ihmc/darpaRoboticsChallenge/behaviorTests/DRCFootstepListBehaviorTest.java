@@ -450,8 +450,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          SysoutTool.println(" orientationDistance = " + orientationDistance);
       }
 
-      assertEquals(0.0, positionDistance, positionThreshold);
-      assertEquals(0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
    }
 
 }
