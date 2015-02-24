@@ -152,9 +152,9 @@ public class DRCSimulationTestHelper
       return drcSimulationFactory;
    }
    
-   public FullRobotModel getEstimatorFullRobotModel()
+   public FullRobotModel getControllerFullRobotModel()
    {
-      return drcSimulationFactory.getEstimatorFullRobotModel();
+      return drcSimulationFactory.getControllerFullRobotModel();
    }
    
    public CommonAvatarEnvironmentInterface getTestEnviroment()
