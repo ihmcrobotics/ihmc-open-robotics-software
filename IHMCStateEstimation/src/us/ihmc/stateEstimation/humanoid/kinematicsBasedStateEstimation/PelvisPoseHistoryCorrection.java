@@ -459,8 +459,7 @@ public class PelvisPoseHistoryCorrection
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
 
-      double maxCorrectionVelocity = maxTranslationVelocityClip.getDoubleValue();
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected, maxCorrectionVelocity);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 
