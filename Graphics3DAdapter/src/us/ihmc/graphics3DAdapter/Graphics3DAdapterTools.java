@@ -79,6 +79,7 @@ public class Graphics3DAdapterTools
 
       jFrame.pack();
       jFrame.setVisible(true);
+      jFrame.setLocationRelativeTo(null);
 
       return jFrame;
    }

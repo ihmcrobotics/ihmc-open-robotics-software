@@ -1,6 +1,7 @@
 package us.ihmc.graphics3DAdapter.jme;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.io.File;
@@ -163,27 +164,30 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    public JMEGraphics3DNode addNodesRecursively(Graphics3DNode graphics3dNode, Node parentNode)
-   {
-      JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this);
-
-      if (rootJoint == null)
+   {  
+      synchronized (graphicsConch)
       {
-         rootJoint = jmeNode;
+         JMEGraphics3DNode jmeNode = new JMEGraphics3DNode(graphics3dNode, assetLocator, this);
+   
+         if (rootJoint == null)
+         {
+            rootJoint = jmeNode;
+         }
+   
+         Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
+   
+         jmeNode.setType(nodeType);
+         
+         jmeGraphicsNodes.put(graphics3dNode, jmeNode);
+         parentNode.attachChild(jmeNode);
+   
+         for (Graphics3DNode child : graphics3dNode.getChildrenNodes())
+         {
+            addNodesRecursively(child, jmeNode);
+         }
+         
+         return jmeNode;
       }
-
-      Graphics3DNodeType nodeType = graphics3dNode.getNodeType();
-
-      jmeNode.setType(nodeType);
-
-      jmeGraphicsNodes.put(graphics3dNode, jmeNode);
-      parentNode.attachChild(jmeNode);
-
-      for (Graphics3DNode child : graphics3dNode.getChildrenNodes())
-      {
-         addNodesRecursively(child, jmeNode);
-      }
-      
-      return jmeNode;
    }
 
    public void addRootNode(final Graphics3DNode rootNode)
@@ -221,7 +225,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          }
       }
 
-      JMEViewportAdapter newViewport = new JMEViewportAdapter(this, rootNode, isMainViewport, isOffScreen ? ViewportType.OFFSCREEN : ViewportType.CANVAS);
+      JMEViewportAdapter newViewport = new JMEViewportAdapter(this, rootNode, isMainViewport, isOffScreen ? ViewportType.OFFSCREEN : ViewportType.CANVAS, false, Color.LIGHT_GRAY);
       
       return newViewport;
    }
@@ -331,12 +335,15 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private void recursivelyRemoveNodesFromMap(Graphics3DNode rootNode)
    {
-      for (Graphics3DNode child : rootNode.getChildrenNodes())
+      synchronized (graphicsConch)
       {
-         recursivelyRemoveNodesFromMap(child);
+         for (Graphics3DNode child : rootNode.getChildrenNodes())
+         {
+            recursivelyRemoveNodesFromMap(child);
+         }
+   
+         jmeGraphicsNodes.remove(rootNode);
       }
-
-      jmeGraphicsNodes.remove(rootNode);
    }
 
    public void removeRootNode(final Graphics3DNode rootNode)
@@ -807,11 +814,21 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       return list;
    }
 
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(final Color3f color)
    {
-      System.err.println(getClass().getSimpleName() + ": setBackgroundColor not implemented.");
-
-      // TODO
+//      enqueue(new Callable<Object>()
+//      {
+//         @Override
+//         public Object call() throws Exception
+//         {
+//            for (JMEViewportAdapter viewportAdapter : viewportAdapters)
+//            {
+//               viewportAdapter.getViewPort().setBackgroundColor(new ColorRGBA(color.x, color.y, color.z, 1.0f));
+//            }
+//            
+//            return null;
+//         }
+//      });
    }
 
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode)
@@ -907,8 +924,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       
       if (jmeGraphicsNodes != null)
       {
-         jmeGraphicsNodes.clear();
-         jmeGraphicsNodes = null;
+         synchronized (graphicsConch)
+         {
+            jmeGraphicsNodes.clear();
+            jmeGraphicsNodes = null;
+         }
       }
       
       if (jmeGraphicsNodesListView != null)
@@ -916,8 +936,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          synchronized (graphicsConch)
          {
             jmeGraphicsNodesListView.clear();
+            jmeGraphicsNodesListView = null;
          }
-         jmeGraphicsNodesListView = null;
       }
       
       selectedListenerHolder = null;
