@@ -233,7 +233,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
          System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
       }
 
-      assertEquals(0.0, positionDistance, POSITION_THRESHOLD);
-      assertEquals(0.0, orientationDistance, ORIENTATION_THRESHOLD);
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
 }

@@ -28,11 +28,9 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.LookAtBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -216,7 +214,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
       double angleBetweenAxes = Math.abs(Math.acos(desiredLookAxis.dot(actualLookAxis)));
 
-      assertEquals(0.0, angleBetweenAxes, ORIENTATION_THRESHOLD);
+      assertEquals("Angle between actual and desired lookAt directions," + angleBetweenAxes + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, angleBetweenAxes, ORIENTATION_THRESHOLD);
    }
 
    private Vector3d getQuatAxis(Quat4d quat)

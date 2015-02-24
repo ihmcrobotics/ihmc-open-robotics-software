@@ -151,7 +151,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testSimpleTaskSpaceHandPoseMove() throws SimulationExceededMaximumTimeException
+   public void testTaskSpaceMoveToPoseAchievedInJointSpace() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -456,8 +456,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
          System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
       }
 
-      assertEquals(0.0, positionDistance, positionThreshold);
-      assertEquals(0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
    }
 
    private void assertCurrentHandPoseIsWithinThresholds(RobotSide robotSide, double[] desiredArmPose)
