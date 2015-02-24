@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 
@@ -116,6 +117,15 @@ public class DRCNetworkModuleParameters
    public void setUseRosModule(boolean b)
    {
       useRosModule = b;
+      if(rosUri ==null)
+         try
+         {
+            rosUri = new URI("http://localhost:11311");
+         }
+         catch (URISyntaxException e)
+         {
+            e.printStackTrace();
+         }
    }
 
    public void setRosUri(URI rosURI)
