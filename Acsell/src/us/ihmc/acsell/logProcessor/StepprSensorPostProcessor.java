@@ -126,7 +126,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
 
             sensorProcessing.computeJointVelocityFromFiniteDifference(jointVelocityAlphaFilter, true); //vizonly
             sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
-            sensorProcessing.addJointAccelerationAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter);
+            sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
             sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
             sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
