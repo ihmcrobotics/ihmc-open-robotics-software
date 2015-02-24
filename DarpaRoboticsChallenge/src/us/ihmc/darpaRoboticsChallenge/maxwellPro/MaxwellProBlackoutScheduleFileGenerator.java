@@ -6,7 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import us.ihmc.darpaRoboticsChallenge.maxwellPro.blackoutGenerators.ConstantBlackoutGenerator;
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutGenerator;
+import us.ihmc.communication.blackoutGenerators.ConstantBlackoutGenerator;
 
 public class MaxwellProBlackoutScheduleFileGenerator
 {
