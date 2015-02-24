@@ -26,4 +26,8 @@ public interface StepingParameters extends FootstepParameters
    public abstract double getMaxAngleTurnOutwards(); //the maximum angle the foot can turn outwards in a step
 
    public abstract double getMaxAngleTurnInwards(); //the maximum angle the foot can turn inwards in a step
+
+   public abstract double getMinAreaPercentForValidFootstep(); //the minimum percentage of area that the robot can take a step with
+
+   public abstract double getDangerAreaPercentForValidFootstep(); //the percentage of footstep area below which large footsteps cannot be taken
 }

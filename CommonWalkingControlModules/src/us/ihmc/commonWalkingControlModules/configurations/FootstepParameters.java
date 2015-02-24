@@ -18,4 +18,6 @@ public interface FootstepParameters
    public abstract double getActualFootWidth();
 
    public abstract double getActualFootLength();
+
+   public abstract double getFootstepArea();
 }
