@@ -5,8 +5,6 @@ import static us.ihmc.yoUtilities.stateMachines.StateMachineTools.addRequestedSt
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
@@ -21,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProduce
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameTuple;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -154,7 +151,7 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 30, registry);
+         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 10, registry);
          waypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
       
@@ -162,7 +159,7 @@ public class HandControlModule
       
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, trajectoryTimeProvider, registry);
+         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, 10, registry);
          wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
@@ -436,6 +433,7 @@ public class HandControlModule
          handPoseStatusProducer.sendStartedStatus(robotSide);
    }
 
+   @Deprecated
    public void moveJointspaceWithWaypoints(Map<OneDoFJoint, double[]> desiredJointPositions, double time)
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -446,9 +444,9 @@ public class HandControlModule
 
       trajectoryTimeProvider.set(time);
 
-      for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
+      for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         waypointsPolynomialTrajectoryGenerators.get(oneDoFJoint).setDesiredPositions(desiredJointPositions.get(oneDoFJoint));
+         waypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[i]).setDesiredPositions(desiredJointPositions.get(oneDoFJoints[i]));
       }
 
       jointSpaceHandControlState.setTrajectories(waypointsPolynomialTrajectoryGenerators);
@@ -458,20 +456,17 @@ public class HandControlModule
 //      if (handPoseStatusProducer != null)
 //         handPoseStatusProducer.sendStartedStatus(robotSide);
    }
-   
-   public void moveJointspaceWithWaypointsForWholeBodyTrajectory(RobotSide robotSide, double[] timeArray, double[][] positionArray, double[][] velocityArray)
+
+   public void moveJointspaceWithWaypoints(RobotSide robotSide, double[] timeArray, double[][] positionArray, double[][] velocityArray)
    {
-         if (positionArray.length!=oneDoFJoints.length){
-            throw new RuntimeException("not all joint positions specified");
-         }
-         
-      int i = -1;
-      
-      
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      if (positionArray.length != oneDoFJoints.length)
       {
-         ++i;
-         wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoint).initializeTrajectory(timeArray, positionArray[i], velocityArray[i]);
+         throw new RuntimeException("not all joint positions specified");
+      }
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[i]).setWaypoints(timeArray, positionArray[i], velocityArray[i]);
       }
 
       jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
