@@ -57,9 +57,14 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
    public AtlasContactPointParameters(DRCRobotJointMap jointMap, AtlasRobotVersion atlasVersion)
    {
+      this(0.0, jointMap, atlasVersion);
+   }
+   
+   public AtlasContactPointParameters(double footZWobbleForTests, DRCRobotJointMap jointMap, AtlasRobotVersion atlasVersion)
+   {
       this.jointMap = jointMap;
       this.atlasVersion = atlasVersion;
-      createFootContactPoints();
+      createFootContactPoints(footZWobbleForTests);
    }
 
    public void createPelvisContactPoints()
@@ -180,6 +185,11 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
 
    public void createFootContactPoints()
    {
+      createFootContactPoints(0.0);
+   }
+   
+   public void createFootContactPoints(double footZWobbleForTests)
+   {
       for (RobotSide robotSide : RobotSide.values)
       {
          //MomentumBasedControll ContactPoints
@@ -208,7 +218,14 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
             {
                double x = (ix - 1.0) * dx - xOffset;
                double y = (iy - 1.0) * dy - yOffset;
-               Point3d gcOffset = new Point3d(x, y, 0.0);
+               
+               double z = 0.0;
+               if (((ix == 1) && (iy == 1)) || ((ix == 2) && (iy == 2)))
+               {
+                  z = -footZWobbleForTests;
+               }
+               
+               Point3d gcOffset = new Point3d(x, y, z);
 
                AtlasPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide).transform(gcOffset);
                jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(jointMap.getJointBeforeFootName(robotSide), new Vector3d(gcOffset))); // to SCS

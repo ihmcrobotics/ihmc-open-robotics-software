@@ -102,6 +102,11 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    public AtlasJointMap(AtlasRobotVersion atlasVersion)
    {
+      this(0.0, atlasVersion);
+   }
+   
+   public AtlasJointMap(double footZWobbleForTests, AtlasRobotVersion atlasVersion)
+   {
       this.atlasVersion = atlasVersion;
 
       for (RobotSide robotSide : RobotSide.values)
@@ -160,7 +165,7 @@ public class AtlasJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion);
+      contactPointParameters = new AtlasContactPointParameters(footZWobbleForTests, this, atlasVersion);
       
       for (RobotSide robtSide : RobotSide.values)
       {
