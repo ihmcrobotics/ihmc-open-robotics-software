@@ -107,6 +107,34 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
+   public void testTurn360DegreesInPlace() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Initializing Behavior", DEBUG);
+      FramePose2d desiredMidFeetPose2d = getCurrentMidFeetPose2dCopy();
+      double currentYaw = desiredMidFeetPose2d.getYaw();
+      desiredMidFeetPose2d.setYaw(currentYaw + Math.toRadians(360.0));
+      
+      WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
+
+      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+      SysoutTool.println("Behavior Should be done", DEBUG);
+
+      assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
+      assertTrue(walkToLocationBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
