@@ -272,6 +272,18 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getMinAreaPercentForValidFootstep()
+   {
+      return 0.5;
+   }
+
+   @Override
+   public double getDangerAreaPercentForValidFootstep()
+   {
+      return 0.75;
+   }
+
+   @Override
    public double getCaptureKpParallelToMotion()
    {
       return 1.5;
@@ -651,6 +663,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getActualFootLength()
    {
       return getFootLength();
+   }
+
+   @Override
+   public double getFootstepArea()
+   {
+      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
    }
 
    @Override
