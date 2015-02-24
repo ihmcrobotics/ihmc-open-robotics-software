@@ -8,6 +8,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
 
 public class UserDesiredChestOrientationProvider implements ChestOrientationProvider
 {
@@ -89,5 +90,17 @@ public class UserDesiredChestOrientationProvider implements ChestOrientationProv
    public double getTrajectoryTime()
    {
       return chestTrajectoryTime.getDoubleValue();
+   }
+
+   @Override
+   public boolean checkForNewChestOrientationWithWaypoints()
+   {
+      return false;
+   }
+
+   @Override
+   public WaypointOrientationTrajectoryData getDesiredChestOrientationWithWaypoints()
+   {
+      return null;
    }
 }
