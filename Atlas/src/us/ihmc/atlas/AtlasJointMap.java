@@ -55,7 +55,6 @@ import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasJointMap implements DRCRobotJointMap
@@ -101,11 +100,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
 
    public AtlasJointMap(AtlasRobotVersion atlasVersion)
-   {
-      this(0.0, atlasVersion);
-   }
-   
-   public AtlasJointMap(double footZWobbleForTests, AtlasRobotVersion atlasVersion)
    {
       this.atlasVersion = atlasVersion;
 
@@ -165,7 +159,8 @@ public class AtlasJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParameters = new AtlasContactPointParameters(footZWobbleForTests, this, atlasVersion);
+      boolean createFootContactPoints = true;
+      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints);
       
       for (RobotSide robtSide : RobotSide.values)
       {
