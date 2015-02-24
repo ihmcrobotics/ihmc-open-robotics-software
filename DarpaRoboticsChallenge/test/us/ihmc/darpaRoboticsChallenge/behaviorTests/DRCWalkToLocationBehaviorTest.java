@@ -107,7 +107,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testTurn360DegreesInPlace() throws SimulationExceededMaximumTimeException
+   public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -118,7 +118,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       SysoutTool.println("Initializing Behavior", DEBUG);
       FramePose2d desiredMidFeetPose2d = getCurrentMidFeetPose2dCopy();
       double currentYaw = desiredMidFeetPose2d.getYaw();
-      desiredMidFeetPose2d.setYaw(currentYaw + Math.toRadians(360.0));
+      desiredMidFeetPose2d.setYaw(currentYaw + Math.toRadians(361.0));
       
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
 
