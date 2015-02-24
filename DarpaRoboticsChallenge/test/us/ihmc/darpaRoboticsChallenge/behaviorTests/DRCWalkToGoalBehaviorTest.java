@@ -116,7 +116,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel(), true);
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();

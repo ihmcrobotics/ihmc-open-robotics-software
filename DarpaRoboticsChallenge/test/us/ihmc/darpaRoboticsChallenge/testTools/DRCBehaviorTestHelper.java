@@ -104,7 +104,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
          DRCRobotModel robotModel, KryoPacketCommunicator controllerCommunicator)
    {
-      super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, false, robotModel, true);
+      super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, false, robotModel);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
