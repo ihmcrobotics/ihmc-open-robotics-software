@@ -184,7 +184,7 @@ public class ManipulationControlModule
          double[] timeArray = handPoseProvider.getDesiredWholeBodyTrajectoryTimeArray();
          double[][] jointPositionArray = handPoseProvider.getDesiredWholeBodyTrajectoryPositionArray(robotSide);
          double[][] jointVelocityArray = handPoseProvider.getDesiredWholeBodyTrajectoryVelocityArray(robotSide);
-         handControlModules.get(robotSide).moveJointspaceWithWaypointsForWholeBodyTrajectory(robotSide, timeArray, jointPositionArray, jointVelocityArray);
+         handControlModules.get(robotSide).moveJointspaceWithWaypoints(robotSide, timeArray, jointPositionArray, jointVelocityArray);
          handPoseProvider.setWholeBodyTrajectoryPacketAtomicReferenceToNull(robotSide);
       }
    }
