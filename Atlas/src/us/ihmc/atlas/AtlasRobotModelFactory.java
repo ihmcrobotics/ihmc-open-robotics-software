@@ -67,6 +67,11 @@ public class AtlasRobotModelFactory
       }
       return -1;
    }
+   
+   public static AtlasRobotModel selectModelFromGraphicSelector()
+   {
+      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false));
+   }
 
    public static AtlasRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)
    {
