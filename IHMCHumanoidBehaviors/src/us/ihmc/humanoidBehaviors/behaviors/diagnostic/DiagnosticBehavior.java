@@ -280,11 +280,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
       pelvisShiftScaleFactor.set(0.4, 0.7);
 
-      double tolerance = 1e-8;
-      int maxIterations = 500;
-      double maxStepSize = 1.0;
-      double minRandomSearchScalar = -0.5;
-      double maxRandomSearchScalar = 1.0;
+      // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
+      int maxIterations = 60;
+      double lambdaLeastSquares = 0.0009;
+      double tolerance = 0.0025;
+      double maxStepSize = 0.2;
+      double minRandomSearchScalar = 0.01;
+      double maxRandomSearchScalar = 0.8;
+      
       DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
       angularSelectionMatrix.set(0, 0, 1.0);
       angularSelectionMatrix.set(1, 1, 1.0);
@@ -340,14 +343,14 @@ public class DiagnosticBehavior extends BehaviorInterface
          upperArmJoints.put(robotSide, ScrewTools.filterJoints(ScrewTools.createJointPath(chest, upperArmBody), OneDoFJoint.class));
          upperArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(upperArmJoints.get(robotSide)), OneDoFJoint.class));
          GeometricJacobian upperArmJacobian = new GeometricJacobian(upperArmJointsClone.get(robotSide), upperArmJointsClone.get(robotSide)[upperArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
-         NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         NumericalInverseKinematicsCalculator inverseKinematicsForUpperArm = new NumericalInverseKinematicsCalculator(upperArmJacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForUpperArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForUpperArms.put(robotSide, inverseKinematicsForUpperArm);
 
          lowerArmJoints.put(robotSide, ScrewTools.filterJoints(ScrewTools.createJointPath(lowerArmBody, hand), OneDoFJoint.class));
          lowerArmJointsClone.put(robotSide, ScrewTools.filterJoints(ScrewTools.cloneJointPath(lowerArmJoints.get(robotSide)), OneDoFJoint.class));
          GeometricJacobian lowerArmJacobian = new GeometricJacobian(lowerArmJointsClone.get(robotSide), lowerArmJointsClone.get(robotSide)[lowerArmJointsClone.get(robotSide).length - 1].getSuccessor().getBodyFixedFrame());
-         NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         NumericalInverseKinematicsCalculator inverseKinematicsForLowerArm = new NumericalInverseKinematicsCalculator(lowerArmJacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
          inverseKinematicsForLowerArm.setSelectionMatrix(angularSelectionMatrix);
          inverseKinematicsForLowerArms.put(robotSide, inverseKinematicsForLowerArm);
       }
@@ -1735,7 +1738,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       if (!success)
       {
          counterForUpperArmIK++;
-         ScrewTestTools.setRandomPositions(upperArmJointsClone.get(robotSide), random);
+         ScrewTestTools.setRandomPositions(upperArmJointsClone.get(robotSide), random, 0.0, 1.0);
          return computeUpperArmJointAngles(robotSide, desiredUpperArmOrientation, false);
       }
 
