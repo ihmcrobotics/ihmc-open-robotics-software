@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
@@ -20,6 +22,7 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
+@BambooPlan(planType = {BambooPlanType.Exclude}) // Revisit JOptimzer some day and see if they ever got their act in gear...
 public class SimpleJOptimizerTest
 {
    private static final boolean VERBOSE = true;
