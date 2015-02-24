@@ -9,8 +9,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -21,8 +24,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
@@ -31,6 +33,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 {
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private final boolean DEBUG = true;
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
 
@@ -45,6 +48,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
+   private final DoubleYoVariable walkDistance = new DoubleYoVariable(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
 
@@ -103,10 +107,12 @@ public class WalkToLocationBehavior extends BehaviorInterface
       hasTargetBeenProvided.set(true);
       generateFootsteps();
    }
-
-   public void setwalkingYawOrientationAngle(double walkingYawOrientationAngle)
+   
+   public void setWalkingOrientationRelativeToPathDirection(double orientationRelativeToPathDirection)
    {
-      pathType.setAngle(walkingYawOrientationAngle);
+      pathType.setAngle(orientationRelativeToPathDirection);
+      if (hasTargetBeenProvided.getBooleanValue())
+         generateFootsteps();
    }
 
    @Override
@@ -130,6 +136,11 @@ public class WalkToLocationBehavior extends BehaviorInterface
       //for testing purpose
       //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
    }
+   
+   public int getNumberOfFootSteps()
+   {
+      return footsteps.size();
+   }
 
    private void generateFootsteps()
    {
@@ -140,6 +151,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
             
       footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
       footstepGenerator.initialize();
+      walkDistance.set(footstepGenerator.getDistance());
       
       if(footstepGenerator.getDistance() > minDistanceThresholdForWalking || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking) 
       {
@@ -157,6 +169,9 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       footstepListBehavior.set(footsteps);
       haveFootstepsBeenGenerated.set(true);
+      
+      if(DEBUG)
+         SysoutTool.println("Walk Distance: " + walkDistance.getDoubleValue());
    }
 
    @Override

@@ -11,32 +11,29 @@ public class WalkToLocationTask extends BehaviorTask
    private final FramePose2d targetPoseInWorld;
    private final WalkToLocationBehavior walkToLocationBehavior;
 
-   private final double walkingYawOrientationAngle;
+   private final double orientationRelativeToPathDirection;
    private double footstepLength;
 
-   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double walkingYawOrientationAngle,
+   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
          double footstepLength, DoubleYoVariable yoTime, double sleepTime)
    {
-      super(walkToLocationBehavior, yoTime , sleepTime);
+      super(walkToLocationBehavior, yoTime, sleepTime);
       this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
-      this.walkingYawOrientationAngle = walkingYawOrientationAngle;
+      this.orientationRelativeToPathDirection = orientationRelativeToPathDirection;
       this.footstepLength = footstepLength;
    }
-   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double walkingYawOrientationAngle,
+
+   public WalkToLocationTask(FramePose2d targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
          double footstepLength, DoubleYoVariable yoTime)
    {
-      super(walkToLocationBehavior, yoTime);
-      this.targetPoseInWorld = new FramePose2d(targetPoseInWorld);
-      this.walkToLocationBehavior = walkToLocationBehavior;
-      this.walkingYawOrientationAngle = walkingYawOrientationAngle;
-      this.footstepLength = footstepLength;
+      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, yoTime, 0.0);
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      walkToLocationBehavior.setwalkingYawOrientationAngle(walkingYawOrientationAngle);
+      walkToLocationBehavior.setWalkingOrientationRelativeToPathDirection(orientationRelativeToPathDirection);
       walkToLocationBehavior.setFootstepLength(footstepLength);
       walkToLocationBehavior.setTarget(targetPoseInWorld);
    }
