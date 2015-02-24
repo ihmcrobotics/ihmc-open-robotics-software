@@ -4,15 +4,15 @@ import us.ihmc.utilities.ComparableDataObject;
 
 public abstract class Packet<T> implements ComparableDataObject<T>
 {
-   private int destination = PacketDestination.BROADCAST.ordinal();
+   public byte destination = (byte) PacketDestination.BROADCAST.ordinal();
    public void setDestination(PacketDestination destination)
    {
-      this.destination = destination.ordinal();
+      setDestination(destination.ordinal());
    }
    
    public void setDestination(int destination)
    {
-      this.destination = destination;
+      this.destination = (byte) destination;
    }
    
    public int getDestination()

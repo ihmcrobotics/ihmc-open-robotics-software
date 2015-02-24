@@ -102,6 +102,7 @@ public class DepthDataFilter
               new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
    }
 
+   @Deprecated
    public PointCloudPacket filterPolarLidarScan(LidarScan lidarScan)
    {
       ArrayList<Point3d> points = new ArrayList<>();
@@ -117,6 +118,7 @@ public class DepthDataFilter
 
    }
    
+   @Deprecated
    private void addLidarScan(LidarScan lidarScan, int i, ArrayList<Point3d> points)
    {
       Point3d lidarOrigin = new Point3d();

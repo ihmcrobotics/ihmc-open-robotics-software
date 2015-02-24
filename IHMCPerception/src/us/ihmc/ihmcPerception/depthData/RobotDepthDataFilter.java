@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -17,11 +17,11 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 public class RobotDepthDataFilter extends DepthDataFilter
 {
    private final RobotBoundingBoxes robotBoundingBoxes;
-   private final SDFFullRobotModel fullRobotModel;
+   private final FullRobotModel fullRobotModel;
    private final SideDependentList<ArrayList<Point2d>> contactPoints;
 
 
-   public RobotDepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, SDFFullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
+   public RobotDepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, FullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super((fullRobotModel.getHead() == null) ? ReferenceFrame.getWorldFrame() : fullRobotModel.getHead().getBodyFixedFrame());
       this.robotBoundingBoxes = robotBoundingBoxes;
