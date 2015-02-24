@@ -36,10 +36,8 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
-
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
@@ -51,7 +49,7 @@ public class DRCSimulationTestHelper
    private final SimulationConstructionSet scs;
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
-   private final PacketCommunicator networkObjectCommunicator;
+   private final PacketCommunicator mockUiObjectCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
@@ -80,10 +78,10 @@ public class DRCSimulationTestHelper
    }
    
          
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator networkObjectCommunicator, String name, 
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator mockUiObjectCommunicator, String name, 
          String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
    {
-      this.networkObjectCommunicator = networkObjectCommunicator;
+      this.mockUiObjectCommunicator = mockUiObjectCommunicator;
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -113,12 +111,12 @@ public class DRCSimulationTestHelper
          networkProcessorParameters.setUseSensorModule(startNetworkProcessor);
          networkProcessorParameters.setUsePerceptionModule(startNetworkProcessor);
          
-         simulationStarter.addPacketCommunicatorToNetworkProcessor(networkObjectCommunicator);
       }
       networkProcessorParameters.setUseBehaviorVisualizer(false); // Needs to be false for bamboo.
       
-      simulationStarter.setControllerPacketCommunicator(networkObjectCommunicator);
+//      simulationStarter.setControllerPacketCommunicator(networkObjectCommunicator);
       simulationStarter.startSimulation(networkProcessorParameters, false);
+      simulationStarter.addPacketCommunicatorToNetworkProcessor(mockUiObjectCommunicator);
 
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();
@@ -184,40 +182,40 @@ public class DRCSimulationTestHelper
 
    public void sendFootstepListToListeners(FootstepDataList footstepDataList)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendFootstepListToListeners(footstepDataList);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendFootstepListToListeners(footstepDataList);
    }
    
    public void sendHandstepPacketToListeners(HandstepPacket handstepPacket)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandstepPacketToListeners(handstepPacket);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendHandstepPacketToListeners(handstepPacket);
    }
    
    public void sendHandPosePacketToListeners(HandPosePacket handPosePacket)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendHandPosePacketToListeners(handPosePacket);
-      if (networkObjectCommunicator instanceof KryoLocalPacketCommunicator)
-         networkObjectCommunicator.send(handPosePacket);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendHandPosePacketToListeners(handPosePacket);
+      if (mockUiObjectCommunicator instanceof KryoLocalPacketCommunicator)
+         mockUiObjectCommunicator.send(handPosePacket);
    }
 
    public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendBlindWalkingPacketToListeners(blindWalkingPacket);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendBlindWalkingPacketToListeners(blindWalkingPacket);
    }
 
    public void sendComHeightPacketToListeners(ComHeightPacket comHeightPacket)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendComHeightPacketToListeners(comHeightPacket);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendComHeightPacketToListeners(comHeightPacket);
    }
 
    public void sendChestOrientationPacketToListeners(ChestOrientationPacket chestOrientationPacket)
    {
-      if (networkObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) networkObjectCommunicator).sendChestOrientation(chestOrientationPacket);
+      if (mockUiObjectCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) mockUiObjectCommunicator).sendChestOrientation(chestOrientationPacket);
    }
 
    public SDFRobot getRobot()
