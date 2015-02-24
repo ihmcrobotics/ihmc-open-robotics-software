@@ -312,6 +312,18 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getMinAreaPercentForValidFootstep()
+   {
+      return 0.5;
+   }
+
+   @Override
+   public double getDangerAreaPercentForValidFootstep()
+   {
+      return 0.75;
+   }
+
+   @Override
    public double getCaptureKpParallelToMotion()
    {
       if (!runningOnRealRobot) return 1.4;
@@ -687,6 +699,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getActualFootLength()
    {
       return getFootLength();
+   }
+
+   @Override
+   public double getFootstepArea()
+   {
+      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
    }
 
    @Override
