@@ -10,15 +10,11 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
    private CommunicationBlackoutGenerator blackoutGenerator;
    private volatile boolean enableBlackouts = false;
    private volatile boolean blackout = false;
+   private ExecutorService executor = Executors.newSingleThreadExecutor();
    
    public StandardBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator)
    {
       this.blackoutGenerator = blackoutGenerator;
-   }
-   
-   public void enableBlackouts(boolean enable)
-   {
-      enableBlackouts = enable;
    }
    
    public CommunicationBlackoutGenerator getBlackoutGenerator()
@@ -26,12 +22,17 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
       return blackoutGenerator;
    }
    
-   public void startBlackoutSimulator(long currentTime)
+   @Override
+   public void startBlackoutSimulator()
    {
       enableBlackouts = true;
-      
-      ExecutorService executor = Executors.newSingleThreadExecutor();
-      executor.execute(new BlackoutTimer(currentTime));
+      executor.execute(new BlackoutTimer(getCurrentTime()));
+   }
+   
+   @Override
+   public void stopBlackoutSimulator()
+   {
+      enableBlackouts = false;
    }
    
    @Override
@@ -70,9 +71,13 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
          while(enableBlackouts)
          {
             StandardBlackoutSimulator.this.lock();
-            
+            if(getCurrentTime() % 1000 == 0)
+               System.out.println(getCurrentTime() + " " + blackout);
             long currentTime = StandardBlackoutSimulator.this.getCurrentTime();
-            if(currentTime - currentBlackoutStartTime >= currentBlackoutLength)
+            
+            if(currentTime - currentBlackoutStartTime < 0)
+               blackout = false;
+            else if(currentTime - currentBlackoutStartTime >= currentBlackoutLength)
             {
                blackout = false;
                currentBlackoutStartTime = currentTime + 1000;
