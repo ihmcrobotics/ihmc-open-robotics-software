@@ -81,7 +81,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(DRCWalkToLocationBehaviorTest.class + " after class.");
    }
 
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final double POSITION_THRESHOLD = 0.06;   // Atlas typically achieves between 0.02-0.03 position threshold
    private final double ORIENTATION_THRESHOLD = 0.2;  // Atlas typically achieves between .005-0.1 orientation threshold (more accurate when turning in place at final target)
@@ -155,6 +155,48 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       SysoutTool.println("Behavior Should be done", DEBUG);
 
       assertCurrentMidFeetPoseIsWithinThreshold(desiredMidFeetPose2d);
+      assertTrue(walkToLocationBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Initializing Behavior", DEBUG);
+      double walkDistance = 2.0 * getRobotModel().getWalkingControllerParameters().getMinStepLengthForToeOff();
+      Vector2d walkDirection = new Vector2d(-1, 0);
+      FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
+
+      int randomZeroOrOne = RandomTools.generateRandomInt(new Random(), 0, 1);
+      double walkingOrientationRelativeToPathDirection;
+      if (randomZeroOrOne == 0)
+      {
+         walkingOrientationRelativeToPathDirection = Math.PI;
+      }
+      else
+      {
+         walkingOrientationRelativeToPathDirection = -Math.PI;
+      }
+      WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d, walkingOrientationRelativeToPathDirection);
+      int numberOfFootsteps = walkToLocationBehavior.getNumberOfFootSteps();
+      if (DEBUG)
+         SysoutTool.println("Number of Footsteps: " + numberOfFootsteps);
+      assertTrue(numberOfFootsteps <= 4.0);
+
+      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+      SysoutTool.println("Behavior Should be done", DEBUG);
+
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD);  //TODO: Determine why position error is so large when walking backwards
       assertTrue(walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
@@ -442,6 +484,12 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    private WalkToLocationBehavior createAndSetupWalkToLocationBehavior(FramePose2d desiredMidFeetPose)
    {
+      return createAndSetupWalkToLocationBehavior(desiredMidFeetPose, 0.0);
+   }
+
+   
+   private WalkToLocationBehavior createAndSetupWalkToLocationBehavior(FramePose2d desiredMidFeetPose, double walkingOrientationRelativeToPathDirection)
+   {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
@@ -451,6 +499,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
             walkingControllerParams);
 
       walkToLocationBehavior.initialize();
+      walkToLocationBehavior.setWalkingOrientationRelativeToPathDirection(walkingOrientationRelativeToPathDirection);
       walkToLocationBehavior.setTarget(desiredMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
 
