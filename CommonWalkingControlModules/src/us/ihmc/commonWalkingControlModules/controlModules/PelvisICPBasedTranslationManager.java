@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
@@ -18,7 +19,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
+import us.ihmc.yoUtilities.math.trajectories.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoPositionProvider;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
@@ -36,7 +40,11 @@ public class PelvisICPBasedTranslationManager
    private final DoubleYoVariable pelvisPositionTrajectoryTime = new DoubleYoVariable("pelvisPositionTrajectoryTime", registry);
    private final YoFramePoint initialPelvisPosition = new YoFramePoint("initialPelvis", worldFrame, registry);
    private final YoFramePoint finalPelvisPosition = new YoFramePoint("finalPelvis", worldFrame, registry);
+
+   private final BooleanYoVariable isUsingWaypointTrajectory;
+   private PositionTrajectoryGenerator activeTrajectoryGenerator;
    private final StraightLinePositionTrajectoryGenerator pelvisPositionTrajectoryGenerator;
+   private final MultipleWaypointsPositionTrajectoryGenerator pelvisWaypointsPositionTrajectoryGenerator;
 
    private final YoFrameVector2d pelvisPositionError = new YoFrameVector2d("pelvisPositionError", worldFrame, registry);
    private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisPositionProportionalGain", registry);
@@ -65,6 +73,7 @@ public class PelvisICPBasedTranslationManager
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final FramePoint tempPosition = new FramePoint();
+   private final FrameVector tempVelocity = new FrameVector();
    private final FramePoint2d tempPosition2d = new FramePoint2d();
    private final FrameVector2d tempError2d = new FrameVector2d();
    private final FrameVector2d tempICPOffset = new FrameVector2d();
@@ -80,12 +89,18 @@ public class PelvisICPBasedTranslationManager
 
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
 
+      isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
+      isUsingWaypointTrajectory.set(false);
+
       DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(pelvisPositionTrajectoryTime);
       PositionProvider initialPositionProvider = new YoPositionProvider(initialPelvisPosition);
       PositionProvider finalPositionProvider = new YoPositionProvider(finalPelvisPosition);
       pelvisPositionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator("pelvis", worldFrame, trajectoryTimeProvider, initialPositionProvider,
             finalPositionProvider, registry);
       pelvisPositionTrajectoryGenerator.initialize();
+      activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
+
+      pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", 10, worldFrame, registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
@@ -105,6 +120,14 @@ public class PelvisICPBasedTranslationManager
 
    public void compute(RobotSide supportLeg)
    {
+      if (isUsingWaypointTrajectory != null)
+      {
+         if (isUsingWaypointTrajectory.getBooleanValue())
+            activeTrajectoryGenerator = pelvisWaypointsPositionTrajectoryGenerator;
+         else
+            activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
+      }
+
       supportFrame = supportLeg == null ? midFeetZUpFrame : ankleZUpFrames.get(supportLeg);
 
       if (!isEnabled.getBooleanValue())
@@ -147,6 +170,24 @@ public class PelvisICPBasedTranslationManager
             initialPelvisPosition.setAndMatchFrame(tempPosition);
             finalPelvisPosition.setAndMatchFrame(desiredPelvisPoseProvider.getDesiredPelvisPosition(supportFrame));
             pelvisPositionTrajectoryGenerator.initialize();
+            isUsingWaypointTrajectory.set(false);
+            activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
+            isRunning.set(true);
+         }
+         else if (desiredPelvisPoseProvider.checkForNewPositionWithWaypoints())
+         {
+            initialPelvisPositionTime.set(yoTime.getDoubleValue());
+            pelvisWaypointsPositionTrajectoryGenerator.clear();
+            tempPosition.setToZero(pelvisZUpFrame);
+            tempPosition.changeFrame(worldFrame);
+            tempVelocity.setToZero(worldFrame);
+            pelvisWaypointsPositionTrajectoryGenerator.appendWayPoint(0.0, tempPosition, tempVelocity);
+            WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
+            desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
+            pelvisWaypointsPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
+            pelvisWaypointsPositionTrajectoryGenerator.initialize();
+            isUsingWaypointTrajectory.set(true);
+            activeTrajectoryGenerator = pelvisWaypointsPositionTrajectoryGenerator;
             isRunning.set(true);
          }
       }
@@ -154,8 +195,8 @@ public class PelvisICPBasedTranslationManager
       if (isRunning.getBooleanValue())
       {
          double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
-         pelvisPositionTrajectoryGenerator.compute(deltaTime);
-         pelvisPositionTrajectoryGenerator.get(tempPosition);
+         activeTrajectoryGenerator.compute(deltaTime);
+         activeTrajectoryGenerator.get(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
    }
@@ -243,5 +284,6 @@ public class PelvisICPBasedTranslationManager
       initialPelvisPosition.setAndMatchFrame(tempPosition);
       finalPelvisPosition.setAndMatchFrame(tempPosition);
       pelvisPositionTrajectoryGenerator.initialize();
+      activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
    }
 }
