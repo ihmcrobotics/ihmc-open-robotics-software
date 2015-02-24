@@ -68,18 +68,18 @@ public class DRCSimulationTestHelper
   
    public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, false, robotModel);
+      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, false, robotModel, true);
    }
 
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationConstructionSetParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationConstructionSetParameters, false, robotModel);
+      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationConstructionSetParameters, false, robotModel, true);
    }
    
          
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator packetCommunicator, String name, 
-         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
+         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel, boolean attachProvidedPacketCommunicatorToController)
    {
       this.mockUiObjectCommunicator = packetCommunicator;
       this.testEnvironment = commonAvatarEnvironmentInterface;
@@ -114,7 +114,9 @@ public class DRCSimulationTestHelper
       }
       networkProcessorParameters.setUseBehaviorVisualizer(false); // Needs to be false for bamboo.
       
-      simulationStarter.setControllerPacketCommunicator(packetCommunicator);
+      if (attachProvidedPacketCommunicatorToController)
+         simulationStarter.setControllerPacketCommunicator(packetCommunicator);
+      
       simulationStarter.startSimulation(networkProcessorParameters, false);
       
       if (packetCommunicator != null)
