@@ -1826,7 +1826,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       jFrame = new JFrame("Simulation Construction Set");
-      jFrame.setIconImage(new ImageIcon(ClassLoader.getSystemResource("running-man-32x32-Sim.png").getPath()).getImage());
+      jFrame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-32x32-Sim.png")).getImage());
 
       try
       {
