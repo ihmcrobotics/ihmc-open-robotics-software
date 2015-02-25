@@ -106,7 +106,7 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-add_executable(periodic_assembler src/assemble_clouds.cpp)
+add_executable(periodic_assembler src/periodic_assembler.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
