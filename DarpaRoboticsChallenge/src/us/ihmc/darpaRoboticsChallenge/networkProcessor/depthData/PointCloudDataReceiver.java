@@ -35,14 +35,16 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();
 
+   private final ArrayList<RobotBoundingBoxes> pointCloudFilters = new ArrayList<>();
+   
    private final AtomicBoolean sendData = new AtomicBoolean(false);
 
    private volatile boolean running = true;
 
-   public PointCloudDataReceiver(RobotBoundingBoxes robotBoundingBoxes, FullRobotModel fullRobotModel, DRCRobotJointMap jointMap,
+   public PointCloudDataReceiver(FullRobotModel fullRobotModel, DRCRobotJointMap jointMap,
          RobotPoseBuffer robotPoseBuffer, PacketCommunicator packetCommunicator)
    {
-      this.depthDataFilter = new RobotDepthDataFilter(robotBoundingBoxes, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
+      this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
       this.robotPoseBuffer = robotPoseBuffer;
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
 
@@ -65,7 +67,16 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                for (int i = 0; i < data.points.size(); i++)
                {
                   Point3d pointInWorld = robotPoseBuffer.transformToWorld(data.scanFrame, data.timestamps[i], data.points.get(i));
-                  depthDataFilter.addPoint(pointInWorld, data.originInWorld);
+                  
+                  boolean include = true;
+                  for(int f = 0; f < pointCloudFilters.size(); f++)
+                  {
+                     include &= pointCloudFilters.get(f).isValidPoint(data.originInWorld, pointInWorld);
+                  }
+                  if(include)
+                  {
+                     depthDataFilter.addPoint(pointInWorld, data.originInWorld);
+                  }
                }
                readWriteLock.writeLock().unlock();
             }
@@ -110,7 +121,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       {
          setLidarState(LidarState.DISABLE);
          depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
-         depthDataFilter.clearLidarData(DepthDataTree.OCTREE);
+         depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
       }
       readWriteLock.writeLock().unlock();
    }
@@ -123,10 +134,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    public void setLidarState(LidarState lidarState)
    {
-      readWriteLock.writeLock().lock();
-      depthDataFilter.setLidarState(lidarState);
-      readWriteLock.writeLock().unlock();
-
       sendData.set(lidarState != LidarState.DISABLE);
    }
 
@@ -223,5 +230,10 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          this.points = points;
       }
 
+   }
+
+   public void addPointFilter(RobotBoundingBoxes robotBoundingBoxes)
+   {
+      pointCloudFilters.add(robotBoundingBoxes);
    }
 }

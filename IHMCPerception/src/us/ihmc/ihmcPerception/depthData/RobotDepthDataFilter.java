@@ -16,15 +16,13 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class RobotDepthDataFilter extends DepthDataFilter
 {
-   private final RobotBoundingBoxes robotBoundingBoxes;
    private final FullRobotModel fullRobotModel;
    private final SideDependentList<ArrayList<Point2d>> contactPoints;
 
 
-   public RobotDepthDataFilter(RobotBoundingBoxes robotBoundingBoxes, FullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
+   public RobotDepthDataFilter(FullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super((fullRobotModel.getHead() == null) ? ReferenceFrame.getWorldFrame() : fullRobotModel.getHead().getBodyFixedFrame());
-      this.robotBoundingBoxes = robotBoundingBoxes;
       this.fullRobotModel = fullRobotModel;
       this.contactPoints = contactPoints;
    }
@@ -34,7 +32,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    {
       boolean valid = super.isValidNearScan(point, lidarOrigin);
       valid &= point.z > getMidFootPoint().z + parameters.nearScanZMinAboveFeet;
-      valid &= parameters.nearScanCollisions || robotBoundingBoxes.isValidPoint(lidarOrigin, point);
+//      valid &= parameters.nearScanCollisions || robotBoundingBoxes.isValidPoint(lidarOrigin, point);
       valid &= Math.abs(getAngleToPelvis(point, lidarOrigin)) < parameters.nearScanRadians;
 
       return valid;
@@ -42,10 +40,10 @@ public class RobotDepthDataFilter extends DepthDataFilter
 
    // TODO: isAheadOfPelvis must be commented out when debugging val currently
    @Override
-   public boolean isValidOctree(Point3d point, Point3d lidarOrigin)
+   public boolean isValidPoint(Point3d point, Point3d lidarOrigin)
    {
-      boolean valid = super.isValidOctree(point, lidarOrigin);
-      valid &= robotBoundingBoxes.isValidPoint(lidarOrigin, point);
+      boolean valid = super.isValidPoint(point, lidarOrigin);
+//      valid &= robotBoundingBoxes.isValidPoint(lidarOrigin, point);
       valid &= isAheadOfPelvis(point);
 
       return valid;
@@ -139,7 +137,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    public void setParameters(DepthDataFilterParameters parameters)
    {
       super.setParameters(parameters);
-      robotBoundingBoxes.setScale(parameters.boundingBoxScale);
+//      robotBoundingBoxes.setScale(parameters.boundingBoxScale);
 
    }
 }

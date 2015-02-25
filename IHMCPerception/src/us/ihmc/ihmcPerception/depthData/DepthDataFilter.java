@@ -7,33 +7,23 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.communication.packets.sensing.FilteredPointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.GroundOnlyQuadTree;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
 import us.ihmc.userInterface.util.DecayingResolutionFilter;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.SphericalLinearResolutionProvider;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DepthDataFilter
 {
    private static final boolean USE_SIMPLIFIED_QUAD_TREE = true;
-
-   public static final int OCTREE_MIN_BOXES = 20000;
-   public static final int OCTREE_MAX_BOXES = 100000;
    public static final double QUAD_TREE_EXTENT = 200;
 
    private final QuadTreeHeightMapInterface quadTree;
-   private final Octree octree;
    private final DecayingResolutionFilter nearScan;
 
 
@@ -50,8 +40,6 @@ public class DepthDataFilter
       this.parameters = DepthDataFilterParameters.getDefaultParameters();
       nearScan = new DecayingResolutionFilter(parameters.nearScanResolution, parameters.nearScanDecayMillis, parameters.nearScanCapacity);
       quadTree = setupGroundOnlyQuadTree(parameters);
-      octree = setupOctree(headFrame);
-      quadTree.setOctree(octree);
    }
 
    public void setWorldToCorrected(RigidBodyTransform adjustment)
@@ -81,56 +69,6 @@ public class DepthDataFilter
                                     parameters.quadtreeHeightThreshold, 100000);
    }
 
-   private Octree setupOctree(ReferenceFrame headFrame)
-   {
-      if (parameters.USE_RESOLUTION_SPHERE)
-      {
-         SphericalLinearResolutionProvider resolutionProvider = new SphericalLinearResolutionProvider(new FramePoint(headFrame,
-                                                                   parameters.LIDAR_RESOLUTION_SPHERE_DISTANCE_FROM_HEAD, 0.0,
-                                                                   0.0), parameters.LIDAR_RESOLUTION_SPHERE_INNER_RADIUS,
-                                                                      parameters.LIDAR_RESOLUTION_SPHERE_INNER_RESOLUTION,
-                                                                      parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RADIUS,
-                                                                      parameters.LIDAR_RESOLUTION_SPHERE_OUTER_RESOLUTION);
-
-         return new Octree(new OneDimensionalBounds[] {new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-                 new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-                 new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, resolutionProvider);
-      }
-
-      return new Octree(new OneDimensionalBounds[] {new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-              new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT),
-              new OneDimensionalBounds(-QUAD_TREE_EXTENT, QUAD_TREE_EXTENT)}, DepthDataFilterParameters.OCTREE_RESOLUTION_WHEN_NOT_USING_RESOLUTION_SPHERE);
-   }
-
-   @Deprecated
-   public PointCloudPacket filterPolarLidarScan(LidarScan lidarScan)
-   {
-      ArrayList<Point3d> points = new ArrayList<>();
-      for (int i = 0; i < lidarScan.size(); i++)
-      {
-         addLidarScan(lidarScan, i, points);
-      }
-      Point3d origin = new Point3d();
-      Vector3d worldVector = new Vector3d();
-      lidarScan.getAverageTransform().get(worldVector);
-      origin.set(worldVector);
-      return new PointCloudPacket(origin, points.toArray(new Point3d[points.size()]), lidarScan.params.timestamp);
-
-   }
-   
-   @Deprecated
-   private void addLidarScan(LidarScan lidarScan, int i, ArrayList<Point3d> points)
-   {
-      Point3d lidarOrigin = new Point3d();
-      lidarScan.getAverageTransform().transform(lidarOrigin);
-
-  
-         Point3d point = lidarScan.getPoint(i);
-         if(addPoint(point, lidarOrigin))
-         {
-            points.add(point);
-         }
-   }
 
 
    public boolean addPoint(Point3d point, Point3d sensorOrigin)
@@ -148,15 +86,11 @@ public class DepthDataFilter
          send = nearScan.add(point.x, point.y, point.z) || send;
       }
 
-      if (isValidOctree(point, sensorOrigin))
+      if (isValidPoint(point, sensorOrigin))
       {
          if (isPossibleGround(point, sensorOrigin))
          {
             send = quadTree.addPoint(point.x, point.y, point.z) || send;
-         }
-         else
-         {
-            send = quadTree.addPointToOctree(point.x, point.y, point.z) || send;
          }
       }
 
@@ -175,7 +109,7 @@ public class DepthDataFilter
       return valid;
    }
 
-   protected boolean isValidOctree(Point3d point, Point3d lidarOrigin)
+   protected boolean isValidPoint(Point3d point, Point3d lidarOrigin)
    {
       boolean valid = true;
 
@@ -191,25 +125,11 @@ public class DepthDataFilter
       return (point.z - footZ) < parameters.quadTreeZMax;
    }
 
-   private boolean rayInRange(double rayLength)
-   {
-      return (rayLength > parameters.minRange) && (rayLength < parameters.maxRange);
-   }
-
    private boolean pointInRange(Point3d point, Point3d sensorOrigin)
    {
       double dist = sensorOrigin.distance(point);
 
       return (dist > parameters.minRange) && (dist < parameters.maxRange);
-   }
-
-   // TODO get rid of this and integrate with parameters
-   public void setLidarState(LidarState lidarState)
-   {
-      if (lidarState == LidarState.ENABLE)
-      {
-         quadTree.setUpdateOctree(true);
-      }
    }
 
    public void clearLidarData(DepthDataTree lidarTree)
@@ -218,9 +138,8 @@ public class DepthDataFilter
 
       switch (lidarTree)
       {
-         case OCTREE :
-            octree.clearTree();
-
+         case DECAY_POINT_CLOUD :
+            nearScan.clear();
             break;
 
          case QUADTREE :
@@ -249,12 +168,7 @@ public class DepthDataFilter
    {
       return quadTree;
    }
-
-   public Octree getOctree()
-   {
-      return octree;
-   }
-
+   
    public DecayingResolutionFilter getNearScan()
    {
       return nearScan;
@@ -263,25 +177,35 @@ public class DepthDataFilter
    public DepthDataFilterParameters getParameters()
    {
       return parameters;
-   }
-
-   public FilteredPointCloudPacket filterAndTransformPointCloud(PointCloudPacket pointCloud, RigidBodyTransform transformToWorld)
+   }   
+   
+   @Deprecated
+   public PointCloudPacket filterPolarLidarScan(LidarScan lidarScan)
    {
-      Point3d[] points = pointCloud.getPoints();
-      Point3d origin = new Point3d();
-      transformToWorld.transform(origin);
-      ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
-
-      for (int i = 0; i < points.length; i++)
+      ArrayList<Point3d> points = new ArrayList<>();
+      for (int i = 0; i < lidarScan.size(); i++)
       {
-         transformToWorld.transform(points[i]);
-
-         if (addPoint(points[i], origin))
-         {
-            filteredPoints.add(points[i]);
-         }
+         addLidarScan(lidarScan, i, points);
       }
+      Point3d origin = new Point3d();
+      Vector3d worldVector = new Vector3d();
+      lidarScan.getAverageTransform().get(worldVector);
+      origin.set(worldVector);
+      return new PointCloudPacket(origin, points.toArray(new Point3d[points.size()]), lidarScan.params.timestamp);
 
-      return new FilteredPointCloudPacket(pointCloud.origin, filteredPoints, transformToWorld, pointCloud.getTimeStamp());
+   }
+   
+   @Deprecated
+   private void addLidarScan(LidarScan lidarScan, int i, ArrayList<Point3d> points)
+   {
+      Point3d lidarOrigin = new Point3d();
+      lidarScan.getAverageTransform().transform(lidarOrigin);
+
+  
+         Point3d point = lidarScan.getPoint(i);
+         if(addPoint(point, lidarOrigin))
+         {
+            points.add(point);
+         }
    }
 }

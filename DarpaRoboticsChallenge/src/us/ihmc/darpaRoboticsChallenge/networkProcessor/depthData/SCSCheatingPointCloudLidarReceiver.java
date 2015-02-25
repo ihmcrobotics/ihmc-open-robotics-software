@@ -8,16 +8,18 @@ import javax.vecmath.Point3d;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
+import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class SCSCheatingPointCloudLidarReceiver implements PacketConsumer<SimulatedLidarScanPacket>
 {
-   private final PointCloudDataReceiver pointCloudDataReceiver;
 
-   public SCSCheatingPointCloudLidarReceiver(PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
+   private final PointCloudDataReceiver pointCloudDataReceiver;
+   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
+      pointCloudDataReceiver.addPointFilter(robotBoundingBoxes);
       packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
 
