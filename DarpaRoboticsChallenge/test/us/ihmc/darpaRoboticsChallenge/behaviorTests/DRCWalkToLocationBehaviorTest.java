@@ -29,11 +29,9 @@ import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -69,8 +67,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -83,8 +79,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    private static final boolean DEBUG = false;
 
-   private final double POSITION_THRESHOLD = 0.06;   // Atlas typically achieves between 0.02-0.03 position threshold
-   private final double ORIENTATION_THRESHOLD = 0.2;  // Atlas typically achieves between .005-0.1 orientation threshold (more accurate when turning in place at final target)
+   private final double POSITION_THRESHOLD = 0.06; // Atlas typically achieves between 0.02-0.03 position threshold
+   private final double ORIENTATION_THRESHOLD = 0.2; // Atlas typically achieves between .005-0.1 orientation threshold (more accurate when turning in place at final target)
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
@@ -98,8 +94,10 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -119,7 +117,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       FramePose2d desiredMidFeetPose2d = getCurrentMidFeetPose2dCopy();
       double currentYaw = desiredMidFeetPose2d.getYaw();
       desiredMidFeetPose2d.setYaw(currentYaw + Math.toRadians(361.0));
-      
+
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
 
       SysoutTool.println("Starting to Execute Behavior", DEBUG);
@@ -132,7 +130,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
@@ -159,7 +157,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
@@ -196,12 +194,50 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
       SysoutTool.println("Behavior Should be done", DEBUG);
 
-      assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD);  //TODO: Determine why position error is so large when walking backwards
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD); //TODO: Determine why position error is so large when walking backwards
       assertTrue(walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testWalkAtAngleButPreserveInitialPelvisHeading() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Initializing Behavior", DEBUG);
+      int numberOfFootstepsBetweenStartAndTarget = 4;
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      Vector2d walkDirection = new Vector2d(0.5, 0.5);
+      FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
+
+      WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
+      walkToLocationBehavior.initialize();
+      walkToLocationBehavior.setTarget(desiredMidFeetPose2d, true);
+
+      int numberOfFootstepsActual = walkToLocationBehavior.getNumberOfFootSteps();
+      int numberOfFootstepsMaximumIfRobotDoesntTurnInPlace = numberOfFootstepsBetweenStartAndTarget + 2;
+      if (DEBUG)
+         SysoutTool.println("Number of Footsteps: " + numberOfFootstepsActual);
+      assertTrue("Robot is not preserving heading while walking at angle.  Number of footsteps, " + numberOfFootstepsActual + ", exceeds desired number, "
+            + numberOfFootstepsMaximumIfRobotDoesntTurnInPlace, numberOfFootstepsActual <= numberOfFootstepsMaximumIfRobotDoesntTurnInPlace);
+
+      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+      SysoutTool.println("Behavior Should be done", DEBUG);
+
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD); //TODO: Determine why position error is so large when walking backwards
+      assertTrue(walkToLocationBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
@@ -213,9 +249,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
 
       SysoutTool.println("Initializing Behavior", DEBUG);
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);  
+      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
       double walkAngleDegrees = RandomTools.generateRandomDouble(new Random(), 45.0);
-      
+
       Vector2d walkDirection = new Vector2d(Math.cos(Math.toRadians(walkAngleDegrees)), Math.sin(Math.toRadians(walkAngleDegrees)));
       FramePose2d desiredMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, Math.toRadians(walkAngleDegrees));
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
@@ -230,7 +266,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
@@ -242,9 +278,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertTrue(success);
 
       SysoutTool.println("Initializing Behavior", DEBUG);
-      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);  
+      double walkDistance = RandomTools.generateRandomDouble(new Random(), 1.0, 2.0);
       double walkAngleDegrees = RandomTools.generateRandomDouble(new Random(), 45.0);
-      
+
       Vector2d walkDirection = new Vector2d(Math.cos(Math.toRadians(walkAngleDegrees)), Math.sin(Math.toRadians(walkAngleDegrees)));
       FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d);
@@ -344,9 +380,8 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       assertPosesAreWithinThresholds(midFeetPoseAtPause, midFeetPoseAtResume, positionThreshold, orientationThreshold);
       assertTrue(walkToLocationBehavior.isDone());
       assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
-      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, 0.9*POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
-      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, 0.9*ORIENTATION_THRESHOLD);
-
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, 0.9 * POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
+      assertPosesAreWithinThresholds(desiredMidFeetPose2d, midFeetPoseFinal, POSITION_THRESHOLD, 0.9 * ORIENTATION_THRESHOLD);
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -396,7 +431,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkStopAndWalkToDifferentLocation() throws SimulationExceededMaximumTimeException
@@ -436,7 +471,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       double orientationThreshold = Math.PI;
       assertPosesAreWithinThresholds(midFeetPose2dAtStop, midFeetPose2dFinal, positionThreshold, orientationThreshold);
       assertTrue(!walkToLocationBehavior.isDone());
-      
+
       SysoutTool.println("Setting New Behavior Inputs", DEBUG);
       walkDistance = 1.0;
       walkDirection.set(0, 1);
@@ -445,7 +480,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       walkToLocationBehavior.setTarget(newDesiredMidFeetPose2d);
       walkToLocationBehavior.resume();
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
-      
+
       SysoutTool.println("Starting to Execute Behavior", DEBUG);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
       assertTrue(success);
@@ -453,7 +488,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       assertCurrentMidFeetPoseIsWithinThreshold(newDesiredMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -463,12 +498,12 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       walkDirection.normalize();
 
-      desiredMidFeetPose.setX( desiredMidFeetPose.getX() + walkDistance * walkDirection.getX() );
-      desiredMidFeetPose.setY( desiredMidFeetPose.getY() + walkDistance * walkDirection.getY() );
-      
+      desiredMidFeetPose.setX(desiredMidFeetPose.getX() + walkDistance * walkDirection.getX());
+      desiredMidFeetPose.setY(desiredMidFeetPose.getY() + walkDistance * walkDirection.getY());
+
       return desiredMidFeetPose;
    }
-   
+
    private FramePose2d copyOffsetAndYawCurrentMidfeetPose2d(double walkDistance, Vector2d walkDirection, double desiredYawAngle)
    {
       FramePose2d desiredMidFeetPose = getCurrentMidFeetPose2dCopy();
@@ -477,7 +512,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       double xDesired = desiredMidFeetPose.getX() + walkDistance * walkDirection.getX();
       double yDesired = desiredMidFeetPose.getY() + walkDistance * walkDirection.getY();
-      
+
       desiredMidFeetPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), xDesired, yDesired, desiredYawAngle);
       return desiredMidFeetPose;
    }
@@ -487,8 +522,19 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       return createAndSetupWalkToLocationBehavior(desiredMidFeetPose, 0.0);
    }
 
-   
    private WalkToLocationBehavior createAndSetupWalkToLocationBehavior(FramePose2d desiredMidFeetPose, double walkingOrientationRelativeToPathDirection)
+   {
+      final WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
+
+      walkToLocationBehavior.initialize();
+      walkToLocationBehavior.setWalkingOrientationRelativeToPathDirection(walkingOrientationRelativeToPathDirection);
+      walkToLocationBehavior.setTarget(desiredMidFeetPose);
+      assertTrue(walkToLocationBehavior.hasInputBeenSet());
+
+      return walkToLocationBehavior;
+   }
+
+   private WalkToLocationBehavior createNewWalkToLocationBehavior()
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
@@ -497,12 +543,6 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       final WalkToLocationBehavior walkToLocationBehavior = new WalkToLocationBehavior(communicationBridge, fullRobotModel, referenceFrames,
             walkingControllerParams);
-
-      walkToLocationBehavior.initialize();
-      walkToLocationBehavior.setWalkingOrientationRelativeToPathDirection(walkingOrientationRelativeToPathDirection);
-      walkToLocationBehavior.setTarget(desiredMidFeetPose);
-      assertTrue(walkToLocationBehavior.hasInputBeenSet());
-
       return walkToLocationBehavior;
    }
 
@@ -550,8 +590,9 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
          SysoutTool.println(" positionDistance = " + positionDistance);
          SysoutTool.println(" orientationDistance = " + orientationDistance);
       }
-      
+
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
    }
 }
