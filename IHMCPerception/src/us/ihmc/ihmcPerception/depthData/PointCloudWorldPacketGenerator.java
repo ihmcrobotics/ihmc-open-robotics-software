@@ -47,7 +47,7 @@ public class PointCloudWorldPacketGenerator implements Runnable
       ArrayList<Point3d> groundPoints = new ArrayList<>();
       ArrayList<TimestampedPoint> nearScanTimestampedPoints = depthDataFilter.getNearScan().getPointsCopy();
       packet.defaultGroundHeight = (float) depthDataFilter.getQuadTree().getDefaultHeightWhenNoPoints();
-      depthDataFilter.getQuadTree().getStoredPoints(groundPoints);
+      depthDataFilter.getQuadTree().getCellAverageStoredPoints(groundPoints);
       readLock.unlock();
 
       packet.setGroundQuadTreeSupport(groundPoints.toArray(new Point3d[groundPoints.size()]));
