@@ -20,12 +20,14 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {
-   private final KryoLocalPacketCommunicator handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.HAND_MANAGER.ordinal(), "RobotiqHandCommunicator");
+   private final KryoLocalPacketCommunicator handManagerPacketCommunicator;
    
 	public RobotiqHandCommandManager(RobotSide robotSide)
 	{
 	   super(RobotiqControlThread.class, robotSide);
+	   
+	   handManagerPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+	         robotSide.equals(RobotSide.LEFT) ? PacketDestination.LEFT_HAND_MANAGER.ordinal() : PacketDestination.RIGHT_HAND_MANAGER.ordinal(), "RobotiqHandCommunicator");
 	   
 	   setupOutboundPacketListeners();
 	   setupInboundPacketListeners();

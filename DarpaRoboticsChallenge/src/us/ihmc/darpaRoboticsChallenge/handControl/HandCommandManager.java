@@ -29,7 +29,9 @@ public abstract class HandCommandManager
 		
 		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
 		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
-		                                                              new IHMCCommunicationKryoNetClassList(), PacketDestination.HAND_MANAGER.ordinal(), "HandCommandManagerClient");
+		                                                              new IHMCCommunicationKryoNetClassList(),
+		                                                              robotSide.equals(RobotSide.LEFT) ? PacketDestination.LEFT_HAND_MANAGER.ordinal() : PacketDestination.RIGHT_HAND_MANAGER.ordinal(),
+		                                                              robotSide.getCamelCaseNameForStartOfExpression() + "HandCommandManagerClient");
 		packetCommunicator.setReconnectAutomatically(true);
 		
 		try
