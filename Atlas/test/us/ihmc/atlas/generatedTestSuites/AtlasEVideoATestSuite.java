@@ -7,6 +7,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseStandingYawedTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class
 })
 
