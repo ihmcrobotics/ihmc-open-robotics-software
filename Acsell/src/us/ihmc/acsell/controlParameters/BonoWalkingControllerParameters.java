@@ -260,6 +260,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getMaxSwingHeightFromStanceFoot()
+   {
+      return 0.25;
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI/4.0;
