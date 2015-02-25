@@ -69,13 +69,19 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   Point3d pointInWorld = robotPoseBuffer.transformToWorld(data.scanFrame, data.timestamps[i], data.points.get(i));
                   
                   boolean include = true;
+                  Point3d origin = data.originInWorld;
+                  if(origin == null)
+                  {
+                     origin = new Point3d();
+                     robotPoseBuffer.floorEntry(data.timestamps[0]).getLidarPose(0).transform(origin);
+                  }
                   for(int f = 0; f < pointCloudFilters.size(); f++)
                   {
-                     include &= pointCloudFilters.get(f).isValidPoint(data.originInWorld, pointInWorld);
+                     include &= pointCloudFilters.get(f).isValidPoint(origin, pointInWorld);
                   }
                   if(include)
                   {
-                     depthDataFilter.addPoint(pointInWorld, data.originInWorld);
+                     depthDataFilter.addPoint(pointInWorld, origin);
                   }
                }
                readWriteLock.writeLock().unlock();
