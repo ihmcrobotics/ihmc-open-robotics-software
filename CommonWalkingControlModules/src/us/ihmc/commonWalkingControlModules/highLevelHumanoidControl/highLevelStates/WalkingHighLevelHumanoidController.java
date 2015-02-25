@@ -431,7 +431,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
 
       icpAndMomentumBasedController.initialize();
-      desiredICP.set(capturePoint.getFramePoint2dCopy());
+      desiredICP.setByProjectionOntoXYPlane(capturePoint);
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
@@ -668,7 +668,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToAndNextFootstepsData.setW0(icpAndMomentumBasedController.getOmega0());
          transferToAndNextFootstepsData.setDoubleSupportDuration(transferTimeCalculationProvider.getValue());
          transferToAndNextFootstepsData.setSingleSupportDuration(swingTimeCalculationProvider.getValue());
-         double doubleSupportInitialTransferDuration = 0.4; // TODO: Magic Number
+         double doubleSupportInitialTransferDuration = Double.NaN; // Was 0.4, not used anymore
          transferToAndNextFootstepsData.setDoubleSupportInitialTransferDuration(doubleSupportInitialTransferDuration);
          boolean stopIfReachedEnd = (upcomingFootstepList.getNumberOfFootstepsToProvide() <= 3); // TODO: Magic Number
          transferToAndNextFootstepsData.setStopIfReachedEnd(stopIfReachedEnd);
@@ -763,6 +763,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredECMPinSupportPolygon.set(false);
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
+
+         if (transferToSide == null)
+         {
+            swingTimeCalculationProvider.updateSwingTime();
+            transferTimeCalculationProvider.updateTransferTime();
+         }
 
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
