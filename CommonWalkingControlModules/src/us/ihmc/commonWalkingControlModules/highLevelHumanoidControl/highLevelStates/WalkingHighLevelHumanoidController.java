@@ -764,7 +764,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
 
-         if (transferToSide == null)
+         if (transferToSide == null && (pushRecoveryModule == null || !pushRecoveryModule.isRecoveringFromDoubleSupportFall()))
          {
             swingTimeCalculationProvider.updateSwingTime();
             transferTimeCalculationProvider.updateTransferTime();
