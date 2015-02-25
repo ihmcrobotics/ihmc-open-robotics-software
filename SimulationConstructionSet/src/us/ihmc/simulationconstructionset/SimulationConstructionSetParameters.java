@@ -69,6 +69,8 @@ public class SimulationConstructionSetParameters
          Boolean showYoGraphicsObjects = Boolean.parseBoolean(property);
          setShowYoGraphicObjects(showYoGraphicsObjects);
       }
+      
+      int foo = 0;
    }
 
    public int getDataBufferSize()
