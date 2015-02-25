@@ -22,6 +22,14 @@ public class SquaredUpDRCDemo01RobotAtPlatformsInitialSetup extends OffsetAndYaw
       
       return new SquaredUpDRCDemo01RobotAtPlatformsInitialSetup(startingLocation, yaw);
    }
+
+   public static SquaredUpDRCDemo01RobotAtPlatformsInitialSetup createInitialSetupAtNthWall(int nthWall)
+   {
+      double alpha = ((double) nthWall)/7.0;
+      Vector3d startingLocation = morph(firstPlatform, lastPlatform, alpha);
+      startingLocation.add(new Vector3d(-1.0 - 0.1, 1.0 - 0.1, 0.0));
+      return new SquaredUpDRCDemo01RobotAtPlatformsInitialSetup(startingLocation, yaw - Math.PI/2.0);
+   }
    
    public static SquaredUpDRCDemo01RobotAtPlatformsInitialSetup createInitialSetupAtNthPlatformToesTouching(int nthPlatform)
    {

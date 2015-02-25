@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -25,7 +24,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierWithStackTracing;
@@ -34,20 +32,14 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInterface
 {   
-   private SimulationTestingParameters simulationTestingParameters;
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   protected SimulationTestingParameters simulationTestingParameters;
+   protected DRCSimulationTestHelper drcSimulationTestHelper;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -189,6 +181,76 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 26.0)
+   @Test(timeout = 78091)
+   public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED;
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
+
+      FootstepDataList footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
+      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3d center = new Point3d(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 26.0)
+   @Test(timeout = 78091)
+   public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.SMALL_WALL;
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
+
+      FootstepDataList footstepDataList = createFootstepsForSideSteppingOverSmallWall();
+      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3d center = new Point3d(-4.7944324216932475, -4.38051322671167, 0.7893380490431007);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -346,6 +408,40 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+   }
+
+   private FootstepDataList createFootstepsForSideSteppingOverSmallPlatform()
+   {
+      Quat4d orientation = new Quat4d();
+      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      FootstepDataList footstepDataList = new FootstepDataList();
+      RotationFunctions.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.40, -5.03, .24), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-3.22, -4.85, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.50, -5.13, .24), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-3.37, -5.00, .24), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.67, -5.30, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-3.50, -5.13, .24), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-3.84, -5.47, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-3.67, -5.30, 0.0), new Quat4d(orientation)));
+      return footstepDataList;
+   }
+
+   private FootstepDataList createFootstepsForSideSteppingOverSmallWall()
+   {
+      Quat4d orientation = new Quat4d();
+      Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
+      FootstepDataList footstepDataList = new FootstepDataList();
+      RotationFunctions.getQuaternionFromYawAndZNormal(3.0/4.0*Math.PI, verticalVector, orientation);
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-4.18, -3.81, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.58, -4.21, 0.0), new Quat4d(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-4.30, -3.93, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.71, -4.34, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-4.58, -4.21, 0.0), new Quat4d(orientation), TrajectoryType.OBSTACLE_CLEARANCE, 0.24));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(-4.84, -4.47, 0.0), new Quat4d(orientation)));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(-4.67, -4.30, 0.0), new Quat4d(orientation)));
+      return footstepDataList;
    }
 
    private FootstepDataList createFootstepsForSteppingOffOfSmallPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
