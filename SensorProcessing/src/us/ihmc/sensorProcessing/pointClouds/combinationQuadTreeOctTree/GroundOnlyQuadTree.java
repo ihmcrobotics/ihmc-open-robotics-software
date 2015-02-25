@@ -440,6 +440,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
     */
    public void getStoredPoints(Collection<Point3d> points)
    {
+      getCellAverageStoredPoints(points);
+   }
+   @Override
+   public void getCellAverageStoredPoints(Collection<Point3d> points)
+   {
       List<RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData>> leaves =listAllLeafNodes();
       for(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> leaf :leaves)
       {
@@ -447,6 +452,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
          if(leafData!=null)
             points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
       }
+      
    }
    
 
@@ -460,5 +466,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    {
       return defaultHeightWhenNoPoints;
    }
+
 
 }

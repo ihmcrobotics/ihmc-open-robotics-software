@@ -27,6 +27,7 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
 	public abstract boolean addToQuadtree(double x, double y, double z);
 	
    public void getStoredPoints(Collection<Point3d> points);
+   public void getCellAverageStoredPoints(Collection<Point3d> points);
 
    public abstract void lock();
 
