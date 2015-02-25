@@ -444,7 +444,8 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       for(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> leaf :leaves)
       {
          HyperCubeLeaf<GroundAirDescriptor> leafData = leaf.getLeaf();
-         points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
+         if(leafData!=null)
+            points.add(new Point3d(leafData.getLocation()[0], leafData.getLocation()[1], leafData.getValue().getHeight()));
       }
    }
    
