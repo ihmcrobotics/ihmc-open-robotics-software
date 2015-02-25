@@ -235,6 +235,39 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    }
 
    @Override
+   public void setSupportLeg(RobotSide supportLeg)
+   {
+      ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
+
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, s0.getY());
+      tempFramePoint.changeFrame(newFrame);
+      s0.setY(tempFramePoint.getZ());
+
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, d0.getY());
+      tempFramePoint.changeFrame(newFrame);
+      d0.setY(tempFramePoint.getZ());
+
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, dF.getY());
+      tempFramePoint.changeFrame(newFrame);
+      dF.setY(tempFramePoint.getZ());
+
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, sF.getY());
+      tempFramePoint.changeFrame(newFrame);
+      sF.setY(tempFramePoint.getZ());
+
+      Point2d[] points = new Point2d[] { s0, d0, dF, sF };
+      double[] endpointSlopes = new double[] { 0.0, 0.0 };
+
+      double[] waypointSlopes = new double[2];
+      waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
+      waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
+
+      spline.setPoints(points, endpointSlopes, waypointSlopes);
+
+      frameOfLastFoostep = newFrame;
+   }
+
+   @Override
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep,
          List<PlaneContactState> contactStates)
    {
