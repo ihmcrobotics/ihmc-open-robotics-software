@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
+import javax.management.RuntimeErrorException;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
@@ -265,6 +266,10 @@ public class PinJoint extends OneDegreeOfFreedomJoint
 
       this.q_min = q_min;
       this.q_max = q_max;
+      
+      if (q_min < q_max)
+         throw new RuntimeException("q_min must be less than q_max. q_min=" + q_min + ", q_max=" + q_max);
+      
       this.k_limit = k_limit;
       this.b_limit = b_limit;
    }
