@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutGenerator;
 import us.ihmc.communication.blackoutGenerators.ConstantBlackoutGenerator;
@@ -27,7 +28,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
       {
          String output = time.toString() + ",";
 
-         long blackoutLength = blackoutGenerator.calculateNextBlackoutLength(time.inSeconds());
+         long blackoutLength = blackoutGenerator.calculateNextBlackoutLength(time.inSeconds(), TimeUnit.SECONDS);
          
          output += blackoutLength + ",";
          time.addSeconds(1);
@@ -45,7 +46,7 @@ public class MaxwellProBlackoutScheduleFileGenerator
       int runLength = 3600;
       String outputFileName = "constantBlackoutSchedule.csv";
       
-      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3);
+      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3, TimeUnit.SECONDS);
       
       try
       {
