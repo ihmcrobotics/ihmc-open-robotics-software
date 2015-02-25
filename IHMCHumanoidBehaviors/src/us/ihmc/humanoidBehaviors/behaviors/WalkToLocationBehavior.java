@@ -46,7 +46,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private double swingTime;
    private double transferTime;
-   
+
    private final FramePose robotPose = new FramePose();
    private final Point3d robotLocation = new Point3d();
    private final Quat4d robotOrientation = new Quat4d();
@@ -83,10 +83,10 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      
+
       this.swingTime = walkingControllerParameters.getDefaultSwingTime();
       this.transferTime = walkingControllerParameters.getDefaultTransferTime();
-      
+
       this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
             Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
@@ -182,12 +182,12 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       this.swingTime = swingTime;
    }
-   
+
    public void setTransferTime(double transferTime)
    {
       this.transferTime = transferTime;
    }
-   
+
    public void setWalkingOrientationRelativeToPathDirection(double orientationRelativeToPathDirection)
    {
       pathType.setAngle(orientationRelativeToPathDirection);
@@ -229,6 +229,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private void generateFootsteps()
    {
+      FramePoint midFeetPosition = getCurrentMidFeetPosition();
+
       footsteps.clear();
       FramePose2d endPose = new FramePose2d(worldFrame);
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
@@ -242,9 +244,6 @@ public class WalkToLocationBehavior extends BehaviorInterface
             || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking)
       {
          footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
-
-         FramePoint midFeetPosition = new FramePoint(referenceFrames.getMidFeetZUpFrame());
-         midFeetPosition.changeFrame(worldFrame);
 
          for (int i = 0; i < footsteps.size(); i++)
          {
@@ -268,6 +267,15 @@ public class WalkToLocationBehavior extends BehaviorInterface
       if (!haveFootstepsBeenGenerated.getBooleanValue())
          generateFootsteps();
       footstepListBehavior.doControl();
+   }
+
+   private FramePoint getCurrentMidFeetPosition()
+   {
+      FramePoint ret = new FramePoint();
+      ret.setToZero(referenceFrames.getMidFeetZUpFrame());
+      ret.changeFrame(worldFrame);
+
+      return ret;
    }
 
    @Override
