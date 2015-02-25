@@ -97,6 +97,15 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       {
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
+         communicationBridge = null;
+         yoTime = null;
+         robot = null;
+         fullRobotModel = null;
+         referenceFrames = null;
+         walkingControllerParameters = null;
+         robotDataReceiver = null;
+         behaviorDispatcher = null;
+         yoDoubleSupport = null;
       }
 
       GlobalTimer.clearTimers();
@@ -107,9 +116,9 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final double POSITION_THRESHOLD = 0.1;
    private final double ORIENTATION_THRESHOLD = 0.05;
 
-   private static final boolean DEBUG = false;
+   private final boolean DEBUG = false;
 
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private BehaviorCommunicationBridge communicationBridge;
    private DoubleYoVariable yoTime;
 
