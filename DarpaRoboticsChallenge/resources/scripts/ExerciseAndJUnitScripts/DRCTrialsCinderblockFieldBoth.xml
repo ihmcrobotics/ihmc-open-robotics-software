@@ -1,7 +1,7 @@
 <object-stream>
   <long>4539457881</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
-    <heightOffset>.046</heightOffset>
+    <heightOffset>.06</heightOffset>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>10547334849</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
