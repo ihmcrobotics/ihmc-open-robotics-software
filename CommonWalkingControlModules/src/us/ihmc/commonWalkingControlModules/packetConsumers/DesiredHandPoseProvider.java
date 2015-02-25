@@ -39,7 +39,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final PacketConsumer<StopArmMotionPacket> handPauseCommandConsumer;
 
    private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
-   
+
    private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryHandPoseListConsumer;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame)
@@ -70,7 +70,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             pausePackets.get(object.getRobotSide()).set(object);
          }
       };
-      
+
       handPoseListConsumer = new PacketConsumer<HandPoseListPacket>()
       {
          @Override
@@ -79,15 +79,15 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             handPoseListPackets.get(object.getRobotSide()).set(object);
          }
       };
-      
+
       wholeBodyTrajectoryHandPoseListConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
-    		  {
-    	  @Override
-    	  public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket object)
-    	  {
-    		  wholeBodyTrajectoryHandPoseListPackets.set(object);
-    	  }
-    		  };
+      {
+         @Override
+         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket object)
+         {
+            wholeBodyTrajectoryHandPoseListPackets.set(object);
+         }
+      };
    }
 
    private void updateFromNewestPacket(RobotSide robotSide)
@@ -144,19 +144,19 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return packets.get(robotSide).get() != null;
    }
-   
+
    @Override
    public boolean checkForNewPauseCommand(RobotSide robotSide)
    {
       return pausePackets.get(robotSide).get() != null;
    }
-   
+
    @Override
    public boolean checkForNewPoseList(RobotSide robotSide)
    {
       return handPoseListPackets.get(robotSide).get() != null;
    }
-   
+
    @Override
    public void getPauseCommand(RobotSide robotSide)
    {
@@ -220,36 +220,9 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             desiredJointAngles.put(fullRobotModel.getArmJoint(robotSide, armJoint), jointAngles);
          }
       }
-      
+
       return desiredJointAngles;
    }
-   
-//   public Map<OneDoFJoint, double[]> getDesiredJointAnglesForWholeBodyWaypointTrajectory(RobotSide robotSide)
-//   {
-//      WholeBodyTrajectoryDevelopmentPacket object = wholeBodyTrajectoryHandPoseListPackets.get();
-//      if (object == null)
-//         return null;
-//
-//      trajectoryTime = object.getArmTrajectoryTime();
-//
-//      int i = -1;
-//      Map<OneDoFJoint, double[]> desiredJointAngles = desiredJointAngleForWaypointTrajectoryMaps.get(robotSide);
-//      for (ArmJointName armJoint : fullRobotModel.getRobotSpecificJointNames().getArmJointNames())
-//      {
-//         if (object.getArmJointAngles(robotSide) != null)
-//         {
-//            double[] jointAngles = object.getArmJointAngles(robotSide)[++i];
-//            desiredJointAngles.put(fullRobotModel.getArmJoint(robotSide, armJoint), jointAngles);
-//         }
-//      }
-//      //TODO left Arm info is extracted first. Then right is. Thats why we clear it after right is read. This is dirty I know. I'll fix this later. -Will
-//      if(robotSide==RobotSide.RIGHT){
-//         wholeBodyTrajectoryHandPoseListPackets.set(null);
-//      }
-//      
-//      return desiredJointAngles;
-//   }
-   
 
    @Override
    public ReferenceFrame getDesiredReferenceFrame(RobotSide robotSide)
@@ -290,7 +263,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return handPoseListConsumer;
    }
-   
+
    public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryHandPoseListConsumer()
    {
       return wholeBodyTrajectoryHandPoseListConsumer;
@@ -298,28 +271,16 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
 
    @Override
    public boolean checkForNewWholeBodyPoseList(RobotSide robotSide)
-   {      
-      if(wholeBodyTrajectoryHandPoseListPackets.get()!=null){
+   {
+      if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
+      {
          return wholeBodyTrajectoryHandPoseListPackets.get().packetHasArmTrajectoryFor(robotSide);
-      }else{
+      }
+      else
+      {
          return false;
       }
    }
-
-//   @Override
-//   public void getDesiredsForWholeBodyWaypointTrajectory(RobotSide robotSide, double[] timeArrayToPack, double[][] positionArrayToPack,
-//         double[][] velocityArrayToPack)
-//   {
-//      timeArrayToPack = wholeBodyTrajectoryHandPoseListPackets.get().absTime;
-//      if(robotSide==RobotSide.LEFT){
-//         positionArrayToPack = wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngles;
-//         velocityArrayToPack = wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointVelocity;
-//      }else{
-//         positionArrayToPack = wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngles;
-//         velocityArrayToPack = wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointVelocity;
-//      }
-//         
-//   }
 
    @Override
    public double[] getDesiredWholeBodyTrajectoryTimeArray()
@@ -330,9 +291,12 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public double[][] getDesiredWholeBodyTrajectoryPositionArray(RobotSide robotSide)
    {
-      if(robotSide==RobotSide.LEFT){
+      if (robotSide == RobotSide.LEFT)
+      {
          return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngles;
-      }else{
+      }
+      else
+      {
          return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngles;
       }
    }
@@ -340,9 +304,12 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public double[][] getDesiredWholeBodyTrajectoryVelocityArray(RobotSide robotSide)
    {
-      if(robotSide==RobotSide.LEFT){
+      if (robotSide == RobotSide.LEFT)
+      {
          return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointVelocity;
-      }else{
+      }
+      else
+      {
          return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointVelocity;
       }
    }
@@ -350,9 +317,10 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public void setWholeBodyTrajectoryPacketAtomicReferenceToNull(RobotSide robotSide)
    {
-      if(robotSide==RobotSide.RIGHT){
+      if (robotSide == RobotSide.RIGHT)
+      {
          wholeBodyTrajectoryHandPoseListPackets.set(null);
       }
    }
-   
+
 }

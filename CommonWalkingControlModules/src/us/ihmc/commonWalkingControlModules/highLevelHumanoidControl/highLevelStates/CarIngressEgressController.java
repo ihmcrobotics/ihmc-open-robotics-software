@@ -148,7 +148,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       pelvisJacobianId = momentumBasedController.getOrCreateGeometricJacobian(fullRobotModel.getElevator(), fullRobotModel.getPelvis(), fullRobotModel
             .getPelvis().getBodyFixedFrame());
 
-      pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 10, worldFrame, registry);
+      pelvisPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvis", 15, worldFrame, registry);
 
       // Set up the chest trajectory generator
       this.chestOrientationProvider = variousWalkingProviders.getDesiredChestOrientationProvider();

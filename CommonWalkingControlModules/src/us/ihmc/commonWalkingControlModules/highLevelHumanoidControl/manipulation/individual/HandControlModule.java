@@ -151,7 +151,7 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 10, registry);
+         OneDoFJointWayPointTrajectoryGenerator trajectoryGenerator = new OneDoFJointWayPointTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory", oneDoFJoint, trajectoryTimeProvider, 15, registry);
          waypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
       }
       
@@ -159,7 +159,7 @@ public class HandControlModule
       
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, 10, registry);
+         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, 15, registry);
          wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
