@@ -804,7 +804,7 @@ abstract public class WholeBodyIkSolver
             if( ret == ComputeResult.FAILED_INVALID)
             {
                cachedAnglesQ.set( savedCacheQ );
-               System.out.println("RESTORE\n"+ cachedAnglesQ);
+//               System.out.println("RESTORE\n"+ cachedAnglesQ);
             }
          }
 
