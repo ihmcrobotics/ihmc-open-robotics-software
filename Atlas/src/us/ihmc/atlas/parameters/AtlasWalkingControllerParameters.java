@@ -313,6 +313,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getMaxSwingHeightFromStanceFoot()
+   {
+      return 0.3;
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI/4.0;
@@ -824,7 +830,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12); // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.01);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 
