@@ -21,18 +21,18 @@ public class PointCloudWorldPacketGenerator implements Runnable
          .getNamedThreadFactory("PointCloudWorldPacketGenerator"));
 
    private final ReadLock readLock;
-   private final DepthDataFilter depthDataFilter;
+   private final DepthDataStore depthDataFilter;
    private final PacketCommunicator packetCommunicator;
    private ScheduledFuture<?> scheduled = null;
 
-   public PointCloudWorldPacketGenerator(PacketCommunicator packetCommunicator, ReadLock readLock, DepthDataFilter depthDataFilter)
+   public PointCloudWorldPacketGenerator(PacketCommunicator packetCommunicator, ReadLock readLock, DepthDataStore depthDataFilter)
    {
       this.packetCommunicator = packetCommunicator;
       this.readLock = readLock;
       this.depthDataFilter = depthDataFilter;
    }
 
-   PointCloudWorldPacketGenerator(DepthDataFilter depthDataFilter)
+   PointCloudWorldPacketGenerator(DepthDataStore depthDataFilter)
    {
       readLock = new ReentrantReadWriteLock().readLock();
       this.depthDataFilter = depthDataFilter;
