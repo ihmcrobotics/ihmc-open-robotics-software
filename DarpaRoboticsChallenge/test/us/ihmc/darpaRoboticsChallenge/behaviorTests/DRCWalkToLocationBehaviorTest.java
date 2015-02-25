@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.vecmath.Vector2d;
@@ -24,6 +25,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.TrajectoryBasedStopThreadUpdatable;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -33,6 +35,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
@@ -202,7 +205,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testWalkAtAngleButPreserveInitialPelvisHeading() throws SimulationExceededMaximumTimeException
+   public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -214,25 +217,123 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       int numberOfFootstepsBetweenStartAndTarget = 4;
       double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
       Vector2d walkDirection = new Vector2d(0.5, 0.5);
-      FramePose2d desiredMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
+      FramePose2d startMidFeetPose2d = getCurrentMidFeetPose2dCopy();
+      FramePose2d targetMidFeetPose2d = copyAndOffsetCurrentMidfeetPose2d(walkDistance, walkDirection);
 
       WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
       walkToLocationBehavior.initialize();
-      walkToLocationBehavior.setTarget(desiredMidFeetPose2d, true);
+      walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.START_ORIENTATION);
 
-      int numberOfFootstepsActual = walkToLocationBehavior.getNumberOfFootSteps();
-      int numberOfFootstepsMaximumIfRobotDoesntTurnInPlace = numberOfFootstepsBetweenStartAndTarget + 2;
-      if (DEBUG)
-         SysoutTool.println("Number of Footsteps: " + numberOfFootstepsActual);
-      assertTrue("Robot is not preserving heading while walking at angle.  Number of footsteps, " + numberOfFootstepsActual + ", exceeds desired number, "
-            + numberOfFootstepsMaximumIfRobotDoesntTurnInPlace, numberOfFootstepsActual <= numberOfFootstepsMaximumIfRobotDoesntTurnInPlace);
+      FramePose2d currentFootstepPose = new FramePose2d();
+      for (Footstep footstep : walkToLocationBehavior.getFootSteps())
+      {
+         footstep.getPose2d(currentFootstepPose);
+         assertEquals("Current footstep orientation does not match start orientation.", 0.0, currentFootstepPose.getOrientationDistance(startMidFeetPose2d),
+               ORIENTATION_THRESHOLD);
+      }
 
       SysoutTool.println("Starting to Execute Behavior", DEBUG);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
       assertTrue(success);
       SysoutTool.println("Behavior Should be done", DEBUG);
 
-      assertPosesAreWithinThresholds(desiredMidFeetPose2d, getCurrentMidFeetPose2dCopy(), 10.0 * POSITION_THRESHOLD); //TODO: Determine why position error is so large when walking backwards
+      assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
+      assertTrue(walkToLocationBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Initializing Behavior", DEBUG);
+      int numberOfFootstepsBetweenStartAndTarget = 4;
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      Vector2d walkDirection = new Vector2d(-0.5, -0.5);
+      double walkDirectionYaw = Math.atan2(walkDirection.y, walkDirection.x);
+      FramePose2d targetMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, walkDirectionYaw);
+
+      WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
+      walkToLocationBehavior.initialize();
+      walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.TARGET_ORIENTATION);
+
+      ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
+      int numberOfFootsteps = footsteps.size();
+      FramePose2d currentFootstepPose = new FramePose2d();
+      for (int numberOfStepsFromTarget = 0; numberOfStepsFromTarget <= numberOfFootstepsBetweenStartAndTarget; numberOfStepsFromTarget++)
+      {
+         footsteps.get(numberOfFootsteps - numberOfStepsFromTarget - 1).getPose2d(currentFootstepPose);
+         assertEquals("Current footstep orientation does not match end orientation.", 0.0, currentFootstepPose.getOrientationDistance(targetMidFeetPose2d),
+               ORIENTATION_THRESHOLD);
+      }
+
+      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+      SysoutTool.println("Behavior Should be done", DEBUG);
+
+      assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
+      assertTrue(walkToLocationBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Initializing Behavior", DEBUG);
+      int numberOfFootstepsBetweenStartAndTarget = 4;
+      double walkDistance = numberOfFootstepsBetweenStartAndTarget * getRobotModel().getWalkingControllerParameters().getMaxStepLength();
+      Vector2d walkDirection = new Vector2d(0.5, 0.5);
+      double walkDirectionYaw = Math.atan2(walkDirection.y, walkDirection.x);
+
+      FramePose2d startMidFeetPose2d = getCurrentMidFeetPose2dCopy();
+      FramePose2d targetMidFeetPose2d = copyOffsetAndYawCurrentMidfeetPose2d(walkDistance, walkDirection, walkDirectionYaw);
+      FramePose2d startTargetMidPose2dMean = new FramePose2d();
+      startTargetMidPose2dMean.interpolate(startMidFeetPose2d, targetMidFeetPose2d, 0.5);
+
+      WalkToLocationBehavior walkToLocationBehavior = createNewWalkToLocationBehavior();
+      walkToLocationBehavior.initialize();
+      walkToLocationBehavior.setTarget(targetMidFeetPose2d, WalkingOrientation.START_TARGET_ORIENTATION_MEAN);
+
+      ArrayList<Footstep> footsteps = walkToLocationBehavior.getFootSteps();
+      int numberOfFootsteps = footsteps.size();
+      FramePose2d currentFootstepPose = new FramePose2d();
+
+      int numberOfStepsAlignedWithMeanOrientation = 0;
+      for (Footstep footstep : footsteps)
+      {
+         footstep.getPose2d(currentFootstepPose);
+
+         if (currentFootstepPose.getOrientationDistance(startTargetMidPose2dMean) < ORIENTATION_THRESHOLD)
+            numberOfStepsAlignedWithMeanOrientation++;
+      }
+
+      SysoutTool.println("Total number of footsteps: " + numberOfFootsteps + ", number Of Footsteps aligned with mean orientation: "
+            + numberOfStepsAlignedWithMeanOrientation);
+      assertTrue("Number Of Footsteps aligned with mean orientation !> total number of footsteps",
+            numberOfStepsAlignedWithMeanOrientation > 0.5 * numberOfFootsteps);
+
+      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(walkToLocationBehavior);
+      assertTrue(success);
+      SysoutTool.println("Behavior Should be done", DEBUG);
+
+      assertCurrentMidFeetPoseIsWithinThreshold(targetMidFeetPose2d);
       assertTrue(walkToLocationBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();

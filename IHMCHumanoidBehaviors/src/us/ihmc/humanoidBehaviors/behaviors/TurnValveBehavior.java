@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.packets.behaviors.TurnValvePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.util.PacketControllerTools;
+import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -196,15 +197,14 @@ public class TurnValveBehavior extends BehaviorInterface
       FramePose2d targetMidFeetFramePose = new FramePose2d(valveFrame);
       targetMidFeetFramePose.setX(-howFarToStandBackFromValve);
       targetMidFeetFramePose.setY(-howFarToStandToTheRightOfValve);
+      targetMidFeetFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      int maxNumberOfStepsToWalkBackwards = 4;
-      double orientationRelativeToPathDirection = walkBackwardsIfTargetIsBehindRobotAndNearby(targetMidFeetFramePose, maxNumberOfStepsToWalkBackwards);
-      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetFramePose, walkToLocationBehavior, orientationRelativeToPathDirection, stepLength, yoTime);
+      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetFramePose, walkToLocationBehavior, WalkingOrientation.START_TARGET_ORIENTATION_MEAN, stepLength, yoTime, 0.0);
 
       return ret;
    }
    
-   private double walkBackwardsIfTargetIsBehindRobotAndNearby(FramePose2d targetMidFeetFramePose, int maxNumberOfStepsToWalkBackwards)
+   private double maintainHeadingIfTargetIsNearby(FramePose2d targetMidFeetFramePose, int maxNumberOfStepsToWalkBackwards)
    {
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       targetMidFeetFramePose.changeFrame(midFeetZUpFrame);
@@ -218,11 +218,12 @@ public class TurnValveBehavior extends BehaviorInterface
       double walkDistance = currentMidFeetPose.getPositionDistance(targetMidFeetFramePose);
       
       boolean targetWalkLocationIsNearby = walkDistance < maxNumberOfStepsToWalkBackwards * walkingControllerParameters.getMaxStepLength();
+      boolean targetHeadingIsCloseToCurrentHeading = currentMidFeetPose.getOrientationDistance(targetMidFeetFramePose) < Math.toRadians(45.0);
 
       double orientationRelativeToPathDirection = 0.0;
       if (targetWalkLocationIsBehindRobot && targetWalkLocationIsNearby)
       {
-         orientationRelativeToPathDirection = Math.PI;
+         orientationRelativeToPathDirection = Math.PI;  //do inverseCosine of dot product between pelvis x-axis and vectorFromPelvisToTarget
       }
       
       if (DEBUG)
