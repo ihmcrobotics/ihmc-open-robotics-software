@@ -48,6 +48,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final PositionTrajectoryGenerator positionTrajectoryGenerator, pushRecoveryPositionTrajectoryGenerator;
    private final VelocityConstrainedOrientationTrajectoryGenerator orientationTrajectoryGenerator;
 
+   private final CurrentConfigurationProvider stanceConfigurationProvider;
    private final CurrentConfigurationProvider initialConfigurationProvider;
    private final VectorProvider initialVelocityProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
@@ -86,6 +87,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
       initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
+      ReferenceFrame stanceFootFrame = referenceFrames.getFootFrame(robotSide.getOppositeSide());
+      stanceConfigurationProvider = new CurrentConfigurationProvider(stanceFootFrame);
       initialVelocityProvider = new CurrentLinearVelocityProvider(footFrame, rigidBody, twistCalculator);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -97,7 +100,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       swingTrajectoryGenerator = new TwoWaypointPositionTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
-            initialConfigurationProvider, initialVelocityProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
+            initialConfigurationProvider, initialVelocityProvider, stanceConfigurationProvider, finalConfigurationProvider, touchdownVelocityProvider, trajectoryParametersProvider,
             registry, yoGraphicsListRegistry, walkingControllerParameters, visualizeSwingTrajectory);
 
       pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
