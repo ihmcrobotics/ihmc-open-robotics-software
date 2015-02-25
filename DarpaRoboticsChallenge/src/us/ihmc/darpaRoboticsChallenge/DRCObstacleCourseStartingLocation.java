@@ -34,7 +34,8 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    IN_FRONT_OF_CYLINDER_BLOCKS,
    IN_FRONT_OF_SLANTED_CINDERBLOCK_FIELD,
    OFFSET_ONE_METER_X_AND_Y,
-   OFFSET_ONE_METER_X_AND_Y_ROTATED_PI;
+   OFFSET_ONE_METER_X_AND_Y_ROTATED_PI,
+   SMALL_PLATFORM_TURNED, SMALL_WALL;
 
    public static final HashMap<String, OffsetAndYawRobotInitialSetup> initialSetupMap = new HashMap<String, OffsetAndYawRobotInitialSetup>();
 
@@ -59,6 +60,8 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS, new SquaredUpDRCDemo01Robot(0.0, 18.6, Math.toRadians(44.2), Math.toRadians(45.0)));
       addMapping(DRCObstacleCourseStartingLocation.IN_FRONT_OF_CYLINDER_BLOCKS, new SquaredUpDRCDemo01Robot(0.0, 10.1, Math.toRadians(44.5), Math.toRadians(45.0)));
       addMapping(DRCObstacleCourseStartingLocation.SMALL_PLATFORM, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthPlatform(2));
+      addMapping(DRCObstacleCourseStartingLocation.SMALL_WALL, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthWall(2));
+      addMapping(DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED, new OffsetAndYawRobotInitialSetup(-3.1, -4.73, 0.0, 3.0/4.0 * Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.STAIRS, new SquaredUpDRCDemo01Robot(0.0, 1.9818, Math.toRadians(135.0), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.STEPPING_STONES, new SquaredUpDRCDemo01Robot(0.3, 7.2588, Math.toRadians(174.0695), Math.toRadians(5.0)));
       addMapping(DRCObstacleCourseStartingLocation.MID_LADDER, new SquaredUpDRCDemo01Robot(0.3, 7.1, Math.toRadians(45 * 3 / 2), 0.0));
