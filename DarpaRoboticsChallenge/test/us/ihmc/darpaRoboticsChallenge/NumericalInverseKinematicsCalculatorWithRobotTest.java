@@ -47,8 +47,6 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final long seed = 1493091L;
-   private static final Random randomNumberGenerator = new Random(seed);
    private static final ArrayList<Double> shoulderRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> elbowRollLimits = new ArrayList<Double>();
    private static final ArrayList<Double> wristRollLimits = new ArrayList<Double>();
@@ -201,7 +199,9 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    @Test(timeout = 120000)
    public void testSimpleCase()
    {
-      generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(0.5);
+      Random random = new Random(1984L);
+
+      generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(random, 0.5);
 
       FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
       FrameOrientation handEndEffectorOrientationFK = getHandEndEffectorOrientation();
@@ -209,7 +209,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
       double errorThreshold = 0.005;
-      boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+      boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
       assertTrue(success);
    }
 
@@ -219,6 +219,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    @Test(timeout = 120000)
    public void testRandomFeasibleRobotPoses()
    {
+      Random random = new Random(1776L);
+
       int numberOfTests = 5000;
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
@@ -228,7 +230,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         generateRandomArmPoseWithForwardKinematics();
+         generateRandomArmPoseWithForwardKinematics(random);
          fullRobotModel.updateFrames();
 
          FramePoint handEndEffectorPositionFK = getHandEndEffectorPosition();
@@ -240,7 +242,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          }
 
          double errorThreshold = 0.01;
-         boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
+         boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
          if (success)
             numberPassed++;
       }
@@ -269,13 +271,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       assertTrue(percentPassed > 0.96);
    }
 
-   public boolean testAPose(FramePoint handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
+   public boolean testAPose(Random random, FramePoint handEndEffectorPositionFK, FrameOrientation handEndEffectorOrientationFK, InitialGuessForTests initialGuessForTests,
                             double errorThreshold, boolean updateListenersEachStep)
    {
       testPositionForwardKinematics.set(handEndEffectorPositionFK);
       testOrientationForwardKinematics.set(handEndEffectorOrientationFK);
 
-      solveForArmPoseWithInverseKinematics(handEndEffectorOrientationFK, handEndEffectorPositionFK, initialGuessForTests, updateListenersEachStep);
+      solveForArmPoseWithInverseKinematics(random, handEndEffectorOrientationFK, handEndEffectorPositionFK, initialGuessForTests, updateListenersEachStep);
 
       FramePoint handEndEffectorPositionIK = getHandEndEffectorPosition();
       FrameOrientation handEndEffectorOrientationIK = getHandEndEffectorOrientation();
@@ -307,7 +309,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return positionErrorAcceptable && orientationErrorAcceptable;
    }
 
-   private void solveForArmPoseWithInverseKinematics(FrameOrientation desiredOrientation, FramePoint desiredPosition,
+   private void solveForArmPoseWithInverseKinematics(Random random, FrameOrientation desiredOrientation, FramePoint desiredPosition,
            InitialGuessForTests initialGuessForTests, boolean updateListenersEachStep)
    {
       FramePose handPose = new FramePose(worldFrame);
@@ -320,7 +322,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       handPose.getPose(transform);
 
-      createInitialGuess(initialGuessForTests);
+      createInitialGuess(random, initialGuessForTests);
 
       if (VISUALIZE && updateListenersEachStep)
       {
@@ -336,7 +338,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       solvingTime.add((long) (((double) (end - start)) * 1e-6));
    }
 
-   private void createInitialGuess(InitialGuessForTests initialGuessForTests)
+   private void createInitialGuess(Random random, InitialGuessForTests initialGuessForTests)
    {
       switch (initialGuessForTests)
       {
@@ -354,7 +356,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
          case RANDOM :
          {
-            generateRandomArmPoseWithForwardKinematics();
+            generateRandomArmPoseWithForwardKinematics(random);
          }
 
          default :
@@ -392,7 +394,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       return handEndEffectorPosition;
    }
 
-   private void generateRandomArmPoseWithForwardKinematics()
+   private void generateRandomArmPoseWithForwardKinematics(Random random)
    {
       for (JointNames name : JointNames.values())
       {
@@ -401,13 +403,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
 
-         double randomJointAngle = RandomTools.generateRandomDouble(randomNumberGenerator, minRange, maxRange);
+         double randomJointAngle = RandomTools.generateRandomDouble(random, minRange, maxRange);
          jointAngles.put(name, randomJointAngle);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
    }
 
-   private void generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(double maxAngleDeviationFromMidRange)
+   private void generateArmPoseSlightlyOffOfMidRangeWithForwardKinematics(Random random, double maxAngleDeviationFromMidRange)
    {
       for (JointNames name : JointNames.values())
       {
@@ -418,7 +420,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
          double middleRangeJointAngle = (minRange + maxRange) / 2.0;
 
-         double deviation = RandomTools.generateRandomDouble(randomNumberGenerator, maxAngleDeviationFromMidRange);
+         double deviation = RandomTools.generateRandomDouble(random, maxAngleDeviationFromMidRange);
 
          jointAngles.put(name, middleRangeJointAngle + deviation);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
