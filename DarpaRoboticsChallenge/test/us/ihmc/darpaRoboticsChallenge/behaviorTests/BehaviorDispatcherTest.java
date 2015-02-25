@@ -107,7 +107,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    private final double POSITION_THRESHOLD = 0.1;
    private final double ORIENTATION_THRESHOLD = 0.05;
 
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private BehaviorCommunicationBridge communicationBridge;
