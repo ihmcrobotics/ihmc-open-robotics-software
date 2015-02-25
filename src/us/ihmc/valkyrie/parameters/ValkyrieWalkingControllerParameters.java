@@ -300,6 +300,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getMaxSwingHeightFromStanceFoot()
+   {
+      return 0.3;
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI/4.0;
