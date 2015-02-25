@@ -22,7 +22,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
    private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = false;
-   private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = true;
+   private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
    protected boolean trajectoryWasReplanned;
 
