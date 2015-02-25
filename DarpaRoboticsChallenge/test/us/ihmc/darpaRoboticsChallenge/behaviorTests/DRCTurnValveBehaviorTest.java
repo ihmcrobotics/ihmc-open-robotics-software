@@ -7,12 +7,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -30,8 +28,8 @@ import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterfa
 import us.ihmc.darpaRoboticsChallenge.environment.DRCValveEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
@@ -40,6 +38,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
@@ -121,7 +120,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(0), 0.0);
       
-      valveLocations.add(new Point3d(2.0 * TurnValveBehavior.howFarToStandBackFromValve, 2.0 * TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
+      valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, 3.0 * TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(1), 45.0);
 
       return new DRCValveEnvironment(valveLocations, valveYawAngles_degrees);
@@ -148,10 +147,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      Vector3d graspApproachDirectionInValveFrame = new Vector3d(1,0,0);
+      double graspApproachConeAngle = Math.toRadians(15.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      double turnValveAngle = Math.toRadians(180.0);
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachDirectionInValveFrame, valveRadius, turnValveAngle);
+      double turnValveAngle = Math.toRadians(-180.0);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, turnValveAngle);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
@@ -198,10 +197,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      Vector3d graspApproachDirectionInValveFrame = new Vector3d(1,0,0);
+      double graspApproachConeAngle = Math.toRadians(15.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       double turnValveAngle = Math.toRadians(180.0);
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachDirectionInValveFrame, valveRadius, turnValveAngle);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, turnValveAngle);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
@@ -222,6 +221,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
+      //TODO: Test turning valve with a corrupted transform to world
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -249,7 +249,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
 
       graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, ValveType.BIG_VALVE.getValveRadius(), ValveGraspLocation.SIX_O_CLOCK);
+      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), ValveGraspLocation.TWELVE_O_CLOCK, Math.toRadians(15.0), Axis.X);
       final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, valveTransformToWorld, RobotSide.RIGHT, 2.0);

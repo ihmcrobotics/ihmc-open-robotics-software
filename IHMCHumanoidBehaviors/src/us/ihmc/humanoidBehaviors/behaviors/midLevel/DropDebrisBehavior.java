@@ -127,14 +127,16 @@ public class DropDebrisBehavior extends BehaviorInterface
       handPoseToPack.setPose(tempPosition, tempOrientation);
       handPoseToPack.changeFrame(worldFrame);
       pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, (new FingerStateTask(side, FingerState.OPEN, fingerStateBehavior, yoTime)));
-      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, handPoseToPack, trajectoryTime));
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, new HandPoseTask(side, trajectoryTime, handPoseToPack, Frame.WORLD, handPoseBehavior, yoTime));
+
    }
 
    private void submitSingleTaskStageHandPose(FramePose handPoseToPack, RobotSide side, Point3d tempPosition, Quat4d tempOrientation)
    {
       handPoseToPack.setPose(tempPosition, tempOrientation);
       handPoseToPack.changeFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new HandPoseTask(side, yoTime, handPoseBehavior, Frame.WORLD, handPoseToPack, trajectoryTime));
+      pipeLine.submitSingleTaskStage(new HandPoseTask(side, trajectoryTime, handPoseToPack, Frame.WORLD, handPoseBehavior, yoTime));
+
    }
 
    @Override

@@ -33,7 +33,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 {
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
 

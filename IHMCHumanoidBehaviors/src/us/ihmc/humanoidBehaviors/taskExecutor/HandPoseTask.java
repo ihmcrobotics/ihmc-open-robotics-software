@@ -39,27 +39,9 @@ public class HandPoseTask extends BehaviorTask
       this(robotSide, new HandPosePacket(robotSide, trajectoryTime, desiredArmJointAngles), handPoseBehavior, yoTime, sleepTime, false);
    }
 
-   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, RigidBodyTransform pose,
-         double trajectoryTime)
-   {
-      this(robotSide, yoTime, handPoseBehavior, frame, pose, trajectoryTime, false);
-   }
-
-   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, RigidBodyTransform pose,
-         double trajectoryTime, boolean stopHandIfCollision)
-   {
-      this(robotSide, PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), handPoseBehavior, yoTime, stopHandIfCollision);
-   }
-
    public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime)
    {
-      this(robotSide, handPosePacket, handPoseBehavior, yoTime, false);
-   }
-
-   public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime,
-         boolean stopHandIfCollision)
-   {
-      this(robotSide, handPosePacket, handPoseBehavior, yoTime, 0.0, stopHandIfCollision);
+      this(robotSide, handPosePacket, handPoseBehavior, yoTime, 0.0, false);
    }
 
    public HandPoseTask(RobotSide robotSide, HandPosePacket handPosePacket, HandPoseBehavior handPoseBehavior, DoubleYoVariable yoTime, double sleepTime,
@@ -78,20 +60,21 @@ public class HandPoseTask extends BehaviorTask
       this.stopHandIfCollision = stopHandIfCollision;
    }
 
-   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime)
+   public HandPoseTask(RobotSide robotSide, double trajectoryTime, FramePose desiredPose, Frame desiredPoseFrame, HandPoseBehavior handPoseBehavior,
+         DoubleYoVariable yoTime)
    {
-      this(robotSide, yoTime, handPoseBehavior, frame, pose, trajectoryTime, false);
+      this(robotSide, trajectoryTime, desiredPose, desiredPoseFrame, handPoseBehavior, yoTime, false);
    }
 
-   public HandPoseTask(RobotSide robotSide, DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, Frame frame, FramePose pose, double trajectoryTime,
-         boolean stopHandIfCollision)
+   public HandPoseTask(RobotSide robotSide, double trajectoryTime, FramePose desiredHandPose, Frame desiredPoseFrame, HandPoseBehavior handPoseBehavior,
+         DoubleYoVariable yoTime, boolean stopHandIfCollision)
    {
       super(handPoseBehavior, yoTime);
       this.handPoseBehavior = handPoseBehavior;
 
-      RigidBodyTransform poseTransformToWorld = new RigidBodyTransform();
-      pose.getPose(poseTransformToWorld);
-      this.handPosePacket = PacketControllerTools.createHandPosePacket(frame, poseTransformToWorld, robotSide, trajectoryTime);
+      RigidBodyTransform desiredPoseTransformToPoseFrame = new RigidBodyTransform();
+      desiredHandPose.getPose(desiredPoseTransformToPoseFrame);
+      this.handPosePacket = PacketControllerTools.createHandPosePacket(desiredPoseFrame, desiredPoseTransformToPoseFrame, robotSide, trajectoryTime);
 
       doHandPoseRelativeToHandPoseAtTransitionIntoAction = false;
       this.robotSide = robotSide;
