@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
@@ -52,7 +53,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private FootstepDataList currentFootStepList;
    private FootstepData currentFootBeingLookedAt;
    
-   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames)
+   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
       isDone = new BooleanYoVariable(behaviorName + "_isDone", registry);
@@ -60,7 +61,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
 
       footstepListQueue = new ConcurrentListeningQueue<FootstepDataList>();
       SnapFootstepQueue = new ConcurrentListeningQueue<SnapFootstepPacket>();
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       lookAtBehavior = new LookAtBehavior(outgoingCommunicationBridge);
       this.referenceFrames = referenceFrames;
       midZUpFrame = referenceFrames.getMidFeetZUpFrame();

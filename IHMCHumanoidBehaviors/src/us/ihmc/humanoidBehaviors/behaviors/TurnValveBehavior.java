@@ -86,7 +86,7 @@ public class TurnValveBehavior extends BehaviorInterface
       graspValveTurnAndUnGraspBehavior = new GraspValveTurnAndUnGraspBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             wholeBodyControllerParameters, tippingDetectedBoolean);
       childBehaviors.add(graspValveTurnAndUnGraspBehavior);
-      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
+      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
       childBehaviors.add(scriptBehavior);
 
       scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<ScriptBehaviorInputPacket>();

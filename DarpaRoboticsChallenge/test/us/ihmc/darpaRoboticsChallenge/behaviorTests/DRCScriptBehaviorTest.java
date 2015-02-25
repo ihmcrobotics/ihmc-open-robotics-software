@@ -461,7 +461,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
       BooleanYoVariable yoDoubleSupport = drcBehaviorTestHelper.getCapturePointUpdatable().getYoDoubleSupport();
 
-      final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
+      final ScriptBehavior scriptBehavior = new ScriptBehavior(communicationBridge, fullRobotModel, yoTime, yoDoubleSupport, getRobotModel().getWalkingControllerParameters());
 
       InputStream inputStream = new FileInputStream(new File(filePath.getAbsolutePath()));
       RigidBodyTransform scriptTransformToWorld = recordFrame.getTransformToDesiredFrame(worldFrame);

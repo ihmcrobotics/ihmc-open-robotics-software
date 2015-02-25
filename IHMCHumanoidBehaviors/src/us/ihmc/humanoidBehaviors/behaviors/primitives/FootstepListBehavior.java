@@ -39,12 +39,17 @@ public class FootstepListBehavior extends BehaviorInterface
    private final BooleanYoVariable hasLastStepBeenReached = new BooleanYoVariable("hasLastStepBeenReached", registry);
    private final BooleanYoVariable footStepStatusIsDoneWalking = new BooleanYoVariable("footStepStatusIsDoneWalking", registry);
 
-   public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   private double defaultSwingTime;
+   private double defaultTranferTime;
+
+   public FootstepListBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>();
       attachControllerListeningQueue(footstepStatusQueue, FootstepStatus.class);
       numberOfFootsteps.set(-1);
+      defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
+      defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();
    }
 
    public void set(FootstepDataList footStepList)
@@ -53,23 +58,28 @@ public class FootstepListBehavior extends BehaviorInterface
       numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
       packetHasBeenSent.set(false);
    }
-
-   public void set(ArrayList<Footstep> footsteps)
+   
+   public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataList footsepDataList = new FootstepDataList();
-
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime,transferTime);
+      
       for (int i = 0; i < footsteps.size(); i++)
       {
          Footstep footstep = footsteps.get(i);
          Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
          Quat4d orientation = new Quat4d();
          footstep.getOrientation(orientation);
-
+         
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepData footstepData = new FootstepData(footstepSide, location, orientation);
-         footsepDataList.add(footstepData);
+         footstepDataList.add(footstepData);
       }
-      set(footsepDataList);
+      set(footstepDataList);
+   }
+   
+   public void set(ArrayList<Footstep> footsteps)
+   {
+      set(footsteps, defaultSwingTime, defaultTranferTime);
    }
 
    @Override
