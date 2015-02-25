@@ -54,6 +54,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final ArrayList<BehaviorInterface> childBehaviors;
    private final HandPoseBehavior moveHandToHomeBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
+   private WalkToLocationTask walkToValveTask;
    private final GraspValveTurnAndUnGraspBehavior graspValveTurnAndUnGraspBehavior;
    private final ScriptBehavior scriptBehavior;
 
@@ -119,8 +120,9 @@ public class TurnValveBehavior extends BehaviorInterface
 
       pipeLine.doControl();
 
-      if (walkToLocationBehavior.isDone())
+      if (walkToValveTask != null && walkToValveTask.isDone())
       {
+         SysoutTool.println("PAUSING BECAUSE CAPTURE POINT ERROR EXCEEDS THRESHOLD");
          pauseIfCapturePointErrorIsTooLarge();
       }
    }
@@ -178,7 +180,8 @@ public class TurnValveBehavior extends BehaviorInterface
 
       HandPoseTask moveHandToHomeTask = new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
             moveHandToHomeBehavior, yoTime);
-      WalkToLocationTask walkToValveTask = createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
+
+      this.walkToValveTask = createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
       ScriptTask turnValveTask = new ScriptTask(scriptBehavior, scriptBehaviorInputPacket, yoTime);
 
       pipeLine.submitSingleTaskStage(moveHandToHomeTask);
@@ -194,9 +197,9 @@ public class TurnValveBehavior extends BehaviorInterface
 
       FramePose2d valvePose2d = new FramePose2d();
       valvePose2d.setPose(valveTransformToWorld);
-      
+
       Pose2dReferenceFrame valveZUpFrame = new Pose2dReferenceFrame("valveZUp", valvePose2d);
-      
+
       FramePose2d targetMidFeetZUpFramePose = new FramePose2d(valveZUpFrame);
       targetMidFeetZUpFramePose.setX(-howFarToStandBackFromValve);
       targetMidFeetZUpFramePose.setY(-howFarToStandToTheRightOfValve);
@@ -214,42 +217,43 @@ public class TurnValveBehavior extends BehaviorInterface
          walkingOrientation = WalkingOrientation.ALIGNED_WITH_PATH;
       }
 
-      double sleepTimeBeforeNextTask = 0.0;
-      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime, sleepTimeBeforeNextTask);
+      double sleepTimeBeforeNextTask = 1.0;
+      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime,
+            sleepTimeBeforeNextTask);
 
       return ret;
    }
-   
+
    private final FramePose2d initialMidFeetPose = new FramePose2d();
 
    private FramePose2d getInitialRobotMidFeetZupPose()
    {
       fullRobotModel.updateFrames();
       initialMidFeetPose.setPose(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
-      
+
       return initialMidFeetPose;
    }
-   
+
    private double getWalkingDistanceToValve(FramePose2d targetMidFeetFramePose)
    {
       return getInitialRobotMidFeetZupPose().getPositionDistance(targetMidFeetFramePose);
    }
-   
+
    private boolean isWalkingTargetBehindRobot(FramePose2d targetMidFeetFramePose)
    {
       targetMidFeetFramePose.changeFrame(referenceFrames.getMidFeetZUpFrame());
       double targetMidFeetXPositionInCurrentMidFeetFrame = targetMidFeetFramePose.getX();
       boolean ret = targetMidFeetXPositionInCurrentMidFeetFrame < 0.0;
-      
+
       return ret;
    }
-   
+
    private boolean isRobotAlreadyFacingValve(FramePose2d targetMidFeetFramePose)
    {
       double orientationDistance = targetMidFeetFramePose.getOrientationDistance(getInitialRobotMidFeetZupPose());
       return orientationDistance < Math.toRadians(5.0);
    }
-   
+
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
