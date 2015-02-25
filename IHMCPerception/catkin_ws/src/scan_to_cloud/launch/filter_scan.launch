@@ -1,7 +1,6 @@
 <launch>
   <node pkg="laser_filters" type="scan_to_cloud_filter_chain" name="lidar_scan_filter">
-    <rosparam command="load" file="shadows.yaml" />
-    <!--rosparam command="load" file="my_cloud_config.yaml" /-->
+    <rosparam command="load" file=""$(find scan_to_cloud)/config/shadows.yaml" />
     <param name="high_fidelity" value="true" />
     <param name="target_frame" type="string" value="world" />
     <remap from="scan" to="/multisense/lidar_scan"/>
@@ -12,8 +11,6 @@
     <param name="fixed_frame" value="world" />
     <param name="max_clouds" value="1200" />
   </node>
-  <!--include file="$(find urdf_tutorial)/launch/display.launch" >
-     <arg name="model" value="$(find atlas_description)/urdf/atlas_v4.urdf" />
-  </include-->
-
+  <node pkg="scan_to_cloud" type="periodic_assembler" name="periodic_assembler">
+  </node>
 </launch>
