@@ -2,7 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import java.awt.image.BufferedImage;
 
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.BlackoutPacketConsumer;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.LocalVideoPacket;
@@ -22,10 +24,15 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements PacketC
    SCSCameraInfoReceiver scsCameraInfoReceiver;
 
    public SCSCameraDataReceiver(RobotPoseBuffer robotPoseBuffer, PacketCommunicator scsSensorsCommunicator,
-         KryoLocalPacketCommunicator outgoingSensorDataCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         KryoLocalPacketCommunicator outgoingSensorDataCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+         CommunicationBlackoutSimulator blackoutSimulator)
    {
       super(robotPoseBuffer, outgoingSensorDataCommunicator, ppsTimestampOffsetProvider);
-      scsSensorsCommunicator.attachListener(LocalVideoPacket.class, this);
+      
+      if(blackoutSimulator != null)
+         scsSensorsCommunicator.attachListener(LocalVideoPacket.class, new BlackoutPacketConsumer<LocalVideoPacket>(this, blackoutSimulator));
+      else
+         scsSensorsCommunicator.attachListener(LocalVideoPacket.class, this);
 
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
 
