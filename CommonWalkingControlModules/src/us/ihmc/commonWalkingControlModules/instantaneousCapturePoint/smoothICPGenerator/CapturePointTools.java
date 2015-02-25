@@ -17,6 +17,8 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
  */
 public class CapturePointTools
 {
+   private static final double EPSILON = 1.0e-05;
+
    /**
     * Compute the constant CMP locations and store them in constantCMPsToPack.
     * 
@@ -128,7 +130,7 @@ public class CapturePointTools
 
    /**
     * Compute the desired capture point position at a given time. ICP_d =
-    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*p0
+    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*CMP_0
     * 
     * @param omega0
     * @param time
@@ -138,12 +140,15 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFramePoint desiredCapturePointToPack)
    {
-      desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      else
+         desiredCapturePointToPack.set(initialCapturePoint);
    }
 
    /**
     * Compute the desired capture point position at a given time. ICP_d =
-    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*p0
+    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*CMP_0
     * 
     * @param omega0
     * @param time
@@ -153,7 +158,10 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FramePoint desiredCapturePointToPack)
    {
-      desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      else
+         desiredCapturePointToPack.set(initialCapturePoint);
    }
 
    /**
@@ -168,7 +176,10 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointVelocityToPack)
    {
-      desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointVelocityToPack.setToZero();
    }
 
    /**
@@ -183,7 +194,10 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointVelocityToPack)
    {
-      desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointVelocityToPack.setToZero();
    }
 
    /**
@@ -212,7 +226,10 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, YoFramePoint initialCapturePoint, YoFramePoint initialCMP, YoFrameVector desiredCapturePointAccelerationToPack)
    {
-      desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointAccelerationToPack.setToZero();
    }
 
    /**
@@ -227,7 +244,10 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointAccelerationToPack)
    {
-      desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointAccelerationToPack.setToZero();
    }
 
    /**
