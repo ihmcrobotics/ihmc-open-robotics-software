@@ -267,7 +267,7 @@ public class PinJoint extends OneDegreeOfFreedomJoint
       this.q_min = q_min;
       this.q_max = q_max;
       
-      if (q_min < q_max)
+      if (q_min > q_max)
          throw new RuntimeException("q_min must be less than q_max. q_min=" + q_min + ", q_max=" + q_max);
       
       this.k_limit = k_limit;
