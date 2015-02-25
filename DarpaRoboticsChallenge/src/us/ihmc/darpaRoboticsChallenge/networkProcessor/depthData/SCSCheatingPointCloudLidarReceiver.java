@@ -5,7 +5,9 @@ import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.BlackoutPacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
@@ -16,11 +18,16 @@ public class SCSCheatingPointCloudLidarReceiver implements PacketConsumer<Simula
 {
 
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
+   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver,
+         CommunicationBlackoutSimulator blackoutSimulator)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       pointCloudDataReceiver.addPointFilter(robotBoundingBoxes);
-      packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
+      
+      if(blackoutSimulator != null)
+         packetCommunicator.attachListener(SimulatedLidarScanPacket.class, new BlackoutPacketConsumer<SimulatedLidarScanPacket>(this, blackoutSimulator));
+      else
+         packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
 
    @Override

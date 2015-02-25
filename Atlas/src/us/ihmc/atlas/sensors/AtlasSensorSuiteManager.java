@@ -1,11 +1,17 @@
 package us.ihmc.atlas.sensors;
 
 import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutGenerator;
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
+import us.ihmc.communication.blackoutGenerators.ConstantBlackoutGenerator;
+import us.ihmc.communication.blackoutGenerators.SimulationTimeBasedBlackoutSimulator;
+import us.ihmc.communication.blackoutGenerators.SystemTimeBasedBlackoutSimulator;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -43,6 +49,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
    private final RobotBoundingBoxes robotBoundingBoxes;
+   private CommunicationBlackoutSimulator blackoutSimulator;
 
    public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, SDFFullRobotModel sdfFullRobotModel,
@@ -54,15 +61,19 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
       this.robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 10000, timestampProvider);
       this.pointCloudDataReceiver = new PointCloudDataReceiver(sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
+      
    }
 
    @Override
    public void initializeSimulatedSensors(PacketCommunicator scsSensorsCommunicator)
    {
+      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3000, TimeUnit.MILLISECONDS);
+      blackoutSimulator = new SimulationTimeBasedBlackoutSimulator(blackoutGenerator, sensorSuitePacketCommunicator, timestampProvider);
+      
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
       new SCSCameraDataReceiver(robotPoseBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
-            ppsTimestampOffsetProvider);
+            ppsTimestampOffsetProvider, blackoutSimulator);
 
       //      if (sensorInformation.getPointCloudParameters().length > 0)
       //      {
@@ -71,7 +82,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSCheatingPointCloudLidarReceiver(robotBoundingBoxes, scsSensorsCommunicator, pointCloudDataReceiver);
+         new SCSCheatingPointCloudLidarReceiver(robotBoundingBoxes, scsSensorsCommunicator, pointCloudDataReceiver, blackoutSimulator);
          pointCloudDataReceiver.start();
       }
 
