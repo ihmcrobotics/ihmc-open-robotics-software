@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -28,6 +29,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class WalkToLocationBehavior extends BehaviorInterface
 {
@@ -48,6 +50,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
    private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
+   private final YoFrameVector walkPathVector = new YoFrameVector(getName(), worldFrame, registry);
+   private final DoubleYoVariable initialOrientationToWalkPath = new DoubleYoVariable(getName() + "InitialOrientationToPath", registry);
    private final DoubleYoVariable walkDistance = new DoubleYoVariable(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
@@ -59,7 +63,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    private final SideDependentList<RigidBody> feet = new SideDependentList<RigidBody>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
-   
+
    private double minDistanceThresholdForWalking, minYawThresholdForWalking;
 
    public WalkToLocationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
@@ -67,8 +71,8 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
 
-//      this.targetLocation.set(robotLocation);
-//      this.targetOrientation.set(robotOrientation);
+      //      this.targetLocation.set(robotLocation);
+      //      this.targetOrientation.set(robotOrientation);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
@@ -95,19 +99,48 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       this.targetLocation.set(targetLocation);
       this.targetOrientation.set(targetOrientation);
+      computeCurrentRobotOrientationRelativeToWalkingPath();
+
       hasTargetBeenProvided.set(true);
       generateFootsteps();
    }
 
    public void setTarget(FramePose2d targetPose2dInWorld)
    {
+      setTarget(targetPose2dInWorld, false);
+   }
+
+   public void setTarget(FramePose2d targetPose2dInWorld, boolean walkUsingCurrentOrientationRelativeToPathDirection)
+   {
       targetPose2dInWorld.checkReferenceFrameMatch(worldFrame);
       this.targetLocation.set(targetPose2dInWorld.getX(), targetPose2dInWorld.getY(), 0.0);
       this.targetOrientation.setYawPitchRoll(targetPose2dInWorld.getYaw(), 0.0, 0.0);
+
+      computeCurrentRobotOrientationRelativeToWalkingPath();
+      if (walkUsingCurrentOrientationRelativeToPathDirection)
+         setWalkingOrientationRelativeToPathDirection(initialOrientationToWalkPath.getDoubleValue());
+
       hasTargetBeenProvided.set(true);
       generateFootsteps();
    }
-   
+
+   private void computeCurrentRobotOrientationRelativeToWalkingPath()
+   {
+      this.walkPathVector.sub(this.targetLocation, robotYoPose.getPosition());
+      fullRobotModel.updateFrames();
+      FrameVector2d pelvisHeadingVector = new FrameVector2d(referenceFrames.getPelvisZUpFrame(), 1.0, 0.0);
+      pelvisHeadingVector.changeFrame(worldFrame);
+      initialOrientationToWalkPath.set(-pelvisHeadingVector.angle(walkPathVector.getFrameVector2dCopy()));
+
+      if (DEBUG)
+      {
+         SysoutTool.println("PelvisHeadingVector : " + pelvisHeadingVector);
+         SysoutTool.println("WalkPathVector : " + walkPathVector);
+         SysoutTool.println("InitialOrientationToWalkPath : " + initialOrientationToWalkPath);
+      }
+
+   }
+
    public void setWalkingOrientationRelativeToPathDirection(double orientationRelativeToPathDirection)
    {
       pathType.setAngle(orientationRelativeToPathDirection);
@@ -129,14 +162,14 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       robotPose.getPosition(robotLocation);
       robotPose.getOrientation(robotOrientation);
-      
-    this.targetLocation.set(robotLocation);
-    this.targetOrientation.set(robotOrientation);
+
+      this.targetLocation.set(robotLocation);
+      this.targetOrientation.set(robotOrientation);
 
       //for testing purpose
       //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
    }
-   
+
    public int getNumberOfFootSteps()
    {
       return footsteps.size();
@@ -148,12 +181,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
       FramePose2d endPose = new FramePose2d(worldFrame);
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
-            
+
       footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
       footstepGenerator.initialize();
       walkDistance.set(footstepGenerator.getDistance());
-      
-      if(footstepGenerator.getDistance() > minDistanceThresholdForWalking || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking) 
+
+      if (footstepGenerator.getDistance() > minDistanceThresholdForWalking
+            || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking)
       {
          footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
 
@@ -164,13 +198,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
          {
             Footstep footstep = footsteps.get(i);
             footstep.setZ(midFeetPosition.getZ());
-         }         
+         }
       }
 
       footstepListBehavior.set(footsteps);
       haveFootstepsBeenGenerated.set(true);
-      
-      if(DEBUG)
+
+      if (DEBUG)
          SysoutTool.println("Walk Distance: " + walkDistance.getDoubleValue());
    }
 
@@ -259,12 +293,12 @@ public class WalkToLocationBehavior extends BehaviorInterface
    {
       pathType.setStepLength(footstepLength);
    }
-   
-   public void setDistanceThreshold(double minDistanceThresholdForWalking) 
+
+   public void setDistanceThreshold(double minDistanceThresholdForWalking)
    {
-      this.minDistanceThresholdForWalking = minDistanceThresholdForWalking;      
+      this.minDistanceThresholdForWalking = minDistanceThresholdForWalking;
    }
-   
+
    public void setYawAngleThreshold(double minYawThresholdForWalking)
    {
       this.minYawThresholdForWalking = minYawThresholdForWalking;
