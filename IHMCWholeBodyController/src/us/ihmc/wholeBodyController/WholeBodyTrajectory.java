@@ -17,6 +17,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.Twist;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.trajectory.TrajectoryND;
 import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
@@ -29,9 +31,14 @@ public class WholeBodyTrajectory
    private double maxJointVelocity;
    private double maxJointAcceleration;
    private double maxDistanceInTaskSpaceBetweenWaypoints;
+   private final SDFFullRobotModel currentRobotModel;
+   private final HashMap<String,Integer> jointNameToTrajectoryIndex = new HashMap<String,Integer>();
+   private final HashMap<String, Double> desiredJointAngles = new HashMap<String, Double> ();
 
-   public WholeBodyTrajectory(double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
+   public WholeBodyTrajectory(SDFFullRobotModel fullRobotModel, double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
    {
+      currentRobotModel = new SDFFullRobotModel( fullRobotModel );
+
       this.maxJointVelocity = maxJointVelocity;
       this.maxJointAcceleration = maxJointAcceleration;
       this.maxDistanceInTaskSpaceBetweenWaypoints = maxDistanceInTaskSpaceBetweenWaypoints;
@@ -48,22 +55,19 @@ public class WholeBodyTrajectory
       // TODO this is for debug purpose only
       maxDistanceInTaskSpaceBetweenWaypoints = 0.15;
 
-      SDFFullRobotModel currentRobotModel = new SDFFullRobotModel( initialRobotState );
       InverseDynamicsJointStateCopier copier = new InverseDynamicsJointStateCopier(
             initialRobotState.getElevator(), currentRobotModel.getElevator() );
-      
+
       copier.copy();
-      
+
       int oldMaxReseed = wbSolver.maxNumberOfAutomaticReseeds;
       wbSolver.maxNumberOfAutomaticReseeds = 0;
-
-      HashMap<String,Integer> nameToIndex = new HashMap<String,Integer>();
 
       SideDependentList<ControlledDoF> previousOption = new SideDependentList<ControlledDoF>();
       SideDependentList<RigidBodyTransform> initialTransform  = new SideDependentList<RigidBodyTransform>();
       SideDependentList<RigidBodyTransform> finalTransform    = new SideDependentList<RigidBodyTransform>();
       LockLevel previousLockLimit = wbSolver.getLockLevel();
-      
+
       wbSolver.setLockLevel( LockLevel.LOCK_LEGS_AND_WAIST );
 
       for (RobotSide side: RobotSide.values)
@@ -74,7 +78,7 @@ public class WholeBodyTrajectory
          ReferenceFrame attachment = wbSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
          ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame() );
          RigidBodyTransform attachmentToPalm = palm.getTransformToDesiredFrame( attachment );
-         
+
          previousOption.set( side, wbSolver.getNumberOfControlledDoF(side) );
 
          RigidBodyTransform transform =  initialTargetFrame.getTransformToWorldFrame();
@@ -91,17 +95,13 @@ public class WholeBodyTrajectory
          }
       }
 
-
-      HashMap<String, Double> outputAngles = new HashMap<String, Double> ();
-
-
       ArrayList<String> jointNames = new ArrayList<String>();
 
       for (OneDoFJoint joint: initialRobotState.getOneDoFJoints() )
       {
          if( wbSolver.hasJoint( joint.getName())  )
          {
-            nameToIndex.put( joint.getName(), nameToIndex.size() );
+            jointNameToTrajectoryIndex.put( joint.getName(), jointNameToTrajectoryIndex.size() );
             jointNames.add( joint.getName() );
          }    
       }
@@ -110,7 +110,6 @@ public class WholeBodyTrajectory
       int segmentsRot = 1;
 
       double maxDeltaPos = maxDistanceInTaskSpaceBetweenWaypoints;
-   //   double maxDeltaRot = maxDistanceInTaskSpaceBetweenWaypoints;
 
       for (RobotSide side: RobotSide.values)
       {
@@ -124,14 +123,6 @@ public class WholeBodyTrajectory
 
             segmentsPos = (int) Math.max(segmentsPos, Math.round( distance / maxDeltaPos) );
          }
-      /*   if( numberOfDoF == ControlledDoF.DOF_3P2R || numberOfDoF ==  ControlledDoF.DOF_3P3R )
-         {
-            double distance = RigidBodyTransform.getRotationDifference(
-                  initialTransform.get(side), 
-                  finalTransform.get(side) ).length();
-
-            segmentsRot = (int)  Math.max(segmentsPos, Math.round( distance/ maxDeltaRot) );
-         }*/
       }
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
@@ -141,7 +132,7 @@ public class WholeBodyTrajectory
       Vector64F thisWaypointAngles = new Vector64F(N);
       HashMap<String,Double> thisWaypointAnglesByName = new HashMap<String,Double>();
 
-      for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+      for ( Map.Entry<String, Integer> entry: jointNameToTrajectoryIndex.entrySet() )
       {
          String jointName = entry.getKey();
          double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
@@ -152,12 +143,12 @@ public class WholeBodyTrajectory
       TrajectoryND wb_trajectory = new TrajectoryND(N, maxJointVelocity,  maxJointAcceleration );
 
       wb_trajectory.addNames( jointNames );
-   //   System.out.println("-----");
+
       for (int s=0; s <= numSegments; s++ )
       {
          if( s > 0  )
          {
-            for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+            for ( Map.Entry<String, Integer> entry: jointNameToTrajectoryIndex.entrySet() )
             {
                String jointName = entry.getKey();
                int index = entry.getValue();
@@ -167,16 +158,17 @@ public class WholeBodyTrajectory
                double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
                double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ(); 
                double currentAngle = currentRobotModel.getOneDoFJointByName(jointName).getQ(); 
-               
+
                //double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
                double interpolatedAngle = initialAngle*(1.0 -alpha) + finalAngle*alpha ;
-               
+
                thisWaypointAngles.set(index,interpolatedAngle );
                thisWaypointAnglesByName.put( jointName, interpolatedAngle  );
             }
-  
+
             currentRobotModel.updateJointsAngleButKeepOneFootFixed(thisWaypointAnglesByName, RobotSide.RIGHT);
-            
+
+
             for (RobotSide side: RobotSide.values)
             {
                RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
@@ -185,7 +177,7 @@ public class WholeBodyTrajectory
                interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
 
                FramePose target =  new FramePose( ReferenceFrame.getWorldFrame(), interpolatedTransform );
-               
+
                wbSolver.setGripperPalmTarget( initialRobotState,  side, target );
 
                if( side == RobotSide.RIGHT )
@@ -198,36 +190,35 @@ public class WholeBodyTrajectory
             if( s < numSegments )
             {
                //---------------------------------
-                ComputeResult ret =  wbSolver.compute(currentRobotModel,  thisWaypointAnglesByName, outputAngles);
+               ComputeResult ret =  wbSolver.compute(currentRobotModel,  thisWaypointAnglesByName, desiredJointAngles);
                //---------------------------------
 
                // note: use also the failed one that didn't converge... better than nothing.
-              // if( ret != ComputeResult.FAILED_INVALID)
-                if( ret == ComputeResult.SUCCEEDED)
+               // if( ret != ComputeResult.FAILED_INVALID)
+               if( ret == ComputeResult.SUCCEEDED)
                {
-                 //  System.out.println(" SUCCEEDED ");
-                  for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+                  //  System.out.println(" SUCCEEDED ");
+                  for ( Map.Entry<String, Integer> entry: jointNameToTrajectoryIndex.entrySet() )
                   {
                      String jointName = entry.getKey();
                      int index = entry.getValue();
-                     Double angle = outputAngles.get( jointName );
+                     Double angle = desiredJointAngles.get( jointName );
                      thisWaypointAngles.set(index, angle );
                      thisWaypointAnglesByName.put( jointName, angle );  
                   }
                   wb_trajectory.addWaypoint(thisWaypointAngles.data);
                }
                else{
-                 /*  System.out.println("OOOOPS");
+                  /*  System.out.println("OOOOPS");
                  for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
-                     
                      String jointName = entry.getKey();
                      int index = entry.getValue();
                      double alpha = 1.0 / (double) ( numSegments + 1 -s ); 
-   
+
                      double currentAngle = thisWaypointAnglesByName.get(jointName);
                      double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ();  
-                     
+
                      double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
                      thisWaypointAngles.set(index, interpolatedAngle );
                      thisWaypointAnglesByName.put( jointName, interpolatedAngle );  
@@ -247,111 +238,95 @@ public class WholeBodyTrajectory
       wb_trajectory.buildTrajectory();
 
       wbSolver.maxNumberOfAutomaticReseeds = oldMaxReseed;
-      
+
       wbSolver.setLockLevel( previousLockLimit );
-      
+
       return wb_trajectory;
    }
 
 
-   static public WholeBodyTrajectoryPacket convertTrajectoryToPacket(
-         SDFFullRobotModel model,
+   public WholeBodyTrajectoryPacket convertTrajectoryToPacket(
          TrajectoryND wbTrajectory)
    {
-      // build the trajectory packet from the new waypoints
-
-      int numJointsPerArm = model.armJointIDsList.get(RobotSide.LEFT).size();
-      int numWaypoints = wbTrajectory.getNumWaypoints();
-      int numJoints = wbTrajectory.getNumDimensions();
-
-
-      ReferenceFrame fixedFoot = model.getSoleFrame(RobotSide.RIGHT);
+      int numJointsPerArm = currentRobotModel.armJointIDsList.get(RobotSide.LEFT).size();
+      int numWaypoints    = wbTrajectory.getNumWaypoints();
 
       WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(numWaypoints,numJointsPerArm);
 
-      OneDoFJoint[] oneDoFJoints = model.getOneDoFJoints();
-
-      for (int w=0; w<numWaypoints; w++ )
+      for (int w=0; w < numWaypoints; w++ )
       {
          WaypointND    jointsWaypoint = wbTrajectory.getWaypoint(w);
          WholeBodyPose packetWaypoint = packet.waypoints[w];
 
-         //just take the first one, they are suppose to be all the same.
          packetWaypoint.absTime = jointsWaypoint.absTime;
 
-         int J = 0;
-         // TODO: check the order.
+         // store trajectories in the correct place
 
-         for (RobotSide side: RobotSide.values)
-         {
-            for(OneDoFJoint joint: model.armJointIDsList.get(side) )
-            {
-               String jointName = joint.getName();
-               int index = -1;
-               for(index=0; index< numJoints; index++ )
-               {
-                  if( oneDoFJoints[index].getName().equals(jointName) ) break;
-               } 
-               if( side.equals( RobotSide.LEFT))
-               {
-                  packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.position[index];
-                  packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.velocity[index];
-               }
-               else{
-                  packetWaypoint.rightArmJointAngle[J]    = jointsWaypoint.position[index];
-                  packetWaypoint.rightArmJointVelocity[J] = jointsWaypoint.velocity[index];
-               }
-               J++;
-            }
-         }      
-
-         RigidBodyTransform[] worldToPelvis = new RigidBodyTransform[2];
-         RigidBodyTransform[] worldToChest = new RigidBodyTransform[2];
-
-         final double dT = 0.0001;
-
-         for (int i=0; i< 2; i++)
-         {
-            worldToPelvis[i] = new RigidBodyTransform();
-            worldToChest[i]  = new RigidBodyTransform();
-
-            for (int j=0; j<numJoints; j++  )
-            {
-               double jointAngle =  jointsWaypoint.position[j];
-
-               if( i==1 )
-               {
-                  jointAngle += dT*jointsWaypoint.velocity[j];
-               }
-               model.getOneDoFJoints()[j].setQ( jointAngle );
-            }
-            model.updateFrames();
-
-            ReferenceFrame pelvis    = model.getRootJoint().getFrameAfterJoint();
-            ReferenceFrame movedFoot = model.getSoleFrame(RobotSide.RIGHT);
-            ReferenceFrame chest     = model.getChest().getBodyFixedFrame();
-
-            RigidBodyTransform worldToFixed = fixedFoot.getTransformToWorldFrame();
-            RigidBodyTransform movedToPelvis = pelvis.getTransformToDesiredFrame(movedFoot);
-
-            worldToPelvis[i].multiply( worldToFixed, movedToPelvis);
-
-            RigidBodyTransform pelvisToChest = chest.getTransformToDesiredFrame( pelvis );
-            worldToChest[i].multiply( worldToPelvis[i], pelvisToChest);
+         //-----  check if this is part of the arms ---------
+         int J = 0 ;
+         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.LEFT) )
+         {   
+            int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
+            packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.position[index];
+            packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.velocity[index];
          }
 
-         Vector3d positionA = new Vector3d();
-         Vector3d positionB = new Vector3d();
+         J = 0 ;
+         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.RIGHT) )
+         {   
+            int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
+            packetWaypoint.rightArmJointAngle[J] = jointsWaypoint.position[index];
+            packetWaypoint.rightArmJointAngle[J] = jointsWaypoint.velocity[index];
+         }
 
-         worldToPelvis[0].getTranslation(positionA);
-         worldToPelvis[1].getTranslation(positionB);
+         ///---------- calculation in task space ------------
 
-         packetWaypoint.pelvisVelocity.x = (positionB.x - positionA.x)/dT;
-         packetWaypoint.pelvisVelocity.y = (positionB.y - positionA.y)/dT;
-         packetWaypoint.pelvisVelocity.z = (positionB.z - positionA.z)/dT;
+         // store this before updating the model.
+         ReferenceFrame fixedFoot = currentRobotModel.getSoleFrame(RobotSide.RIGHT);
 
-         worldToPelvis[0].get( packetWaypoint.pelvisOrientation,  packetWaypoint.pelvisPosition);
-         worldToChest[0].get( packetWaypoint.chestOrientation );
+         // first, we need to copy position and velocities in the SDFFullRobotModel
+         for ( Map.Entry<String, Integer> entry: jointNameToTrajectoryIndex.entrySet() )
+         {
+            OneDoFJoint joint = currentRobotModel.getOneDoFJointByName( entry.getKey() );
+            int index = entry.getValue();
+
+            joint.setQ(  jointsWaypoint.position[index] );
+            joint.setQd( jointsWaypoint.velocity[index] );
+         }
+         currentRobotModel.updateFrames();
+
+         // align the foot as usually
+         TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(),  currentRobotModel.getElevator() );
+         twistCalculator.compute();
+
+         ReferenceFrame pelvis    = currentRobotModel.getRootJoint().getFrameAfterJoint();
+         ReferenceFrame movedFoot = currentRobotModel.getSoleFrame(RobotSide.RIGHT);
+
+         RigidBodyTransform worldToFoot   = fixedFoot.getTransformToWorldFrame();
+         RigidBodyTransform footToPelvis  = pelvis.getTransformToDesiredFrame( movedFoot );
+         RigidBodyTransform worldToPelvis = new RigidBodyTransform();
+         worldToPelvis.multiply( worldToFoot, footToPelvis );
+
+         currentRobotModel.getRootJoint().setPositionAndRotation(worldToPelvis);
+         
+         currentRobotModel.updateFrames();
+         
+         //-----  store pelvis data --------
+
+         worldToPelvis.get( packetWaypoint.pelvisOrientation,  packetWaypoint.pelvisPosition);
+       
+         Twist twistToPack = new Twist();
+         twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getElevator() );
+         
+         packetWaypoint.pelvisLinearVelocity.set(  twistToPack.getLinearPartCopy()  );
+         packetWaypoint.pelvisAngularVelocity.set( twistToPack.getAngularPartCopy() );
+         
+       //-----  store chest data --------
+         RigidBodyTransform worldToChest =  currentRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
+         worldToChest.get( packetWaypoint.chestOrientation );
+        
+         twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getChest() );
+         packetWaypoint.chestAngularVelocity.set(  twistToPack.getAngularPartCopy() );
 
       }
       return null;

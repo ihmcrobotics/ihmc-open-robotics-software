@@ -185,7 +185,6 @@ public class WholeBodyIkSolverTestHelper
 
             modelVisualizer.update(0);
 
-            ThreadTools.sleep(100);
          }
 
          for (RobotSide side : RobotSide.values())

@@ -110,7 +110,7 @@ public abstract class WholeBodyTrajectoryTest
 
          if( ret == ComputeResult.SUCCEEDED )
          {
-            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory( 1.5, 15, 0.10);
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory( actualRobotModel, 1.5, 15, 0.10);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
             Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
