@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.roughTerrainWalking;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -11,6 +13,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -36,6 +39,31 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 {
    private SimulationTestingParameters simulationTestingParameters;
    private DRCSimulationTestHelper drcSimulationTestHelper;
+
+   @Before
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
+
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (drcSimulationTestHelper != null)
+      {
+         drcSimulationTestHelper.destroySimulation();
+         drcSimulationTestHelper = null;
+      }
+
+      simulationTestingParameters = null;
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
 
    private class TestController implements RobotController
    {
@@ -186,7 +214,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
    @BambooAnnotations.AverageDuration
    @Test(timeout = 300000)
-   public void testNegativeSwingHight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
