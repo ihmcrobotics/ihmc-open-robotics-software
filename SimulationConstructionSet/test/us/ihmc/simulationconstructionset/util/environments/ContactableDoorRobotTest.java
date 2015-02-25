@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
@@ -33,7 +32,8 @@ public class ContactableDoorRobotTest
    @Test(timeout = 100000)
    public void testPointIsClose()
    {      
-      Vector3d pos = new Vector3d(5.0, -5.0, 10.0);
+      double epsilon = 1e-4;
+      Point3d pos = new Point3d(5.0, -5.0, 10.0);
 
       ContactableDoorRobot door = createDefaultDoor(pos, 0);
       
@@ -41,12 +41,12 @@ public class ContactableDoorRobotTest
       
       assertFalse(door.isClose(new Point3d()));
       assertFalse(door.isClose(new Point3d(1e4, -1e4, 1e4)));
-      assertTrue(door.isClose(tempPos));
+      assertTrue(door.isPointOnOrInside(tempPos));
       Point3d diagonal = new Point3d(
-            tempPos.x + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 
-            tempPos.y + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.y, 
-            tempPos.z + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.z);
-      assertTrue(door.isClose(diagonal));
+            tempPos.x + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 
+            tempPos.y + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.y, 
+            tempPos.z + (1.0 - epsilon)*ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.z);
+      assertTrue(door.isPointOnOrInside(diagonal));
    }
    
    @AverageDuration
@@ -57,7 +57,7 @@ public class ContactableDoorRobotTest
       robots = new Robot[1];
       
       // create door   
-      Vector3d pos = new Vector3d(2.0, 1.0, 0.0);
+      Point3d pos = new Point3d(2.0, 1.0, 0.0);
       int id = 1;
       ContactableDoorRobot door = createDefaultDoor(pos, id);
       
@@ -73,17 +73,18 @@ public class ContactableDoorRobotTest
       Thread myThread = new Thread(scs);
       myThread.start();
       
-      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 50.0);
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0);
       try
       {
-         blockingSimulationRunner.simulateAndBlock(50.0);
+         blockingSimulationRunner.simulateAndBlock(60.0);
       }
       catch (Exception e)
       {
          System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
       }
        
-      assertTrue(Math.abs(door.getYaw()) < 1e-3);
+      System.out.println(door.getHingeYaw());
+      assertTrue(Math.abs(door.getHingeYaw()) < 1e-3);
       
       if(testingParams.getKeepSCSUp())
       {
@@ -91,7 +92,7 @@ public class ContactableDoorRobotTest
       }
    }
 
-   private ContactableDoorRobot createDefaultDoor(Vector3d positionInWorld, int id)
+   private ContactableDoorRobot createDefaultDoor(Point3d positionInWorld, int id)
    {
       return new ContactableDoorRobot("robotDoor" + id, positionInWorld);
    }
