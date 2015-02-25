@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.configurations;
 /**
  * Created by agrabertilton on 2/20/15.
  */
-public interface StepingParameters extends FootstepParameters
+public interface SteppingParameters extends FootstepParameters
 {
    public abstract double getMaxStepLength();
 
@@ -22,6 +22,8 @@ public interface StepingParameters extends FootstepParameters
    public abstract double getMaxStepUp();
 
    public abstract double getMaxStepDown();
+
+   public abstract double getMaxSwingHeightFromStanceFoot();
 
    public abstract double getMaxAngleTurnOutwards(); //the maximum angle the foot can turn outwards in a step
 

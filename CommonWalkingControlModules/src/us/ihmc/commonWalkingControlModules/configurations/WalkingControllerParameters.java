@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
-public interface WalkingControllerParameters extends HeadOrientationControllerParameters, StepingParameters
+public interface WalkingControllerParameters extends HeadOrientationControllerParameters, SteppingParameters
 {
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
