@@ -13,9 +13,11 @@ public interface CoMHeightTrajectoryGenerator
 {
    public abstract void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager);
 
+   public abstract void setSupportLeg(RobotSide supportLeg);
+
    public abstract void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, RobotSide supportLeg, Footstep nextFootstep, List<PlaneContactState> contactStates);
    
-   public void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData);
+   public abstract void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData);
 
    public abstract boolean hasBeenInitializedWithNextStep();
 }

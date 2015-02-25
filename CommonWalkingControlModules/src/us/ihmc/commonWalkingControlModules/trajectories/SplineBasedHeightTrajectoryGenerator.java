@@ -169,4 +169,11 @@ public class SplineBasedHeightTrajectoryGenerator implements CoMHeightTrajectory
    public void attachWalkOnToesManager(WalkOnTheEdgesManager walkOnTheEdgesManager)
    {
    }
+
+   @Override
+   public void setSupportLeg(RobotSide supportLeg)
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

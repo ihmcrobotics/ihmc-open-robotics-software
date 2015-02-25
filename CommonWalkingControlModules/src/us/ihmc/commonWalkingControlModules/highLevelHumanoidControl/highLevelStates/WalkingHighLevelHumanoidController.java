@@ -996,6 +996,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             pelvisOrientationManager.setToZeroInSupportFoot(supportSide);
+            centerOfMassHeightTrajectoryGenerator.setSupportLeg(supportSide);
          }
       }
 
