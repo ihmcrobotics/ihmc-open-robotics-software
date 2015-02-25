@@ -12,7 +12,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class HoldPositionState extends AbstractFootControlState
 {
-   private static final boolean CONTROL_WRT_PELVIS = true;
+   private static final boolean CONTROL_WRT_PELVIS = false;
 
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final FrameVector fullyConstrainedNormalContactVector;
