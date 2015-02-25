@@ -3,13 +3,14 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
+import javax.vecmath.Point3d;
 
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableDoorRobot;
+import us.ihmc.simulationconstructionset.util.environments.ContactablePinJointRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -25,7 +26,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
  */
 public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final List<ContactableDoorRobot> doorRobots = new ArrayList<ContactableDoorRobot>();
+   private final List<ContactablePinJointRobot> doorRobots = new ArrayList<ContactablePinJointRobot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
       
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -34,15 +35,12 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
-   }
-   
-   public void createDoor(Vector3d positionInWorld, int id)
-   {
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot" + id, positionInWorld);
-      door.setKdDoor(1.0);
-      door.setKpDoor(10.0);
+      
+      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3d(3.0, 0.0, 0.0));
+      door.setKdDoor(1e-2);
+      door.setKpDoor(1e-2);
       doorRobots.add(door);
-      door.createAvailableContactPoints(id, 40, 0.02, true);
+      door.createAvailableContactPoints(0, 40, 0.02, true);
    }
    
    private CombinedTerrainObject3D setUpGround(String name)
@@ -50,6 +48,8 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       combinedTerrainObject.addBox(-10.0, -10.0, 10.0, 10.0, -0.05, 0.0, YoAppearance.DarkGray());
+      combinedTerrainObject.addBox(2.0, -0.05, 2.95, 0.05, 2.0, YoAppearance.Beige());
+      combinedTerrainObject.addBox(3.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, -0.05, 4.0 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.x, 0.05, 2.0, YoAppearance.Beige());
       
       return combinedTerrainObject;
    }
@@ -71,7 +71,7 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
    {
       ContactController contactController = new ContactController();
       contactController.setContactParameters(100000.0, 100.0, 0.5, 0.3);
-      System.out.println("# of contact pts = " + contactPoints.size());
+
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(doorRobots);
       doorRobots.get(0).setController(contactController);    

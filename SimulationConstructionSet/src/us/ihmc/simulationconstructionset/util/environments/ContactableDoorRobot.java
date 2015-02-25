@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
@@ -17,22 +18,33 @@ import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
+import us.ihmc.utilities.math.geometry.FrameBox3d;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class ContactableDoorRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {
-   public static final Vector2d DEFAULT_HANDLE_OFFSET = new Vector2d(0.65, 0.85);
-   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(0.7, 0.03, 2.0);
-   public static final double DEFAULT_MASS = 20.28; // 5lbs
-   public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.03;
-   public static final Vector3d DEFAULT_HANDLE_DIMENSIONS = new Vector3d(0.05, 0.01, 0.005);
-   public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.0075;
+   public static final Vector2d DEFAULT_HANDLE_OFFSET = new Vector2d(0.83, 0.98);
+   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(1.0, 0.045, 2.04);
+   public static final double DEFAULT_MASS = 2.28; // 5lbs
+   public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
+   public static final Vector3d DEFAULT_HANDLE_DIMENSIONS = new Vector3d(0.09, 0.02, 0.008);
+   public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
+   private static final double DOOR_CLOSED_STICTION = 1e5;
+   private static final double HANDLE_OPEN_THRESHOLD = 45.0;
    
    private static final AppearanceDefinition defaultColor = YoAppearance.Gray();
    
@@ -40,10 +52,14 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
    private double depthY;
    private double heightZ;
    
+   private final RigidBodyTransform originalDoorPose;
+   private final PoseReferenceFrame doorFrame;
+   private final FrameBox3d doorBox;
+   
+   private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<PoseReferenceFrame>();
+   
    private double mass;
    private Matrix3d inertiaMatrix;
-      
-   private final Vector3d positionInWorld;
    
    private Link doorLink;
    private PinJoint doorHingePinJoint;
@@ -57,13 +73,15 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
    private final double handleDoorSeparation;
    private final double handleHingeRadius;
    
-   public ContactableDoorRobot(String name, Vector3d positionInWorld)
+   private final BooleanYoVariable doorIsOpen;
+   
+   public ContactableDoorRobot(String name, Point3d positionInWorld)
    {
       this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
             DEFAULT_HANDLE_DIMENSIONS, DEFAULT_HANDLE_DOOR_SEPARATION, DEFAULT_HANDLE_HINGE_RADIUS);
    }
    
-   public ContactableDoorRobot(String name, Vector3d boxDimensions, double mass, Vector3d positionInWorld, Vector2d handleOffset, 
+   public ContactableDoorRobot(String name, Vector3d boxDimensions, double mass, Point3d positionInWorld, Vector2d handleOffset, 
          Vector3d handleDimensions, double handleDoorSeparation, double handleHingeRadius)
    {
       super(name);
@@ -73,26 +91,66 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
       this.widthX = boxDimensions.x;
       this.depthY = boxDimensions.y;
       this.heightZ = boxDimensions.z;
-      
-      this.positionInWorld = positionInWorld;
-      
+            
       this.handleOffset = handleOffset;
       this.handleDimensions = handleDimensions;
       this.handleHingeRadius = handleHingeRadius;
       
       this.handleDoorSeparation = handleDoorSeparation;      
       
-      createDoor();
+      createDoor(new Vector3d(positionInWorld));
       createDoorGraphics();
       createHandle();
       createHandleGraphics();
+      
+      // set up reference frames
+      originalDoorPose = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(positionInWorld)); 
+      doorFrame = new PoseReferenceFrame("doorFrame", new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(positionInWorld), new AxisAngle4d()));
+      doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
+      
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         Vector3d offset = new Vector3d(handleOffset.x, 0.5*depthY + robotSide.negateIfLeftSide(0.5*depthY + handleDoorSeparation), handleOffset.y);
+         handlePoses.put(robotSide, new PoseReferenceFrame(robotSide.getCamelCaseNameForStartOfExpression() + "HandleFrame",
+               new FramePose(doorFrame, new Point3d(offset), new AxisAngle4d()))); // new RigidBodyTransform(new AxisAngle4d(), offset));
+      }
+      
+      // set up handle to enable door opening
+      doorIsOpen = new BooleanYoVariable("doorIsOpen", yoVariableRegistry);
+      
+      handlePinJoint.getQ().addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            boolean doorOpen = handlePinJoint.getQ().getDoubleValue() < - Math.toRadians(HANDLE_OPEN_THRESHOLD);
+            doorIsOpen.set(doorOpen);
+         }
+      });
+      
+      doorIsOpen.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if(doorIsOpen.getBooleanValue())
+            {
+               doorHingePinJoint.setStiction(0.0);
+               doorHingePinJoint.setDamping(0.0);
+            }
+            else
+            {
+               doorHingePinJoint.setStiction(DOOR_CLOSED_STICTION);
+               doorHingePinJoint.setDamping(1e5);
+            }
+         }
+      });
    }
-   
-   private void createDoor()
+
+   private void createDoor(Vector3d positionInWorld)
    {
       // creating the pinJoint, i.e. door hinge
-      Vector3d jointAxisVector = new Vector3d(0.0, 0.0, 1.0);      
-      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, jointAxisVector);
+      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis.Z);
       
       // door link
       doorLink = new Link("doorLink");
@@ -136,21 +194,20 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
       Matrix3d rotX90 = new Matrix3d();
       rotX90.rotX(Math.PI / 2.0);
       doorHandleGraphics.rotate(rotX90);
-      doorHandleGraphics.addCylinder(handleDoorSeparation, handleHingeRadius, YoAppearance.Grey());
-      doorHandleGraphics.addCylinder(-handleDoorSeparation-depthY, handleHingeRadius, YoAppearance.Grey());
       doorHandleGraphics.translate(new Vector3d(0.0, 0.0, -0.5 * depthY)); // center graphics
       
       for(RobotSide robotSide : RobotSide.values())
       {
+         doorHandleGraphics.addCylinder(robotSide.negateIfLeftSide(handleDoorSeparation+0.5*depthY), handleHingeRadius, YoAppearance.Grey());
          // graphics - handle
-         double translation = robotSide.negateIfLeftSide(0.03 + 0.5*depthY);
+         double translation = robotSide.negateIfLeftSide(handleDoorSeparation + 0.5*depthY);
          doorHandleGraphics.translate(new Vector3d(0.0, 0.0, translation));
          List<Point2d> handlePoints = new ArrayList<Point2d>();
-         handlePoints.add(new Point2d(0.0  , -0.5 * handleDimensions.y));
-         handlePoints.add(new Point2d(0.0  ,  0.5 * handleDimensions.y));
-         handlePoints.add(new Point2d(-handleDimensions.x,  0.5 * handleDimensions.y));
-         handlePoints.add(new Point2d(-handleDimensions.x, -0.5 * handleDimensions.y));
-         double extrusionLength = robotSide.negateIfLeftSide(0.005);
+         handlePoints.add(new Point2d(0.0  , 0.0));
+         handlePoints.add(new Point2d(0.0  , handleDimensions.y));
+         handlePoints.add(new Point2d(-handleDimensions.x, handleDimensions.y));
+         handlePoints.add(new Point2d(-handleDimensions.x, 0.0));
+         double extrusionLength = robotSide.negateIfLeftSide(handleDimensions.z);
          doorHandleGraphics.addExtrudedPolygon(handlePoints, extrusionLength, YoAppearance.Grey());
          doorHandleGraphics.translate(new Vector3d(0.0, 0.0, -translation)); 
       }
@@ -160,49 +217,133 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
    
    @Override
    public boolean isClose(Point3d pointInWorldToCheck)
-   {
-      double epsilon = 2.0*handleDoorSeparation;
-      
-      Point3d pointToCheck = toDoorFrame(pointInWorldToCheck);
-      
-      System.out.println(pointToCheck);
-      
-      boolean b1 = pointToCheck.getX() > -epsilon && pointToCheck.getX() < widthX + epsilon && 
-            pointToCheck.getY() > -epsilon && pointToCheck.getY() < depthY + epsilon && 
-            pointToCheck.getZ() > -epsilon && pointToCheck.getZ() < heightZ + epsilon;
-            
-      return b1;
+   {      
+      return isPointOnOrInside(pointInWorldToCheck);
    }
    
    @Override
    public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
-      Point3d pointInDoorFrame = toDoorFrame(pointInWorldToCheck);
+      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      pointToCheck.changeFrame(doorFrame);
+      pointToCheck.add(-0.5*widthX, -0.5*depthY, -0.5*heightZ); // since FrameBox3d.isInsideOrOnSurface assumes center of box is origin
+
+      if (doorBox.isInsideOrOnSurface(pointToCheck))
+      {
+         return true;
+      }
       
-      // check if on/inside door
-      if(pointInDoorFrame.getX() >= 0.0 && pointInDoorFrame.getX() <= widthX && 
-            pointInDoorFrame.getY() >= 0.0 && pointInDoorFrame.getY() <= depthY && 
-                  pointInDoorFrame.getZ() >= 0.0 && pointInDoorFrame.getZ() <= heightZ)
+      pointToCheck.add(0.5*widthX, 0.5*depthY, 0.5*heightZ);
+      if(isInsideHandles(pointToCheck))
          return true;
       
-//      // check if on/inside handle
-//      for(RobotSide robotSide : RobotSide.values())
-//      {
-//         pointToCheck.changeFrame(handleFrames.get(robotSide));
-//         
-//         if(pointToCheck.getX() >= 0.0 && pointToCheck.getX() <= handleDimensions.x &&
-//               pointToCheck.getY() >= 0.0 && pointToCheck.getY() <= handleDimensions.y &&
-//               pointToCheck.getZ() >= 0.0 && pointToCheck.getZ() <= handleDimensions.z)
-//            return true;
-//      }
-//      
-//      // check if on/inside hinge
-//      pointToCheck.changeFrame(handleFrames.get(RobotSide.LEFT));
-//      if(pointToCheck.getY() >= 0.0 && pointToCheck.getY() <= 2.0 * handleDoorSeparation &&
-//            pointToCheck.getX() * pointToCheck.getX() + pointToCheck.getZ() + pointToCheck.getZ() <= handleHingeRadius * handleHingeRadius)
-//         return true;
-      
       return false;
+   }
+   
+   private boolean isInsideHandles(FramePoint pointInDoorFrame)
+   {
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         pointInDoorFrame.changeFrame(handlePoses.get(robotSide));
+         
+         if(pointInDoorFrame.getX() <= 0.0 && pointInDoorFrame.getX() >= -handleDimensions.x
+               && robotSide.negateIfLeftSide(pointInDoorFrame.getY()) >= 0.0 && robotSide.negateIfLeftSide(pointInDoorFrame.getY()) <= handleDimensions.y
+               && pointInDoorFrame.getZ() >= 0.0 && pointInDoorFrame.getZ() <= handleDimensions.z)
+            return true;
+      }
+      return false;
+   }   
+   
+   @Override
+   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   {
+      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      
+      boolean packedByHandles = false;
+      
+      FramePoint frameIntersectionToPack = new FramePoint();
+      FrameVector frameNormalToPack = new FrameVector();
+      
+      // check if close enough to handles
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         pointToCheck.changeFrame(handlePoses.get(robotSide));
+         double yVal = robotSide.negateIfLeftSide(pointToCheck.getY());
+         
+         if(yVal < -0.5*handleDoorSeparation)
+            continue;
+         
+         packedByHandles = true;
+         
+         boolean topNearDoor = pointToCheck.getZ() > (handleDimensions.z / handleDimensions.y) * yVal;
+         boolean bottomNearDoor = pointToCheck.getZ() < - (handleDimensions.z / handleDimensions.y) * yVal + handleDimensions.z;
+         
+         frameIntersectionToPack.changeFrame(handlePoses.get(robotSide));
+         frameNormalToPack.changeFrame(handlePoses.get(robotSide));
+                  
+         if(topNearDoor)
+         {
+            if(bottomNearDoor)
+            {
+               frameNormalToPack.set(0.0, -1.0, 0.0);
+               frameIntersectionToPack.set(pointToCheck.getX(), Math.max(yVal, 0.0), Math.max(Math.min(0.0, pointToCheck.getZ()), handleDimensions.z));
+            }
+            else
+            {
+               frameNormalToPack.set(0.0, 0.0, 1.0);
+               frameIntersectionToPack.set(pointToCheck.getX(), Math.max(Math.min(0.0, yVal), handleDimensions.y), Math.min(pointToCheck.getZ(), handleDimensions.z));               
+            }
+         }
+         else
+         {
+            if(bottomNearDoor)
+            {
+               frameNormalToPack.set(0.0, 0.0, -1.0);
+               frameIntersectionToPack.set(pointToCheck.getX(), Math.max(Math.min(0.0, yVal), handleDimensions.y), Math.min(pointToCheck.getZ(), 0.0));
+            }
+            else
+            {
+               frameNormalToPack.set(0.0, 1.0, 0.0);
+               frameIntersectionToPack.set(pointToCheck.getX(), Math.min(yVal, handleDimensions.y), Math.max(Math.min(0.0, pointToCheck.getZ()), handleDimensions.z));
+            }
+         }
+         
+         if(robotSide.equals(RobotSide.LEFT))
+         {
+            frameNormalToPack.setY(-frameNormalToPack.getY());
+            frameIntersectionToPack.setY(-frameIntersectionToPack.getY());
+         }
+      }
+      
+      if(!packedByHandles)
+      {
+         pointToCheck.changeFrame(doorFrame);
+         doorBox.getClosestPointAndNormalAt(frameIntersectionToPack, frameNormalToPack, pointToCheck);         
+      }
+      
+      frameNormalToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      normalToPack.set(frameNormalToPack.getVectorCopy());
+      
+      frameIntersectionToPack.changeFrame(ReferenceFrame.getWorldFrame());
+      intersectionToPack.set(frameIntersectionToPack.getPointCopy());
+   }
+   
+   @Override
+   public void updateAllGroundContactPointVelocities()
+   {
+      Matrix3d hingeRotation = new Matrix3d();
+      hingeRotation.rotZ(getHingeYaw());
+      RigidBodyTransform newDoorPose = new RigidBodyTransform(hingeRotation, originalDoorPose.cloneTranslation());
+      doorFrame.setPoseAndUpdate(newDoorPose);
+      
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         RigidBodyTransform handlePose = handlePoses.get(robotSide).getTransformToDesiredFrame(doorFrame);
+         handlePose.setRotation(new AxisAngle4d(0.0, 1.0, 0.0, getHandleAngle()));
+         handlePoses.get(robotSide).setPoseAndUpdate(handlePose);
+      }
+      
+      super.updateAllGroundContactPointVelocities();
    }
    
    public void setKdDoor(double kd)
@@ -240,32 +381,19 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
       doorHingePinJoint.setQ(yaw);
    }
    
-   public double getYaw()
+   public double getHingeYaw()
    {
       return doorHingePinJoint.getQ().getDoubleValue();
    }
    
-   private Point3d toDoorFrame(Point3d pointInWorld)
+   public double getHandleAngle()
    {
-      Point3d ret = new Point3d(pointInWorld);
-      ret.sub(positionInWorld);
-      double q = getYaw();
-      double rotX = ret.x * Math.cos(q) + ret.y * Math.sin(q);
-      ret.y       = -ret.x * Math.sin(q) + ret.y * Math.cos(q);
-      ret.x = rotX;
-      return ret;
+      return handlePinJoint.getQ().getDoubleValue();
    }
    
-   private Point3d toHandleFrame(Point3d pointInWorld, RobotSide robotSide)
+   public void setHandleAngle(double theta)
    {
-      return null;
-   }
-
-   @Override
-   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
-   {
-      Point3d pointInDoorFrame = toDoorFrame(pointInWorldToCheck);
-      
+      handlePinJoint.setQ(theta);
    }
 
    @Override
@@ -297,8 +425,7 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
    @Override
    public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      // TODO
-//      transformToWorld.set(doorFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));
+      transformToWorld.set(doorFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));
    }
 
    @Override
