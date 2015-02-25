@@ -40,6 +40,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotDataReceiver drcRobotDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
    private final PointCloudDataReceiver pointCloudDataReceiver;
+   private final RobotBoundingBoxes robotBoundingBoxes;
 
    public ValkyrieSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, SDFFullRobotModel sdfFullRobotModel,
          DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, boolean runningOnRealRobot)
@@ -47,9 +48,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
-      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, DRCHandType.VALKYRIE, sdfFullRobotModel);
+      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, DRCHandType.VALKYRIE, sdfFullRobotModel);
       this.robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 10000, timestampProvider);
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(robotBoundingBoxes, sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
    }
 
    @Override
@@ -58,7 +59,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
       new SCSCameraDataReceiver(robotPoseBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
-      new SCSCheatingPointCloudLidarReceiver(scsSensorsCommunicator, pointCloudDataReceiver);
+      new SCSCheatingPointCloudLidarReceiver(robotBoundingBoxes, scsSensorsCommunicator, pointCloudDataReceiver);
       pointCloudDataReceiver.start();
    }
 
