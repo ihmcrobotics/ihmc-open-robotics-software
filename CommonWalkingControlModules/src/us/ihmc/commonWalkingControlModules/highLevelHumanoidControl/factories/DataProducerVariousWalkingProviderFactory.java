@@ -124,7 +124,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
 
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, chestOrientationProvider.getWholeBodyTrajectoryPacketConsumer() );
+      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, chestOrientationProvider.getWholeBodyTrajectoryPacketConsumer());
       
       objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
       objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, pelvisPoseProvider.getWholeBodyTrajectoryPacketConsumer());

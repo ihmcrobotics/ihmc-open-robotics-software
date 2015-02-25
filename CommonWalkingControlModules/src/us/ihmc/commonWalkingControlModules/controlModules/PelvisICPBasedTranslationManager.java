@@ -100,7 +100,7 @@ public class PelvisICPBasedTranslationManager
       pelvisPositionTrajectoryGenerator.initialize();
       activeTrajectoryGenerator = pelvisPositionTrajectoryGenerator;
 
-      pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", 10, worldFrame, registry);
+      pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", 15, worldFrame, registry);
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);

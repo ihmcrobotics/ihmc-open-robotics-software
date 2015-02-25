@@ -14,6 +14,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -137,7 +138,7 @@ public class PelvisOrientationManager
 
       boolean doVelocityAtWaypoints = false;
       boolean allowMultipleFrames = false;
-      pelvisWaypointsOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 10, doVelocityAtWaypoints, allowMultipleFrames, desiredPelvisFrame, registry);
+      pelvisWaypointsOrientationOffsetTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("pelvisWaypointsOffset", 15, doVelocityAtWaypoints, allowMultipleFrames, desiredPelvisFrame, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -182,6 +183,9 @@ public class PelvisOrientationManager
       desiredPelvisAngularVelocity.set(tempAngularVelocity);
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
+      
+//      if (RotationFunctions.isRotationProper(tempOrientation.getMatrix3dCopy()))
+//         throw new RuntimeException(getClass().getSimpleName() + ": Desired chest orientation is screwed");
 
       if (pelvisPoseProvider != null)
       {
