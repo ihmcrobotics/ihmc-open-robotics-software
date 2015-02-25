@@ -1,23 +1,27 @@
 package us.ihmc.communication.blackoutGenerators;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class TimeDependentStepFunctionBlackoutGenerator implements CommunicationBlackoutGenerator
 {
+   private final TimeUnit timeUnit;
    private long maxBlackoutLength;
    private long runLength;
    
    private Random random = new Random(System.currentTimeMillis());
    
-   public TimeDependentStepFunctionBlackoutGenerator(long maxBlackoutLength, long runLength)
+   public TimeDependentStepFunctionBlackoutGenerator(TimeUnit timeUnit, long maxBlackoutLength, long runLength)
    {
+      this.timeUnit = timeUnit;
       this.maxBlackoutLength = maxBlackoutLength;
       this.runLength = runLength;
    }
    
    @Override
-   public long calculateNextBlackoutLength(long currentTime)
+   public long calculateNextBlackoutLength(long currentTime, TimeUnit timeUnit)
    {
+      currentTime = this.timeUnit.convert(currentTime, timeUnit);
       long blackoutLength = 0;
       double runCompletionRatio = (double)currentTime/(double)runLength;
       if(runCompletionRatio <= (1.0/3.0))
@@ -41,7 +45,7 @@ public class TimeDependentStepFunctionBlackoutGenerator implements Communication
             blackoutLength = random.nextInt((int)Math.round(upperBound));
       }
       
-      return blackoutLength + 1;
+      return timeUnit.convert(blackoutLength + 1, this.timeUnit);
    }
 
 }

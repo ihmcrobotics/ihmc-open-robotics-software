@@ -4,7 +4,7 @@ import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
-public class BlackoutPacketConsumer<P extends Packet<?>> implements PacketConsumer<P>
+public class BlackoutPacketConsumer<P extends Packet<P>> implements PacketConsumer<P>
 {
    private final PacketConsumer<P> packetConsumer;
    private CommunicationBlackoutSimulator blackoutSimulator;

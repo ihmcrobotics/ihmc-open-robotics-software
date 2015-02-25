@@ -1,30 +1,26 @@
 package us.ihmc.communication.blackoutGenerators;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 
 public class SystemTimeBasedBlackoutSimulator extends StandardBlackoutSimulator
 {
    private final boolean DEBUG = false;
    
-   public SystemTimeBasedBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator)
+   public SystemTimeBasedBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator, PacketCommunicator packetCommunicator)
    {
-      super(blackoutGenerator);
+      super(blackoutGenerator, packetCommunicator);
       
       if(DEBUG)
          Executors.newSingleThreadExecutor().execute(new BlackoutTimerWatcher());
    }
 
    @Override
-   public long getCurrentTime()
+   public long getCurrentTime(TimeUnit timeUnit)
    {
-      return System.currentTimeMillis();
-   }
-   
-   public static void main(String[] args)
-   {
-      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3000);
-      SystemTimeBasedBlackoutSimulator blackoutSimulator = new SystemTimeBasedBlackoutSimulator(blackoutGenerator);
-      blackoutSimulator.startBlackoutSimulator();
+      return timeUnit.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
    }
    
    class BlackoutTimerWatcher implements Runnable
@@ -39,7 +35,7 @@ public class SystemTimeBasedBlackoutSimulator extends StandardBlackoutSimulator
          while(true)
          {
             if(inBlackout != SystemTimeBasedBlackoutSimulator.this.blackoutCommunication())
-               System.out.println(getCurrentTime());
+               System.out.println(getCurrentTime(TimeUnit.MILLISECONDS));
             
             inBlackout = SystemTimeBasedBlackoutSimulator.this.blackoutCommunication();
          }
