@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
@@ -54,39 +55,43 @@ public class SwingTrajectoryHeightCalculator
    private double horizontalBuffer;
    private double verticalBuffer;
    private double pathWidth;
+   private SteppingParameters steppingParameters;
 
-   public SwingTrajectoryHeightCalculator(double horizontalBuffer, double verticalBuffer, double pathWidth)
+   public SwingTrajectoryHeightCalculator(double horizontalBuffer, double verticalBuffer, double pathWidth, SteppingParameters steppingParameters)
    {
       this.horizontalBuffer = horizontalBuffer;
       this.verticalBuffer = verticalBuffer;
       this.pathWidth = pathWidth;
+      this.steppingParameters = steppingParameters;
    }
 
-   public double getSwingHeight(Footstep initialFootstep, Footstep endFootstep, HeightMapWithPoints heightMap)
+   public double getSwingHeight(Footstep initialFootstep, Footstep stanceFootstep, Footstep endFootstep, HeightMapWithPoints heightMap)
    {
       FramePose startPose = new FramePose();
       initialFootstep.getSolePose(startPose);
       FramePose endPose = new FramePose();
       endFootstep.getSolePose(endPose);
+      Point3d position = new Point3d();
+      stanceFootstep.getPosition(position);
 
-      return getSwingHeight(startPose, endPose, heightMap);
+      return getSwingHeight(startPose, endPose, position.getZ(), heightMap);
    }
 
-   public double getSwingHeight(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)
+   public double getSwingHeight(FramePose startPose, FramePose endPose, double stanceHeight, HeightMapWithPoints groundProfile)
    {
       FramePoint startFramePoint = startPose.getFramePointCopy();
       FramePoint endFramePoint = endPose.getFramePointCopy();
       Point3d startPoint = startFramePoint.getPointCopy();
       Point3d endPoint = endFramePoint.getPointCopy();
-      return getSwingHeight(startPoint, endPoint, groundProfile);
+      return getSwingHeight(startPoint, endPoint, stanceHeight, groundProfile);
    }
 
-   public double getSwingHeight(FootstepData initialFootstep, FootstepData endFootstep, HeightMapWithPoints heightMap)
+   public double getSwingHeight(FootstepData initialFootstep, FootstepData stanceFootstep, FootstepData endFootstep, HeightMapWithPoints heightMap)
    {
-      return getSwingHeight(initialFootstep.getLocation(), endFootstep.getLocation(), heightMap);
+      return getSwingHeight(initialFootstep.getLocation(), endFootstep.getLocation(), stanceFootstep.getLocation().getZ(), heightMap);
    }
 
-   public double getSwingHeight(Point3d startPoint, Point3d endPoint, HeightMapWithPoints groundProfile)
+   public double getSwingHeight(Point3d startPoint, Point3d endPoint, double stanceHeight, HeightMapWithPoints groundProfile)
    {
       Vector3d startToEnd2d = new Vector3d(endPoint);
       startToEnd2d.sub(startPoint);
@@ -115,7 +120,13 @@ public class SwingTrajectoryHeightCalculator
          }
       }
 
-      return maxZDiffFromStart + verticalBuffer;
+      double swingHeight = maxZDiffFromStart + verticalBuffer;
+      //crop based on stance foot
+      double distanceAboveStanceFoot = startPoint.getZ() + swingHeight - stanceHeight;
+      if (distanceAboveStanceFoot > steppingParameters.getMaxSwingHeightFromStanceFoot()){
+         swingHeight = stanceHeight + steppingParameters.getMaxSwingHeightFromStanceFoot() - startPoint.getZ();
+      }
+      return swingHeight;
    }
 
    public List<FramePoint> computeSwingTrajectoryPoints(FramePose startPose, FramePose endPose, HeightMapWithPoints groundProfile)

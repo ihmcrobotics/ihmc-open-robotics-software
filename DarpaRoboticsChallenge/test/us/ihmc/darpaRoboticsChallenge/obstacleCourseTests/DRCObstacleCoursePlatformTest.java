@@ -237,114 +237,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestFinishedMessage();
    }
 
-   private class TestController implements RobotController
-   {
-      YoVariableRegistry registry = new YoVariableRegistry("SwingHeightTestController");
-      Random random = new Random();
-      FullRobotModel estimatorModel;
-      DoubleYoVariable maxFootHeight = new DoubleYoVariable("maxFootHeight", registry);
-      DoubleYoVariable leftFootHeight = new DoubleYoVariable("leftFootHeight", registry);
-      DoubleYoVariable rightFootHeight = new DoubleYoVariable("rightFootHeight", registry);
-      DoubleYoVariable randomNum = new DoubleYoVariable("randomNumberInTestController", registry);
-      FramePoint leftFootOrigin;
-      FramePoint rightFootOrigin;
-
-      public TestController(FullRobotModel estimatorModel){
-         this.estimatorModel = estimatorModel;
-      }
-
-      @Override
-      public void doControl()
-      {
-
-
-         ReferenceFrame leftFootFrame = estimatorModel.getFoot(RobotSide.LEFT).getBodyFixedFrame();
-         leftFootOrigin = new FramePoint(leftFootFrame);
-         leftFootOrigin.changeFrame(ReferenceFrame.getWorldFrame());
-
-         ReferenceFrame rightFootFrame = estimatorModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame();
-         rightFootOrigin = new FramePoint(rightFootFrame);
-         rightFootOrigin.changeFrame(ReferenceFrame.getWorldFrame());
-
-         randomNum.set(random.nextDouble());
-         leftFootHeight.set(leftFootOrigin.getZ());
-         rightFootHeight.set(rightFootOrigin.getZ());
-         maxFootHeight.set(Math.max(maxFootHeight.getDoubleValue(), leftFootHeight.getDoubleValue()));
-         maxFootHeight.set(Math.max(maxFootHeight.getDoubleValue(), rightFootHeight.getDoubleValue()));
-      }
-
-      @Override
-      public void initialize()
-      {
-      }
-
-      @Override
-      public YoVariableRegistry getYoVariableRegistry()
-      {
-         return registry;
-      }
-
-      @Override
-      public String getName()
-      {
-         return null;
-      }
-
-      @Override
-      public String getDescription()
-      {
-         return null;
-      }
-
-      public double getMaxFootHeight(){ return maxFootHeight.getDoubleValue();}
-   }
-
-   @AverageDuration
-   @Test(timeout = 300000)
-   public void testMultipleHeightFootsteps() throws SimulationExceededMaximumTimeException
-   {
-      BambooTools.reportTestStartedMessage();
-
-      double[] heights = {0.1, 0.2, 0.3};
-      double[] maxHeights = new double[heights.length];
-      boolean success;
-      for (int i = 0; i < heights.length; i++){
-         double currentHeight = heights[i];
-         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-         simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-         simulationTestingParameters.setRunMultiThreaded(false);
-         drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOverSmallPlatformTest", "", selectedLocation,  simulationTestingParameters, getRobotModel());
-         FullRobotModel estimatorRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-         TestController testController = new TestController(estimatorRobotModel);
-         drcSimulationTestHelper.getRobot().setController(testController, 1);
-
-         SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-
-         setupCameraForWalkingOverSmallPlatform(simulationConstructionSet);
-
-         ThreadTools.sleep(1000);
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
-
-         FootstepDataList footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
-         maxHeights[i] = testController.getMaxFootHeight();
-         assertTrue(success);
-
-         if (i != heights.length - 1)
-            drcSimulationTestHelper.destroySimulation();
-      }
-
-      for (int i = 0; i < heights.length -1; i++){
-         if (heights[i] > heights[i+1]){
-            assertTrue(maxHeights[i] > maxHeights[i+1]);
-         }else{
-            assertTrue(maxHeights[i] < maxHeights[i+1]);
-         }
-      }
-
-      BambooTools.reportTestFinishedMessage();
-   }
 
 
 	@AverageDuration(duration = 16.0)
@@ -484,17 +376,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       return desiredFootsteps;
    }
 
-   private FootstepDataList createBasicFootstepFromDefaultForSwingHeightTest(double swingHeight)
-   {
-      FootstepDataList desiredFootsteps =  new FootstepDataList(0.0, 0.0);
-      FootstepData footstep = new FootstepData(RobotSide.RIGHT, new Point3d(0.4, -0.125, 0.085), new Quat4d(0, 0, 0, 1));
-      footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE);
-      footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
-      return desiredFootsteps;
-   }
-   
-   
    private FootstepDataList createFootstepsForSteppingOntoMediumPlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
