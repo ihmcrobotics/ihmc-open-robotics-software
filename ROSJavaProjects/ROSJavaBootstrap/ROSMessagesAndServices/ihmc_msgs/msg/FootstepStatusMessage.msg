@@ -16,4 +16,6 @@ geometry_msgs/Vector3 actualFootPositionInWorld
 
 geometry_msgs/Quaternion actualFootOrientationInWorld
 
+int8 destination
+
 
