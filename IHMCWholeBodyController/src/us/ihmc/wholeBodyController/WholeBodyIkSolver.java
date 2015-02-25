@@ -48,7 +48,7 @@ abstract public class WholeBodyIkSolver
       FAILED_INVALID,         // calculated solution is completely wrong
       FAILED_NOT_CONVERGED,   // calculated solution is not good enough, but you might want to double check the error to see if it is acceptable.
       SUCCEEDED               // calculated solution is good.
-      };
+   };
 
    ///--------------- Constants -----------------------------------------
    // just a number
@@ -109,6 +109,7 @@ abstract public class WholeBodyIkSolver
       protected final OneDoFJoint[] workingJointsInUrdfOrder;
       protected final SideDependentList<HashSet<Integer>> armJointIds = new SideDependentList<HashSet<Integer>>();
       protected final SideDependentList<HashSet<Integer>> legJointIds = new SideDependentList<HashSet<Integer>>();
+
       protected final int[] waistJointId;
 
       protected final DenseMatrix64F coupledJointWeights;
@@ -119,7 +120,7 @@ abstract public class WholeBodyIkSolver
 
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
-      
+
       protected int maxNumberOfAutomaticReseeds = 3;
 
       //------- Abstract method that provide robot-specific information and configuration  -------------
@@ -187,7 +188,7 @@ abstract public class WholeBodyIkSolver
          if( maxReseeds < 0 ) maxReseeds = 0;
          maxNumberOfAutomaticReseeds = maxReseeds;
       }
-      
+
       public ReferenceFrame getRootFrame(){
          return getRootFrame(workingSdfModel);
       }
@@ -485,11 +486,6 @@ abstract public class WholeBodyIkSolver
 
          keepArmQuiet.get(endEffectorSide).setValue( false );
 
-         RobotSide steadySide = endEffectorSide.getOppositeSide();
-
-         hierarchicalSolver.prioritizeTasks(taskEndEffectorPosition.get(steadySide), taskEndEffectorPosition.get(endEffectorSide));
-         hierarchicalSolver.prioritizeTasks(taskEndEffectorRotation.get(steadySide), taskEndEffectorRotation.get(endEffectorSide));
-
          Quat4d quat = new Quat4d();
          Vector3d pos = new Vector3d();
          ee_transform.get(quat, pos);
@@ -558,22 +554,22 @@ abstract public class WholeBodyIkSolver
             }
          }
       }
-      
+
       private void enableJointWeights(SDFFullRobotModel actualSdfModel, int index, boolean enable)
       {
          double val = enable ? 1 : 0; 
-         
+
          taskJointsPose.getWeightsJointSpace().set(index, val);
          taskJointsPose.getWeightsError().set( index, val );
-         
+
          getHierarchicalSolver().collisionAvoidance.getJointWeights().set(index, val);
-  
+
          taskEndEffectorPosition.get(LEFT).getWeightsJointSpace().set(index, val);
          taskEndEffectorPosition.get(RIGHT).getWeightsJointSpace().set(index, val);
 
          taskEndEffectorRotation.get(LEFT).getWeightsJointSpace().set(index, val);
          taskEndEffectorRotation.get(RIGHT).getWeightsJointSpace().set(index, val);
-         
+
          if( !enable ) {
             OneDoFJoint joint = actualSdfModel.getOneDoFJointByName(urdfModel.getActiveJointName(index));
             cachedAnglesQ.set(index, joint.getQ());
@@ -591,11 +587,30 @@ abstract public class WholeBodyIkSolver
       private void checkIfArmShallStayQuiet(SDFFullRobotModel actualSdfModel)
       {
          for( RobotSide side: RobotSide.values())
-         {            
+         {         
+            boolean enable =  controlledDoF.get(side) != ControlledDoF.DOF_NONE;
+
             for (int jointId: armJointIds.get(side))
             {
-               enableJointWeights(actualSdfModel, jointId, controlledDoF.get(side) != ControlledDoF.DOF_NONE );
+               enableJointWeights(actualSdfModel, jointId, enable );
             }
+
+            /*  if( taskEndEffectorPosition.get(side).isErrorLessThanTolerance() &&
+                  taskEndEffectorRotation.get(side).isErrorLessThanTolerance() )
+            {
+               for (int jointId: armJointIds.get(side))
+               {
+                  taskJointsPose.getWeightMatrixTaskSpace().set(jointId, jointId,  0.1);
+                  preferedJointPose.set( jointId, cachedAnglesQ.get(jointId) );
+                  taskJointsPose.setTarget( preferedJointPose );
+               }
+            }
+            else{
+               for (int jointId: armJointIds.get(side))
+               {
+                  taskJointsPose.getWeightMatrixTaskSpace().set(jointId, jointId,  0.0);
+               }
+            }*/
          }
       }
 
@@ -699,27 +714,31 @@ abstract public class WholeBodyIkSolver
 
             for(RobotSide robotSide: RobotSide.values())
             {
-               if( controlledDoF.get(robotSide) == ControlledDoF.DOF_NONE &&  armJointIds.get(robotSide).contains(i))
+               if(  armJointIds.get(robotSide).contains(i) )
                {
-                  partOfQuietArm = true;
-               }
-
-               if( lockLevel == LockLevel.LOCK_LEGS_AND_WAIST &&  waistJointId[0] == i )  
-               {
-                  partOfQuietWaist = true;
-               }
-               if( lockLevel != LockLevel.LOCK_LEGS_AND_WAIST || lockLevel != LockLevel.LOCK_LEGS_AND_WAIST_X_Y ) 
-               {
-                  if( waistJointId[1] == i || waistJointId[2] == i )
-                     partOfQuietWaist = true;
-               }
+                  if( keepArmQuiet.get(robotSide).isTrue() || controlledDoF.get(robotSide) == ControlledDoF.DOF_NONE )
+                  {
+                     partOfQuietArm = true;
+                  }
+               }        
             }
 
-            if( !partOfQuietArm && !partOfQuietLeg && !partOfQuietWaist) {
+            if( lockLevel == LockLevel.LOCK_LEGS_AND_WAIST &&  waistJointId[0] == i )  
+            {
+               partOfQuietWaist = true;
+            }
+            if( lockLevel != LockLevel.LOCK_LEGS_AND_WAIST || lockLevel != LockLevel.LOCK_LEGS_AND_WAIST_X_Y ) 
+            {
+               if( waistJointId[1] == i || waistJointId[2] == i )
+                  partOfQuietWaist = true;
+            }
+
+            if( !( partOfQuietArm || partOfQuietLeg || partOfQuietWaist ) ) {
                cachedAnglesQ.set(i, newQ.get(i));
             } 
          }
       }
+
 
 
       public ComputeResult compute(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, ComputeOption opt) throws Exception
@@ -754,22 +773,39 @@ abstract public class WholeBodyIkSolver
          }
 
          enforceControlledDoF( opt );
+         
+         //-------------------------------------------
+         for(RobotSide side: RobotSide.values)
+         {
+            if( ( taskEndEffectorPosition.get(side).isErrorLessThanTolerance() || taskEndEffectorPosition.get(side).isEnabled() == false) && 
+                ( taskEndEffectorRotation.get(side).isErrorLessThanTolerance() || taskEndEffectorRotation.get(side).isEnabled() == false) )
+            {
+               keepArmQuiet.get( side ).setValue( true );
+            }
+            else{
+               keepArmQuiet.get( side ).setValue( false );
+            }
+         }
+       //-------------------------------------------
 
          ComputeResult ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
-         
+
          int reseedLeft = maxNumberOfAutomaticReseeds;
 
+         
+         Vector64F savedCacheQ = new Vector64F(cachedAnglesQ);
+         
          while( reseedLeft > 0 && ret != ComputeResult.SUCCEEDED)
-         {
+         { 
+            savedCacheQ.set( cachedAnglesQ );
             reseedCachedModel();
-            ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
+            ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );           
             reseedLeft--;
-         }
-
-         if(opt != ComputeOption.RESEED)
-         {
-            //  keepArmQuiet.get(LEFT).setValue(true);
-            //  keepArmQuiet.get(RIGHT).setValue(true);
+            if( ret == ComputeResult.FAILED_INVALID)
+            {
+               cachedAnglesQ.set( savedCacheQ );
+               System.out.println("RESTORE\n"+ cachedAnglesQ);
+            }
          }
 
          return ret;
@@ -855,7 +891,7 @@ abstract public class WholeBodyIkSolver
 
             q_out.set(cachedAnglesQ);
             ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
-            
+
          }
          catch (Exception e)
          {
