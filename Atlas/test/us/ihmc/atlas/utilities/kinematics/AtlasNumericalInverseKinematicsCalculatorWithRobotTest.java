@@ -2,6 +2,8 @@ package us.ihmc.atlas.utilities.kinematics;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -35,13 +37,15 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
    {
+      Random random = new Random(1234L);
+
       FramePoint handEndEffectorPositionFK = new FramePoint(ReferenceFrame.getWorldFrame(), -0.10094331252710122, 0.702327488375448, 0.8842020873774364);
       FrameOrientation handEndEffectorOrientationFK = new FrameOrientation(ReferenceFrame.getWorldFrame(), 0.5948015455279927, -0.24418998175404205, 0.11864264766705496, 0.7566414582898712);
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = true;
-      double errorThreshold = 10.01;
-      boolean success = testAPose(handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
+      double errorThreshold = 0.01;
+      boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold , updateListenersEachStep);
       assertTrue(success);
    }
    
