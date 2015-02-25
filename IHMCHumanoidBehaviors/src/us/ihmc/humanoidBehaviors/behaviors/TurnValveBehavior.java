@@ -20,9 +20,9 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose2d;
+import us.ihmc.utilities.math.geometry.Pose2dReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
@@ -191,56 +191,65 @@ public class TurnValveBehavior extends BehaviorInterface
    private WalkToLocationTask createWalkToValveTask(RigidBodyTransform valveTransformToWorld, double stepLength)
    {
       fullRobotModel.updateFrames();
+
+      FramePose2d valvePose2d = new FramePose2d();
+      valvePose2d.setPose(valveTransformToWorld);
       
-      TransformReferenceFrame valveFrame = new TransformReferenceFrame("valve", ReferenceFrame.getWorldFrame(), valveTransformToWorld);
+      Pose2dReferenceFrame valveZUpFrame = new Pose2dReferenceFrame("valveZUp", valvePose2d);
+      
+      FramePose2d targetMidFeetZUpFramePose = new FramePose2d(valveZUpFrame);
+      targetMidFeetZUpFramePose.setX(-howFarToStandBackFromValve);
+      targetMidFeetZUpFramePose.setY(-howFarToStandToTheRightOfValve);
+      targetMidFeetZUpFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FramePose2d targetMidFeetFramePose = new FramePose2d(valveFrame);
-      targetMidFeetFramePose.setX(-howFarToStandBackFromValve);
-      targetMidFeetFramePose.setY(-howFarToStandToTheRightOfValve);
-      targetMidFeetFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      double maxDistanceToWalkNotAlignedWithWalkingPath = 4.0 * walkingControllerParameters.getMaxStepLength();
+      boolean targetIsNearby = getWalkingDistanceToValve(targetMidFeetZUpFramePose) < maxDistanceToWalkNotAlignedWithWalkingPath;
+      WalkingOrientation walkingOrientation;
+      if (targetIsNearby)
+      {
+         walkingOrientation = WalkingOrientation.START_TARGET_ORIENTATION_MEAN;
+      }
+      else
+      {
+         walkingOrientation = WalkingOrientation.ALIGNED_WITH_PATH;
+      }
 
-      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetFramePose, walkToLocationBehavior, WalkingOrientation.START_TARGET_ORIENTATION_MEAN, stepLength, yoTime, 0.0);
+      double sleepTimeBeforeNextTask = 0.0;
+      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime, sleepTimeBeforeNextTask);
 
       return ret;
    }
    
-   private double maintainHeadingIfTargetIsNearby(FramePose2d targetMidFeetFramePose, int maxNumberOfStepsToWalkBackwards)
+   private final FramePose2d initialMidFeetPose = new FramePose2d();
+
+   private FramePose2d getInitialRobotMidFeetZupPose()
    {
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      targetMidFeetFramePose.changeFrame(midFeetZUpFrame);
-      double targetMidFeetXPositionInCurrentMidFeetFrame = targetMidFeetFramePose.getX();
-      boolean targetWalkLocationIsBehindRobot = targetMidFeetXPositionInCurrentMidFeetFrame < 0.0;
-
-      targetMidFeetFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-
-      FramePose2d currentMidFeetPose = new FramePose2d();
-      currentMidFeetPose.setPose(midFeetZUpFrame.getTransformToWorldFrame());
-      double walkDistance = currentMidFeetPose.getPositionDistance(targetMidFeetFramePose);
+      fullRobotModel.updateFrames();
+      initialMidFeetPose.setPose(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
       
-      boolean targetWalkLocationIsNearby = walkDistance < maxNumberOfStepsToWalkBackwards * walkingControllerParameters.getMaxStepLength();
-      boolean targetHeadingIsCloseToCurrentHeading = currentMidFeetPose.getOrientationDistance(targetMidFeetFramePose) < Math.toRadians(45.0);
-
-      double orientationRelativeToPathDirection = 0.0;
-      if (targetWalkLocationIsBehindRobot && targetWalkLocationIsNearby)
-      {
-         orientationRelativeToPathDirection = Math.PI;  //do inverseCosine of dot product between pelvis x-axis and vectorFromPelvisToTarget
-      }
-      
-      if (DEBUG)
-      {
-         SysoutTool.println("Current MidFeetZUpPose: " + currentMidFeetPose);
-         SysoutTool.println("Target MidFeetZUpPose: " + targetMidFeetFramePose);
-
-         SysoutTool.println("Desired Valve Manipulation MidFeetZUpFramePose: " + targetMidFeetFramePose);
-         SysoutTool.println("Walk Distance: " + walkDistance);
-
-         SysoutTool.println("Target MidFeet X Position In Current MidFeet Frame: " + targetMidFeetXPositionInCurrentMidFeetFrame);
-         SysoutTool.println("WalkingYawAngle: " + orientationRelativeToPathDirection);
-      }
-      
-      return orientationRelativeToPathDirection;
+      return initialMidFeetPose;
    }
-
+   
+   private double getWalkingDistanceToValve(FramePose2d targetMidFeetFramePose)
+   {
+      return getInitialRobotMidFeetZupPose().getPositionDistance(targetMidFeetFramePose);
+   }
+   
+   private boolean isWalkingTargetBehindRobot(FramePose2d targetMidFeetFramePose)
+   {
+      targetMidFeetFramePose.changeFrame(referenceFrames.getMidFeetZUpFrame());
+      double targetMidFeetXPositionInCurrentMidFeetFrame = targetMidFeetFramePose.getX();
+      boolean ret = targetMidFeetXPositionInCurrentMidFeetFrame < 0.0;
+      
+      return ret;
+   }
+   
+   private boolean isRobotAlreadyFacingValve(FramePose2d targetMidFeetFramePose)
+   {
+      double orientationDistance = targetMidFeetFramePose.getOrientationDistance(getInitialRobotMidFeetZupPose());
+      return orientationDistance < Math.toRadians(5.0);
+   }
+   
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
