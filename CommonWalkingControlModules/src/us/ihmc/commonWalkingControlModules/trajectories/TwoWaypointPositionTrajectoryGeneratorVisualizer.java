@@ -41,6 +41,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
    private static final String namePrefix = "Viz";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFramePoint initialPosition;
+   private final YoFramePoint stancePosition;
    private final YoFramePoint finalPosition;
    private final List<YoFramePoint> waypoints = new ArrayList<YoFramePoint>();
    private final YoFrameVector initialVelocity;
@@ -185,7 +186,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       int arcLengthCalculatorDivisionsPerPolynomial = 20;
 
       return new TwoWaypointPositionTrajectorySpecifiedByPoints(namePrefix + "Generator", worldFrame, stepTimeProvider, initialPositionProvider,
-              initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
+              initialVelocityProvider, null,  finalPositionProvider, finalDesiredVelocityProvider, trajectoryParametersProvider, registry,
               arcLengthCalculatorDivisionsPerPolynomial, yoGraphicsListRegistry, null, false, waypoints);
    }
    
@@ -195,12 +196,12 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       private final List<YoFramePoint> waypoints;
       
       public TwoWaypointPositionTrajectorySpecifiedByPoints(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
+            PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
             VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
             int arcLengthCalculatorDivisionsPerPolynomial, YoGraphicsListRegistry yoGraphicsListRegistry,
             WalkingControllerParameters walkingControllerParameters, boolean visualize, List<YoFramePoint> waypoints)
       {
-         super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, finalPositionProvider, finalDesiredVelocityProvider,
+         super(namePrefix, referenceFrame, stepTimeProvider, initialPositionProvider, initialVelocityProvider, stancePositionProvider, finalPositionProvider, finalDesiredVelocityProvider,
                trajectoryParametersProvider, parentRegistry, yoGraphicsListRegistry, walkingControllerParameters,
                visualize);
          

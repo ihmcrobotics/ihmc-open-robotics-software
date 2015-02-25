@@ -48,6 +48,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final DoubleProvider stepTimeProvider;
    private final PositionProvider[] positionSources = new PositionProvider[2];
+   private final PositionProvider stancePositionSource;
    private final VectorProvider[] velocitySources = new VectorProvider[2];
 
    private final DoubleYoVariable stepTime;
@@ -62,6 +63,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
    private final DoubleYoVariable[] allTimes = new DoubleYoVariable[6];
    protected final YoFramePoint[] allPositions = new YoFramePoint[6];
+   protected final YoFramePoint stancePosition;
    private final YoFrameVector[] allVelocities = new YoFrameVector[6];
 
    private final TrajectoryParametersProvider trajectoryParametersProvider;
@@ -81,9 +83,10 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private final YoConcatenatedSplines concatenatedSplinesWithArcLengthCalculatedIteratively;
 
    private boolean waypointsAreTheSamePoint = false;
+   WalkingControllerParameters walkingControllerParameters;
 
    public TwoWaypointPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider stepTimeProvider,
-           PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider finalPositionProvider,
+           PositionProvider initialPositionProvider, VectorProvider initialVelocityProvider, PositionProvider stancePositionProvider, PositionProvider finalPositionProvider,
            VectorProvider finalDesiredVelocityProvider, TrajectoryParametersProvider trajectoryParametersProvider, YoVariableRegistry parentRegistry,
            YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
@@ -111,6 +114,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
       positionSources[0] = initialPositionProvider;
       positionSources[1] = finalPositionProvider;
+      stancePositionSource = stancePositionProvider;
+      this.walkingControllerParameters = walkingControllerParameters;
 
       velocitySources[0] = initialVelocityProvider;
       velocitySources[1] = finalDesiredVelocityProvider;
@@ -132,6 +137,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          allPositions[i] = new YoFramePoint(namePrefix + "FixedPointPosition" + i, referenceFrame, registry);
          allVelocities[i] = new YoFrameVector(namePrefix + "FixedPointVelocity" + i, referenceFrame, registry);
       }
+      stancePosition = new YoFramePoint(namePrefix + "StancePosition", referenceFrame, registry);
 
       concatenatedSplinesWithArcLengthApproximatedByDistance = new YoConcatenatedSplines(new int[] {4, 2, 6, 2, 4}, referenceFrame,
               arcLengthCalculatorDivisionsPerPolynomial, registry, namePrefix + "ConcatenatedSplinesWithArcLengthApproximatedByDistance");
@@ -413,7 +419,12 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          allPositions[endpointIndices[i]].set(tempPosition);
          allVelocities[endpointIndices[i]].set(tempVelocity);
       }
-
+      if (stancePositionSource != null)
+      {
+         stancePositionSource.get(tempPosition);
+         tempPosition.changeFrame(referenceFrame);
+         stancePosition.set(tempPosition);
+      }
       allTimes[endpointIndices[0]].set(0.0);
       allTimes[endpointIndices[1]].set(stepTime.getDoubleValue());
    }
@@ -457,6 +468,17 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    {
       double swingHeight = trajectoryParameters.getSwingHeight();
       swingHeight = Math.max(swingHeight, TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+
+      double initialHeight = allPositions[0].getZ();
+      if (stancePositionSource != null)
+      {
+         double stanceHeight = stancePosition.getZ();
+         double maxWorldHeightForSwing = stanceHeight + walkingControllerParameters.getMaxSwingHeightFromStanceFoot();
+         if (initialHeight + swingHeight > maxWorldHeightForSwing)
+         {
+            swingHeight = maxWorldHeightForSwing - initialHeight;
+         }
+      }
 
       switch (trajectoryParameters.getTrajectoryType())
       {

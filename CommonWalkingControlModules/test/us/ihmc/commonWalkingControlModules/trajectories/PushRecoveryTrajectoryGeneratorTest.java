@@ -61,7 +61,7 @@ public class PushRecoveryTrajectoryGeneratorTest
       TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
 
       TwoWaypointPositionTrajectoryGenerator trajectory = new TwoWaypointPositionTrajectoryGenerator("", worldFrame, stepTimeProvider, initialPositionProvider,
-            initialVelocityProvider, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, null, false);
+            initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, null, false);
 
       List<Point3d> points = new ArrayList<Point3d>();
       points.add(firstIntermediatePosition);
