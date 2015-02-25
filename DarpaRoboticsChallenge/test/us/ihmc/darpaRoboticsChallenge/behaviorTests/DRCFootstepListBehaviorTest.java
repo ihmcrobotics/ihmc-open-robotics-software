@@ -129,7 +129,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(success);
 
       SysoutTool.println("Dispatching Behavior", DEBUG);
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
@@ -186,7 +186,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       SysoutTool.println("Dispatching Behavior", DEBUG);
       drcBehaviorTestHelper.updateRobotModel();
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
@@ -249,7 +249,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
 
       SysoutTool.println("Dispatching Behavior", DEBUG);
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
       SideDependentList<FramePose2d> desiredFootPoses = new SideDependentList<FramePose2d>();
@@ -318,7 +318,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       xOffsets.add(0.2);
       xOffsets.add(0.3);
 
-      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       SideDependentList<FramePose2d> desiredFinalFootPoses = new SideDependentList<FramePose2d>();
 
       ArrayList<Footstep> desiredFootsteps = new ArrayList<Footstep>();

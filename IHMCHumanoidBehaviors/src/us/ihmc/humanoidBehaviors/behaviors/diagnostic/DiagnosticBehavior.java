@@ -235,7 +235,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, yoDoubleSupport);
       registry.addChild(footPoseBehavior.getYoVariableRegistry());
 
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       registry.addChild(footstepListBehavior.getYoVariableRegistry());
 
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
@@ -1293,7 +1293,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       targetPoseInWorld.setPoseIncludingFrame(midFeetZUpFrame, x, y, robotYaw);
       targetPoseInWorld.changeFrame(worldFrame);
       
-      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue() * percentOfMaxFootstepLength, yoTime);
+      WalkToLocationTask walkToLocationTask = new WalkToLocationTask(targetPoseInWorld, walkToLocationBehavior, angleRelativeToPath, footstepLength.getDoubleValue() * percentOfMaxFootstepLength, swingTime.getDoubleValue(), transferTime.getDoubleValue(), yoTime);
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(walkToLocationBehavior, walkToLocationTask);
       else

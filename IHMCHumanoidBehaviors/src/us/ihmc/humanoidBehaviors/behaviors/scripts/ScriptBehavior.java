@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
@@ -92,13 +93,13 @@ public class ScriptBehavior extends BehaviorInterface
    public final FingerStateBehavior fingerStateBehavior;
    
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
-         BooleanYoVariable doubleSupport)
+         BooleanYoVariable doubleSupport, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
       scriptEngine = new ScriptEngine(null);
 
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
       handStateBehavior = new HandStateBehavior(outgoingCommunicationBridge, yoTime);

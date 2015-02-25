@@ -39,6 +39,9 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
 
+   private double swingTime;
+   private double transferTime;
+   
    private final FramePose robotPose = new FramePose();
    private final Point3d robotLocation = new Point3d();
    private final Quat4d robotOrientation = new Quat4d();
@@ -76,9 +79,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
+      
+      this.swingTime = walkingControllerParameters.getDefaultSwingTime();
+      this.transferTime = walkingControllerParameters.getDefaultTransferTime();
+      
       this.pathType = new SimplePathParameters(walkingControllerParameters.getMaxStepLength(), walkingControllerParameters.getInPlaceWidth(), 0.0,
             Math.toRadians(20.0), Math.toRadians(10.0), 0.4); // 10 5 0.4
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge);
+      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -141,6 +148,16 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
    }
 
+   public void setSwingTime(double swingTime)
+   {
+      this.swingTime = swingTime;
+   }
+   
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+   }
+   
    public void setWalkingOrientationRelativeToPathDirection(double orientationRelativeToPathDirection)
    {
       pathType.setAngle(orientationRelativeToPathDirection);
@@ -201,7 +218,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
          }
       }
 
-      footstepListBehavior.set(footsteps);
+      footstepListBehavior.set(footsteps, swingTime, transferTime);
       haveFootstepsBeenGenerated.set(true);
 
       if (DEBUG)

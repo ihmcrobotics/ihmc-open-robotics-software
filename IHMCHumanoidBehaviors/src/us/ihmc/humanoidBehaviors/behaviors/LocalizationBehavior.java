@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.io.InputStream;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -24,12 +25,12 @@ public class LocalizationBehavior extends BehaviorInterface {
 	private ScriptBehaviorInputPacket receivedScriptBehavior;
 	private boolean firstRun = false;
 	
-	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport)
+	public LocalizationBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, WalkingControllerParameters walkingControllerParameters)
 	   {
 	      super(outgoingCommunicationBridge);
 	      
 	      this.fullRobotModel = fullRobotModel;
-	      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport);
+	      scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
 	      registry.addChild(scriptBehavior.getYoVariableRegistry());
 	      scriptBehaviorInputPacketListener = new ConcurrentListeningQueue<>();
 	      super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
