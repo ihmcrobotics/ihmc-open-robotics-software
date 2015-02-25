@@ -1,9 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspLocation;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -12,26 +11,28 @@ public class GraspValveTask extends BehaviorTask
 {
    private final GraspValveBehavior graspValveBehavior;
    private final RigidBodyTransform valveTransformToWorld;
-   private final Vector3d approachDirection;
+   private final ValveGraspLocation valveGraspLocation;
+   private final double graspApproachConeAngle;
+   private final Axis valvePinJointAxisInValveFrame;
    private final double valveRadius;
-   private final boolean graspValveRim;
 
    private final boolean DEBUG = false;
 
-   public GraspValveTask(GraspValveBehavior graspValveBehavior, RigidBodyTransform valveTransformToWorld, Vector3d approachDirection,
-         boolean graspValveRim, double valveRadius, DoubleYoVariable yoTime)
+   public GraspValveTask(GraspValveBehavior graspValveBehavior, RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation,
+         double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame, double valveRadius, DoubleYoVariable yoTime)
    {
       super(graspValveBehavior, yoTime);
       this.graspValveBehavior = graspValveBehavior;
       this.valveTransformToWorld = new RigidBodyTransform(valveTransformToWorld);
-      this.approachDirection = new Vector3d(approachDirection);
+      this.graspApproachConeAngle = graspApproachConeAngle;
+      this.valvePinJointAxisInValveFrame = valvePinJointAxisInValveFrame;
+      this.valveGraspLocation = valveGraspLocation;
       this.valveRadius = valveRadius;
-      this.graspValveRim = graspValveRim;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      graspValveBehavior.setGraspPose(RobotSide.RIGHT, valveTransformToWorld, valveRadius, ValveGraspLocation.TWELVE_O_CLOCK);
+      graspValveBehavior.setGraspPose(RobotSide.RIGHT, valveTransformToWorld, valveRadius, valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame);
    }
 }

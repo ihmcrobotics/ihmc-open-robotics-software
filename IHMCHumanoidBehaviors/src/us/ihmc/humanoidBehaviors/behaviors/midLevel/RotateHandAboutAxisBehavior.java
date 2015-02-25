@@ -112,7 +112,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          {
             throw new RuntimeException("Hand Pose must be defined in World reference frame.");
          }
-         taskExecutor.submit(new HandPoseTask(robotSide, yoTime, handPoseBehavior, packetFrame, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse));
+         taskExecutor.submit(new HandPoseTask(robotSide, trajectoryTime / numberOfDiscreteHandPosesToUse, desiredHandPose, packetFrame, handPoseBehavior, yoTime));
 //         taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse, 0, ControlledDoF.DOF_3P2R, true));
       }
 
