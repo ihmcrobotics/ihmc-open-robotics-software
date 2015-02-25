@@ -9,7 +9,6 @@ import javax.vecmath.Point3d;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ConstantResolutionProvider;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeLeaf;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTree;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.OneDimensionalBounds;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.RecursableHyperTreeNode;
 import us.ihmc.utilities.dataStructures.hyperCubeTree.ResolutionProvider;
@@ -21,16 +20,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 {
    
    private final ResolutionProvider constantResolution;
-   private Octree octree;
 
    private double heightThreshold;
    private int maxNodes = 1;
 
-   private boolean updateOctree = true;
-   private boolean updateQuadtree = true;
-
    private int numberOfNodes = 0;
-   private boolean octreeChanged = false;
    
    private  double defaultHeightWhenNoPoints=Double.NaN;
 
@@ -69,26 +63,9 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    
    public boolean addPoint(double x, double y, double z)
    {
-      if (!updateQuadtree)
-      {
-         return addPointToOctree(x, y, z);
-      }
-
-      if (!updateOctree)
-      {
-         return addToQuadtree(x, y, z);
-      }
-
-      octreeChanged = false;
-      return addToQuadtree(x, y, z) || octreeChanged;
+      return addToQuadtree(x, y, z);
    }
    
-   public boolean addPointToOctree(double x, double y, double z)
-   {
-      octreeChanged = false;
-      puntLeaf(new HyperCubeLeaf<GroundAirDescriptor>(new GroundAirDescriptor((float) z, 0.0f), new double[] { x, y }));
-      return octreeChanged;
-   }
 
    public boolean addToQuadtree(double x, double y, double z)
    {
@@ -107,15 +84,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    // Core functions
    //================================================================================
 
-   private void puntLeaf(HyperCubeLeaf<GroundAirDescriptor> leafToPunt)
-   {
-      if ((octree == null) || !updateOctree)
-         return;
-
-      double[] location = new double[] { leafToPunt.getLocation()[0], leafToPunt.getLocation()[1], leafToPunt.getValue().getHeight() };
-      octree.upRezz(location);
-      octreeChanged = octree.put(location, true);
-   }
 
    private boolean putRecursively(RecursableHyperTreeNode<GroundAirDescriptor, GroundOnlyQuadTreeData> node, final HyperCubeLeaf<GroundAirDescriptor> leaf)
    {
@@ -140,7 +108,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
       if (node.getMetaData().getIsStuffAboveMe() && newLeafIsSignificantyAboveOldLeaf)
       {
-         puntLeaf(leaf);
          return false;
       }
 
@@ -171,7 +138,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
       if (newLeafIsSignificantyAboveOldLeaf)
       {
-         puntLeaf(leaf);
          node.getMetaData().setIsStuffAboveMe(true);
 
          return true; // true because metadata changed
@@ -179,7 +145,6 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
 
       if (newLeafIsSignificantyBelowOldLeaf)
       {
-         puntLeaf(node.getLeaf());
          node.setLeaf(leaf);
          node.getMetaData().setHeight(leaf.getValue().getHeight());
          node.getMetaData().setIsStuffAboveMe(true);
@@ -458,24 +423,10 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    // Setters
    //================================================================================
 
-   public void setOctree(Octree octree)
-   {
-      this.octree = octree;
-   }
 
    public void setHeightThreshold(double threshold)
    {
       this.heightThreshold = threshold;
-   }
-
-   public void setUpdateOctree(boolean updateOctree)
-   {
-      this.updateOctree = updateOctree;
-   }
-
-   public void setUpdateQuadtree(boolean updateQuadtree)
-   {
-      this.updateQuadtree = updateQuadtree;
    }
 
    @Override

@@ -42,7 +42,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotDataReceiver drcRobotDataReceiver;
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final RobotPoseBuffer robotPoseBuffer;
-   
+   private final RobotBoundingBoxes robotBoundingBoxes;
 
    public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, SDFFullRobotModel sdfFullRobotModel,
@@ -51,9 +51,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
-      RobotBoundingBoxes robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
+      this.robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, handType, sdfFullRobotModel);
       this.robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 10000, timestampProvider);
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(robotBoundingBoxes, sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
    }
 
    @Override
@@ -71,7 +71,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSCheatingPointCloudLidarReceiver(scsSensorsCommunicator, pointCloudDataReceiver);
+         new SCSCheatingPointCloudLidarReceiver(robotBoundingBoxes, scsSensorsCommunicator, pointCloudDataReceiver);
          pointCloudDataReceiver.start();
       }
 

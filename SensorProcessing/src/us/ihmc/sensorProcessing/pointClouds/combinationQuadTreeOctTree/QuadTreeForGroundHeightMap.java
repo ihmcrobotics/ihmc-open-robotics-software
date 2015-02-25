@@ -7,7 +7,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.vecmath.Point3d;
 
 import us.ihmc.utilities.dataStructures.hyperCubeTree.HyperCubeTreeListener;
-import us.ihmc.utilities.dataStructures.hyperCubeTree.Octree;
 import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGround;
 import us.ihmc.utilities.dataStructures.quadTree.QuadTreeForGroundParameters;
@@ -138,25 +137,6 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       }
    }
 
-   @Override
-   public void setOctree(Octree octree)
-   {
-      // TODO Auto-generated method stub
-   }
-
-   @Override
-   public boolean addPointToOctree(double x, double y, double z)
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
-
-   @Override
-   public void setUpdateOctree(boolean b)
-   {
-      // TODO Auto-generated method stub
-   }
-
    ArrayList<HyperCubeTreeListener<GroundAirDescriptor, GroundOnlyQuadTreeData>> hyperCubeTreeListeners = new ArrayList<HyperCubeTreeListener<GroundAirDescriptor,GroundOnlyQuadTreeData>>();
    
    @Override
@@ -185,12 +165,6 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       lock();
       hyperCubeTreeListeners.add(listener);
       unlock();
-   }
-
-   @Override
-   public void setUpdateQuadtree(boolean update)
-   {
-      // TODO Auto-generated method stub
    }
 
    @Override
