@@ -30,6 +30,7 @@ import org.junit.runners.Suite;
    us.ihmc.simulationconstructionset.SimulationConstructionSetProcessDataCallTest.class,
    us.ihmc.simulationconstructionset.SimulationRewoundListenerTest.class,
    us.ihmc.simulationconstructionset.torqueSpeedCurve.TypicalTorqueSpeedCurveTest.class,
+   us.ihmc.simulationconstructionset.util.dataProcessors.YoVariableValueDataCheckerTest.class,
    us.ihmc.simulationconstructionset.util.environments.ContactableDoorRobotTest.class,
    us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobotTest.class,
    us.ihmc.simulationconstructionset.util.environments.ContactableValveRobotTest.class,
