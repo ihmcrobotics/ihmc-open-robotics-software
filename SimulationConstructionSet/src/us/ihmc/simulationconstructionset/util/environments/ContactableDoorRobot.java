@@ -18,8 +18,12 @@ import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.FrameBox3d;
@@ -35,13 +39,13 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-public class ContactableDoorRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
+public class ContactableDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
    public static final Vector2d DEFAULT_HANDLE_OFFSET = new Vector2d(0.83, 0.98);
-   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(1.0, 0.045, 2.04);
+   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(0.8509, 0.045, 2.04);
    public static final double DEFAULT_MASS = 2.28; // 5lbs
    public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
-   public static final Vector3d DEFAULT_HANDLE_DIMENSIONS = new Vector3d(0.09, 0.02, 0.008);
+   public static final Vector3d DEFAULT_HANDLE_DIMENSIONS = new Vector3d(0.1, 0.03, 0.02); // new Vector3d(0.09, 0.02, 0.008);
    public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
    private static final double DOOR_CLOSED_STICTION = 1e5;
    private static final double HANDLE_OPEN_THRESHOLD = 45.0;
@@ -75,6 +79,8 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
    
    private final BooleanYoVariable doorIsOpen;
    
+   private final InternalMultiJointArticulatedContactable internalMultiJointArticulatedContactable;
+   
    public ContactableDoorRobot(String name, Point3d positionInWorld)
    {
       this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
@@ -85,6 +91,8 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
          Vector3d handleDimensions, double handleDoorSeparation, double handleHingeRadius)
    {
       super(name);
+      
+      internalMultiJointArticulatedContactable = new InternalMultiJointArticulatedContactable(getName(), this);
       
       this.mass = mass;           
       
@@ -204,10 +212,10 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
          doorHandleGraphics.translate(new Vector3d(0.0, 0.0, translation));
          List<Point2d> handlePoints = new ArrayList<Point2d>();
          handlePoints.add(new Point2d(0.0  , 0.0));
-         handlePoints.add(new Point2d(0.0  , handleDimensions.y));
-         handlePoints.add(new Point2d(-handleDimensions.x, handleDimensions.y));
+         handlePoints.add(new Point2d(0.0  , handleDimensions.z));
+         handlePoints.add(new Point2d(-handleDimensions.x, handleDimensions.z));
          handlePoints.add(new Point2d(-handleDimensions.x, 0.0));
-         double extrusionLength = robotSide.negateIfLeftSide(handleDimensions.z);
+         double extrusionLength = robotSide.negateIfLeftSide(handleDimensions.y);
          doorHandleGraphics.addExtrudedPolygon(handlePoints, extrusionLength, YoAppearance.Grey());
          doorHandleGraphics.translate(new Vector3d(0.0, 0.0, -translation)); 
       }
@@ -230,15 +238,21 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
 
       if (doorBox.isInsideOrOnSurface(pointToCheck))
       {
+         lastInsideHandles = false;
          return true;
       }
       
       pointToCheck.add(0.5*widthX, 0.5*depthY, 0.5*heightZ);
       if(isInsideHandles(pointToCheck))
+      {
+         lastInsideHandles = true;
          return true;
+      }
       
       return false;
    }
+   
+   private boolean lastInsideHandles; // TODO hack since SlipStickModel doesn't seem to address multi-Link situations
    
    private boolean isInsideHandles(FramePoint pointInDoorFrame)
    {
@@ -422,19 +436,16 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
       // TODO Auto-generated method stub
    }
 
-   @Override
    public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
    {
       transformToWorld.set(doorFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));
    }
 
-   @Override
    public void setMass(double mass)
    {
       this.mass = mass;
    }
 
-   @Override
    public void setMomentOfInertia(double Ixx, double Iyy, double Izz)
    {
       inertiaMatrix.setM00(Ixx);
@@ -448,10 +459,113 @@ public class ContactableDoorRobot extends ContactablePinJointRobot implements Se
       inertiaMatrix.setM22(Izz);
    }
 
-   @Override
    public PinJoint getPinJoint()
    {
       return doorHingePinJoint;
    }
+   
+   public PinJoint getHandleJoint()
+   {
+      return handlePinJoint;
+   }
+   
+   @Override
+   public void updateContactPoints()
+   {
+      internalMultiJointArticulatedContactable.updateContactPoints();
+   }
 
+   @Override
+   public int getAndLockAvailableContactPoint()
+   {
+      return internalMultiJointArticulatedContactable.getAndLockAvailableContactPoint();
+   }
+
+   @Override
+   public void unlockContactPoint(GroundContactPoint groundContactPoint)
+   {      
+      internalMultiJointArticulatedContactable.unlockContactPoint(groundContactPoint);
+   }
+
+   @Override
+   public GroundContactPoint getLockedContactPoint(int contactPointIndex)
+   {
+      return internalMultiJointArticulatedContactable.getLockedContactPoint(contactPointIndex);
+   }
+      
+   public void createAvailableContactPoints(int groupId, int numDoorContactPoints, int numHandleContactPoints, double forceVectorScale, boolean visualizeContacts)
+   {
+      ArrayList<Integer> numContactPoints = new ArrayList<Integer>();
+      numContactPoints.add(new Integer(numDoorContactPoints));
+      numContactPoints.add(new Integer(numHandleContactPoints));
+      internalMultiJointArticulatedContactable.createAvailableContactPoints(groupId, numContactPoints, forceVectorScale, visualizeContacts);
+      
+      internalMultiJointArticulatedContactable.setNumDoorContactPoints(numDoorContactPoints);
+   }
+
+   private static class InternalMultiJointArticulatedContactable extends MultiJointArticulatedContactable
+   {
+      private final ContactableDoorRobot robot;
+      public int numDoorContactPoints;
+      
+      public InternalMultiJointArticulatedContactable(String name, ContactableDoorRobot robot)
+      {
+         super(name, robot);
+         this.robot = robot;
+      }
+
+      @Override
+      public boolean isClose(Point3d pointInWorldToCheck)
+      {
+         return robot.isClose(pointInWorldToCheck);
+      }
+
+      @Override
+      public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+      {
+         return robot.isPointOnOrInside(pointInWorldToCheck);
+      }
+
+      @Override
+      public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+      {
+         robot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
+      }
+
+      @Override
+      public GroundContactPoint getLockedContactPoint(int contactPointIndex)
+      {
+         if (contactPointIndex > numDoorContactPoints)
+         {
+            contactPointIndex -= numDoorContactPoints;
+         }
+         
+         int jointIndex = robot.lastInsideHandles ? 1 : 0;
+         
+         GroundContactPoint point = getLockedContactPoint(jointIndex, contactPointIndex);
+                 
+         return point;
+      }
+      
+      @Override
+      public int getAndLockAvailableContactPoint()
+      {
+         int jointIndex = robot.lastInsideHandles ? 1 : 0;
+         return getAndLockAvailableContactPoint(jointIndex);
+      }
+
+      @Override
+      public ArrayList<Joint> getJoints()
+      {
+         ArrayList<Joint> joints = new ArrayList<Joint>();
+         joints.add(robot.getPinJoint());
+         joints.add(robot.getHandleJoint());
+         return joints;
+      }
+      
+      public void setNumDoorContactPoints(int numDoorContactPoints) 
+      {
+         this.numDoorContactPoints = numDoorContactPoints;
+      }
+   }
 }

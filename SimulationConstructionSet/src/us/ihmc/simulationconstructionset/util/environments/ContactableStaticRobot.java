@@ -13,21 +13,21 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public abstract class ContactableStaticRobot extends Robot implements Contactable
 {
    private static final long serialVersionUID = -3371489685439165270L;
-   private final InternalArticulatedContactable articulatedContactable;
+   private final InternalSingleJointArticulatedContactable articulatedContactable;
 
    public ContactableStaticRobot(String name)
    {
       super(name);
-      articulatedContactable = new InternalArticulatedContactable(name, this); 
+      articulatedContactable = new InternalSingleJointArticulatedContactable(name, this); 
    }
    
    public abstract NullJoint getNullJoint();
 
-   private static class InternalArticulatedContactable extends ArticulatedContactable
+   private static class InternalSingleJointArticulatedContactable extends SingleJointArticulatedContactable
    {
       private final ContactableStaticRobot contactableRobot;
 
-      public InternalArticulatedContactable(String name, ContactableStaticRobot robot)
+      public InternalSingleJointArticulatedContactable(String name, ContactableStaticRobot robot)
       {
          super(name, robot);
          this.contactableRobot = robot;
