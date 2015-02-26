@@ -12,6 +12,7 @@ import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.blackoutGenerators.ConstantBlackoutGenerator;
 import us.ihmc.communication.blackoutGenerators.SimulationTimeBasedBlackoutSimulator;
 import us.ihmc.communication.blackoutGenerators.SystemTimeBasedBlackoutSimulator;
+import us.ihmc.communication.blackoutGenerators.UserSettableBlackoutGenerator;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -50,6 +51,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotPoseBuffer robotPoseBuffer;
    private final RobotBoundingBoxes robotBoundingBoxes;
    private CommunicationBlackoutSimulator blackoutSimulator;
+   private CommunicationBlackoutGenerator blackoutGenerator;
 
    public AtlasSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, SDFFullRobotModel sdfFullRobotModel,
@@ -67,7 +69,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializeSimulatedSensors(PacketCommunicator scsSensorsCommunicator)
    {
-      CommunicationBlackoutGenerator blackoutGenerator = new ConstantBlackoutGenerator(3000, TimeUnit.MILLISECONDS);
+//      blackoutGenerator = new ConstantBlackoutGenerator(3000, TimeUnit.MILLISECONDS);
+      blackoutGenerator = new UserSettableBlackoutGenerator(sensorSuitePacketCommunicator, TimeUnit.SECONDS);
       blackoutSimulator = new SimulationTimeBasedBlackoutSimulator(blackoutGenerator, sensorSuitePacketCommunicator, timestampProvider);
       
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
