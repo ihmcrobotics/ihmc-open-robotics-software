@@ -13,7 +13,7 @@ public class SDFFullRobotModelFactory implements FullRobotModelFactory
       this.sdfJointNameMap = sdfJointNameMap;
    }
 
-   public SDFFullRobotModel create()
+   public SDFFullRobotModel createFullRobotModel()
    {
       return new SDFFullRobotModel(generalizedSDFRobotModel.getRootLinks().get(0), sdfJointNameMap, new String[0]);
    }
