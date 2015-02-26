@@ -5,10 +5,11 @@ import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.BlackoutPacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
-import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
@@ -16,11 +17,12 @@ public class SCSCheatingPointCloudLidarReceiver implements PacketConsumer<Simula
 {
 
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
+   private final ReferenceFrame lidarFrame;
+   
+   public SCSCheatingPointCloudLidarReceiver(String lidarName, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
-      pointCloudDataReceiver.addPointFilter(robotBoundingBoxes);
-      
+      this.lidarFrame = pointCloudDataReceiver.getLidarFrame(lidarName);
       packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
 
@@ -32,10 +34,8 @@ public class SCSCheatingPointCloudLidarReceiver implements PacketConsumer<Simula
 
       long[] timestamps = new long[points.size()];
       Arrays.fill(timestamps, packet.getScanStartTime());
-      Point3d origin = new Point3d();
-      scan.getAverageTransform().transform(origin);
 
-      pointCloudDataReceiver.receivedPointCloudData(ReferenceFrame.getWorldFrame(), origin, timestamps, points);
+      pointCloudDataReceiver.receivedPointCloudData(ReferenceFrame.getWorldFrame(), lidarFrame, timestamps, points);
    }
 
    public void connect()

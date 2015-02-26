@@ -289,8 +289,8 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new AtlasSensorSuiteManager(getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-            getFootstepParameters(), createFullRobotModel(), getHandType(), target);
+      return new AtlasSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
+            getFootstepParameters(), getHandType(), target);
    }
 
    @Override

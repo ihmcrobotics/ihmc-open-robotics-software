@@ -67,7 +67,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.fullRobotModel = robotModel.createFullRobotModel();
-      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null, true);
+      RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
@@ -87,7 +87,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupOutputs(String namespace)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new RobotDataReceiver(fullRobotModel, null, true);
+      new RobotDataReceiver(fullRobotModel, null);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       RobotPoseBuffer robotPoseBuffer = new RobotPoseBuffer(controllerCommunicationBridge, 1000, timestampProvider);
 

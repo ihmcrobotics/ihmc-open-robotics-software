@@ -9,6 +9,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -17,40 +19,44 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
-import us.ihmc.communication.producers.RobotPoseBuffer;
+import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
-import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PointCloudDataReceiver extends Thread implements NetStateListener
 {
+   private final SDFFullRobotModel fullRobotModel;
+   private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
+   private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
-   private final RobotPoseBuffer robotPoseBuffer;
-
-   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-   private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();
-
-   private final ArrayList<RobotBoundingBoxes> pointCloudFilters = new ArrayList<>();
    
+   private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+   private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();   
    private final AtomicBoolean sendData = new AtomicBoolean(false);
-
    private volatile boolean running = true;
 
-   public PointCloudDataReceiver(FullRobotModel fullRobotModel, DRCRobotJointMap jointMap,
-         RobotPoseBuffer robotPoseBuffer, PacketCommunicator packetCommunicator)
+   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
+         RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator)
    {
+      this.fullRobotModel = modelFactory.createFullRobotModel();
+      this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
-      this.robotPoseBuffer = robotPoseBuffer;
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
 
       setupListeners(packetCommunicator);
       packetCommunicator.attachStateListener(this);
 
+   }  
+   
+   public ReferenceFrame getLidarFrame(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseFrame(lidarName);
    }
 
    @Override
@@ -64,25 +70,30 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
             if (data != null && sendData.get())
             {
                readWriteLock.writeLock().lock();
+               
+               long prevTimestamp = -1;
                for (int i = 0; i < data.points.size(); i++)
                {
-                  Point3d pointInWorld = robotPoseBuffer.transformToWorld(data.scanFrame, data.timestamps[i], data.points.get(i));
+                  long nextTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamps[i]);
+                  if(nextTimestamp != prevTimestamp)
+                  {
+                     robotConfigurationDataBuffer.updateFullRobotModel(true, nextTimestamp, fullRobotModel, null);
+                     prevTimestamp = nextTimestamp;
+                  }
                   
-                  boolean include = true;
-                  Point3d origin = data.originInWorld;
-                  if(origin == null)
+                  Point3d pointInWorld; 
+                  if(!data.scanFrame.isWorldFrame())
                   {
-                     origin = new Point3d();
-                     robotPoseBuffer.floorEntry(data.timestamps[0]).getLidarPose(0).transform(origin);
+                     throw new RuntimeException("TODO: Implement me");
                   }
-                  for(int f = 0; f < pointCloudFilters.size(); f++)
+                  else
                   {
-                     include &= pointCloudFilters.get(f).isValidPoint(origin, pointInWorld);
+                     pointInWorld = data.points.get(i);
                   }
-                  if(include)
-                  {
-                     depthDataFilter.addPoint(pointInWorld, origin);
-                  }
+                  
+                  Point3d origin = new Point3d();
+                  data.lidarFrame.getTransformToWorldFrame().transform(origin);
+                  depthDataFilter.addPoint(pointInWorld, origin);
                }
                readWriteLock.writeLock().unlock();
             }
@@ -98,11 +109,11 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    /**
     * Receive new data. Data is stored in a queue, so do not reuse!
     * @param scanFrame
-    * @param originInWorld
+    * @param lidarFrame
     * @param timestamps
     * @param points
     */
-   public void receivedPointCloudData(ReferenceFrame scanFrame, Point3d originInWorld, long[] timestamps, ArrayList<Point3d> points)
+   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points)
    {
       if (timestamps.length != points.size())
       {
@@ -111,14 +122,15 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
       try
       {
-         dataQueue.put(new PointCloudData(scanFrame, originInWorld, timestamps, points));
+         dataQueue.put(new PointCloudData(scanFrame, lidarFrame, timestamps, points));
       }
       catch (InterruptedException e)
       {
          e.printStackTrace();
       }
+
    }
-   
+
    @Override
    public void connected()
    {
@@ -223,22 +235,17 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private static class PointCloudData
    {
       private ReferenceFrame scanFrame;
-      private Point3d originInWorld;
+      private ReferenceFrame lidarFrame;
       private long[] timestamps;
       private ArrayList<Point3d> points;
 
-      public PointCloudData(ReferenceFrame scanFrame, Point3d originInWorld, long[] timestamps, ArrayList<Point3d> points)
+      public PointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points)
       {
          this.scanFrame = scanFrame;
-         this.originInWorld = originInWorld;
+         this.lidarFrame = lidarFrame;
          this.timestamps = timestamps;
          this.points = points;
       }
 
-   }
-
-   public void addPointFilter(RobotBoundingBoxes robotBoundingBoxes)
-   {
-      pointCloudFilters.add(robotBoundingBoxes);
    }
 }
