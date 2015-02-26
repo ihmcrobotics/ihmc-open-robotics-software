@@ -40,6 +40,7 @@ dependencies {
     testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
     testCompile project(':IHMCWholeBodyController').sourceSets.test.output
     compile project(':IHMCCommunication')
+    testCompile project(':IHMCCommunication').sourceSets.test.output
     compile project(':Graphics3DAdapter')
     compile project(':IHMCROSTools')
     compile project(':IHMCWholeBodyController')
