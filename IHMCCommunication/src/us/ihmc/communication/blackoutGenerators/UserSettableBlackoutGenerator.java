@@ -3,19 +3,14 @@ package us.ihmc.communication.blackoutGenerators;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.BlackoutDurationPacket;
-
-public class UserSettableBlackoutGenerator implements CommunicationBlackoutGenerator, PacketConsumer<BlackoutDurationPacket>
+public class UserSettableBlackoutGenerator implements CommunicationBlackoutGenerator
 {
    private final TimeUnit timeUnit;
    private final AtomicLong blackoutLength = new AtomicLong();
    
-   public UserSettableBlackoutGenerator(PacketCommunicator packetCommunicator, TimeUnit timeUnit)
+   public UserSettableBlackoutGenerator(TimeUnit timeUnit)
    {
       this.timeUnit = timeUnit;
-      packetCommunicator.attachListener(BlackoutDurationPacket.class, this);
    }
 
    @Override
@@ -24,10 +19,9 @@ public class UserSettableBlackoutGenerator implements CommunicationBlackoutGener
       return timeUnit.convert(blackoutLength.get(), this.timeUnit);
    }
 
-   @Override
-   public void receivedPacket(BlackoutDurationPacket packet)
+   public void setBlackoutDuration(long blackoutDuration, TimeUnit timeUnit)
    {
-      blackoutLength.set(timeUnit.convert(packet.getBlackoutDuration(), TimeUnit.SECONDS));
+      blackoutLength.set(this.timeUnit.convert(blackoutDuration, timeUnit));
    }
 
 }

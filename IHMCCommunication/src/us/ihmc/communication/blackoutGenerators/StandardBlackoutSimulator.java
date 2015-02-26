@@ -5,11 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.BlackoutPacket;
 
-public abstract class StandardBlackoutSimulator implements CommunicationBlackoutSimulator, PacketConsumer<BlackoutPacket>
+public abstract class StandardBlackoutSimulator implements CommunicationBlackoutSimulator
 {
    private final int GOOD_COMMS_PERIOD_IN_MILLI = 1000;
    
@@ -22,7 +20,6 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
    public StandardBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator, PacketCommunicator packetCommunicator)
    {
       this.blackoutGenerator = blackoutGenerator;
-      packetCommunicator.attachListener(BlackoutPacket.class, this);
    }
    
    public CommunicationBlackoutGenerator getBlackoutGenerator()
@@ -45,18 +42,6 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
    public boolean blackoutCommunication()
    {
       return blackout;
-   }
-   
-   @Override
-   public boolean isEnabled()
-   {
-      return enableBlackouts;
-   }
-   
-   @Override
-   public void receivedPacket(BlackoutPacket packet)
-   {
-      enableBlackouts(packet.getBlackout());
    }
    
    public void lock()
