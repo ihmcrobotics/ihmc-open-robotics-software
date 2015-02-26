@@ -291,6 +291,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       return valveClosePercentage.getDoubleValue();
    }
    
+   public double getNumberOfPossibleTurns()
+   {
+      return valveNumberOfPossibleTurns;
+   }
+   
    @Override
    public void setMass(double mass)
    {
