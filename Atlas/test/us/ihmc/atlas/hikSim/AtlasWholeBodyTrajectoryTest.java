@@ -9,6 +9,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -23,7 +24,10 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    static private AtlasWholeBodyIK wbSolver = new AtlasWholeBodyIK( atlasRobotModel );
    
    static private SimulationConstructionSet scs;
-   static private boolean VISUALIZE_GUI = true; // don't commit this to true, will break bamboo
+
+   private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();   
+   private final boolean VISUALIZE_GUI = simulationTestingParameters.getCreateGUI();
+
    static FullRobotModelVisualizer modelVisualizer;
    
    public AtlasWholeBodyTrajectoryTest() throws InterruptedException
