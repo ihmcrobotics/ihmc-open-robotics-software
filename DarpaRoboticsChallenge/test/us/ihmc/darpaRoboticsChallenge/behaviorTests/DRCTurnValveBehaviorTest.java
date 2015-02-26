@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
@@ -20,7 +21,6 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.TurnValvePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -28,9 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterfa
 import us.ihmc.darpaRoboticsChallenge.environment.DRCValveEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -147,9 +145,9 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      double graspApproachConeAngle = Math.toRadians(15.0);
+      double graspApproachConeAngle = Math.toRadians(0.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      double turnValveAngle = Math.toRadians(-180.0);
+      double turnValveAngle = Math.toRadians(180.0);
       TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, turnValveAngle);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
@@ -231,13 +229,14 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-
+ 
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
-
+      valveRobot.getAndLockAvailableContactPoint();
+      
       RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
@@ -247,14 +246,14 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
       final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
-
-      graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), ValveGraspLocation.TWELVE_O_CLOCK, Math.toRadians(15.0), Axis.X);
-      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
-      handPoseBehavior.initialize();
-      handPoseBehavior.setInput(Frame.WORLD, valveTransformToWorld, RobotSide.RIGHT, 2.0);
       
+      graspValveBehavior.initialize();
+      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION, Math.toRadians(0.0), Axis.X);
+      FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
+      SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
+
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspValveBehavior);
+      assertPosesAreWithinThresholds(desiredGraspPose, getCurrentHandPose(robotSideOfGraspingHand));
 
       success = success & graspValveBehavior.isDone();
       assertTrue(success);
@@ -292,6 +291,37 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       ret.changeFrame(worldFrame);
 
       return ret;
+   }
+   
+   private FramePose getCurrentHandPose(RobotSide robotSideToTest)
+   {
+      FramePose ret = new FramePose();
+      drcBehaviorTestHelper.updateRobotModel();
+      ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideToTest));
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
+      return ret;
+   }
+   
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose)
+   {
+      double positionThreshold = 0.05;
+      double orientationThreshold = Math.toRadians(5.0);
+      assertPosesAreWithinThresholds(desiredPose, actualPose, positionThreshold, orientationThreshold);
+   }
+   
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)
+   {
+      double positionDistance = desiredPose.getPositionDistance(actualPose);
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
+
+      if (DEBUG)
+      {
+         System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
+         System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
+      }
+
+      assertEquals("Pose position error : " + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error : " + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
    }
 
 }

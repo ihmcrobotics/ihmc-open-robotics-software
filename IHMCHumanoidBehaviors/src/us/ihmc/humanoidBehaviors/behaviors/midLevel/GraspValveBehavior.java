@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.AxisAngle4d;
@@ -44,7 +45,7 @@ public class GraspValveBehavior extends BehaviorInterface
 
    private final double VALVE_RIM_THICKNESS = 0.03;
    private final double WRIST_OFFSET_FROM_HAND = 0.11 * 0.75; // 0.11
-   private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 3.0 * WRIST_OFFSET_FROM_HAND; //0.3
+   private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 3.5 * WRIST_OFFSET_FROM_HAND; //0.3
    private final double HAND_POSE_TRAJECTORY_TIME = 2.0;//2.0;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -106,11 +107,11 @@ public class GraspValveBehavior extends BehaviorInterface
       reachedMidPoint = new BooleanYoVariable("reachedMidPoint", registry);
    }
 
-   public void setGraspPoseNew(RobotSide robotSideOfGraspingHand, RigidBodyTransform valveTransformToWorld, double valveRadius,
+   public void setGraspPoseWholeBodyIK(RobotSide robotSideOfGraspingHand, RigidBodyTransform valveTransformToWorld, double valveRadius,
          ValveGraspLocation valveGraspLocation)
    {
       TransformReferenceFrame valveFrame = new TransformReferenceFrame("Valve", worldFrame, valveTransformToWorld);
-      FramePose graspPose = getTwelveOClockGraspPose(robotSideOfGraspingHand, valveRadius, 0.0, 0.0, valveFrame);
+      FramePose graspPose = getTwelveOClockGraspPose(robotSideOfGraspingHand, valveRadius, 0.0, 0.0, valveFrame, true);
 
       double graspClockwiseOffsetFromTwelveOClock = -valveGraspLocation.ordinal() * Math.toRadians(90.0);
       graspPose.rotatePoseAboutAxis(valveFrame, Axis.X, graspClockwiseOffsetFromTwelveOClock);
@@ -141,59 +142,54 @@ public class GraspValveBehavior extends BehaviorInterface
       haveInputsBeenSet.set(true);
    }
 
+   private ArrayList<FramePose> graspPoses = new ArrayList<FramePose>();
+
    public void setGraspPose(RobotSide robotSideOfGraspingHand, RigidBodyTransform valveTransformToWorld, double valveRadius,
          ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame)
    {
       TransformReferenceFrame valveFrame = new TransformReferenceFrame("Valve", worldFrame, valveTransformToWorld);
-
-      FramePose preGraspPose = getTwelveOClockGraspPose(robotSideOfGraspingHand, valveRadius, graspApproachConeAngle, -MIDPOSE_OFFSET_FROM_FINALPOSE,
-            valveFrame);
-      FramePose graspPose = getTwelveOClockGraspPose(robotSideOfGraspingHand, valveRadius, graspApproachConeAngle, -WRIST_OFFSET_FROM_HAND,
-            valveFrame);
+      FramePose valvePose = new FramePose();
+      valvePose.setToZero(valveFrame);
 
       double graspClockwiseOffsetFromTwelveOClock = -valveGraspLocation.ordinal() * Math.toRadians(90.0);
-      
-      preGraspPose.rotatePoseAboutAxis(valveFrame, valvePinJointAxisInValveFrame, graspClockwiseOffsetFromTwelveOClock);
-      graspPose.rotatePoseAboutAxis(valveFrame, valvePinJointAxisInValveFrame, graspClockwiseOffsetFromTwelveOClock);
+
+      FramePose finalGraspPose = new FramePose(valvePose);
+      finalGraspPose.rotatePoseAboutAxis(finalGraspPose.getReferenceFrame(), Axis.X, Math.PI);
+      finalGraspPose.translate(-WRIST_OFFSET_FROM_HAND - VALVE_RIM_THICKNESS, 0.0, valveRadius);
+
+      FramePose preGraspPose = new FramePose(finalGraspPose);
+      preGraspPose.translate(-MIDPOSE_OFFSET_FROM_FINALPOSE, 0.0, 0.0);
+
+      graspPoses.add(preGraspPose);
+      graspPoses.add(finalGraspPose);
+
+      for (FramePose graspPose : graspPoses)
+      {
+         graspPose.rotatePoseAboutAxis(valveFrame, valvePinJointAxisInValveFrame, graspClockwiseOffsetFromTwelveOClock);
+      }
 
       if (DEBUG)
       {
          SysoutTool.println("graspClockwiseOffsetFromTwelveOClock : " + graspClockwiseOffsetFromTwelveOClock);
-         SysoutTool.println("graspPose in valve frame : " + graspPose);
+         SysoutTool.println("graspPose in valve frame : " + finalGraspPose);
       }
 
       preGraspPose.changeFrame(worldFrame);
-      graspPose.changeFrame(worldFrame);
+      finalGraspPose.changeFrame(worldFrame);
 
-      double [] desiredArmPose = getCurrentArmPose(robotSideOfGraspingHand);
-      ArmJointName wristTwist = ArmJointName.WRIST_PITCH;
-      double q_desired = actualFullRobotModel.getArmJoint(robotSideOfGraspingHand, wristTwist).getJointLimitUpper();
-      setSingleJoint(desiredArmPose, robotSideOfGraspingHand, wristTwist, q_desired, true);
-      
-      HandPoseTask twistWrist = new HandPoseTask(robotSideOfGraspingHand, desiredArmPose, yoTime, handPoseBehavior, 1.0);
-      
-      
-      double [] desiredArmPoseElbowPitch = getCurrentArmPose(robotSideOfGraspingHand);
-      ArmJointName elbowPitch = ArmJointName.ELBOW_PITCH;
-      double q_elbowPitch_desired = actualFullRobotModel.getArmJoint(robotSideOfGraspingHand, elbowPitch).getJointLimitLower();
-      setSingleJoint(desiredArmPose, robotSideOfGraspingHand, wristTwist, q_elbowPitch_desired, true);
-      
-      HandPoseTask twistElbowPitch = new HandPoseTask(robotSideOfGraspingHand, desiredArmPose, yoTime, handPoseBehavior, 1.0);
-      
       Vector3d valveOffsetFromWorld = new Vector3d();
       valveTransformToWorld.get(valveOffsetFromWorld);
       double comHeightDesired = valveOffsetFromWorld.getZ() - 1.15 + valveRadius * Math.cos(graspClockwiseOffsetFromTwelveOClock);
 
-      CoMHeightTask dropItLikeItsHot = new CoMHeightTask(comHeightDesired, yoTime, comHeightBehavior, 1.0);
+      CoMHeightTask comHeightTask = new CoMHeightTask(comHeightDesired, yoTime, comHeightBehavior, 1.0);
       FingerStateTask openHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.OPEN, fingerStateBehavior, yoTime);
       HandPoseTask moveHandToFavorableGraspApproachLocation = new HandPoseTask(robotSideOfGraspingHand, 1.0, preGraspPose, Frame.WORLD, handPoseBehavior,
             yoTime);
-      HandPoseTask movePalmToBeInContactWithValveRim = new HandPoseTask(robotSideOfGraspingHand, 1.0, graspPose, Frame.WORLD, handPoseBehavior, yoTime);
+      HandPoseTask movePalmToBeInContactWithValveRim = new HandPoseTask(robotSideOfGraspingHand, 1.0, finalGraspPose, Frame.WORLD, handPoseBehavior, yoTime);
       FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime);
 
       taskExecutor.clear();
-      taskExecutor.submit(dropItLikeItsHot);
-      taskExecutor.submit(twistElbowPitch);
+      //      taskExecutor.submit(comHeightTask);
       taskExecutor.submit(moveHandToFavorableGraspApproachLocation);
       taskExecutor.submit(openHandTask);
       taskExecutor.submit(movePalmToBeInContactWithValveRim);
@@ -202,16 +198,22 @@ public class GraspValveBehavior extends BehaviorInterface
       haveInputsBeenSet.set(true);
    }
 
-   RigidBodyTransform temp = new RigidBodyTransform();
-   Point3d tempPoint = new Point3d();
+   private Vector3d getLongAxisOfValveRimAtTwelveOClock(boolean putThumbInsideRim)
+   {
+      Vector3d ret = new Vector3d(0.0, robotSideOfGraspingHand.negateIfRightSide(1.0), 0.0); // Thumb on outside of rim: (0.0, robotSideOfGraspingHand.negateIfRightSide(-1.0), 0.0)
+
+      if (putThumbInsideRim)
+         ret.negate();
+
+      return ret;
+   }
 
    private FramePose getTwelveOClockGraspPose(RobotSide robotSideOfGraspingHand, double valveRadius, double twelveOClockGraspApproachPitch,
-         double positionOffset, ReferenceFrame valveFrame)
+         double positionOffset, ReferenceFrame valveFrame, boolean putThumbInsideRim)
    {
-      Vector3d longAxisOfValveRimAtTwelveOClock = new Vector3d(0.0, -robotSideOfGraspingHand.negateIfRightSide(1.0), 0.0); // Thumb on outside of rim: (0.0, robotSideOfGraspingHand.negateIfRightSide(-1.0), 0.0)
-
       Point3d twelveOClockGraspPositionInValveFrame = new Point3d(0.0, 0.0, valveRadius);
-      AxisAngle4d twelveOClockGraspOrientationInValveFrame = new AxisAngle4d(longAxisOfValveRimAtTwelveOClock, twelveOClockGraspApproachPitch);
+      AxisAngle4d twelveOClockGraspOrientationInValveFrame = new AxisAngle4d(getLongAxisOfValveRimAtTwelveOClock(putThumbInsideRim),
+            twelveOClockGraspApproachPitch);
 
       FramePose twelveOClockGraspPose = new FramePose(valveFrame, twelveOClockGraspPositionInValveFrame, twelveOClockGraspOrientationInValveFrame);
 
@@ -221,7 +223,19 @@ public class GraspValveBehavior extends BehaviorInterface
 
       return twelveOClockGraspPose;
    }
-   
+
+   public FramePose getGraspApproachPose()
+   {
+      return graspPoses.get(0);
+   }
+
+   public FramePose getDesiredFinalGraspPose()
+   {
+      if (!hasInputBeenSet())
+         throw new RuntimeException("Must set input before calling this method!");
+      return graspPoses.get(graspPoses.size() - 1);
+   }
+
    //   private final Quat4d desiredGraspOrientation = new Quat4d();
    //   private final Vector3d valveOffsetFromWorld = new Vector3d();
 
