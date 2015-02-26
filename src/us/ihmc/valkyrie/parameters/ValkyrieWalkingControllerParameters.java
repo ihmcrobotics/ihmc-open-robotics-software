@@ -116,6 +116,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public boolean isNeckPositionControlled()
+   {
+      return false;
+   }
+
+   @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       String[] defaultHeadOrientationControlJointNames = new String[]
