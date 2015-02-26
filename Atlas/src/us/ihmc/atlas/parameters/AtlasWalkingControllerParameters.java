@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -139,12 +140,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      String[] defaultHeadOrientationControlJointNames = new String[]
-      {
-            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
-      };
-
-      return defaultHeadOrientationControlJointNames;
+      if(target==AtlasTarget.REAL_ROBOT)
+         return new String[0];
+      else
+         return new String[]{jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)};
    }
    
    @Override
@@ -351,7 +350,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getCaptureKpParallelToMotion()
    {
       if (!(target == AtlasTarget.REAL_ROBOT))
-         return 1.0;
+         return 1.5; //1.0
       return 1.0; 
    }
 
@@ -359,7 +358,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getCaptureKpOrthogonalToMotion()
    {      
       if (!(target == AtlasTarget.REAL_ROBOT))
-         return 1.0;
+         return 1.5; //1.0
       return 1.0; 
    }
    
@@ -506,19 +505,17 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry)
    {
-      YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("ChestOrientation", registry);
+      YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
-      double kp = 80.0;
-      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
-      double ki = 0.0;
-      double maxIntegralError = 0.0;
+      double kpXY = 80.0;
+      double kpZ = 80.0;
+      double zetaXY = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
+      double zetaZ = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
       double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 6.0 : 36.0;
       double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 60.0 : 540.0;
 
-      gains.setProportionalGain(kp);
-      gains.setDampingRatio(zeta);
-      gains.setIntegralGain(ki);
-      gains.setMaximumIntegralError(maxIntegralError);
+      gains.setProportionalGains(kpXY, kpZ);
+      gains.setDampingRatios(zetaXY, zetaZ);
       gains.setMaximumAcceleration(maxAccel);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
@@ -825,7 +822,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      return null;
+      if(target==AtlasTarget.REAL_ROBOT)
+         return new String[]{NeckJointName.LOWER_NECK_PITCH.toString()};
+      else
+         return new String[0];
    }
 
    @Override
