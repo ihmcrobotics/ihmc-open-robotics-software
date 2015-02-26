@@ -12,6 +12,7 @@ import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
@@ -28,8 +29,10 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    private final ByteBuffer responseBuffer = ByteBuffer.allocate(8);
 
    private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
+   private boolean isRosMainNodeAttached=false;
+   private static AtlasPPSTimestampOffsetProvider instance = null;
 
-   public AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
+   private AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
    {
       ppsPort = sensorInformation.getPPSProviderPort();
       ppsTopic = sensorInformation.getPPSRosTopic();
@@ -47,6 +50,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
          public void onNewMessage(StampedPps message)
          {
             currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getHostTime().totalNsecs());
+            System.out.println("PPSOffset"+String.format("%.10f",TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get())));
             offsetIsDetermined.set(true);
          }
       };
@@ -60,9 +64,13 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    }
 
    @Override
-   public void attachToRosMainNode(RosMainNode rosMainNode)
+   public synchronized void attachToRosMainNode(RosMainNode rosMainNode)
    {
-      rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
+      if(!isRosMainNodeAttached)
+      {
+         rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
+         isRosMainNodeAttached=true;
+      }
    }
 
    @Override
@@ -96,6 +104,13 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    public boolean offsetIsDetermined()
    {
       return offsetIsDetermined.get();
+   }
+
+   public synchronized static PPSTimestampOffsetProvider getInstance(AtlasSensorInformation sensorInformation)
+   {
+      if(instance == null)
+            instance=new AtlasPPSTimestampOffsetProvider(sensorInformation);
+      return instance;
    }
 
 }
