@@ -25,7 +25,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       {
          YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQ(), robot.getYoTime());
          double upperLimit = joint.getJointUpperLimit();
-         double lowerLimit = joint.getJointUpperLimit();
+         double lowerLimit = joint.getJointLowerLimit();
          double range = upperLimit - lowerLimit;
          
          if (Double.isNaN(range))
@@ -36,7 +36,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          yoVariableValueDataChecker.setMaximumValue(upperLimit + limitAdjustment);
          yoVariableValueDataChecker.setMinimumValue(lowerLimit - limitAdjustment);
 
-         yoVariableValueDataChecker.setMaximumDerivative((1.0 * TOLERACE_FACTOR)* joint.getVelocityLimit());
+         yoVariableValueDataChecker.setMaximumDerivative((1.0 + TOLERACE_FACTOR)* joint.getVelocityLimit());
          
          //PDN: Joints don't have acceleration limits. Not sure what to do
          //yoVariableValueDataChecker.setMaximumSecondDerivate((1.0 * TOLERACE_FACTOR)* joint.get());
