@@ -37,17 +37,7 @@ public class HeadOrientationManager
    private int jacobianId = -1;
 
    private final BooleanYoVariable hasBeenInitialized;
-   private final BooleanYoVariable doPositionControl;
 
-   // In progress
-//   /** Call this constructor to do position control on the neck joints */
-//   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationProvider desiredHeadOrientationProvider,
-//         double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
-//   {
-//      this(momentumBasedController, null, desiredHeadOrientationProvider, trajectoryTime, initialDesiredHeadYawPitchRoll, parentRegistry);
-//   }
-
-   /** Call this constructor to do force control on the neck */
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
          HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
@@ -57,8 +47,6 @@ public class HeadOrientationManager
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
       registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      doPositionControl = new BooleanYoVariable(getClass().getSimpleName() + "DoPositionControl", registry);
-      doPositionControl.set(headOrientationControlModule == null);
 
       if (desiredHeadOrientationProvider != null)
       {
@@ -115,9 +103,6 @@ public class HeadOrientationManager
 
    public void compute()
    {
-      // Just to make sure it is not changed from SCS
-      doPositionControl.set(headOrientationControlModule == null);
-
       initialize();
 
       checkForNewDesiredOrientationInformation();
