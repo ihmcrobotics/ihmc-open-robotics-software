@@ -309,6 +309,43 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testGraspValveUsingWholeBodyIKBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+ 
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
+      ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
+      valveRobot.getAndLockAvailableContactPoint();
+      
+      RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
+      RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
+      valveRobot.getBodyTransformToWorld(valveTransformToWorld);
+
+      FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
+      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
+      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+
+      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+      
+      graspValveBehavior.initialize();
+      graspValveBehavior.setGraspPoseWholeBodyIK(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION, Math.toRadians(0.0), Axis.X);
+      FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
+      SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspValveBehavior);
+      assertPosesAreWithinThresholds(desiredGraspPose, getCurrentHandPose(robotSideOfGraspingHand));
+
+      success = success & graspValveBehavior.isDone();
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
 
    private TurnValveBehavior createNewTurnValveBehavior()
    {

@@ -46,7 +46,7 @@ public class WholeBodyInverseKinematicTask extends BehaviorTask
       desiredHandPoseBeforeOffset.checkReferenceFrameMatch(worldFrame);
       this.desiredHandPose = new FramePose(desiredHandPoseBeforeOffset);
       this.numberOfReseeds = numberOfReseeds;
-      this.controlledDofs = ControlledDoF.DOF_3P2R;
+      this.controlledDofs = ControlledDoF.DOF_3P3R;
       this.setPalmTarget = true;
       this.offsetHandPoseAlongPalmNormalByThisMuch = offsetHandPoseAlongPalmNormalByThisMuch;
    }
