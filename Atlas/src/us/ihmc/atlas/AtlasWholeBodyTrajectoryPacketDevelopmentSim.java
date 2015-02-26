@@ -109,20 +109,20 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       }
    }
 
-   //      private double[][] generateArmTrajectory(RobotSide side, int waypoints)
-   //      {
-   //   	   double[][] trajectoryAnglesToReturn = new double[6][waypoints];
-   //   	   for(int w = 0; w<waypoints; w++){
-   //   	      int joints = -1;
-   //   	      for (ArmJointName armJointName : actualRobotModel.getRobotSpecificJointNames().getArmJointNames()){
-   //   //		   for(ArmJointName armJointName : robotModel.getJointMap().getArmJointNames()){
-   //   			   OneDoFJoint armJoint = actualRobotModel.getOneDoFJointByName(robotModel.getJointMap().getArmJointName(side, armJointName));
-   //   			   double q = armJoint.getJointLimitLower() +  w*(armJoint.getJointLimitUpper() - armJoint.getJointLimitLower()) / waypoints;
-   //   			   trajectoryAnglesToReturn[++joints][w] = q;
-   //   		   }
-   //   	   }
-   //   	   return trajectoryAnglesToReturn;
-   //      }
+//         private double[][] generateArmTrajectory(RobotSide side, int waypoints)
+//         {
+//      	   double[][] trajectoryAnglesToReturn = new double[6][waypoints];
+//      	   for(int w = 0; w<waypoints; w++){
+//      	      int joints = -1;
+//      	      for (ArmJointName armJointName : actualRobotModel.getRobotSpecificJointNames().getArmJointNames()){
+//      //		   for(ArmJointName armJointName : robotModel.getJointMap().getArmJointNames()){
+//      			   OneDoFJoint armJoint = actualRobotModel.getOneDoFJointByName(robotModel.getJointMap().getArmJointName(side, armJointName));
+//      			   double q = armJoint.getJointLimitLower() +  w*(armJoint.getJointLimitUpper() - armJoint.getJointLimitLower()) / waypoints;
+//      			   trajectoryAnglesToReturn[++joints][w] = q;
+//      		   }
+//      	   }
+//      	   return trajectoryAnglesToReturn;
+//         }
 
    private double[][] generateArmTrajectory(RobotSide robotSide, int waypoints)
    {
