@@ -40,7 +40,6 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
@@ -86,10 +85,8 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
-
 import us.ihmc.utilities.GraphicsUpdatable;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
