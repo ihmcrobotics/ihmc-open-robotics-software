@@ -19,6 +19,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -72,8 +73,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -107,8 +106,10 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -158,39 +159,38 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       SysoutTool.println("Initializing Sim", DEBUG);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-      
+
+      SysoutTool.println("Setting Hand Pose Behavior Input in Joint Space", DEBUG);
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
-      final HandPoseBehavior jointSpacehandPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredJointSpaceHandPose);
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredJointSpaceHandPose);
 
-      SysoutTool.println("Starting Task Space Hand Pose Behavior", DEBUG);
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(jointSpacehandPoseBehavior);
-      SysoutTool.println("Task Space Hand Pose Behavior Should Be Done", DEBUG);
-      
+      SysoutTool.println("Starting Joint Space Hand Pose Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      SysoutTool.println("Joint Space Hand Pose Behavior Should Be Done", DEBUG);
+
       assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, desiredJointSpaceHandPose);
-      assertTrue(jointSpacehandPoseBehavior.isDone());
-      
+      assertTrue(handPoseBehavior.isDone());
+
       SysoutTool.println("Recording HandPose Acheived in Joint Space", DEBUG);
       FramePose handPoseAcheivedInJointSpace = getCurrentHandPose(robotSide);
-      
-      drcBehaviorTestHelper.closeAndDispose();
-      drcBehaviorTestHelper = null;
-      
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
-
-      SysoutTool.println("Re-initializing Sim", DEBUG);
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      HandPosePacket goToHomePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime);
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(goToHomePacket);
+      SysoutTool.println("Moving arm back to home pose", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      SysoutTool.println("Arm should be back to home pose", DEBUG);
       assertTrue(success);
-      
 
-      SysoutTool.println("Initializing Task Space Hand Pose Behavior", DEBUG);
-      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, handPoseAcheivedInJointSpace);
+      SysoutTool.println("Setting Hand Pose Behavior Input in Task Space", DEBUG);
+      RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
+      handPoseAcheivedInJointSpace.getPose(handPoseTargetTransform);
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
+      assertTrue(handPoseBehavior.hasInputBeenSet());
 
       SysoutTool.println("Starting Task Space Hand Pose Behavior", DEBUG);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
@@ -276,7 +276,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResume() throws SimulationExceededMaximumTimeException
@@ -292,7 +292,6 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double[] handPoseTarget = createRandomArmPose(robotSide);
       double trajectoryTime = 4.0;
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, handPoseTarget);
-
 
       ReferenceFrame frameToKeepTrackOf = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
       double pauseTime = 1.0;
@@ -389,19 +388,19 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       return q;
    }
 
-
    private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, FramePose handPoseTarget)
    {
       HandPoseBehavior ret = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
-      
+
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseTarget.getPose(handPoseTargetTransform);
-      
+
       ret.initialize();
       ret.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
-      
+
       return ret;
    }
+
    private HandPoseBehavior createNewHandPoseBehavior(RobotSide robotSide, double trajectoryTime, double[] desiredArmJointAngles)
    {
       final HandPoseBehavior ret = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
@@ -457,7 +456,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
-      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
    }
 
    private void assertCurrentHandPoseIsWithinThresholds(RobotSide robotSide, double[] desiredArmPose)
@@ -476,12 +476,12 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
          double q_actual = actualArmPose[i];
          double error = Math.abs(q_actual - q_desired);
 
-
          if (DEBUG)
          {
             SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
-         assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(JOINT_POSITION_THRESHOLD) + " degrees.", q_desired, q_actual, JOINT_POSITION_THRESHOLD);
+         assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(JOINT_POSITION_THRESHOLD)
+               + " degrees.", q_desired, q_actual, JOINT_POSITION_THRESHOLD);
       }
    }
 }

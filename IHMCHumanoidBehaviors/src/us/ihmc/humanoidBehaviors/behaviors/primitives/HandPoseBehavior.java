@@ -90,19 +90,13 @@ public class HandPoseBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
+
       if (inputListeningQueue.isNewPacketAvailable())
       {
          consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
       }
 
-      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable() && trajectoryTimeElapsed.getDoubleValue() > 0.1)
-      {
-         SysoutTool.println("COLLISION DETECTED!  STOPPING HAND.");
-         stop();
-         isDone.set(true);
-      }
-
-      trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
       if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
@@ -110,7 +104,15 @@ public class HandPoseBehavior extends BehaviorInterface
             SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
       }
+      
+      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable() && trajectoryTimeElapsed.getDoubleValue() > 0.1)
+      {
+         SysoutTool.println("COLLISION DETECTED!  STOPPING HAND.");
+         stop();
+         isDone.set(true);
+      }
 
+      
       if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
       {
          sendHandPoseToController();
@@ -164,6 +166,9 @@ public class HandPoseBehavior extends BehaviorInterface
       inputListeningQueue.clear();
       status = null;
       hasInputBeenSet.set(false);
+      hasPacketBeenSent.set(false);
+      outgoingHandPosePacket = null;
+
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
       isDone.set(false);
