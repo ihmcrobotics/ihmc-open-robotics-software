@@ -198,7 +198,7 @@ public class DRCSimulationFactory
       }
       else
       {
-         System.err.println("[WARNING] Running simulation in single threaded mode");
+         System.err.println(getClass().getSimpleName() + "[WARNING] Running simulation in single threaded mode");
          multiThreadedRobotController = new SingleThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);
       }
       int estimatorTicksPerSimulationTick = (int) Math.round(drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
