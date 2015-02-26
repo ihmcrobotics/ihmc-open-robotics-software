@@ -126,7 +126,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testTurnValve180Degrees() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -135,6 +135,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
+      double initialValveClosePercentage = valveRobot.getClosePercentage();
+      double turnValveThisMuchToCloseIt = valveRobot.getNumberOfPossibleTurns() * 2.0 * Math.PI * (1.0 - initialValveClosePercentage / 100.0);
 
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
@@ -147,14 +149,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       double graspApproachConeAngle = Math.toRadians(0.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      double turnValveAngle = Math.toRadians(180.0);
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, turnValveAngle);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
 
-      double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
@@ -165,8 +165,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       success = success & turnValveBehavior.isDone();
       
       assertTrue(success);
-      assertTrue(finalValveClosePercentage > initialValveClosePercentage);
-      assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
+      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, " + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue("Valve is not fully closed!  Final valve close percentage = " + finalValveClosePercentage, finalValveClosePercentage > 90.0);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
 
@@ -176,7 +176,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testWalkToAndTurnValve180Degrees() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testWalkToAndCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -188,7 +188,9 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
-
+      double initialValveClosePercentage = valveRobot.getClosePercentage();
+      double turnValveThisMuchToCloseIt = valveRobot.getNumberOfPossibleTurns() * 2.0 * Math.PI * (1.0 - initialValveClosePercentage / 100.0);
+      
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
@@ -197,14 +199,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       double graspApproachConeAngle = Math.toRadians(15.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      double turnValveAngle = Math.toRadians(180.0);
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, turnValveAngle);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
 
-      double initialValveClosePercentage = valveRobot.getClosePercentage();
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
@@ -215,8 +215,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       success = success & turnValveBehavior.isDone();
       
       assertTrue(success);
-      assertTrue(finalValveClosePercentage > initialValveClosePercentage);
-      assertTrue(finalValveClosePercentage > DESIRED_VALVE_CLOSE_PERCENTAGE);
+      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, " + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue("Valve is not fully closed!  Final valve close percentage = " + finalValveClosePercentage, finalValveClosePercentage > 90.0);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
       //TODO: Test turning valve with a corrupted transform to world

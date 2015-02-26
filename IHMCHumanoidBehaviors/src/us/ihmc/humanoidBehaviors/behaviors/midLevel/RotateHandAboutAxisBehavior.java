@@ -40,7 +40,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
    private final TaskExecutor taskExecutor;
    private final HandPoseBehavior handPoseBehavior;
-//   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
+   //   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable hasInputBeenSet;
@@ -52,7 +52,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.taskExecutor = new TaskExecutor();
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-//      this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
+      //      this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
    }
@@ -67,26 +67,28 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    }
 
    public void setInput(RobotSide robotSide, Axis axisOrientationInGraspedObjectFrame, RigidBodyTransform graspedObjectTransformToWorld,
-         double totalRotationInRadians, double trajectoryTime)
+         double totalRotationInRadians, double rotationRateRadPerSec)
    {
       FramePose currentHandPoseInWorld = new FramePose();
       currentHandPoseInWorld.setToZero(fullRobotModel.getHandControlFrame(robotSide));
       currentHandPoseInWorld.changeFrame(world);
 
-      setInput(robotSide, currentHandPoseInWorld, axisOrientationInGraspedObjectFrame, graspedObjectTransformToWorld, totalRotationInRadians, trajectoryTime);
+      setInput(robotSide, currentHandPoseInWorld, axisOrientationInGraspedObjectFrame, graspedObjectTransformToWorld, totalRotationInRadians,
+            rotationRateRadPerSec);
    }
 
-
    public void setInput(RobotSide robotSide, FramePose currentHandPoseInWorld, Axis axisOrientationInGraspedObjectFrame,
-         RigidBodyTransform graspedObjectTransformToWorld, double totalRotationInRadians, double trajectoryTime)
+         RigidBodyTransform graspedObjectTransformToWorld, double totalRotationInRadians, double rotationRateRadPerSec)
    {
       PoseReferenceFrame graspedObjectFrame = new PoseReferenceFrame("graspedObjectFrameBeforeRotation", world);
       graspedObjectFrame.setPoseAndUpdate(graspedObjectTransformToWorld);
 
       radiansToRotateBetweenHandPoses = Math.abs(radiansToRotateBetweenHandPoses) * Math.signum(totalRotationInRadians);
-      
+
       int numberOfDiscreteHandPosesToUse = (int) Math.round(totalRotationInRadians / radiansToRotateBetweenHandPoses);
-      double trajectoryTimePerHandPose = trajectoryTime / numberOfDiscreteHandPosesToUse;
+
+      double totalTrajectoryTime = totalRotationInRadians / rotationRateRadPerSec;
+      double trajectoryTimePerHandPose = totalTrajectoryTime / numberOfDiscreteHandPosesToUse;
 
       if (DEBUG)
       {
@@ -97,8 +99,9 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          SysoutTool.println("Number Of Discrete Hand Poses To Use: " + numberOfDiscreteHandPosesToUse);
          SysoutTool.println("Trajectory Time Per Hand Pose: " + trajectoryTimePerHandPose);
       }
-      
-      ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, graspedObjectFrame, axisOrientationInGraspedObjectFrame, numberOfDiscreteHandPosesToUse);
+
+      ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, graspedObjectFrame,
+            axisOrientationInGraspedObjectFrame, numberOfDiscreteHandPosesToUse);
 
       taskExecutor.clear();
       for (FramePose desiredHandPose : handPosesTangentToSemiCircularPath)
@@ -113,26 +116,26 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
             throw new RuntimeException("Hand Pose must be defined in World reference frame.");
          }
          taskExecutor.submit(new HandPoseTask(robotSide, trajectoryTimePerHandPose, desiredHandPose, packetFrame, handPoseBehavior, yoTime));
-//         taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse, 0, ControlledDoF.DOF_3P2R, true));
+         //         taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse, 0, ControlledDoF.DOF_3P2R, true));
       }
 
       hasInputBeenSet.set(true);
    }
 
-
-   private ArrayList<FramePose> copyHandPoseAndRotateAboutAxisRecursively(FramePose handPoseInWorld, ReferenceFrame graspedObjectFrame, Axis axisOrientationInGraspedObjectFrame, int numberOfHandPoses)
+   private ArrayList<FramePose> copyHandPoseAndRotateAboutAxisRecursively(FramePose handPoseInWorld, ReferenceFrame graspedObjectFrame,
+         Axis axisOrientationInGraspedObjectFrame, int numberOfHandPoses)
    {
       ArrayList<FramePose> desiredHandPoses = new ArrayList<FramePose>(numberOfHandPoses);
 
-//      desiredHandPoses.add(copyHandPoseAndRotateAboutAxis(handPoseInWorld));
+      //      desiredHandPoses.add(copyHandPoseAndRotateAboutAxis(handPoseInWorld));
       desiredHandPoses.add(handPoseInWorld.getRotatedAboutAxisCopy(graspedObjectFrame, axisOrientationInGraspedObjectFrame, radiansToRotateBetweenHandPoses));
-
 
       for (int i = desiredHandPoses.size(); i < numberOfHandPoses; i++)
       {
          FramePose previousDesiredHandPose = desiredHandPoses.get(i - 1);
-//         FramePose nextDesiredHandPose = copyHandPoseAndRotateAboutAxis(previousDesiredHandPose);
-         FramePose nextDesiredHandPose = previousDesiredHandPose.getRotatedAboutAxisCopy(graspedObjectFrame, axisOrientationInGraspedObjectFrame, radiansToRotateBetweenHandPoses);
+         //         FramePose nextDesiredHandPose = copyHandPoseAndRotateAboutAxis(previousDesiredHandPose);
+         FramePose nextDesiredHandPose = previousDesiredHandPose.getRotatedAboutAxisCopy(graspedObjectFrame, axisOrientationInGraspedObjectFrame,
+               radiansToRotateBetweenHandPoses);
          SysoutTool.println("Adding Desired Hand Pose Position: " + nextDesiredHandPose.printOutPosition(), DEBUG);
          desiredHandPoses.add(i, nextDesiredHandPose);
       }
