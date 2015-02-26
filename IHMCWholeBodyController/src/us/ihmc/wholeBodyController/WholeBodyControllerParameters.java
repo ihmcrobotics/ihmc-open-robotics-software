@@ -8,9 +8,10 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModelFactory;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
-public interface WholeBodyControllerParameters
+public interface WholeBodyControllerParameters extends FullRobotModelFactory
 {
 	public CapturePointPlannerParameters getCapturePointPlannerParameters();
 

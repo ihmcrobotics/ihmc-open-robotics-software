@@ -50,7 +50,7 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
    {
       if (rosMainNode.isStarted())
       {
-         long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getSimTime());
+         long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(object.getTimestamp());
          Time t = Time.fromNano(timeStamp);//wallTime.getCurrentTime());
 
          if(object.jointNameHash != jointNameHash)

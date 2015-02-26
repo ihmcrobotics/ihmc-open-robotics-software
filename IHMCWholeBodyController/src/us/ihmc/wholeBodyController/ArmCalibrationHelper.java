@@ -103,7 +103,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
          }
          
 
-         File captureDir = new File(basedir, String.valueOf(lastJointConfigurationData.getSimTime()));
+         File captureDir = new File(basedir, String.valueOf(lastJointConfigurationData.getTimestamp()));
          captureDir.mkdirs();
          System.out.println("Writing calibration files to " + captureDir);
          File image = new File(captureDir, "leftEyeImage.png");
