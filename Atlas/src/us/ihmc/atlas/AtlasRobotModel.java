@@ -275,7 +275,7 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       if (target == AtlasTarget.REAL_ROBOT)
       {
-         return new AtlasPPSTimestampOffsetProvider(sensorInformation);
+         return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
       if (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
