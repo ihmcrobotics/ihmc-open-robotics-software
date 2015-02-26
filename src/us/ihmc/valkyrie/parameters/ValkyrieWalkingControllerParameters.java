@@ -40,13 +40,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       this.runningOnRealRobot = runningOnRealRobot;
 
       // Genreated using ValkyrieFullRobotModelVisualizer
-      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424, 0.11738015536007923,
-            1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112, 0.1743525371234003,
-            -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
+      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[]
+      {
+         0.8772111323383822, -0.47056204413925823, 0.09524700476706424, 0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275,
+         0.3166524835978034, -0.48010478444326166, -0.8597095955922112, 0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0
+      });
 
-      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[] { 0.8772107606751612, -0.47056267784177724, -0.09524729695945025, 0.11738015535642271,
-            -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021, -0.3166524835989298, -0.48010546476828164, -0.8597107556492186,
-            -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0 });
+      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[]
+      {
+         0.8772107606751612, -0.47056267784177724, -0.09524729695945025, 0.11738015535642271, -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021,
+         -0.3166524835989298, -0.48010546476828164, -0.8597107556492186, -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0
+      });
 
       handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
       handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
@@ -82,7 +86,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean doToeOffWhenHittingAnkleLimit()
    {
-      return false; 
+      return false;
    }
 
    @Override
@@ -126,7 +130,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       String[] defaultHeadOrientationControlJointNames = new String[]
       {
-//            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
+//       jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
       };
 
       return defaultHeadOrientationControlJointNames;
@@ -135,12 +139,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      String[] defaultChestOrientationControlJointNames = new String[]
-      {
-            jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
-            jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)
-      };
+      String[] defaultChestOrientationControlJointNames = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+              jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)};
 
       return defaultChestOrientationControlJointNames;
    }
@@ -148,13 +148,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getNeckPitchUpperLimit()
    {
-      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;//1.14494;
+      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;    // 1.14494;
    }
 
    @Override
    public double getNeckPitchLowerLimit()
    {
-      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;//-0.602139;
+      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;    // -0.602139;
    }
 
    @Override
@@ -175,19 +175,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final double maximumHeightAboveGround = 0.735 + 0.23;
 
    // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private final double minimumHeightAboveGround = 0.785;                                       
-   //   private double nominalHeightAboveGround = 0.865; 
-   //   private final double maximumHeightAboveGround = 0.925; 
+   // private final double minimumHeightAboveGround = 0.785;
+   // private double nominalHeightAboveGround = 0.865;
+   // private final double maximumHeightAboveGround = 0.925;
 
-   //   // USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   //   private double minimumHeightAboveGround = 0.68;                                       
-   //   private double nominalHeightAboveGround = 0.76; 
-   //   private double maximumHeightAboveGround = 0.82; 
+   //// USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
+   // private double minimumHeightAboveGround = 0.68;
+   // private double nominalHeightAboveGround = 0.76;
+   // private double maximumHeightAboveGround = 0.82;
 
-   //   // USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-   //   private double minimumHeightAboveGround = 0.68;                                       
-   //   private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo        
-   //   private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo        
+   //// USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
+   // private double minimumHeightAboveGround = 0.68;
+   // private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
+   // private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -234,7 +234,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMinLegLengthBeforeCollapsingSingleSupport()
    {
-      //TODO: Useful values
+      // TODO: Useful values
       return 0.1;
    }
 
@@ -259,13 +259,15 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDesiredStepForward()
    {
-      return 0.5; //0.35;
+      return 0.5;    // 0.35;
    }
 
    @Override
    public double getMaxStepLength()
    {
-      if (!runningOnRealRobot) return 0.6; //0.5; //0.35;
+      if (!runningOnRealRobot)
+         return 0.6;    // 0.5; //0.35;
+
       return 0.6;
    }
 
@@ -284,7 +286,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6; //0.4;
+      return 0.6;    // 0.4;
    }
 
    @Override
@@ -314,7 +316,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI/4.0;
+      return Math.PI / 4.0;
    }
 
    @Override
@@ -338,21 +340,27 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getCaptureKpParallelToMotion()
    {
-      if (!runningOnRealRobot) return 1.4;
+      if (!runningOnRealRobot)
+         return 1.4;
+
       return 1.4;
    }
 
    @Override
    public double getCaptureKpOrthogonalToMotion()
    {
-      if (!runningOnRealRobot) return 1.4;
+      if (!runningOnRealRobot)
+         return 1.4;
+
       return 1.4;
    }
 
    @Override
    public double getCaptureKi()
    {
-      if (!runningOnRealRobot) return 4.0;
+      if (!runningOnRealRobot)
+         return 4.0;
+
       return 0.0;
    }
 
@@ -365,22 +373,28 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getCaptureFilterBreakFrequencyInHz()
    {
-      if (!runningOnRealRobot) return 16.0;
-      return 16.0; //20.0;//16.0;
+      if (!runningOnRealRobot)
+         return 16.0;
+
+      return 16.0;    // 20.0;//16.0;
    }
 
    @Override
    public double getCMPRateLimit()
    {
-      if (!runningOnRealRobot) return 60.0;
-      return 6.0; //12.0;//60.0; //6.0;
+      if (!runningOnRealRobot)
+         return 60.0;
+
+      return 6.0;    // 12.0;//60.0; //6.0;
    }
 
    @Override
    public double getCMPAccelerationLimit()
    {
-      if (!runningOnRealRobot) return 2000.0;
-      return 200.0; //400.0;//2000.0; //200.0;
+      if (!runningOnRealRobot)
+         return 2000.0;
+
+      return 200.0;    // 400.0;//2000.0; //200.0;
    }
 
    @Override
@@ -398,7 +412,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -413,10 +427,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
-      double kpXY = runningOnRealRobot ? 160.0 : 100.0; // 120.0
-      double kpZ = runningOnRealRobot ? 120.0 : 100.0; // 120.0
-      double zetaXY = runningOnRealRobot ? 0.5 : 0.8; // 0.7
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.7
+      double kpXY = runningOnRealRobot ? 160.0 : 100.0;    // 120.0
+      double kpZ = runningOnRealRobot ? 120.0 : 100.0;    // 120.0
+      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;    // 0.7
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;    // 0.7
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
@@ -461,7 +475,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[]{0.0, 0.67, 0.0};
+      return new double[] {0.0, 0.67, 0.0};
    }
 
    @Override
@@ -479,7 +493,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       gains.setMaximumAcceleration(maxAcceleration);
       gains.setMaximumJerk(maxJerk);
       gains.createDerivativeGainUpdater(true);
-      
+
       return gains;
    }
 
@@ -488,10 +502,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // 60.0
-      double kpZ = runningOnRealRobot ? 40.0 : 100.0; // 60.0
-      double zetaXY = runningOnRealRobot ? 0.7 : 0.8; // 0.4
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.4
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0;    // 60.0
+      double kpZ = runningOnRealRobot ? 40.0 : 100.0;    // 60.0
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.8;    // 0.4
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;    // 0.4
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
@@ -509,18 +523,18 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-      double kpXY = 100.0; // 150.0
+      double kpXY = 100.0;    // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
       double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; //160
-      double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7; 
+      double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0;    // 160
+      double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7;
       double zetaOrientationZ = runningOnRealRobot ? 0.5 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -547,7 +561,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -574,7 +588,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kpXY, kpZ);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -600,7 +614,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kp, kp);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -621,13 +635,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSupportSingularityEscapeMultiplier()
    {
-      return -30; //negative as knee axis are -y direction
+      return -30;    // negative as knee axis are -y direction
    }
 
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return -(runningOnRealRobot ? 30.0 : 200.0); //negative as knee axis are -y direction
+      return -(runningOnRealRobot ? 30.0 : 200.0);    // negative as knee axis are -y direction
    }
 
    @Override
@@ -700,7 +714,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return ValkyriePhysicalProperties.footBack + ValkyriePhysicalProperties.footForward;
    }
-   
+
    @Override
    public double getActualFootWidth()
    {
@@ -758,7 +772,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return runningOnRealRobot ? 50.0 : 5.0;
    }
-   
+
    @Override
    public double getCoPThresholdFraction()
    {
@@ -768,11 +782,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      String[] jointsToIgnore = new String[] {
-      //            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
-      //            jointMap.getNeckJointName(NeckJointName.NECK_YAW),
-      //            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+      String[] jointsToIgnore = new String[]
+      {
+         // jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
+         // jointMap.getNeckJointName(NeckJointName.NECK_YAW),
+         // jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
       };
+
       return jointsToIgnore;
    }
 
@@ -783,7 +799,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12); //0.06);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12);    // 0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 
@@ -792,7 +808,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return !runningOnRealRobot;
    }
-   
+
    @Override
    public double getContactThresholdHeight()
    {
@@ -804,7 +820,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return FootSwitchType.WrenchBased;
    }
-   
+
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
@@ -815,5 +831,29 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
       return false;
+   }
+
+   @Override
+   public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0.9649;
+   }
+
+   @Override
+   public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0.8949;
+   }
+
+   @Override
+   public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
+   {
+      return 0.65;
+   }
+
+   @Override
+   public double pelvisToAnkleThresholdForWalking()
+   {
+      return 0.8157;
    }
 }
