@@ -19,6 +19,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.Pose2dReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -33,16 +34,16 @@ public class TurnValveBehavior extends BehaviorInterface
 {
    public enum ValveGraspLocation
    {
-      TWELVE_O_CLOCK, THREE_O_CLOCK, SIX_O_CLOCK, NINE_O_CLOCK
+      TWELVE_O_CLOCK, THREE_O_CLOCK, SIX_O_CLOCK, NINE_O_CLOCK, CENTER
    }
 
    private static final boolean DEBUG = false;
 
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
    public static final ValveGraspLocation DEFAULT_GRASP_LOCATION = ValveGraspLocation.TWELVE_O_CLOCK;
-   public static final double DEFAULT_ANGLE_TO_ROTATE_PER_GRASP_CYCLE = Math.toRadians(160.0);
+   public static final double MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE = Math.toRadians(160.0);
    public static final double howFarToStandToTheRightOfValve = 2.0 * robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
-   public static final double howFarToStandBackFromValve = 0.64; //0.64
+   public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
 
    private final SDFFullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
@@ -68,8 +69,8 @@ public class TurnValveBehavior extends BehaviorInterface
    private final double maxObservedWristForce = 0.0;
    private final double maxObservedCapturePointError = 0.0;
 
-   private final double minDistanceForWalkingBetweenTurns = 0.1;
-   private final double minYawDeltaForWalkingBetweenTurns = Math.toRadians(5.0);
+   private final double minDistanceForWalkingBetweenValveTurns = 0.1;
+   private final double minYawDeltaForWalkingBetweenValveTurns = Math.toRadians(5.0);
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
@@ -98,8 +99,8 @@ public class TurnValveBehavior extends BehaviorInterface
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
 
-      walkToLocationBehavior.setDistanceThreshold(minDistanceForWalkingBetweenTurns);
-      walkToLocationBehavior.setYawAngleThreshold(minYawDeltaForWalkingBetweenTurns);
+      walkToLocationBehavior.setDistanceThreshold(minDistanceForWalkingBetweenValveTurns);
+      walkToLocationBehavior.setYawAngleThreshold(minYawDeltaForWalkingBetweenValveTurns);
 
       super.attachNetworkProcessorListeningQueue(scriptBehaviorInputPacketListener, ScriptBehaviorInputPacket.class);
       super.attachNetworkProcessorListeningQueue(turnValvePacketListener, TurnValvePacket.class);
@@ -129,7 +130,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private void pauseIfCapturePointErrorIsTooLarge()
    {
-      if (tippingDetected.getBooleanValue() && !isPaused.getBooleanValue())
+      if (tippingDetected.getBooleanValue() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
          this.pause();
          if (DEBUG)
@@ -140,31 +141,36 @@ public class TurnValveBehavior extends BehaviorInterface
    public void setInput(TurnValvePacket turnValvePacket)
    {
       setInput(turnValvePacket.getValveTransformToWorld(), DEFAULT_GRASP_LOCATION, turnValvePacket.getGraspApproachConeAngle(), Axis.X,
-            turnValvePacket.getValveRadius(), turnValvePacket.getTurnValveAngle(),
-            DEFAULT_ANGLE_TO_ROTATE_PER_GRASP_CYCLE * Math.signum(turnValvePacket.getTurnValveAngle()));
+            turnValvePacket.getValveRadius(), turnValvePacket.getTurnValveAngle());
    }
 
    public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
-         Axis valvePinJointAxisInValveFrame, double valveRadius, double totalAngleToRotateValve, double angleToRotatePerGraspUngraspCycle)
+         Axis valvePinJointAxisInValveFrame, double valveRadius, double totalAngleToRotateValve)
    {
       SysoutTool.println("Not using script behavior.", DEBUG);
 
       HandPoseTask moveHandToHomeTask = new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
             moveHandToHomeBehavior, yoTime);
 
-      WalkToLocationTask walkToValveTask = createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
-
-      angleToRotatePerGraspUngraspCycle = Math.abs(angleToRotatePerGraspUngraspCycle) * Math.signum(totalAngleToRotateValve);
-      GraspValveTurnAndUnGraspTask graspValveTurnAndUnGraspTask = new GraspValveTurnAndUnGraspTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
-            valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotatePerGraspUngraspCycle, yoTime);
+      walkToValveTask = createWalkToValveTaskIfNecessary(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
 
       pipeLine.submitSingleTaskStage(moveHandToHomeTask);
-      pipeLine.submitSingleTaskStage(walkToValveTask);
+      if (walkToValveTask != null)
+         pipeLine.submitSingleTaskStage(walkToValveTask);
 
-      int numberOfGraspUngraspCycles = (int) Math.ceil(totalAngleToRotateValve / angleToRotatePerGraspUngraspCycle);
+      int numberOfGraspUngraspCycles = (int) Math.ceil(Math.abs(totalAngleToRotateValve / MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE));
+      double totalAngleToRotateValveRemaining = totalAngleToRotateValve;
+
       for (int i = 0; i < numberOfGraspUngraspCycles; i++)
       {
+         double angleToRotateOnThisGraspUngraspCycle = MathTools.clipToMinMax(totalAngleToRotateValveRemaining, MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE);
+
+         GraspValveTurnAndUnGraspTask graspValveTurnAndUnGraspTask = new GraspValveTurnAndUnGraspTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
+               valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotateOnThisGraspUngraspCycle, yoTime);
+
          pipeLine.submitSingleTaskStage(graspValveTurnAndUnGraspTask);
+
+         totalAngleToRotateValveRemaining -= angleToRotateOnThisGraspUngraspCycle;
       }
 
       pipeLine.submitSingleTaskStage(moveHandToHomeTask);
@@ -181,17 +187,54 @@ public class TurnValveBehavior extends BehaviorInterface
       HandPoseTask moveHandToHomeTask = new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
             moveHandToHomeBehavior, yoTime);
 
-      this.walkToValveTask = createWalkToValveTask(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
+      walkToValveTask = createWalkToValveTaskIfNecessary(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
+
       ScriptTask turnValveTask = new ScriptTask(scriptBehavior, scriptBehaviorInputPacket, yoTime);
 
       pipeLine.submitSingleTaskStage(moveHandToHomeTask);
-      pipeLine.submitSingleTaskStage(walkToValveTask);
+      if (walkToValveTask != null)
+         pipeLine.submitSingleTaskStage(walkToValveTask);
       pipeLine.submitSingleTaskStage(turnValveTask);
 
       hasInputBeenSet.set(true);
    }
 
-   private WalkToLocationTask createWalkToValveTask(RigidBodyTransform valveTransformToWorld, double stepLength)
+   private WalkToLocationTask createWalkToValveTaskIfNecessary(RigidBodyTransform valveTransformToWorld, double stepLength)
+   {
+      FramePose2d targetMidFeetZUpFramePose = computeDesiredWalkToLocation(valveTransformToWorld);
+
+      FramePose2d initialMidFeetZUpFramePose = getInitialRobotMidFeetZupPose();
+
+      double positionDistanceToValve = initialMidFeetZUpFramePose.getPositionDistance(targetMidFeetZUpFramePose);
+      double orientationDistanceToValve = initialMidFeetZUpFramePose.getOrientationDistance(targetMidFeetZUpFramePose);
+
+      boolean isItNecessaryToWalkToValve = Math.abs(positionDistanceToValve) > Math.abs(minDistanceForWalkingBetweenValveTurns)
+            || Math.abs(orientationDistanceToValve) > Math.abs(minYawDeltaForWalkingBetweenValveTurns);
+
+      if (!isItNecessaryToWalkToValve)
+         return null;
+
+      double maxDistanceToWalkNotAlignedWithWalkingPath = 4.0 * walkingControllerParameters.getMaxStepLength();
+
+      boolean valveIsNearby = positionDistanceToValve < maxDistanceToWalkNotAlignedWithWalkingPath;
+      WalkingOrientation walkingOrientation;
+      if (valveIsNearby)
+      {
+         walkingOrientation = WalkingOrientation.START_TARGET_ORIENTATION_MEAN;
+      }
+      else
+      {
+         walkingOrientation = WalkingOrientation.ALIGNED_WITH_PATH;
+      }
+
+      double sleepTimeBeforeNextTask = 1.0; // Add sleep time to prevent ICP fall detection from intervening during final transition into double support at the end of the walking task
+      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime,
+            sleepTimeBeforeNextTask);
+
+      return ret;
+   }
+
+   private FramePose2d computeDesiredWalkToLocation(RigidBodyTransform valveTransformToWorld)
    {
       fullRobotModel.updateFrames();
 
@@ -205,23 +248,7 @@ public class TurnValveBehavior extends BehaviorInterface
       targetMidFeetZUpFramePose.setY(-howFarToStandToTheRightOfValve);
       targetMidFeetZUpFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double maxDistanceToWalkNotAlignedWithWalkingPath = 4.0 * walkingControllerParameters.getMaxStepLength();
-      boolean targetIsNearby = getWalkingDistanceToValve(targetMidFeetZUpFramePose) < maxDistanceToWalkNotAlignedWithWalkingPath;
-      WalkingOrientation walkingOrientation;
-      if (targetIsNearby)
-      {
-         walkingOrientation = WalkingOrientation.START_TARGET_ORIENTATION_MEAN;
-      }
-      else
-      {
-         walkingOrientation = WalkingOrientation.ALIGNED_WITH_PATH;
-      }
-
-      double sleepTimeBeforeNextTask = 1.0;
-      WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime,
-            sleepTimeBeforeNextTask);
-
-      return ret;
+      return targetMidFeetZUpFramePose;
    }
 
    private final FramePose2d initialMidFeetPose = new FramePose2d();

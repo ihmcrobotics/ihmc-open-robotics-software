@@ -13,25 +13,25 @@ public class RotateHandAboutAxisTask extends BehaviorTask
    private final RigidBodyTransform graspedObjectTransformToWorld;
    private final Axis pinJointAxisInGraspedObjectFrame;
    private final double turnAngleRad;
-   private final double trajectoryTime;
+   private final double rotationRateRadPerSec;
 
    private final RotateHandAboutAxisBehavior rotateHandAboutAxisBehavior;
 
    public RotateHandAboutAxisTask(RobotSide robotSide, DoubleYoVariable yoTime, RotateHandAboutAxisBehavior rotateGraspedPinJointBodyBehavior,
-         RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad, double trajectoryTime)
+         RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad, double rotationRateRadPerSec)
    {
       super(rotateGraspedPinJointBodyBehavior, yoTime);
       this.rotateHandAboutAxisBehavior = rotateGraspedPinJointBodyBehavior;
       this.robotSide = robotSide;
-      this.graspedObjectTransformToWorld = new RigidBodyTransform(graspedObjectTransformToWorld);  // Creating new object here prevents strange behaviors when this task is repeated
+      this.graspedObjectTransformToWorld = new RigidBodyTransform(graspedObjectTransformToWorld); // Creating new object here prevents strange behaviors when this task is repeated
       this.pinJointAxisInGraspedObjectFrame = pinJointAxisInGraspedObjectFrame;
       this.turnAngleRad = turnAngleRad;
-      this.trajectoryTime = trajectoryTime;
+      this.rotationRateRadPerSec = rotationRateRadPerSec;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      rotateHandAboutAxisBehavior.setInput(robotSide, pinJointAxisInGraspedObjectFrame, graspedObjectTransformToWorld, turnAngleRad, trajectoryTime);
+      rotateHandAboutAxisBehavior.setInput(robotSide, pinJointAxisInGraspedObjectFrame, graspedObjectTransformToWorld, turnAngleRad, rotationRateRadPerSec);
    }
 }

@@ -87,23 +87,23 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
       }
    }
 
-   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame,
-         double valveRadius, double turnValveAngle)
+   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
+         Axis valvePinJointAxisInValveFrame, double valveRadius, double turnValveAngle)
    {
       RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
-      double trajectoryTimeRotateValve = 2.0;
+      double valveRotationRateRadPerSec = Math.PI / 2.0;
       double trajectoryTimeMoveHandAwayFromValve = 2.0;
 
-      
-      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, yoTime);
+      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, valveGraspLocation, graspApproachConeAngle,
+            valvePinJointAxisInValveFrame, valveRadius, yoTime);
 
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
-            valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, trajectoryTimeRotateValve);
+            valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, valveRotationRateRadPerSec);
 
       FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime);
 
       FrameVector graspApproachDirection = getGraspApproachDirectionInWorld(valveTransformToWorld, valveGraspLocation, graspApproachConeAngle);
-      
+
       HandPoseTask moveHandAwayFromValveTask = new HandPoseTask(robotSideOfHandToUse, graspApproachDirection.getVectorCopy(), -0.3, fullRobotModel, yoTime,
             handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);
 
@@ -120,12 +120,12 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
    {
       TransformReferenceFrame valveFrame = new TransformReferenceFrame("valve", ReferenceFrame.getWorldFrame(), valveTransformToWorld);
       FrameVector graspApproachDirection = new FrameVector(valveFrame, Math.cos(graspApproachConeAngle), 0.0, Math.sin(graspApproachConeAngle));
-      
+
       double graspClockwiseOffsetFromTwelveOClock = -valveGraspLocation.ordinal() * Math.toRadians(90.0);
       RigidBodyTransform rotateClockwise = new RigidBodyTransform();
       rotateClockwise.rotX(graspClockwiseOffsetFromTwelveOClock);
       graspApproachDirection.applyTransform(rotateClockwise);
-      
+
       graspApproachDirection.changeFrame(ReferenceFrame.getWorldFrame());
       return graspApproachDirection;
    }
