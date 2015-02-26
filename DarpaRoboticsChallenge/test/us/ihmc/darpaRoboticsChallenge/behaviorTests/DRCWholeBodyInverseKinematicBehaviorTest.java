@@ -1,7 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.LinkedHashMap;
 import java.util.Random;
 
 import org.junit.After;
@@ -13,11 +15,15 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -26,8 +32,13 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
@@ -48,7 +59,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
-      @After
+   @After
    public void destroySimulationAndRecycleMemory()
    {
       if (simulationTestingParameters.getKeepSCSUp())
@@ -64,8 +75,6 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -82,11 +91,15 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
    private SDFFullRobotModel fullRobotModel;
    private WholeBodyControllerParameters wholeBodyControllerParameters;
 
+   private ArmJointName[] armJointNames;
+   private int numberOfArmJoints;
+   private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
+   
    private final double DELTA_YAW = 0.2;//0.05;
    private final double DELTA_PITCH = 0.5;//0.08;
    private final double DELTA_ROLL = Math.PI;
 
-      @Before
+   @Before
    public void setUp()
    {
       if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
@@ -108,7 +121,74 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
 
       wholeBodyControllerParameters = getRobotModel();
       fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+      
+      armJointNames = drcBehaviorTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
+      numberOfArmJoints = armJointNames.length;
 
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         armJointIndices.put(armJointNames[i], i);
+      }
+   }
+
+   @AverageDuration(duration = 90.0)
+   @Test(timeout = 300000)
+   public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Sim", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      SysoutTool.println("Setting Hand Pose Behavior Input in Joint Space", DEBUG);
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 2.0;
+      double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
+      
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+      handPoseBehavior.initialize();
+      HandPosePacket jointSpaceHandPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredJointSpaceHandPose);
+      handPoseBehavior.setInput(jointSpaceHandPosePacket);
+
+      SysoutTool.println("Starting Joint Space Hand Pose Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      SysoutTool.println("Joint Space Hand Pose Behavior Should Be Done", DEBUG);
+
+      assertTrue(success);
+      assertCurrentArmPoseIsWithinThresholds(robotSide, desiredJointSpaceHandPose);
+      assertTrue(handPoseBehavior.isDone());
+
+      SysoutTool.println("Recording HandPose Acheived in Joint Space", DEBUG);
+      FramePose handPoseAcheivedInJointSpace = getCurrentHandPose(robotSide);
+
+      HandPosePacket goToHomePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime);
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(goToHomePacket);
+      SysoutTool.println("Moving arm back to home pose", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      SysoutTool.println("Arm should be back to home pose", DEBUG);
+      assertTrue(success);
+      
+      
+      SysoutTool.println("Initializing Whole Body Inverse Kinematic Behavior", DEBUG);
+
+      final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(
+            drcBehaviorTestHelper.getBehaviorCommunicationBridge(), wholeBodyControllerParameters, fullRobotModel, yoTime);
+      wholeBodyIKBehavior.initialize();
+      wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN);
+         
+      wholeBodyIKBehavior.setInputs(robotSide, handPoseAcheivedInJointSpace, trajectoryTime, 5, ControlledDoF.DOF_3P3R, false);
+      assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
+
+      wholeBodyIKBehavior.computeSolution();
+      assertTrue(wholeBodyIKBehavior.hasSolutionBeenFound());
+      drcBehaviorTestHelper.executeBehaviorUntilDone(wholeBodyIKBehavior);
+
+      assertTrue(wholeBodyIKBehavior.isDone());
+      assertPosesAreWithinThresholds(handPoseAcheivedInJointSpace, getCurrentHandPose(robotSide), 2.0 * POSITION_ERROR_MARGIN, 2.0 * ANGLE_ERROR_MARGIN);
+
+      BambooTools.reportTestFinishedMessage();
    }
 
    @AverageDuration(duration = 90.0)
@@ -148,7 +228,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
          System.out.println(desiredHandPose);
          System.out.println("  ");
       }
-      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration , 5, ControlledDoF.DOF_3P3R, false);
+      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration, 5, ControlledDoF.DOF_3P3R, false);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
 
       wholeBodyIKBehavior.computeSolution();
@@ -195,5 +275,112 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
 
       yawPitchRollMin[2] = side.negateIfRightSide(0.295);
       yawPitchRollMax[2] = side.negateIfRightSide(0.295 + DELTA_ROLL);
+   }
+   
+   private double[] createRandomArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(new Random(), 1.5));
+         armPose[jointNum] = qDesired;
+      }
+
+      return armPose;
+   }
+
+   private double clipDesiredJointQToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
+   {
+      FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
+
+      double q;
+      double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
+      double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
+
+      if (qMin > qMax)
+      {
+         double temp = qMax;
+         qMax = qMin;
+         qMin = temp;
+      }
+
+      q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
+      return q;
+   }
+   
+   private double[] getCurrentArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         ArmJointName jointName = armJointNames[jointNum];
+         double currentAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, jointName).getQ();
+         armPose[jointNum] = currentAngle;
+      }
+
+      return armPose;
+   }
+   
+   private FramePose getCurrentHandPose(RobotSide robotSideToTest)
+   {
+      FramePose ret = new FramePose();
+      drcBehaviorTestHelper.updateRobotModel();
+      ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideToTest));
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
+      return ret;
+   }
+   
+   private void assertCurrentHandPoseIsWithinThresholds(RobotSide robotSide, FramePose desiredPose)
+   {
+      FramePose currentPose = getCurrentHandPose(robotSide);
+      assertPosesAreWithinThresholds(desiredPose, currentPose);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose)
+   {
+      assertPosesAreWithinThresholds(desiredPose, actualPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)
+   {
+      double positionDistance = desiredPose.getPositionDistance(actualPose);
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
+
+      if (DEBUG)
+      {
+         System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
+         System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
+      }
+
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
+   }
+   
+   private void assertCurrentArmPoseIsWithinThresholds(RobotSide robotSide, double[] desiredArmPose)
+   {
+      double[] currentArmPose = getCurrentArmPose(robotSide);
+      assertPosesAreWithinThresholds(desiredArmPose, currentArmPose, robotSide);
+   }
+
+   private void assertPosesAreWithinThresholds(double[] desiredArmPose, double[] actualArmPose, RobotSide robotSide)
+   {
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         ArmJointName armJointName = armJointNames[i];
+
+         double q_desired = desiredArmPose[i];
+         double q_actual = actualArmPose[i];
+         double error = Math.abs(q_actual - q_desired);
+
+         if (DEBUG)
+         {
+            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+         }
+         assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD)
+               + " degrees.", q_desired, q_actual, DRCHandPoseBehaviorTest.JOINT_POSITION_THRESHOLD);
+      }
    }
 }
