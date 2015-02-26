@@ -163,6 +163,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
    {
       private long startTime;
       private final long triggerTimeInNanoSeconds;
+      private boolean packetPairHack; // this exists so Robotiq hands work in sim; I, Nathan Mertins, assume full responsibility
       
       public TimedElapsedChecker(long timeInMilliSeconds)
       {
@@ -176,8 +177,15 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
          if(currentTime - startTime >= triggerTimeInNanoSeconds)
          {
             startTime = currentTime;
+            packetPairHack = true;
             return true;
          }
+         if(packetPairHack)
+         {
+            packetPairHack = false;
+            return true;
+         }
+         
          return false;
      }
    }

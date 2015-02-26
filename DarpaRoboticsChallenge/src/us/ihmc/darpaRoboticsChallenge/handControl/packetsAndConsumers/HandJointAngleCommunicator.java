@@ -8,12 +8,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
-import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-// fills a ring buffer with pose and joint data and in a worker thread passes it to the appropriate consumer 
 public class HandJointAngleCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 250;
@@ -21,7 +20,7 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final PacketCommunicator packetCommunicator;
-   private final ConcurrentRingBuffer<HandJointAnglePacket> packetRingBuffer;
+   private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
@@ -30,11 +29,10 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    {
       this.side = side;
       this.packetCommunicator = networkProcessorCommunicator;
-      packetRingBuffer = new ConcurrentRingBuffer<HandJointAnglePacket>(HandJointAngleCommunicator.builder, 8);
+      packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       startWriterThread();
    }
 
-   // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
       ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -43,17 +41,10 @@ public class HandJointAngleCommunicator implements RawOutputWriter
          @Override
          public void run()
          {
-            if (packetRingBuffer.poll())
-            {
-               while (packetRingBuffer.peek() != null)
-               {
-                  if (packetCommunicator != null)
-                     packetCommunicator.send(packetRingBuffer.read());
-               }
-               packetRingBuffer.flush();
-            }
+            if (packetCommunicator != null)
+               packetCommunicator.send(packetCopier.getCopyForReading());
          }
-      },  0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
+      }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
    }
 
    @Override
@@ -86,17 +77,16 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 	   connected.set(true);
    }
 
-   // puts the state data into the ring buffer for the output thread
    @Override
    public void write()
    {
-      HandJointAnglePacket packet = packetRingBuffer.next();
+      HandJointAnglePacket packet = packetCopier.getCopyForWriting();
       if (packet == null)
       {
          return;
       }
       packet.setAll(side, connected.get(), fingers[0], fingers[1], fingers[2]);
-      packetRingBuffer.commit();
+      packetCopier.commit();
    }
 
    public static final Builder<HandJointAnglePacket> builder = new Builder<HandJointAnglePacket>()
