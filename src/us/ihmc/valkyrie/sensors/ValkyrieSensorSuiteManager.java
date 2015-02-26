@@ -70,7 +70,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       //TODO: Fixme
       //      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, sensorSuitePacketCommunicator, sdfFullRobotModel, sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.IBEO_ID), lidarDataFilter);
-      new RosPointCloudReceiver(sensorInformation.getLidarParameters(0).getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      new RosPointCloudReceiver(sensorInformation.getLidarParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
       pointCloudDataReceiver.start();
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
