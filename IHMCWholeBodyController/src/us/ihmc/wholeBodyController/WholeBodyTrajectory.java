@@ -97,11 +97,14 @@ public class WholeBodyTrajectory
 
       ArrayList<String> jointNames = new ArrayList<String>();
 
+      int counter = 0;
       for (OneDoFJoint joint: initialRobotState.getOneDoFJoints() )
       {
          if( wbSolver.hasJoint( joint.getName())  )
          {
-            jointNameToTrajectoryIndex.put( joint.getName(), jointNameToTrajectoryIndex.size() );
+            jointNameToTrajectoryIndex.put( joint.getName(),counter);
+            counter++;
+            
             jointNames.add( joint.getName() );
          }    
       }
@@ -135,8 +138,9 @@ public class WholeBodyTrajectory
       for ( Map.Entry<String, Integer> entry: jointNameToTrajectoryIndex.entrySet() )
       {
          String jointName = entry.getKey();
+         int index = entry.getValue();
          double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
-         thisWaypointAngles.set( entry.getValue(), initialAngle );  
+         thisWaypointAngles.set( index, initialAngle );  
          thisWaypointAnglesByName.put( jointName, initialAngle );   
       }
 
