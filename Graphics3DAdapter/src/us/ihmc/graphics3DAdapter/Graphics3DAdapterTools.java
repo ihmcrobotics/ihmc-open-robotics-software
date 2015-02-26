@@ -5,6 +5,7 @@ import java.awt.Canvas;
 import java.awt.Container;
 import java.awt.Dimension;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.vecmath.Vector3d;
@@ -77,6 +78,7 @@ public class Graphics3DAdapterTools
       contentPane.setLayout(new BorderLayout());
       contentPane.add("Center", panel);
 
+      jFrame.setIconImage(new ImageIcon("resources/running-man-32x32.png").getImage());
       jFrame.pack();
       jFrame.setVisible(true);
       jFrame.setLocationRelativeTo(null);
