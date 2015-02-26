@@ -39,7 +39,7 @@ public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
       testPubSubSingleCloud(PointType.XYZRGB);
    }
 
-   private void testPubSubSingleCloud(PointType testPointType) throws URISyntaxException, InterruptedException
+   private void testPubSubSingleCloud(final PointType testPointType) throws URISyntaxException, InterruptedException
    {
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "topicClientTestNode");
 
@@ -62,19 +62,19 @@ public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            super.unpackPointsAndIntensities(pointCloud);
-            assertEquals(pointType, super.pointType);
-            assertArrayEquals(testPoints, super.points);
+            UnpackedPointCloud unpackedCloud = super.unpackPointsAndIntensities(pointCloud);
+            assertEquals(testPointType, unpackedCloud.getPointType());
+            assertArrayEquals(testPoints, unpackedCloud.getPoints());
 
-            switch (super.pointType)
+            switch (unpackedCloud.getPointType())
             {
                case XYZI :
-                  assertArrayEquals(testIntensities, super.intensities, 1e-10f);
+                  assertArrayEquals(testIntensities, unpackedCloud.getIntensities(), 1e-10f);
 
                   break;
 
                case XYZRGB :
-                  assertArrayEquals(testColor, super.pointColors);
+                  assertArrayEquals(testColor, unpackedCloud.getPointColors());
                   break;
             }
 

@@ -45,21 +45,21 @@ public class RosPointCloudFilterRepublisher implements Runnable
          public synchronized void onNewMessage(PointCloud2 pointCloud)
          {
             growablePointCloud.clear();
-            unpackPointsAndIntensities(pointCloud);
+            UnpackedPointCloud unpackedCloud=unpackPointsAndIntensities(pointCloud);
 
-            for (int i = 0; i < points.length; i++)
+            for (int i = 0; i < unpackedCloud.getPoints().length; i++)
             {
                switch (PointType.fromFromFieldNames(pointCloud.getFields()))
                {
                   case XYZI :
-                     if (includePoint(points[i], intensities[i]))
-                        growablePointCloud.addPoint(points[i], intensities[i]);
+                     if (includePoint(unpackedCloud.getPoints()[i], unpackedCloud.getIntensities()[i]))
+                        growablePointCloud.addPoint(unpackedCloud.getPoints()[i], unpackedCloud.getIntensities()[i]);
 
                      break;
 
                   case XYZRGB :
-                     if (includePoint(points[i], pointColors[i]))
-                        growablePointCloud.addPoint(points[i], pointColors[i]);
+                     if (includePoint(unpackedCloud.getPoints()[i], unpackedCloud.getPointColors()[i]))
+                        growablePointCloud.addPoint(unpackedCloud.getPoints()[i], unpackedCloud.getPointColors()[i]);
 
                      break;
                }

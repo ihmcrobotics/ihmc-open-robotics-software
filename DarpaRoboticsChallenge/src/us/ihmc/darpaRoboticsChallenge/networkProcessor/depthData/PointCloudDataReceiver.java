@@ -117,9 +117,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       {
          e.printStackTrace();
       }
-
    }
-
+   
    @Override
    public void connected()
    {
