@@ -171,12 +171,30 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       assertTrue(success);
       
       
-      SysoutTool.println("Initializing Whole Body Inverse Kinematic Behavior", DEBUG);
+      SysoutTool.println("Setting Hand Pose Behavior Input in Task Space", DEBUG);
+      RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
+      handPoseAcheivedInJointSpace.getPose(handPoseTargetTransform);
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
+      assertTrue(handPoseBehavior.hasInputBeenSet());
 
+      SysoutTool.println("Starting Task Space Hand Pose Behavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      SysoutTool.println("Task Space Hand Pose Behavior Should Be Done", DEBUG);
+
+      assertTrue(success);
+      assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseAcheivedInJointSpace);
+      assertTrue(handPoseBehavior.isDone());
+
+      FramePose finalTaskSpaceHandPose = getCurrentHandPose(robotSide);
+      double handPoseBehaviorPositionError = finalTaskSpaceHandPose.getPositionDistance(handPoseAcheivedInJointSpace);
+      double handPoseBehaviorOrientationError = finalTaskSpaceHandPose.getOrientationDistance(handPoseAcheivedInJointSpace);
+      
+      SysoutTool.println("Initializing Whole Body Inverse Kinematic Behavior", DEBUG);
       final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(
             drcBehaviorTestHelper.getBehaviorCommunicationBridge(), wholeBodyControllerParameters, fullRobotModel, yoTime);
       wholeBodyIKBehavior.initialize();
-      wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN);
+      wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(handPoseBehaviorPositionError, handPoseBehaviorOrientationError);
          
       wholeBodyIKBehavior.setInputs(robotSide, handPoseAcheivedInJointSpace, trajectoryTime, 5, ControlledDoF.DOF_3P3R, false);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
@@ -186,7 +204,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       drcBehaviorTestHelper.executeBehaviorUntilDone(wholeBodyIKBehavior);
 
       assertTrue(wholeBodyIKBehavior.isDone());
-      assertPosesAreWithinThresholds(handPoseAcheivedInJointSpace, getCurrentHandPose(robotSide), 2.0 * POSITION_ERROR_MARGIN, 2.0 * ANGLE_ERROR_MARGIN);
+      assertPosesAreWithinThresholds(handPoseAcheivedInJointSpace, getCurrentHandPose(robotSide), 2.0 * handPoseBehaviorPositionError, 2.0 * handPoseBehaviorOrientationError);
 
       BambooTools.reportTestFinishedMessage();
    }
