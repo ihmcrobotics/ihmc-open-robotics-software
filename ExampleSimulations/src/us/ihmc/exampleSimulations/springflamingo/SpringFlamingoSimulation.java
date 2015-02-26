@@ -16,6 +16,7 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.visualizers.RobotFreezeFramer;
@@ -60,7 +61,7 @@ public class SpringFlamingoSimulation
 
    private final SimulationConstructionSet sim;
 
-   public SpringFlamingoSimulation() throws SimulationExceededMaximumTimeException
+   public SpringFlamingoSimulation() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       double baseGravity = EARTH_GRAVITY;    // MOON_GRAVITY; //1.5 * EARTH_GRAVITY; //4.0; //9.81;
       double minGravity = MOON_GRAVITY;    // 1.64; //4.0;
@@ -318,7 +319,7 @@ public class SpringFlamingoSimulation
       return sim;
    }
 
-   public static void main(String[] args) throws SimulationExceededMaximumTimeException
+   public static void main(String[] args) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       new SpringFlamingoSimulation();
    }
