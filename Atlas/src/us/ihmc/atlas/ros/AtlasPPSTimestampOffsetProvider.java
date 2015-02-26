@@ -23,6 +23,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    private final String ppsTopic;
    private RosTimestampSubscriber ppsSubscriber;
    private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
+   private final AtomicLong lastTimeStampOffset = new AtomicLong(0);
    private ZMQ.Socket requester;
 
    private final byte[] requestPayload = { PPSRequestType.GET_NEW_PPS_TIMESTAMP };
@@ -50,7 +51,9 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
          public void onNewMessage(StampedPps message)
          {
             currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getHostTime().totalNsecs());
-            System.out.println("PPSOffset"+String.format("%.10f",TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get())));
+            if(offsetIsDetermined.get() && Math.abs(currentTimeStampOffset.get()-lastTimeStampOffset.get())>1e7) 
+               System.out.println(getClass().getSimpleName() + " UnstablePPSOffset"+String.format("%.10f",TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get()))+" second");
+            lastTimeStampOffset.set(currentTimeStampOffset.get());
             offsetIsDetermined.set(true);
          }
       };
