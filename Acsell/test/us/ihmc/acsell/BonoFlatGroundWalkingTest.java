@@ -7,6 +7,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
@@ -16,7 +17,7 @@ public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException
+   public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
