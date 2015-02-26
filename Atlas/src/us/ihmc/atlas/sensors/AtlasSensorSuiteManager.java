@@ -6,6 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -88,12 +89,14 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializePhysicalSensors(URI rosCoreURI)
    {
+      if(rosCoreURI==null)
+         new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in "+ NetworkParameters.defaultParameterFile);
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 
       RosNativeNetworkProcessor rosNativeNetworkProcessor;
-      if (RosNativeNetworkProcessor.hasNativeLibrary())
+      if (RosNativeNetworkProcessor.hasNativeLibrary() && rosCoreURI != null)
       {
          rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
          rosNativeNetworkProcessor.connect();
