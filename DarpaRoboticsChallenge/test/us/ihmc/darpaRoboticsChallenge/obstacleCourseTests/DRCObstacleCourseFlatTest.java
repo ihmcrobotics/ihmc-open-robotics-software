@@ -406,8 +406,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       int ticksPerPerturbation = 10;
       OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, simulationConstructionSet.getDT() * (ticksPerPerturbation));
-      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.01, 0.015, 0.005});
-      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.017, 0.06, 0.011});
+      oscillateFeetPerturber.setTranslationMagnitude(new double[]{0.008, 0.011, 0.004});
+      oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[]{0.012, 0.047, 0.009});
       
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.LEFT, new double[]{1.0, 2.5, 3.3});
       oscillateFeetPerturber.setTranslationFrequencyHz(RobotSide.RIGHT, new double[]{2.0, 0.5, 1.3});
