@@ -1,9 +1,11 @@
 package us.ihmc.robotiq.control;
 
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
@@ -75,16 +77,22 @@ public class RobotiqHandCommandManager extends HandCommandManager
       JFrame frame = new JFrame();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
-      JButton button = new JButton("Calibrate");
+      final JComboBox<FingerState> stateToSend = new JComboBox<FingerState>(FingerState.values());
+      stateToSend.setSelectedItem(FingerState.CALIBRATE);
+      
+      final JButton button = new JButton("Send");
       button.addActionListener(new ActionListener()
       {
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.RIGHT, FingerState.CALIBRATE));
+            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.RIGHT,
+                  (FingerState)(stateToSend.getSelectedItem())));
          }
       });
+      frame.setLayout(new FlowLayout());
       
+      frame.getContentPane().add(stateToSend);
       frame.getContentPane().add(button);
       frame.pack();
       frame.setVisible(true);
