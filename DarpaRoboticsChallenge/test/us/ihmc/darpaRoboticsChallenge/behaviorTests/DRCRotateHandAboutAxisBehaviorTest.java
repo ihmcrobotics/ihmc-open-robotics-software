@@ -155,7 +155,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
 
       success = success & rotateHandBehavior.isDone();
       assertTrue(success);
-      assertPosesAreWithinThresholds(initialHandPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(25.0));  //TODO: Figure out why orientation threshold is so large.
+      assertPosesAreWithinThresholds(initialHandPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(25.0));  //TODO: Looks decent in sim, but need to figure out why orientation threshold is so large.
 
       BambooTools.reportTestFinishedMessage();
    }
