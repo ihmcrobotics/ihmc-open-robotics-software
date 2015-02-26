@@ -34,7 +34,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
       if (addDynamicGraphicForceVectorsForceVectors) yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       for(int i = 0; i < totalContactPointsAvailable.size(); i++)
-      {
+      {         
          Joint joint = getJoints().get(i);
 
          for(int j = 0; j < totalContactPointsAvailable.get(i).intValue(); j++)
@@ -62,7 +62,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
             }
          }
       }
-      
+            
       if (addDynamicGraphicForceVectorsForceVectors)
       {
          robot.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
@@ -74,20 +74,12 @@ public abstract class MultiJointArticulatedContactable implements Contactable
    {
       for(int i = 0; i < allGroundContactPoints.size(); i++)
       {
-         for(int j = 0; j < allGroundContactPoints.get(i).size(); j++)
+         try
          {
-            BooleanYoVariable contactAvailable = contactsAvailable.get(i).get(j);
-            
-            if(contactAvailable.getBooleanValue())
-            {
-               System.out.println("Locked " + "Joint " + i + ", Contact Point " + j);
-               
-               contactAvailable.set(false);
-               
-               int index = (i == 0) ? j : allGroundContactPoints.size() + j;
-                              
-               return index;
-            }
+            return getAndLockAvailableContactPoint(i);
+         }
+         catch(RuntimeException e)
+         {
          }
       }
       
@@ -108,7 +100,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
          }
       }
       
-      throw new RuntimeException("No contact points are available");
+      throw new RuntimeException("No contact points are available, trying to access them for joint " + jointIndex);
    }
    
    @Override
@@ -123,7 +115,6 @@ public abstract class MultiJointArticulatedContactable implements Contactable
                BooleanYoVariable contactAvailable = contactsAvailable.get(i).get(j);
                if(!contactAvailable.getBooleanValue())
                {
-                  System.out.println("Unlocked " + "Joint " + i + ", Contact Point " + j);
                   contactAvailable.set(true);
                   
                   return;
