@@ -131,7 +131,6 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return Math.toRadians(-20.0);
    }
 
-   @Override
    public boolean isNeckPositionControlled()
    {
       return false;
