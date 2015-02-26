@@ -30,6 +30,14 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double maximumHeightAboveAnkle();
 
+   public abstract double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment();
+
+   public abstract double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment();
+
+   public abstract double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment();
+
+   public abstract double pelvisToAnkleThresholdForWalking();
+
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
@@ -47,7 +55,6 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
-
 
    public abstract double getCaptureKpParallelToMotion();
 
@@ -72,7 +79,7 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract YoPDGains createUnconstrainedJointsControlGains(YoVariableRegistry registry);
 
    public abstract YoOrientationPIDGains createChestControlGains(YoVariableRegistry registry);
-   
+
    public abstract YoSE3PIDGains createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGains createHoldPositionFootControlGains(YoVariableRegistry registry);
