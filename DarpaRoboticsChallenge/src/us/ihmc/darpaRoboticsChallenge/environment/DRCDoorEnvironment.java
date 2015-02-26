@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
  * 
  * <ul>
  *    <li> Door width = 33.5in
- *    <li> Force to open if weighted = 3lb applied at the handle
+ *    <li> Default force to open if weighted = 3lb applied at the handle
  * </ul>
  */
 public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
@@ -36,8 +36,6 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
       
       ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3d(3.0, 0.0, 0.0));
-      door.setKdDoor(1e-2);
-      door.setKpDoor(1e-2);
       doorRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
    }
@@ -89,7 +87,14 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
    
    public enum DoorType
    {
-      NO_TORQUE, THREE_LBS_TO_MOVE, FIVE_LBS_TO_MOVE;
+      NO_TORQUE(0.0), THREE_LBS_TO_MOVE(11.4), FIVE_LBS_TO_MOVE(18.9);
+      
+      double tau;
+      
+      private DoorType(double tau)
+      {
+         this.tau = tau;
+      }
    }
 
 }
