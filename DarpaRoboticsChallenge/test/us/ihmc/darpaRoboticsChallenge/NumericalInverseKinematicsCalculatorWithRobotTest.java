@@ -262,7 +262,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
 
       assertTrue(averageTimeMillis < 4.0);
-      assertTrue(maximumTimeMillis < 40.0);
+      assertTrue(maximumTimeMillis < 100.0);
       
       //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
 //      assertTrue(averageTimeMillis < 0.04);
