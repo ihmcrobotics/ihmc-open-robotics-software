@@ -67,7 +67,7 @@ public abstract class WholeBodyTrajectoryTest
    public void testTrajectory() throws Exception
    {
    
-      wbSolver.setVerbosityLevel(1);
+      wbSolver.setVerbosityLevel( (getSimulationConstructionSet() != null) ? 1:0 );
 
       wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
       wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
