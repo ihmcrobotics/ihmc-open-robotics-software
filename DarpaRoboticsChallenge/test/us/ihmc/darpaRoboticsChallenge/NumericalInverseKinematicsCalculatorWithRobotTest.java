@@ -208,7 +208,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
       InitialGuessForTests initialGuessForTests = InitialGuessForTests.MIDRANGE;
       boolean updateListenersEachStep = false;
-      double errorThreshold = 0.005;
+      double errorThreshold = 0.01; 
       boolean success = testAPose(random, handEndEffectorPositionFK, handEndEffectorOrientationFK, initialGuessForTests, errorThreshold, updateListenersEachStep);
       assertTrue(success);
    }
