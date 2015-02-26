@@ -99,6 +99,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public boolean isNeckPositionControlled()
+   {
+      return false;
+   }
+
+   @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       return new String[0];
