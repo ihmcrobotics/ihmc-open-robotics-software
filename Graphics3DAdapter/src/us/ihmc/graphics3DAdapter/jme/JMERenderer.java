@@ -597,7 +597,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    @Override
    public void isShowing(PBOAwtPanel pboAwtPanel)
    {
-      System.out.println(PrintTools.INFO + "A " + pboAwtPanel.getClass().getSimpleName() + " showed on screen.");
+      PrintTools.info(this, "A " + pboAwtPanel.getClass().getSimpleName() + " showed on screen.");
       
       if (!gpuLidars.isEmpty())
       {
@@ -610,7 +610,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (DEBUG_GPU_LIDAR_PARALLEL_SCENE)
       {
-         System.out.println(PrintTools.DEBUG + "Creating " + pboAwtPanel.getClass().getSimpleName());
+         PrintTools.debug(this, "Creating " + pboAwtPanel.getClass().getSimpleName());
       }
    }
    
@@ -618,8 +618,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (!pboAwtPanels.isEmpty())
       {
-         System.out.print(PrintTools.INFO + "Updating GPULidar scenes...");
-
          Timer timer = new Timer().start();
 
          for (JMEGPULidar gpuLidar : gpuLidars)
@@ -627,7 +625,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             gpuLidar.updateViewPortScenes();
          }
 
-         System.out.println("done. Took " + FormattingTools.getFormattedDecimal3D(timer.now()) + " (s)");
+         PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.now(), 2) + " s");
       }
    }
 
