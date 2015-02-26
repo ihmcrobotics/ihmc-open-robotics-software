@@ -28,8 +28,8 @@ public abstract class SingleJointArticulatedContactable implements Contactable
       
       ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(joints);
-      if(joints.size() != 1)
-         throw new RuntimeException("The robot " + name + " has " + joints.size() + " joints. It can only have 1 to be a SingleJointArticulatedContactable");
+//      if(joints.size() != 1)
+//         throw new RuntimeException("The robot " + name + " has " + joints.size() + " joints. It can only have 1 to be a SingleJointArticulatedContactable");
    }
 
    public abstract Joint getJoint();
