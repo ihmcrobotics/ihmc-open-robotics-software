@@ -2,16 +2,14 @@ package us.ihmc.valkyrie.sensors;
 
 import java.net.URI;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
-import us.ihmc.communication.producers.RobotPoseBuffer;
-import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
@@ -20,70 +18,52 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataR
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSCheatingPointCloudLidarReceiver;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
-import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;
-import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.wholeBodyController.DRCHandType;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
    private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.SENSOR_MANAGER.ordinal(), "VAL_SENSOR_MANAGER");
-   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
-   private final RobotDataReceiver drcRobotDataReceiver;
-   private final RobotPoseBuffer robotPoseBuffer;
+   private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   private final RobotBoundingBoxes robotBoundingBoxes;
+   private final SDFFullRobotModelFactory fullRobotModelFactory;
 
-   public ValkyrieSensorSuiteManager(PPSTimestampOffsetProvider ppsTimestampOffsetProvider, SDFFullRobotModel sdfFullRobotModel,
+   public ValkyrieSensorSuiteManager(SDFFullRobotModelFactory fullRobotModelFactory, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          DRCRobotSensorInformation sensorInformation, ValkyrieJointMap jointMap, boolean runningOnRealRobot)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
+      this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
-      this.drcRobotDataReceiver = new RobotDataReceiver(sdfFullRobotModel, null, true);
-      robotBoundingBoxes = new RobotBoundingBoxes(drcRobotDataReceiver, DRCHandType.VALKYRIE, sdfFullRobotModel);
-      this.robotPoseBuffer = new RobotPoseBuffer(sensorSuitePacketCommunicator, 10000, timestampProvider);
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(sdfFullRobotModel, jointMap, robotPoseBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
    }
 
    @Override
    public void initializeSimulatedSensors(PacketCommunicator scsSensorsCommunicator)
    {
-      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
+      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
-      new SCSCameraDataReceiver(robotPoseBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
-      new SCSCheatingPointCloudLidarReceiver(robotBoundingBoxes, scsSensorsCommunicator, pointCloudDataReceiver);
+      new SCSCameraDataReceiver(fullRobotModelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
+      new SCSCheatingPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
       pointCloudDataReceiver.start();
    }
 
    @Override
    public void initializePhysicalSensors(URI sensorURI)
    {
-      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, drcRobotDataReceiver);
+      sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
       RosMainNode rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");
 
-      RosNativeNetworkProcessor rosNativeNetworkProcessor;
-      if (RosNativeNetworkProcessor.hasNativeLibrary())
-      {
-         rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(sensorURI.toString());
-         rosNativeNetworkProcessor.connect();
-      }
-      else
-      {
-         rosNativeNetworkProcessor = null;
-      }
-
       DRCRobotCameraParameters cameraParamaters = sensorInformation.getCameraParameters(0);
 
-      new RosCameraReceiver(cameraParamaters, robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, null, sensorURI);
+      new RosCameraReceiver(fullRobotModelFactory, sensorInformation.getCameraParameters(0), robotConfigurationDataBuffer, rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, null, sensorURI);
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, sensorSuitePacketCommunicator, null);
       sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);

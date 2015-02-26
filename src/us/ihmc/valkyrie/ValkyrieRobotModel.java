@@ -320,7 +320,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
-      return new ValkyrieSensorSuiteManager(getPPSTimestampOffsetProvider(), createFullRobotModel(), sensorInformation, jointMap, runningOnRealRobot);
+      return new ValkyrieSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, jointMap, runningOnRealRobot);
    }
 
    @Override
