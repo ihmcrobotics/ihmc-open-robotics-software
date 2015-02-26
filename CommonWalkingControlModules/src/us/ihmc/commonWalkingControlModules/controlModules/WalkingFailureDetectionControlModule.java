@@ -44,6 +44,8 @@ public class WalkingFailureDetectionControlModule
       updateCombinedPolygon();
 
       isFallDetectionActivated = new BooleanYoVariable("isFallDetectionActivated", registry);
+      isFallDetectionActivated.set(true);
+      
       icpDistanceFromFootPolygonThreshold = new DoubleYoVariable("icpDistanceFromFootPolygonThreshold", registry);
       icpDistanceFromFootPolygonThreshold.set(0.05);
       icpDistanceFromFootPolygon = new DoubleYoVariable("icpDistanceFromFootPolygon", registry);
