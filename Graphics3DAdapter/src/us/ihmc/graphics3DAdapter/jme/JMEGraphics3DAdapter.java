@@ -13,6 +13,7 @@ import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
+import us.ihmc.graphics3DAdapter.input.Mouse3DListener;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.jme.JMERenderer.RenderType;
@@ -109,6 +110,12 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
    public void addMouseListener(MouseListener mouseListener)
    {
       jmeRenderer.addMouseListener(mouseListener);
+   }
+
+   @Override
+   public void addMouse3DListener(Mouse3DListener mouse3DListener)
+   {
+      jmeRenderer.addMouse3DListener(mouse3DListener);
    }
 
    public void freezeFrame(Graphics3DNode rootJoint)

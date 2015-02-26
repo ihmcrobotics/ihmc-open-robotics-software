@@ -101,24 +101,12 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
          setUpPostProcesses();
       }
 
-
       this.viewportType = viewportType;
 
-
-      switch (viewportType)
+      if (viewportType.equals(ViewportType.MULTICAM) || viewportType.equals(ViewportType.CANVAS))
       {
-         case CANVAS :
-         case MULTICAM :
-            jmeRenderer.getContextManager().addJMEViewportAdapter(this);
-            this.selectedListener = new JMESelectedListener(jmeRenderer.getSelectedListenerHolder(), jmeRenderer.getKeyListenerHolder(),
-                    jmeRenderer.getMouseListenerHolder(), jmeRenderer.getJmeGraphicsNodes(), rootNode, jmeRenderer.getInputManager(), jmeCamera);
-
-            break;
-
-         default :
-            this.selectedListener = null;
-
-            break;
+         jmeRenderer.getContextManager().addJMEViewportAdapter(this);
+         this.selectedListener = new JMESelectedListener(jmeRenderer, rootNode, jmeCamera);
       }
 
       jmeRenderer.registerViewport(this);
@@ -448,6 +436,4 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       // TODO Auto-generated method stub
 
    }
-
-
 }

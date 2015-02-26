@@ -13,13 +13,15 @@ import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
+import us.ihmc.graphics3DAdapter.input.Mouse3DListener;
 import us.ihmc.graphics3DAdapter.input.MouseButton;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
-public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, SelectedListener
+public class ClassicCameraController implements TrackingDollyCameraController, KeyListener, MouseListener, Mouse3DListener, SelectedListener
 {
    public static final double MIN_FIELD_OF_VIEW = 0.001;
    public static final double MAX_FIELD_OF_VIEW = 2.0;
@@ -91,6 +93,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       graphics3dAdapter.addKeyListener(classicCameraController);
       graphics3dAdapter.addMouseListener(classicCameraController);
+      graphics3dAdapter.addMouse3DListener(classicCameraController);
       graphics3dAdapter.addSelectedListener(classicCameraController);
 
       return classicCameraController;
@@ -132,11 +135,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       return isMounted;
    }
 
+   @Override
    public CameraTrackingAndDollyPositionHolder getCameraTrackAndDollyVariablesHolder()
    {
       return cameraTrackAndDollyVariablesHolder;
    }
 
+   @Override
    public void setConfiguration(CameraConfiguration config, CameraMountList mountList)
    {
       if (config == null)
@@ -178,46 +183,55 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       // this.update();
    }
 
+   @Override
    public boolean isTracking()
    {
       return isTracking;
    }
 
+   @Override
    public boolean isTrackingX()
    {
       return isTrackingX;
    }
 
+   @Override
    public boolean isTrackingY()
    {
       return isTrackingY;
    }
 
+   @Override
    public boolean isTrackingZ()
    {
       return isTrackingZ;
    }
 
+   @Override
    public boolean isDolly()
    {
       return isDolly;
    }
 
+   @Override
    public boolean isDollyX()
    {
       return isDollyX;
    }
 
+   @Override
    public boolean isDollyY()
    {
       return isDollyY;
    }
 
+   @Override
    public boolean isDollyZ()
    {
       return isDollyZ;
    }
 
+   @Override
    public void setTracking(boolean track, boolean trackX, boolean trackY, boolean trackZ)
    {
       setTracking(track);
@@ -226,6 +240,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       setTrackingZ(trackZ);
    }
 
+   @Override
    public void setDolly(boolean dolly, boolean dollyX, boolean dollyY, boolean dollyZ)
    {
       setDolly(dolly);
@@ -234,6 +249,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       setDollyZ(dollyZ);
    }
 
+   @Override
    public void setTrackingOffsets(double dx, double dy, double dz)
    {
       trackDX = dx;
@@ -241,6 +257,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       trackDZ = dz;
    }
 
+   @Override
    public void setDollyOffsets(double dx, double dy, double dz)
    {
       dollyDX = dx;
@@ -248,106 +265,127 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       dollyDZ = dz;
    }
 
+   @Override
    public void setTracking(boolean track)
    {
       isTracking = track;
    }
 
+   @Override
    public void setTrackingX(boolean trackX)
    {
       isTrackingX = trackX;
    }
 
+   @Override
    public void setTrackingY(boolean trackY)
    {
       isTrackingY = trackY;
    }
 
+   @Override
    public void setTrackingZ(boolean trackZ)
    {
       isTrackingZ = trackZ;
    }
 
+   @Override
    public void setDolly(boolean dolly)
    {
       isDolly = dolly;
    }
 
+   @Override
    public void setDollyX(boolean dollyX)
    {
       isDollyX = dollyX;
    }
 
+   @Override
    public void setDollyY(boolean dollyY)
    {
       isDollyY = dollyY;
    }
 
+   @Override
    public void setDollyZ(boolean dollyZ)
    {
       isDollyZ = dollyZ;
    }
 
+   @Override
    public double getTrackingXOffset()
    {
       return trackDX;
    }
 
+   @Override
    public double getTrackingYOffset()
    {
       return trackDY;
    }
 
+   @Override
    public double getTrackingZOffset()
    {
       return trackDZ;
    }
 
+   @Override
    public double getDollyXOffset()
    {
       return dollyDX;
    }
 
+   @Override
    public double getDollyYOffset()
    {
       return dollyDY;
    }
 
+   @Override
    public double getDollyZOffset()
    {
       return dollyDZ;
    }
 
+   @Override
    public void setTrackingXOffset(double dx)
    {
       trackDX = dx;
    }
 
+   @Override
    public void setTrackingYOffset(double dy)
    {
       trackDY = dy;
    }
 
+   @Override
    public void setTrackingZOffset(double dz)
    {
       trackDZ = dz;
    }
 
+   @Override
    public void setDollyXOffset(double dx)
    {
       dollyDX = dx;
    }
 
+   @Override
    public void setDollyYOffset(double dy)
    {
       dollyDY = dy;
    }
 
+   @Override
    public void setDollyZOffset(double dz)
    {
       dollyDZ = dz;
    }
 
+   @Override
    public void update()
    {
       if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
@@ -559,6 +597,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public void setKeyFrameTime(int time)
    {
       for (int i = keyFrameTimes.size() - 1; i >= 0; i--)
@@ -603,72 +642,85 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       return cameraKeyPoints;
    }
 
+   @Override
    public double getFixX()
    {
       return this.fixX;
    }
 
+   @Override
    public double getFixY()
    {
       return this.fixY;
    }
 
+   @Override
    public double getFixZ()
    {
       return this.fixZ;
    }
 
+   @Override
    public double getCamX()
    {
       return this.camX;
    }
 
+   @Override
    public double getCamY()
    {
       return this.camY;
    }
 
+   @Override
    public double getCamZ()
    {
       return this.camZ;
    }
 
+   @Override
    public void setFixX(double fx)
    {
       this.fixX = fx;
 
    }
 
+   @Override
    public void setFixY(double fy)
    {
       this.fixY = fy;
 
    }
 
+   @Override
    public void setFixZ(double fz)
    {
       this.fixZ = fz;
 
    }
 
+   @Override
    public void setCamX(double cx)
    {
       this.camX = cx;
 
    }
 
+   @Override
    public void setCamY(double cy)
    {
       this.camY = cy;
 
    }
 
+   @Override
    public void setCamZ(double cz)
    {
       this.camZ = cz;
 
    }
 
+   @Override
    public void setFixPosition(double fx, double fy, double fz)
    {
       this.fixX = fx;
@@ -677,6 +729,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
+   @Override
    public void setCameraPosition(double cx, double cy, double cz)
    {
       this.camX = cx;
@@ -799,6 +852,13 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
+   @Override
+   public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
+   {
+      doMouseDraggedRight(drz, drx);
+   }
+
+   @Override
    public void setFieldOfView(double fov)
    {
       fieldOfView = fov;
@@ -950,6 +1010,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       lastTransitionTime = System.currentTimeMillis();
    }
 
+   @Override
    public void toggleCameraKeyMode()
    {
       setUseCameraKeyPoints(!useKeyCameraPoints());
@@ -960,16 +1021,19 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       return toggleCameraKeyPoints;
    }
 
+   @Override
    public void setUseCameraKeyPoints(boolean use)
    {
       toggleCameraKeyPoints = use;
    }
 
+   @Override
    public boolean useKeyCameraPoints()
    {
       return toggleCameraKeyPoints;
    }
 
+   @Override
    public boolean setCameraKeyPoint(int time)
    {
       boolean added = false;
@@ -1000,6 +1064,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       return true;
    }
 
+   @Override
    public void nextCameraKeyPoint(int time)
    {
       // int closestLesserTime = Integer.MIN_VALUE;
@@ -1027,6 +1092,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       gotoKey(cameraKeyPointIndex);
    }
 
+   @Override
    public void previousCameraKeyPoint(int time)
    {
       cameraKeyPointIndex--;
@@ -1040,37 +1106,44 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       gotoKey(cameraKeyPointIndex);
    }
 
+   @Override
    public void removeCameraKeyPoint(int time)
    {
       cameraKeyPoints.remove(cameraKeyPointIndex);
       removeKeyFrameByIndex(cameraKeyPointIndex);
    }
 
+   @Override
    public double getTrackXVar()
    {
       return cameraTrackAndDollyVariablesHolder.getTrackingX();
    }
 
+   @Override
    public double getTrackYVar()
    {
       return cameraTrackAndDollyVariablesHolder.getTrackingY();
    }
 
+   @Override
    public double getTrackZVar()
    {
       return cameraTrackAndDollyVariablesHolder.getTrackingZ();
    }
 
+   @Override
    public double getDollyXVar()
    {
       return cameraTrackAndDollyVariablesHolder.getDollyX();
    }
 
+   @Override
    public double getDollyYVar()
    {
       return cameraTrackAndDollyVariablesHolder.getDollyY();
    }
 
+   @Override
    public double getDollyZVar()
    {
       return cameraTrackAndDollyVariablesHolder.getDollyZ();
@@ -1112,6 +1185,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       storedFixPositions.add(new Point3d(getFixX(), getFixY(), getFixZ()));
    }
 
+   @Override
    public void reset()
    {
       // TODO Auto-generated method stub
@@ -1123,6 +1197,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private Vector3d zAxis = new Vector3d(), yAxis = new Vector3d(), xAxis = new Vector3d();
 
+   @Override
    public void computeTransform(RigidBodyTransform currXform)
    {
       update();
@@ -1133,63 +1208,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
          return;
       }
-
-      //    // Note: The following you should be able to just do with Transform3D.lookAt()...
-      //    double delX = getCamX() - getFixX();
-      //    if (Double.isNaN(delX))
-      //       return;
-      //    double delY = getCamY() - getFixY();
-      //    if (Double.isNaN(delY))
-      //       return;
-      //    double delZ = getCamZ() - getFixZ();
-      //    if (Double.isNaN(delZ))
-      //       return;
-      //
-      //    // Z axis points away from camera look ray...
-      //    zAxis.set(delX, delY, delZ);
-      //
-      //    if (zAxis.length() < 1.0e-10)
-      //       zAxis.set(0.0, 0.0, -1.0); // Prevent "non-congruent transform above ViewPlatform exceptions...
-      //    if (zAxis.length() > 1.0e100)
-      //       return;
-      //
-      //    zAxis.normalize();
-      //
-      //    yAxis.set(0.0, 0.0, 1.0);
-      //
-      //    if (yAxis.equals(zAxis))
-      //    {
-      //       yAxis.set(0.0, 1.0, 0.0);
-      //    }
-      //
-      //    xAxis.cross(yAxis, zAxis);
-      //    xAxis.normalize();
-      //
-      //    yAxis.cross(zAxis, xAxis);
-      //
-      //    /*
-      //     * double[] t3DMatrix = new double[] {xAxis.x, yAxis.x, zAxis.x,
-      //     * classicCameraController.getCamX(), xAxis.y, yAxis.y, zAxis.y,
-      //     * classicCameraController.getCamY(), xAxis.z, yAxis.z, zAxis.z,
-      //     * classicCameraController.getCamZ(), 0.0, 0.0, 0.0, 1.0};
-      //     */
-      //
-      //    t3DMatrix[0] = xAxis.x;
-      //    t3DMatrix[1] = yAxis.x;
-      //    t3DMatrix[2] = zAxis.x;
-      //    t3DMatrix[3] = getCamX();
-      //    t3DMatrix[4] = xAxis.y;
-      //    t3DMatrix[5] = yAxis.y;
-      //    t3DMatrix[6] = zAxis.y;
-      //    t3DMatrix[7] = getCamY();
-      //    t3DMatrix[8] = xAxis.z;
-      //    t3DMatrix[9] = yAxis.z;
-      //    t3DMatrix[10] = zAxis.z;
-      //    t3DMatrix[11] = getCamZ();
-      //    t3DMatrix[12] = 0.0;
-      //    t3DMatrix[13] = 0.0;
-      //    t3DMatrix[14] = 0.0;
-      //    t3DMatrix[15] = 1.0;
 
       positionOffset.set(getCamX(), getCamY(), getCamZ());
       xAxis.set(getFixX(), getFixY(), getFixZ());
@@ -1209,6 +1227,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       currXform.normalize();
    }
 
+   @Override
    public void keyPressed(Key key)
    {
       if (alreadyClosing) return;
@@ -1251,6 +1270,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
+   @Override
    public void keyReleased(Key key)
    {
       if (alreadyClosing) return;
@@ -1308,6 +1328,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    }
 
+   @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
       if (alreadyClosing) return;
@@ -1326,6 +1347,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
       if (alreadyClosing) return;
@@ -1358,6 +1380,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public double getClipNear()
    {
       if (isMounted)
@@ -1370,6 +1393,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public double getClipFar()
    {
       if (isMounted)
@@ -1382,6 +1406,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public double getHorizontalFieldOfViewInRadians()
    {
       if (isMounted)
@@ -1394,16 +1419,19 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
 
+   @Override
    public void setClipDistanceNear(double near)
    {
       clipDistanceNear = near;
    }
 
+   @Override
    public void setClipDistanceFar(double far)
    {
       clipDistanceFar = far;
    }
 
+   @Override
    public void copyPositionTrackingDollyConfiguration(TrackingDollyCameraController otherCamera)
    {
       setTracking(otherCamera.isTracking(), otherCamera.isTrackingX(), otherCamera.isTrackingY(), otherCamera.isTrackingZ());
@@ -1435,6 +1463,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private boolean alreadyClosing = false;
    
+   @Override
    public void closeAndDispose()
    {
       if (alreadyClosing) return;

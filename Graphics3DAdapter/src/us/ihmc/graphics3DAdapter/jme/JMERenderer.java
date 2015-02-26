@@ -27,10 +27,13 @@ import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.KeyListenerHolder;
+import us.ihmc.graphics3DAdapter.input.Mouse3DListener;
+import us.ihmc.graphics3DAdapter.input.Mouse3DListenerHolder;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.MouseListenerHolder;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListenerHolder;
+import us.ihmc.graphics3DAdapter.input.mouse3D.Mouse3DJoystick;
 import us.ihmc.graphics3DAdapter.jme.JMEViewportAdapter.ViewportType;
 import us.ihmc.graphics3DAdapter.jme.context.PBOAwtPanel;
 import us.ihmc.graphics3DAdapter.jme.context.PBOAwtPanelListener;
@@ -114,9 +117,12 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    private boolean isTerrainVisible = true;
 
+   private Mouse3DJoystick mouse3DJoystick = new Mouse3DJoystick();
+   
    private SelectedListenerHolder selectedListenerHolder = new SelectedListenerHolder();
    private KeyListenerHolder keyListenerHolder = new KeyListenerHolder();
    private MouseListenerHolder mouseListenerHolder = new MouseListenerHolder();
+   private Mouse3DListenerHolder mouse3DListenerHolder = new Mouse3DListenerHolder();
 
    private Node rootJoint;
    private Node terrain;
@@ -869,6 +875,21 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       return mouseListenerHolder;
    }
+   
+   public void addMouse3DListener(Mouse3DListener mouse3DListener)
+   {
+      mouse3DListenerHolder.addMouse3DListener(mouse3DListener);
+   }
+
+   public Mouse3DListenerHolder getMouse3DListenerHolder()
+   {
+      return mouse3DListenerHolder;
+   }
+   
+   public Mouse3DJoystick getMouse3DJoystick()
+   {
+      return mouse3DJoystick;
+   }
 
    public DirectionalLight getPrimaryLight()
    {
@@ -943,6 +964,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       selectedListenerHolder = null;
       keyListenerHolder = null;
       mouseListenerHolder = null;
+      mouse3DListenerHolder = null;
+      
+      mouse3DJoystick.stopPolling();
 
       rootJoint = null;
       terrain = null;
