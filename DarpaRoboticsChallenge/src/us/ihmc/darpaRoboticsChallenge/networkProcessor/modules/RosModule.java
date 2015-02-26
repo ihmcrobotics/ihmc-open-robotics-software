@@ -79,7 +79,7 @@ public class RosModule
       
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new RosSCSLidarPublisher(simulatedSensorCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
+//         new RosSCSLidarPublisher(simulatedSensorCommunicator, rosMainNode, ppsTimestampOffsetProvider, sdfFullRobotModel, sensorInformation.getLidarParameters(), tfPublisher);
       }
       
       if(sensorInformation.setupROSLocationService())

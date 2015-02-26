@@ -90,26 +90,52 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
     *
     */
 
-   protected Point3d[] points = null;
-   protected float[] intensities = null;
-   protected Color3f[] pointColors = null;
-   protected PointType pointType = null;
-
-   protected void unpackPointsAndIntensities(PointCloud2 pointCloud)
+   protected static class UnpackedPointCloud
    {
-      int numberOfPoints = pointCloud.getWidth() * pointCloud.getHeight();
-      points = new Point3d[numberOfPoints];
-      pointType = PointType.fromFromFieldNames(pointCloud.getFields());
+		  Point3d[] points = null;
+		  float[] intensities = null;
+		  Color3f[] pointColors = null;
+		  PointType pointType = null;
+		  
+		  public Point3d[] getPoints()
+		  {
+			  return points;
+		  }
+		  
+		  public float[] getIntensities()
+		  {
+			  return intensities;
+		  }
+		  
+		  public Color3f[] getPointColors()
+		  {
+			  return pointColors;
+		  }
+		  
+		  public PointType getPointType()
+		  {
+			  return pointType;
+		  }
+   }
+   
 
-      switch (pointType)
+   protected UnpackedPointCloud unpackPointsAndIntensities(PointCloud2 pointCloud)
+   {
+
+	   UnpackedPointCloud packet = new UnpackedPointCloud();
+      int numberOfPoints = pointCloud.getWidth() * pointCloud.getHeight();
+      packet.points = new Point3d[numberOfPoints];
+      packet.pointType = PointType.fromFromFieldNames(pointCloud.getFields());
+
+      switch (packet.pointType)
       {
          case XYZI :
-            intensities = new float[numberOfPoints];
+        	 packet.intensities = new float[numberOfPoints];
 
             break;
 
          case XYZRGB :
-            pointColors = new Color3f[numberOfPoints];
+        	 packet.pointColors = new Color3f[numberOfPoints];
 
             break;
       }
@@ -124,17 +150,19 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       else
          byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
+      
       for (int i = 0; i < numberOfPoints; i++)
       {
+    	 byteBuffer.position(i*pointStep+offset); 
          float x = byteBuffer.getFloat();
          float y = byteBuffer.getFloat();
          float z = byteBuffer.getFloat();
-         points[i] = new Point3d(x, y, z);
+         packet.points[i] = new Point3d(x, y, z);
 
-         switch (pointType)
+         switch (packet.pointType)
          {
             case XYZI :
-               intensities[i] = byteBuffer.getFloat();;
+            	packet.intensities[i] = byteBuffer.getFloat();;
 
                break;
 
@@ -143,9 +171,11 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
                int g = (int) byteBuffer.get();
                int r = (int) byteBuffer.get();
                byte dummy = byteBuffer.get();
-               pointColors[i] = new Color3f(r, g, b);
+               packet.pointColors[i] = new Color3f(r, g, b);
          }
       }
+      
+      return packet;
    }
 
    @Override
