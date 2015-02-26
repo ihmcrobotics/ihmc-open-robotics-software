@@ -18,16 +18,12 @@ public class SCSCheatingPointCloudLidarReceiver implements PacketConsumer<Simula
 {
 
    private final PointCloudDataReceiver pointCloudDataReceiver;
-   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver,
-         CommunicationBlackoutSimulator blackoutSimulator)
+   public SCSCheatingPointCloudLidarReceiver(RobotBoundingBoxes robotBoundingBoxes, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       pointCloudDataReceiver.addPointFilter(robotBoundingBoxes);
       
-      if(blackoutSimulator != null)
-         packetCommunicator.attachListener(SimulatedLidarScanPacket.class, new BlackoutPacketConsumer<SimulatedLidarScanPacket>(this, blackoutSimulator));
-      else
-         packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
+      packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
 
    @Override

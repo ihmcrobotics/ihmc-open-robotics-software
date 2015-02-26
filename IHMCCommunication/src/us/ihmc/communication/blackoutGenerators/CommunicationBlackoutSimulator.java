@@ -8,5 +8,5 @@ public interface CommunicationBlackoutSimulator
    public boolean blackoutCommunication();
    public long getCurrentTime(TimeUnit timeUnit);
    public void enableBlackouts(boolean enable);
-   public boolean isEnabled();
+   public CommunicationBlackoutGenerator getBlackoutGenerator();
 }
