@@ -19,6 +19,7 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 /** 
  * Use LookAtBehavior() to provide visual feedback about upcoming footsteps.
@@ -53,7 +54,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    private FootstepDataList currentFootStepList;
    private FootstepData currentFootBeingLookedAt;
    
-   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters)
+   public CheckEachStepWhileWalkingBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
       isDone = new BooleanYoVariable(behaviorName + "_isDone", registry);
@@ -62,7 +63,7 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
       footstepListQueue = new ConcurrentListeningQueue<FootstepDataList>();
       SnapFootstepQueue = new ConcurrentListeningQueue<SnapFootstepPacket>();
       footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
-      lookAtBehavior = new LookAtBehavior(outgoingCommunicationBridge);
+      lookAtBehavior = new LookAtBehavior(outgoingCommunicationBridge, walkingControllerParameters, yoTime);
       this.referenceFrames = referenceFrames;
       midZUpFrame = referenceFrames.getMidFeetZUpFrame();
 
