@@ -101,7 +101,7 @@ public class MultiSenseSensorManager
       {
          multiSenseParamaterSetter.setMultisenseResolution(rosMainNode);
    
-         if (RosNativeNetworkProcessor.hasNativeLibrary())
+         if (RosNativeNetworkProcessor.hasNativeLibrary() && rosNativeNetworkProcessor!=null)
          {
             multiSenseParamaterSetter.setupNativeROSCommunicator(rosNativeNetworkProcessor, lidarSpindleVelocity);
          }

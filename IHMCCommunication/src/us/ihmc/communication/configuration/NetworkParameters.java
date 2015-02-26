@@ -11,7 +11,7 @@ import java.util.Properties;
 public class NetworkParameters
 {
    private static final String helpText = "Please use NetworkParametersCreator to create one and place it in the working directory, or pass in -DnetworkParameterFile=[path].";
-   static final String defaultParameterFile = "IHMCNetworkParameters.ini";
+   public static final String defaultParameterFile = "IHMCNetworkParameters.ini";
 
    private static NetworkParameters instance = null;
 
