@@ -36,51 +36,90 @@ public class HeadOrientationManager
    private final YoQuaternionProvider finalOrientationProvider;
    private int jacobianId = -1;
 
+   private final BooleanYoVariable hasBeenInitialized;
+   private final BooleanYoVariable doPositionControl;
+
+   // In progress
+//   /** Call this constructor to do position control on the neck joints */
+//   public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationProvider desiredHeadOrientationProvider,
+//         double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
+//   {
+//      this(momentumBasedController, null, desiredHeadOrientationProvider, trajectoryTime, initialDesiredHeadYawPitchRoll, parentRegistry);
+//   }
+
+   /** Call this constructor to do force control on the neck */
    public HeadOrientationManager(MomentumBasedController momentumBasedController, HeadOrientationControlModule headOrientationControlModule,
-         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, YoVariableRegistry parentRegistry)
+         HeadOrientationProvider desiredHeadOrientationProvider, double trajectoryTime, double[] initialDesiredHeadYawPitchRoll, YoVariableRegistry parentRegistry)
    {
       this.momentumBasedController = momentumBasedController;
       this.yoTime = momentumBasedController.getYoTime();
       this.headOrientationControlModule = headOrientationControlModule;
       this.desiredHeadOrientationProvider = desiredHeadOrientationProvider;
+      registry = new YoVariableRegistry(getClass().getSimpleName());
+      parentRegistry.addChild(registry);
+      doPositionControl = new BooleanYoVariable(getClass().getSimpleName() + "DoPositionControl", registry);
+      doPositionControl.set(headOrientationControlModule == null);
 
       if (desiredHeadOrientationProvider != null)
       {
          headOrientationExpressedInFrame = desiredHeadOrientationProvider.getHeadOrientationExpressedInFrame();
 
-         registry = new YoVariableRegistry(getClass().getSimpleName());
          receivedNewHeadOrientationTime = new DoubleYoVariable("receivedNewHeadOrientationTime", registry);
          isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
          headOrientationTrajectoryTime = new DoubleYoVariable("headOrientationTrajectoryTime", registry);
+
+         hasBeenInitialized = new BooleanYoVariable("hasHeadOrientationManagerBeenInitialized", registry);
+         hasBeenInitialized.set(false);
 
          headOrientationTrajectoryTime.set(trajectoryTime);
          DoubleProvider trajectoryTimeProvider = new YoVariableDoubleProvider(headOrientationTrajectoryTime);
          //         initialOrientationProvider = new CurrentOrientationProvider(headOrientationExpressedInFrame, headOrientationControlModule.getHead().getBodyFixedFrame());
          initialOrientationProvider = new YoQuaternionProvider("headInitialOrientation", headOrientationExpressedInFrame, registry);
          finalOrientationProvider = new YoQuaternionProvider("headFinalOrientation", headOrientationExpressedInFrame, registry);
+         desiredOrientation.setIncludingFrame(headOrientationExpressedInFrame, initialDesiredHeadYawPitchRoll);
+         finalOrientationProvider.setOrientation(desiredOrientation);
          orientationTrajectoryGenerator = new OrientationInterpolationTrajectoryGenerator("headOrientation", headOrientationExpressedInFrame,
                trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, registry);
          orientationTrajectoryGenerator.setContinuouslyUpdateFinalOrientation(true);
-         orientationTrajectoryGenerator.initialize();
-         parentRegistry.addChild(registry);
       }
       else
       {
          headOrientationExpressedInFrame = null;
-         registry = null;
          receivedNewHeadOrientationTime = null;
          headOrientationTrajectoryTime = null;
          isTrackingOrientation = null;
+         hasBeenInitialized = null;
          initialOrientationProvider = null;
          finalOrientationProvider = null;
          orientationTrajectoryGenerator = null;
       }
+   }
+   
+   private void initialize()
+   {
+      if (hasBeenInitialized != null && hasBeenInitialized.getBooleanValue())
+         return;
+
+      hasBeenInitialized.set(true);
+
+      ReferenceFrame headFrame = momentumBasedController.getFullRobotModel().getHead().getBodyFixedFrame();
+      desiredOrientation.setToZero(headFrame);
+      desiredOrientation.changeFrame(headOrientationExpressedInFrame);
+      initialOrientationProvider.setOrientation(desiredOrientation);
+      receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
+      orientationTrajectoryGenerator.initialize();
+      isTrackingOrientation.set(true);
    }
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
 
    public void compute()
    {
+      // Just to make sure it is not changed from SCS
+      doPositionControl.set(headOrientationControlModule == null);
+
+      initialize();
+
       checkForNewDesiredOrientationInformation();
       
       if (desiredHeadOrientationProvider != null && isTrackingOrientation.getBooleanValue())
@@ -108,11 +147,11 @@ public class HeadOrientationManager
 
       if (desiredHeadOrientationProvider.isNewHeadOrientationInformationAvailable())
       {
-//         orientationTrajectoryGenerator.get(desiredOrientation);
-//         initialOrientationProvider.setOrientation(desiredOrientation);
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         initialOrientationProvider.setOrientation(desiredOrientation);
          finalOrientationProvider.setOrientation(desiredHeadOrientationProvider.getDesiredHeadOrientation());
-//         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
-//         orientationTrajectoryGenerator.initialize();
+         receivedNewHeadOrientationTime.set(yoTime.getDoubleValue());
+         orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
       }
       else if (desiredHeadOrientationProvider.isNewLookAtInformationAvailable())
