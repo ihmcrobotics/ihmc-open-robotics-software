@@ -5,8 +5,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-
 public abstract class StandardBlackoutSimulator implements CommunicationBlackoutSimulator
 {
    private final int GOOD_COMMS_PERIOD_IN_MILLI = 1000;
@@ -17,7 +15,7 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
    private volatile boolean blackout = false;
    private ExecutorService executor = Executors.newSingleThreadExecutor();
    
-   public StandardBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator, PacketCommunicator packetCommunicator)
+   public StandardBlackoutSimulator(CommunicationBlackoutGenerator blackoutGenerator)
    {
       this.blackoutGenerator = blackoutGenerator;
    }

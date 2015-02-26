@@ -5,9 +5,7 @@ import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.communication.blackoutGenerators.CommunicationBlackoutSimulator;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.BlackoutPacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.ihmcPerception.depthData.RobotBoundingBoxes;

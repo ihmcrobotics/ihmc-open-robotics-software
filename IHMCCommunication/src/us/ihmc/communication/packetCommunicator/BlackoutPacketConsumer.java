@@ -18,7 +18,7 @@ public class BlackoutPacketConsumer<P extends Packet<P>> implements PacketConsum
    @Override
    public void receivedPacket(P packet)
    {
-      if(!blackoutSimulator.blackoutCommunication())
+      if(blackoutSimulator != null && !blackoutSimulator.blackoutCommunication())
          packetConsumer.receivedPacket(packet);
    }
 }
