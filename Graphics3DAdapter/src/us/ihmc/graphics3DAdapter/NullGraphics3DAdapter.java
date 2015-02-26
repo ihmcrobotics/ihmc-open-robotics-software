@@ -16,6 +16,7 @@ import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
+import us.ihmc.graphics3DAdapter.input.Mouse3DListener;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
@@ -197,6 +198,11 @@ public class NullGraphics3DAdapter implements Graphics3DAdapter
    }
 
    public void addMouseListener(MouseListener mouseListener)
+   {
+   }
+
+   @Override
+   public void addMouse3DListener(Mouse3DListener mouse3dListener)
    {
    }
 
