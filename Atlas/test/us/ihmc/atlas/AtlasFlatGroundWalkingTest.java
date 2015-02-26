@@ -8,6 +8,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
@@ -19,7 +20,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
 	@AverageDuration(duration = 119.9)
 	@Test(timeout = 1009754)
-   public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException
+   public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -32,7 +33,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 
 	@AverageDuration(duration = 0.7)
 	@Test(timeout = 300000)
-   public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException
+   public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       try
       {

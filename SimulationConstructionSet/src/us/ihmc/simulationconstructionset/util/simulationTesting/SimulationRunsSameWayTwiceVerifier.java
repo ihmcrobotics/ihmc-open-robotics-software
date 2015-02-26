@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.ThreadTools;
@@ -32,7 +33,7 @@ public class SimulationRunsSameWayTwiceVerifier
       ThreadTools.sleep(1000);
    }
 
-   public boolean verifySimRunsSameWayTwice(double maxPercentDifference, ArrayList<String> stringsToIgnore) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public boolean verifySimRunsSameWayTwice(double maxPercentDifference, ArrayList<String> stringsToIgnore) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
 
    {
       boolean firstSimDone, secondSimDone;
@@ -90,7 +91,7 @@ public class SimulationRunsSameWayTwiceVerifier
       return false;
    }
 
-   private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
 
    {
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");

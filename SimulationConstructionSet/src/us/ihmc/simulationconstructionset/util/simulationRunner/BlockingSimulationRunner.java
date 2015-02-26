@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.util.simulationRunner;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
@@ -25,6 +26,8 @@ public class BlockingSimulationRunner
    private final double maximumClockRunTimeInSeconds;
    private final boolean destroySimulationIfOverrunMaxTime;
 
+   private final AtomicBoolean hasControllerFailed = new AtomicBoolean(false);
+
    public BlockingSimulationRunner(SimulationConstructionSet scs, double maximumClockRunTimeInSeconds)
    {
       this(scs, maximumClockRunTimeInSeconds, true);
@@ -38,7 +41,7 @@ public class BlockingSimulationRunner
       this.destroySimulationIfOverrunMaxTime = destroySimulationaIfOverrunMaxTime;
    }
 
-   public void simulateNTicksAndBlock(int numberOfTicks) throws SimulationExceededMaximumTimeException
+   public void simulateNTicksAndBlock(int numberOfTicks) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       // TODO: Sometimes you need to sleep before simulating and blocking. Need to fix up the threading stuff in SCS to make more reliable.
 //    if (!hasSleptOnce)
@@ -51,9 +54,10 @@ public class BlockingSimulationRunner
 
 //    waitForSimulationToStart();
       waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, destroySimulationIfOverrunMaxTime);
+      checkIfControllerHasFailed();
    }
 
-   public void simulateAndBlock(double simulateTime) throws SimulationExceededMaximumTimeException
+   public void simulateAndBlock(double simulateTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
 //    System.out.println("Starting Simulation for " + simulateTime);
 
@@ -70,6 +74,7 @@ public class BlockingSimulationRunner
 
 //    waitForSimulationToStart();
       waitForSimulationToFinish(scs, maximumClockRunTimeInSeconds, destroySimulationIfOverrunMaxTime);
+      checkIfControllerHasFailed();
 
       double endTime = scs.getTime();
       double elapsedTime = endTime - startTime;
@@ -83,7 +88,7 @@ public class BlockingSimulationRunner
 
    }
 
-   public boolean doOneShotRewindTest(double t0, double t1, double t2) throws SimulationExceededMaximumTimeException
+   public boolean doOneShotRewindTest(double t0, double t1, double t2) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       boolean passed = true;
 
@@ -186,6 +191,27 @@ public class BlockingSimulationRunner
             throw new SimulationExceededMaximumTimeException("Simulation Exceeded maximumClockRunTimeInSeconds");
          }
       }
+   }
+
+   private void checkIfControllerHasFailed() throws ControllerFailureException
+   {
+      if (hasControllerFailed.get())
+         throw new ControllerFailureException("Controller failure has been detected.");
+   }
+
+   public ControllerFailureListener createControllerFailureListener()
+   {
+      ControllerFailureListener controllerFailureListener = new ControllerFailureListener()
+      {
+         @Override
+         public void controllerFailed()
+         {
+            hasControllerFailed.set(true);
+            scs.stop();
+         }
+      };
+
+      return controllerFailureListener;
    }
 
    public static class SimulationExceededMaximumTimeException extends Exception

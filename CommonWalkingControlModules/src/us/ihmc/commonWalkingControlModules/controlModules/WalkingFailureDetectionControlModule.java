@@ -45,7 +45,7 @@ public class WalkingFailureDetectionControlModule
 
       isFallDetectionActivated = new BooleanYoVariable("isFallDetectionActivated", registry);
       isFallDetectionActivated.set(true);
-      
+
       icpDistanceFromFootPolygonThreshold = new DoubleYoVariable("icpDistanceFromFootPolygonThreshold", registry);
       icpDistanceFromFootPolygonThreshold.set(0.05);
       icpDistanceFromFootPolygon = new DoubleYoVariable("icpDistanceFromFootPolygon", registry);
@@ -73,7 +73,7 @@ public class WalkingFailureDetectionControlModule
       currentCapturePoint.getFrameTuple2dIncludingFrame(capturePoint);
       icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint));
       // TODO need to investigate this method, seems to be buggy
-//      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
+      //      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint.distance(capturePoint) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       isRobotFalling.set(!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);

@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
@@ -33,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -189,7 +189,7 @@ public class MomentumBasedController
 
    private final double totalMass;
 
-   private final ArrayList<HighLevelControllerFailureListener> highLevelControllerFailureListeners = new ArrayList<>();
+   private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -1224,16 +1224,16 @@ public class MomentumBasedController
       return controlledJoints;
    }
 
-   public void attachHighLevelControllerFailureListener(HighLevelControllerFailureListener listener)
+   public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      this.highLevelControllerFailureListeners.add(listener);
+      this.controllerFailureListeners.add(listener);
    }
 
-   public void reportControlFailureToListeners()
+   public void reportControllerFailureToListeners()
    {
-      for (int i = 0; i < highLevelControllerFailureListeners.size(); i++)
+      for (int i = 0; i < controllerFailureListeners.size(); i++)
       {
-         highLevelControllerFailureListeners.get(i).controllerFailed();
+         controllerFailureListeners.get(i).controllerFailed();
       }
    }
 }

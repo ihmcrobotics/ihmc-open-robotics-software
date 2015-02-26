@@ -25,6 +25,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrection;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -298,7 +299,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException
+   public void testRandomInterpolationFinals() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       Random random = new Random(1984L);
@@ -347,7 +348,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
 
    private boolean testInterpolationForTranslationAndRotationToRandomTargetsFromOrigin(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
-         throws SimulationExceededMaximumTimeException
+         throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -413,7 +414,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
    
    private boolean testInterpolationForTranslationToRandomTargetsFromOrigin(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
-         throws SimulationExceededMaximumTimeException
+         throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -477,7 +478,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
 
    private boolean testInterpolationForTranslationAndRotationToRandomTargetsFromSpecificLocations(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry,
-         int numTargets) throws SimulationExceededMaximumTimeException
+         int numTargets) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -545,7 +546,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
    
    private boolean testInterpolationForTranslationToRandomTargetsFromSpecificLocations(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry,
-         int numTargets) throws SimulationExceededMaximumTimeException
+         int numTargets) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -611,7 +612,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
 
    private boolean testYawForTranslationAndRotation(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
-         throws SimulationExceededMaximumTimeException
+         throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -680,7 +681,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
    }
    
    private boolean testYawForTranslation(Random random, ExternalPelvisPoseCreator externalPelvisPoseCreator, YoVariableRegistry registry, int numTargets)
-         throws SimulationExceededMaximumTimeException
+         throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       setPelvisPoseHistoryCorrectorAlphaBreakFreq(registry, 5.0, 5.0);
       setPelvisPoseHistoryCorrectorMaxVelocity(registry, 100.0, 100.0);
@@ -803,14 +804,14 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
       }
    }
 
-   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
+   public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       try
       {
          bsr.simulateAndBlock(simulationTime);
          return true;
       }
-      catch (Exception e)
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
       {
          System.err.println("Caught exception in " + getClass().getSimpleName() + ".simulateAndBlockAndCatchExceptions. Exception = /n" + e);
          throw e;

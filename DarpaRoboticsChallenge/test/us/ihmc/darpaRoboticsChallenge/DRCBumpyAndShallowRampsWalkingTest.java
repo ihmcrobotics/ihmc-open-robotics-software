@@ -28,6 +28,7 @@ import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
@@ -81,7 +82,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
 	@AverageDuration(duration = 70.5)
 	@Test(timeout = 352587)
-   public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException
+   public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -166,7 +167,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 	@QuarantinedTest("This has never worked. Would be nice if we can get it to work.")
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException
+   public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -296,7 +297,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
 	@AverageDuration(duration = 87.3)
 	@Test(timeout = 436492)
-   public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException
+   public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -347,7 +348,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
 
    private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
-           throws SimulationExceededMaximumTimeException
+           throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);

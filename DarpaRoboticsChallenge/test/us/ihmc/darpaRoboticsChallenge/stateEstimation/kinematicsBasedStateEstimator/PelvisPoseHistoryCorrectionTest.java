@@ -47,6 +47,7 @@ import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -512,7 +513,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    @QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException
+   public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
