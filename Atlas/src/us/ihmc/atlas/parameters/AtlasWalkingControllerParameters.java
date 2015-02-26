@@ -132,6 +132,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public boolean isNeckPositionControlled()
+   {
+      return false;
+   }
+
+   @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
       String[] defaultHeadOrientationControlJointNames = new String[]

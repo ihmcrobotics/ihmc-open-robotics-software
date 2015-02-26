@@ -12,6 +12,8 @@ public interface HeadOrientationControllerParameters
 
    public abstract double[] getInitialHeadYawPitchRoll();
 
+   public abstract boolean isNeckPositionControlled();
+
    public abstract double getNeckPitchUpperLimit();
 
    public abstract double getNeckPitchLowerLimit();
