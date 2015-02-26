@@ -6,8 +6,10 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -19,6 +21,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.TaskExecutor;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -32,7 +35,8 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 {
    private double radiansToRotateBetweenHandPoses = Math.toRadians(18.0);
 
-   private static final boolean DEBUG = false;
+   private final boolean DEBUG = false;
+   private final boolean USE_WHOLE_BODY_IK = false;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
@@ -40,7 +44,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
    private final TaskExecutor taskExecutor;
    private final HandPoseBehavior handPoseBehavior;
-   //   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
+   private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable hasInputBeenSet;
@@ -52,7 +56,8 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.taskExecutor = new TaskExecutor();
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      //      this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
+      this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters,
+            fullRobotModel, yoTime);
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
    }
@@ -87,7 +92,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
       int numberOfDiscreteHandPosesToUse = (int) Math.round(totalRotationInRadians / radiansToRotateBetweenHandPoses);
 
-      double totalTrajectoryTime = totalRotationInRadians / rotationRateRadPerSec;
+      double totalTrajectoryTime = Math.abs(totalRotationInRadians / rotationRateRadPerSec);
       double trajectoryTimePerHandPose = totalTrajectoryTime / numberOfDiscreteHandPosesToUse;
 
       if (DEBUG)
@@ -115,8 +120,15 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          {
             throw new RuntimeException("Hand Pose must be defined in World reference frame.");
          }
-         taskExecutor.submit(new HandPoseTask(robotSide, trajectoryTimePerHandPose, desiredHandPose, packetFrame, handPoseBehavior, yoTime));
-         //         taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose, trajectoryTime / numberOfDiscreteHandPosesToUse, 0, ControlledDoF.DOF_3P2R, true));
+         if (USE_WHOLE_BODY_IK)
+         {
+            taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose,
+                  trajectoryTimePerHandPose, 0, ControlledDoF.DOF_3P2R, true));
+         }
+         else
+         {
+            taskExecutor.submit(new HandPoseTask(robotSide, trajectoryTimePerHandPose, desiredHandPose, packetFrame, handPoseBehavior, yoTime));
+         }
       }
 
       hasInputBeenSet.set(true);
