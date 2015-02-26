@@ -2,25 +2,45 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.LookAtStatus;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class LookAtBehavior extends BehaviorInterface
 {
+   private final boolean DEBUG = false;
+   
    private LookAtPacket packetToSend;
    private int lookAtPacketIndex = 0;
+   
+   private final double trajectoryTime;
+   
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable startTime;
+   private final DoubleYoVariable trajectoryTimeElapsed;
+   
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable inputsHaveBeenSupplied;
    private final ConcurrentListeningQueue<LookAtPacket> inputListeningQueue = new ConcurrentListeningQueue<LookAtPacket>();
    private final ConcurrentListeningQueue<LookAtStatus> statusListeningQueue = new ConcurrentListeningQueue<LookAtStatus>();
 
-   public LookAtBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge)
+   public LookAtBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters, DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
+      this.yoTime = yoTime;
+      String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
+      startTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "StartTime", registry);
+      startTime.set(Double.NaN);
+      trajectoryTime = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
+      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "trajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed.set(Double.NaN);
       isDone = new BooleanYoVariable(behaviorName + "_isDone", registry);
       inputsHaveBeenSupplied = new BooleanYoVariable(behaviorName + "_inputsHaveBeenSupplied", registry);
    }
@@ -28,6 +48,8 @@ public class LookAtBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
+      
       if (inputListeningQueue.isNewPacketAvailable())
       {
          packetToSend = inputListeningQueue.getNewestPacket();
@@ -39,15 +61,24 @@ public class LookAtBehavior extends BehaviorInterface
       {
          sendPacketToController(packetToSend);
          packetToSend = null;
+         startTime.set(yoTime.getDoubleValue());
       }
 
       if (statusListeningQueue.isNewPacketAvailable())
       {
-         LookAtStatus lookAtResult = statusListeningQueue.getNewestPacket();
-         if (lookAtResult.getIndex() == lookAtPacketIndex)
+         LookAtStatus lookAtStatus = statusListeningQueue.getNewestPacket();
+         if (lookAtStatus.getIndex() == lookAtPacketIndex)
          {
-            isDone.set(lookAtResult.isFinished());
+            isDone.set(lookAtStatus.isFinished());
          }
+      }
+      
+      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+            && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime)
+      {
+         if (DEBUG)
+            SysoutTool.println("setting isDone = true");
+         isDone.set(true);
       }
    }
 
@@ -102,7 +133,6 @@ public class LookAtBehavior extends BehaviorInterface
    @Override
    public boolean isDone()
    {
-      // FIXME: LookAtStatus.isFinished() not yet implemented
       return isDone.getBooleanValue();
    }
 
@@ -119,6 +149,9 @@ public class LookAtBehavior extends BehaviorInterface
       isDone.set(false);
       inputListeningQueue.clear();
       statusListeningQueue.clear();
+
+      startTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
    }
 
    @Override

@@ -173,6 +173,10 @@ public class HandPoseBehavior extends BehaviorInterface
       isPaused.set(false);
       isDone.set(false);
       hasBeenInitialized.set(true);
+      
+      trajectoryTime.set(Double.NaN);
+      startTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
    }
 
    @Override

@@ -63,8 +63,6 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -93,8 +91,10 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -102,8 +102,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
    //TODO: Fix HeadOrienationManager() so that head actually tracks desired yaw and roll orientations.  Currently, only pitch orientation tracks properly.
 
-   
-	@AverageDuration(duration = 27.5)
+   @AverageDuration(duration = 27.5)
    @Test(timeout = 82410)
    public void testLookAtPitch() throws SimulationExceededMaximumTimeException
    {
@@ -116,7 +115,7 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
       LookAtBehavior lookAtBehavior = testLookAtBehavior(trajectoryTime, desiredHeadQuat);
 
-      assertTrue(lookAtBehavior.isDone());
+      assertTrue("Behavior should be done, but it isn't.", lookAtBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -192,12 +191,13 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
    {
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      final LookAtBehavior lookAtBehavior = new LookAtBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
+      final LookAtBehavior lookAtBehavior = new LookAtBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel()
+            .getWalkingControllerParameters(), drcBehaviorTestHelper.getYoTime());
 
       lookAtBehavior.setLookAtLocation(pointToLookAt);
       assertTrue(lookAtBehavior.hasInputBeenSet());
 
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(lookAtBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(lookAtBehavior);
 
       assertTrue(success);
 
@@ -214,7 +214,8 @@ public abstract class DRCLookAtBehaviorTest implements MultiRobotTestInterface
 
       double angleBetweenAxes = Math.abs(Math.acos(desiredLookAxis.dot(actualLookAxis)));
 
-      assertEquals("Angle between actual and desired lookAt directions," + angleBetweenAxes + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, angleBetweenAxes, ORIENTATION_THRESHOLD);
+      assertEquals("Angle between actual and desired lookAt directions," + angleBetweenAxes + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0,
+            angleBetweenAxes, ORIENTATION_THRESHOLD);
    }
 
    private Vector3d getQuatAxis(Quat4d quat)
