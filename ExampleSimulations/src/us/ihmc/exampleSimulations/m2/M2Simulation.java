@@ -15,6 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -29,7 +30,7 @@ public class M2Simulation implements SimulationDoneListener
    private SimulationConstructionSet sim;
    private M2Robot m2;
 
-   public M2Simulation() throws SimulationExceededMaximumTimeException
+   public M2Simulation() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       M2Parameters littleM2Parameters = new LittleM2Parameters();
       M2Parameters bigM2Parameters = new BigM2Parameters();
@@ -221,7 +222,7 @@ public class M2Simulation implements SimulationDoneListener
       System.out.println("Simulate Done");
    }
 
-   public static void main(String[] args) throws SimulationExceededMaximumTimeException
+   public static void main(String[] args) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
 	  new M2Simulation();
    }

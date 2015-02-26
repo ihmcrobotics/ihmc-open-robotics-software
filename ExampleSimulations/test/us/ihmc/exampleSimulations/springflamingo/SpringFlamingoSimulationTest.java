@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
@@ -26,7 +27,7 @@ public class SpringFlamingoSimulationTest
    private SimulationConstructionSet scs;
 
    @Before
-   public void setUp() throws SimulationExceededMaximumTimeException
+   public void setUp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SpringFlamingoSimulation springFlamingoSimulation = new SpringFlamingoSimulation();
       scs = springFlamingoSimulation.getSimulationConstructionSet();
