@@ -1,7 +1,7 @@
 package us.ihmc.wholeBodyController;
 
 public enum DRCHandType {
-	NONE(false), IROBOT(false), HOOK(false), ROBOTIQ(true), VALKYRIE(false);
+	NONE(false), IROBOT(false), HOOK(false), ROBOTIQ(false), VALKYRIE(false);
 	
 	private final boolean simulateHand;
 	

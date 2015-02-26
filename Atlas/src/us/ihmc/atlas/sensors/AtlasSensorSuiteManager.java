@@ -8,7 +8,6 @@ import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -35,7 +34,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.SENSOR_MANAGER.ordinal(), "ATLAS_SENSOR_MANAGER");
-   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
    private final PointCloudDataReceiver pointCloudDataReceiver;
@@ -49,7 +47,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, handType, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       this.modelFactory = modelFactory;
    }
 
@@ -58,8 +56,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
-      new SCSCameraDataReceiver(modelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
+      SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(modelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
             ppsTimestampOffsetProvider);
+      cameraDataReceiver.start();
+      
 
       //      if (sensorInformation.getPointCloudParameters().length > 0)
       //      {

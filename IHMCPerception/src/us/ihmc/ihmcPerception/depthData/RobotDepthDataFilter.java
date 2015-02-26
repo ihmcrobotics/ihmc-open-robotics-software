@@ -13,20 +13,29 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCHandType;
 
 public class RobotDepthDataFilter extends DepthDataFilter
 {
    private final FullRobotModel fullRobotModel;
    private final SideDependentList<ArrayList<Point2d>> contactPoints;
+   private final RobotBoundingBoxes boundingBoxes;
 
 
-   public RobotDepthDataFilter(FullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
+   public RobotDepthDataFilter(DRCHandType drcHandType, FullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super((fullRobotModel.getHead() == null) ? ReferenceFrame.getWorldFrame() : fullRobotModel.getHead().getBodyFixedFrame());
       this.fullRobotModel = fullRobotModel;
       this.contactPoints = contactPoints;
+      this.boundingBoxes = new RobotBoundingBoxes(drcHandType, fullRobotModel);
    }
 
+   @Override
+   public boolean addPoint(Point3d point, Point3d sensorOrigin)
+   {
+      return boundingBoxes.isValidPoint(sensorOrigin, point) && super.addPoint(point, sensorOrigin);
+   }
+   
    @Override
    public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {

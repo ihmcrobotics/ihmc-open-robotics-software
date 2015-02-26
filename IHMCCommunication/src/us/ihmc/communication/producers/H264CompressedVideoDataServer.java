@@ -20,6 +20,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer, PacketConsumer<VideoControlPacket>
 {
@@ -65,7 +66,8 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
 
    }
 
-   public synchronized void updateImage(BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
+   @Override
+   public synchronized void updateImage(RobotSide robotSide, BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
          final double fov)
    {
       if (!handler.isConnected() || !videoEnabled)
@@ -133,7 +135,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
             nal.get(data);
-            handler.newVideoPacketAvailable(timeStamp, data, cameraPosition, cameraOrientation, fov);
+            handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, fov);
          }
       }
       catch (IOException e)
