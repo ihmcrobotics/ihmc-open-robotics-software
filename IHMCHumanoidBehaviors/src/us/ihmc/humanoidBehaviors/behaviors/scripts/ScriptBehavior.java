@@ -45,7 +45,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
-import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -92,14 +91,14 @@ public class ScriptBehavior extends BehaviorInterface
    private final ThighStateBehavior thighStateBehavior;
    private final HighLevelStateBehavior highLevelStateBehavior;
    public final FingerStateBehavior fingerStateBehavior;
-   
+
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
    {
       this(outgoingCommunicationBridge, fullRobotModel, yoTime, null, null);
-      
+
       SysoutTool.println("Warning: FootPosePackets and FootstepDataList packets are not supported when using this constructor!");
    }
-   
+
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
          BooleanYoVariable doubleSupport, WalkingControllerParameters walkingControllerParameters)
    {
@@ -282,35 +281,10 @@ public class ScriptBehavior extends BehaviorInterface
       {
          SysoutTool.println("Starting Importing " + scriptFileName, DEBUG);
 
-         this.childInputPackets = scriptEngine.getScriptObjects(scriptResourceStream);
+         if (childInputPackets == null)
+            childInputPackets = new ArrayList<ScriptObject>();
 
-         int numberOfEndOfScriptCommands = 0;
-         for (ScriptObject inputPacket : childInputPackets)
-         {
-            SysoutTool.println(" Importing child : " + inputPacket.toString() + " to script behavior", DEBUG);
-            
-            if (inputPacket.getScriptObject() instanceof EndOfScriptCommand)
-            {
-               numberOfEndOfScriptCommands ++;
-            }
-            
-            if (footPoseBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOT_POSE)
-            {
-               childInputPackets.remove(inputPacket);
-               SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootPosePackets!");
-            }
-
-            if (footstepListBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOTSTEP_LIST)
-            {
-               childInputPackets.remove(inputPacket);
-               SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootstepDataList packets!");
-            }
-         }
-         
-         if (numberOfEndOfScriptCommands != 1)
-         {
-            throw new RuntimeException("Number of EndOfScriptCommand() packets = " + numberOfEndOfScriptCommands + "!  Must equal one.");
-         }
+         populateChildBehaviorInputPackets(scriptEngine.getScriptObjects(scriptResourceStream));
 
          this.behaviorOriginTransformToWorld = transformToWorld;
 
@@ -331,6 +305,48 @@ public class ScriptBehavior extends BehaviorInterface
          SysoutTool.println("Script Resource Stream is null. Can't load script!", DEBUG);
          scriptImported.set(false);
       }
+   }
+
+   private void populateChildBehaviorInputPackets(ArrayList<ScriptObject> packetsToAdd)
+   {
+      int numberOfEndOfScriptCommands = 0;
+      for (ScriptObject inputPacket : packetsToAdd)
+      {
+         SysoutTool.println(" Importing child : " + inputPacket.toString() + " to script behavior", DEBUG);
+
+         if (inputPacket.getScriptObject() instanceof EndOfScriptCommand)
+         {
+            numberOfEndOfScriptCommands++;
+         }
+
+         if (isChildPacketValid(inputPacket))
+            this.childInputPackets.add(inputPacket);
+
+      }
+
+      if (numberOfEndOfScriptCommands != 1)
+      {
+         throw new RuntimeException("Number of EndOfScriptCommand() packets = " + numberOfEndOfScriptCommands + "!  Must equal one.");
+      }
+   }
+
+   private boolean isChildPacketValid(ScriptObject inputPacket)
+   {
+      boolean ret = true;
+
+      if (footPoseBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOT_POSE)
+      {
+         SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootPosePackets!");
+         return false;
+      }
+
+      if (footstepListBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOTSTEP_LIST)
+      {
+         SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootstepDataList packets!");
+         return false;
+      }
+
+      return ret;
    }
 
    private void sendScriptStatusPacketToNetworkProcessor(ScriptBehaviorStatusEnum scriptBehaviorStatusEnum, int scriptIndexToSend)
@@ -376,7 +392,7 @@ public class ScriptBehavior extends BehaviorInterface
    private PrimitiveBehaviorType getPrimitiveBehaviorType(ScriptObject inputPacket)
    {
       PrimitiveBehaviorType ret = PrimitiveBehaviorType.IDLE;
-      
+
       Object scriptObject = inputPacket.getScriptObject();
 
       if (scriptObject instanceof FootstepDataList)
@@ -637,9 +653,9 @@ public class ScriptBehavior extends BehaviorInterface
    public boolean hasInputBeenSet()
    {
       boolean ret = scriptImported.getBooleanValue();
-      
+
       PrimitiveBehaviorType currentBehaviorState = stateMachine.getCurrentState().getStateEnum();
-      if ( currentBehaviorState != PrimitiveBehaviorType.IDLE )
+      if (currentBehaviorState != PrimitiveBehaviorType.IDLE)
       {
          ret &= stateMachine.getCurrentState().getBehavior().hasInputBeenSet();
       }
