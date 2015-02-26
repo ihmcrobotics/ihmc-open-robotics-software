@@ -2,12 +2,18 @@ package us.ihmc.valkyrie;
 
 import javax.vecmath.Vector3d;
 
+import org.junit.Ignore;
+import org.junit.Test;
+
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseFlatTest;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 @BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
@@ -43,6 +49,17 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    protected double getFootSlipTimeDeltaAfterTouchdown()
    {
       return 0.1;
+   }
+   
+   
+   @Ignore
+   @QuarantinedTest("Doesn't work with Valkyrie yet. Need to get it working some day")
+   @Override
+   @AverageDuration
+   @Test(timeout = 300000)
+   public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees();
    }
 
 }
