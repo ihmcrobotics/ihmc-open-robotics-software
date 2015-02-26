@@ -85,7 +85,7 @@ public class HeadOrientationManager
    
    private void initialize()
    {
-      if (hasBeenInitialized != null && hasBeenInitialized.getBooleanValue())
+      if (hasBeenInitialized == null && hasBeenInitialized.getBooleanValue())
          return;
 
       hasBeenInitialized.set(true);
