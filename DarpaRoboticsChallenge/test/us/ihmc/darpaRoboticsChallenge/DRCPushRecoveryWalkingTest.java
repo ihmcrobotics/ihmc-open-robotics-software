@@ -111,8 +111,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 20.6)
-	@Test(timeout = 61751)
+	@AverageDuration(duration = 34.9)
+	@Test(timeout = 174536)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -131,8 +131,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 20.2)
-	@Test(timeout = 60475)
+	@AverageDuration(duration = 34.4)
+	@Test(timeout = 171862)
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -151,8 +151,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 30.9)
-	@Test(timeout = 92743)
+	@AverageDuration(duration = 50.9)
+	@Test(timeout = 254660)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -180,8 +180,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 19.8)
-	@Test(timeout = 59360)
+	@AverageDuration(duration = 33.5)
+	@Test(timeout = 167410)
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -200,8 +200,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 20.2)
-	@Test(timeout = 60718)
+	@AverageDuration(duration = 34.3)
+	@Test(timeout = 171329)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -220,8 +220,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 30.1)
-	@Test(timeout = 90332)
+	@AverageDuration(duration = 51.3)
+	@Test(timeout = 256611)
    public void TestPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -250,8 +250,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 36.6)
-	@Test(timeout = 109654)
+	@AverageDuration(duration = 61.9)
+	@Test(timeout = 309687)
    public void TestPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
@@ -280,8 +280,8 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 20.1)
-	@Test(timeout = 60442)
+	@AverageDuration(duration = 34.0)
+	@Test(timeout = 169978)
    public void TestPushRightRandomTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
    {
       BambooTools.reportTestStartedMessage();
