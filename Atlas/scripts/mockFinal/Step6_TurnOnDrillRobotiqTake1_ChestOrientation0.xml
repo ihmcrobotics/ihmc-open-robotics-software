@@ -77,10 +77,6 @@
       <double>-1.1781</double>
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
-  <long>30604995742</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>49904832825</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
@@ -1802,10 +1798,6 @@
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.023324</heightOffset>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
-  <long>611802280593</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>614842318392</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>

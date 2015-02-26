@@ -89,7 +89,7 @@ public enum AtlasRobotVersion
          if (hasRobotiqHands())
          {
             centerOfHandToWristTranslation = new Vector3f(0.16f, robotSide.negateIfLeftSide(0f), 0f);
-            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(90));
+            angles[0] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
             angles[1] = 0.0f;
             angles[2] = (float) robotSide.negateIfLeftSide(Math.toRadians(0));
          }

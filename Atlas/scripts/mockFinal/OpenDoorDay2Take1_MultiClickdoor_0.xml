@@ -1,8 +1,4 @@
 <object-stream>
-  <long>3462159106</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
   <long>9534032595</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>RIGHT</robotSide>
