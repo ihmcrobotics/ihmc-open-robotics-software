@@ -45,6 +45,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
+import us.ihmc.humanoidBehaviors.taskExecutor.FootstepListTask;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -92,6 +93,13 @@ public class ScriptBehavior extends BehaviorInterface
    private final HighLevelStateBehavior highLevelStateBehavior;
    public final FingerStateBehavior fingerStateBehavior;
    
+   public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime)
+   {
+      this(outgoingCommunicationBridge, fullRobotModel, yoTime, null, null);
+      
+      SysoutTool.println("Warning: FootPosePackets and FootstepDataList packets are not supported when using this constructor!");
+   }
+   
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
          BooleanYoVariable doubleSupport, WalkingControllerParameters walkingControllerParameters)
    {
@@ -99,13 +107,28 @@ public class ScriptBehavior extends BehaviorInterface
 
       scriptEngine = new ScriptEngine(null);
 
-      footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      if (walkingControllerParameters != null)
+      {
+         footstepListBehavior = new FootstepListBehavior(outgoingCommunicationBridge, walkingControllerParameters);
+      }
+      else
+      {
+         footstepListBehavior = null;
+      }
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       footStateBehavior = new FootStateBehavior(outgoingCommunicationBridge);
       handStateBehavior = new HandStateBehavior(outgoingCommunicationBridge, yoTime);
       headOrientationBehavior = new HeadOrientationBehavior(outgoingCommunicationBridge, yoTime);
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
-      footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, doubleSupport);
+      if (doubleSupport != null)
+      {
+         footPoseBehavior = new FootPoseBehavior(outgoingCommunicationBridge, yoTime, doubleSupport);
+
+      }
+      else
+      {
+         footPoseBehavior = null;
+      }
       pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
       chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
       handLoadBearingBehavior = new HandLoadBearingBehavior(outgoingCommunicationBridge);
@@ -269,6 +292,18 @@ public class ScriptBehavior extends BehaviorInterface
             if (inputPacket.getScriptObject() instanceof EndOfScriptCommand)
             {
                numberOfEndOfScriptCommands ++;
+            }
+            
+            if (footPoseBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOT_POSE)
+            {
+               childInputPackets.remove(inputPacket);
+               SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootPosePackets!");
+            }
+
+            if (footstepListBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOTSTEP_LIST)
+            {
+               childInputPackets.remove(inputPacket);
+               SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootstepDataList packets!");
             }
          }
          
