@@ -25,6 +25,7 @@ import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class PointCloudDataReceiver extends Thread implements NetStateListener
@@ -40,15 +41,15 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final AtomicBoolean sendData = new AtomicBoolean(false);
    private volatile boolean running = true;
 
-   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
+   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, DRCHandType handType, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator)
    {
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
+      this.depthDataFilter = new RobotDepthDataFilter(handType, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
-
+      
       setupListeners(packetCommunicator);
       packetCommunicator.attachStateListener(this);
 
@@ -77,7 +78,10 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   long nextTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamps[i]);
                   if(nextTimestamp != prevTimestamp)
                   {
-                     robotConfigurationDataBuffer.updateFullRobotModel(true, nextTimestamp, fullRobotModel, null);
+                     if(robotConfigurationDataBuffer.updateFullRobotModel(true, nextTimestamp, fullRobotModel, null) == -1)
+                     {
+                        continue;
+                     }
                      prevTimestamp = nextTimestamp;
                   }
                   

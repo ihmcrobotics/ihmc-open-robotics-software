@@ -111,6 +111,7 @@ public class MultiSenseSensorManager
 
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, packetCommunicator, logger);
 
+      cameraReceiver.start();
       packetCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);
    }
 

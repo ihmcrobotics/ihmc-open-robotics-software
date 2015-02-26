@@ -26,7 +26,6 @@ import org.junit.runners.Suite;
    us.ihmc.communication.serializers.sensing.IntrinsicCameraParametersPacketTest.class,
    us.ihmc.communication.serializers.sensing.LidarStateSerializerTest.class,
    us.ihmc.communication.serializers.sensing.LookAtPacketSerializerTest.class,
-   us.ihmc.communication.serializers.sensing.VideoPacketSerializerTest.class,
    us.ihmc.communication.serializers.walking.BlindWalkingPacketSerializerTest.class,
    us.ihmc.communication.serializers.walking.ChestOrientationPacketSerializerTest.class,
    us.ihmc.communication.serializers.walking.FootPosePacketSerializerTest.class,

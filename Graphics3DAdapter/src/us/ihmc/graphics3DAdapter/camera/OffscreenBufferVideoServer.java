@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class OffscreenBufferVideoServer
 {
@@ -49,7 +50,7 @@ public class OffscreenBufferVideoServer
 
       public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
       {
-         videoDataServer.updateImage(bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+         videoDataServer.updateImage(RobotSide.LEFT, bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
       }
 
       public Point3d getCameraPosition()

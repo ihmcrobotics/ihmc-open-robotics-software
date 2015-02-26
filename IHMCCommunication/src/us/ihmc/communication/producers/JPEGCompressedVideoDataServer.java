@@ -11,6 +11,7 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 {
@@ -24,7 +25,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
    }
 
    @Override
-   public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
    {
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
       try
@@ -32,7 +33,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
          ByteBuffer buffer = encoder.encode(picture, 90);
          byte[] data =  new byte[buffer.remaining()];
          buffer.get(data);
-         handler.newVideoPacketAvailable(timeStamp, data, cameraPosition, cameraOrientation, fov);
+         handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, fov);
       }
       catch (IOException e)
       {
