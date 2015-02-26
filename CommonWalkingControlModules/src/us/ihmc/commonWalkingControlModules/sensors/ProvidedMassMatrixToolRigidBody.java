@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -57,17 +58,15 @@ public class ProvidedMassMatrixToolRigidBody
    private final FramePoint temporaryPoint = new FramePoint();
    private final FrameVector temporaryVector = new FrameVector();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
-
    
-   
-   public ProvidedMassMatrixToolRigidBody(String name, final InverseDynamicsJoint wristJoint, final FullRobotModel fullRobotModel, double gravity, 
+   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullRobotModel fullRobotModel, double gravity, 
          double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
       
-      
-      this.handFixedFrame = wristJoint.getSuccessor().getBodyFixedFrame();
-      this.wristFrame = wristJoint.getFrameAfterJoint();
+      this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
+      this.wristFrame = fullRobotModel.getHandControlFrame(robotSide);
       
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
