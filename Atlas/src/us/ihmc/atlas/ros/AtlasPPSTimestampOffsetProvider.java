@@ -50,9 +50,16 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
          @Override
          public void onNewMessage(StampedPps message)
          {
-            currentTimeStampOffset.set(requestNewestRobotTimestamp() - message.getHostTime().totalNsecs());
-            if(offsetIsDetermined.get() && Math.abs(currentTimeStampOffset.get()-lastTimeStampOffset.get())>1e7) 
-               System.out.println(getClass().getSimpleName() + " UnstablePPSOffset"+String.format("%.10f",TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get()))+" second");
+            long robotPPSTimestamp=requestNewestRobotTimestamp();
+            long multisensePPSTimestamp=message.getHostTime().totalNsecs();
+            currentTimeStampOffset.set( robotPPSTimestamp-multisensePPSTimestamp);
+            if(offsetIsDetermined.get() && Math.abs(currentTimeStampOffset.get()-lastTimeStampOffset.get())>1e7)
+            {
+               System.out.println(getClass().getSimpleName() + " UnstablePPSOffset"+
+               String.format("robot %d ns, multisense %d ns,diff, %.4f s",
+                     robotPPSTimestamp, multisensePPSTimestamp,
+                     TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get())));
+            }
             lastTimeStampOffset.set(currentTimeStampOffset.get());
             offsetIsDetermined.set(true);
          }
