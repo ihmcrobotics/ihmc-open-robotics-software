@@ -145,7 +145,53 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       double q_wristPitchInitial = getCurrentArmPose(robotSide)[armJointIndices.get(wristPitchJointName)];
       double q_wristDesired = -getJointMotionDirectionThatDoesNotExceedJointLimits(wristPitchOneDoFJoint, q_wristPitchInitial, turnAngleRad);
 
-      final RotateHandAboutAxisBehavior rotateHandBehavior = createNewRotateHandBehavior();
+      boolean useWholeBodyInverseKinematics = false;
+      final RotateHandAboutAxisBehavior rotateHandBehavior = createNewRotateHandBehavior(useWholeBodyInverseKinematics);
+      rotateHandBehavior.initialize();
+      rotateHandBehavior.setInput(robotSide, handPoseAfterJointSpaceRotation, handFrameAxisAlignedWithWristPitchJoint, handFrame.getTransformToWorldFrame(),
+            q_wristDesired, trajectoryTime);
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateHandBehavior);
+      FramePose handPoseAfterTaskSpaceUnRotation = getCurrentHandPose(robotSide);
+
+      success = success & rotateHandBehavior.isDone();
+      assertTrue(success);
+      assertPosesAreWithinThresholds(initialHandPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(25.0));  //TODO: Looks decent in sim, but need to figure out why orientation threshold is so large.
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @AverageDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testRotateInJointSpaceAndUnRotateInTaskSpaceUsingWholeBodyInverseKinematics() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Simulation", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 2.0;
+      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
+      ArmJointName wristPitchJointName = ArmJointName.WRIST_PITCH;
+      OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
+
+      SysoutTool.println("Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName, DEBUG);
+      FramePose initialHandPose = getCurrentHandPose(robotSide);
+      Axis handFrameAxisAlignedWithWristPitchJoint = getReferenceFrameAxisThatIsAlignedWithParentArmJoint(robotSide, handFrame, wristPitchJointName);
+      FramePose handPoseAfterJointSpaceRotation = getCurrentHandPose(robotSide);
+      SysoutTool.println("Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint, DEBUG);
+
+      double jointSpaceRotation = initialHandPose.getOrientationDistance(handPoseAfterJointSpaceRotation);
+      assertEquals("", Math.toRadians(90.0), Math.abs(jointSpaceRotation), Math.toRadians(1.0));
+
+      double turnAngleRad = Math.toRadians(90.0);
+      double q_wristPitchInitial = getCurrentArmPose(robotSide)[armJointIndices.get(wristPitchJointName)];
+      double q_wristDesired = -getJointMotionDirectionThatDoesNotExceedJointLimits(wristPitchOneDoFJoint, q_wristPitchInitial, turnAngleRad);
+
+      boolean useWholeBodyInverseKinematics = true;
+      final RotateHandAboutAxisBehavior rotateHandBehavior = createNewRotateHandBehavior(useWholeBodyInverseKinematics);
       rotateHandBehavior.initialize();
       rotateHandBehavior.setInput(robotSide, handPoseAfterJointSpaceRotation, handFrameAxisAlignedWithWristPitchJoint, handFrame.getTransformToWorldFrame(),
             q_wristDesired, trajectoryTime);
@@ -168,14 +214,14 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       }
    }
 
-   private RotateHandAboutAxisBehavior createNewRotateHandBehavior()
+   private RotateHandAboutAxisBehavior createNewRotateHandBehavior(boolean useWholeBodyInverseKinematics)
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
       SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
       ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
 
-      RotateHandAboutAxisBehavior ret = new RotateHandAboutAxisBehavior(communicationBridge, fullRobotModel, referenceFrames, getRobotModel(), yoTime);
+      RotateHandAboutAxisBehavior ret = new RotateHandAboutAxisBehavior(communicationBridge, fullRobotModel, referenceFrames, getRobotModel(), yoTime, useWholeBodyInverseKinematics);
       return ret;
    }
 
@@ -350,9 +396,9 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
          System.out.println("positionDistance=" + positionDistance);
          System.out.println("orientationDistance=" + orientationDistance);
       }
-
-      assertEquals(0.0, positionDistance, positionThreshold);
-      assertEquals(0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
    }
 
 }

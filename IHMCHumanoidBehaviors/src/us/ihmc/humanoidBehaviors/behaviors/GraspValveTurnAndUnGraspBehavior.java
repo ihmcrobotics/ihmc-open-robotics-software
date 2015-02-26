@@ -54,7 +54,7 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
 
    public GraspValveTurnAndUnGraspBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
-         BooleanYoVariable tippingDetectedBoolean)
+         BooleanYoVariable tippingDetectedBoolean, boolean useWholeBodyInverseKinematics)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
@@ -64,7 +64,7 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
       graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
       childBehaviors.add(graspValveBehavior);
       rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters,
-            yoTime);
+            yoTime, useWholeBodyInverseKinematics);
       childBehaviors.add(rotateGraspedValveBehavior);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
