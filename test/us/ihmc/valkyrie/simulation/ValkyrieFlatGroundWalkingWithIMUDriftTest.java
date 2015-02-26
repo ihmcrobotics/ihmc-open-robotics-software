@@ -11,6 +11,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAcceleratingYawDriftCorruptor;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -25,7 +26,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
    @QuarantinedTest("Need to fix the signal corruptors for the simulated sensors.")
 	@AverageDuration(duration = 50.3)
 	@Test(timeout = 150919)
-   public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException
+   public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 

@@ -27,6 +27,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -97,7 +98,7 @@ public class ValkyriePosePlaybackDemoTest
 
 	@AverageDuration(duration = 13.8)
 	@Test(timeout = 41473)
-   public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException
+   public void testPosePlaybackControllerWithWarmupPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       int numberOfPoses = 5;
       double trajectoryTime = 1.0;
@@ -119,7 +120,7 @@ public class ValkyriePosePlaybackDemoTest
 
 	@AverageDuration(duration = 17.9)
 	@Test(timeout = 53820)
-   public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException
+   public void testPosePlaybackControllerWithRandomPoses() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       int numberOfPoses = 5;
       double delayTime = 0.25;
@@ -141,7 +142,7 @@ public class ValkyriePosePlaybackDemoTest
 
 	@AverageDuration(duration = 13.7)
 	@Test(timeout = 41074)
-   public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException
+   public void testPosePlaybackControllerWithRandomPosesWithSomeJointsUncontrolled() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       int numberOfPoses = 5;
       double delayTime = 0.25;
