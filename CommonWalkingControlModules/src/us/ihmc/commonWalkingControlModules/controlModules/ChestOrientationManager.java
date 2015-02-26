@@ -7,7 +7,6 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
@@ -119,8 +118,6 @@ public class ChestOrientationManager
             activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          
          activeTrajectoryGenerator.get(desiredOrientation);
-         if (!RotationFunctions.isRotationProper(desiredOrientation.getMatrix3dCopy()))
-            throw new RuntimeException(getClass().getSimpleName() + ": Desired chest orientation is screwed");
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }
