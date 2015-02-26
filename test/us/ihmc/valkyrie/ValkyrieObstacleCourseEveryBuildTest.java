@@ -26,7 +26,7 @@ public class ValkyrieObstacleCourseEveryBuildTest extends DRCObstacleCourseEvery
    }
 
    @Ignore
-   @QuarantinedTest("")
+   @QuarantinedTest("Doesn't work with Valkyrie yet. Need to get it working some day")
    @Override
    @AverageDuration
    @Test(timeout = 300000)
