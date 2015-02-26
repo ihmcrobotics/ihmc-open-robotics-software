@@ -2,7 +2,6 @@ package us.ihmc.graphics3DAdapter.camera;
 
 public interface TrackingDollyCameraController extends CameraController, CameraPropertiesHolder
 {
-   
    public void reset();
 
    public void setTrackingOffsets(double dx, double dy, double dz);
