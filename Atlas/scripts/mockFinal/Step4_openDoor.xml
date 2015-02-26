@@ -437,11 +437,7 @@
       <w>-0.42438179657686287</w>
     </quaternion>
   </us.ihmc.communication.packets.walking.ChestOrientationPacket>
-  <long>168681114931</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-  <long>186317598866</long>
+    <long>186317598866</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
     <heightOffset>0.03773000000000001</heightOffset>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
@@ -757,11 +753,7 @@
       <double>0.22657011123724968</double>
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
-  <long>354218966320</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-  <long>358672607244</long>
+    <long>358672607244</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
@@ -810,11 +802,7 @@
       <w>-0.08235446090725053</w>
     </quaternion>
   </us.ihmc.communication.packets.walking.ChestOrientationPacket>
-  <long>372806759330</long>
-  <us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-    <depthDataTree>OCTREE</depthDataTree>
-  </us.ihmc.communication.packets.sensing.DepthDataClearCommand>
-  <long>377903665121</long>
+    <long>377903665121</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
