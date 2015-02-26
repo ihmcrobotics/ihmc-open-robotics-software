@@ -175,7 +175,7 @@ public class MomentumBasedControllerFactory
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, yoTime, gravityZ,
             twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
-            oldMomentumControlModule, updatables, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
+            oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
             transferTimeCalculator, transferTime);

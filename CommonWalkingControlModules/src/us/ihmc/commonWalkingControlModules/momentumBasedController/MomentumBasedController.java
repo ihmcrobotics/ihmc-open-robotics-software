@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisu
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactoryHelper;
@@ -195,8 +196,8 @@ public class MomentumBasedController
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
          SideDependentList<ContactablePlaneBody> feet, SideDependentList<ContactablePlaneBody> handsWithFingersBentBack,
          SideDependentList<ContactablePlaneBody> thighs, ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
-         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, WalkingControllerParameters walkingControllerParameters,
-         YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         OldMomentumControlModule oldMomentumControlModule, ArrayList<Updatable> updatables, ArmControllerParameters armControllerParameters,
+         WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -383,7 +384,8 @@ public class MomentumBasedController
          RigidBody hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide, getFullRobotModel(), gravityZ, controlDT, registry, yoGraphicsListRegistry));
+            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide, getFullRobotModel(), gravityZ, controlDT, armControllerParameters,
+                  registry, yoGraphicsListRegistry));
             handWrenches.put(robotSide, new Wrench());
          }
       }
