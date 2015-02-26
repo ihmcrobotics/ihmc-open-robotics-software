@@ -57,14 +57,19 @@ public class AtlasNetworkProcessor
     	  IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
-       networkModuleParams.setUseUiModule(true);
-       networkModuleParams.setUseBehaviorModule(true);
-       networkModuleParams.setUseSensorModule(true);
-       networkModuleParams.setUseRosModule(true);
-       networkModuleParams.setUseBehaviorVisualizer(true);
-//       networkModuleParams.setUseHandModule(true);
-//       networkModuleParams.setUsePerceptionModule(true);
-    	  
+        networkModuleParams.setUseUiModule(true);
+        networkModuleParams.setUseBehaviorModule(true);
+        networkModuleParams.setUseSensorModule(true);
+        networkModuleParams.setUseBehaviorVisualizer(true);
+//      networkModuleParams.setUsePerceptionModule(true);
+
+        URI rosuri = NetworkParameters.getROSURI();
+        if(rosuri != null)
+        {
+           networkModuleParams.setUseRosModule(true);
+           networkModuleParams.setRosUri(rosuri);
+           System.out.println("ROS_MASTER_URI="+rosuri);
+        }
     	  try
     	  {
     	     AtlasTarget target;
@@ -81,6 +86,8 @@ public class AtlasNetworkProcessor
     	        target = AtlasTarget.SIM;
     	     }
     		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
+           if(model.getHandModel()!=null)
+              networkModuleParams.setUseHandModule(true);       
     	  }
     	  catch (IllegalArgumentException e)
     	  {
@@ -92,9 +99,9 @@ public class AtlasNetworkProcessor
     	  
     	  System.out.println("Using the " + model + " model");
     	  
-    	  URI rosMasterURI = NetworkParameters.getROSURI();
-    	  networkModuleParams.setRosUri(rosMasterURI);
-
+        URI rosMasterURI = NetworkParameters.getROSURI();
+        networkModuleParams.setRosUri(rosMasterURI);
+        
     	  if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
     	  {
     	     System.err
@@ -106,7 +113,6 @@ public class AtlasNetworkProcessor
     	  }
     	  else
     	  {
-    	     
            String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
            int tcpPort = NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
            KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList, communicatorId, "Atlas_Controller_Endpoint");
