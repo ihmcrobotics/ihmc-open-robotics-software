@@ -269,7 +269,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
          System.out.println("right hand pose");
          System.out.println(rightHandPose);
       }
-      assertTrue(rightHandPose.epsilonEquals(desiredHandPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN));
+      assertPosesAreWithinThresholds(desiredHandPose, rightHandPose, POSITION_ERROR_MARGIN, ANGLE_ERROR_MARGIN);
 
       BambooTools.reportTestFinishedMessage();
    }
