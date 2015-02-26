@@ -36,7 +36,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    private double radiansToRotateBetweenHandPoses = Math.toRadians(18.0);
 
    private final boolean DEBUG = false;
-   private final boolean USE_WHOLE_BODY_IK = false;
+   private final boolean USE_WHOLE_BODY_IK;
 
    private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
@@ -50,7 +50,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    private final BooleanYoVariable hasInputBeenSet;
 
    public RotateHandAboutAxisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
+         ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime, boolean useWholeBodyInverseKinematics)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
@@ -60,6 +60,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
             fullRobotModel, yoTime);
       this.yoTime = yoTime;
       this.hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
+      this.USE_WHOLE_BODY_IK = useWholeBodyInverseKinematics;
    }
 
    @Override

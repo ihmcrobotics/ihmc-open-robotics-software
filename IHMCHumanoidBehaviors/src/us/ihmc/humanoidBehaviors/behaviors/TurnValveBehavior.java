@@ -38,7 +38,9 @@ public class TurnValveBehavior extends BehaviorInterface
    }
 
    private static final boolean DEBUG = false;
-
+   private final boolean USE_WHOLE_BODY_INVERSE_KINEMATICS = false;
+   
+   
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
    public static final ValveGraspLocation DEFAULT_GRASP_LOCATION = ValveGraspLocation.TWELVE_O_CLOCK;
    public static final double MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE = Math.toRadians(160.0);
@@ -87,7 +89,7 @@ public class TurnValveBehavior extends BehaviorInterface
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       childBehaviors.add(walkToLocationBehavior);
       graspValveTurnAndUnGraspBehavior = new GraspValveTurnAndUnGraspBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
-            wholeBodyControllerParameters, tippingDetectedBoolean);
+            wholeBodyControllerParameters, tippingDetectedBoolean, USE_WHOLE_BODY_INVERSE_KINEMATICS);
       childBehaviors.add(graspValveTurnAndUnGraspBehavior);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
       childBehaviors.add(scriptBehavior);
