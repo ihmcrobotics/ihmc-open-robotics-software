@@ -100,7 +100,7 @@ public class MultiSenseSensorManager
 
    private void registerLidarReceivers()
    { 
-      new RosPointCloudReceiver(lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      new RosPointCloudReceiver(lidarParamaters, rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
    }
 
    private void registerCameraReceivers()
