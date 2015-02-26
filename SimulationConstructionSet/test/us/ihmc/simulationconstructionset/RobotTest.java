@@ -19,6 +19,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -46,7 +47,7 @@ public class RobotTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Random random = new Random(1765L);
       double l1 = 2.0, l2 = 2.0, r1 = 0.1, r2 = 0.05;
@@ -157,7 +158,7 @@ public class RobotTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testSingleFloatingBodyWithCoMOffset() throws SimulationExceededMaximumTimeException, InterruptedException, UnreasonableAccelerationException
+   public void testSingleFloatingBodyWithCoMOffset() throws SimulationExceededMaximumTimeException, InterruptedException, UnreasonableAccelerationException, ControllerFailureException
    {
       Random random = new Random(1659L);
       Robot robot = new Robot("r1");

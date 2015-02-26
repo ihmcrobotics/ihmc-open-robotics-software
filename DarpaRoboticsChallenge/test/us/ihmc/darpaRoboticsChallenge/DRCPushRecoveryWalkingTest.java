@@ -21,6 +21,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
@@ -93,7 +94,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    @Ignore
 	@AverageDuration(duration = 50.0)
 	@Test(timeout=300000)
-   public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -113,7 +114,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 34.9)
 	@Test(timeout = 174536)
-   public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -133,7 +134,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 34.4)
 	@Test(timeout = 171862)
-   public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -153,7 +154,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 50.9)
 	@Test(timeout = 254660)
-   public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -182,7 +183,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 33.5)
 	@Test(timeout = 167410)
-   public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -202,7 +203,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 34.3)
 	@Test(timeout = 171329)
-   public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -222,7 +223,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 51.3)
 	@Test(timeout = 256611)
-   public void TestPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -252,7 +253,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 61.9)
 	@Test(timeout = 309687)
-   public void TestPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -282,7 +283,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
 	@AverageDuration(duration = 34.0)
 	@Test(timeout = 169978)
-   public void TestPushRightRandomTransferState() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushRightRandomTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());
@@ -300,7 +301,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-   private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException
+   private void setupTest(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       boolean runMultiThreaded = false;
       setupTrack(runMultiThreaded, robotModel);
@@ -367,7 +368,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    }
 
    private void testPush(Vector3d forceDirection, double magnitude, double duration, double percentInState, RobotSide side, SideDependentList<StateTransitionCondition> condition, double stateTime)
-         throws SimulationExceededMaximumTimeException, InterruptedException
+         throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       double delay = stateTime * percentInState;
 

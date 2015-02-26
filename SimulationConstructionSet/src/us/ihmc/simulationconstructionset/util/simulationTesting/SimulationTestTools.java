@@ -11,6 +11,7 @@ import java.util.Random;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -214,7 +215,7 @@ public class SimulationTestTools
       }
    }
    
-   public static void testInitialValuesStoredCorrectly(SimulationConstructionSet scs, List<String> namesToSkipOver, double maximumClockRunTimeInSeconds) throws SimulationExceededMaximumTimeException
+   public static void testInitialValuesStoredCorrectly(SimulationConstructionSet scs, List<String> namesToSkipOver, double maximumClockRunTimeInSeconds) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       // TODO: Not sure why the qdd are different on the very first tick, but we should probably fix this.
       namesToSkipOver.add("qdd_");

@@ -31,6 +31,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -83,7 +84,7 @@ public class AtlasSDFVerificationTest
    @QuarantinedTest("February 16, 2015. This passes locally, but not on Bamboo. It does some crazy file writing, but in the wrong order seemingly. Someone please fix...")
 	@AverageDuration(duration = 10.4)
 	@Test(timeout = 41302)
-   public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
+   public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -138,7 +139,7 @@ public class AtlasSDFVerificationTest
       assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
    }
 
-   private void simulate(SimulationConstructionSet scs) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException
+   private void simulate(SimulationConstructionSet scs) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {
       scs.startOnAThread();
 

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
@@ -304,9 +305,15 @@ public class MomentumBasedControllerFactory
       }
    }
 
-   public void attachHighLevelControllerFailureListener(HighLevelControllerFailureListener listener)
+   public void attachControllerFailureListeners(List<ControllerFailureListener> listeners)
    {
-      momentumBasedController.attachHighLevelControllerFailureListener(listener);
+      for (int i = 0; i < listeners.size(); i++)
+         attachControllerFailureListener(listeners.get(i));
+   }
+
+   public void attachControllerFailureListener(ControllerFailureListener listener)
+   {
+      momentumBasedController.attachControllerFailureListener(listener);
    }
 
    public YoVariableRegistry getRegistry()

@@ -31,6 +31,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
@@ -97,19 +98,19 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
    }
 
    //   @Test(timeout=300000)
-   public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException
+   public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       testDRCOverBlocksField(0.4);
    }
 
 	@AverageDuration(duration = 301.9)
 	@Test(timeout = 905700)
-   public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException
+   public void testDRCOverRandomBars() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       testDRCOverBlocksField(-0.4);
    }
 
-   private void testDRCOverBlocksField(double StartingYOffsetFromCenter) throws SimulationExceededMaximumTimeException
+   private void testDRCOverBlocksField(double StartingYOffsetFromCenter) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -225,7 +226,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
    }
 
    private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
-         throws SimulationExceededMaximumTimeException
+         throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);

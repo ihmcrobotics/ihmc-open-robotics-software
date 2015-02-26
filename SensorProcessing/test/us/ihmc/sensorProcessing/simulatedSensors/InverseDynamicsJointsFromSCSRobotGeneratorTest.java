@@ -27,6 +27,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
@@ -89,7 +90,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testSinglePinJoint() throws SimulationExceededMaximumTimeException
+   public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestSinglePinJoint");
 
@@ -123,7 +124,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testTwoPinJoints() throws SimulationExceededMaximumTimeException
+   public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestTwoPinJoints");
 
@@ -176,7 +177,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException
+   public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Robot robot = new Robot("TestSingleFloatingJoint");
 
@@ -214,7 +215,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException
+   public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       Random random = new Random(1984L);
       int numberOfJoints = 10;

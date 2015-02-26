@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.stateEstimation.humanoid.DRCSimulatedSensorNoiseParameters;
 import us.ihmc.utilities.MemoryTools;
@@ -84,14 +85,14 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
       }
    }
 
-   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName) throws SimulationExceededMaximumTimeException
+   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
 
       simulateAndAssertGoodWalking(track, runName);
    }
    
-   protected void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName) throws SimulationExceededMaximumTimeException
+   protected void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
@@ -139,7 +140,7 @@ public abstract class DRCFlatGroundWalkingWithIMUDriftTest implements MultiRobot
    }
  
    private void initiateMotion(SimulationConstructionSet scs, double standingTimeDuration, BlockingSimulationRunner runner)
-           throws SimulationExceededMaximumTimeException
+           throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("walk");
       walk.set(false);

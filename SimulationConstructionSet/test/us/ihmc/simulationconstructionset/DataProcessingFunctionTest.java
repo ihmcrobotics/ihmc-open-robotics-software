@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -16,7 +17,7 @@ public class DataProcessingFunctionTest
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void testSimpleDataProcessingFunction() throws SimulationExceededMaximumTimeException
+   public void testSimpleDataProcessingFunction() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       final Robot robot = new Robot("DataProcessingFunctionTestRobot");
 

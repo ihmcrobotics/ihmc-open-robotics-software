@@ -22,6 +22,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.MemoryTools;
@@ -74,7 +75,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
    @AverageDuration(duration = 30.0)
    @Test(timeout=300000)
-   public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       
@@ -273,7 +274,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    private void initiateWalkingMotion(double standingTimeDuration, double walkingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)
-           throws SimulationExceededMaximumTimeException
+           throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       walk.set(false);
       runner.simulateAndBlock(standingTimeDuration);

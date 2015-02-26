@@ -35,6 +35,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -117,14 +118,12 @@ public class DRCSimulationTestHelper
       }
       
       simulationStarter.startSimulation(networkProcessorParameters, false);
-      
-//      if (packetCommunicator != null)
-//         simulationStarter.addPacketCommunicatorToNetworkProcessor(packetCommunicator);
 
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+      simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
@@ -135,7 +134,6 @@ public class DRCSimulationTestHelper
          nothingChangedVerifier = null;
       }
    }
-
 
    public BlockingSimulationRunner getBlockingSimulationRunner()
    {
@@ -231,7 +229,7 @@ public class DRCSimulationTestHelper
       return sdfRobot;
    }
 
-   public void simulateAndBlock(double simulationTime) throws SimulationExceededMaximumTimeException
+   public void simulateAndBlock(double simulationTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       blockingSimulationRunner.simulateAndBlock(simulationTime);
    }

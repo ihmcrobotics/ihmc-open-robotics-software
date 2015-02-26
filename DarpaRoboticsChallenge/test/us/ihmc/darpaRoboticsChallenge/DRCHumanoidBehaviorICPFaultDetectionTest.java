@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
@@ -191,7 +192,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
 
       BambooTools.reportTestStartedMessage();
@@ -237,7 +238,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
 	@AverageDuration
 	@Test(timeout=300000)
-   public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException
+   public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
       BambooTools.reportTestStartedMessage();
       setupTest(getRobotModel());

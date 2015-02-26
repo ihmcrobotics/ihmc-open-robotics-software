@@ -2,13 +2,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 
-import us.ihmc.commonWalkingControlModules.controlModules.HighLevelControllerFailureListener;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -60,7 +60,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void setupControllerForFailure(final HighLevelState fallbackController)
    {
-      momentumBasedController.attachHighLevelControllerFailureListener(new HighLevelControllerFailureListener()
+      momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
          public void controllerFailed()

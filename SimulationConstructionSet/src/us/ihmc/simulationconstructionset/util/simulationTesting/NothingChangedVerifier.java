@@ -9,6 +9,7 @@ import javax.swing.JOptionPane;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.ThreadTools;
@@ -55,13 +56,13 @@ public class NothingChangedVerifier
       return writeNewBaseFile;
    }
    
-   public void runSimulation(double simTime) throws SimulationExceededMaximumTimeException
+   public void runSimulation(double simTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       if (simTime > 0.0)
          blockingSimulationRunner.simulateAndBlock(simTime);
    }
    
-   public void runAndVerifySameResultsAsPreviously(double simTime, double maxPercentDifference, ArrayList<String> stringsToIgnore) throws SimulationExceededMaximumTimeException
+   public void runAndVerifySameResultsAsPreviously(double simTime, double maxPercentDifference, ArrayList<String> stringsToIgnore) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       runSimulation(simTime);
       verifySameResultsAsPreviously(maxPercentDifference, stringsToIgnore);

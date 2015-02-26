@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationRunsSameWayTwiceVerifier;
 import us.ihmc.utilities.ArrayTools;
@@ -94,19 +95,19 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    private static final boolean cheatWithGroundHeightAtForFootstep = false;
    private static final boolean drawGroundProfile = false;
 
-   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
+   protected void setupAndTestFlatGroundSimulationTrack(DRCRobotModel robotModel, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       DRCFlatGroundWalkingTrack track = setupFlatGroundSimulationTrack(robotModel);
 
       simulateAndAssertGoodWalking(track, runName, doPelvisYawWarmup);
    }
 
-   protected void setupAndTestFlatGroundSimulationTrackTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
+   protected void setupAndTestFlatGroundSimulationTrackTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       simulateAndAssertSimRunsSameWayTwice(robotModel);
    }
 
-   private void simulateAndAssertSimRunsSameWayTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException
+   private void simulateAndAssertSimRunsSameWayTwice(DRCRobotModel robotModel) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SimulationConstructionSet scsOne = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
       SimulationConstructionSet scsTwo = setupFlatGroundSimulationTrackForSameWayTwiceVerifier(robotModel).getSimulationConstructionSet();
@@ -119,7 +120,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
    
-   private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException
+   private void simulateAndAssertGoodWalking(DRCFlatGroundWalkingTrack track, String runName, boolean doPelvisYawWarmup) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
@@ -313,7 +314,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       assertFalse("Had to write new base file. On next run nothing should change", writeNewBaseFile);
    }
 
-   private void checkSimulationRunsSameWayTwice(SimulationRunsSameWayTwiceVerifier verifier) throws SimulationExceededMaximumTimeException
+   private void checkSimulationRunsSameWayTwice(SimulationRunsSameWayTwiceVerifier verifier) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       ArrayList<String> stringsToIgnore = new ArrayList<String>();
       stringsToIgnore.add("nano");
