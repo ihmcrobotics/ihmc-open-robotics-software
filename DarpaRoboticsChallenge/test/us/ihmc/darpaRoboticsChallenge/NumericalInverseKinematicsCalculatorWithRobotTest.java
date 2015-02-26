@@ -133,13 +133,13 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       {
          case PETER_SOLVER :
          {
-            int maxIterations = 500;
-            double orientationDiscount = 0.2;    // 1.0;
+            double orientationDiscount = 0.2;
+            int maxIterations = 5000;
             boolean solveOrientation = true;
-            double convergeTolerance = 1e-12;    // 0.02;
-            double acceptTolLoc = 0.005;    // 0.02;
+            double convergeTolerance = 4.0e-6; //1e-12;
+            double acceptTolLoc = 0.005;
             double acceptTolAngle = 0.02;
-            double parameterChangePenalty = 0.0;
+            double parameterChangePenalty = 1.0e-4; //0.1;
             inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(leftHandJacobian, orientationDiscount, maxIterations, solveOrientation,
                     convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
 
@@ -260,9 +260,9 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          System.out.println("Average Solving Time: " + averageTimeMillis + " ms");
          System.out.println("Maximal Solving Time: " + maximumTimeMillis + " ms");
       }
-
+      
       assertTrue(averageTimeMillis < 4.0);
-      assertTrue(maximumTimeMillis < 100.0);
+      assertTrue(maximumTimeMillis < 400.0);
       
       //NumericalInverseKinematicCalculator is much faster than the DDogLegOne, so use the following when running it...
 //      assertTrue(averageTimeMillis < 0.04);
