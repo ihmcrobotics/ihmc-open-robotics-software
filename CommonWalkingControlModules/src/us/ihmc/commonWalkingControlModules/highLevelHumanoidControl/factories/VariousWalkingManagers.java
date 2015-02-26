@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvid
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -61,6 +60,7 @@ public class VariousWalkingManagers
       HeadOrientationControlModule headOrientationControlModule = null;
       HeadOrientationManager headOrientationManager = null;
 
+      double trajectoryTimeHeadOrientation = walkingControllerParameters.getTrajectoryTimeHeadOrientation();
       if (fullRobotModel.getHead() != null)
       {
          desiredHeadOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
@@ -68,8 +68,9 @@ public class VariousWalkingManagers
          headOrientationControlModule = setupHeadOrientationControlModule(momentumBasedController, desiredHeadOrientationProvider, walkingControllerParameters,
                yoGraphicsListRegistry, registry);
 
+         double[] initialHeadYawPitchRoll = walkingControllerParameters.getInitialHeadYawPitchRoll();
          headOrientationManager = new HeadOrientationManager(momentumBasedController, headOrientationControlModule, desiredHeadOrientationProvider,
-               walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
+               trajectoryTimeHeadOrientation, initialHeadYawPitchRoll, registry);
       }
 
       ChestOrientationProvider desiredChestOrientationProvider = null;
@@ -85,9 +86,8 @@ public class VariousWalkingManagers
 
          chestOrientationControlModule = new ChestOrientationControlModule(chestOrientationExpressedInFrame, chest, twistCalculator, controlDT, chestControlGains, registry);
 
-         chestOrientationManager = new ChestOrientationManager(momentumBasedController, 
-               chestOrientationControlModule, desiredChestOrientationProvider,
-               walkingControllerParameters.getTrajectoryTimeHeadOrientation(), registry);
+         chestOrientationManager = new ChestOrientationManager(momentumBasedController, chestOrientationControlModule, desiredChestOrientationProvider,
+               trajectoryTimeHeadOrientation, registry);
       }
 
       ManipulationControlModule manipulationControlModule = null;
@@ -126,10 +126,6 @@ public class VariousWalkingManagers
       YoOrientationPIDGains gains = headOrientationControllerParameters.createHeadOrientationControlGains(registry);
       HeadOrientationControlModule headOrientationControlModule = new HeadOrientationControlModule(momentumBasedController, headOrientationExpressedInFrame,
             headOrientationControllerParameters, gains, registry, yoGraphicsListRegistry);
-
-      // Setting initial head pitch
-      FrameOrientation orientation = new FrameOrientation(headOrientationExpressedInFrame, headOrientationControllerParameters.getInitialHeadYawPitchRoll());
-      headOrientationControlModule.setOrientationToTrack(new FrameOrientation(orientation));
 
       return headOrientationControlModule;
    }
