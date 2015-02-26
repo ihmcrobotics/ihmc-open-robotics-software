@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import javax.vecmath.Matrix3d;
 
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -60,13 +61,20 @@ public class ProvidedMassMatrixToolRigidBody
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
    
    public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullRobotModel fullRobotModel, double gravity, 
-         double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         double controlDT, ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
       
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
       this.wristFrame = fullRobotModel.getHandControlFrame(robotSide);
+      
+//      ReferenceFrame attachmentPlateFrame = fullRobotModel.getHandControlFrame(robotSide);
+//      Vector3d attachmentPlateToHandCenterOffset = new Vector3d(0.0, 0.0, 0.0);
+//      RigidBodyTransform attachmentPlateToHandCenter = new RigidBodyTransform(new Quat4d(), attachmentPlateToHandCenterOffset);
+//      this.wristFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
+//            attachmentPlateFrame, attachmentPlateToHandCenter);
       
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
@@ -152,7 +160,7 @@ public class ProvidedMassMatrixToolRigidBody
       toolWrench.changeFrame(handFixedFrame);
       toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
       
-      temporaryVector.setIncludingFrame(handFixedFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
+      temporaryVector.setIncludingFrame(wristFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
       temporaryVector.changeFrame(ReferenceFrame.getWorldFrame());
       temporaryVector.scale(0.01);
       objectForceInWorld.set(temporaryVector);
