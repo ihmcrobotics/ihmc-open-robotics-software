@@ -328,7 +328,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    }
 
 	@AverageDuration(duration = 28.3)
-	@Test//(timeout = 84780)
+	@Test(timeout = 300000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
