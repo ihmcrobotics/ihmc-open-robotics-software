@@ -856,6 +856,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
    {
       doMouseDraggedRight(drz, drx);
+      doMouseDraggedMiddle(0.0, dy);
+      pan(dx * 1000, dz * 1000);
    }
 
    @Override
