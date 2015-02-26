@@ -119,8 +119,8 @@ public class ChestOrientationManager
             activeTrajectoryGenerator.changeFrame(pelvisZUpFrame);
          
          activeTrajectoryGenerator.get(desiredOrientation);
-//         if (RotationFunctions.isRotationProper(desiredOrientation.getMatrix3dCopy()))
-//            throw new RuntimeException(getClass().getSimpleName() + ": Desired chest orientation is screwed");
+         if (!RotationFunctions.isRotationProper(desiredOrientation.getMatrix3dCopy()))
+            throw new RuntimeException(getClass().getSimpleName() + ": Desired chest orientation is screwed");
          chestOrientationControlModule.setDesireds(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
          isTrackingOrientation.set(!isTrajectoryDone);
       }

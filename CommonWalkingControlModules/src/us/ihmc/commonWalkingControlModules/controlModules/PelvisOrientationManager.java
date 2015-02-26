@@ -169,8 +169,13 @@ public class PelvisOrientationManager
       }
       
       updateDesireds();
+      
+      if (!RotationFunctions.isRotationProper(orientationTrajectoryData.getOrientation().getMatrix3dCopy()))
+         throw new RuntimeException(getClass().getSimpleName() + ": Desired pelvis orientation is screwed");
 
       rootJointAngularAccelerationControlModule.doControl(orientationTrajectoryData);
+      
+      
    }
 
    private void updateDesireds()
@@ -184,8 +189,7 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
       desiredPelvisFrame.update();
       
-//      if (RotationFunctions.isRotationProper(tempOrientation.getMatrix3dCopy()))
-//         throw new RuntimeException(getClass().getSimpleName() + ": Desired chest orientation is screwed");
+
 
       if (pelvisPoseProvider != null)
       {
