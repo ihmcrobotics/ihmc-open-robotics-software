@@ -83,7 +83,6 @@ public class ContactableDoorRobotTest
          System.err.println("Caught exception in SimulationTestHelper.simulateAndBlockAndCatchExceptions. Exception = " + e);
       }
        
-      System.out.println(door.getHingeYaw());
       assertTrue(Math.abs(door.getHingeYaw()) < 1e-3);
       
       if(testingParams.getKeepSCSUp())

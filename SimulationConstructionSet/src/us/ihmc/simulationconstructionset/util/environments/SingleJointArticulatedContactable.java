@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -12,7 +13,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
-public abstract class ArticulatedContactable implements Contactable
+public abstract class SingleJointArticulatedContactable implements Contactable
 {
    private final String name;
    private final Robot robot;
@@ -20,10 +21,15 @@ public abstract class ArticulatedContactable implements Contactable
    private final ArrayList<GroundContactPoint> allGroundContactPoints = new ArrayList<GroundContactPoint>();
    private final ArrayList<BooleanYoVariable> contactsAvailable = new ArrayList<BooleanYoVariable>();
 
-   public ArticulatedContactable(String name, Robot robot)
+   public SingleJointArticulatedContactable(String name, Robot robot)
    {
       this.name = name;
       this.robot = robot;
+      
+      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<OneDegreeOfFreedomJoint>();
+      robot.getAllOneDegreeOfFreedomJoints(joints);
+      if(joints.size() != 1)
+         throw new RuntimeException("The robot " + name + " has " + joints.size() + " joints. It can only have 1 to be a SingleJointArticulatedContactable");
    }
 
    public abstract Joint getJoint();

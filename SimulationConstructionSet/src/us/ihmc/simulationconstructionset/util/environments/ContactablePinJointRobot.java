@@ -13,12 +13,12 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public abstract class ContactablePinJointRobot extends Robot implements Contactable
 {
    private static final long serialVersionUID = -3371489685439165270L;
-   private final InternalArticulatedContactable articulatedContactable;
+   private final InternalSingleJointArticulatedContactable articulatedContactable;
 
    public ContactablePinJointRobot(String name)
    {
       super(name);
-      articulatedContactable = new InternalArticulatedContactable(name, this); 
+      articulatedContactable = new InternalSingleJointArticulatedContactable(name, this); 
    }
    
    public abstract PinJoint getPinJoint();
@@ -29,11 +29,11 @@ public abstract class ContactablePinJointRobot extends Robot implements Contacta
 
    public abstract void setMomentOfInertia(double Ixx, double Iyy, double Izz);
 
-   private static class InternalArticulatedContactable extends ArticulatedContactable
+   private static class InternalSingleJointArticulatedContactable extends SingleJointArticulatedContactable
    {
       private final ContactablePinJointRobot contactableRobot;
 
-      public InternalArticulatedContactable(String name, ContactablePinJointRobot robot)
+      public InternalSingleJointArticulatedContactable(String name, ContactablePinJointRobot robot)
       {
          super(name, robot);
          this.contactableRobot = robot;

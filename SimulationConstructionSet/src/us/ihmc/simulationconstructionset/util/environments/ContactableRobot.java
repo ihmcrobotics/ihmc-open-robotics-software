@@ -13,12 +13,12 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public abstract class ContactableRobot extends Robot implements Contactable
 {
-   private final InternalArticulatedContactable articulatedContactable;
+   private final InternalSingleJointArticulatedContactable articulatedContactable;
 
    public ContactableRobot(String name)
    {
       super(name);
-      articulatedContactable = new InternalArticulatedContactable(name, this);
+      articulatedContactable = new InternalSingleJointArticulatedContactable(name, this);
    }
 
    public abstract FloatingJoint getFloatingJoint();
@@ -27,11 +27,11 @@ public abstract class ContactableRobot extends Robot implements Contactable
 
    public abstract void setMomentOfInertia(double Ixx, double Iyy, double Izz);
 
-   private static class InternalArticulatedContactable extends ArticulatedContactable
+   private static class InternalSingleJointArticulatedContactable extends SingleJointArticulatedContactable
    {
       private final ContactableRobot contactableRobot;
 
-      public InternalArticulatedContactable(String name, ContactableRobot robot)
+      public InternalSingleJointArticulatedContactable(String name, ContactableRobot robot)
       {
          super(name, robot);
          this.contactableRobot = robot;
