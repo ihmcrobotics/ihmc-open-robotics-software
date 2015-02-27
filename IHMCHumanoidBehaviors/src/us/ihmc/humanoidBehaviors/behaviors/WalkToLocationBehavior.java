@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -62,8 +63,6 @@ public class WalkToLocationBehavior extends BehaviorInterface
    private final DoubleYoVariable walkDistance = new DoubleYoVariable(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);
-
-   private TurnStraightTurnFootstepGenerator footstepGenerator;
 
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
    private FootstepListBehavior footstepListBehavior;
@@ -147,8 +146,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
          break;
 
       case START_TARGET_ORIENTATION_MEAN:
-         double desiredOrientationRelativeToWalkingPath = 0.5 * (initialRobotOrientationRelativeToWalkingPath + targetRobotOrientationRelativeToWalkingPath);
-         setWalkingOrientationRelativeToPathDirection(desiredOrientationRelativeToWalkingPath);
+         setWalkingOrientationRelativeToPathDirection(0.5 * (initialRobotOrientationRelativeToWalkingPath + targetRobotOrientationRelativeToWalkingPath));
          break;
 
       default:
@@ -212,9 +210,6 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       this.targetLocation.set(robotLocation);
       this.targetOrientation.set(robotOrientation);
-
-      //for testing purpose
-      //this.setTarget(new Point3d(2.0, 2.0,0.0),new YoFrameOrientation( "blabla", ReferenceFrame.getWorldFrame(), registry));
    }
 
    public int getNumberOfFootSteps()
@@ -236,18 +231,43 @@ public class WalkToLocationBehavior extends BehaviorInterface
       endPose.setPosition(new FramePoint2d(worldFrame, targetLocation.getX(), targetLocation.getY()));
       endPose.setOrientation(new FrameOrientation2d(worldFrame, targetOrientation.getYaw().getDoubleValue()));
 
-      footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
+      boolean computeFootstepsWithFlippedInitialTurnDirection = pathType.getAngle() != 0.0;
+
+      TurnStraightTurnFootstepGenerator footstepGenerator = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose, pathType);
       footstepGenerator.initialize();
+
       walkDistance.set(footstepGenerator.getDistance());
 
       if (footstepGenerator.getDistance() > minDistanceThresholdForWalking
             || Math.abs(footstepGenerator.getSignedInitialTurnDirection()) > minYawThresholdForWalking)
       {
-         footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
+         List<Footstep> footstepsNominalOrientation = footstepGenerator.generateDesiredFootstepList();
 
-         for (int i = 0; i < footsteps.size(); i++)
+         if (computeFootstepsWithFlippedInitialTurnDirection)
          {
-            Footstep footstep = footsteps.get(i);
+            pathType.setAngle(-pathType.getAngle());
+            TurnStraightTurnFootstepGenerator footstepGeneratorFlippedInitialTurnDirection = new TurnStraightTurnFootstepGenerator(feet, soleFrames, endPose,
+                  pathType); //FIXME: should be able to re-use other footStepGenerator, but doesn't work so far..
+            footstepGeneratorFlippedInitialTurnDirection.initialize();
+            List<Footstep> footstepsFlippedOrientation = footstepGeneratorFlippedInitialTurnDirection.generateDesiredFootstepList();
+            pathType.setAngle(-pathType.getAngle());
+
+            if (footstepsFlippedOrientation.size() < footstepsNominalOrientation.size())
+            {
+               footsteps.addAll(footstepsFlippedOrientation);
+            }
+            else
+            {
+               footsteps.addAll(footstepsNominalOrientation);
+            }
+         }
+         else
+         {
+            footsteps.addAll(footstepsNominalOrientation);
+         }
+
+         for (Footstep footstep : footsteps)
+         {
             footstep.setZ(midFeetPosition.getZ());
          }
       }

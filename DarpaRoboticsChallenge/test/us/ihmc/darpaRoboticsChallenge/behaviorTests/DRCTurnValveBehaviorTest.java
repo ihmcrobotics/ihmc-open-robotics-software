@@ -119,7 +119,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(0), 0.0);
       
-      valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, 3.0 * TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
+      valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, 4.0 * TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(1), 45.0);
 
       return new DRCValveEnvironment(valveLocations, valveYawAngles_degrees);
