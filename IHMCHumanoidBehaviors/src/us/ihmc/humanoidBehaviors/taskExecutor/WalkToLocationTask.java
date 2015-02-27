@@ -7,8 +7,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WalkToLocationTask extends BehaviorTask
 {
-   private static final boolean DEBUG = false;
-
    private final FramePose2d targetPoseInWorld;
    private final WalkToLocationBehavior walkToLocationBehavior;
 
@@ -69,10 +67,14 @@ public class WalkToLocationTask extends BehaviorTask
          walkToLocationBehavior.setWalkingOrientationRelativeToPathDirection(orientationRelativeToPathDirection);
       }
       walkToLocationBehavior.setFootstepLength(footstepLength);
-      if(swingTime != Double.NaN)
+      if (!Double.isNaN(swingTime))
+      {
          walkToLocationBehavior.setSwingTime(swingTime);
-      if(transferTime != Double.NaN)
+      }
+      if (!Double.isNaN(transferTime))
+      {
          walkToLocationBehavior.setTransferTime(transferTime);
+      }
       walkToLocationBehavior.setTarget(targetPoseInWorld, walkingOrientation);
    }
 }
