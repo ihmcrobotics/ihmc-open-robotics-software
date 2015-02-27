@@ -7,12 +7,10 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.AbstractJointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelInverseKinematicsTaskspaceHandPositionControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelJointSpaceHandControlControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -76,7 +74,7 @@ public class HandControlModule
    private final Map<OneDoFJoint, Double> jointCurrentPositionMap;
 
    private final TaskspaceHandPositionControlState taskSpacePositionControlState;
-   private final AbstractJointSpaceHandControlState jointSpaceHandControlState;
+   private final JointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingPlaneHandControlState loadBearingControlState;
 
    private final EnumYoVariable<HandControlState> requestedState;
@@ -183,20 +181,13 @@ public class HandControlModule
       loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
             fullRobotModel.getElevator(), hand, jacobianId, registry);
 
-      if (armControlParameters.doLowLevelPositionControl())
-      {
-         jointSpaceHandControlState = new LowLevelJointSpaceHandControlControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints,
-               momentumBasedController, armControlParameters, controlDT, registry);
-      }
-      else
-      {
-         jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints,
-               momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
-      }
+      boolean doPositionControl = armControlParameters.doLowLevelPositionControl();
+      jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints, doPositionControl,
+            momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
 
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
       {
-         if (armControlParameters.doLowLevelPositionControl())
+         if (doPositionControl)
          {
             taskSpacePositionControlState = new LowLevelInverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
                   robotSide, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, controlDT,
