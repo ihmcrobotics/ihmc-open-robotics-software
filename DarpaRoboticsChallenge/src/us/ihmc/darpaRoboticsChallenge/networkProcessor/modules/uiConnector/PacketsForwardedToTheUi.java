@@ -12,9 +12,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
-import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.communication.packets.sensing.RobotPoseData;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
@@ -47,7 +45,8 @@ public class PacketsForwardedToTheUi
       HandPosePacket.class,
       DepthDataClearCommand.class,
       IntrinsicCameraParametersPacket.class,
-      PointCloudWorldPacket.class
+      PointCloudWorldPacket.class,
+      HandJointAnglePacket.class
 //      HeadPosePacket.class,
 //      RawIMUPacket.class,
       
@@ -56,7 +55,6 @@ public class PacketsForwardedToTheUi
    public static final HashMap<Class, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class, Long>();
    static {
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
-      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HandJointAnglePacket.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
    }
