@@ -27,6 +27,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.BacklashCompensatingVelocityYoVariable;
 import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.yoUtilities.math.filters.ProcessingYoVariable;
+import us.ihmc.yoUtilities.math.filters.RevisedBacklashCompensatingVelocityYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -338,7 +339,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
          List<ProcessingYoVariable> processors = processedJointVelocities.get(oneDoFJoint);
          String suffix = "_sp" + processors.size();
-         BacklashCompensatingVelocityYoVariable jointVelocity = new BacklashCompensatingVelocityYoVariable("bl_qd_" + jointName + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
+         RevisedBacklashCompensatingVelocityYoVariable jointVelocity = new RevisedBacklashCompensatingVelocityYoVariable("bl_qd_" + jointName + suffix, "", alphaFilter, intermediateJointPosition, updateDT, slopTime, registry);
          processors.add(jointVelocity);
 
          if (!forVizOnly)
