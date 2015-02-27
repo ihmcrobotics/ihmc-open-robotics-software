@@ -10,9 +10,11 @@ import us.ihmc.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
@@ -27,6 +29,7 @@ public class PacketsForwardedToTheUi
 {
    public static final long UI_JOINT_CONFIGURATION_UPDATE_MILLIS = 100l;
    public static final long UI_WRIST_FEET_SENSORS_UPDATE_MILLIS = 500l;
+   public static final long UI_MULTISENSE_IMU_CHECK_MILLIS=5000l;
    
    public static Class[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
       FootstepStatus.class,                          
@@ -47,8 +50,6 @@ public class PacketsForwardedToTheUi
       IntrinsicCameraParametersPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class
-//      HeadPosePacket.class,
-//      RawIMUPacket.class,
       
    };
    
@@ -57,6 +58,8 @@ public class PacketsForwardedToTheUi
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotConfigurationData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
+      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(HeadPosePacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
+      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RawIMUPacket.class, UI_MULTISENSE_IMU_CHECK_MILLIS);
    }
    
    
