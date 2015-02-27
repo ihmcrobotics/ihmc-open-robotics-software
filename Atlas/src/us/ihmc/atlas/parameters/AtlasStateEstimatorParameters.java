@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -47,8 +48,13 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
       {
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 6000.0);
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
       }
+      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 8000.0);
+      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 8000.0);
+      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 8000.0);
+
    }
 
    @Override
@@ -56,9 +62,10 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
+//      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
+//      DoubleYoVariable noFilter = sensorProcessing.createAlphaFilter("notFilter", Double.POSITIVE_INFINITY);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
@@ -66,12 +73,16 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
-      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+//      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
+
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
-
+      
+      // Compute velocity using only the low-pass positions (before the elasticity compensation).
+//      sensorProcessing.computeJointVelocityFromFiniteDifference(noFilter, true);
       sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
       sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
