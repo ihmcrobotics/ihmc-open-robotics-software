@@ -32,6 +32,7 @@ import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -198,7 +199,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          }
       };
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, bipedFeet, yoGraphicsListRegistry);
+            postProcessedSensors, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeet, yoGraphicsListRegistry);
       return stateEstimator;
    }
 
