@@ -182,7 +182,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
       if(robotVisualizer != null)
       {
-         robotVisualizer.update(startTimestamp, estimatorRegistry);
+         robotVisualizer.update(startTimestamp);
       }
       estimatorTick.increment();
    }
