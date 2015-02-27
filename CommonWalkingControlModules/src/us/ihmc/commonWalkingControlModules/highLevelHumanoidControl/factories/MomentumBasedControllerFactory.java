@@ -33,6 +33,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
@@ -334,9 +335,13 @@ public class MomentumBasedControllerFactory
          controllerStateChangedListenersToAttach.add(listener);
    }
 
+   public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
+   {
+      momentumBasedController.attachRobotMotionStatusChangedListener(listener);
+   }
+
    public YoVariableRegistry getRegistry()
    {
       return registry;
    }
-
 }

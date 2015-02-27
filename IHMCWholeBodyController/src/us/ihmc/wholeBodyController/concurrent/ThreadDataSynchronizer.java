@@ -7,6 +7,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
@@ -15,11 +16,13 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
+   private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
+   private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
 
    private final ConcurrentCopier<IntermediateEstimatorStateHolder> estimatorStateCopier;
 
@@ -35,11 +38,13 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFullRobotModel.getSoleFrames());
+      estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
 
       controllerFullRobotModel = wholeBodyControlParameters.createFullRobotModel();
       controllerForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
       controllerRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(controllerFullRobotModel);
       controllerCenterOfPressureDataHolder =  new CenterOfPressureDataHolder(controllerFullRobotModel.getSoleFrames());
+      controllerRobotMotionStatusHolder = new RobotMotionStatusHolder();
 
       IntermediateEstimatorStateHolder.Builder stateCopierBuilder = new IntermediateEstimatorStateHolder.Builder(wholeBodyControlParameters,
             estimatorFullRobotModel.getElevator(), controllerFullRobotModel.getElevator(), estimatorForceSensorDataHolder, controllerForceSensorDataHolder,
@@ -47,7 +52,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       estimatorStateCopier = new ConcurrentCopier<IntermediateEstimatorStateHolder>(stateCopierBuilder);
 
       ControllerDataForEstimatorHolder.Builder controllerStateCopierBuilder = new ControllerDataForEstimatorHolder.Builder(estimatorCenterOfPressureDataHolder,
-            controllerCenterOfPressureDataHolder);
+            controllerCenterOfPressureDataHolder, estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder);
       controllerStateCopier = new ConcurrentCopier<>(controllerStateCopierBuilder);
    }
 
@@ -126,6 +131,18 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
    }
 
    @Override
+   public RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder()
+   {
+      return estimatorRobotMotionStatusHolder;
+   }
+
+   @Override
+   public RobotMotionStatusHolder getControllerRobotMotionStatusHolder()
+   {
+      return controllerRobotMotionStatusHolder;
+   }
+
+   @Override
    public long getTimestamp()
    {
       return timestamp;
@@ -149,7 +166,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForWriting();
       if (holder != null)
       {
-         holder.getCenterOfPressureInSoleFrame();
+         holder.parseControllerDataToEstimator();
          controllerStateCopier.commit();
       }
    }
@@ -160,7 +177,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForReading();
       if (holder != null)
       {
-         holder.setCenterOfPressureInSoleFrame();
+         holder.copyControllerData();
          return true;
       }
       else

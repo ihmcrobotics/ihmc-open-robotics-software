@@ -36,6 +36,8 @@ import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.utilities.frictionModels.FrictionModel;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -193,6 +195,7 @@ public class MomentumBasedController
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
+   private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -1256,5 +1259,16 @@ public class MomentumBasedController
       {
          controllerStateChangedListeners.get(i).controllerStateHasChanged(yoTime.getDoubleValue());
       }
+   }
+
+   public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
+   {
+      robotMotionStatusChangedListeners.add(listener);
+   }
+
+   public void reportChangeOfRobotMotionStatus(RobotMotionStatus newStatus)
+   {
+      for (int i = 0; i < robotMotionStatusChangedListeners.size(); i++)
+         robotMotionStatusChangedListeners.get(i).robotMotionStatusHasChanged(newStatus, yoTime.getDoubleValue());
    }
 }

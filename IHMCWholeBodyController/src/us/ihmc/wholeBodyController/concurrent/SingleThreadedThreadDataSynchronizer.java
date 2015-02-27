@@ -7,6 +7,7 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -17,11 +18,13 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
    private final ForceSensorDataHolder estimatorForceSensorDataHolder;
    private final RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
+   private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
 
    private final SDFFullRobotModel controllerFullRobotModel;
    private final ForceSensorDataHolder controllerForceSensorDataHolder;
    private final RawJointSensorDataHolderMap controllerRawJointSensorDataHolderMap;
    private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
+   private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
 
    private final LongYoVariable timestamp;
    private final LongYoVariable estimatorClockStartTime;
@@ -45,21 +48,25 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       estimatorForceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(estimatorFullRobotModel.getForceSensorDefinitions()));
       estimatorRawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(estimatorFullRobotModel);
       estimatorCenterOfPressureDataHolder = new CenterOfPressureDataHolder(estimatorFullRobotModel.getSoleFrames());
+      estimatorRobotMotionStatusHolder = new RobotMotionStatusHolder();
 
       controllerFullRobotModel = estimatorFullRobotModel;
       controllerForceSensorDataHolder = estimatorForceSensorDataHolder;
       controllerRawJointSensorDataHolderMap = estimatorRawJointSensorDataHolderMap;
       controllerCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
+      controllerRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
       
       this.fullRobotModelRewinder = new FullRobotModelRootJointRewinder(estimatorFullRobotModel, registry);
       scs.attachSimulationRewoundListener(fullRobotModelRewinder);
    }
 
+   @Override
    public boolean receiveEstimatorStateForController()
    {
       return true;
    }
 
+   @Override
    public void publishEstimatorState(long timestamp, long estimatorTick, long estimatorClockStartTime)
    {
       this.timestamp.set(timestamp);
@@ -70,65 +77,90 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       fullRobotModelRewinder.recordCurrentState();
    }
 
+   @Override
    public SDFFullRobotModel getEstimatorFullRobotModel()
    {
       return estimatorFullRobotModel;
    }
 
+   @Override
    public ForceSensorDataHolder getEstimatorForceSensorDataHolder()
    {
       return estimatorForceSensorDataHolder;
    }
 
+   @Override
    public SDFFullRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
    }
 
+   @Override
    public ForceSensorDataHolder getControllerForceSensorDataHolder()
    {
       return controllerForceSensorDataHolder;
    }
 
+   @Override
    public RawJointSensorDataHolderMap getEstimatorRawJointSensorDataHolderMap()
    {
       return estimatorRawJointSensorDataHolderMap;
    }
 
+   @Override
    public RawJointSensorDataHolderMap getControllerRawJointSensorDataHolderMap()
    {
       return controllerRawJointSensorDataHolderMap;
    }
 
+   @Override
    public CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder()
    {
       return estimatorCenterOfPressureDataHolder;
    }
 
+   @Override
    public CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder()
    {
       return controllerCenterOfPressureDataHolder;
    }
 
+   @Override
+   public RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder()
+   {
+      return estimatorRobotMotionStatusHolder;
+   }
+
+   @Override
+   public RobotMotionStatusHolder getControllerRobotMotionStatusHolder()
+   {
+      return controllerRobotMotionStatusHolder;
+   }
+
+   @Override
    public long getTimestamp()
    {
       return timestamp.getLongValue();
    }
 
+   @Override
    public long getEstimatorClockStartTime()
    {
       return estimatorClockStartTime.getLongValue();
    }
 
+   @Override
    public long getEstimatorTick()
    {
       return estimatorTick.getLongValue();
    }
 
+   @Override
    public void publishControllerData()
    {      
    }
 
+   @Override
    public boolean receiveControllerDataForEstimator()
    {
       return true;

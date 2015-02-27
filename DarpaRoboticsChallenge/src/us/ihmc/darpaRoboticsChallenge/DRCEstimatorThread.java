@@ -30,6 +30,7 @@ import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -68,6 +69,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
+   private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
    
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
@@ -85,11 +87,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       estimatorController = new ModularRobotController("EstimatorController");
       
       centerOfPressureDataHolderFromController = threadDataSynchronizer.getEstimatorCenterOfPressureDataHolder();
+      robotMotionStatusFromController = threadDataSynchronizer.getEstimatorRobotMotionStatusHolder();
+
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParameters, forceSensorDataHolderForEstimator, centerOfPressureDataHolderFromController, yoGraphicsListRegistry, estimatorRegistry);
+               contactPointParameters, forceSensorDataHolderForEstimator, centerOfPressureDataHolderFromController, robotMotionStatusFromController,
+               yoGraphicsListRegistry, estimatorRegistry);
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
@@ -190,7 +195,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
@@ -231,10 +237,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
       
       String[] imuSensorsToUseInStateEstimator = sensorInformation.getIMUSensorsToUseInStateEstimator();
-      
+
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator, centerOfPressureDataHolderFromController, bipedFeet, yoGraphicsListRegistry);
+            sensorOutputMapReadOnly, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator, centerOfPressureDataHolderFromController,
+            robotMotionStatusFromController, bipedFeet, yoGraphicsListRegistry);
 
       return drcStateEstimator;
    }
