@@ -354,4 +354,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       };
       return ret;
    }
+
+   @Override
+   public String[] getPositionControlledJointsForSimulation()
+   {
+      return null;
+   }
 }
