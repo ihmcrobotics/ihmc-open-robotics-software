@@ -43,8 +43,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspValveBehavior extends BehaviorInterface
 {
-   private final double TWELVE_O_CLOCK_HANDFRAME_ROLL = Math.PI;
-   private final double VALVE_RIM_THICKNESS = 0.03;
+   private final double TWELVE_O_CLOCK_HANDFRAME_ROLL_ANGLE = Math.PI;
+   private final double VALVE_RIM_THICKNESS = 0.08;
    private final double WRIST_OFFSET_FROM_HAND = 0.11 * 0.75; // 0.11
    private final double MIDPOSE_OFFSET_FROM_FINALPOSE = 3.5 * WRIST_OFFSET_FROM_HAND; //0.3
    private final double HAND_POSE_TRAJECTORY_TIME = 2.0;//2.0;
@@ -160,24 +160,8 @@ public class GraspValveBehavior extends BehaviorInterface
       FramePose valvePose = new FramePose();
       valvePose.setToZero(valveFrame);
 
-      FramePose finalGraspHandFramePose = new FramePose(valvePose);
-      finalGraspHandFramePose.rotatePoseAboutAxis(finalGraspHandFramePose.getReferenceFrame(), Axis.X,
-            robotSideOfGraspingHand.negateIfLeftSide(TWELVE_O_CLOCK_HANDFRAME_ROLL));
-
-      double twelveOClockGraspPositionZinValveFrame;
-      if (valveGraspLocation.equals(ValveGraspLocation.CENTER))
-      {
-         twelveOClockGraspPositionZinValveFrame = 0.0;
-      }
-      else
-      {
-         twelveOClockGraspPositionZinValveFrame = valveRadius;
-      }
-      finalGraspHandFramePose.translate(-WRIST_OFFSET_FROM_HAND - VALVE_RIM_THICKNESS, 0.0, twelveOClockGraspPositionZinValveFrame);
-
-      FramePose preGraspHandFramePose = new FramePose(finalGraspHandFramePose);
-      preGraspHandFramePose.translate(-MIDPOSE_OFFSET_FROM_FINALPOSE, 0.0, 0.0);
-
+      FramePose finalGraspHandFramePose = getTwelveOClockGraspHandFramePose(valvePose, valveGraspLocation, graspApproachConeAngle, valveRadius,
+            robotSideOfGraspingHand);
 
       double graspClockwiseOffsetFromTwelveOClock;
       if (valveGraspLocation.equals(ValveGraspLocation.CENTER))
@@ -188,9 +172,11 @@ public class GraspValveBehavior extends BehaviorInterface
       {
          graspClockwiseOffsetFromTwelveOClock = -valveGraspLocation.ordinal() * Math.toRadians(90.0);
       }
-      
+
       double angleToTwistHandDuringFinalGraspApproach = -0.5 * TurnValveBehavior.MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE;
 
+      FramePose preGraspHandFramePose = new FramePose(finalGraspHandFramePose);
+      preGraspHandFramePose.translate(-MIDPOSE_OFFSET_FROM_FINALPOSE, 0.0, 0.0);
       preGraspHandFramePose.rotatePoseAboutAxis(valveFrame, valvePinJointAxisInValveFrame, graspClockwiseOffsetFromTwelveOClock
             - angleToTwistHandDuringFinalGraspApproach);
 
@@ -225,9 +211,35 @@ public class GraspValveBehavior extends BehaviorInterface
       pipeLine.submitTaskForPallelPipesStage(handPoseBehavior, moveHandToFavorableGraspApproachLocation);
       pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, openHandTask);
       pipeLine.submitSingleTaskStage(movePalmToBeInContactWithValveRim);
-      pipeLine.submitSingleTaskStage(closeHandTask);
+
+      if (!valveGraspLocation.equals(ValveGraspLocation.CENTER))
+         pipeLine.submitSingleTaskStage(closeHandTask);
 
       haveInputsBeenSet.set(true);
+   }
+
+   private FramePose getTwelveOClockGraspHandFramePose(FramePose valvePose, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
+         double valveRadius, RobotSide robotSideOfGraspingHand)
+   {
+      FramePose ret = new FramePose(valvePose);
+      ret.rotatePoseAboutAxis(ret.getReferenceFrame(), Axis.X, robotSideOfGraspingHand.negateIfLeftSide(TWELVE_O_CLOCK_HANDFRAME_ROLL_ANGLE));
+
+      double twelveOClockGraspPositionZinValveFrame;
+      if (valveGraspLocation.equals(ValveGraspLocation.CENTER))
+      {
+         twelveOClockGraspPositionZinValveFrame = 0.0;
+      }
+      else
+      {
+         twelveOClockGraspPositionZinValveFrame = valveRadius;
+      }
+
+      ret.translate(-VALVE_RIM_THICKNESS, 0.0, twelveOClockGraspPositionZinValveFrame);
+      PoseReferenceFrame longAxisOfValveRimAtTwelveOClockFrame = new PoseReferenceFrame("valveRimFrame", ret);
+      ret.translate(-WRIST_OFFSET_FROM_HAND, 0.0, 0.0);
+      ret.rotatePoseAboutAxis(longAxisOfValveRimAtTwelveOClockFrame, Axis.Y, graspApproachConeAngle);
+
+      return ret;
    }
 
    private Vector3d getLongAxisOfValveRimAtTwelveOClock(boolean putThumbInsideRim)

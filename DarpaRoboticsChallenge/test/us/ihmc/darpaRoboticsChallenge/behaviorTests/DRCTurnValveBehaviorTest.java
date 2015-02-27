@@ -148,7 +148,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      double graspApproachConeAngle = Math.toRadians(0.0);
+      double graspApproachConeAngle = Math.toRadians(30.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
