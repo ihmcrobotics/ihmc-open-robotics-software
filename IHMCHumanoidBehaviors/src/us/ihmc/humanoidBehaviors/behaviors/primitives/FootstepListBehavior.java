@@ -90,7 +90,6 @@ public class FootstepListBehavior extends BehaviorInterface
       if (!packetHasBeenSent.getBooleanValue() && outgoingFootstepDataList != null)
       {
          sendFootsepListToController();
-         //Send to Network processor for downlink to UI
       }
    }
 
