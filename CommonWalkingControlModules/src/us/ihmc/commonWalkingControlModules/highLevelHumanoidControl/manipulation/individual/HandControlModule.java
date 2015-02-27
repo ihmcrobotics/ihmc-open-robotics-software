@@ -52,6 +52,10 @@ public class HandControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   // JPratt. February 27, 2015: Added this since new Atlas was having trouble with network stuff.
+   // It was sending 14,000 variables. This and others reduces it a bit when set to false.
+   private static final boolean REGISTER_YOVARIABLES = true;
+
    private final YoVariableRegistry registry;
 
    private final StateMachine<HandControlState> stateMachine;
@@ -216,7 +220,7 @@ public class HandControlModule
 
       isExecutingHandStep = new BooleanYoVariable(namePrefix + "DoingHandstep", registry);
 
-      parentRegistry.addChild(registry);
+      if (REGISTER_YOVARIABLES) parentRegistry.addChild(registry);
    }
 
    private void setupStateMachine()
