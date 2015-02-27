@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -12,6 +14,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -68,13 +71,13 @@ public class ProvidedMassMatrixToolRigidBody
       this.registry = new YoVariableRegistry(name);
       
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
-      this.wristFrame = fullRobotModel.getHandControlFrame(robotSide);
+//      this.wristFrame = fullRobotModel.getHandControlFrame(robotSide);
       
-//      ReferenceFrame attachmentPlateFrame = fullRobotModel.getHandControlFrame(robotSide);
-//      Vector3d attachmentPlateToHandCenterOffset = new Vector3d(0.0, 0.0, 0.0);
-//      RigidBodyTransform attachmentPlateToHandCenter = new RigidBodyTransform(new Quat4d(), attachmentPlateToHandCenterOffset);
-//      this.wristFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
-//            attachmentPlateFrame, attachmentPlateToHandCenter);
+      ReferenceFrame attachmentPlateFrame = fullRobotModel.getHandControlFrame(robotSide);
+      Vector3d attachmentPlateToHandCenterOffset = new Vector3d(armControllerParameters.getWristHandCenterOffset(), 0.0, 0.0);
+      RigidBodyTransform attachmentPlateToHandCenter = new RigidBodyTransform(new Quat4d(), attachmentPlateToHandCenterOffset);
+      this.wristFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
+            attachmentPlateFrame, attachmentPlateToHandCenter);
       
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);

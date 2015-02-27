@@ -23,4 +23,6 @@ public interface ArmControllerParameters
    public abstract boolean doLowLevelPositionControl();
 
    public abstract Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide);
+   
+   public abstract double getWristHandCenterOffset();
 }
