@@ -75,4 +75,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract LogModelProvider getLogModelProvider();
 
    public abstract Pair<Class<?>, String[]> getOperatorInterfaceStarter();
+   
+   public abstract Class<?> getSpectatorInterfaceClass();
 }

@@ -6,7 +6,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
-import us.ihmc.atlas.parameters.AtlasFootstepPlanningParameterization;
 import us.ihmc.atlas.physics.AtlasPhysicsEngineConfiguration;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -388,5 +387,11 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       String[] args = { "-m " + getAtlasVersion().name() };
       return new Pair<Class<?>, String[]>(AtlasOperatorUserInterface.class, args);
+   }
+
+   @Override
+   public Class<?> getSpectatorInterfaceClass()
+   {
+      return AtlasSpectatorInterface.class;
    }
 }
