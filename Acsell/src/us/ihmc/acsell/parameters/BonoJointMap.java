@@ -301,4 +301,10 @@ public class BonoJointMap implements DRCRobotJointMap
    {
       return spineJointStrings.get(spineJointName);
    }
+
+   @Override
+   public String[] getPositionControlledJointsForSimulation()
+   {
+      return null;
+   }
 }
