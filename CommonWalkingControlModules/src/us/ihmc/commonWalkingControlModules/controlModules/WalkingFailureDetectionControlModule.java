@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -17,11 +19,14 @@ public class WalkingFailureDetectionControlModule
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FrameConvexPolygon2d combinedFootPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d combinedFootPolygonWithNextFootstep = new FrameConvexPolygon2d();
    private final SideDependentList<FrameConvexPolygon2d> footPolygons = new SideDependentList<>();
+   private final FrameConvexPolygon2d nextFootstepPolygon = new FrameConvexPolygon2d();
    private final SideDependentList<FrameConvexPolygon2d> footPolygonsInWorldFrame = new SideDependentList<>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final BooleanYoVariable isUsingNextFootstep;
    private final BooleanYoVariable isFallDetectionActivated;
    private final DoubleYoVariable icpDistanceFromFootPolygon;
    private final DoubleYoVariable icpDistanceFromFootPolygonThreshold;
@@ -40,6 +45,12 @@ public class WalkingFailureDetectionControlModule
          FrameConvexPolygon2d footPolygonInWorldFrame = new FrameConvexPolygon2d();
          footPolygonsInWorldFrame.put(robotSide, footPolygonInWorldFrame);
       }
+
+      // Just for allocating memory for the nextFootstepPolygon
+      nextFootstepPolygon.setIncludingFrameAndUpdate(footPolygons.get(RobotSide.LEFT));
+
+      isUsingNextFootstep = new BooleanYoVariable("isFallDetectionUsingNextFootstep", registry);
+      isUsingNextFootstep.set(false);
 
       updateCombinedPolygon();
 
@@ -64,6 +75,23 @@ public class WalkingFailureDetectionControlModule
       }
 
       combinedFootPolygon.setIncludingFrameAndUpdate(footPolygonsInWorldFrame.get(RobotSide.LEFT), footPolygonsInWorldFrame.get(RobotSide.RIGHT));
+
+      // If there is a nextFootstep, increase the polygon to include it.
+      if (isUsingNextFootstep.getBooleanValue())
+         combinedFootPolygonWithNextFootstep.setIncludingFrameAndUpdate(combinedFootPolygon, nextFootstepPolygon);
+   }
+
+   public void setNextFootstep(Footstep nextFootstep)
+   {
+      isUsingNextFootstep.set(nextFootstep != null);
+
+      if (isUsingNextFootstep.getBooleanValue())
+      {
+         ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
+         ConvexPolygon2d footPolygon = footPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
+         nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
+         nextFootstepPolygon.changeFrame(worldFrame);
+      }
    }
 
    public void checkIfRobotIsFalling(YoFramePoint currentCapturePoint, YoFramePoint2d desiredCapturePoint)
@@ -71,7 +99,10 @@ public class WalkingFailureDetectionControlModule
       updateCombinedPolygon();
 
       currentCapturePoint.getFrameTuple2dIncludingFrame(capturePoint);
-      icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint));
+      if (isUsingNextFootstep.getBooleanValue())
+         icpDistanceFromFootPolygon.set(combinedFootPolygonWithNextFootstep.distance(capturePoint));
+      else
+         icpDistanceFromFootPolygon.set(combinedFootPolygon.distance(capturePoint));
       // TODO need to investigate this method, seems to be buggy
       //      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
