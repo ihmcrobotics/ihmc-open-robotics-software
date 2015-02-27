@@ -26,5 +26,7 @@ public interface DRCRobotJointMap extends SDFJointNameMap
 
    public abstract String getSpineJointName(SpineJointName spineJointName);
 
+   public abstract String[] getPositionControlledJointsForSimulation();
+
    public abstract DRCRobotContactPointParameters getContactPointParameters();
 }
