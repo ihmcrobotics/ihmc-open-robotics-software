@@ -100,7 +100,7 @@ public class AtlasMultiContact
       scsInitialSetup.setRecordFrequency(recordFrequency);
       scsInitialSetup.setInitializeEstimatorToActual(true);
 
-      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters(false)
+      ArmControllerParameters armControllerParameters = new AtlasArmControllerParameters()
       {
          public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullRobotModel fullRobotModel, RobotSide robotSide)
          {

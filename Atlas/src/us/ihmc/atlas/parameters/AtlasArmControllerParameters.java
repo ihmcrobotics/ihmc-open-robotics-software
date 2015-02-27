@@ -19,15 +19,17 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 public class AtlasArmControllerParameters implements ArmControllerParameters
 {
    private final boolean runningOnRealRobot;
+   private final double handCenterOffset;
 
    public AtlasArmControllerParameters()
    {
-      this(false);
+      this(false, 0.0);
    }
 
-   public AtlasArmControllerParameters(boolean runningOnRealRobot)
+   public AtlasArmControllerParameters(boolean runningOnRealRobot, double handCenterOffset)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      this.handCenterOffset = handCenterOffset;
    }
 
    @Override
@@ -121,5 +123,11 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
       jointPositions.put(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(-0.07));
 
       return jointPositions;
+   }
+
+   @Override
+   public double getWristHandCenterOffset()
+   {
+      return handCenterOffset;
    }
 }

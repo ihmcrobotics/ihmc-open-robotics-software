@@ -108,7 +108,7 @@ public class AtlasRobotModel implements DRCRobotModel
       boolean runningOnRealRobot = target == AtlasTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(runningOnRealRobot);
       sensorInformation = new AtlasSensorInformation(target);
-      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot);
+      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, selectedVersion.getDistanceAttachmentPlateHand());
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
