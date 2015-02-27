@@ -37,12 +37,16 @@ public class GeometricJacobianHolder
    /**
     * Find or create a Jacobian and register it in the MomentumBasedController.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
+    * If the array of joints is empty, it returns -1.
     * @param joints
     * @param jacobianFrame
     * @return
     */
    public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
+      if (joints == null || joints.length == 0)
+         return -1;
+
       for (int i = 0; i < robotJacobians.size(); i++)
       {
          GeometricJacobian jacobian = robotJacobians.get(i);
