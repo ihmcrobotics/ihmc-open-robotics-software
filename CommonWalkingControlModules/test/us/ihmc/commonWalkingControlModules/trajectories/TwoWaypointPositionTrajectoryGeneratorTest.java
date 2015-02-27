@@ -32,6 +32,13 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 	private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 	@AverageDuration
+   @Test(timeout=300000)
+   public void testRegisteringYoVariables()
+   {
+      assertTrue(TwoWaypointPositionTrajectoryGenerator.REGISTER_YOVARIABLES);
+   }
+	
+	@AverageDuration
 	@Test(timeout=300000)
 	public void testSimpleTrajectories()
 	{
