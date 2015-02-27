@@ -4,6 +4,7 @@ import java.nio.FloatBuffer;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.vecmath.Point3f;
 import javax.vecmath.Tuple3f;
 
 import com.jme3.asset.AssetManager;
@@ -144,6 +145,18 @@ public class JMEPointCloudGenerator
       return generatePointCloudGraph(coords, null);
    }
 
+   public Node generatePointCloudGraph(Point3f[] pointCoordinates3d)
+   {
+      Vector3f[] vectorArray = new Vector3f[pointCoordinates3d.length];
+      
+      for (int i = 0; i < pointCoordinates3d.length; i++)
+      {
+         vectorArray[i] = new Vector3f(pointCoordinates3d[i].x, pointCoordinates3d[i].y, pointCoordinates3d[i].z);
+      }
+
+      return generatePointCloudGraph(vectorArray, null);
+   }
+   
    public Node generatePointCloudGraph(Vector3f[] pointCoordinates3d)
    {
       FloatBuffer coords = BufferUtils.createFloatBuffer(pointCoordinates3d);
