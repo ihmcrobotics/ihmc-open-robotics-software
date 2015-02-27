@@ -181,7 +181,28 @@ public class ChestOrientationManager
       {
          receivedNewChestOrientationTime.set(yoTime.getDoubleValue());
 
-         waypointOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
+         simpleOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
+         activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
+         activeTrajectoryGenerator.get(desiredOrientation);
+         simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
+         
+         WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
+         double totalTime = 0.0;
+         for ( double time: trajectoryData.getTimeAtWaypoints() )
+         {
+            totalTime += time;
+         }
+         int lastIndex = trajectoryData.getOrientations().length -1;
+         FrameOrientation lastChestOrientation = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );
+         
+         simpleOrientationTrajectoryGenerator.setFinalOrientation( lastChestOrientation );  
+         simpleOrientationTrajectoryGenerator.setTrajectoryTime( totalTime );
+         
+         simpleOrientationTrajectoryGenerator.initialize();
+         isUsingWaypointTrajectory.set(false);
+         activeTrajectoryGenerator = simpleOrientationTrajectoryGenerator;
+         
+         /*waypointOrientationTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
          activeTrajectoryGenerator.changeFrame(chestOrientationExpressedInFrame);
          activeTrajectoryGenerator.get(desiredOrientation);
          waypointOrientationTrajectoryGenerator.clear();
@@ -191,7 +212,7 @@ public class ChestOrientationManager
          waypointOrientationTrajectoryGenerator.appendWaypoints(trajectoryData);
          waypointOrientationTrajectoryGenerator.initialize();
          isUsingWaypointTrajectory.set(true);
-         activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;
+         activeTrajectoryGenerator = waypointOrientationTrajectoryGenerator;*/
          isTrackingOrientation.set(true);
       }
    }  

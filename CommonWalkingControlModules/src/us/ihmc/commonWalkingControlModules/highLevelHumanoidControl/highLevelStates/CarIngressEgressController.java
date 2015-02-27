@@ -331,6 +331,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
             pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
+            
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = pelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
             desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
             pelvisPositionTrajectoryGenerator.clear();
