@@ -48,13 +48,8 @@ public class RobotAllJointsDataCheckerTest
          Thread.yield();
       }
       
-      scs.cropBuffer();
-      scs.gotoInPointNow();
-      scs.stepForwardNow(1);
-      scs.setInPoint();
-      scs.cropBuffer();
-      
       RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, twoLinkRobotForTesting);
+      robotAllJointsDataChecker.cropFirstPoint();
       
       scs.applyDataProcessingFunction(robotAllJointsDataChecker);
    }

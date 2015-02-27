@@ -88,6 +88,10 @@ public abstract class WholeBodyTrajectoryTest
       targetListRight.add(new Point3d(0.5, -0.4, 1.4));
       targetListRight.add(new Point3d(0.5, -0.2, 0.6));
 
+      double maximumJointVelocity = 1.5;
+      double maximumJointAcceleration = 15.0;
+      
+      
       for (Point3d rightTarget : targetListRight)
       {
          if (getSimulationConstructionSet() != null)
@@ -111,9 +115,10 @@ public abstract class WholeBodyTrajectoryTest
 
          ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
 
+        
          if (ret == ComputeResult.SUCCEEDED)
          {
-            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, 1.5, 15, 0.10);
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 5.0); //0.10);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
             Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
@@ -172,6 +177,9 @@ public abstract class WholeBodyTrajectoryTest
 
          Robot robot = scs.getRobots()[0];
          RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
+         robotAllJointsDataChecker.setMaximumDerivativeForAllJoints(1.01 * maximumJointVelocity);
+         robotAllJointsDataChecker.setMaximumSecondDerivativeForAllJoints(1.01 * maximumJointAcceleration);
+         
          scs.applyDataProcessingFunction(robotAllJointsDataChecker);
       }
    }
