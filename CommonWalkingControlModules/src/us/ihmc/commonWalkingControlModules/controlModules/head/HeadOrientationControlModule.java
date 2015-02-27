@@ -85,6 +85,7 @@ public class HeadOrientationControlModule
    private final DenseMatrix64F desiredJointAngles;
 
    private final BooleanYoVariable doPositionControl = new BooleanYoVariable("doPositionControlForNeck", registry);
+   private final boolean[] doIntegrateDesiredAccerations;
 
    /*
     * TODO Sylvain. In walking, the head in controlled with respect to the
@@ -162,6 +163,9 @@ public class HeadOrientationControlModule
 
       setHeadOrientationLimits(headOrientationControllerParameters);
 
+      doIntegrateDesiredAccerations = new boolean[headOrientationControlJoints.length];
+      saveDoAccelerationIntegration();
+
       parentRegistry.addChild(registry);
    }
 
@@ -177,6 +181,15 @@ public class HeadOrientationControlModule
       if (jacobianId == -1) // Nothing to control there
          return;
 
+      if (doPositionControl.getBooleanValue())
+      {
+         enablePositionControl();
+      }
+      else
+      {
+         disablePositionControl();
+      }
+
       packDesiredFrameOrientation(desiredOrientation);
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
@@ -184,28 +197,21 @@ public class HeadOrientationControlModule
       DegenerateOrientationControlModule.computeSelectionMatrix(jacobianId, momentumBasedController, selectionMatrix);
 
       if (doPositionControl.getBooleanValue())
-         doPositionControl();
-      else
-         doForceControl();
+         computeJointsDesiredOrientationAndAngularVelocity();
+
+      computeJointsDesiredAcceleration();
    }
 
-   private void doPositionControl()
+   private void computeJointsDesiredOrientationAndAngularVelocity()
    {
       numericalInverseKinematicsCalculator.setSelectionMatrix(selectionMatrix);
       desiredOrientation.changeFrame(baseFrame);
       desiredOrientation.getTransform3D(desiredHeadTransform);
       numericalInverseKinematicsCalculator.solve(desiredHeadTransform);
       numericalInverseKinematicsCalculator.getBest(desiredJointAngles);
-
-      for (int i = 0; i < headOrientationControlJoints.length; i++)
-      {
-         OneDoFJoint joint = headOrientationControlJoints[i];
-         joint.setqDesired(desiredJointAngles.get(i, 0));
-         joint.setUnderPositionControl(true);
-      }
    }
 
-   private void doForceControl()
+   private void computeJointsDesiredAcceleration()
    {
       controlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       controlledLinearAcceleration.setToZero(headFrame);
@@ -214,10 +220,33 @@ public class HeadOrientationControlModule
       
       taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+   }
 
+   private void saveDoAccelerationIntegration()
+   {
       for (int i = 0; i < headOrientationControlJoints.length; i++)
       {
          OneDoFJoint joint = headOrientationControlJoints[i];
+         doIntegrateDesiredAccerations[i] = joint.getIntegrateDesiredAccelerations();
+      }
+   }
+
+   private void enablePositionControl()
+   {
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         OneDoFJoint joint = headOrientationControlJoints[i];
+         joint.setIntegrateDesiredAccelerations(false);
+         joint.setUnderPositionControl(true);
+      }
+   }
+
+   private void disablePositionControl()
+   {
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         OneDoFJoint joint = headOrientationControlJoints[i];
+         joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccerations[i]);
          joint.setUnderPositionControl(false);
       }
    }
