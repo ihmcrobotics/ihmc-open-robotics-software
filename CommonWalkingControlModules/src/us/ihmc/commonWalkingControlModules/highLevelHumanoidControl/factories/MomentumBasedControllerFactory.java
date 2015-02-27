@@ -32,6 +32,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
@@ -81,6 +82,8 @@ public class MomentumBasedControllerFactory
    private final ContactableBodiesFactory contactableBodiesFactory;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
+
+   private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footSensorNames,
          WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
@@ -176,6 +179,7 @@ public class MomentumBasedControllerFactory
       momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, yoTime, gravityZ,
             twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
             oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
+      momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
             transferTimeCalculator, transferTime);
@@ -314,6 +318,20 @@ public class MomentumBasedControllerFactory
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
       momentumBasedController.attachControllerFailureListener(listener);
+   }
+
+   public void attachControllerStateChangedListeners(List<ControllerStateChangedListener> listeners)
+   {
+      for (int i = 0; i < listeners.size(); i++)
+         attachControllerStateChangedListener(listeners.get(i));
+   }
+
+   public void attachControllerStateChangedListener(ControllerStateChangedListener listener)
+   {
+      if (momentumBasedController != null)
+         momentumBasedController.attachControllerStateChangedListener(listener);
+      else
+         controllerStateChangedListenersToAttach.add(listener);
    }
 
    public YoVariableRegistry getRegistry()

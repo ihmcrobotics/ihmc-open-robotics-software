@@ -69,6 +69,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransition;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
@@ -376,6 +377,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          stateMachine.addState(transferState);
          stateMachine.addState(singleSupportState);
       }
+
+      stateMachine.attachStateChangedListener(new StateChangedListener<WalkingState>()
+      {
+         @Override
+         public void stateChanged(State<WalkingState> oldState, State<WalkingState> newState, double time)
+         {
+            momentumBasedController.reportControllerStateChangeToListeners();
+         }
+      });
    }
 
    private RigidBody baseForChestOrientationControl;
