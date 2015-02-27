@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -15,6 +16,7 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
+import us.ihmc.darpaRoboticsChallenge.controllers.JointLowLevelPositionControlSimulator;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -27,6 +29,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -38,6 +41,7 @@ import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotCont
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
@@ -212,16 +216,17 @@ public class DRCSimulationFactory
       {
          multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
       }
-      if(drcRobotModel.getJointMap().getHeadName() != null)
+      DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
+      if(jointMap.getHeadName() != null)
       {
-         DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), drcRobotModel.getJointMap().getHeadName());
+         DRCSimulatedIMUPublisher drcSimulatedIMUPublisher = new DRCSimulatedIMUPublisher(globalDataProducer, drcEstimatorThread.getSimulatedIMUOutput(), jointMap.getHeadName());
          multiThreadedRobotController.addController(drcSimulatedIMUPublisher, slowPublisherTicksPerSimulationTick, false);
       }
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
          System.err.println(this.getClass().getSimpleName() + ": Warning! Initializing Estimator to Actual!");
-         initializeEstimatorToActual(drcEstimatorThread, robotInitialSetup, simulatedRobot, drcRobotModel.getJointMap());
+         initializeEstimatorToActual(drcEstimatorThread, robotInitialSetup, simulatedRobot, jointMap);
       }
 
       simulatedRobot.setController(multiThreadedRobotController);
@@ -232,6 +237,20 @@ public class DRCSimulationFactory
                lidarParams.getLidarSpindleJointName(), lidarParams.getLidarSpindleVelocity(), drcRobotModel.getSimulateDT());
          simulatedRobot.setController(lidarControllerInterface);
       }
+
+      String[] positionControlledJoints = jointMap.getPositionControlledJointsForSimulation();
+      if (positionControlledJoints != null)
+      {
+         for (String jointName : positionControlledJoints)
+         {
+            OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
+            SDFFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+            OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, drcRobotModel.getSimulateDT());
+            simulatedRobot.setController(positionControlSimulator);
+         }
+      }
+
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
 

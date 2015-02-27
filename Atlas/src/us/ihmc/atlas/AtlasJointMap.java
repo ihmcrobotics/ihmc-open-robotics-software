@@ -360,5 +360,27 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return spineJointStrings.get(spineJointName);
    }
+
+   @Override
+   public String[] getPositionControlledJointsForSimulation()
+   {
+      // For simulating position control of the neck and arm joints
+
+//      ArrayList<String> positionControlledJoints = new ArrayList<>();
+//      for (NeckJointName neckJoint : neckJoints)
+//         positionControlledJoints.add(neckJointStrings.get(neckJoint));
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         for (ArmJointName armJoint : armJoints)
+//         {
+//            positionControlledJoints.add(getArmJointName(robotSide, armJoint));
+//         }
+//      }
+//
+//      String[] ret = new String[positionControlledJoints.size()];
+//      positionControlledJoints.toArray(ret);
+//      return ret;
+      return null;
+   }
 }
 
