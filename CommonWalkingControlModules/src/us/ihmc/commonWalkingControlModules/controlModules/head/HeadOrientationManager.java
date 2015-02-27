@@ -1,15 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -34,7 +29,6 @@ public class HeadOrientationManager
    private final ReferenceFrame headOrientationExpressedInFrame;
    private final YoQuaternionProvider initialOrientationProvider;
    private final YoQuaternionProvider finalOrientationProvider;
-   private int jacobianId = -1;
 
    private final BooleanYoVariable hasBeenInitialized;
 
@@ -107,22 +101,19 @@ public class HeadOrientationManager
 
       checkForNewDesiredOrientationInformation();
       
-      if (desiredHeadOrientationProvider != null && isTrackingOrientation.getBooleanValue())
+      if (desiredHeadOrientationProvider != null)
       {
-         double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
-         orientationTrajectoryGenerator.compute(deltaTime);
+         if (isTrackingOrientation.getBooleanValue())
+         {
+            double deltaTime = yoTime.getDoubleValue() - receivedNewHeadOrientationTime.getDoubleValue();
+            orientationTrajectoryGenerator.compute(deltaTime);
+            isTrackingOrientation.set(!orientationTrajectoryGenerator.isDone());
+         }
          orientationTrajectoryGenerator.get(desiredOrientation);
          headOrientationControlModule.setOrientationToTrack(desiredOrientation);
-         isTrackingOrientation.set(!orientationTrajectoryGenerator.isDone());
       }
 
-      if (jacobianId >= 0)
-      {
-         headOrientationControlModule.compute();
-
-         TaskspaceConstraintData taskspaceConstraintData = headOrientationControlModule.getTaskspaceConstraintData();
-         momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
-      }
+      headOrientationControlModule.compute();
    }
 
    private void checkForNewDesiredOrientationInformation()
@@ -151,50 +142,5 @@ public class HeadOrientationManager
          orientationTrajectoryGenerator.initialize();
          isTrackingOrientation.set(true);
       }
-      
-   }
-
-   public int createJacobian(String[] headOrientationControlJointNames)
-   {
-      FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
-      InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
-
-      int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(headOrientationControlJoints, headOrientationControlModule.getHead()
-            .getBodyFixedFrame());
-      return jacobianId;
-   }
-
-   public void setUp(RigidBody base, int jacobianId)
-   {
-      this.jacobianId = jacobianId;
-      headOrientationControlModule.setBase(base);
-      headOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
-   }
-
-   public void setUp(RigidBody base, int jacobianId, double proportionalGainX, double proportionalGainY, double proportionalGainZ, double derivativeGainX,
-         double derivativeGainY, double derivativeGainZ)
-   {
-      this.jacobianId = jacobianId;
-      headOrientationControlModule.setBase(base);
-      headOrientationControlModule.setJacobian(momentumBasedController.getJacobian(jacobianId));
-      headOrientationControlModule.setProportionalGains(proportionalGainX, proportionalGainY, proportionalGainZ);
-      headOrientationControlModule.setDerivativeGains(derivativeGainX, derivativeGainY, derivativeGainZ);
-   }
-
-   public void setMaxAccelerationAndJerk(double maxAcceleration, double maxJerk)
-   {
-      headOrientationControlModule.setMaxAccelerationAndJerk(maxAcceleration, maxJerk);
-   }
-
-   public void setControlGains(double proportionalGain, double derivativeGain)
-   {
-      headOrientationControlModule.setProportionalGains(proportionalGain, proportionalGain, proportionalGain);
-      headOrientationControlModule.setDerivativeGains(derivativeGain, derivativeGain, derivativeGain);
-   }
-
-   public void turnOff()
-   {
-      setUp(null, -1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
    }
 }

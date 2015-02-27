@@ -10,7 +10,6 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyPositionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -106,9 +105,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
 
    private final DoubleYoVariable carIngressChestOrientationKp = new DoubleYoVariable("carIngressChestOrientationKp", registry);
    private final DoubleYoVariable carIngressChestOrientationZeta = new DoubleYoVariable("carIngressChestOrientationZeta", registry);
-
-   private final DoubleYoVariable carIngressHeadOrientationKp = new DoubleYoVariable("carIngressHeadOrientationKp", registry);
-   private final DoubleYoVariable carIngressHeadOrientationZeta = new DoubleYoVariable("carIngressHeadOrientationZeta", registry);
 
    private final YoFrameVector yoPelvisLinearAcceleration = new YoFrameVector("pelvisLinearAcceleration", worldFrame, registry);
 
@@ -219,30 +215,8 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       return ret;
    }
 
-   private VariableChangedListener createHeadGainsChangedListener()
-   {
-      VariableChangedListener ret = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            double headKp = carIngressHeadOrientationKp.getDoubleValue();
-            double headZeta = carIngressHeadOrientationZeta.getDoubleValue();
-            double headKd = GainCalculator.computeDerivativeGain(headKp, headZeta);
-            headOrientationManager.setControlGains(headKp, headKd);
-         }
-      };
-
-      carIngressHeadOrientationKp.addVariableChangedListener(ret);
-      carIngressHeadOrientationZeta.addVariableChangedListener(ret);
-
-      return ret;
-   }
-
    private RigidBody baseForChestOrientationControl;
    private int jacobianForChestOrientationControlId;
-
-   private RigidBody baseForHeadOrientationControl;
-   private int jacobianIdForHeadOrientationControl;
 
    private void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
@@ -250,11 +224,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       ChestOrientationManager chestOrientationManager = variousWalkingManagers.getChestOrientationManager();
       String[] chestOrientationControlJointNames = walkingControllerParameters.getDefaultChestOrientationControlJointNames();
       jacobianForChestOrientationControlId = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
-
-      baseForHeadOrientationControl = fullRobotModel.getPelvis();
-      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
-      jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(headOrientationControlJointNames);
    }
 
    public void initialize()
@@ -268,12 +237,6 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       carIngressChestOrientationZeta.set(1.0);
       VariableChangedListener chestGainsChangedListener = createChestGainsChangedListener();
       chestGainsChangedListener.variableChanged(null);
-
-      headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
-      carIngressHeadOrientationKp.set(40.0);
-      carIngressHeadOrientationZeta.set(1.0);
-      VariableChangedListener headGainsChangedListener = createHeadGainsChangedListener();
-      headGainsChangedListener.variableChanged(null);
 
       initializeContacts();
 

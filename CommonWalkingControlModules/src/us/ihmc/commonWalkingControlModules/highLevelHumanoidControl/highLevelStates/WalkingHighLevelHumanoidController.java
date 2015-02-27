@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
 import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
@@ -382,9 +381,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private RigidBody baseForChestOrientationControl;
    private int jacobianForChestOrientationControlId;
 
-   private RigidBody baseForHeadOrientationControl;
-   private int jacobianIdForHeadOrientationControl;
-
    public void setupManagers(VariousWalkingManagers variousWalkingManagers)
    {
       baseForChestOrientationControl = fullRobotModel.getElevator();
@@ -394,17 +390,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (chestOrientationManager != null)
       {
          jacobianForChestOrientationControlId = chestOrientationManager.createJacobian(fullRobotModel, chestOrientationControlJointNames);
-         chestOrientationManager.setUp(baseForChestOrientationControl, jacobianIdForHeadOrientationControl);
-      }
-
-      baseForHeadOrientationControl = fullRobotModel.getElevator();
-      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      String[] headOrientationControlJointNames = walkingControllerParameters.getDefaultHeadOrientationControlJointNames();
-
-      if (headOrientationManager != null)
-      {
-         jacobianIdForHeadOrientationControl = headOrientationManager.createJacobian(headOrientationControlJointNames);
-         headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
+         chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
       }
    }
 
@@ -420,12 +406,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (chestOrientationManager != null)
       {
          chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
-      }
-
-      HeadOrientationManager headOrientationManager = variousWalkingManagers.getHeadOrientationManager();
-      if (headOrientationManager != null)
-      {
-         headOrientationManager.setUp(baseForHeadOrientationControl, jacobianIdForHeadOrientationControl);
       }
 
       pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());

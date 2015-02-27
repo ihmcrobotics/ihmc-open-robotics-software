@@ -1,19 +1,32 @@
 package us.ihmc.commonWalkingControlModules.controlModules.head;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.OriginAndPointFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
@@ -23,7 +36,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 
 
-public class HeadOrientationControlModule extends DegenerateOrientationControlModule
+public class HeadOrientationControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -36,6 +49,8 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    private enum HeadTrackingMode {ORIENTATION, POINT}
 
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   
    private final EnumYoVariable<HeadTrackingMode> headTrackingMode = EnumYoVariable.create("headTrackingMode", HeadTrackingMode.class, registry);
 
    private final DoubleYoVariable yawLimit = new DoubleYoVariable("yawLimit", registry);
@@ -44,6 +59,32 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
    private final DoubleYoVariable rollLimit = new DoubleYoVariable("rollLimit", registry);
 
    private final RigidBody head;
+   private final RigidBody elevator;
+   private final ReferenceFrame baseFrame;
+
+   private final MomentumBasedController momentumBasedController;
+   private final RigidBodyOrientationControlModule controlModule;
+
+   private final FrameOrientation desiredOrientation = new FrameOrientation();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
+   private final FrameVector desiredAngularAcceleration = new FrameVector();
+   private final FrameVector controlledLinearAcceleration = new FrameVector();
+   private final FrameVector controlledAngularAcceleration = new FrameVector();
+   private final SpatialAccelerationVector controlledSpatialAcceleration = new SpatialAccelerationVector();
+
+   private final RigidBodyTransform desiredHeadTransform = new RigidBodyTransform();
+
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
+
+   private final int jacobianId;
+   private final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
+
+   private final OneDoFJoint[] headOrientationControlJoints;
+   private final NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator;
+   private final DenseMatrix64F desiredJointAngles;
+
+   private final BooleanYoVariable doPositionControl = new BooleanYoVariable("doPositionControlForNeck", registry);
 
    /*
     * TODO Sylvain. In walking, the head in controlled with respect to the
@@ -55,29 +96,32 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
     */
 
    public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
-           HeadOrientationControllerParameters headOrientationControllerParameters, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry yoGraphicsListRegistry)
+         HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(momentumBasedController, headOrientationExpressedInFrame, headOrientationControllerParameters, null, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public HeadOrientationControlModule(MomentumBasedController momentumBasedController, ReferenceFrame headOrientationExpressedInFrame,
-           HeadOrientationControllerParameters headOrientationControllerParameters, YoOrientationPIDGains gains, YoVariableRegistry parentRegistry,
-           YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
-      super("head", new RigidBody[]
-      {
-      }, momentumBasedController.getFullRobotModel().getHead(), new GeometricJacobian[]
-      {
-      }, momentumBasedController.getTwistCalculator(), momentumBasedController.getControlDT(), gains, parentRegistry);
-
+      this.momentumBasedController = momentumBasedController;
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      this.head = fullRobotModel.getHead();
+      head = fullRobotModel.getHead();
+      headFrame = head.getBodyFixedFrame();
+      elevator = fullRobotModel.getElevator();
+      taskspaceConstraintData.set(elevator, head);
+
+      doPositionControl.set(headOrientationControllerParameters.isNeckPositionControlled());
+
+      String[] headOrientationControlJointNames = headOrientationControllerParameters.getDefaultHeadOrientationControlJointNames();
+      InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(fullRobotModel.getRootJoint().getSuccessor());
+      headOrientationControlJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames), OneDoFJoint.class);
+
+      jacobianId = momentumBasedController.getOrCreateGeometricJacobian(headOrientationControlJoints, headFrame);
+      baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
+
+      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      double dt = momentumBasedController.getControlDT();
+      controlModule = new RigidBodyOrientationControlModule("head", elevator, head, twistCalculator, dt, gains, registry);
 
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
       this.chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      this.headFrame = head.getBodyFixedFrame();
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", worldFrame, registry);
 
@@ -93,7 +137,21 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
          pointTrackingFrameFiz = null;
       }
 
+      InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(headOrientationControlJoints);
+      GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfControlledJoints[cloneOfControlledJoints.length - 1].getSuccessor().getBodyFixedFrame());
+
+      int maxIterations = 5;
+      double lambdaLeastSquares = 0.0009;
+      double tolerance = 0.0025;
+      double maxStepSize = 0.2;
+      double minRandomSearchScalar = 0.01;
+      double maxRandomSearchScalar = 0.8;
+      numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+      desiredJointAngles = new DenseMatrix64F(cloneOfControlledJoints.length, 1);
+
       setHeadOrientationLimits(headOrientationControllerParameters);
+
+      parentRegistry.addChild(registry);
    }
 
    public RigidBody getHead()
@@ -103,7 +161,53 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
    private final FramePoint headPosition = new FramePoint();
 
-   @Override
+   public void compute()
+   {
+      packDesiredFrameOrientation(desiredOrientation);
+      packDesiredAngularVelocity(desiredAngularVelocity);
+      packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
+
+      DegenerateOrientationControlModule.computeSelectionMatrix(jacobianId, momentumBasedController, selectionMatrix);
+
+      if (doPositionControl.getBooleanValue())
+         doPositionControl();
+      else
+         doForceControl();
+   }
+
+   private void doPositionControl()
+   {
+      numericalInverseKinematicsCalculator.setSelectionMatrix(selectionMatrix);
+      desiredOrientation.changeFrame(baseFrame);
+      desiredOrientation.getTransform3D(desiredHeadTransform);
+      numericalInverseKinematicsCalculator.solve(desiredHeadTransform);
+      numericalInverseKinematicsCalculator.getBest(desiredJointAngles);
+
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         OneDoFJoint joint = headOrientationControlJoints[i];
+         joint.setqDesired(desiredJointAngles.get(i, 0));
+         joint.setUnderPositionControl(true);
+      }
+   }
+
+   private void doForceControl()
+   {
+      controlModule.compute(controlledAngularAcceleration, desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      controlledLinearAcceleration.setToZero(headFrame);
+      
+      controlledSpatialAcceleration.set(headFrame, elevator.getBodyFixedFrame(), headFrame, controlledLinearAcceleration, controlledAngularAcceleration);
+      
+      taskspaceConstraintData.set(controlledSpatialAcceleration, nullspaceMultipliers, selectionMatrix);
+      momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
+
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         OneDoFJoint joint = headOrientationControlJoints[i];
+         joint.setUnderPositionControl(false);
+      }
+   }
+
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
       FramePoint positionToPointAt = pointToTrack.getFramePointCopy();
@@ -154,7 +258,7 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
 
       // Limit roll and yaw
       {
-         orientation.changeFrame(getJacobian().getBaseFrame());
+         orientation.changeFrame(elevator.getBodyFixedFrame());
 
          double[] yawPitchRoll = orientation.getYawPitchRoll();
          yawPitchRoll[0] = MathTools.clipToMinMax(yawPitchRoll[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
@@ -173,13 +277,11 @@ public class HeadOrientationControlModule extends DegenerateOrientationControlMo
       rollLimit.set(headOrientationControllerParameters.getHeadRollLimit());
    }
 
-   @Override
    protected void packDesiredAngularVelocity(FrameVector angularVelocityToPack)
    {
       angularVelocityToPack.setToZero(worldFrame);
    }
 
-   @Override
    protected void packDesiredAngularAccelerationFeedForward(FrameVector angularAccelerationToPack)
    {
       angularAccelerationToPack.setToZero(worldFrame);
