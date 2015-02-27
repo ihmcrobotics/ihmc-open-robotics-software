@@ -637,6 +637,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             nextNextFootstep = upcomingFootstepList.getNextNextFootstep();
          }
 
+         failureDetectionControlModule.setNextFootstep(nextFootstep);
+
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
          transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
          transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
@@ -699,6 +701,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
+            failureDetectionControlModule.setNextFootstep(null);
+
             // Do something smart here when going to DoubleSupport state.
             //            instantaneousCapturePointPlanner.initializeForStoppingInDoubleSupport(yoTime.getDoubleValue());
          }
