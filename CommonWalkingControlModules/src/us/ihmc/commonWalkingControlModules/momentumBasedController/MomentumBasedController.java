@@ -744,8 +744,6 @@ public class MomentumBasedController
 
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      joint.setMomentumBasedQddDesired(desiredAcceleration);
-
       if (tempJointAcceleration.get(joint) == null)
          tempJointAcceleration.put(joint, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
 
