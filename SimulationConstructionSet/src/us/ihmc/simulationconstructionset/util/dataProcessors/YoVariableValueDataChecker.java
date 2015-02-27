@@ -12,6 +12,8 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    private BooleanYoVariable minimumValueExceeded;
    private BooleanYoVariable maximumDerivativeExceeded;
    private BooleanYoVariable maximumSecondDerivativeExceeded;
+   private BooleanYoVariable derivativeCompError;
+
 
    private DoubleYoVariable calculatedDerivative;
    private double previousValue;
@@ -20,33 +22,48 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
 
    private DoubleYoVariable time;
    private DoubleYoVariable variableToCheck;
-
-   private double maximumDerivative = Double.POSITIVE_INFINITY;
-   private double maximumSecondDerivative = Double.POSITIVE_INFINITY;
-   private double maximumValue = Double.POSITIVE_INFINITY;
-   private double minimumValue = Double.NEGATIVE_INFINITY;
+   private DoubleYoVariable actualDerivativeofVariableToCheck;
 
    private boolean maxDerivativeExeeded = false;
-
 
    private boolean maxSecondDerivativeExeeded = false;
    private boolean maxValueExeeded = false;
    private boolean minValueExeeded = false;
+   private boolean derivativeCompErrorOccurred = false;
+
    private DoubleYoVariable calculatedSecondDerivative;
 
    private int counter;
 
-   public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time)
+   private ValueDataCheckerParameters valueDataCheckerParameters;
+
+
+   public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time,
+                                     ValueDataCheckerParameters valueDataCheckerParameters)
+   {
+      this(scs, variableToCheck, time, valueDataCheckerParameters, null);
+   }
+
+
+   public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time,
+                                     ValueDataCheckerParameters valueDataCheckerParameters, DoubleYoVariable actualDerivativeOfVariableToCheck)
    {
       YoVariableRegistry registry = scs.getRootRegistry();
 
       this.time = time;
       this.variableToCheck = variableToCheck;
 
+      this.valueDataCheckerParameters = valueDataCheckerParameters.getDefensiveCopy();
+
+      this.actualDerivativeofVariableToCheck = actualDerivativeOfVariableToCheck;
+
       maximumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxValueExceeded", registry);
       minimumValueExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MinValueExceeded", registry);
       maximumDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxDervExceeded", registry);
       maximumSecondDerivativeExceeded = new BooleanYoVariable(variableToCheck.getName() + "_MaxSecDervExceeded", registry);
+
+      if (actualDerivativeofVariableToCheck != null)
+         derivativeCompError = new BooleanYoVariable(variableToCheck.getName() + "_DerivativeCompError", registry);
 
       calculatedDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcDerv", registry);
       calculatedSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcSecDerv", registry);
@@ -56,28 +73,32 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
 
    public void setMaximumDerivative(double maximumDerivative)
    {
-      this.maximumDerivative = Math.abs(maximumDerivative);
+      valueDataCheckerParameters.setMaximumDerivative(maximumDerivative);
    }
 
    public void setMaximumSecondDerivate(double maximumSecondDerivative)
    {
-      this.maximumSecondDerivative = Math.abs(maximumSecondDerivative);
+      valueDataCheckerParameters.setMaximumSecondDerivative(maximumSecondDerivative);
    }
 
    public void setMaximumValue(double maximumValue)
    {
-      if (maximumValue < minimumValue)
-         throw new RuntimeException("maximumValue must be greater than maximumValue. maximumValue=" + maximumValue + ", maximumValue=" + maximumValue);
-
-      this.maximumValue = maximumValue;
+      valueDataCheckerParameters.setMaximumValue(maximumValue);
    }
 
    public void setMinimumValue(double minimumValue)
    {
-      if (minimumValue > maximumValue)
-         throw new RuntimeException("maximumValue must be greater than maximumValue. maximumValue=" + maximumValue + ", maximumValue=" + maximumValue);
-
-      this.minimumValue = minimumValue;
+      valueDataCheckerParameters.setMinimumValue(minimumValue);
+   }
+   
+   public void setErrorThresholdOnDerivativeComparison(double errorThresholdOnDerivativeComparison)
+   {
+      valueDataCheckerParameters.setErrorThresholdOnDerivativeComparison(errorThresholdOnDerivativeComparison);
+   }
+   
+   public void setValueDataCheckerParameters(ValueDataCheckerParameters valueDataCheckerParameters)
+   {
+      this.valueDataCheckerParameters = valueDataCheckerParameters.getDefensiveCopy();
    }
 
    @Override
@@ -88,6 +109,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       maxValueExeeded = false;
       minValueExeeded = false;
       previousDerivative = Double.NaN;
+      derivativeCompErrorOccurred = false;
       counter = 0;
    }
 
@@ -95,8 +117,8 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    public void processData()
    {
       double currentValue = variableToCheck.getDoubleValue();
-      minimumValueExceeded.set(currentValue < minimumValue);
-      maximumValueExceeded.set(currentValue > maximumValue);
+      minimumValueExceeded.set(currentValue < valueDataCheckerParameters.getMinimumValue());
+      maximumValueExceeded.set(currentValue > valueDataCheckerParameters.getMaximumValue());
 
       double currentTime = time.getDoubleValue();
 
@@ -106,6 +128,17 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       if (counter >= 1)
       {
          currentDerivative = (currentValue - previousValue) / (currentTime - previousTime);
+
+         if (actualDerivativeofVariableToCheck != null)
+         {
+            if (Math.abs(actualDerivativeofVariableToCheck.getDoubleValue() - currentDerivative) > valueDataCheckerParameters.getErrorThresholdOnDerivativeComparison())
+            {
+               derivativeCompError.set(true);
+               derivativeCompErrorOccurred = true;
+            }
+            else
+               derivativeCompError.set(false);
+         }
       }
       else
       {
@@ -125,8 +158,8 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       calculatedDerivative.set(currentDerivative);
       calculatedSecondDerivative.set(currentSecondDerivative);
 
-      maximumDerivativeExceeded.set(Math.abs(currentDerivative) > maximumDerivative);
-      maximumSecondDerivativeExceeded.set(Math.abs(currentSecondDerivative) > maximumSecondDerivative);
+      maximumDerivativeExceeded.set(Math.abs(currentDerivative) >  valueDataCheckerParameters.getMaximumDerivative());
+      maximumSecondDerivativeExceeded.set(Math.abs(currentSecondDerivative) > valueDataCheckerParameters.getMaximumSecondDerivative());
 
       maxValueExeeded = maxValueExeeded || maximumValueExceeded.getBooleanValue();
       minValueExeeded = minValueExeeded || minimumValueExceeded.getBooleanValue();
@@ -140,6 +173,12 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
 
       counter++;
    }
+
+   public boolean isDerivativeCompErrorOccurred()
+   {
+      return derivativeCompErrorOccurred;
+   }
+
 
    public boolean isMaxDerivativeExeeded()
    {
