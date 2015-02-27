@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.util.ArrayList;
 import java.util.Random;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -10,25 +11,18 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.WholeBodyIKPacketCreator;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
-import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -124,7 +118,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
 //      	   return trajectoryAnglesToReturn;
 //         }
 
-   private double[][] generateArmTrajectory(RobotSide robotSide, int waypoints)
+   private double[][] generateArmTrajectory(RobotSide robotSide, int numOfWaypoints)
    {
       // Put the arm down
       //waypoints isnt used in this function
@@ -136,12 +130,12 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 });
       double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 });
 
-      int numberOfHandPoses = 10;
-      double[][] armFlyingSequence = new double[numberOfArmJoints][numberOfHandPoses];
+  
+      double[][] armFlyingSequence = new double[numberOfArmJoints][numOfWaypoints];
 
       for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
       {
-         for (int poseIndex = 0; poseIndex < numberOfHandPoses; poseIndex++)
+         for (int poseIndex = 0; poseIndex < numOfWaypoints; poseIndex++)
          {
             double desiredJointAngle;
             switch (poseIndex % 6)
@@ -203,16 +197,29 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
 
    private void executeTest()
    {
-      int waypoints = 10;
-      WholeBodyTrajectoryDevelopmentPacket packet = new WholeBodyTrajectoryDevelopmentPacket(waypoints);
+      int waypoints = 8;
+      WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(waypoints, 6);
       try
-      {
-         double[][] leftArmAngles = generateArmTrajectory(RobotSide.LEFT, waypoints);
-         double[][] rightArmAngles = generateArmTrajectory(RobotSide.RIGHT, waypoints);
-//         double[][] leftArmAngles = transposeDoubleArrayMatrix(generateArmTrajectory(RobotSide.LEFT, waypoints));
-//         double[][] rightArmAngles = transposeDoubleArrayMatrix(generateArmTrajectory(RobotSide.RIGHT, waypoints));
-         packet.setArmJointAngles(leftArmAngles, RobotSide.LEFT);
-         packet.setArmJointAngles(rightArmAngles, RobotSide.RIGHT);
+      {    
+         for (int w=0; w<waypoints; w++ )
+         {
+            packet.timeSincePrevious[w] = 2.0;
+ 
+            packet.pelvisWorldPosition[w] = new Point3d( -0.05, 0.0, 0.2*( w%2 )+0.6);      
+            
+            Quat4d rotation  =  new Quat4d();    
+            rotation.set( new AxisAngle4d(0, 1, 0, 0.2* ( (w%2)*2 - 1) ));
+            
+            packet.chestWorldOrientation[w] = rotation;    
+            packet.pelvisWorldOrientation[w] = new Quat4d(); 
+         }
+         
+         packet.allocateArmTrajectory(RobotSide.LEFT);
+         packet.allocateArmTrajectory(RobotSide.RIGHT);
+         
+         packet.leftArmJointAngle  = generateArmTrajectory(RobotSide.LEFT, waypoints);
+         packet.rightArmJointAngle = generateArmTrajectory(RobotSide.RIGHT, waypoints);
+         
       }
       catch (Exception e)
       {

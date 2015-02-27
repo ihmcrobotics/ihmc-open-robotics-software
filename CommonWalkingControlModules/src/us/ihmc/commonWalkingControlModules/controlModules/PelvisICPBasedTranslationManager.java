@@ -177,11 +177,8 @@ public class PelvisICPBasedTranslationManager
          else if (desiredPelvisPoseProvider.checkForNewPositionWithWaypoints())
          {
             initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            pelvisWaypointsPositionTrajectoryGenerator.clear();
-            tempPosition.setToZero(pelvisZUpFrame);
-            tempPosition.changeFrame(worldFrame);
-            tempVelocity.setToZero(worldFrame);
-            pelvisWaypointsPositionTrajectoryGenerator.appendWayPoint(0.0, tempPosition, tempVelocity);
+            pelvisWaypointsPositionTrajectoryGenerator.clear();          
+            
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
             desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
             pelvisWaypointsPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);

@@ -8,13 +8,15 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 
 public class PacketRouter
 {
    private boolean DEBUG = false;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE;//set to Integer.MIN_VALUE to debug all destinations
-   private Class packetTypeToDebug = null;//set to null to debug all packets
+   private Class[] packetTypesToDebug =null;//set to null to debug all packets
    
    private final int BROADCAST = 0;
    private enum RouteReceieveType {ON_SEND, ON_RECEIVE};
@@ -230,11 +232,16 @@ public class PacketRouter
          return false;
       }
       
-      if(packetTypeToDebug != null && packetTypeToDebug != packetType)
+      if(packetTypesToDebug != null )
       {
+         for (int i=0; i< packetTypesToDebug.length; i++)
+         {
+            if(packetTypesToDebug[i] == packetType) {
+               return true;
+            }
+         }
          return false;
-      }
-      
+      }    
       return true;
    }
    
@@ -257,8 +264,14 @@ public class PacketRouter
    
    public void setPacketTypeToDebug(Class packetTypeToDebug)
    {
-      this.packetTypeToDebug = packetTypeToDebug;
+      this.packetTypesToDebug = new Class[]{ packetTypeToDebug };
    }
+   
+   public void setPacketTypesToDebug(Class[] packetTypesToDebug)
+   {
+      this.packetTypesToDebug = packetTypesToDebug;
+   }
+
    
    private class packetRoutingAction implements PacketConsumer<Packet>
    {

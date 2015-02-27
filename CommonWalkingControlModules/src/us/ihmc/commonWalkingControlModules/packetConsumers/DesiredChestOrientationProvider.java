@@ -7,7 +7,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
@@ -18,7 +18,7 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
+   private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryPacketConsumer;
 
    private final AtomicReference<Quat4d> desiredOrientation = new AtomicReference<>();
    private final AtomicDouble trajectoryTime = new AtomicDouble();
@@ -32,23 +32,28 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
       this.chestOrientationFrame = chestOrientationFrame;
       trajectoryTime.set(defaultTrajectoryTime);
 
-      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
-      {
+      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
+            {
          @Override
-         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
+         public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
             if (packet != null)
             {
-               double[] timeAtWaypoints = packet.timeSincePrevious;
-               Quat4d[] orientations = packet.chestOrientation;
-               WaypointOrientationTrajectoryData data = new WaypointOrientationTrajectoryData(worldFrame, timeAtWaypoints, orientations, null);
-               desiredChestOrientationWithWaypoints.set(data);
+               if(packet.hasChestTrajectory() )
+               {
+
+                  WaypointOrientationTrajectoryData data = new WaypointOrientationTrajectoryData(worldFrame, 
+                        packet.timeSincePrevious, 
+                        packet.chestWorldOrientation, 
+                        packet.chestAngularVelocity);
+                  desiredChestOrientationWithWaypoints.set(data);
+               }
             }
          }
-      };
+            };
    }
 
-   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryPacketConsumer()
+   public PacketConsumer<WholeBodyTrajectoryPacket> getWholeBodyTrajectoryPacketConsumer()
    {
       return wholeBodyTrajectoryPacketConsumer;
    }

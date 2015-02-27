@@ -9,7 +9,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -24,7 +24,7 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryPacketConsumer;
+   private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryPacketConsumer;
 
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
@@ -36,28 +36,31 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
 
    public DesiredPelvisPoseProvider()
    {
-      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
-      {
+      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
+            {
          @Override
-         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket packet)
+         public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
-            if (packet != null)
+            System.out.println("PACKET received");
+            
+            if (packet != null && packet.hasPelvisTrajectory() )
             {
                double[] timeAtWaypoints = packet.timeSincePrevious;
                Point3d[] positions = packet.pelvisWorldPosition;
-               Vector3d[] velocities = packet.pelvisWorldVelocity;
+               Vector3d[] velocities = packet.pelvisLinearVelocity;
                WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(worldFrame, timeAtWaypoints, positions, velocities);
                desiredPelvisPositionWithWaypoints.set(positionTrajectoryData);
 
-               Quat4d[] orientations = packet.pelvisOrientation;
+               Quat4d[] orientations = packet.pelvisWorldOrientation;
+               // TODO: angular velocity is not used yet
                WaypointOrientationTrajectoryData orientationTrajectoryData = new WaypointOrientationTrajectoryData(worldFrame, timeAtWaypoints, orientations, null);
                desiredPelvisOrientationWithWaypoints.set(orientationTrajectoryData);
             }
          }
-      };
+            };
    }
 
-   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryPacketConsumer()
+   public PacketConsumer<WholeBodyTrajectoryPacket> getWholeBodyTrajectoryPacketConsumer()
    {
       return wholeBodyTrajectoryPacketConsumer;
    }
