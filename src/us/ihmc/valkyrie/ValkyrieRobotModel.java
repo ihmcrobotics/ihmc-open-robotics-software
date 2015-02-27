@@ -386,4 +386,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
       return new Pair<Class<?>, String[]>(ValkyrieOperatorUserInterface.class, args);
    }
+
+   @Override
+   public Class<?> getSpectatorInterfaceClass()
+   {
+      
+      
+      return null;
+   }
 }
