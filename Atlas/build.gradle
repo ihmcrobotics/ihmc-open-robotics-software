@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '0.2.1-alpha'
+version = '0.2.2-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -32,9 +32,8 @@ applicationDistribution.from(startScripts.outputDir) {
     into "bin"
 }
 
-applicationDistribution.from(file("Configurations")) {
-    include("*network_config.ini")
-    into "bin/Configurations"
+applicationDistribution.from(file("IHMCNetworkParameters.ini")) {
+	into "bin"
 }
 
 task pushBuild(type:Exec, dependsOn:distTar) {

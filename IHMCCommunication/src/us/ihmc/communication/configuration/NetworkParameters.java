@@ -71,7 +71,7 @@ public class NetworkParameters
       {
          try
          {
-            return new URI(getHost(NetworkParameterKeys.rosURI));
+            return new URI("http://" + getHost(NetworkParameterKeys.rosURI));
          }
          catch (URISyntaxException e)
          {
