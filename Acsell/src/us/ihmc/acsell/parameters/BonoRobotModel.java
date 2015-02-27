@@ -327,4 +327,12 @@ public class BonoRobotModel implements DRCRobotModel
       String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
       return new Pair<Class<?>, String[]>(StepprOperatorInterface.class, args);
    }
+
+   @Override
+   public Class<?> getSpectatorInterfaceClass()
+   {
+      
+      
+      return null;
+   }
 }
