@@ -1,6 +1,7 @@
 package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
@@ -10,7 +11,6 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -22,19 +22,14 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ObjectObjectMap<OneDoFJoint, DoubleYoVariable> rawJointTorques;
-   private final ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques;
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> rawJointTorques = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJoint, DelayedDoubleYoVariable> delayedJointTorques = new LinkedHashMap<>();
 
    private final ArrayList<RawOutputWriter> rawOutputWriters = new ArrayList<RawOutputWriter>();
-
-   double[] prevError;
 
    public DRCSimulationOutputWriter(SDFRobot robot)
    {
       super(robot);
-
-      rawJointTorques = new ObjectObjectMap<OneDoFJoint, DoubleYoVariable>();
-      delayedJointTorques = new ObjectObjectMap<OneDoFJoint, DelayedDoubleYoVariable>();
    }
 
    @Override
@@ -81,17 +76,14 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint oneDoFJoint = joints[i];
-         //         oneDoFJoint.setDampingParameter(DRCRobotDampingParameters.getAtlasDamping(i));
+         String jointName = oneDoFJoint.getName();
 
-         DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + oneDoFJoint.getName(), registry);
-         rawJointTorques.add(oneDoFJoint, rawJointTorque);
+         DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + jointName, registry);
+         rawJointTorques.put(oneDoFJoint, rawJointTorque);
 
-         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + oneDoFJoint.getName(), "", rawJointTorque, TICKS_TO_DELAY, registry);
-         delayedJointTorques.add(oneDoFJoint, delayedJointTorque);
+         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
+         delayedJointTorques.put(oneDoFJoint, delayedJointTorque);
       }
-
-      prevError = new double[revoluteJoints.size()];
-
    }
 
    public void addRawOutputWriter(RawOutputWriter rawOutputWriter)

@@ -34,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.utilities.frictionModels.FrictionModel;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -191,6 +192,7 @@ public class MomentumBasedController
    private final double totalMass;
 
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
+   private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
    
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
          SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ, TwistCalculator twistCalculator,
@@ -1234,6 +1236,25 @@ public class MomentumBasedController
       for (int i = 0; i < controllerFailureListeners.size(); i++)
       {
          controllerFailureListeners.get(i).controllerFailed();
+      }
+   }
+
+   public void attachControllerStateChangedListener(ControllerStateChangedListener listener)
+   {
+      this.controllerStateChangedListeners.add(listener);
+   }
+
+   public void attachControllerStateChangedListeners(List<ControllerStateChangedListener> listeners)
+   {
+      for (int i = 0; i < listeners.size(); i++)
+         attachControllerStateChangedListener(listeners.get(i));
+   }
+
+   public void reportControllerStateChangeToListeners()
+   {
+      for (int i = 0; i < controllerStateChangedListeners.size(); i++)
+      {
+         controllerStateChangedListeners.get(i).controllerStateHasChanged(yoTime.getDoubleValue());
       }
    }
 }

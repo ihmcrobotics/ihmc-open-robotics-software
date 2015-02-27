@@ -44,6 +44,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
+import us.ihmc.wholeBodyController.DRCOutputWriterWithStateChangeSmoother;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
@@ -57,6 +58,7 @@ public class DRCSimulationFactory
 //   public static boolean RUN_MULTI_THREADED = !true;
 
    public static final boolean DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET = false;
+   private static final boolean DO_SMOOTH_JOINT_TORQUES_AT_CONTROLLER_STATE_CHANGES = false;
    
    private static final double gravity = -9.81;
 
@@ -172,6 +174,13 @@ public class DRCSimulationFactory
       }
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
+
+      if (DO_SMOOTH_JOINT_TORQUES_AT_CONTROLLER_STATE_CHANGES)
+      {
+         DRCOutputWriterWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputWriterWithStateChangeSmoother(drcOutputWriter);
+         controllerFactory.attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+         drcOutputWriter = drcOutputWriterWithStateChangeSmoother;
+      }
  
       if (DO_SLOW_INTEGRATION_FOR_TORQUE_OFFSET)
       {
