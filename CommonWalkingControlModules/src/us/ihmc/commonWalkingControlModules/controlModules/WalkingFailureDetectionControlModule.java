@@ -90,7 +90,7 @@ public class WalkingFailureDetectionControlModule
          ReferenceFrame footstepSoleFrame = nextFootstep.getSoleReferenceFrame();
          ConvexPolygon2d footPolygon = footPolygons.get(nextFootstep.getRobotSide()).getConvexPolygon2d();
          nextFootstepPolygon.setIncludingFrameAndUpdate(footstepSoleFrame, footPolygon);
-         nextFootstepPolygon.changeFrame(worldFrame);
+         nextFootstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }
    }
 
