@@ -232,6 +232,15 @@ public class TurnValveBehavior extends BehaviorInterface
       double sleepTimeBeforeNextTask = 1.0; // Add sleep time to prevent ICP fall detection from intervening during final transition into double support at the end of the walking task
       WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime,
             sleepTimeBeforeNextTask);
+      
+      if (DEBUG)
+      {
+         SysoutTool.println("initialMidFeetZUpFramePose: " + initialMidFeetZUpFramePose);
+         SysoutTool.println("targetMidFeetZUpFramePose: " + targetMidFeetZUpFramePose);
+         SysoutTool.println("positionDistanceToValve: " + positionDistanceToValve);
+         SysoutTool.println("orientationDistanceToValve: " + orientationDistanceToValve);
+         SysoutTool.println("walkingOrientation: " + walkingOrientation);
+      }
 
       return ret;
    }
