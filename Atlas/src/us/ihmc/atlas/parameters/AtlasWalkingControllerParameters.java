@@ -134,15 +134,15 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
    public boolean isNeckPositionControlled()
    {
-      return false;
+      if (target == AtlasTarget.REAL_ROBOT)
+         return true;
+      else
+         return false;
    }
 
    @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
-         return new String[0];
-      else
          return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)};
    }
 
@@ -829,7 +829,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public String[] getJointsToIgnoreInController()
    {
       if (target == AtlasTarget.REAL_ROBOT)
-         return new String[] {NeckJointName.LOWER_NECK_PITCH.toString()};
+         return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)};
       else
          return new String[0];
    }
