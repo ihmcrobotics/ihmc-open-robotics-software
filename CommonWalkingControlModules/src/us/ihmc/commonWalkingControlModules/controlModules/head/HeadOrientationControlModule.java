@@ -113,12 +113,9 @@ public class HeadOrientationControlModule
       headOrientationControlJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames), OneDoFJoint.class);
 
       jacobianId = momentumBasedController.getOrCreateGeometricJacobian(headOrientationControlJoints, headFrame);
-      baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double dt = momentumBasedController.getControlDT();
-      controlModule = new RigidBodyOrientationControlModule("head", elevator, head, twistCalculator, dt, gains, registry);
-
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
       this.chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
@@ -137,17 +134,31 @@ public class HeadOrientationControlModule
          pointTrackingFrameFiz = null;
       }
 
-      InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(headOrientationControlJoints);
-      GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfControlledJoints[cloneOfControlledJoints.length - 1].getSuccessor().getBodyFixedFrame());
+      if (jacobianId != -1)
+      {
+         controlModule = new RigidBodyOrientationControlModule("head", elevator, head, twistCalculator, dt, gains, registry);
 
-      int maxIterations = 5;
-      double lambdaLeastSquares = 0.0009;
-      double tolerance = 0.0025;
-      double maxStepSize = 0.2;
-      double minRandomSearchScalar = 0.01;
-      double maxRandomSearchScalar = 0.8;
-      numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      desiredJointAngles = new DenseMatrix64F(cloneOfControlledJoints.length, 1);
+         baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
+         InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(headOrientationControlJoints);
+         GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfControlledJoints[cloneOfControlledJoints.length - 1].getSuccessor().getBodyFixedFrame());
+         
+         int maxIterations = 5;
+         double lambdaLeastSquares = 0.0009;
+         double tolerance = 0.0025;
+         double maxStepSize = 0.2;
+         double minRandomSearchScalar = 0.01;
+         double maxRandomSearchScalar = 0.8;
+         numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+         desiredJointAngles = new DenseMatrix64F(cloneOfControlledJoints.length, 1);
+      }
+      else
+      {
+         controlModule = null;
+
+         baseFrame = null;
+         numericalInverseKinematicsCalculator = null;
+         desiredJointAngles = null;
+      }
 
       setHeadOrientationLimits(headOrientationControllerParameters);
 
@@ -163,6 +174,9 @@ public class HeadOrientationControlModule
 
    public void compute()
    {
+      if (jacobianId == -1) // Nothing to control there
+         return;
+
       packDesiredFrameOrientation(desiredOrientation);
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
