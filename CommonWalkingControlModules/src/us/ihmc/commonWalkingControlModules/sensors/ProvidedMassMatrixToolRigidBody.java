@@ -47,7 +47,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final RigidBody toolBody;
    
    private final ReferenceFrame handFixedFrame;
-   private final ReferenceFrame wristFrame;
+   private final ReferenceFrame handCenterFrame;
    
    private final YoFramePoint objectCenterOfMass;
    private final YoFramePoint objectCenterOfMassInWorld;
@@ -71,12 +71,11 @@ public class ProvidedMassMatrixToolRigidBody
       this.registry = new YoVariableRegistry(name);
       
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
-//      this.wristFrame = fullRobotModel.getHandControlFrame(robotSide);
       
       ReferenceFrame attachmentPlateFrame = fullRobotModel.getHandControlFrame(robotSide);
       Vector3d attachmentPlateToHandCenterOffset = new Vector3d(armControllerParameters.getWristHandCenterOffset(), 0.0, 0.0);
       RigidBodyTransform attachmentPlateToHandCenter = new RigidBodyTransform(new Quat4d(), attachmentPlateToHandCenterOffset);
-      this.wristFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
+      this.handCenterFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
             attachmentPlateFrame, attachmentPlateToHandCenter);
       
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
@@ -99,7 +98,7 @@ public class ProvidedMassMatrixToolRigidBody
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
             jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
            
-      objectCenterOfMass = new YoFramePoint(name + "CoMOffset", wristFrame, registry);
+      objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handCenterFrame, registry);
       objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
       objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
       
@@ -163,7 +162,7 @@ public class ProvidedMassMatrixToolRigidBody
       toolWrench.changeFrame(handFixedFrame);
       toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
       
-      temporaryVector.setIncludingFrame(wristFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
+      temporaryVector.setIncludingFrame(handCenterFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
       temporaryVector.changeFrame(ReferenceFrame.getWorldFrame());
       temporaryVector.scale(0.01);
       objectForceInWorld.set(temporaryVector);
