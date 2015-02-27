@@ -63,4 +63,11 @@ public class BonoArmControlParameters implements ArmControllerParameters
    {
       return new LinkedHashMap<OneDoFJoint, Double>();
    }
+
+   @Override
+   public double getWristHandCenterOffset()
+   {
+      // TODO Auto-generated method stub
+      return 0.0;
+   }
 }
