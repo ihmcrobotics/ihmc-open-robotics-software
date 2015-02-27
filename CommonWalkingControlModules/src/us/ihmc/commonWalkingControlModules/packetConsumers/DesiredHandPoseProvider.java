@@ -90,7 +90,6 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          @Override
          public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
-            System.out.println("DesiredHandPoseProvider: PACKET received");
             wholeBodyTrajectoryHandPoseListPackets.set(packet);
          }
       };
