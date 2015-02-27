@@ -118,7 +118,10 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(PauseCommand.class, pauseCommandConsumer);
       objectCommunicator.attachListener(HighLevelStatePacket.class, highLevelStateProvider);
       objectCommunicator.attachListener(HeadOrientationPacket.class, headOrientationProvider.getHeadOrientationPacketConsumer());
-      objectCommunicator.attachListener(ComHeightPacket.class, desiredComHeightProvider.getComHeightPacketConsumer());
+      
+      objectCommunicator.attachListener(ComHeightPacket.class,           desiredComHeightProvider.getComHeightPacketConsumer());
+      objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, desiredComHeightProvider.getWholeBodyPacketConsumer());
+      
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
       objectCommunicator.attachListener(StopArmMotionPacket.class, handPauseCommandConsumer);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);

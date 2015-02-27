@@ -701,7 +701,6 @@ public class SDFFullRobotModel implements FullRobotModel
          }
       }
       
-
       this.updateFrames();
       
       ReferenceFrame footFrame   = getSoleFrame(sideOfSole);

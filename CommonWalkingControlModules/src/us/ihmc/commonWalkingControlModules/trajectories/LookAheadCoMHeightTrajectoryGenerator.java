@@ -29,6 +29,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 
@@ -312,17 +313,23 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if (desiredComHeightProvider != null && desiredComHeightProvider.isNewComHeightInformationAvailable())
+      if (desiredComHeightProvider != null)
       {
-         offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+         if( desiredComHeightProvider.isNewComHeightInformationAvailable())
+         {
+            offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+         }
+         else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
+         {
+          // System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
+         }
       }
-
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
       frameOfLastFoostep = ankleZUpFrames.get(transferFromFootstep.getRobotSide());
 
       Footstep nextFootstep = null;
-      
+
       if (CONSIDER_NEXT_FOOTSTEP)
          nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
 
@@ -681,10 +688,34 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
-      if (desiredComHeightProvider != null && desiredComHeightProvider.isNewComHeightInformationAvailable())
+      if (desiredComHeightProvider != null)
       {
-         offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
-         offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
+         if( desiredComHeightProvider.isNewComHeightInformationAvailable() )
+         {
+            offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
+            
+           // System.out.println("offsetHeightAboveGround A: " + offsetHeightAboveGround.getDoubleValue() );
+         }
+         else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
+         {
+            WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
+           // System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
+            
+            int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
+            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - 0.085;
+            double totalTime = 0;
+            
+            for (int i=0; i<=lastIndex; i++ )
+            {
+               totalTime += pelvisTrajectory.getTimeAtWaypoints()[i];
+            }
+            
+            offsetHeightAboveGround.set( lastHeight );
+            offsetHeightAboveGroundTrajectoryTimeProvider.set( totalTime );
+            
+           // System.out.println("offsetHeightAboveGround B: " + offsetHeightAboveGround.getDoubleValue() );
+         }
       }
       offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightAboveGroundTrajectory.getValue());
@@ -747,12 +778,12 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       return hasBeenInitializedWithNextStep.getBooleanValue();
    }
-   
+
    public void setOffsetHeightAboveGround(double value)
    {
       offsetHeightAboveGround.set(value);
    }
-   
+
    public double getOffsetHeightAboveGround()
    {
       return offsetHeightAboveGround.getDoubleValue();

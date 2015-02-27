@@ -41,6 +41,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          @Override
          public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
+            //System.out.println("DesiredPelvisPoseProvider: PACKET received");
+
             if (packet != null && packet.hasPelvisTrajectory() )
             {
                double[] timeAtWaypoints = packet.timeSincePrevious;

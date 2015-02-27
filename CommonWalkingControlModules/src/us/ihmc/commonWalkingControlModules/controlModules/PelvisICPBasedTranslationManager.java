@@ -177,12 +177,18 @@ public class PelvisICPBasedTranslationManager
          else if (desiredPelvisPoseProvider.checkForNewPositionWithWaypoints())
          {
             initialPelvisPositionTime.set(yoTime.getDoubleValue());
-            pelvisWaypointsPositionTrajectoryGenerator.clear();          
+            pelvisWaypointsPositionTrajectoryGenerator.clear();     
+            
+            tempPosition.setToZero(pelvisZUpFrame);
+            tempPosition.changeFrame(worldFrame);
+            tempVelocity.setToZero(worldFrame);     
             
             WaypointPositionTrajectoryData desiredPelvisPositionWithWaypoints = desiredPelvisPoseProvider.getDesiredPelvisPositionWithWaypoints();
             desiredPelvisPositionWithWaypoints.changeFrame(worldFrame);
             pelvisWaypointsPositionTrajectoryGenerator.appendWaypoints(desiredPelvisPositionWithWaypoints);
-            pelvisWaypointsPositionTrajectoryGenerator.initialize();
+           
+            pelvisWaypointsPositionTrajectoryGenerator.initialize( tempPosition, tempVelocity );
+           
             isUsingWaypointTrajectory.set(true);
             activeTrajectoryGenerator = pelvisWaypointsPositionTrajectoryGenerator;
             isRunning.set(true);
@@ -194,6 +200,7 @@ public class PelvisICPBasedTranslationManager
          double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
          activeTrajectoryGenerator.compute(deltaTime);
          activeTrajectoryGenerator.get(tempPosition);
+         //System.out.println(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
    }
