@@ -105,4 +105,11 @@ public class ValkyrieArmControllerParameters implements ArmControllerParameters
 
       return jointPositions;
    }
+
+   @Override
+   public double getWristHandCenterOffset()
+   {
+      // TODO Auto-generated method stub
+      return 0.0;
+   }
 }
