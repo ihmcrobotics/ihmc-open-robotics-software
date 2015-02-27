@@ -78,8 +78,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       }
 
       GlobalTimer.clearTimers();
-      
-      
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -92,7 +90,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
 
-   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 60.0;  //79.0
+   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 60.0; //79.0
 
    private static final boolean DEBUG = false;
 
@@ -104,8 +102,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
          throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
       }
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
+      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
+      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(createTestEnvironment(), networkObjectCommunicator, getSimpleRobotName(), null,
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
@@ -115,10 +115,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    {
       ArrayList<Point3d> valveLocations = new ArrayList<Point3d>();
       LinkedHashMap<Point3d, Double> valveYawAngles_degrees = new LinkedHashMap<Point3d, Double>();
-      
+
       valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(0), 0.0);
-      
+
       valveLocations.add(new Point3d(TurnValveBehavior.howFarToStandBackFromValve, 4.0 * TurnValveBehavior.howFarToStandToTheRightOfValve, 1.0));
       valveYawAngles_degrees.put(valveLocations.get(1), 45.0);
 
@@ -148,13 +148,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      double graspApproachConeAngle = Math.toRadians(30.0);
+      double graspApproachConeAngle = TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE;
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
-
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
@@ -164,16 +163,17 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
-      
+
       assertTrue(success);
-      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, " + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, "
+            + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
       assertTrue("Valve is not fully closed!  Final valve close percentage = " + finalValveClosePercentage, finalValveClosePercentage > 90.0);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testCloseValveByGrabbingCenter() throws FileNotFoundException, SimulationExceededMaximumTimeException
@@ -203,7 +203,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       turnValveBehavior.setInput(valveTransformToWorld, ValveGraspLocation.CENTER, 0.0, Axis.X, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
-
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
       SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
@@ -212,17 +211,17 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
-      
+
       assertTrue(success);
-      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, " + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, "
+            + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
       assertTrue("Valve is not fully closed!  Final valve close percentage = " + finalValveClosePercentage, finalValveClosePercentage > 90.0);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
 
       BambooTools.reportTestFinishedMessage();
    }
-   
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testWalkToAndCloseValve() throws FileNotFoundException, SimulationExceededMaximumTimeException
@@ -239,20 +238,19 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
       double initialValveClosePercentage = valveRobot.getClosePercentage();
       double turnValveThisMuchToCloseIt = valveRobot.getNumberOfPossibleTurns() * 2.0 * Math.PI * (1.0 - initialValveClosePercentage / 100.0);
-      
+
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
-      double graspApproachConeAngle = Math.toRadians(15.0);
+      double graspApproachConeAngle = TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE;
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
-
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
@@ -262,9 +260,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
       success = success & turnValveBehavior.isDone();
-      
+
       assertTrue(success);
-      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, " + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
+      assertTrue("Final valve close percentage, " + finalValveClosePercentage + ", is not greater than initial valve close percentage, "
+            + initialValveClosePercentage + "!", finalValveClosePercentage > initialValveClosePercentage);
       assertTrue("Valve is not fully closed!  Final valve close percentage = " + finalValveClosePercentage, finalValveClosePercentage > 90.0);
 
       //TODO: Keep track of max icp error and verify that it doesn't exceed a reasonable threshold
@@ -272,20 +271,20 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testGraspValveBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
- 
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
       valveRobot.getAndLockAvailableContactPoint();
-      
+
       RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
@@ -294,10 +293,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
-      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
-      
+      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+
       graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION, Math.toRadians(0.0), Axis.X);
+      graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION,
+            TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE, Axis.X);
       FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
       SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
 
@@ -306,23 +307,23 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = success & graspValveBehavior.isDone();
       assertTrue(success);
-      
+
       BambooTools.reportTestFinishedMessage();
    }
-   
+
    @AverageDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testGraspValveUsingWholeBodyIKBehavior() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
- 
+
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
       valveRobot.getAndLockAvailableContactPoint();
-      
+
       RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
@@ -331,10 +332,12 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
       SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
 
-      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
-      
+      final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+
       graspValveBehavior.initialize();
-      graspValveBehavior.setGraspPoseWholeBodyIK(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION, Math.toRadians(0.0), Axis.X);
+      graspValveBehavior.setGraspPoseWholeBodyIK(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(),
+            TurnValveBehavior.DEFAULT_GRASP_LOCATION, Math.toRadians(0.0), Axis.X);
       FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
       SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
 
@@ -343,7 +346,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = success & graspValveBehavior.isDone();
       assertTrue(success);
-      
+
       BambooTools.reportTestFinishedMessage();
    }
 
@@ -378,7 +381,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       return ret;
    }
-   
+
    private FramePose getCurrentHandPose(RobotSide robotSideToTest)
    {
       FramePose ret = new FramePose();
@@ -387,14 +390,14 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       ret.changeFrame(ReferenceFrame.getWorldFrame());
       return ret;
    }
-   
+
    private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose)
    {
       double positionThreshold = 0.05;
       double orientationThreshold = Math.toRadians(5.0);
       assertPosesAreWithinThresholds(desiredPose, actualPose, positionThreshold, orientationThreshold);
    }
-   
+
    private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)
    {
       double positionDistance = desiredPose.getPositionDistance(actualPose);
@@ -407,7 +410,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       }
 
       assertEquals("Pose position error : " + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
-      assertEquals("Pose orientation error : " + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance, orientationThreshold);
+      assertEquals("Pose orientation error : " + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
    }
 
 }
