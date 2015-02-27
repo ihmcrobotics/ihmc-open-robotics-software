@@ -828,10 +828,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      if (target == AtlasTarget.REAL_ROBOT)
-         return new String[] {jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)};
-      else
-         return new String[0];
+      return new String[0];
    }
 
    @Override
