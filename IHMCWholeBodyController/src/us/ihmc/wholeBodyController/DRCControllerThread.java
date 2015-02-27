@@ -24,10 +24,13 @@ import us.ihmc.simulationconstructionset.robotController.ModularSensorProcessor;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -155,6 +158,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController,
             centerOfPressureDataHolderForEstimator, yoGraphicsListRegistry, registry, dataProducer, arrayOfJointsToIgnore);
 
+      createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
+
       firstTick.set(true);
       registry.addChild(robotController.getYoVariableRegistry());
       registry.addChild(outputWriter.getControllerYoVariableRegistry());
@@ -166,6 +171,21 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
       }
+   }
+
+   private void createControllerRobotMotionStatusUpdater(MomentumBasedControllerFactory controllerFactory,
+         final RobotMotionStatusHolder controllerRobotMotionStatusHolder)
+   {
+      RobotMotionStatusChangedListener controllerRobotMotionStatusUpdater = new RobotMotionStatusChangedListener()
+      {
+         @Override
+         public void robotMotionStatusHasChanged(RobotMotionStatus newStatus, double time)
+         {
+            controllerRobotMotionStatusHolder.setCurrentRobotMotionStatus(newStatus);
+         }
+      };
+
+      controllerFactory.attachRobotMotionStatusChangedListener(controllerRobotMotionStatusUpdater);
    }
 
    public FullRobotModelCorruptor getFullRobotModelCorruptor()

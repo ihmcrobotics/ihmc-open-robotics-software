@@ -40,6 +40,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationP
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -712,6 +713,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          else
          {
             failureDetectionControlModule.setNextFootstep(null);
+            momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
 
             // Do something smart here when going to DoubleSupport state.
             //            instantaneousCapturePointPlanner.initializeForStoppingInDoubleSupport(yoTime.getDoubleValue());
@@ -758,10 +760,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          feetManager.reset();
          ecmpBasedToeOffHasBeenInitialized.set(false);
 
-         if (transferToSide == null && (pushRecoveryModule == null || !pushRecoveryModule.isRecoveringFromDoubleSupportFall()))
+         if (transferToSide == null)
          {
-            swingTimeCalculationProvider.updateSwingTime();
-            transferTimeCalculationProvider.updateTransferTime();
+            momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
+
+            if (pushRecoveryModule == null || !pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+            {
+               swingTimeCalculationProvider.updateSwingTime();
+               transferTimeCalculationProvider.updateTransferTime();
+            }
          }
 
          if (DEBUG)

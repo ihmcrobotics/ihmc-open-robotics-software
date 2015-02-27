@@ -4,6 +4,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 
 public interface ThreadDataSynchronizerInterface
 {
@@ -27,6 +28,10 @@ public interface ThreadDataSynchronizerInterface
    public abstract CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder();
 
    public abstract CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder();
+
+   public abstract RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder();
+
+   public abstract RobotMotionStatusHolder getControllerRobotMotionStatusHolder();
 
    public abstract long getTimestamp();
 
