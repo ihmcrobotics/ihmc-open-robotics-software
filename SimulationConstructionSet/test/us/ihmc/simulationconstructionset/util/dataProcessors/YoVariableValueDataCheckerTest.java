@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.util.dataProcessors;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
@@ -9,6 +11,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
@@ -18,6 +21,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 @BambooPlan(planType = {BambooPlanType.Fast})
 public class YoVariableValueDataCheckerTest
 {
+   private double EPSILON = 1e-10;
+
+   
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
 
@@ -51,24 +57,28 @@ public class YoVariableValueDataCheckerTest
 
       double deltaT = 0.001;
 
+      double amplitude = 3.0;
+      double offset = 7.0;
+      double freq = 5.0;
+      
       for (double time = 0.0; time < 7.0; time = time + deltaT)
       {
          robot.setTime(time);
 
-         position.set(Math.sin(time));
+         position.set(amplitude * Math.sin(freq * time) + offset);
 
          scs.tickAndUpdate();
       }
-      
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
-      valueDataCheckerParameters.setMaximumDerivative(1.1);
-      valueDataCheckerParameters.setMaximumSecondDerivative(1.1);
-      valueDataCheckerParameters.setMaximumValue(1.1);
-      valueDataCheckerParameters.setMinimumValue(-1.1);
+      valueDataCheckerParameters.setMaximumDerivative(amplitude * freq * 1.01);
+      valueDataCheckerParameters.setMaximumSecondDerivative(amplitude * freq * freq * 1.01);
+      valueDataCheckerParameters.setMaximumValue(amplitude + offset + 1.0);
+      valueDataCheckerParameters.setMinimumValue(offset - amplitude - 1.0);
 
       YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
-
+      yoVariableValueDataChecker.cropFirstPoint();
+      
       scs.applyDataProcessingFunction(yoVariableValueDataChecker);
       assertTrue(!yoVariableValueDataChecker.isMaxDerivativeExeeded());
       assertTrue(!yoVariableValueDataChecker.isMaxSecondDerivativeExeeded());
@@ -98,25 +108,31 @@ public class YoVariableValueDataCheckerTest
 
       double deltaT = 0.001;
 
+
+      double amplitude = 3.0;
+      double offset = 7.0;
+      double freq = 5.0;
+      
       for (double time = 0.0; time < 7.0; time = time + deltaT)
       {
          robot.setTime(time);
 
-         position.set(Math.sin(time));
-         velocity.set(Math.cos(time));
+         position.set(amplitude * Math.sin(freq * time) + offset);
+         velocity.set(amplitude* freq* Math.cos(freq * time));
 
          scs.tickAndUpdate();
       }
+
       
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
-      valueDataCheckerParameters.setMaximumDerivative(1.1);
-      valueDataCheckerParameters.setMaximumSecondDerivative(1.1);
-      valueDataCheckerParameters.setMaximumValue(1.1);
-      valueDataCheckerParameters.setMinimumValue(-1.1);
+      valueDataCheckerParameters.setMaximumDerivative(amplitude * freq * 1.01);
+      valueDataCheckerParameters.setMaximumSecondDerivative(amplitude * freq * freq * 1.01);
+      valueDataCheckerParameters.setMaximumValue(amplitude + offset + 1.0);
+      valueDataCheckerParameters.setMinimumValue(offset - amplitude - 1.0);
+      valueDataCheckerParameters.setErrorThresholdOnDerivativeComparison(1e-1);
 
       YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters, velocity);
-
-     
+      yoVariableValueDataChecker.cropFirstPoint();
 
       scs.applyDataProcessingFunction(yoVariableValueDataChecker);
       assertTrue(!yoVariableValueDataChecker.isMaxDerivativeExeeded());
@@ -148,31 +164,36 @@ public class YoVariableValueDataCheckerTest
 
       double deltaT = 0.001;
 
+      double amplitude = 3.0;
+      double offset = 7.0;
+      double freq = 5.0;
+      
       for (double time = 0.0; time < 7.0; time = time + deltaT)
       {
          robot.setTime(time);
 
-         position.set(Math.sin(time));
-         velocity.set(Math.cos(time) + 0.01 * (Math.random() - 0.5));
+         position.set(amplitude * Math.sin(freq * time) + offset);
+         velocity.set(amplitude* freq* Math.cos(freq * time)+ 0.01 * (Math.random() - 0.5));
 
          scs.tickAndUpdate();
       }
-
+      
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
-      valueDataCheckerParameters.setMaximumDerivative(1.1);
-      valueDataCheckerParameters.setMaximumSecondDerivative(1.1);
-      valueDataCheckerParameters.setMaximumValue(1.1);
-      valueDataCheckerParameters.setMinimumValue(-1.1);
+      valueDataCheckerParameters.setMaximumDerivative(amplitude * freq * 1.01);
+      valueDataCheckerParameters.setMaximumSecondDerivative(amplitude * freq * freq * 1.01);
+      valueDataCheckerParameters.setMaximumValue(amplitude + offset + 1.0);
+      valueDataCheckerParameters.setMinimumValue(offset - amplitude - 1.0);
       valueDataCheckerParameters.setErrorThresholdOnDerivativeComparison(1e-2);
       
       YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters, velocity);
+      yoVariableValueDataChecker.cropFirstPoint();
 
       scs.applyDataProcessingFunction(yoVariableValueDataChecker);
       assertTrue(!yoVariableValueDataChecker.isMaxDerivativeExeeded());
       assertTrue(!yoVariableValueDataChecker.isMaxSecondDerivativeExeeded());
       assertTrue(!yoVariableValueDataChecker.isMaxValueExeeded());
       assertTrue(!yoVariableValueDataChecker.isMinValueExeeded());
-      assertTrue(!yoVariableValueDataChecker.isDerivativeCompErrorOccurred());
+      assertTrue(yoVariableValueDataChecker.isDerivativeCompErrorOccurred());
    }
 
 
@@ -275,4 +296,158 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(2.0);
       yoVariableValueDataChecker.setMaximumValue(1.0);
    }
+   
+   
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+      public void testErrorThresholdOnDerivativeComparison()
+   {
+      Robot robot = new Robot("Derivative");
+
+      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+
+      robot.addYoVariableRegistry(registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+      ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+
+      YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
+      
+      double value = Math.random();
+      yoVariableValueDataChecker.setErrorThresholdOnDerivativeComparison(value);
+      assertEquals(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getErrorThresholdOnDerivativeComparison(), value, EPSILON);
+      
+      yoVariableValueDataChecker.setErrorThresholdOnDerivativeComparison(-value);
+      assertEquals(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getErrorThresholdOnDerivativeComparison(), value, EPSILON);
+   }
+
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+      public void testMaximumDerivative()
+   {
+      Robot robot = new Robot("Derivative");
+
+      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+
+      robot.addYoVariableRegistry(registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+      ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+
+      YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
+
+      double value = Math.random();
+      yoVariableValueDataChecker.setMaximumDerivative(value);
+      assertEquals(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getMaximumDerivative(), value, EPSILON);
+      
+      yoVariableValueDataChecker.setMaximumDerivative(-value);
+      assertEquals(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getMaximumDerivative(), value, EPSILON);
+   }
+
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+   public void testMaximumSecondDerivative()
+   {
+      ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
+
+      double value = Math.random();
+      valueDataCheckerParametersOriginal.setMaximumSecondDerivative(value);
+      assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
+      
+      valueDataCheckerParametersOriginal.setMaximumSecondDerivative(-value);
+      assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
+   }
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+      public void testMaximumValue()
+   {
+      Robot robot = new Robot("Derivative");
+
+      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+
+      robot.addYoVariableRegistry(registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+      ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+
+      YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
+
+
+      double value = Math.random();
+      yoVariableValueDataChecker.setMaximumValue(value);
+      assertEquals(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getMaximumValue(), value, EPSILON);
+      
+      yoVariableValueDataChecker.setMaximumValue(-value);
+      assertFalse(yoVariableValueDataChecker.getValueDataCheckerParametersCopy().getMaximumValue() == value);
+   }
+
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000)
+   
+   public void testMinimumValue()
+   {
+      ValueDataCheckerParameters valueDataCheckerParametersOriginal = new ValueDataCheckerParameters();
+
+      double value = Math.random();
+      valueDataCheckerParametersOriginal.setMinimumValue(value);
+      assertEquals(valueDataCheckerParametersOriginal.getMinimumValue(), value, EPSILON);
+      
+      valueDataCheckerParametersOriginal.setMinimumValue(-value);
+      assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
+   }
+
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000, expected=RuntimeException.class)
+   public void testSetMinGreaterThanMax()
+   {
+      Robot robot = new Robot("Derivative");
+
+      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+
+      robot.addYoVariableRegistry(registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+      ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+
+      YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
+
+      double value = 10.0;
+      yoVariableValueDataChecker.setMaximumValue(value);
+      yoVariableValueDataChecker.setMinimumValue(value + 1.0);
+   }
+   
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 300000, expected=RuntimeException.class)
+   public void testSetMaxLessThanMin()
+   {
+      Robot robot = new Robot("Derivative");
+
+      YoVariableRegistry registry = new YoVariableRegistry("variables");
+      DoubleYoVariable position = new DoubleYoVariable("position", registry);
+
+      robot.addYoVariableRegistry(registry);
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+
+      ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+
+      YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, position, robot.getYoTime(), valueDataCheckerParameters);
+
+      double value = 10.0;
+      yoVariableValueDataChecker.setMinimumValue(value);
+      yoVariableValueDataChecker.setMaximumValue(value - 10.0);
+   }
+
 }

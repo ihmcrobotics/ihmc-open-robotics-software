@@ -64,7 +64,7 @@ public class ValueDataCheckerParameters
    public void setMaximumValue(double maximumValue)
    {
       if (maximumValue < minimumValue)
-         throw new RuntimeException("maximumValue must be greater than maximumValue. maximumValue=" + maximumValue + ", maximumValue=" + maximumValue);
+         throw new RuntimeException("maximumValue must be greater than minimumValue. maximumValue=" + maximumValue + ", minimumValue=" + minimumValue);
       
       this.maximumValue = maximumValue;
    }
@@ -77,7 +77,7 @@ public class ValueDataCheckerParameters
    public void setMinimumValue(double minimumValue)
    {
       if (minimumValue > maximumValue)
-         throw new RuntimeException("maximumValue must be greater than maximumValue. maximumValue=" + maximumValue + ", maximumValue=" + maximumValue);
+         throw new RuntimeException("maximumValue must be greater than minimumValue. maximumValue=" + maximumValue + ", minimumValue=" + minimumValue);
       
       this.minimumValue = minimumValue;
    }

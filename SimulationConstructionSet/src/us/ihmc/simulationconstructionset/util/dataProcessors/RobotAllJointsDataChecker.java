@@ -15,6 +15,8 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    private double DEFAULT_VELOCITY_ERROR_THRESHOLD = 0.5; //Arbitrarily pick this
    private HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker> listOfCheckers;
    
+   private SimulationConstructionSet scs;
+
    public RobotAllJointsDataChecker(SimulationConstructionSet scs, Robot robot)
    {
       listOfCheckers = new HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker>();
@@ -45,15 +47,49 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          
          
          YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQ(), robot.getYoTime(), valueDataCheckerParameters, joint.getQD());
-       
-         
-        
          
          //PDN: Joints don't have acceleration limits. Not sure what to do
          //yoVariableValueDataChecker.setMaximumSecondDerivate((1.0 * TOLERACE_FACTOR)* joint.get());
          
          listOfCheckers.put(joint, yoVariableValueDataChecker);
       }
+   }
+   
+   public void setMaximumDerivativeForAllJoints(double maximumDerivative)
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         setMaximumDerivativeForJoint(joint, maximumDerivative);
+      }
+   }
+   
+   
+   public void setMaximumDerivativeForJoint(OneDegreeOfFreedomJoint joint, double maximumDerivative)
+   {
+      listOfCheckers.get(joint).setMaximumDerivative(maximumDerivative);
+   }
+   
+   public void setMaximumSecondDerivativeForAllJoints(double maximumSecondDerivative)
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         setMaximumSecondDerivativeForJoint(joint, maximumSecondDerivative);
+      }
+   }
+   
+   
+   public void setMaximumSecondDerivativeForJoint(OneDegreeOfFreedomJoint joint, double maximumSecondDerivative)
+   {
+      listOfCheckers.get(joint).setMaximumSecondDerivate(maximumSecondDerivative);
+   }
+   
+   public void cropFirstPoint()
+   {
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(1);
+      scs.setInPoint();
+      scs.cropBuffer();
    }
 
    @Override

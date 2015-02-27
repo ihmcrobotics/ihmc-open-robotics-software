@@ -34,6 +34,8 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    private DoubleYoVariable calculatedSecondDerivative;
 
    private int counter;
+   
+   private SimulationConstructionSet scs;
 
    private ValueDataCheckerParameters valueDataCheckerParameters;
 
@@ -48,6 +50,8 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    public YoVariableValueDataChecker(SimulationConstructionSet scs, DoubleYoVariable variableToCheck, DoubleYoVariable time,
                                      ValueDataCheckerParameters valueDataCheckerParameters, DoubleYoVariable actualDerivativeOfVariableToCheck)
    {
+      this.scs = scs;
+      
       YoVariableRegistry registry = scs.getRootRegistry();
 
       this.time = time;
@@ -69,6 +73,15 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       calculatedSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcSecDerv", registry);
 
       counter = 0;
+   }
+   
+   public void cropFirstPoint()
+   {
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(1);
+      scs.setInPoint();
+      scs.cropBuffer();
    }
 
    public void setMaximumDerivative(double maximumDerivative)
@@ -99,6 +112,11 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    public void setValueDataCheckerParameters(ValueDataCheckerParameters valueDataCheckerParameters)
    {
       this.valueDataCheckerParameters = valueDataCheckerParameters.getDefensiveCopy();
+   }
+   
+   public ValueDataCheckerParameters getValueDataCheckerParametersCopy()
+   {
+      return valueDataCheckerParameters.getDefensiveCopy();
    }
 
    @Override
