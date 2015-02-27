@@ -15,10 +15,11 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    private double DEFAULT_VELOCITY_ERROR_THRESHOLD = 0.5; //Arbitrarily pick this
    private HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker> listOfCheckers;
    
-   private SimulationConstructionSet scs;
+   private final SimulationConstructionSet scs;
 
    public RobotAllJointsDataChecker(SimulationConstructionSet scs, Robot robot)
    {
+      this.scs = scs;
       listOfCheckers = new HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker>();
       
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<>();
