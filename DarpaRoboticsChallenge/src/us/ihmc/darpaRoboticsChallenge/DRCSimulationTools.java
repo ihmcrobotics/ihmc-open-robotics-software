@@ -70,15 +70,16 @@ public abstract class DRCSimulationTools
 
       if(modulesToStart.contains(Modules.OPERATOR_INTERFACE))
       {
-         if(!modulesToStart.contains(Modules.SIMULATION))
-         {
-            simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
-         } 
+         simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(modulesToStart.contains(Modules.SIMULATION));
+         
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
       }
       
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
             simulationStarter.startBehaviorVisualizer();
+      
+      if (modulesToStart.contains(Modules.SPECTATOR_INTERFACE))
+         simulationStarter.startSpectatorInterface();
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes" })
@@ -196,7 +197,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE;
+      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, SPECTATOR_INTERFACE;
 
       public String getPropertyName()
       {
