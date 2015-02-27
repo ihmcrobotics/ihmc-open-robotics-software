@@ -2,11 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -133,7 +132,7 @@ public abstract class DegenerateOrientationControlModule
    private final FrameOrientation desiredOrientation = new FrameOrientation();
    private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
-   private final Vector3d zeroLinearAcceleration = new Vector3d();
+   private final FrameVector zeroLinearAcceleration = new FrameVector();
    private final FrameVector controlledAngularAcceleration = new FrameVector();
 
    public void compute()
@@ -161,7 +160,8 @@ public abstract class DegenerateOrientationControlModule
 
       ReferenceFrame endEffectorFrame = rigidBodyOrientationControlModule.getEndEffector().getBodyFixedFrame();
       ReferenceFrame baseFrame = rigidBodyOrientationControlModule.getBase().getBodyFixedFrame();
-      spatialAcceleration.set(endEffectorFrame, baseFrame, expressedInFrame, zeroLinearAcceleration, controlledAngularAcceleration.getVector());
+      zeroLinearAcceleration.setToZero(expressedInFrame);
+      spatialAcceleration.set(endEffectorFrame, baseFrame, expressedInFrame, zeroLinearAcceleration, controlledAngularAcceleration);
 
       computeSelectionMatrix(jacobian, selectionMatrix);
    }
@@ -253,9 +253,14 @@ public abstract class DegenerateOrientationControlModule
       return bases;
    }
 
-   private static void computeSelectionMatrix(GeometricJacobian jacobian, DenseMatrix64F selectionMatrix)
+   public static void computeSelectionMatrix(int jacobianId, MomentumBasedController momentumBasedController, DenseMatrix64F selectionMatrix)
    {
-      jacobian.compute();
+      DenseMatrix64F jacobianMatrix = momentumBasedController.getJacobian(jacobianId).getJacobianMatrix();
+      CommonOps.pinv(jacobianMatrix, selectionMatrix);
+   }
+
+   public static void computeSelectionMatrix(GeometricJacobian jacobian, DenseMatrix64F selectionMatrix)
+   {
       DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
       CommonOps.pinv(jacobianMatrix, selectionMatrix);
    }

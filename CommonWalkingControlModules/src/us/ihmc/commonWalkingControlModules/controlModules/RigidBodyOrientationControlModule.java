@@ -24,15 +24,21 @@ public class RigidBodyOrientationControlModule
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
          YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, base, endEffector, twistCalculator, dt, null, parentRegistry);
+      this(namePrefix, base, endEffector, twistCalculator, dt, null, false, parentRegistry);
    }
 
    public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
          YoOrientationPIDGains gains, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, base, endEffector, twistCalculator, dt, gains, false, parentRegistry);
+   }
+
+   public RigidBodyOrientationControlModule(String namePrefix, RigidBody base, RigidBody endEffector, TwistCalculator twistCalculator, double dt,
+         YoOrientationPIDGains gains, boolean visualize, YoVariableRegistry parentRegistry)
+   {
       this.base = base;
       this.endEffector = endEffector;
-      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, parentRegistry);
+      this.axisAngleOrientationController = new AxisAngleOrientationController(namePrefix, endEffector.getBodyFixedFrame(), dt, gains, visualize, parentRegistry);
       this.twistCalculator = twistCalculator;
    }
 
@@ -46,7 +52,7 @@ public class RigidBodyOrientationControlModule
       // using twists is a bit overkill; optimize if needed.
       twistCalculator.packRelativeTwist(endEffectorTwist, base, endEffector);
       currentAngularVelocity.setToZero(endEffectorTwist.getExpressedInFrame());
-      endEffectorTwist.packAngularPart(currentAngularVelocity.getVector());
+      endEffectorTwist.packAngularPart(currentAngularVelocity);
 
       desiredAngularVelocity.changeFrame(currentAngularVelocity.getReferenceFrame());
 
