@@ -21,7 +21,7 @@ public class RobotAllJointsDataCheckerTest
    {
       if (simulationTestingParameters.getKeepSCSUp())
       {
-         ThreadTools.sleepForever();
+         //ThreadTools.sleepForever();
       }
    }
 
@@ -57,9 +57,6 @@ public class RobotAllJointsDataCheckerTest
       RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, twoLinkRobotForTesting);
       
       scs.applyDataProcessingFunction(robotAllJointsDataChecker);
-      
-      
-
    }
 
 }

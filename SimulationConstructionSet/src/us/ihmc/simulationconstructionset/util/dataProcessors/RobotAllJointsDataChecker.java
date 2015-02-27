@@ -11,9 +11,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class RobotAllJointsDataChecker implements DataProcessingFunction
 {
    private double TOLERACE_FACTOR = 0.1;
+   private double MINIMUM_TIME_TO_ACCLERATE = 1.0/20.0;
+   private double DEFAULT_VELOCITY_ERROR_THRESHOLD = 0.5; //Arbitrarily pick this
    private HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker> listOfCheckers;
-   
-   
    
    public RobotAllJointsDataChecker(SimulationConstructionSet scs, Robot robot)
    {
@@ -23,7 +23,8 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
       for (OneDegreeOfFreedomJoint joint : oneDegreeOfFreedomJoints)
       {
-         YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQ(), robot.getYoTime());
+         ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
+         
          double upperLimit = joint.getJointUpperLimit();
          double lowerLimit = joint.getJointLowerLimit();
          double range = upperLimit - lowerLimit;
@@ -33,10 +34,20 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          
          double limitAdjustment = range * TOLERACE_FACTOR;
          
-         yoVariableValueDataChecker.setMaximumValue(upperLimit + limitAdjustment);
-         yoVariableValueDataChecker.setMinimumValue(lowerLimit - limitAdjustment);
+         valueDataCheckerParameters.setMaximumValue(upperLimit + limitAdjustment);
+         valueDataCheckerParameters.setMinimumValue(lowerLimit - limitAdjustment);
 
-         yoVariableValueDataChecker.setMaximumDerivative((1.0 + TOLERACE_FACTOR)* joint.getVelocityLimit());
+         valueDataCheckerParameters.setMaximumDerivative((1.0 + TOLERACE_FACTOR)* joint.getVelocityLimit());
+         
+         valueDataCheckerParameters.setMaximumSecondDerivative(joint.getVelocityLimit()/ MINIMUM_TIME_TO_ACCLERATE);
+         
+         valueDataCheckerParameters.setErrorThresholdOnDerivativeComparison(DEFAULT_VELOCITY_ERROR_THRESHOLD);
+         
+         
+         YoVariableValueDataChecker yoVariableValueDataChecker = new YoVariableValueDataChecker(scs, joint.getQ(), robot.getYoTime(), valueDataCheckerParameters, joint.getQD());
+       
+         
+        
          
          //PDN: Joints don't have acceleration limits. Not sure what to do
          //yoVariableValueDataChecker.setMaximumSecondDerivate((1.0 * TOLERACE_FACTOR)* joint.get());
