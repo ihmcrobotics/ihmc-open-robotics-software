@@ -28,13 +28,15 @@ import us.ihmc.yoUtilities.math.trajectories.YoConcatenatedSplines;
 
 public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
+   // JPratt. February 27, 2015: Added this since new Atlas was having trouble with network stuff.
+   // It was sending 14,000 variables. This and others reduces it a bit when set to false.
+   protected static final boolean REGISTER_YOVARIABLES = true;
+   
    private final static int arcLengthCalculatorDivisionsPerPolynomial = 20;
    private final static double EPSILON = 1e-3;
    private final static double WAYPOINT_CLOSENESS_FACTOR = .15;    // waypoints are considered close together if the distance between them is less than the total
 
    // distance times this fraction; waypoints that are close together are both set to their midpoint and passed through at a velocity of zero
-
-
 
    private final String namePostFix = getClass().getSimpleName();
    private final YoVariableRegistry registry;
@@ -91,7 +93,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
            YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
-      parentRegistry.addChild(registry);
+      if (REGISTER_YOVARIABLES) parentRegistry.addChild(registry);
 
       setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
       setInitialSwingVelocityToZero.set(false);
