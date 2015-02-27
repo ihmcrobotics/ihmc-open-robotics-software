@@ -102,9 +102,7 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
 
       FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime);
 
-      FrameVector graspApproachDirection = getGraspApproachDirectionInWorld(valveTransformToWorld, valveGraspLocation, graspApproachConeAngle);
-
-      HandPoseTask moveHandAwayFromValveTask = new HandPoseTask(robotSideOfHandToUse, graspApproachDirection.getVectorCopy(), -0.3, fullRobotModel, yoTime,
+      HandPoseTask moveHandAwayFromValveTask = new HandPoseTask(robotSideOfHandToUse, -0.3, fullRobotModel, yoTime,
             handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);
 
       pipeLine.submitSingleTaskStage(graspValveTask);
