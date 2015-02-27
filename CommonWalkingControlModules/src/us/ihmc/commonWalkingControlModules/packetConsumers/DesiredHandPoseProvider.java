@@ -9,7 +9,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -23,7 +23,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
 {
    private final SideDependentList<AtomicReference<HandPosePacket>> packets = new SideDependentList<AtomicReference<HandPosePacket>>();
    private final SideDependentList<AtomicReference<HandPoseListPacket>> handPoseListPackets = new SideDependentList<AtomicReference<HandPoseListPacket>>();
-   private final AtomicReference<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryHandPoseListPackets = new AtomicReference<WholeBodyTrajectoryDevelopmentPacket>();
+   private final AtomicReference<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListPackets = new AtomicReference<WholeBodyTrajectoryPacket>();
    private final SideDependentList<AtomicReference<StopArmMotionPacket>> pausePackets = new SideDependentList<AtomicReference<StopArmMotionPacket>>();
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
@@ -40,7 +40,12 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
 
    private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
 
-   private final PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> wholeBodyTrajectoryHandPoseListConsumer;
+   private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListConsumer;
+
+   public PacketConsumer<WholeBodyTrajectoryPacket> getWholeBodyTrajectoryPacketConsumer()
+   {
+      return wholeBodyTrajectoryHandPoseListConsumer;
+   }
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame)
    {
@@ -80,12 +85,13 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          }
       };
 
-      wholeBodyTrajectoryHandPoseListConsumer = new PacketConsumer<WholeBodyTrajectoryDevelopmentPacket>()
+      wholeBodyTrajectoryHandPoseListConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
       {
          @Override
-         public void receivedPacket(WholeBodyTrajectoryDevelopmentPacket object)
+         public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
-            wholeBodyTrajectoryHandPoseListPackets.set(object);
+            System.out.println("DesiredHandPoseProvider: PACKET received");
+            wholeBodyTrajectoryHandPoseListPackets.set(packet);
          }
       };
    }
@@ -264,17 +270,13 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       return handPoseListConsumer;
    }
 
-   public PacketConsumer<WholeBodyTrajectoryDevelopmentPacket> getWholeBodyTrajectoryHandPoseListConsumer()
-   {
-      return wholeBodyTrajectoryHandPoseListConsumer;
-   }
 
    @Override
    public boolean checkForNewWholeBodyPoseList(RobotSide robotSide)
    {
       if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
       {
-         return wholeBodyTrajectoryHandPoseListPackets.get().packetHasArmTrajectoryFor(robotSide);
+         return wholeBodyTrajectoryHandPoseListPackets.get().hasArmTrajectory(robotSide);
       }
       else
       {
@@ -293,11 +295,11 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       if (robotSide == RobotSide.LEFT)
       {
-         return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngles;
+         return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngle;
       }
       else
       {
-         return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngles;
+         return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngle;
       }
    }
 

@@ -8,7 +8,6 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket.WholeBodyPose;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -257,30 +256,37 @@ public class WholeBodyTrajectory
 
       WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(numWaypoints,numJointsPerArm);
 
+      double prevAbsoluteTime = 1.0;
+      
+      Vector3d temp = new Vector3d();
+      
       for (int w=0; w < numWaypoints; w++ )
       {
          WaypointND    jointsWaypoint = wbTrajectory.getWaypoint(w);
-         WholeBodyPose packetWaypoint = packet.waypoints[w];
 
-         packetWaypoint.absTime = jointsWaypoint.absTime;
+         packet.timeSincePrevious[w] = jointsWaypoint.absTime - prevAbsoluteTime;
+         prevAbsoluteTime = jointsWaypoint.absTime + 1.0;
 
          // store trajectories in the correct place
 
          //-----  check if this is part of the arms ---------
+         packet.allocateArmTrajectory(RobotSide.LEFT);
+         packet.allocateArmTrajectory(RobotSide.RIGHT);
+         
          int J = 0 ;
          for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.LEFT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
-            packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.position[index];
-            packetWaypoint.leftArmJointAngle[J] = jointsWaypoint.velocity[index];
+            packet.leftArmJointAngle[J][w] = jointsWaypoint.position[index];
+            packet.leftArmJointAngle[J][w] = jointsWaypoint.velocity[index];
          }
 
          J = 0 ;
          for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.RIGHT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
-            packetWaypoint.rightArmJointAngle[J] = jointsWaypoint.position[index];
-            packetWaypoint.rightArmJointAngle[J] = jointsWaypoint.velocity[index];
+            packet.rightArmJointAngle[J][w] = jointsWaypoint.position[index];
+            packet.rightArmJointAngle[J][w] = jointsWaypoint.velocity[index];
          }
 
          ///---------- calculation in task space ------------
@@ -316,23 +322,26 @@ public class WholeBodyTrajectory
          currentRobotModel.updateFrames();
          
          //-----  store pelvis data --------
-
-         worldToPelvis.get( packetWaypoint.pelvisOrientation,  packetWaypoint.pelvisPosition);
+         packet.allocatePelvisTrajectory();
+         worldToPelvis.get( packet.pelvisWorldOrientation[w], temp );
+         packet.pelvisWorldPosition[w].set( temp );
        
          Twist twistToPack = new Twist();
          twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getElevator() );
          
-         packetWaypoint.pelvisLinearVelocity.set(  twistToPack.getLinearPartCopy()  );
-         packetWaypoint.pelvisAngularVelocity.set( twistToPack.getAngularPartCopy() );
+         packet.pelvisLinearVelocity[w].set(  twistToPack.getLinearPartCopy()  );
+         packet.pelvisAngularVelocity[w].set( twistToPack.getAngularPartCopy() );
          
        //-----  store chest data --------
+         packet.allocateChestTrajectory();
          RigidBodyTransform worldToChest =  currentRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
-         worldToChest.get( packetWaypoint.chestOrientation );
+         worldToChest.get( packet.chestWorldOrientation[w] );
         
          twistCalculator.packTwistOfBody(twistToPack, currentRobotModel.getChest() );
-         packetWaypoint.chestAngularVelocity.set(  twistToPack.getAngularPartCopy() );
-
+         packet.chestAngularVelocity[w].set(  twistToPack.getAngularPartCopy() );
       }
-      return null;
+     
+      
+      return packet;
    }
 }

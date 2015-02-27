@@ -48,7 +48,7 @@ import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -124,15 +124,15 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
 
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, chestOrientationProvider.getWholeBodyTrajectoryPacketConsumer());
+      objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, chestOrientationProvider.getWholeBodyTrajectoryPacketConsumer());
       
       objectCommunicator.attachListener(PelvisPosePacket.class, pelvisPoseProvider);
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, pelvisPoseProvider.getWholeBodyTrajectoryPacketConsumer());
+      objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, pelvisPoseProvider.getWholeBodyTrajectoryPacketConsumer());
     
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(HandPoseListPacket.class, handPoseProvider.getHandPoseListConsumer());
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
-      objectCommunicator.attachListener(WholeBodyTrajectoryDevelopmentPacket.class, handPoseProvider.getWholeBodyTrajectoryHandPoseListConsumer());
+      objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, handPoseProvider.getWholeBodyTrajectoryPacketConsumer());
 
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);

@@ -19,6 +19,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.AtlasWholeBodyIK;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 //import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
@@ -46,9 +47,9 @@ public class AtlasWholeBodyIkSolverTest
 
    static private SimulationConstructionSet scs = null;
 
-//   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   final static private boolean VISUALIZE_GUI = false; // simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
+   final static private boolean VISUALIZE_GUI =  simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
    private static final boolean VISUALIZE_RANDOMLY_GENERATED_POSES = (true & VISUALIZE_GUI);
 
    static private FullRobotModelVisualizer modelVisualizer;
