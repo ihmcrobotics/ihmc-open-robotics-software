@@ -9,15 +9,11 @@ import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class HandJointAngleCommunicator implements RawOutputWriter
+public class HandJointAngleCommunicator
 {
-   private final int WORKER_SLEEP_TIME_MILLIS = 250;
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
    private final PacketCommunicator packetCommunicator;
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
@@ -25,10 +21,10 @@ public class HandJointAngleCommunicator implements RawOutputWriter
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
 
-   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator networkProcessorCommunicator)
+   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator)
    {
       this.side = side;
-      this.packetCommunicator = networkProcessorCommunicator;
+      this.packetCommunicator = packetCommunicator;
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       startWriterThread();
    }
@@ -42,29 +38,22 @@ public class HandJointAngleCommunicator implements RawOutputWriter
          public void run()
          {
             if (packetCommunicator != null)
-               packetCommunicator.send(packetCopier.getCopyForReading());
+            {
+               HandJointAnglePacket copyForReading = packetCopier.getCopyForReading();
+               if(copyForReading != null)
+               {
+                  packetCommunicator.send(copyForReading);  
+               }
+            }
          }
       }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
    }
 
-   @Override
-   public void initialize()
-   {
-   }
-
-   @Override
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-
-   @Override
    public String getName()
    {
       return getClass().getSimpleName();
    }
 
-   @Override
    public String getDescription()
    {
       return getName();
@@ -77,7 +66,6 @@ public class HandJointAngleCommunicator implements RawOutputWriter
 	   connected.set(true);
    }
 
-   @Override
    public void write()
    {
       HandJointAnglePacket packet = packetCopier.getCopyForWriting();
