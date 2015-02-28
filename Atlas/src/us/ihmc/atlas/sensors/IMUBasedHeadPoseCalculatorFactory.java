@@ -108,7 +108,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 	HeadPosePacket headPosePacket=new HeadPosePacket();
 	DRCRobotSensorInformation sensorInformation;
 	ReferenceFrame headIMUFrameWhenLevel;
-	RunningStatistics stat = new RunningStatistics(10);
+	RunningStatistics stat = new RunningStatistics(100);
 	
 
 	public IMUBasedHeadPoseCalculator(PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation) {
@@ -128,7 +128,7 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 	{
 		stat.update(newMeasurement);
 		Vector3d stdev= stat.getStdEv();
-		return stdev.length() < 1e-2;
+		return stdev.length() < 0.07;
 	}
 
 	private void process(long timestampInNanoSeconds, Vector3d rawAcceleration)
@@ -145,7 +145,8 @@ class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_r
 				headPosePacket.measuredGravityInWorld.set(rawAcceleration);
 			} else {
                 headPosePacket.reset();
-				headPosePacket.status = MeasurementStatus.UNSTABLE_WAIT;
+                headPosePacket.status = MeasurementStatus.UNSTABLE_WAIT;
+//                System.out.println("stdev"+stat.getStdEv().length());
 			}
 
 		packetCommunicator.send(headPosePacket);
