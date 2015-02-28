@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import org.junit.After;
@@ -187,14 +186,14 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
       assertTrue(success);
 
       double trajectoryTime = 2.0;
-      double handDeltaX = 0.4;
+      double handDeltaX = 0.25;
       double handDeltaY = 0.0;
       double handDeltaZ = 0.0;
       double handDeltaOmega = 0.0;
 
       HandPoseBehavior handPoseBehavior = createHandPoseBehavior(handDeltaX, handDeltaY, handDeltaZ, handDeltaOmega, trajectoryTime);
       
-      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseBehavior, trajectoryTime + 1.0);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
       assertTrue(success);
 
       double actualHandGcCollisionTime = handImpactDetector.getHandImpactTime();
