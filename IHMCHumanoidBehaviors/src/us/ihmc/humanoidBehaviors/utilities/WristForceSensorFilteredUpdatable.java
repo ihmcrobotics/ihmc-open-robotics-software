@@ -2,17 +2,19 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import java.util.List;
 
+import org.codehaus.jackson.map.RuntimeJsonMappingException;
+
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
-import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,12 +23,15 @@ import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderBandPassFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.FirstOrderFilteredYoVariable.FirstOrderFilterType;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {
+   private final boolean DEBUG = false;
+
    private final double DT;
    private final RobotSide robotSide;
 
@@ -40,6 +45,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final FirstOrderFilteredYoVariable yoWristSensorForceMagnitudeBias;
    private final FirstOrderBandPassFilteredYoVariable yoWristSensorForceMagnitudeBandPassFiltered;
 
+   private final IntegerYoVariable yoCollisionSeverityLevelOneToThree;
    private final BooleanYoVariable yoForceLimitExceeded;
    private final BooleanYoVariable yoStiffnessLimitExceeded;
    private final BooleanYoVariable yoImpactDetected;
@@ -53,7 +59,6 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private final DoubleYoVariable yoImpactStiffnessThreshold_NperM;
    private final DoubleYoVariable yoImpactForceThreshold_N;
-   private final BooleanYoVariable stopArmMotionIfImpactDetected;
 
    private final PacketCommunicator controllerCommunicator;
 
@@ -77,7 +82,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       }
       if (wristSensorDefinition == null)
       {
-         System.out.println(this.toString() + ": No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
+         throw new RuntimeJsonMappingException("No Wrist Sensor Definition Found!  Make sure that forceSensorName is properly set.");
       }
       this.forceSensorData = forceSensorDataHolder.getByName(forceSensorName);
 
@@ -96,6 +101,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoImpactStiffnessThreshold_NperM = new DoubleYoVariable(forceSensorName + "ImpactStiffnessThreshold_NperM", registry);
       yoImpactForceThreshold_N = new DoubleYoVariable(forceSensorName + "ImpactForceThreshold_N", registry);
 
+      yoCollisionSeverityLevelOneToThree = new IntegerYoVariable(forceSensorName + "CollisionSeverity", "", registry, 1, 3);
       yoForceLimitExceeded = new BooleanYoVariable(forceSensorName + "forceLimitExceeded", registry);
       yoStiffnessLimitExceeded = new BooleanYoVariable(forceSensorName + "stiffnessLimitExceeded", registry);
       yoImpactDetected = new BooleanYoVariable(forceSensorName + "ImpactDetected", registry);
@@ -106,8 +112,6 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
-      stopArmMotionIfImpactDetected = new BooleanYoVariable(forceSensorName + "stopArmMotionIfImpactDetected", registry);
-
       this.controllerCommunicator = controllerCommunicator;
 
       initialize();
@@ -115,9 +119,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
 
    private void initialize()
    {
-      stopArmMotionIfImpactDetected.set(false);
-
-      yoImpactForceThreshold_N.set(100.0 / 10.0);
+      yoImpactForceThreshold_N.set(100.0);
       yoImpactStiffnessThreshold_NperM.set(10000.0 * 10000.0);
    }
 
@@ -125,22 +127,17 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    {
       return robotSide;
    }
-   
+
    public double getDT()
    {
       return DT;
-   }
-
-   public void setStopMotionIfCollision(boolean stop)
-   {
-      stopArmMotionIfImpactDetected.set(stop);
    }
 
    public double getHandMass()
    {
       return sensorMassCompensator.getDistalMass();
    }
-   
+
    public FramePoint getWristPositionInWorld()
    {
       return sensorMassCompensator.getSensorPosition();
@@ -170,7 +167,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    {
       return sensorMassCompensator.getSensorZForceLowPassFilteredInWorld();
    }
-   
+
    public double getForceRateOfChangeAlongDirectionOfMotion()
    {
       return taskspaceStiffnessCalc.getForceRateOfChangeAlongDirectionOfMotion();
@@ -207,6 +204,8 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoWristSensorForceMagnitude.set(sensorForceRawInWorld.length());
    }
 
+   private double maxFilteredForce;
+
    private void stopArmIfHandCollisionIsDetected(double time)
    {
       estimateStiffnessOfConstraintsActingUponWrist();
@@ -214,27 +213,33 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoWristSensorForceMagnitudeBias.update(yoWristSensorForceMagnitude.getDoubleValue());
       yoWristSensorForceMagnitudeBandPassFiltered.update(yoWristSensorForceMagnitude.getDoubleValue());
 
-      yoForceLimitExceeded.set( taskspaceStiffnessCalc.getForceAlongDirectionOfMotion() > yoImpactForceThreshold_N.getDoubleValue() );
-      yoStiffnessLimitExceeded.set( taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue() );
+      yoForceLimitExceeded.set(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() > yoImpactForceThreshold_N.getDoubleValue());
 
-      if ( yoForceLimitExceeded.getBooleanValue() || yoStiffnessLimitExceeded.getBooleanValue() )
+      double forceToForceLimitRatio = yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() / yoImpactForceThreshold_N.getDoubleValue();
+      yoCollisionSeverityLevelOneToThree.set(MathTools.clipToMinMax((int) Math.round(forceToForceLimitRatio), 1, 3));
+
+      //            yoForceLimitExceeded.set( taskspaceStiffnessCalc.getForceAlongDirectionOfMotion() > yoImpactForceThreshold_N.getDoubleValue() );
+      //      yoStiffnessLimitExceeded.set(taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue());
+
+      if (yoForceLimitExceeded.getBooleanValue())
       {
-         if (!yoImpactDetected.getBooleanValue() && time > 1.0)
+         if (!yoImpactDetected.getBooleanValue() && time > 1.0 || yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() > maxFilteredForce)
          {
             yoImpactDetected.set(true);
             yoImpactTime.set(time);
 
-            if (stopArmMotionIfImpactDetected.getBooleanValue())
-            {
-               StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
-               pausePacket.setDestination(PacketDestination.CONTROLLER);
-               controllerCommunicator.send(pausePacket);
-            }
-            else
-            {
-               controllerCommunicator.send(new HandCollisionDetectedPacket(robotSide));
-            }
+            controllerCommunicator.send(new HandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
+            if (DEBUG)
+               SysoutTool.println("Sending Collision Detected Packet.  FilteredForce = " + yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue(), DEBUG);
+
          }
+      }
+
+      if (Math.abs(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue()) > maxFilteredForce)
+      {
+         maxFilteredForce = Math.abs(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
+         if (DEBUG)
+            SysoutTool.println("maxFilteredForce = " + maxFilteredForce);
       }
    }
 

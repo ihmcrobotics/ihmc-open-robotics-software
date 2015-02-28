@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class HandPoseBehavior extends BehaviorInterface
 {
@@ -33,11 +34,13 @@ public class HandPoseBehavior extends BehaviorInterface
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable trajectoryTimeElapsed;
+   private final DoubleYoVariable percentTimeRemainingAtCollision;
 
    private final BooleanYoVariable hasInputBeenSet;
    private final BooleanYoVariable hasStatusBeenReceived;
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable stopHandIfCollision;
+   private final IntegerYoVariable numberOfConsecutiveCollisions;
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -55,12 +58,16 @@ public class HandPoseBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "trajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
       trajectoryTimeElapsed.set(Double.NaN);
+      percentTimeRemainingAtCollision = new DoubleYoVariable(behaviorNameFirstLowerCase + "PercentTimeRemainingAtCollision", registry);
+      percentTimeRemainingAtCollision.set(Double.NaN);
+
       hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
       stopHandIfCollision = new BooleanYoVariable(behaviorNameFirstLowerCase + "StopIfCollision", registry);
+      numberOfConsecutiveCollisions = new IntegerYoVariable(behaviorNameFirstLowerCase + "ConsecutiveCollisionCount", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
       this.attachControllerListeningQueue(collisionListeningQueue, HandCollisionDetectedPacket.class);
    }
@@ -86,7 +93,7 @@ public class HandPoseBehavior extends BehaviorInterface
       this.outgoingHandPosePacket = handPosePacket;
       hasInputBeenSet.set(true);
    }
-
+   
    @Override
    public void doControl()
    {
@@ -103,19 +110,52 @@ public class HandPoseBehavior extends BehaviorInterface
          if (DEBUG)
             SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
-      }
-      
-      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable() && trajectoryTimeElapsed.getDoubleValue() > 0.1)
-      {
-         SysoutTool.println("COLLISION DETECTED!  STOPPING HAND.");
-         stop();
-         isDone.set(true);
+         numberOfConsecutiveCollisions.set(0);
       }
 
-      
+      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable()
+            && trajectoryTimeElapsed.getDoubleValue() > 0.5)
+      {
+         if (numberOfConsecutiveCollisions.getIntegerValue() == 0)
+         {
+            percentTimeRemainingAtCollision.set(100.0 * (trajectoryTime.getDoubleValue() - trajectoryTimeElapsed.getDoubleValue()) / trajectoryTime.getDoubleValue());
+         }
+         
+         HandCollisionDetectedPacket collisionPacket = collisionListeningQueue.getNewestPacket();
+         
+         int collisionSeverityOneToThree = collisionPacket.getCollisionSeverityOneToThree();
+         
+         if (DEBUG)
+         {
+            SysoutTool.println("COLLISION DETECTED! Severity [1-3]: " + collisionSeverityOneToThree);
+            SysoutTool.println("TrajectoryTimeElapsedPercent: " + numberOfConsecutiveCollisions.getIntegerValue());
+            SysoutTool.println("Number of consecutive collisions: " + numberOfConsecutiveCollisions.getIntegerValue());
+         }
+
+         stopArmMotion();
+
+         //TODO: Reduce number of retries if collision severity *increases*
+         int maxNumberOfTimesToRetryHandPose = 10;
+
+         // reduce number of retries as hand gets closer to target
+         boolean isItFutileToRetryHandPose = numberOfConsecutiveCollisions.getIntegerValue() > maxNumberOfTimesToRetryHandPose * (int) Math.round(percentTimeRemainingAtCollision.getDoubleValue() / 100.0);
+
+         if ( !isItFutileToRetryHandPose )
+         {
+            trajectoryTimeElapsed.set(0.0);
+            trajectoryTime.set(2.0 * outgoingHandPosePacket.trajectoryTime);
+
+            HandPosePacket gentlerVersionOfPreviousPacket = PacketControllerTools.createHandPosePacket(outgoingHandPosePacket.referenceFrame,
+                  outgoingHandPosePacket.position, outgoingHandPosePacket.orientation, outgoingHandPosePacket.robotSide, trajectoryTime.getDoubleValue());
+
+            sendHandPosePacketToController(gentlerVersionOfPreviousPacket);
+         }
+         numberOfConsecutiveCollisions.add(1);
+      }
+
       if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
       {
-         sendHandPoseToController();
+         sendHandPosePacketToController(outgoingHandPosePacket);
       }
 
    }
@@ -125,20 +165,20 @@ public class HandPoseBehavior extends BehaviorInterface
       return status;
    }
 
-   private void sendHandPoseToController()
+   private void sendHandPosePacketToController(HandPosePacket handPosePacket)
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingHandPosePacket.setDestination(PacketDestination.UI);
+         handPosePacket.setDestination(PacketDestination.UI);
 
          if (DEBUG)
-            SysoutTool.println("sending handPose packet to controller and network processor: " + outgoingHandPosePacket);
-         sendPacketToController(outgoingHandPosePacket);
-         sendPacketToNetworkProcessor(outgoingHandPosePacket);
+            SysoutTool.println("sending handPose packet to controller and network processor: " + handPosePacket);
+         sendPacketToController(handPosePacket);
+         sendPacketToNetworkProcessor(handPosePacket);
 
          hasPacketBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingHandPosePacket.getTrajectoryTime());
+         trajectoryTime.set(handPosePacket.getTrajectoryTime());
       }
    }
 
@@ -173,10 +213,12 @@ public class HandPoseBehavior extends BehaviorInterface
       isPaused.set(false);
       isDone.set(false);
       hasBeenInitialized.set(true);
-      
+
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
       trajectoryTimeElapsed.set(Double.NaN);
+      percentTimeRemainingAtCollision.set(Double.NaN);
+      numberOfConsecutiveCollisions.set(0);
    }
 
    @Override
@@ -194,6 +236,9 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
       startTime.set(Double.NaN);
       trajectoryTimeElapsed.set(Double.NaN);
+      percentTimeRemainingAtCollision.set(Double.NaN);
+      numberOfConsecutiveCollisions.set(0);
+
       status = null;
       isDone.set(false);
    }
@@ -234,7 +279,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
          if (hasInputBeenSet())
          {
-            sendHandPoseToController();
+            sendHandPosePacketToController(outgoingHandPosePacket);
          }
       }
    }
