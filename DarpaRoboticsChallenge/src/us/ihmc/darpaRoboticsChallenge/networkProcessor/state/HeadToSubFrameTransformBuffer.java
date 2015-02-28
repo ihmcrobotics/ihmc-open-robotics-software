@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.state;
 
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class HeadToSubFrameTransformBuffer implements PendableBuffer
@@ -10,6 +11,7 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
    private int currentIndex;
    private long oldestTimestamp;
    private long newestTimestamp;
+   private TransformInterpolationCalculator transformInterpolationCalculator;
 
    public HeadToSubFrameTransformBuffer(int size)
    {
@@ -97,8 +99,6 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
          }
          else if (floorData.getTimeStamp() < timestamp)
          {
-            long floor = floorData.getTimeStamp();
-
             index++;
 
             if (index >= size)
@@ -107,10 +107,8 @@ public class HeadToSubFrameTransformBuffer implements PendableBuffer
             }
 
             TimeStampedTransform3D ceilingData = transforms[index];
-            long ceiling = ceilingData.getTimeStamp();
-            double percentage = ((double) (timestamp - floor)) / ((double) (ceiling - floor));
-
-            floorData.interpolateTo(ceilingData, percentage, timeStampedTransform3DToPack);
+            
+            transformInterpolationCalculator.interpolate(floorData, ceilingData, timeStampedTransform3DToPack, timestamp);
             return true;
          }
       }
