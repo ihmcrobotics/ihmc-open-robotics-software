@@ -32,7 +32,7 @@ public class AtlasROSAPISimulator
 
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
       simulationStarter.setRunMultiThreaded(true);
-
+      simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
       simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
       
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();

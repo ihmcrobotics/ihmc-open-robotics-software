@@ -15,16 +15,17 @@ apply plugin: 'application'
 applicationName = "IHMCAtlasAPI"
 mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
 
+
 startScripts {
     outputs.upToDateWhen { false }
 
     doLast {
         def simUnixScript = file(outputDir.canonicalPath + "/${applicationName}Simulator")
-        simUnixScript.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
+        simUnixScript.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator").replace('DEFAULT_JVM_OPTS=""','DEFAULT_JVM_OPTS="-Xmx1024m"')
         simUnixScript.setExecutable(true)
 
         def simWindowsScript = file(outputDir.canonicalPath + "/${applicationName}Simulator.bat")
-        simWindowsScript.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
+        simWindowsScript.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator").replace('DEFAULT_JVM_OPTS=""','DEFAULT_JVM_OPTS="-Xmx1024m"')
     }
 }
 
