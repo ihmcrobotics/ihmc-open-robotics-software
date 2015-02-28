@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.subscribers.TimeStampedPelvisPoseBuffer;
+import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.kinematics.TransformInterpolationCalculator;
@@ -36,7 +36,7 @@ public class PelvisPoseHistoryCorrection
    private static final boolean USE_ROTATION_CORRECTION = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final TimeStampedPelvisPoseBuffer stateEstimatorPelvisPoseBuffer;
+   private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
@@ -138,7 +138,7 @@ public class PelvisPoseHistoryCorrection
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      stateEstimatorPelvisPoseBuffer = new TimeStampedPelvisPoseBuffer(pelvisBufferSize);
+      stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(pelvisBufferSize);
 
       pelvisStateAtLocalizationTimeTranslationFrame = new YoReferencePose("pelvisStateAtLocalizationTimeTranslationFrame", worldFrame, registry);
       pelvisStateAtLocalizationTimeRotationFrame = new YoReferencePose("pelvisStateAtLocalizationTimeRotationFrame", worldFrame, registry);
@@ -412,7 +412,7 @@ public class PelvisPoseHistoryCorrection
       localizationPose.getRotation(localizationRotationInPast);
       newLocalizationRotationFrame.setAndUpdate(localizationRotationInPast);
 
-      stateEstimatorPelvisPoseBuffer.findPose(timeStamp, seTimeStampedPose);
+      stateEstimatorPelvisPoseBuffer.findTransform(timeStamp, seTimeStampedPose);
       RigidBodyTransform sePose = seTimeStampedPose.getTransform3D();
 
       sePose.getTranslation(seTranslationInPast);
