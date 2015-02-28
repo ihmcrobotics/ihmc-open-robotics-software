@@ -38,9 +38,12 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 
 
+/**
+ * @author unknownid
+ *
+ */
 public class ProvidedMassMatrixToolRigidBody
 {
-   
    private final YoVariableRegistry registry;
    
    private final PoseReferenceFrame toolFrame; 
@@ -55,7 +58,9 @@ public class ProvidedMassMatrixToolRigidBody
    
    private final DoubleYoVariable objectMass;
    
-   private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   private final FullRobotModel fullRobotModel;
+   private final double gravity;
+   private InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SixDoFJoint toolJoint;
    private final ReferenceFrame elevatorFrame;
    
@@ -64,11 +69,12 @@ public class ProvidedMassMatrixToolRigidBody
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
    
    public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullRobotModel fullRobotModel, double gravity, 
-         double controlDT, ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
+      this.fullRobotModel = fullRobotModel;
+      this.gravity = gravity;
       
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
       
@@ -85,23 +91,10 @@ public class ProvidedMassMatrixToolRigidBody
       
       this.toolJoint = new SixDoFJoint(name+"Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       this.toolBody = new RigidBody(name+"Body", inertia, toolJoint);
-      
-      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
-      boolean doVelocityTerms = true;
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, elevatorFrame,
-            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, doVelocityTerms, doVelocityTerms);
-      
-      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
-      jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
-      jointsToIgnore.remove(toolJoint);
-      
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
-            jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
-           
+        
       objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handCenterFrame, registry);
       objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
       objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
-      
       
       this.objectCenterOfMassInWorld = new YoFramePoint(name + "CoMInWorld", ReferenceFrame.getWorldFrame(), registry);
       
@@ -120,53 +113,75 @@ public class ProvidedMassMatrixToolRigidBody
       parentRegistry.addChild(registry);
    }
    
+   private boolean hasBeenInitialized = false;
+   private void initialize()
+   {
+      hasBeenInitialized = true;
+      
+      TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
+      
+      boolean doVelocityTerms = true;
+      boolean useDesireds = false;
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, elevatorFrame,
+            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, doVelocityTerms, useDesireds);
+      
+      ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
+      jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
+      jointsToIgnore.remove(toolJoint);
+      
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
+            jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
+   }
    
    public void update()
    {
       toolBody.getInertia().setMass(objectMass.getDoubleValue());
       
-      
       temporaryPoint.setIncludingFrame(objectCenterOfMass.getFrameTuple());
       temporaryPoint.changeFrame(elevatorFrame);
       toolFrame.setPositionAndUpdate(temporaryPoint);
-      
-      
+
+      // Visualization 
       FramePoint toolFramePoint = new FramePoint(toolFrame);
       toolFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      
-      // Visualization stuff
       objectCenterOfMassInWorld.set(toolFramePoint);
    }
 
-   public void control(SpatialAccelerationVector spatialAccelerationVector, Wrench toolWrench)
+   public void control(SpatialAccelerationVector handSpatialAccelerationVector, Wrench toolWrench)
    {
+      if (!hasBeenInitialized)
+      {
+         update();
+         initialize();
+      }
       
       update();
       
-      toolAcceleration.set(spatialAccelerationVector);
+      toolAcceleration.set(handSpatialAccelerationVector);
       toolAcceleration.changeFrameNoRelativeMotion(toolJoint.getFrameAfterJoint());
       
       // TODO: Take relative acceleration between uTorsoCoM and elevator in account
       toolAcceleration.changeBaseFrameNoRelativeAcceleration(elevatorFrame);
-      
-      
       toolAcceleration.changeBodyFrameNoRelativeAcceleration(toolJoint.getFrameAfterJoint());
       
       toolJoint.setDesiredAcceleration(toolAcceleration);
       inverseDynamicsCalculator.compute();
       inverseDynamicsCalculator.getJointWrench(toolJoint, toolWrench);
       
-      
       toolWrench.negate();
-      
       toolWrench.changeFrame(handFixedFrame);
       toolWrench.changeBodyFrameAttachedToSameBody(handFixedFrame);
       
-      temporaryVector.setIncludingFrame(handCenterFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
+      // Visualization
+      temporaryVector.setIncludingFrame(handFixedFrame, toolWrench.getLinearPartX(), toolWrench.getLinearPartY(), toolWrench.getLinearPartZ());
       temporaryVector.changeFrame(ReferenceFrame.getWorldFrame());
       temporaryVector.scale(0.01);
       objectForceInWorld.set(temporaryVector);
       
    }
-
+   
+   public void setMass(double mass)
+   {
+      objectMass.set(mass);
+   }
 }
