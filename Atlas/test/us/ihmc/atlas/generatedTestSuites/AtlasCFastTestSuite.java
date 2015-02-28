@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.calib.KinematicCalibrationHeadLoopResidualTest.class,
+   us.ihmc.atlas.commonWalkingControlModules.sensors.AtlasProvidedMassMatrixToolRigidBodyTest.class,
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
    us.ihmc.atlas.controllers.responses.AtlasHandPoseStatusTest.class,
    us.ihmc.atlas.drcRobot.AtlasSDFVerificationTest.class,
