@@ -209,6 +209,11 @@ public class HeadOrientationControlModule
       desiredOrientation.getTransform3D(desiredHeadTransform);
       numericalInverseKinematicsCalculator.solve(desiredHeadTransform);
       numericalInverseKinematicsCalculator.getBest(desiredJointAngles);
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         OneDoFJoint joint = headOrientationControlJoints[i];
+         joint.setqDesired(desiredJointAngles.get(i, 0));
+      }
    }
 
    private void computeJointsDesiredAcceleration()
