@@ -389,7 +389,7 @@ public class MomentumBasedController
          RigidBody hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide, getFullRobotModel(), gravityZ, controlDT, armControllerParameters,
+            toolRigidBodies.put(robotSide, new ProvidedMassMatrixToolRigidBody(robotSide, getFullRobotModel(), gravityZ, armControllerParameters,
                   registry, yoGraphicsListRegistry));
             handWrenches.put(robotSide, new Wrench());
          }
