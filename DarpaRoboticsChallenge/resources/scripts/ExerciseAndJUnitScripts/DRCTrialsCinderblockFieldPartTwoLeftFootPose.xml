@@ -191,9 +191,9 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>2.320136700073599</x>
+          <x>2.36</x>
           <y>0.2082939685783477</y>
-          <z>0.7100452294625275</z>
+          <z>.735</z>
         </location>
         <orientation>
           <x>0.019221834044074116</x>
