@@ -43,6 +43,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspValveBehavior extends BehaviorInterface
 {
+   private static final boolean STOP_GRASP_MOTION_IF_COLLISION_IS_DETECTED = true;
    private final double TWELVE_O_CLOCK_HANDFRAME_ROLL_ANGLE = Math.PI;
    private final double VALVE_RIM_THICKNESS = 0.08;
    private final double WRIST_OFFSET_FROM_HAND = 0.11 * 0.75; // 0.11
@@ -203,7 +204,7 @@ public class GraspValveBehavior extends BehaviorInterface
       HandPoseTask moveHandToFavorableGraspApproachLocation = new HandPoseTask(robotSideOfGraspingHand, 1.0, preGraspHandFramePose, Frame.WORLD,
             handPoseBehavior, yoTime);
       HandPoseTask movePalmToBeInContactWithValveRim = new HandPoseTask(robotSideOfGraspingHand, 1.0, finalGraspHandFramePose, Frame.WORLD, handPoseBehavior,
-            yoTime);
+            yoTime, STOP_GRASP_MOTION_IF_COLLISION_IS_DETECTED);
       FingerStateTask closeHandTask = new FingerStateTask(robotSideOfGraspingHand, FingerState.CLOSE, fingerStateBehavior, yoTime);
 
       pipeLine.clearAll();

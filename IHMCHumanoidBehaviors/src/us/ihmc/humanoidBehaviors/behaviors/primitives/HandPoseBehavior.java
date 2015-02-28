@@ -40,7 +40,9 @@ public class HandPoseBehavior extends BehaviorInterface
    private final BooleanYoVariable hasStatusBeenReceived;
    private final BooleanYoVariable isDone;
    private final BooleanYoVariable stopHandIfCollision;
+   private final BooleanYoVariable isPausedDueToCollision;
    private final IntegerYoVariable numberOfConsecutiveCollisions;
+   private final DoubleYoVariable yoCollisionTime;
 
    public HandPoseBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime)
    {
@@ -67,7 +69,9 @@ public class HandPoseBehavior extends BehaviorInterface
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
       stopHandIfCollision = new BooleanYoVariable(behaviorNameFirstLowerCase + "StopIfCollision", registry);
+      isPausedDueToCollision = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsPausedDueToCollision", registry);
       numberOfConsecutiveCollisions = new IntegerYoVariable(behaviorNameFirstLowerCase + "ConsecutiveCollisionCount", registry);
+      yoCollisionTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "CollisionTime", registry);
       this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
       this.attachControllerListeningQueue(collisionListeningQueue, HandCollisionDetectedPacket.class);
    }
@@ -93,7 +97,7 @@ public class HandPoseBehavior extends BehaviorInterface
       this.outgoingHandPosePacket = handPosePacket;
       hasInputBeenSet.set(true);
    }
-   
+
    @Override
    public void doControl()
    {
@@ -113,51 +117,74 @@ public class HandPoseBehavior extends BehaviorInterface
          numberOfConsecutiveCollisions.set(0);
       }
 
-      if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && collisionListeningQueue.isNewPacketAvailable()
-            && trajectoryTimeElapsed.getDoubleValue() > 0.5)
+      if (collisionListeningQueue.isNewPacketAvailable())
       {
-         if (numberOfConsecutiveCollisions.getIntegerValue() == 0)
+         if (stopHandIfCollision.getBooleanValue() && !isStopped.getBooleanValue() && !isPaused.getBooleanValue()
+               && trajectoryTimeElapsed.getDoubleValue() > 0.5)
+            handleHandCollision(collisionListeningQueue.getNewestPacket());
+      }
+
+      if (isPausedDueToCollision.getBooleanValue())
+      {
+         if (retryHandPose && yoTime.getDoubleValue() > yoCollisionTime.getDoubleValue() + 0.5)
          {
-            percentTimeRemainingAtCollision.set(100.0 * (trajectoryTime.getDoubleValue() - trajectoryTimeElapsed.getDoubleValue()) / trajectoryTime.getDoubleValue());
+            //            HandPosePacket gentlerVersionOfPreviousPacket = PacketControllerTools.createHandPosePacket(outgoingHandPosePacket.referenceFrame,
+            //                  outgoingHandPosePacket.position, outgoingHandPosePacket.orientation, outgoingHandPosePacket.robotSide,
+            //                  2.0 * outgoingHandPosePacket.trajectoryTime);
+
+            resume();
+            isPausedDueToCollision.set(false);
+            SysoutTool.println("Re-Attemping HandPoseBehavior", DEBUG);
          }
-         
-         HandCollisionDetectedPacket collisionPacket = collisionListeningQueue.getNewestPacket();
-         
-         int collisionSeverityOneToThree = collisionPacket.getCollisionSeverityOneToThree();
-         
-         if (DEBUG)
-         {
-            SysoutTool.println("COLLISION DETECTED! Severity [1-3]: " + collisionSeverityOneToThree);
-            SysoutTool.println("TrajectoryTimeElapsedPercent: " + numberOfConsecutiveCollisions.getIntegerValue());
-            SysoutTool.println("Number of consecutive collisions: " + numberOfConsecutiveCollisions.getIntegerValue());
-         }
-
-         stopArmMotion();
-
-         //TODO: Reduce number of retries if collision severity *increases*
-         int maxNumberOfTimesToRetryHandPose = 10;
-
-         // reduce number of retries as hand gets closer to target
-         boolean isItFutileToRetryHandPose = numberOfConsecutiveCollisions.getIntegerValue() > maxNumberOfTimesToRetryHandPose * (int) Math.round(percentTimeRemainingAtCollision.getDoubleValue() / 100.0);
-
-         if ( !isItFutileToRetryHandPose )
-         {
-            trajectoryTimeElapsed.set(0.0);
-            trajectoryTime.set(2.0 * outgoingHandPosePacket.trajectoryTime);
-
-            HandPosePacket gentlerVersionOfPreviousPacket = PacketControllerTools.createHandPosePacket(outgoingHandPosePacket.referenceFrame,
-                  outgoingHandPosePacket.position, outgoingHandPosePacket.orientation, outgoingHandPosePacket.robotSide, trajectoryTime.getDoubleValue());
-
-            sendHandPosePacketToController(gentlerVersionOfPreviousPacket);
-         }
-         numberOfConsecutiveCollisions.add(1);
       }
 
       if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
       {
          sendHandPosePacketToController(outgoingHandPosePacket);
       }
+   }
 
+   private boolean retryHandPose;
+
+   public void handleHandCollision(HandCollisionDetectedPacket collisionPacket)
+   {
+      int collisionSeverityOneToThree = collisionPacket.getCollisionSeverityOneToThree();
+
+      yoCollisionTime.set(yoTime.getDoubleValue());
+
+      if (numberOfConsecutiveCollisions.getIntegerValue() == 0)
+         percentTimeRemainingAtCollision.set(100.0 * (trajectoryTime.getDoubleValue() - trajectoryTimeElapsed.getDoubleValue())
+               / trajectoryTime.getDoubleValue());
+
+      if (DEBUG)
+      {
+         SysoutTool.println("COLLISION DETECTED! Severity [1-3]: " + collisionSeverityOneToThree);
+         SysoutTool.println("PercentTimeRemainingAtInitialCollision: " + percentTimeRemainingAtCollision.getDoubleValue());
+         SysoutTool.println("Number of consecutive collisions: " + numberOfConsecutiveCollisions.getIntegerValue());
+      }
+
+      //TODO: Reduce number of retries if collision severity *increases*
+      int maxNumberOfTimesToRetryHandPose = 10;
+
+      // reduce number of retries as hand gets closer to target
+      retryHandPose = numberOfConsecutiveCollisions.getIntegerValue() < (int) Math.round(maxNumberOfTimesToRetryHandPose
+            * percentTimeRemainingAtCollision.getDoubleValue() / 100.0);
+
+      if (retryHandPose)
+      {
+         pause();
+         isPausedDueToCollision.set(true);
+      }
+      else
+      {
+         isPausedDueToCollision.set(false);
+         stopArmMotion();
+         finalize();
+         isDone.set(true);
+         SysoutTool.println("Giving Up on Re-Attempting HandPoseBehavior \n", DEBUG);
+      }
+
+      numberOfConsecutiveCollisions.add(1);
    }
 
    public Status getStatus()
@@ -211,6 +238,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
+      isPausedDueToCollision.set(false);
       isDone.set(false);
       hasBeenInitialized.set(true);
 
@@ -219,6 +247,7 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTimeElapsed.set(Double.NaN);
       percentTimeRemainingAtCollision.set(Double.NaN);
       numberOfConsecutiveCollisions.set(0);
+      yoCollisionTime.set(Double.NaN);
    }
 
    @Override
@@ -228,6 +257,7 @@ public class HandPoseBehavior extends BehaviorInterface
       outgoingHandPosePacket = null;
 
       isPaused.set(false);
+      isPausedDueToCollision.set(false);
       isStopped.set(false);
 
       hasInputBeenSet.set(false);
@@ -238,6 +268,7 @@ public class HandPoseBehavior extends BehaviorInterface
       trajectoryTimeElapsed.set(Double.NaN);
       percentTimeRemainingAtCollision.set(Double.NaN);
       numberOfConsecutiveCollisions.set(0);
+      yoCollisionTime.set(Double.NaN);
 
       status = null;
       isDone.set(false);
@@ -302,7 +333,8 @@ public class HandPoseBehavior extends BehaviorInterface
       if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
          if (DEBUG)
-            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide());
+            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = "
+                  + yoTime.getDoubleValue());
          status = handPoseStatus.getStatus();
          hasStatusBeenReceived.set(true);
       }
