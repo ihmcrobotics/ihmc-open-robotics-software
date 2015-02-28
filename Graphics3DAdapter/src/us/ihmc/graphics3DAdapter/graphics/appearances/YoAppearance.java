@@ -89,6 +89,11 @@ public class YoAppearance
 
       return mat;
    }
+   
+   public static AppearanceDefinition RGBColor(double red, double green, double blue, double transparency)
+   {
+      return new YoAppearanceRGBColor(red, green, blue, transparency);
+   }
 
    public static AppearanceDefinition RGBColor(double red, double green, double blue)
    {
