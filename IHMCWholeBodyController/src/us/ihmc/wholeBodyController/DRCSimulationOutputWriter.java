@@ -78,10 +78,10 @@ public class DRCSimulationOutputWriter extends SDFPerfectSimulatedOutputWriter i
          OneDoFJoint oneDoFJoint = joints[i];
          String jointName = oneDoFJoint.getName();
 
-         DoubleYoVariable rawJointTorque = new DoubleYoVariable("raw_tau_" + jointName, registry);
+         DoubleYoVariable rawJointTorque = new DoubleYoVariable("tau_desired_" + jointName, registry);
          rawJointTorques.put(oneDoFJoint, rawJointTorque);
 
-         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("delayed_tau_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
+         DelayedDoubleYoVariable delayedJointTorque = new DelayedDoubleYoVariable("tau_delayed_" + jointName, "", rawJointTorque, TICKS_TO_DELAY, registry);
          delayedJointTorques.put(oneDoFJoint, delayedJointTorque);
       }
    }
