@@ -1,39 +1,22 @@
 package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
-import us.ihmc.pathGeneration.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FramePose2d;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.math.geometry.Pose2dReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
-import us.ihmc.yoUtilities.math.frames.YoFramePoint;
-import us.ihmc.yoUtilities.math.frames.YoFramePose;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class TurnInPlaceBehavior extends BehaviorInterface
 {
