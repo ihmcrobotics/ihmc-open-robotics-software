@@ -9,6 +9,9 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
@@ -18,8 +21,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
+import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -36,41 +42,67 @@ import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-public abstract class WholeBodyTrajectoryTest
+public abstract class WholeBodyTrajectoryTest 
 {
-   private SDFFullRobotModel actualRobotModel;
-   private SDFFullRobotModel desiredRobotModel;
-   private WholeBodyIkSolver wbSolver;
-
-   static private final YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry");
-   private final ArrayList<Pair<ReferenceFrame, ReferenceFrame>> handArrayList = new ArrayList<Pair<ReferenceFrame, ReferenceFrame>>();
-
    static private final boolean DEBUG = false;
 
-   public abstract WholeBodyControllerParameters getRobotModel();
-
-   public abstract FullRobotModelVisualizer getFullRobotModelVisualizer();
-
-   public abstract SimulationConstructionSet getSimulationConstructionSet();
-
-
-   public WholeBodyTrajectoryTest(SDFFullRobotModel actualRobotModel, WholeBodyIkSolver solver)
+   public abstract WholeBodyTrajectoryTestHelper getWholeBodyTrajectoryTestHelper();
+   
+   private SimulationTestingParameters simulationTestingParameters;   
+   private SimulationConstructionSet scs;
+   private FullRobotModelVisualizer modelVisualizer;
+   
+   @Before
+   public void showMemoryUsageBeforeTest()
    {
-      this.actualRobotModel = actualRobotModel;
-      desiredRobotModel = getRobotModel().createFullRobotModel();
-      this.wbSolver = solver;
-
-      Vector3d rootPosition = new Vector3d(0, 0, 0.93);
-      actualRobotModel.getRootJoint().setPosition(rootPosition);
+      simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
+   @After
+   public void destroySimulationAndRecycleMemory()
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
 
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (scs != null)
+      {
+         scs.closeAndDispose();
+         scs = null;
+      }
 
+      modelVisualizer = null;
+      simulationTestingParameters = null;
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+   
+  
+   @Ignore
    @AverageDuration(duration = 4.1)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
-      wbSolver.setVerbosityLevel( (getSimulationConstructionSet() != null) ? 1:0 );
+      WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
+      
+      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
+
+      Vector3d rootPosition = new Vector3d(0, 0, 0.93);
+      actualRobotModel.getRootJoint().setPosition(rootPosition);
+      
+      scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
+      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel,  0.01);
+      scs.startOnAThread(); 
+            
+      scs.maximizeMainWindow();
+      modelVisualizer.update(0);
+
+      
+      wbSolver.setVerbosityLevel((scs != null) ? 1:0);
 
       wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
       wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
@@ -94,18 +126,18 @@ public abstract class WholeBodyTrajectoryTest
       
       for (Point3d rightTarget : targetListRight)
       {
-         if (getSimulationConstructionSet() != null)
+         if (scs != null)
          {
             for (int a = 0; a < 50; a++)
             {
                // Thread.sleep(10);
-               getFullRobotModelVisualizer().update(0);
+               modelVisualizer.update(0);
             }
          }
 
          FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d());
 
-         if (getSimulationConstructionSet() != null)
+         if (scs != null)
          {
             visualizePoint(0.04, YoAppearance.Green(), targetR);
          }
@@ -141,10 +173,10 @@ public abstract class WholeBodyTrajectoryTest
                actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
                result = trajectory.getNextInterpolatedPoints(0.01);
 
-               if (getSimulationConstructionSet() != null)
+               if (scs != null)
                {
                   // Thread.yield(); // sleep(10);
-                  getFullRobotModelVisualizer().update(0);
+                  modelVisualizer.update(0);
                }
             }
 
@@ -154,21 +186,19 @@ public abstract class WholeBodyTrajectoryTest
             //fail("no solution found\n");
          }
 
-         if (getSimulationConstructionSet() != null)
+         if (scs != null)
          {
             for (int a = 0; a < 50; a++)
             {
                // Thread.sleep(10);
-               getFullRobotModelVisualizer().update(0);
+               modelVisualizer.update(0);
             }
          }
       }
 
       // value test
-      if (getSimulationConstructionSet() != null)
+      if (scs != null)
       {
-         SimulationConstructionSet scs = getSimulationConstructionSet();
-
          scs.cropBuffer();
          scs.gotoInPointNow();
          scs.stepForwardNow(1);
@@ -185,9 +215,27 @@ public abstract class WholeBodyTrajectoryTest
    }
    
    @AverageDuration(duration = 4.1)
-   //@Test(timeout = 22445)
+   @Test(timeout = 22445)
    public void testPointToPoint() throws Exception
    {
+      WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
+
+      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
+
+      Vector3d rootPosition = new Vector3d(0, 0, 0.93);
+      actualRobotModel.getRootJoint().setPosition(rootPosition);
+      
+      
+      scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
+      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel,  0.01);
+      scs.startOnAThread(); 
+            
+      scs.maximizeMainWindow();
+      modelVisualizer.update(0);
+      
+      
       wbSolver.setVerbosityLevel(0);
 
       wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
@@ -212,18 +260,17 @@ public abstract class WholeBodyTrajectoryTest
 
          for (Point3d rightTarget : targetListRight)
          {
-            if (getSimulationConstructionSet() != null)
+            if (scs != null)
             {
                for (int a = 0; a < 50; a++)
                {
-                  // Thread.sleep(10);
-                  getFullRobotModelVisualizer().update(0);
+                  modelVisualizer.update(0);
                }
             }
 
             FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d());
 
-            if (getSimulationConstructionSet() != null)
+            if (scs != null)
             {
                visualizePoint(0.04, YoAppearance.Green(), targetR);
             }
@@ -258,10 +305,9 @@ public abstract class WholeBodyTrajectoryTest
                   actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
                   result = trajectory.getNextInterpolatedPoints(0.01);
 
-                  if (getSimulationConstructionSet() != null)
+                  if (scs != null)
                   {
-                     // Thread.yield(); // sleep(10);
-                     getFullRobotModelVisualizer().update(0);
+                     modelVisualizer.update(0);
                   }
                }
 
@@ -271,12 +317,11 @@ public abstract class WholeBodyTrajectoryTest
                fail("no solution found\n");
             }
 
-            if (getSimulationConstructionSet() != null)
+            if (scs != null)
             {
                for (int a = 0; a < 50; a++)
                {
-                  // Thread.sleep(10);
-                  getFullRobotModelVisualizer().update(0);
+                  modelVisualizer.update(0);
                }
             }
          }
@@ -286,10 +331,8 @@ public abstract class WholeBodyTrajectoryTest
      
 
       // value test
-      if (getSimulationConstructionSet() != null)
+      if (scs != null)
       {
-         SimulationConstructionSet scs = getSimulationConstructionSet();
-
          scs.cropBuffer();
          scs.gotoInPointNow();
          scs.stepForwardNow(1);
@@ -312,6 +355,8 @@ public abstract class WholeBodyTrajectoryTest
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addSphere(radius, color);
 
+      YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry");
+      
       YoFramePoint framePoint = new YoFramePoint("point" + count, ReferenceFrame.getWorldFrame(), registry);
       YoFrameOrientation frameOrientation = new YoFrameOrientation("orientation" + count, ReferenceFrame.getWorldFrame(), registry);
       YoGraphicShape yoGraphicsShape = new YoGraphicShape("target" + count, linkGraphics, framePoint, frameOrientation, 1.0);
@@ -322,7 +367,7 @@ public abstract class WholeBodyTrajectoryTest
 
       yoGraphicsShape.setTransformToWorld(transform);
 
-      getSimulationConstructionSet().addYoGraphic(yoGraphicsShape);
+      scs.addYoGraphic(yoGraphicsShape);
    }
 
 }
