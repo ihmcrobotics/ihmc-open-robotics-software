@@ -321,7 +321,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          }
          else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
          {
-          // System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
+           System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
          }
       }
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
@@ -693,28 +693,29 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          if( desiredComHeightProvider.isNewComHeightInformationAvailable() )
          {
             offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
-            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());        
+            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundTrajectory.initialize();
+            // System.out.format("offsetHeightAboveGround A:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), desiredComHeightProvider.getComHeightTrajectoryTime(), desiredComHeightProvider.getComHeightOffset() );
             
-           // System.out.println("offsetHeightAboveGround A: " + offsetHeightAboveGround.getDoubleValue() );
          }
          else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
          {
             WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
-           // System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
-            
+        
             int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
             double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - 0.085;
             double totalTime = 0;
             
-            for (int i=0; i<=lastIndex; i++ )
-            {
+            for (int i=0; i<=lastIndex; i++ ) {
                totalTime += pelvisTrajectory.getTimeAtWaypoints()[i];
             }
             
             offsetHeightAboveGround.set( lastHeight );
             offsetHeightAboveGroundTrajectoryTimeProvider.set( totalTime );
-            
-           // System.out.println("offsetHeightAboveGround B: " + offsetHeightAboveGround.getDoubleValue() );
+            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+            offsetHeightAboveGroundTrajectory.initialize();
+          //  System.out.format("offsetHeightAboveGround B:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), totalTime, lastHeight );
          }
       }
       offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
