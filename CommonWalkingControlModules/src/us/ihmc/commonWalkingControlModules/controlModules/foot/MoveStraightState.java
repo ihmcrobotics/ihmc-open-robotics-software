@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
+import us.ihmc.utilities.math.trajectories.providers.ChangeableConfigurationProvider;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -21,6 +20,10 @@ public class MoveStraightState extends AbstractUnconstrainedState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
 
+   private final ReferenceFrame footFrame;
+   private final FramePose initialFootPose = new FramePose();
+   private final ChangeableConfigurationProvider initialConfigurationProvider = new ChangeableConfigurationProvider();
+
    public MoveStraightState(FootControlHelper footControlHelper, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.MOVE_STRAIGHT, footControlHelper, gains, registry);
@@ -31,11 +34,7 @@ public class MoveStraightState extends AbstractUnconstrainedState
       finalConfigurationProvider = new YoSE3ConfigurationProvider(namePrefix + "MoveStraightFootFinal", worldFrame, registry);
       trajectoryTimeProvider = new YoVariableDoubleProvider(namePrefix + "MoveStraightTrajectoryTime", registry);
 
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-
-      // TODO Check if it is necessary to implement a initial position provider using the previous desired instead of the current. (Sylvain)
-      ReferenceFrame footFrame = referenceFrames.getFootFrame(robotSide);
-      CurrentConfigurationProvider initialConfigurationProvider = new CurrentConfigurationProvider(footFrame);
+      footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
 
       positionTrajectoryGenerator = new StraightLinePositionTrajectoryGenerator(namePrefix + "FootPosition", worldFrame, trajectoryTimeProvider,
             initialConfigurationProvider, finalConfigurationProvider, registry);
@@ -53,6 +52,18 @@ public class MoveStraightState extends AbstractUnconstrainedState
    @Override
    protected void initializeTrajectory()
    {
+      if (getPreviousState() == this)
+      {
+         positionTrajectoryGenerator.get(desiredPosition);
+         orientationTrajectoryGenerator.get(desiredOrientation);
+         initialFootPose.setPoseIncludingFrame(desiredPosition, desiredOrientation);
+      }
+      else
+      {
+         initialFootPose.setToZero(footFrame);
+      }
+      initialConfigurationProvider.set(initialFootPose);
+
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
    }
