@@ -20,6 +20,7 @@ import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
@@ -37,7 +38,9 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
+import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -91,6 +94,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final FootstepListBehavior footstepListBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ComHeightBehavior comHeightBehavior;
+   private final TurnInPlaceBehavior turnInPlaceBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -143,6 +147,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       STEPS_SHORT,
       STEPS_LONG,
       STEPS_IN_PLACE,
+      TURN_IN_PLACE_SEQUENCE,
+      TURN_IN_PLACE_ANGLE,
       FEET_SQUARE_UP,
       GO_HOME,
       REDO_LAST_TASK
@@ -168,6 +174,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private final DoubleYoVariable maxFootPoseHeight;
    private final DoubleYoVariable maxFootPoseDisplacement;
+   
+   private final DoubleYoVariable angleToTurnInDegrees;
    
    private final SideDependentList<ReferenceFrame> upperArmsFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> lowerArmsFrames = new SideDependentList<>();
@@ -209,6 +217,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       maxFootPoseHeight.set(0.1);
       maxFootPoseDisplacement = new DoubleYoVariable(behaviorNameFirstLowerCase + "maxFootPoseDisplacement", registry);
       maxFootPoseDisplacement.set(0.2);
+      angleToTurnInDegrees = new DoubleYoVariable(behaviorNameFirstLowerCase + "AngleToTurnInDegrees", registry);
+      angleToTurnInDegrees.set(0.0);
       
       trajectoryTime.set(FAST_MOTION ? 0.5 : 3.0);
       flyingTrajectoryTime.set(FAST_MOTION ? 0.5 : 10.0);
@@ -241,6 +251,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
       registry.addChild(comHeightBehavior.getYoVariableRegistry());
 
+      turnInPlaceBehavior = new TurnInPlaceBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      registry.addChild(turnInPlaceBehavior.getYoVariableRegistry());
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          String namePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
@@ -973,14 +986,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, -outsideFootDisplacement, robotSide.negateIfRightSide(outsideFootDisplacement), footPoseHeight));
       
       //footOrientation changes
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
-      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
-      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
-      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
-      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
-      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
-      
+//      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+//      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.6, robotSide.negateIfRightSide(0.02), 0.15, 0.0, -0.9, 0.0);
+//      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, 0.0, 0.2, 0.0, 0.0, 0.0);
+//      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.25, robotSide.negateIfRightSide(0.01), 0.15, 0.0, 1.2, 0.0);
+//      submitFootPose(parallelize, robotSide, ankleZUpFrame, -0.5, robotSide.negateIfRightSide(0.02), 0.30, 0.0, 2.4, 0.0);
+//      submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
+//      submitFootPose(parallelize, robotSide, ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.3), 0.20, 0.0, 0.0, robotSide.negateIfRightSide(0.5));
+//      
       
       //put the foot back on the ground
       submitFootPosition(parallelize, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, footPoseHeight));
@@ -1957,6 +1970,14 @@ public class DiagnosticBehavior extends BehaviorInterface
                lastDiagnosticTask.set(DiagnosticTask.STEPS_IN_PLACE);
                sequenceStepsInPlace();
                break;
+            case TURN_IN_PLACE_SEQUENCE:
+               lastDiagnosticTask.set(DiagnosticTask.TURN_IN_PLACE_SEQUENCE);
+               sequenceTurnInPlace();
+               break;
+            case TURN_IN_PLACE_ANGLE:
+               lastDiagnosticTask.set(DiagnosticTask.TURN_IN_PLACE_ANGLE);
+               submitTurnInPlaceAngle(false, Math.toRadians(angleToTurnInDegrees.getDoubleValue()));
+               break;
             case FEET_SQUARE_UP:
                lastDiagnosticTask.set(DiagnosticTask.FEET_SQUARE_UP);
                sequenceSquareUp();
@@ -1977,6 +1998,21 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
          requestedDiagnostic.set(null);
       }
+   }
+
+   private void sequenceTurnInPlace()
+   {
+      submitTurnInPlaceAngle(false, -Math.PI/2.0 +0.01); // little values to be sure in which direction the robot will turn
+      submitTurnInPlaceAngle(false, Math.PI - 0.02);
+      submitTurnInPlaceAngle(false, -Math.PI/2.0 + 0.01);
+   }
+
+   private void submitTurnInPlaceAngle(boolean parallelize, double angleToTurn)
+   {
+      if(parallelize)
+         pipeLine.submitTaskForPallelPipesStage(turnInPlaceBehavior, new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
+      else
+         pipeLine.submitSingleTaskStage(new TurnInPlaceTask(angleToTurn, turnInPlaceBehavior, transferTime.getDoubleValue(), swingTime.getDoubleValue(), yoTime));
    }
 
    private void sequenceFootLift()
@@ -2026,6 +2062,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          handPoseBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
+         turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
       }
    }
 
@@ -2037,6 +2074,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          handPoseBehaviors.get(robotSide).consumeObjectFromController(object);
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
+         turnInPlaceBehavior.consumeObjectFromController(object);
       }
    }
 
