@@ -200,10 +200,13 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       int waypoints = 8;
       WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(waypoints, 6);
       try
-      {    
+      {
+         
          for (int w=0; w<waypoints; w++ )
          {
-            packet.timeSincePrevious[w] = 2.0;
+            packet.timeAtWaypoint[w] = 2.0;
+            if( w > 0 ) 
+               packet.timeAtWaypoint[w] += packet.timeAtWaypoint[w-1];
  
             packet.pelvisWorldPosition[w] = new Point3d( -0.05, 0.0, 0.2*( w%2 )+0.6);      
             

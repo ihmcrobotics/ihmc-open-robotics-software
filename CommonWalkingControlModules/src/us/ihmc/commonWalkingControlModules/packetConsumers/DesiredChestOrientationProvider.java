@@ -43,7 +43,7 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
                {
 
                   WaypointOrientationTrajectoryData data = new WaypointOrientationTrajectoryData(worldFrame, 
-                        packet.timeSincePrevious, 
+                        packet.timeAtWaypoint, 
                         packet.chestWorldOrientation, 
                         packet.chestAngularVelocity);
                   desiredChestOrientationWithWaypoints.set(data);

@@ -286,7 +286,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public double[] getDesiredWholeBodyTrajectoryTimeArray()
    {
-      return wholeBodyTrajectoryHandPoseListPackets.get().timeSincePrevious;
+      return wholeBodyTrajectoryHandPoseListPackets.get().timeAtWaypoint;
    }
 
    @Override
