@@ -99,7 +99,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedOneDoFJointPositionSensor simulatedOneDoFJointPositionSensor = jointPositionSensors.getSecond(i);
          simulatedOneDoFJointPositionSensor.startComputation();
          simulatedOneDoFJointPositionSensor.waitUntilComputationIsDone();
-         Double q = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData();
+         double q = simulatedOneDoFJointPositionSensor.getJointPositionOutputPort().getData().doubleValue();
          sensorProcessing.setJointPositionSensorValue(oneDoFJoint, q);
       }
 
@@ -109,7 +109,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedOneDoFJointTorqueSensor simulatedOneDoFJointTorqueSensor = jointTorqueSensors.getSecond(i);
          simulatedOneDoFJointTorqueSensor.startComputation();
          simulatedOneDoFJointTorqueSensor.waitUntilComputationIsDone();
-         Double tau = simulatedOneDoFJointTorqueSensor.getJointTorqueOutputPort().getData();
+         double tau = simulatedOneDoFJointTorqueSensor.getJointTorqueOutputPort().getData().doubleValue();
          sensorProcessing.setJointTauSensorValue(oneDoFJoint, tau);
       }
 
@@ -118,7 +118,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          SimulatedOneDoFJointVelocitySensor simulatedOneDoFJointVelocitySensor = jointVelocitySensors.getSecond(i);
          simulatedOneDoFJointVelocitySensor.startComputation();
          simulatedOneDoFJointVelocitySensor.waitUntilComputationIsDone();
-         Double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData();
+         double value = simulatedOneDoFJointVelocitySensor.getJointVelocityOutputPort().getData().doubleValue();
          sensorProcessing.setJointVelocitySensorValue(jointVelocitySensors.getFirst(i), value);
       }
 

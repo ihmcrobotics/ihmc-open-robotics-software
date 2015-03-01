@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointTorqueSensor extends SimulatedSensor<MutableDouble>
 {
-   private final ControlFlowOutputPort<Double> jointTorqueOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<MutableDouble> jointTorqueOutputPort = createOutputPort();
    private final OneDegreeOfFreedomJoint joint;
    private final MutableDouble jointTorque = new MutableDouble();
 
@@ -20,7 +20,7 @@ public class SimulatedOneDoFJointTorqueSensor extends SimulatedSensor<MutableDou
    {
       jointTorque.setValue(joint.getTau().getDoubleValue());
       corrupt(jointTorque);
-      jointTorqueOutputPort.setData(jointTorque.doubleValue());
+      jointTorqueOutputPort.setData(jointTorque);
    }
 
    public void waitUntilComputationIsDone()
@@ -28,7 +28,7 @@ public class SimulatedOneDoFJointTorqueSensor extends SimulatedSensor<MutableDou
       // empty
    }
 
-   public ControlFlowOutputPort<Double> getJointTorqueOutputPort()
+   public ControlFlowOutputPort<MutableDouble> getJointTorqueOutputPort()
    {
       return jointTorqueOutputPort;
    }
