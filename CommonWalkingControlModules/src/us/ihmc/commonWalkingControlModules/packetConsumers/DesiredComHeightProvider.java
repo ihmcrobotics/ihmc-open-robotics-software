@@ -67,7 +67,7 @@ public class DesiredComHeightProvider
    {
       if (packet != null && packet.hasPelvisTrajectory() )
       {
-         double[] timeAtWaypoints = packet.timeSincePrevious;
+         double[] timeAtWaypoints = packet.timeAtWaypoint;
          Point3d[] positions = packet.pelvisWorldPosition;
          Vector3d[] velocities = packet.pelvisLinearVelocity;
          WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(ReferenceFrame.getWorldFrame(), timeAtWaypoints, positions, velocities);

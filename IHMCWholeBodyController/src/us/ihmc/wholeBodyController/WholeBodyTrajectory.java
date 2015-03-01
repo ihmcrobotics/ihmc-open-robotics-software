@@ -268,8 +268,6 @@ public class WholeBodyTrajectory
 
       WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(numWaypoints + 1,numJointsPerArm);
 
-      double prevAbsoluteTime = 0.0;
-
       Vector3d temp = new Vector3d();
 
       /*
@@ -283,10 +281,7 @@ public class WholeBodyTrajectory
       {
          WaypointND    jointsWaypoint = wbTrajectory.getWaypoint(w);
 
-         packet.timeSincePrevious[w] = jointsWaypoint.absTime - prevAbsoluteTime + 0.2;
-         prevAbsoluteTime = jointsWaypoint.absTime ;
-
-         // store trajectories in the correct place
+         packet.timeAtWaypoint[w] = jointsWaypoint.absTime + 0.2;
 
          //-----  check if this is part of the arms ---------
 
@@ -359,7 +354,7 @@ public class WholeBodyTrajectory
       // add one last point to give to the controller the time to converge.
       
       int w = numWaypoints;
-      packet.timeSincePrevious[w] = 0.25;
+      packet.timeAtWaypoint[w] = 0.25;
       
       for (int J=0; J< 6; J++)
       {
