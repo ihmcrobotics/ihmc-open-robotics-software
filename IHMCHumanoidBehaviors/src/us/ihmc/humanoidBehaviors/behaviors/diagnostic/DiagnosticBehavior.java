@@ -40,7 +40,6 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.pathGeneration.footstepGenerator.TurnInPlaceFootstepGenerator;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -151,7 +150,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       TURN_IN_PLACE_ANGLE,
       FEET_SQUARE_UP,
       GO_HOME,
-      REDO_LAST_TASK
+      REDO_LAST_TASK,
+      BUTTY_SHAKE,
    };
 
    private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
@@ -186,6 +186,9 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<YoFrameOrientation> currentHandOrientations = new SideDependentList<YoFrameOrientation>();
 
    private final SideDependentList<RigidBodyTransform> armZeroJointAngleConfigurationOffsets = new SideDependentList<>();
+
+   private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry); 
+   private final DoubleYoVariable buttyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry); 
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -232,6 +235,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
       footstepLength.set(0.3);
+
+      buttyShakeTime.set(1.0);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
@@ -292,6 +297,8 @@ public class DiagnosticBehavior extends BehaviorInterface
 
       pelvisShiftScaleFactor = new YoFrameVector2d("DiagnosticPelvisShiftScaleFactor", null, registry);
       pelvisShiftScaleFactor.set(0.4, 0.7);
+
+      pelvisOrientationScaleFactor.set(0.1);
 
       // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
       int maxIterations = 60;
@@ -1597,9 +1604,14 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll)
    {
+      submitDesiredPelvisOrientation(parallelize, yaw, pitch, roll, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+   }
+
+   private void submitDesiredPelvisOrientation(boolean parallelize, double yaw, double pitch, double roll, double trajectoryTime, double sleepTime)
+   {
       FrameOrientation desiredPelvisOrientation = new FrameOrientation(findFixedFrameForPelvisOrientation(), yaw, pitch, roll);
       desiredPelvisOrientation.changeFrame(worldFrame);
-      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      PelvisPoseTask pelvisPoseTask = new PelvisPoseTask(desiredPelvisOrientation, yoTime, pelvisPoseBehavior, trajectoryTime, sleepTime);
       if (parallelize)
          pipeLine.submitTaskForPallelPipesStage(pelvisPoseBehavior, pelvisPoseTask);
       else
@@ -1982,6 +1994,9 @@ public class DiagnosticBehavior extends BehaviorInterface
                lastDiagnosticTask.set(DiagnosticTask.FEET_SQUARE_UP);
                sequenceSquareUp();
                break;
+            case BUTTY_SHAKE:
+               lastDiagnosticTask.set(DiagnosticTask.BUTTY_SHAKE);
+               sequenceButtyShake(activeSideForFootControl.getEnumValue());
             case GO_HOME:
                lastDiagnosticTask.set(DiagnosticTask.GO_HOME);
                sequenceGoHome();
@@ -2033,6 +2048,30 @@ public class DiagnosticBehavior extends BehaviorInterface
          ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
          submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
          submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
+      }
+   }
+
+   private void sequenceButtyShake(RobotSide footSideToPickUp)
+   {
+      if (footSideToPickUp != null)
+      {
+         ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(footSideToPickUp);
+         submitFootPosition(false, footSideToPickUp, new FramePoint(ankleZUpFrame, 0.0, 0.0, maxFootPoseHeight.getDoubleValue()));
+      }
+
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+      {
+         double yaw = (i % 2) == 0 ? 1.0 : -1.0;
+         yaw *= this.minMaxYaw * pelvisOrientationScaleFactor.getDoubleValue();
+         submitDesiredPelvisOrientation(false, yaw, 0.0, 0.0, buttyShakeTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+      }
+
+      submitPelvisHomeCommand(false);
+
+      if (footSideToPickUp != null)
+      {
+         ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(footSideToPickUp);
+         submitFootPosition(false, footSideToPickUp, new FramePoint(ankleZUpFrame, 0.0, 0.0, -0.1));
       }
    }
 
