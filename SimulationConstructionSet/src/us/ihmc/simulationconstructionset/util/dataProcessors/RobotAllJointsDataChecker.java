@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class RobotAllJointsDataChecker implements DataProcessingFunction
 {
-   private double TOLERACE_FACTOR = 0.1;
+   private double TOLERANCE_FACTOR = 0.1;
    private double MINIMUM_TIME_TO_ACCLERATE = 1.0/20.0;
    private double DEFAULT_VELOCITY_ERROR_THRESHOLD = 0.5; //Arbitrarily pick this
    private HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker> listOfCheckers;
@@ -35,12 +35,12 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          if (Double.isNaN(range))
             throw new RuntimeException("upper joint limit - lower joint limit - NaN!");
          
-         double limitAdjustment = range * TOLERACE_FACTOR;
+         double limitAdjustment = range * TOLERANCE_FACTOR;
          
          valueDataCheckerParameters.setMaximumValue(upperLimit + limitAdjustment);
          valueDataCheckerParameters.setMinimumValue(lowerLimit - limitAdjustment);
 
-         valueDataCheckerParameters.setMaximumDerivative((1.0 + TOLERACE_FACTOR)* joint.getVelocityLimit());
+         valueDataCheckerParameters.setMaximumDerivative((1.0 + TOLERANCE_FACTOR)* joint.getVelocityLimit());
          
          valueDataCheckerParameters.setMaximumSecondDerivative(joint.getVelocityLimit()/ MINIMUM_TIME_TO_ACCLERATE);
          
@@ -78,10 +78,84 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       }
    }
    
-   
    public void setMaximumSecondDerivativeForJoint(OneDegreeOfFreedomJoint joint, double maximumSecondDerivative)
    {
       listOfCheckers.get(joint).setMaximumSecondDerivate(maximumSecondDerivative);
+   }
+   
+   public boolean isDerivativeCompErrorOccurred(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).isDerivativeCompErrorOccurred();
+   }
+
+   public boolean isMaxDerivativeExeeded(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).isMaxDerivativeExeeded();
+   }
+
+   public boolean isMaxSecondDerivativeExeeded(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).isMaxSecondDerivativeExeeded();
+   }
+
+   public boolean isMaxValueExeeded(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).isMaxValueExeeded();
+   }
+
+   public boolean isMinValueExeeded(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).isMinValueExeeded();
+   }
+   
+   public boolean hasDerivativeCompErrorOccurredAnyJoint()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (listOfCheckers.get(joint).isDerivativeCompErrorOccurred())
+            return true;
+      }
+      return false;
+   }
+
+   public boolean hasMaxDerivativeExeededAnyJoint()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (listOfCheckers.get(joint).isMaxDerivativeExeeded())
+            return true;
+      }
+      return false;
+   }
+
+   public boolean hasMaxSecondDerivativeExeededAnyJoint()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (listOfCheckers.get(joint).isMaxSecondDerivativeExeeded())
+            return true;
+      }
+      return false;
+   }
+
+   public boolean hasMaxValueExeededAnyJoint()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (listOfCheckers.get(joint).isMaxValueExeeded())
+            return true;
+      }
+      return false;
+   }
+
+   public boolean hasMinValueExeededAnyJoint()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (listOfCheckers.get(joint).isMinValueExeeded())
+            return true;
+      }
+      return false;
    }
    
    public void cropFirstPoint()
