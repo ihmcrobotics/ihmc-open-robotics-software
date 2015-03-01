@@ -705,12 +705,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
         
             int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
             double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - 0.085;
-            double totalTime = 0;
-            
-            for (int i=0; i<=lastIndex; i++ ) {
-               totalTime += pelvisTrajectory.getTimeAtWaypoints()[i];
-            }
-            
+           
+            // it is not really the last time, since we have the "settling"
+            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[ lastIndex -1 ];
+                          
             offsetHeightAboveGround.set( lastHeight );
             offsetHeightAboveGroundTrajectoryTimeProvider.set( totalTime );
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
