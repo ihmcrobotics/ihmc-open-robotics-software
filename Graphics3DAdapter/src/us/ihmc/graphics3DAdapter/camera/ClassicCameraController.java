@@ -913,8 +913,11 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 //      doMouseDraggedMiddle(0.0, dz);
 //      moveCameraForward(dy);
       
-      rotateAroundFix(drz * 7.0, drx * 7.0);
-      translateFix(dx * 3.0, dy * 3.0, dz * 3.0);
+      double rotateGain = 7.0;
+      double translateGain = 2.0;
+      
+      rotateAroundFix(drz * rotateGain, drx * rotateGain);
+      translateFix(dx * translateGain, dy * translateGain, dz * translateGain);
    }
 
    @Override
@@ -1056,10 +1059,10 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    
    public void translateFix(double dx, double dy, double dz)
    {
-      double zTiltAngle = Math.PI / 2 + Math.atan2(camZ - fixZ, Math.hypot(camX - fixX, camY - fixY));
+//      double zTiltAngle = Math.PI / 2 + Math.atan2(camZ - fixZ, Math.hypot(camX - fixX, camY - fixY));
 
-      double ky = dy * Math.sin(zTiltAngle);
-      double kz = dz * Math.cos(zTiltAngle);
+//      double ky = dy * Math.sin(zTiltAngle);
+//      double kz = dz * Math.cos(zTiltAngle);
       
       double yTiltAngle = Math.atan2(camY - fixY, camX - fixX);
       
@@ -1071,14 +1074,14 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
       if (!isTracking || !isTrackingY)
       {
-         camY += ky * Math.sin(yTiltAngle);
-         fixY += ky * Math.sin(yTiltAngle);
+         camY += dy * Math.sin(yTiltAngle);
+         fixY += dy * Math.sin(yTiltAngle);
       }
 
       if (!isTracking || !isTrackingX)
       {
-         camX += ky * Math.cos(yTiltAngle);
-         fixX += ky * Math.cos(yTiltAngle);
+         camX += dy * Math.cos(yTiltAngle);
+         fixX += dy * Math.cos(yTiltAngle);
       }
 
       double xTiltAngle = yTiltAngle + Math.PI / 2;
