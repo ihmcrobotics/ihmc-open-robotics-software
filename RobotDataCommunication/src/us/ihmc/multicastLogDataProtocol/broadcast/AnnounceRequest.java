@@ -81,6 +81,8 @@ public class AnnounceRequest
          type = AnnounceType.fromHeader(buffer.get());
          sessionID = buffer.getLong();
          buffer.get(group);
+         log = buffer.get() == 1;
+         
          dataPort = buffer.getShort();
          buffer.get(controlIP);
          controlPort = buffer.getShort();
@@ -146,6 +148,7 @@ public class AnnounceRequest
       buffer.put((byte) type.getHeader());
       buffer.putLong(sessionID);
       buffer.put(group);
+      buffer.put(log ? (byte)1 : (byte)0);
       buffer.putShort(dataPort);
       buffer.put(controlIP);
       buffer.putShort(controlPort);
