@@ -187,12 +187,11 @@ public class ChestOrientationManager
          simpleOrientationTrajectoryGenerator.setInitialOrientation(desiredOrientation);
          
          WaypointOrientationTrajectoryData trajectoryData = chestOrientationProvider.getDesiredChestOrientationWithWaypoints();
-         double totalTime = 0.0;
-         for ( double time: trajectoryData.getTimeAtWaypoints() )
-         {
-            totalTime += time;
-         }
-         int lastIndex = trajectoryData.getOrientations().length -1;
+
+         int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;      
+         // it is not really the last time, since we have the "settling"
+         double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex -1 ];     
+
          FrameOrientation lastChestOrientation = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );
          
          simpleOrientationTrajectoryGenerator.setFinalOrientation( lastChestOrientation );  

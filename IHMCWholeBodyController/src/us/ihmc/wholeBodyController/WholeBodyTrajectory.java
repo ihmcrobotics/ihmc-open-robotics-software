@@ -135,6 +135,7 @@ public class WholeBodyTrajectory
       }
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
+      //numSegments = 2;
 
 
       Vector64F thisWaypointAngles = new Vector64F(N);
@@ -280,7 +281,7 @@ public class WholeBodyTrajectory
       for (int w=0; w < numWaypoints; w++ )
       {
          WaypointND    jointsWaypoint = wbTrajectory.getWaypoint(w);
-
+                
          packet.timeAtWaypoint[w] = jointsWaypoint.absTime + 0.2;
 
          //-----  check if this is part of the arms ---------
@@ -354,24 +355,26 @@ public class WholeBodyTrajectory
       // add one last point to give to the controller the time to converge.
       
       int w = numWaypoints;
-      packet.timeAtWaypoint[w] = 0.25;
-      
-      for (int J=0; J< 6; J++)
+      if( w > 0)
       {
-         packet.leftArmJointAngle[J][w]    = packet.leftArmJointAngle[J][w-1];
-         packet.leftArmJointVelocity[J][w] = packet.leftArmJointVelocity[J][w-1];
-   
-         packet.rightArmJointAngle[J][w]    = packet.rightArmJointAngle[J][w-1];
-         packet.rightArmJointVelocity[J][w] = packet.rightArmJointVelocity[J][w-1];
-      }
-      packet.pelvisWorldPosition[w].set(  packet.pelvisWorldPosition[w-1] );
-      packet.pelvisLinearVelocity[w].set(  packet.pelvisLinearVelocity[w-1] );
-      packet.pelvisAngularVelocity[w].set( packet.pelvisAngularVelocity[w-1] );
-      packet.pelvisWorldOrientation[w].set( packet.pelvisWorldOrientation[w-1] );
-            
-      packet.chestWorldOrientation[w].set( packet.chestWorldOrientation[w-1] );
-      packet.chestAngularVelocity[w].set(  packet.chestAngularVelocity[w-1] );
+         packet.timeAtWaypoint[w] = 0.25 + packet.timeAtWaypoint[w-1];
       
+         for (int J=0; J< 6; J++)
+         {
+            packet.leftArmJointAngle[J][w]    = packet.leftArmJointAngle[J][w-1];
+            packet.leftArmJointVelocity[J][w] = packet.leftArmJointVelocity[J][w-1];
+      
+            packet.rightArmJointAngle[J][w]    = packet.rightArmJointAngle[J][w-1];
+            packet.rightArmJointVelocity[J][w] = packet.rightArmJointVelocity[J][w-1];
+         }
+         packet.pelvisWorldPosition[w].set(  packet.pelvisWorldPosition[w-1] );
+         packet.pelvisLinearVelocity[w].set(  packet.pelvisLinearVelocity[w-1] );
+         packet.pelvisAngularVelocity[w].set( packet.pelvisAngularVelocity[w-1] );
+         packet.pelvisWorldOrientation[w].set( packet.pelvisWorldOrientation[w-1] );
+               
+         packet.chestWorldOrientation[w].set( packet.chestWorldOrientation[w-1] );
+         packet.chestAngularVelocity[w].set(  packet.chestAngularVelocity[w-1] );
+      }
       return packet;
    }
 }

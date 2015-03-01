@@ -218,16 +218,14 @@ public class PelvisOrientationManager
           
             WaypointOrientationTrajectoryData trajectoryData = pelvisPoseProvider.getDesiredPelvisOrientationWithWaypoints();
             
-            double totalTime = 0.0;
-            for ( double time: trajectoryData.getTimeAtWaypoints() )
-            {
-               totalTime += time;
-            }
+            int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;      
+            // it is not really the last time, since we have the "settling"
+            double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex -1 ];
+            
             offsetTrajectoryTime.set( totalTime );
             activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
-            initialPelvisOrientationOffset.set(tempOrientation);
-            
-            int lastIndex = trajectoryData.getOrientations().length -1;
+            initialPelvisOrientationOffset.set(tempOrientation);         
+
             FrameOrientation pelvisOrientationProvided = new FrameOrientation( ReferenceFrame.getWorldFrame(), trajectoryData.getOrientations()[lastIndex] );
             
             pelvisOrientationProvided.changeFrame(desiredPelvisFrame);
