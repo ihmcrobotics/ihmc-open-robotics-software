@@ -7,7 +7,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableDouble>
 {
-   private final ControlFlowOutputPort<Double> jointPositionOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<MutableDouble> jointPositionOutputPort = createOutputPort();
    private final OneDegreeOfFreedomJoint joint;
    private final MutableDouble jointPosition = new MutableDouble();
 
@@ -20,7 +20,7 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
    {
       jointPosition.setValue(joint.getQ().getDoubleValue());
       corrupt(jointPosition);
-      jointPositionOutputPort.setData(jointPosition.doubleValue());
+      jointPositionOutputPort.setData(jointPosition);
    }
 
    public void waitUntilComputationIsDone()
@@ -28,7 +28,7 @@ public class SimulatedOneDoFJointPositionSensor extends SimulatedSensor<MutableD
       // empty
    }
 
-   public ControlFlowOutputPort<Double> getJointPositionOutputPort()
+   public ControlFlowOutputPort<MutableDouble> getJointPositionOutputPort()
    {
       return jointPositionOutputPort;
    }
