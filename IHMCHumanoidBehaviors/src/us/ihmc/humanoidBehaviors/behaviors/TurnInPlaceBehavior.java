@@ -125,9 +125,19 @@ public class TurnInPlaceBehavior extends BehaviorInterface
       footstepGenerator.initialize();
       
       footsteps.addAll(footstepGenerator.generateDesiredFootstepList());
+
+      FramePoint midFeetPoint = new FramePoint();
+      midFeetPoint.setToZero(referenceFrames.getMidFeetZUpFrame());
+      midFeetPoint.changeFrame(worldFrame);
+      
+      for(Footstep footstep : footsteps)
+      {
+         footstep.setZ(midFeetPoint.getZ());
+      }
       
       footstepListBehavior.set(footsteps, swingTime, transferTime);
       haveFootstepsBeenGenerated.set(true);
+      
    }
 
    @Override
