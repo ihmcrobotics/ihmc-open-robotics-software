@@ -72,7 +72,7 @@ public class DesiredComHeightProvider
          Vector3d[] velocities = packet.pelvisLinearVelocity;
          WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(ReferenceFrame.getWorldFrame(), timeAtWaypoints, positions, velocities);
          multipointTrajectory.set(positionTrajectoryData);
-       //  System.out.println("DesiredComHeightProvider: PACKET received");
+        // System.out.println("DesiredComHeightProvider: PACKET received\n" +  packet);
       }
    }
 
