@@ -1,6 +1,6 @@
 package us.ihmc.wholeBodyController;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,16 +42,14 @@ import us.ihmc.yoUtilities.graphics.YoGraphicShape;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
-public abstract class WholeBodyTrajectoryTest 
+public abstract class WholeBodyTrajectoryTest
 {
-   static private final boolean DEBUG = false;
-
    public abstract WholeBodyTrajectoryTestHelper getWholeBodyTrajectoryTestHelper();
-   
-   private SimulationTestingParameters simulationTestingParameters;   
+
+   private SimulationTestingParameters simulationTestingParameters;
    private SimulationConstructionSet scs;
    private FullRobotModelVisualizer modelVisualizer;
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -78,42 +76,42 @@ public abstract class WholeBodyTrajectoryTest
       simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
-  
+
+
    @Ignore
    @AverageDuration(duration = 4.1)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
-      
+
       SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
       SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
       WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
-      
+
       scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
-      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel,  0.01);
-      scs.startOnAThread(); 
-            
+      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel, 0.01);
+      scs.startOnAThread();
+
       scs.maximizeMainWindow();
       modelVisualizer.update(0);
 
-      
-      wbSolver.setVerbosityLevel((scs != null) ? 1:0);
+
+      wbSolver.setVerbosityLevel((scs != null) ? 1 : 0);
 
       wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
       wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
 
-      ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
+      // ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
 
       ArrayList<Point3d> targetListRight = new ArrayList<Point3d>();
 
       // FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
 
-      targetListRight.add(new Point3d(0.4, -0.6, 1.4));      
+      targetListRight.add(new Point3d(0.4, -0.6, 1.4));
       targetListRight.add(new Point3d(0.4, -0.6, 0.8));
       targetListRight.add(new Point3d(0.5, 0.6, 1.0));
       targetListRight.add(new Point3d(0.5, -0.0, 1.0));
@@ -122,35 +120,31 @@ public abstract class WholeBodyTrajectoryTest
 
       double maximumJointVelocity = 1.5;
       double maximumJointAcceleration = 15.0;
-      
-      
+
+
       for (Point3d rightTarget : targetListRight)
       {
-         if (scs != null)
+         for (int a = 0; a < 50; a++)
          {
-            for (int a = 0; a < 50; a++)
-            {
-               // Thread.sleep(10);
-               modelVisualizer.update(0);
-            }
+            modelVisualizer.update(0);
          }
+
 
          FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d());
 
-         if (scs != null)
-         {
-            visualizePoint(0.04, YoAppearance.Green(), targetR);
-         }
+
+         visualizePoint(0.04, YoAppearance.Green(), targetR);
+
 
          // wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.LEFT,  targetL );
          wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, targetR);
 
          ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
 
-        
+
          if (ret == ComputeResult.SUCCEEDED)
          {
-            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 5.0); //0.10);
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 5.0);    // 0.10);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
             Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
@@ -173,50 +167,44 @@ public abstract class WholeBodyTrajectoryTest
                actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
                result = trajectory.getNextInterpolatedPoints(0.01);
 
-               if (scs != null)
-               {
-                  // Thread.yield(); // sleep(10);
-                  modelVisualizer.update(0);
-               }
+
+               modelVisualizer.update(0);
+
             }
 
          }
          else
          {
-            //fail("no solution found\n");
+            fail("no solution found\n");
          }
 
-         if (scs != null)
+
+         for (int a = 0; a < 50; a++)
          {
-            for (int a = 0; a < 50; a++)
-            {
-               // Thread.sleep(10);
-               modelVisualizer.update(0);
-            }
+            modelVisualizer.update(0);
          }
+
       }
 
       // value test
-      if (scs != null)
-      {
-         scs.cropBuffer();
-         scs.gotoInPointNow();
-         scs.stepForwardNow(1);
-         scs.setInPoint();
-         scs.cropBuffer();
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(1);
+      scs.setInPoint();
+      scs.cropBuffer();
 
-         Robot robot = scs.getRobots()[0];
-         RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
-         robotAllJointsDataChecker.setMaximumDerivativeForAllJoints(1.01 * maximumJointVelocity);
-         robotAllJointsDataChecker.setMaximumSecondDerivativeForAllJoints(1.01 * maximumJointAcceleration);
-         
-         scs.applyDataProcessingFunction(robotAllJointsDataChecker);
-      }
+      Robot robot = scs.getRobots()[0];
+      RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
+      robotAllJointsDataChecker.setMaximumDerivativeForAllJoints(1.01 * maximumJointVelocity);
+      robotAllJointsDataChecker.setMaximumSecondDerivativeForAllJoints(1.01 * maximumJointAcceleration);
+
+      scs.applyDataProcessingFunction(robotAllJointsDataChecker);
    }
-   
+
+   //@Ignore
    @AverageDuration(duration = 4.1)
    @Test(timeout = 22445)
-   public void testPointToPoint() throws Exception
+   public void testPointToPointRight() throws Exception
    {
       WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
 
@@ -226,125 +214,227 @@ public abstract class WholeBodyTrajectoryTest
 
       Vector3d rootPosition = new Vector3d(0, 0, 0.93);
       actualRobotModel.getRootJoint().setPosition(rootPosition);
-      
-      
+
+
       scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
-      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel,  0.01);
-      scs.startOnAThread(); 
-            
+      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel, 0.01);
+      scs.startOnAThread();
+
       scs.maximizeMainWindow();
       modelVisualizer.update(0);
-      
-      
+
       wbSolver.setVerbosityLevel(0);
 
-      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
-      wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
+      RobotSide robotSide = RobotSide.RIGHT;
 
-      ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
-      
-      int numberOfTest = 10;
-      
-      for(int i=0; i<numberOfTest ; i++)
+      wbSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wbSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
+
+      ArrayList<Point3d> targetList = new ArrayList<Point3d>();
+
+      // FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
+
+      // For now, use a set of hard corded points. It would be better to have random points to chos from
+      double sideMultiplier = 1.0;
+      robotSide.negateIfLeftSide(sideMultiplier);
+
+      targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 1.4));
+      targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 0.8));
+      targetList.add(new Point3d(0.5, 0.6 * sideMultiplier, 1.0));
+      targetList.add(new Point3d(0.5, -0.0 * sideMultiplier, 1.0));
+      targetList.add(new Point3d(0.5, -0.4 * sideMultiplier, 1.4));
+      targetList.add(new Point3d(0.5, -0.2 * sideMultiplier, 0.6));
+
+      double maximumJointVelocity = 1.5;
+      double maximumJointAcceleration = 15.0;
+
+      for (Point3d target : targetList)
       {
-         ArrayList<Point3d> targetListRight = new ArrayList<Point3d>();
+         modelVisualizer.update(0);
 
-         // FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
+         FramePose poseFrameTarget = new FramePose(ReferenceFrame.getWorldFrame(), target, new Quat4d());
 
-         targetListRight.add(new Point3d(0.4, -0.6, 1.4));      
-         targetListRight.add(new Point3d(0.4, -0.6, 0.8));
-         targetListRight.add(new Point3d(0.5, 0.6, 1.0));
-         targetListRight.add(new Point3d(0.5, -0.0, 1.0));
-         targetListRight.add(new Point3d(0.5, -0.4, 1.4));
-         targetListRight.add(new Point3d(0.5, -0.2, 0.6));
+         visualizePoint(0.04, YoAppearance.Green(), poseFrameTarget);
 
-         for (Point3d rightTarget : targetListRight)
+         wbSolver.setGripperPalmTarget(actualRobotModel, robotSide, poseFrameTarget);
+
+         ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+
+         if (ret == ComputeResult.SUCCEEDED)
          {
-            if (scs != null)
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 0.10);
+            TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
+
+            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+
+            while (result.first().booleanValue() == false)
             {
-               for (int a = 0; a < 50; a++)
+               HashMap<String, Double> angles = new HashMap<String, Double>();
+               HashMap<String, Double> velocities = new HashMap<String, Double>();
+               int index = 0;
+               for (OneDoFJoint joint : actualRobotModel.getOneDoFJoints())
                {
-                  modelVisualizer.update(0);
-               }
-            }
-
-            FramePose targetR = new FramePose(ReferenceFrame.getWorldFrame(), rightTarget, new Quat4d());
-
-            if (scs != null)
-            {
-               visualizePoint(0.04, YoAppearance.Green(), targetR);
-            }
-
-            // wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.LEFT,  targetL );
-            wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, targetR);
-
-            ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
-
-            if (ret == ComputeResult.SUCCEEDED)
-            {
-               WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, 1.5, 15, 0.10);
-               TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
-
-               Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
-
-               while (result.first().booleanValue() == false)
-               {
-                  HashMap<String, Double> angles = new HashMap<String, Double>();
-                  HashMap<String, Double> velocities = new HashMap<String, Double>();
-                  int index = 0;
-                  for (OneDoFJoint joint : actualRobotModel.getOneDoFJoints())
+                  if (wbSolver.hasJoint(joint.getName()))
                   {
-                     if (wbSolver.hasJoint(joint.getName()))
-                     {
-                        angles.put(joint.getName(), result.second().position[index]);
-                        velocities.put(joint.getName(), result.second().velocity[index]);
-                        index++;
-                     }
-                  }
-
-                  actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
-                  result = trajectory.getNextInterpolatedPoints(0.01);
-
-                  if (scs != null)
-                  {
-                     modelVisualizer.update(0);
+                     angles.put(joint.getName(), result.second().position[index]);
+                     velocities.put(joint.getName(), result.second().velocity[index]);
+                     index++;
                   }
                }
 
-            }
-            else
-            {
-               fail("no solution found\n");
-            }
+               actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
+               result = trajectory.getNextInterpolatedPoints(0.01);
 
-            if (scs != null)
-            {
-               for (int a = 0; a < 50; a++)
-               {
-                  modelVisualizer.update(0);
-               }
+               modelVisualizer.update(0);
             }
          }
+         else
+         {
+            fail("no solution found\n");
+         }
+
+         modelVisualizer.update(0);
       }
-      
-      
-     
 
       // value test
-      if (scs != null)
-      {
-         scs.cropBuffer();
-         scs.gotoInPointNow();
-         scs.stepForwardNow(1);
-         scs.setInPoint();
-         scs.cropBuffer();
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(1);
+      scs.setInPoint();
+      scs.cropBuffer();
 
-         Robot robot = scs.getRobots()[0];
-         RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
-         scs.applyDataProcessingFunction(robotAllJointsDataChecker);
-      }
+      Robot robot = scs.getRobots()[0];
+      RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
+      robotAllJointsDataChecker.setMaximumDerivativeForAllJoints(1.2 * maximumJointVelocity);
+      robotAllJointsDataChecker.setMaximumSecondDerivativeForAllJoints(1.2 * maximumJointAcceleration);
+
+      scs.applyDataProcessingFunction(robotAllJointsDataChecker);
+
+      assertFalse(robotAllJointsDataChecker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxDerivativeExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxSecondDerivativeExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxValueExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMinValueExeededAnyJoint());
    }
-   
+
+   //@Ignore
+   @AverageDuration(duration = 4.1)
+   @Test(timeout = 22445)
+   public void testPointToPointLeft() throws Exception
+   {
+      WholeBodyTrajectoryTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyTrajectoryTestHelper();
+
+      SDFFullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualRobotModel();
+      SDFFullRobotModel desiredRobotModel = wholeBodyTrajectoryTestHelper.getRobotModel().createFullRobotModel();
+      WholeBodyIkSolver wbSolver = wholeBodyTrajectoryTestHelper.getWholeBodyIkSolver();
+
+      Vector3d rootPosition = new Vector3d(0, 0, 0.93);
+      actualRobotModel.getRootJoint().setPosition(rootPosition);
+
+      scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
+      modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel, 0.01);
+      scs.startOnAThread();
+
+      scs.maximizeMainWindow();
+      modelVisualizer.update(0);
+
+      wbSolver.setVerbosityLevel(0);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      
+      wbSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wbSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
+
+      ArrayList<Point3d> targetList = new ArrayList<Point3d>();
+
+      // FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
+
+      // For now, use a set of hard corded points. It would be better to have random points to chos from
+      double sideMultiplier = 1.0;
+      robotSide.negateIfLeftSide(sideMultiplier);
+
+      targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 1.4));
+      targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 0.8));
+      targetList.add(new Point3d(0.5, 0.6 * sideMultiplier, 1.0));
+      targetList.add(new Point3d(0.5, -0.0 * sideMultiplier, 1.0));
+      targetList.add(new Point3d(0.5, -0.4 * sideMultiplier, 1.4));
+      targetList.add(new Point3d(0.5, -0.2 * sideMultiplier, 0.6));
+
+      double maximumJointVelocity = 1.5;
+      double maximumJointAcceleration = 15.0;
+
+      for (Point3d target : targetList)
+      {
+         modelVisualizer.update(0);
+
+         FramePose poseFrameTarget = new FramePose(ReferenceFrame.getWorldFrame(), target, new Quat4d());
+
+         visualizePoint(0.04, YoAppearance.Green(), poseFrameTarget);
+
+         wbSolver.setGripperPalmTarget(actualRobotModel, robotSide, poseFrameTarget);
+
+         ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+
+         if (ret == ComputeResult.SUCCEEDED)
+         {
+            WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 0.10);
+            TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
+
+            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+
+            while (result.first().booleanValue() == false)
+            {
+               HashMap<String, Double> angles = new HashMap<String, Double>();
+               HashMap<String, Double> velocities = new HashMap<String, Double>();
+               int index = 0;
+               for (OneDoFJoint joint : actualRobotModel.getOneDoFJoints())
+               {
+                  if (wbSolver.hasJoint(joint.getName()))
+                  {
+                     angles.put(joint.getName(), result.second().position[index]);
+                     velocities.put(joint.getName(), result.second().velocity[index]);
+                     index++;
+                  }
+               }
+
+               actualRobotModel.updateJointsStateButKeepOneFootFixed(angles, velocities, RobotSide.RIGHT);
+               result = trajectory.getNextInterpolatedPoints(0.01);
+
+               modelVisualizer.update(0);
+            }
+         }
+         else
+         {
+            fail("no solution found\n");
+         }
+
+         modelVisualizer.update(0);
+      }
+
+      // value test
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(1);
+      scs.setInPoint();
+      scs.cropBuffer();
+
+      Robot robot = scs.getRobots()[0];
+      RobotAllJointsDataChecker robotAllJointsDataChecker = new RobotAllJointsDataChecker(scs, robot);
+      robotAllJointsDataChecker.setMaximumDerivativeForAllJoints(1.2 * maximumJointVelocity);
+      robotAllJointsDataChecker.setMaximumSecondDerivativeForAllJoints(1.2 * maximumJointAcceleration);
+
+      scs.applyDataProcessingFunction(robotAllJointsDataChecker);
+
+      assertFalse(robotAllJointsDataChecker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxDerivativeExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxSecondDerivativeExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMaxValueExeededAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasMinValueExeededAnyJoint());
+
+
+   }
+
+
 
    static int count = 0;
 
@@ -356,7 +446,7 @@ public abstract class WholeBodyTrajectoryTest
       linkGraphics.addSphere(radius, color);
 
       YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry");
-      
+
       YoFramePoint framePoint = new YoFramePoint("point" + count, ReferenceFrame.getWorldFrame(), registry);
       YoFrameOrientation frameOrientation = new YoFrameOrientation("orientation" + count, ReferenceFrame.getWorldFrame(), registry);
       YoGraphicShape yoGraphicsShape = new YoGraphicShape("target" + count, linkGraphics, framePoint, frameOrientation, 1.0);
