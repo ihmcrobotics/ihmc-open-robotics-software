@@ -76,7 +76,7 @@ public class AnnounceRequest
 
    public boolean readHeader(ByteBuffer buffer)
    {
-      if (buffer.remaining() >= 19)
+      if (buffer.remaining() >= 20)
       {
          type = AnnounceType.fromHeader(buffer.get());
          sessionID = buffer.getLong();
