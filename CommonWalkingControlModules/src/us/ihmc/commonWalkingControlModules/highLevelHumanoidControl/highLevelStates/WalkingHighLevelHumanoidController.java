@@ -1402,6 +1402,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private final FramePoint2d capturePoint2d = new FramePoint2d();
+   private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
    // FIXME: don't override
    private void doMotionControlInternal()
@@ -1426,8 +1427,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
-
-      controlledCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocity.getFrameVector2dCopy()));
+      
+      desiredICPVelocity.packFrameVector2d(desiredICPVelocityAsFrameVector);
+      controlledCoMHeightAcceleration.set(computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector));
 
       doFootControl();
       doArmControl();
