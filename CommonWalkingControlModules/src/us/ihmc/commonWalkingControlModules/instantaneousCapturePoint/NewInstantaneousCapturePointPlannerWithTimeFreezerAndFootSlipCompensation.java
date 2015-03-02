@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 
 public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
 {
-   private static final boolean USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK = false;
+   private static final boolean USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK = true;
    
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final EnumYoVariable<RobotSide> currentTransferToSide;
