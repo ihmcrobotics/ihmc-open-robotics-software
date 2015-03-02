@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.head;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.DegenerateOrientationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.SelectionMatrixComputer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -88,6 +88,7 @@ public class HeadOrientationControlModule
    private final BooleanYoVariable doPositionControl = new BooleanYoVariable("doPositionControlForNeck", registry);
    private final boolean[] doIntegrateDesiredAccerations;
 
+   private final SelectionMatrixComputer selectionMatrixComputer = new SelectionMatrixComputer();
    /*
     * TODO Sylvain. In walking, the head in controlled with respect to the
     * elevator (see WalkingHighLevelHumanoidController.setupManagers()). This
@@ -195,7 +196,7 @@ public class HeadOrientationControlModule
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
 
-      DegenerateOrientationControlModule.computeSelectionMatrix(jacobianId, momentumBasedController, selectionMatrix);
+      selectionMatrixComputer.computeSelectionMatrix(jacobianId, momentumBasedController, selectionMatrix);
 
       if (doPositionControl.getBooleanValue())
          computeJointsDesiredOrientationAndAngularVelocity();

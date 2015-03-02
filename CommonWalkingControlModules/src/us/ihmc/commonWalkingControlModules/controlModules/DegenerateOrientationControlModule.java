@@ -3,9 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -46,6 +44,8 @@ public abstract class DegenerateOrientationControlModule
 
    private final double controlDT;
 
+   private final SelectionMatrixComputer selectionMatrixComputer = new SelectionMatrixComputer();
+   
    public DegenerateOrientationControlModule(String namePrefix, RigidBody[] defaultBases, RigidBody endEffector, GeometricJacobian[] defaultJacobians,
          TwistCalculator twistCalculator, double controlDT, YoVariableRegistry parentRegistry)
    {
@@ -163,7 +163,7 @@ public abstract class DegenerateOrientationControlModule
       zeroLinearAcceleration.setToZero(expressedInFrame);
       spatialAcceleration.set(endEffectorFrame, baseFrame, expressedInFrame, zeroLinearAcceleration, controlledAngularAcceleration);
 
-      computeSelectionMatrix(jacobian, selectionMatrix);
+      selectionMatrixComputer.computeSelectionMatrix(jacobian, selectionMatrix);
    }
 
    public TaskspaceConstraintData getTaskspaceConstraintData()
@@ -253,15 +253,5 @@ public abstract class DegenerateOrientationControlModule
       return bases;
    }
 
-   public static void computeSelectionMatrix(int jacobianId, MomentumBasedController momentumBasedController, DenseMatrix64F selectionMatrix)
-   {
-      DenseMatrix64F jacobianMatrix = momentumBasedController.getJacobian(jacobianId).getJacobianMatrix();
-      CommonOps.pinv(jacobianMatrix, selectionMatrix);
-   }
-
-   public static void computeSelectionMatrix(GeometricJacobian jacobian, DenseMatrix64F selectionMatrix)
-   {
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      CommonOps.pinv(jacobianMatrix, selectionMatrix);
-   }
+   
 }
