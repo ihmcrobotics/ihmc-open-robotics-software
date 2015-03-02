@@ -12,6 +12,7 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 public class GeometricJacobianHolder
 {
    private final List<GeometricJacobian> robotJacobians = new ArrayList<GeometricJacobian>();
+   private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
    
    public void compute()
    {
@@ -31,9 +32,10 @@ public class GeometricJacobianHolder
     */
    public int getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
    {
-      return getOrCreateGeometricJacobian(ScrewTools.createJointPath(ancestor, descendant), jacobianFrame);
+      int numberOfJoints = ScrewTools.createJointPath(temporaryToStoreJointPath, ancestor, descendant);
+      return getOrCreateGeometricJacobian(temporaryToStoreJointPath, numberOfJoints, jacobianFrame);
    }
-   
+
    /**
     * Find or create a Jacobian and register it in the MomentumBasedController.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
@@ -44,14 +46,19 @@ public class GeometricJacobianHolder
     */
    public int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
-      if (joints == null || joints.length == 0)
+      return getOrCreateGeometricJacobian(joints, joints.length, jacobianFrame);
+   }
+
+   private int getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, int numberOfJointsToConsider, ReferenceFrame jacobianFrame)
+   {
+      if (joints == null || numberOfJointsToConsider == 0)
          return -1;
 
       for (int i = 0; i < robotJacobians.size(); i++)
       {
          GeometricJacobian jacobian = robotJacobians.get(i);
          InverseDynamicsJoint[] existingJacobianJoints = jacobian.getJointsInOrder();
-         boolean sameNumberOfJoints = joints.length == existingJacobianJoints.length;
+         boolean sameNumberOfJoints = numberOfJointsToConsider == existingJacobianJoints.length;
          boolean areExpressedFrameTheSame = jacobianFrame == jacobian.getJacobianFrame();
          
          if (sameNumberOfJoints && areExpressedFrameTheSame)
@@ -71,8 +78,17 @@ public class GeometricJacobianHolder
                return i;
          }
       }
-
-      GeometricJacobian newJacobian = new GeometricJacobian(joints, jacobianFrame);
+      GeometricJacobian newJacobian;
+      if (joints.length == numberOfJointsToConsider)
+      {
+         newJacobian = new GeometricJacobian(joints, jacobianFrame);
+      }
+      else
+      {
+         InverseDynamicsJoint[] jointsForNewJacobian = new InverseDynamicsJoint[numberOfJointsToConsider];
+         System.arraycopy(joints, 0, jointsForNewJacobian, 0, numberOfJointsToConsider);
+         newJacobian = new GeometricJacobian(jointsForNewJacobian, jacobianFrame);
+      }
       newJacobian.compute(); // Compute in case you need it right away
       int jacobianId = robotJacobians.size();
       robotJacobians.add(newJacobian);
