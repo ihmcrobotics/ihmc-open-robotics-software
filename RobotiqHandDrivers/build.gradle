@@ -6,11 +6,15 @@ version = '1.0'
 
 apply plugin: 'application'
 
-applicationName = 'RobotiqControlThread'
-mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
-
 setupDefaultDirectoryStructure()
 
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+applicationName = 'RobotiqControlThread'
+mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
+
+applicationDistribution.from(file("IHMCNetworkParameters.ini")) {
+	into "bin"
+}
