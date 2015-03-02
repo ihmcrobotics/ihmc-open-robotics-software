@@ -46,7 +46,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    private static final String left_camera_name = "stereo_camera_left";
    private static final String left_camera_topic = multisense_namespace + "/left/image_rect_color/compressed";
-   private static final String left_info_camera_topic = multisense_namespace +"/left/camera_info";
+   private static final String left_info_camera_topic = multisense_namespace +"/left/image_rect_color/camera_info";//left/image_rect_color/camera_info
    private static final String left_frame_name = multisense_namespace + "/left_camera_frame";
    
    private static final String right_camera_name = "stereo_camera_right";
