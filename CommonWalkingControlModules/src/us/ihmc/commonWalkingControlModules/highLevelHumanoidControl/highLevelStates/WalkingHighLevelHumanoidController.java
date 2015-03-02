@@ -85,7 +85,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
 
-   private PushRecoveryControlModule pushRecoveryModule;
+   private final PushRecoveryControlModule pushRecoveryModule;
 
    private final static boolean DEBUG = false;
 
@@ -187,7 +187,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final BooleanYoVariable ecmpBasedToeOffHasBeenInitialized = new BooleanYoVariable("ecmpBasedToeOffHasBeenInitialized", registry);
    private final YoFramePoint2d desiredECMP = new YoFramePoint2d("desiredECMP", "", worldFrame, registry);
    private final BooleanYoVariable desiredECMPinSupportPolygon = new BooleanYoVariable("desiredECMPinSupportPolygon", registry);
-   private YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
+   private final YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
    private TransferToAndNextFootstepsData neutralFootstepsData;
 
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
@@ -438,7 +438,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
+   private final EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
 
    private class DoubleSupportState extends State<WalkingState>
    {
@@ -1470,6 +1470,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData();
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
+   private final FramePoint pelvisPosition = new FramePoint();
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
@@ -1506,7 +1507,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
-         FramePoint pelvisPosition = new FramePoint(referenceFrames.getPelvisFrame());
+         pelvisPosition.setToZero(referenceFrames.getPelvisFrame());
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
          Twist pelvisTwist = new Twist();
