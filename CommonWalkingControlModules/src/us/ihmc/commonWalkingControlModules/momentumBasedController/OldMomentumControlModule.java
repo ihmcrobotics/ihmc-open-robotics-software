@@ -134,6 +134,9 @@ public class OldMomentumControlModule implements MomentumControlModule
       externalWrenchesToCompensateFor.clear();
    }
 
+   private final TotalWrenchCalculator totalWrenchCalculator = new TotalWrenchCalculator();
+   private final Wrench admissibleGroundReactionWrench = new Wrench();
+
    public MomentumModuleSolution compute(Map<ContactablePlaneBody, ? extends PlaneContactState> planeContactStates, RobotSide upcomingSupportLeg)
    {
       solver.compute();
@@ -202,8 +205,7 @@ public class OldMomentumControlModule implements MomentumControlModule
          }
       }
 
-      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
-            totalGroundReactionWrench.getExpressedInFrame());
+      totalWrenchCalculator.computeTotalWrench(admissibleGroundReactionWrench, externalWrenches.values(), totalGroundReactionWrench.getExpressedInFrame());
       desiredCentroidalMomentumRate.set(admissibleGroundReactionWrench);
       desiredCentroidalMomentumRate.add(gravitationalWrench);
 
