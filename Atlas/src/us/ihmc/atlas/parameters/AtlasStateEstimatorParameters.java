@@ -1,5 +1,6 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -34,8 +36,11 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<>();
 
+   private final DRCRobotJointMap jointMap;
+
    public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot, double estimatorDT)
    {
+      this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
 
       this.estimatorDT = estimatorDT;
@@ -62,32 +67,51 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       YoVariableRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-//      DoubleYoVariable jointPositionAlphaFilter = sensorProcessing.createAlphaFilter("jointPositionAlphaFilter", defaultFilterBreakFrequency);
       Map<OneDoFJoint, DoubleYoVariable> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
-//      DoubleYoVariable noFilter = sensorProcessing.createAlphaFilter("notFilter", Double.POSITIVE_INFINITY);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
+      DoubleYoVariable armJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointBacklashSlopTime", registry);
+      armJointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
+
+      String[] armJointNames = createArmJointNames();
       DoubleYoVariable orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationAlphaFilter", defaultFilterBreakFrequency);
 
-//      sensorProcessing.addJointPositionAlphaFilter(jointPositionAlphaFilter, false);
-
       if (doElasticityCompensation)
          sensorProcessing.addJointPositionElasticyCompensator(jointPositionStiffness, false);
-      
-      // Compute velocity using only the low-pass positions (before the elasticity compensation).
-//      sensorProcessing.computeJointVelocityFromFiniteDifference(noFilter, true);
-      sensorProcessing.computeJointVelocityWithBacklashCompensator(jointVelocityAlphaFilter, jointVelocitySlopTime, false);
-      sensorProcessing.addJointVelocityAlphaFilter(jointVelocityAlphaFilter, false);
+
+      sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilter, jointVelocitySlopTime, false, armJointNames);
+      sensorProcessing.addJointVelocityAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter, false, armJointNames);
+
+      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter, armJointVelocitySlopTime, false, armJointNames);
+      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter, false, armJointNames);
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
       sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+   }
+
+   private String[] createArmJointNames()
+   {
+      ArrayList<String> armJointNameList = new ArrayList<>();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ArmJointName jointName : jointMap.getArmJointNames())
+         {
+            armJointNameList.add(jointMap.getArmJointName(robotSide, jointName));
+         }
+      }
+
+      String[] armJointNames = new String[armJointNameList.size()];
+      armJointNameList.toArray(armJointNames);
+      return armJointNames;
    }
 
    @Override
