@@ -172,8 +172,8 @@ public class FootControlHelper
    private void computeJointsAlignmentFactor()
    {
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
-      hipYawAxis.setIncludingFrame(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getJointAxis());
-      ankleRollAxis.setIncludingFrame(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL).getJointAxis());
+      fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getJointAxis(hipYawAxis);
+      fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL).getJointAxis(ankleRollAxis);
 
       ankleRollAxis.changeFrame(hipYawAxis.getReferenceFrame());
       ankleRollAndHipYawAlignmentFactor.set(Math.abs(ankleRollAxis.dot(hipYawAxis)));
