@@ -93,8 +93,16 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
            YoGraphicsListRegistry yoGraphicsListRegistry, WalkingControllerParameters walkingControllerParameters, boolean visualize)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
-      if (REGISTER_YOVARIABLES) parentRegistry.addChild(registry);
-
+      if (REGISTER_YOVARIABLES) 
+      {
+         parentRegistry.addChild(registry);
+      }
+      else
+      {
+         visualize = false;
+         yoGraphicsListRegistry = null;
+      }
+      
       setInitialSwingVelocityToZero = new BooleanYoVariable(namePrefix + "SetInitialSwingVelocityToZero", registry);
       setInitialSwingVelocityToZero.set(false);
 
