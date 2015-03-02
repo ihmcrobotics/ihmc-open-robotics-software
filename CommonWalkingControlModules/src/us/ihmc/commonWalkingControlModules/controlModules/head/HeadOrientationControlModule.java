@@ -293,6 +293,7 @@ public class HeadOrientationControlModule
       enforceLimits(orientationToPack);
    }
 
+   private final double[] tempRPY = new double[3];
    private void enforceLimits(FrameOrientation orientation)
    {
       ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
@@ -300,21 +301,21 @@ public class HeadOrientationControlModule
       // Limit pitch with respect to the chest frame
       {
          orientation.changeFrame(chestFrame);
-         double[] yawPitchRoll = orientation.getYawPitchRoll();
-         yawPitchRoll[1] = MathTools.clipToMinMax(yawPitchRoll[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
+         orientation.getYawPitchRoll(tempRPY);
+         double[] tempRPY = orientation.getYawPitchRoll();
+         tempRPY[1] = MathTools.clipToMinMax(tempRPY[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
 
-         orientation.setYawPitchRoll(yawPitchRoll);
+         orientation.setYawPitchRoll(tempRPY);
       }
 
       // Limit roll and yaw
       {
          orientation.changeFrame(elevator.getBodyFixedFrame());
+         orientation.getYawPitchRoll(tempRPY);
+         tempRPY[0] = MathTools.clipToMinMax(tempRPY[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
+         tempRPY[2] = MathTools.clipToMinMax(tempRPY[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
 
-         double[] yawPitchRoll = orientation.getYawPitchRoll();
-         yawPitchRoll[0] = MathTools.clipToMinMax(yawPitchRoll[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
-         yawPitchRoll[2] = MathTools.clipToMinMax(yawPitchRoll[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
-
-         orientation.setYawPitchRoll(yawPitchRoll);
+         orientation.setYawPitchRoll(tempRPY);
          orientation.changeFrame(initialReferenceFrame);
       }
    }
