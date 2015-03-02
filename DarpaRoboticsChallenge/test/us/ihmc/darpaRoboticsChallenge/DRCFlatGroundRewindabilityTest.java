@@ -28,6 +28,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifferenc
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestInterface
@@ -113,6 +114,8 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
    
+   @Ignore
+   @QuarantinedTest("Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
 	@AverageDuration
 	@Test(timeout=2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
