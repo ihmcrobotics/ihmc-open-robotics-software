@@ -4,6 +4,11 @@ apply from: 'gradleScripts/util.gradle'
 sourceCompatibility = 1.7
 version = '1.0'
 
+apply plugin: 'application'
+
+applicationName = 'RobotiqControlThread'
+mainClassName = 'us.ihmc.robotiq.control.RobotiqControlThread'
+
 setupDefaultDirectoryStructure()
 
 setupDefaultRepositories()
