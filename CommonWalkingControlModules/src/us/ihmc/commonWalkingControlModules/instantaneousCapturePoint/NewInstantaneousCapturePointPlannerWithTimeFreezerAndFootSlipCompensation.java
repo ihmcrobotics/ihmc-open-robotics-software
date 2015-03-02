@@ -18,6 +18,8 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 
 public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
 {
+   private static final boolean USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK = false;
+   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final EnumYoVariable<RobotSide> currentTransferToSide;
    private final BooleanYoVariable doTimeFreezing;
@@ -189,7 +191,11 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       double percentToScaleDownAtEnd = 1.0 - (percentIn) / 0.95;
       percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
       percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
-      tmpCapturePointVelocity.scale(percentToScaleBackOnVelocity.getDoubleValue());
+
+      if (USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK)
+      {
+         tmpCapturePointVelocity.scale(percentToScaleBackOnVelocity.getDoubleValue());         
+      }
    }
 
    private void freezeTimeUsingFreezeTimeFactor(double time)
