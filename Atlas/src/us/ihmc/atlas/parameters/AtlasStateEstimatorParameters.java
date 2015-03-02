@@ -53,7 +53,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       defaultJointStiffness = 10000.0;
       for (RobotSide robotSide : RobotSide.values)
       {
-         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 6000.0);
+         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 8000.0);
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
       }
       jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 8000.0);
