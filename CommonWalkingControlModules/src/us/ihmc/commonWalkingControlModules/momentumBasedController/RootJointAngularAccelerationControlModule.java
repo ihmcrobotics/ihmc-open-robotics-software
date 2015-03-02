@@ -58,9 +58,10 @@ public class RootJointAngularAccelerationControlModule
       rootJointOrientationControlModule.reset();
    }
 
+   private final FrameVector rootJointAngularAcceleration = new FrameVector();
    public void doControl(OrientationTrajectoryData orientationTrajectoryData)
    {
-      FrameVector rootJointAngularAcceleration = computeDesiredRootJointAngularAcceleration(orientationTrajectoryData);
+      computeDesiredRootJointAngularAcceleration(orientationTrajectoryData, rootJointAngularAcceleration);
       taskspaceConstraintData.setAngularAcceleration(rootSuccessor.getBodyFixedFrame(), rootPredecessor.getBodyFixedFrame(), rootJointAngularAcceleration, rootJointNullspaceMultipliers);
       momentumBasedController.setDesiredSpatialAcceleration(rootJacobianId, taskspaceConstraintData);
 
@@ -73,14 +74,13 @@ public class RootJointAngularAccelerationControlModule
       // empty
    }
 
-   private FrameVector computeDesiredRootJointAngularAcceleration(OrientationTrajectoryData orientationTrajectoryData)
+   private final FrameVector tempFrameVector= new FrameVector();
+   private void computeDesiredRootJointAngularAcceleration(OrientationTrajectoryData orientationTrajectoryData, FrameVector vectorToPack)
    {
-      FrameVector ret = new FrameVector(rootJoint.getFrameAfterJoint());
-      rootJointOrientationControlModule.compute(ret, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
-              orientationTrajectoryData.getAngularAcceleration());
+      vectorToPack.setToZero(rootJoint.getFrameAfterJoint());
+      rootJointOrientationControlModule.compute(vectorToPack, orientationTrajectoryData.getOrientation(), orientationTrajectoryData.getAngularVelocity(),
+            orientationTrajectoryData.getAngularAcceleration());
 //      ret.changeFrame(rootJoint.getFrameAfterJoint());
-
-      return ret;
    }
 
    public void setProportionalGains(double proportionalGainX, double proportionalGainY, double proportionalGainZ)
