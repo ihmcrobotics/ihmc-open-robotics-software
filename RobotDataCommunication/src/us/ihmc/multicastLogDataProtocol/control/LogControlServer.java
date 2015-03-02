@@ -20,7 +20,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class LogControlServer
 {
-   protected static int RESOURCE_FOLDER_SIZE = 72000000;
+   protected static int RESOURCE_FOLDER_SIZE = 3 * 72000000;
 
    private int port = LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START;
    private KryoObjectServer server;
