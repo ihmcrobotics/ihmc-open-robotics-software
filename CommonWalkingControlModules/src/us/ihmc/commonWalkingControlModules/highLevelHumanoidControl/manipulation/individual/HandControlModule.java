@@ -102,9 +102,26 @@ public class HandControlModule
          YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains, ControlStatusProducer controlStatusProducer,
          HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
    {
-      this.handPoseStatusProducer = handPoseStatusProducer;
+      YoGraphicsListRegistry yoGraphicsListRegistry;
+      boolean visualize;
+
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       name = namePrefix + getClass().getSimpleName();
+      registry = new YoVariableRegistry(name);
+      
+      if (REGISTER_YOVARIABLES) 
+      {
+         yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+         visualize = true;
+         parentRegistry.addChild(registry);
+      }
+      else
+      {
+         yoGraphicsListRegistry = null;
+         visualize = false;
+      }
+      
+      this.handPoseStatusProducer = handPoseStatusProducer;
 
       hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", parentRegistry);
       hasHandPoseStatusBeenSent.set(false);
@@ -130,7 +147,6 @@ public class HandControlModule
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
       this.robotSide = robotSide;
-      registry = new YoVariableRegistry(name);
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
@@ -172,8 +188,6 @@ public class HandControlModule
             fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      boolean visualize = true;
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
             yoGraphicsListRegistry);
@@ -220,7 +234,6 @@ public class HandControlModule
 
       isExecutingHandStep = new BooleanYoVariable(namePrefix + "DoingHandstep", registry);
 
-      if (REGISTER_YOVARIABLES) parentRegistry.addChild(registry);
    }
 
    private void setupStateMachine()
