@@ -1474,6 +1474,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FramePoint pelvisPosition = new FramePoint();
    private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
 
+   private final Twist currentPelvisTwist = new Twist();
+
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
       centerOfMassHeightInputData
@@ -1512,9 +1514,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          pelvisPosition.setToZero(referenceFrames.getPelvisFrame());
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         Twist pelvisTwist = new Twist();
-         twistCalculator.packTwistOfBody(pelvisTwist, fullRobotModel.getPelvis());
-         pelvisTwist.changeFrame(worldFrame);
+         twistCalculator.packTwistOfBody(currentPelvisTwist, fullRobotModel.getPelvis());
+         currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
 
@@ -1608,11 +1609,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    {
       List<PlaneContactState> contactStatesList = new ArrayList<PlaneContactState>();
 
-      for (ContactablePlaneBody contactablePlaneBody : feet)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         PlaneContactState contactState = momentumBasedController.getContactState(contactablePlaneBody);
+         PlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
 
-         //       YoPlaneContactState contactState = contactStates.get(contactablePlaneBody);
          if (contactState.inContact())
             contactStatesList.add(contactState);
       }
