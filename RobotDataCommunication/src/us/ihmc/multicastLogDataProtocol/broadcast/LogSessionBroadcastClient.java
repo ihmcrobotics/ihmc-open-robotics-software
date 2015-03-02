@@ -24,7 +24,7 @@ import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest.AnnounceType;
 
 public class LogSessionBroadcastClient extends Thread
 {
-   private static final long TIMEOUT = 5000;
+   private static final long TIMEOUT = 20000;
 
    private final InetAddress announceGroup = InetAddress.getByAddress(LogSessionBroadcaster.announceGroupAddress);
    private final InetSocketAddress address;
@@ -128,8 +128,10 @@ public class LogSessionBroadcastClient extends Thread
       else
       {
          TimestampedEntryHolder value = new TimestampedEntryHolder(reply);
-         logSessions.put(reply.getSessionID(), value);
-         listener.logSessionCameOnline(value.getAnnounceRequest());
+         if(logSessions.put(reply.getSessionID(), value) == null)
+         {
+            listener.logSessionCameOnline(value.getAnnounceRequest());
+         }
       }
    }
 
