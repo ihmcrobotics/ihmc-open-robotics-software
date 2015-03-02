@@ -35,7 +35,7 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
       registry.addChild(drcOutputWriter.getControllerYoVariableRegistry());
 
       alphaForJointTorqueForStateChanges.set(0.0);
-      slopTime.set(0.03);
+      slopTime.set(0.16);
       timeAtHighLevelControllerStateChange.set(Double.NEGATIVE_INFINITY);
    }
 
