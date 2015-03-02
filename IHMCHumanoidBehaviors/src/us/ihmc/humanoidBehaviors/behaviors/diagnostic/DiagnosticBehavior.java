@@ -766,7 +766,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    private void sequenceUpperBody()
    {
-      sequenceArmPose();
+      sequenceArmPose(activeSideForHandControl.getEnumValue());
 
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
       
@@ -914,38 +914,69 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       submitDesiredChestOrientation(true, 0.0, percentOfJointLimit * maxPitchBackward, 0.0);
       submitDesiredPelvisOrientation(true, 0.0, percentOfJointLimitForPelvis * maxPitchBackward, percentOfJointLimitForPelvis * minMaxRoll);
-      
+
       submitChestHomeCommand(true);
       submitPelvisHomeCommand(true);
    }
 
-   private void sequenceArmPose()
-   {
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_BACK);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_BACK);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_03);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_FORWARD);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.SMALL_CHICKEN_WINGS);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.STRAIGHTEN_ELBOWS);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LITTLE);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_BACK);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGER_CHICKEN_WINGS);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_OUT_EXTENDED);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_MORE);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LOT);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPER_CHICKEN_WINGS);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_SUPPINATE_IN);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_SUPPINATE_OUT);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_DOWN);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_OUT_TRICEP_EXERCISE);
-      submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_STRAIGHT_DOWN);
+   private void sequenceArmPose(RobotSide robotSide)
+   { 
+      if (robotSide == null)
+      {
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_BACK);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_WAY_BACK);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_03);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.REACH_FORWARD);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.SMALL_CHICKEN_WINGS);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGE_CHICKEN_WINGS);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.STRAIGHTEN_ELBOWS);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LITTLE);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_BACK);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.LARGER_CHICKEN_WINGS);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARMS_OUT_EXTENDED);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_MORE);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPPINATE_ARMS_IN_A_LOT);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.SUPER_CHICKEN_WINGS);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_SUPPINATE_IN);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_SUPPINATE_OUT);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_DOWN);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_NINETY_ELBOW_UP);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_OUT_TRICEP_EXERCISE);
+         submitSymmetricHumanoidArmPose(HumanoidArmPose.ARM_STRAIGHT_DOWN);
+      }
+      else
+      {
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.STAND_PREP);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.REACH_BACK);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.REACH_WAY_BACK);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARMS_03);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.REACH_FORWARD);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.SMALL_CHICKEN_WINGS);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.LARGE_CHICKEN_WINGS);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.STRAIGHTEN_ELBOWS);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.SUPPINATE_ARMS_IN_A_LITTLE);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARMS_BACK);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.LARGER_CHICKEN_WINGS);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARMS_OUT_EXTENDED);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.SUPPINATE_ARMS_IN_MORE);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.SUPPINATE_ARMS_IN_A_LOT);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.SUPER_CHICKEN_WINGS);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.FLYING);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.FLYING_SUPPINATE_IN);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.FLYING_SUPPINATE_OUT);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_NINETY_ELBOW_DOWN);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_NINETY_ELBOW_FORWARD);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_NINETY_ELBOW_UP);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_FORTFIVE_ELBOW_UP);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_FORTFIVE_ELBOW_DOWN);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_OUT_TRICEP_EXERCISE);
+         submitHumanoidArmPose(robotSide, HumanoidArmPose.ARM_STRAIGHT_DOWN);
+      }
    }
 
    private void sequenceFootPoseShort()
@@ -1892,7 +1923,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          {
             case ARM_MOTIONS:
                lastDiagnosticTask.set(DiagnosticTask.ARM_MOTIONS);
-               sequenceArmPose();
+               sequenceArmPose(activeSideForHandControl.getEnumValue());
                break;
             case CHEST_ROTATIONS:
                lastDiagnosticTask.set(DiagnosticTask.CHEST_ROTATIONS);
