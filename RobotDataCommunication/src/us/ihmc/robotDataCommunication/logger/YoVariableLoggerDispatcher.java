@@ -52,6 +52,7 @@ public class YoVariableLoggerDispatcher implements LogBroadcastListener
       System.out.println("New control session came online " + request);
       if (request.isLog())
       {
+         System.out.println("Logging sesion " + request);
          try
          {
             new YoVariableLogger(request, options);

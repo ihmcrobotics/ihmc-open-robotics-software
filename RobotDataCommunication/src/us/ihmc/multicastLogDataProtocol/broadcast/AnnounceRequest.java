@@ -72,6 +72,7 @@ public class AnnounceRequest
       }
       System.arraycopy(original.videoStream, 0, videoStream, 0, videoStream.length);
       this.videoPort = original.videoPort;
+      this.log = original.log;
    }
 
    public boolean readHeader(ByteBuffer buffer)
