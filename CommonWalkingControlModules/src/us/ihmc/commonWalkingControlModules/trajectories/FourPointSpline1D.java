@@ -53,7 +53,7 @@ public class FourPointSpline1D
 //            points[1].y, intermediateSlopes[0], points[2].y, intermediateSlopes[1], points[3].y, endpointSlopes[1]);
    }
 
-   public double[] getZSlopeAndSecondDerivative(double queryPoint)
+   public void getZSlopeAndSecondDerivative(double queryPoint, double[] resultToPack)
    {
       spline.compute(queryPoint);
       double z = spline.getPosition();
@@ -71,7 +71,9 @@ public class FourPointSpline1D
          slope = 0.0;
          secondDerivative = 0.0;
       }
-      
-      return new double[] {z, slope, secondDerivative};
+
+      resultToPack[0] = z;
+      resultToPack[1] = slope;
+      resultToPack[2] = secondDerivative;
    }
 }
