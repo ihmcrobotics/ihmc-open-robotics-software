@@ -33,7 +33,10 @@ import us.ihmc.yoUtilities.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-
+/**
+ * TODO There is not enough ReferenceFrames in that class, it is pretty fragile
+ *
+ */
 public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajectoryGenerator
 {
    private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
@@ -100,6 +103,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.ankleZUpFrames = ankleZUpFrames;
+      frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
@@ -327,7 +331,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       }
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
+
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, previousZFinal.getDoubleValue());
       frameOfLastFoostep = ankleZUpFrames.get(transferFromFootstep.getRobotSide());
+      tempFramePoint.changeFrame(frameOfLastFoostep);
+      previousZFinal.set(tempFramePoint.getZ());
 
       Footstep nextFootstep = null;
 
@@ -714,7 +722,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
             
             int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
             double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - midAnkleZ;
-           
+            // TODO (Sylvain) Check if that's the right way to do it
+//            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
+
             // it is not really the last time, since we have the "settling"
             double totalTime = pelvisTrajectory.getTimeAtWaypoints()[ lastIndex -1 ];
                           
