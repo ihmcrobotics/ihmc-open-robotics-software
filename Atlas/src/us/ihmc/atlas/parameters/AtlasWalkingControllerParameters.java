@@ -366,7 +366,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       if (!(target == AtlasTarget.REAL_ROBOT))
          return 4.0;
 
-      return 4.0;
+      return 2.0;
    }
 
    @Override
@@ -433,7 +433,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
 
       double kp = 80.0;
-      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
+      double zeta = (target == AtlasTarget.REAL_ROBOT) ? 0.5 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 12.0 : 36.0;
@@ -511,8 +511,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double kpXY = 80.0;
       double kpZ = 80.0;
-      double zetaXY = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
-      double zetaZ = (target == AtlasTarget.REAL_ROBOT) ? 0.25 : 0.8;
+      double zetaXY = (target == AtlasTarget.REAL_ROBOT) ? 0.5 : 0.8;
+      double zetaZ = (target == AtlasTarget.REAL_ROBOT) ? 0.5 : 0.8;
       double maxAccel = (target == AtlasTarget.REAL_ROBOT) ? 6.0 : 36.0;
       double maxJerk = (target == AtlasTarget.REAL_ROBOT) ? 60.0 : 540.0;
 
@@ -863,7 +863,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
-      return 0.035;
+      return 0.025; //0.035;
    }
 
    @Override
