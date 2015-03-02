@@ -24,7 +24,7 @@ public class AtlasROSAPISimulator
 {
    private static String defaultRosNameSpace = "atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS";
-   private final boolean startUI = true;
+   private final boolean startUI = false;
    
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
@@ -32,7 +32,7 @@ public class AtlasROSAPISimulator
 
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
       simulationStarter.setRunMultiThreaded(true);
-      simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
+      
       simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
       
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
