@@ -695,6 +695,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private final FramePoint height = new FramePoint();
    private final Point3d anklePosition = new Point3d();
+   private final double[] splineOutput = new double[3];
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
@@ -743,7 +744,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
-      double[] splineOutput = spline.getZSlopeAndSecondDerivative(splineQuery);
+      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
       double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
@@ -775,8 +776,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private double[] getPartialDerivativesWithRespectToS(LineSegment2d segment)
    {
-      double dsdx = (segment.getSecondEndPointCopy().getX() - segment.getFirstEndPointCopy().getX()) / segment.length();
-      double dsdy = (segment.getSecondEndPointCopy().getY() - segment.getFirstEndPointCopy().getY()) / segment.length();
+      double dsdx = (segment.getX1() - segment.getX0()) / segment.length();
+      double dsdy = (segment.getY1() - segment.getY0()) / segment.length();
 
       return new double[] { dsdx, dsdy };
    }

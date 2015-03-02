@@ -206,12 +206,14 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       solve(coMHeightPartialDerivativesDataToPack, queryPoint);
    }
 
+   private final double[] splineOutput = new double[3];
+
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
-      double[] splineOutput = spline.getZSlopeAndSecondDerivative(splineQuery);
+      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
       double z = splineOutput[0];
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
