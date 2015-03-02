@@ -56,12 +56,14 @@ public class ExternalWrenchHandler
    {
       for (int i = 0; i < planeContactStates.size(); i++)
       {
-         externalWrenches.get(planeContactStates.get(i).getRigidBody()).setToZero();
+         RigidBody rigidBody = planeContactStates.get(i).getRigidBody();
+         externalWrenches.get(rigidBody).setToZero(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame());
       }
 
       for (int i = 0; i < rigidBodiesWithWrenchToCompensateFor.size(); i++)
       {
-         externalWrenches.get(rigidBodiesWithWrenchToCompensateFor.get(i)).setToZero();
+         RigidBody rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
+         externalWrenches.get(rigidBody).setToZero(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame());
       }
    }
 
