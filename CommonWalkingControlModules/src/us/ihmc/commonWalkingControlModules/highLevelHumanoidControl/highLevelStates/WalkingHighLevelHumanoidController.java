@@ -1471,6 +1471,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final CoMXYTimeDerivativesData comXYTimeDerivatives = new CoMXYTimeDerivativesData();
    private final FramePoint desiredCenterOfMassHeightPoint = new FramePoint(worldFrame);
    private final FramePoint pelvisPosition = new FramePoint();
+   private final FramePoint2d comPositionAsFramePoint2d = new FramePoint2d();
 
    private double computeDesiredCoMHeightAcceleration(FrameVector2d desiredICPVelocity)
    {
@@ -1532,8 +1533,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       comXYAcceleration.scale(icpAndMomentumBasedController.getOmega0()); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       // FrameVector2d comd2dSquared = new FrameVector2d(comXYVelocity.getReferenceFrame(), comXYVelocity.getX() * comXYVelocity.getX(), comXYVelocity.getY() * comXYVelocity.getY());
-
-      comXYTimeDerivatives.setCoMXYPosition(comPosition.toFramePoint2d());
+      comPosition.getFramePoint2d(comPositionAsFramePoint2d);
+      comXYTimeDerivatives.setCoMXYPosition(comPositionAsFramePoint2d);
       comXYTimeDerivatives.setCoMXYVelocity(comXYVelocity);
       comXYTimeDerivatives.setCoMXYAcceleration(comXYAcceleration);
 
