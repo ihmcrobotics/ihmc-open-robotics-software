@@ -132,6 +132,8 @@ public class ProvidedMassMatrixToolRigidBody
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(),
             jointsToIgnore, spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
    }
+
+   private final FramePoint toolFramePoint = new FramePoint();
    
    public void update()
    {
@@ -142,7 +144,7 @@ public class ProvidedMassMatrixToolRigidBody
       toolFrame.setPositionAndUpdate(temporaryPoint);
 
       // Visualization 
-      FramePoint toolFramePoint = new FramePoint(toolFrame);
+      toolFramePoint.setToZero(toolFrame);
       toolFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       objectCenterOfMassInWorld.set(toolFramePoint);
    }
