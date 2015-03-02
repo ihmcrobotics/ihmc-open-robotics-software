@@ -117,7 +117,7 @@ public class ExternalWrenchHandler
 
       for (int i = 0; i < rigidBodiesWithWrenchToCompensateFor.size(); i++)
       {
-         RigidBody rigidBody = planeContactStates.get(i).getRigidBody();
+         RigidBody rigidBody = rigidBodiesWithWrenchToCompensateFor.get(i);
          Wrench externalWrench = externalWrenches.get(rigidBody);
          externalWrench.add(externalWrenchesToCompensateFor.get(rigidBody));
       }
