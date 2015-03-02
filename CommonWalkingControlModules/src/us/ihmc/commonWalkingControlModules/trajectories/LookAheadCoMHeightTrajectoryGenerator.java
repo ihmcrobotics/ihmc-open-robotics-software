@@ -3,12 +3,14 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.List;
 
 import javax.vecmath.Point2d;
+import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -26,7 +28,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
@@ -685,6 +686,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    }
 
    private final FramePoint height = new FramePoint();
+   private final Point3d anklePosition = new Point3d();
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
@@ -703,8 +705,15 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          {
             WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
         
+            double midAnkleZ = 0.0;
+            ankleZUpFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(anklePosition);
+            midAnkleZ += anklePosition.getZ() * 0.5;
+            ankleZUpFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation(anklePosition);
+            midAnkleZ += anklePosition.getZ() * 0.5;
+               
+            
             int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
-            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - 0.085;
+            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - midAnkleZ;
            
             // it is not really the last time, since we have the "settling"
             double totalTime = pelvisTrajectory.getTimeAtWaypoints()[ lastIndex -1 ];
