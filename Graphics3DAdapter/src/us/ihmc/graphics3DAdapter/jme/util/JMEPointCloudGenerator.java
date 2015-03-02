@@ -144,8 +144,13 @@ public class JMEPointCloudGenerator
 
       return generatePointCloudGraph(coords, null);
    }
-
+   
    public Node generatePointCloudGraph(Point3f[] pointCoordinates3d)
+   {
+      return generatePointCloudGraph(pointCoordinates3d, null);
+   }
+   
+   public Node generatePointCloudGraph(Point3f[] pointCoordinates3d, ColorRGBA[] colorsRGBA)
    {
       Vector3f[] vectorArray = new Vector3f[pointCoordinates3d.length];
       
@@ -154,7 +159,7 @@ public class JMEPointCloudGenerator
          vectorArray[i] = new Vector3f(pointCoordinates3d[i].x, pointCoordinates3d[i].y, pointCoordinates3d[i].z);
       }
 
-      return generatePointCloudGraph(vectorArray, null);
+      return generatePointCloudGraph(vectorArray, colorsRGBA);
    }
    
    public Node generatePointCloudGraph(Vector3f[] pointCoordinates3d)
