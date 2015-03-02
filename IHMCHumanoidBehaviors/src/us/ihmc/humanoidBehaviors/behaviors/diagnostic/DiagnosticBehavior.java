@@ -126,9 +126,11 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       CHEST_ROTATIONS,
       PELVIS_ROTATIONS,
+      BOOTY_SHAKE,
       SHIFT_WEIGHT,
       COMBINED_CHEST_PELVIS,
       ARM_MOTIONS,
+      ARM_SHAKE,
       UPPER_BODY,
       FOOT_LIFT,
       FOOT_POSES_SHORT,
@@ -151,7 +153,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       FEET_SQUARE_UP,
       GO_HOME,
       REDO_LAST_TASK,
-      BUTTY_SHAKE,
    };
 
    private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
@@ -188,7 +189,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<RigidBodyTransform> armZeroJointAngleConfigurationOffsets = new SideDependentList<>();
 
    private final DoubleYoVariable pelvisOrientationScaleFactor = new DoubleYoVariable("diagnosticBehaviorPelvisOrientationScaleFactor", registry); 
-   private final DoubleYoVariable buttyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry); 
+   private final DoubleYoVariable bootyShakeTime = new DoubleYoVariable("diagnosticBehaviorButtyShakeTime", registry); 
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -236,7 +237,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       footstepLength = new DoubleYoVariable(behaviorNameFirstLowerCase + "FootstepLength", registry);
       footstepLength.set(0.3);
 
-      buttyShakeTime.set(1.0);
+      bootyShakeTime.set(1.0);
 
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       registry.addChild(walkToLocationBehavior.getYoVariableRegistry());
@@ -286,7 +287,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       activeSideForFootControl = new EnumYoVariable<>("activeSideForFootControl", registry, RobotSide.class, true);
       activeSideForFootControl.set(RobotSide.LEFT);
 
-      activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class);
+      activeSideForHandControl = new EnumYoVariable<>("activeSideForHandControl", registry, RobotSide.class, true);
       activeSideForHandControl.set(RobotSide.LEFT);
 
       numberOfCyclesToRun = new IntegerYoVariable("numberOfDiagnosticCyclesToRun", registry);
@@ -1994,12 +1995,16 @@ public class DiagnosticBehavior extends BehaviorInterface
                lastDiagnosticTask.set(DiagnosticTask.FEET_SQUARE_UP);
                sequenceSquareUp();
                break;
-            case BUTTY_SHAKE:
-               lastDiagnosticTask.set(DiagnosticTask.BUTTY_SHAKE);
-               sequenceButtyShake(activeSideForFootControl.getEnumValue());
+            case BOOTY_SHAKE:
+               lastDiagnosticTask.set(DiagnosticTask.BOOTY_SHAKE);
+               sequenceBootyShake(activeSideForFootControl.getEnumValue());
             case GO_HOME:
                lastDiagnosticTask.set(DiagnosticTask.GO_HOME);
                sequenceGoHome();
+               break;
+            case ARM_SHAKE:
+               lastDiagnosticTask.set(DiagnosticTask.ARM_SHAKE);
+               sequenceArmShake(activeSideForHandControl.getEnumValue());
                break;
             case REDO_LAST_TASK:
                if(lastDiagnosticTask.getEnumValue() != null)
@@ -2051,7 +2056,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
-   private void sequenceButtyShake(RobotSide footSideToPickUp)
+   private void sequenceBootyShake(RobotSide footSideToPickUp)
    {
       if (footSideToPickUp != null)
       {
@@ -2063,7 +2068,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          double yaw = (i % 2) == 0 ? 1.0 : -1.0;
          yaw *= this.minMaxYaw * pelvisOrientationScaleFactor.getDoubleValue();
-         submitDesiredPelvisOrientation(false, yaw, 0.0, 0.0, buttyShakeTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
+         submitDesiredPelvisOrientation(false, yaw, 0.0, 0.0, bootyShakeTime.getDoubleValue(), sleepTimeBetweenPoses.getDoubleValue());
       }
 
       submitPelvisHomeCommand(false);
@@ -2075,9 +2080,28 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
+   private void sequenceArmShake(RobotSide armSide)
+   {
+      double halfPi = Math.PI / 2.0;
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      boolean mirrorOrientationForRightSide = true;
+
+      for (int i = 0; i < numberOfCyclesToRun.getIntegerValue(); i++)
+      {
+         double yaw = (i % 2) == 0 ? 1.0 : -1.0;
+         yaw += 0.75;
+         yaw *= Math.toRadians(10.0);
+         desiredUpperArmOrientation.setYawPitchRoll(yaw, 0.0, 0.0);
+         if (armSide == null)
+            submitSymmetricHandPose(desiredUpperArmOrientation, -halfPi, null);
+         else
+            submitHandPose(armSide, desiredUpperArmOrientation, -halfPi, null, mirrorOrientationForRightSide);
+      }
+   }
+
    private void handleRequestedArmPose()
    {
-      if (requestedSingleArmPose.getEnumValue() != null)
+      if (requestedSingleArmPose.getEnumValue() != null && activeSideForHandControl.getEnumValue() != null)
       {
          submitHumanoidArmPose(activeSideForHandControl.getEnumValue(), requestedSingleArmPose.getEnumValue());
          requestedSingleArmPose.set(null);
