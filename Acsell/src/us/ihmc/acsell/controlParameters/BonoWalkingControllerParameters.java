@@ -777,7 +777,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
-      return 0.025;
+      return 0.035;
 
    }
 
