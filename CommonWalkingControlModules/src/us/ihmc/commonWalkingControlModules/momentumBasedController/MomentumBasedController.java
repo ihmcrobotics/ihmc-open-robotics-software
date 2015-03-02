@@ -571,6 +571,7 @@ public class MomentumBasedController
     * Call this method after doSecondaryControl() to generate a small torque of flexion at the knees when almost straight.
     * This helps a lot when working near singularities but it is kinda hackish.
     */
+   private final FrameVector tempVector = new FrameVector();
    public void doPassiveKneeControl()
    {
       double maxPassiveTorque = passiveKneeMaxTorque.getDoubleValue();
@@ -580,7 +581,8 @@ public class MomentumBasedController
       for (RobotSide robotSide : RobotSide.values)
       {
          OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE);
-         double sign = Math.signum(kneeJoint.getJointAxis().getY());
+         kneeJoint.getJointAxis(tempVector);
+         double sign = Math.signum(tempVector.getY());
          double tauKnee = kneeJoint.getTau();
          double qKnee = kneeJoint.getQ() * sign;
          double qdKnee = kneeJoint.getQd() * sign;
