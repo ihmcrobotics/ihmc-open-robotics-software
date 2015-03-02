@@ -46,6 +46,7 @@ public class HeadOrientationControlModule
    private final ReferenceFrame headFrame;
    private final OriginAndPointFrame pointTrackingFrame;
    private final YoGraphicReferenceFrame pointTrackingFrameFiz;
+   private final FramePoint positionToPointAt = new FramePoint();
 
    private enum HeadTrackingMode {ORIENTATION, POINT}
 
@@ -258,7 +259,7 @@ public class HeadOrientationControlModule
 
    protected void packDesiredFrameOrientation(FrameOrientation orientationToPack)
    {
-      FramePoint positionToPointAt = pointToTrack.getFramePointCopy();
+      pointToTrack.getFrameTupleIncludingFrame(positionToPointAt);
       headPosition.setToZero(headFrame);
       pointTrackingFrame.setOriginAndPositionToPointAt(headPosition, positionToPointAt);
 
