@@ -70,7 +70,8 @@ public class RigidBodySpatialAccelerationControlModule
       accelerationToPack.set(acceleration);
    }
 
-   Twist currentTwist = new Twist();
+   private final Twist currentTwist = new Twist();
+
    public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
          SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration, RigidBody base)
    {
@@ -81,14 +82,13 @@ public class RigidBodySpatialAccelerationControlModule
       se3pdController.compute(acceleration, desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, currentTwist);
 
       acceleration.getExpressedInFrame().checkReferenceFrameMatch(desiredAccelerationLinearViz.getReferenceFrame());
-
-      desiredAccelerationLinearViz.set(acceleration.getLinearPartCopy());
-      desiredAccelerationAngularViz.set(acceleration.getAngularPartCopy());
+      desiredAccelerationLinearViz.set(acceleration.getLinearPartX(), acceleration.getLinearPartY(), acceleration.getLinearPartZ());
+      desiredAccelerationAngularViz.set(acceleration.getAngularPartX(), acceleration.getAngularPartY(), acceleration.getAngularPartZ());
    }
 
-   FramePose desiredEndEffectorPose = new FramePose();
-   Twist desiredEndEffectorTwist = new Twist();
-   SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration = new SpatialAccelerationVector();
+   private final FramePose desiredEndEffectorPose = new FramePose();
+   private final Twist desiredEndEffectorTwist = new Twist();
+   private final SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration = new SpatialAccelerationVector();
 
    public void doPositionControl(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
          FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration, RigidBody base)
@@ -99,8 +99,8 @@ public class RigidBodySpatialAccelerationControlModule
       doPositionControl(desiredEndEffectorPose, desiredEndEffectorTwist, feedForwardEndEffectorSpatialAcceleration, base);
    }
 
-   FramePoint endEffectorPosition = new FramePoint();
-   FrameOrientation endEffectorOrientation = new FrameOrientation();
+   private final FramePoint endEffectorPosition = new FramePoint();
+   private final FrameOrientation endEffectorOrientation = new FrameOrientation();
 
    public void packDesiredEndEffectorPoseFromDesiredPositions(FramePose poseToPack, FramePoint endEffectorPositionIn, FrameOrientation endEffectorOrientationIn)
    {
@@ -121,7 +121,7 @@ public class RigidBodySpatialAccelerationControlModule
       twistToPack.set(endEffectorFrame, base.getBodyFixedFrame(), endEffectorFrame, linearVelocityOfOrigin.getVector(), angularVelocity.getVector());
    }
 
-   Twist twistOfEndEffectorWithRespectToElevator = new Twist();
+   private final Twist twistOfEndEffectorWithRespectToElevator = new Twist();
 
    public void calculateDesiredEndEffectorSpatialAcceleration(SpatialAccelerationVector toPack, FrameVector linearAccelerationOfOrigin,
          FrameVector angularAcceleration, RigidBody base)
