@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -68,7 +70,10 @@ public class CentroidalMomentumHandler
 
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
-         columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indices = listToPackIndices.toArray();
+         columnsForJoints.put(joint, indices);
       }
 
       centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
