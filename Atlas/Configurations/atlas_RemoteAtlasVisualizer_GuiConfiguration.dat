@@ -1,10 +1,10 @@
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.PelvisErrorCorrectionAlphaFilter</Variables>
+		<Variables>atlas.q_back_bkz,atlas.q_l_leg_hpz,atlas.q_r_leg_hpz</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
-			<ScalingMethod>1</ScalingMethod>
+			<ScalingMethod>0</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.totalErrorPelvis_positionX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.interpolatedPelvisError_positionX</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.totalErrorPelvis_positionY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.interpolatedPelvisError_positionY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_InputOffset</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.totalErrorPelvis_positionZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.interpolatedPelvisError_positionZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitl_leg_hpz_Status,root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitr_leg_hpz_Status</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.correctedPelvis_positionX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.seNonProcessedPelvis_positionX</Variables>
+		<Variables>atlas.q_neck_ry,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q_bef,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q_befcomp,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_angleOffsetPreTransmission</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.seNonProcessedPelvis_positionY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.correctedPelvis_positionY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_neck_ry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_neck_ry.ll_out_neck_ry_q_d</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.seNonProcessedPelvis_positionZ,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.correctedPelvis_positionZ</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_neck_ry.ll_out_neck_ry_q_d</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.leftToolRigidBody.leftToolRigidBodyObjectMass</Variables>
+		<Variables>root.remotemain.DRCControllerThread.actualControlDT</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -96,8 +96,171 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.atlasCommunicationDelay</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.totalDelay</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.bdi_calibrate_state</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpxqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpxqdd_d</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_knyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_knyqdd_d</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpyqdd_d</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpzqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpzqdd_d</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkzqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkxqdd_d</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_hpx.ll_in_l_leg_hpx_f</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-<Entry Boxes>enablePushRecovery</Entry Boxes>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Walking
+</Title>
+<Entry Boxes>requestedBehavior,ll_in_back_bkx_angleOffsetPreTransmission,maxICPErrorBeforeSingleSupport,swingTime,transferTime,chestCoMOffsetY,captureKpParallel,captureKpOrthogonal,l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,icpPlannerInitialTransferDuration,slopTimeForSmoothedJointTorques,icpInFromCenter,captureKi,captureKiBleedoff,chestCoMOffsetX</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+hpzForce
+</Title>
+<Entry Boxes>ll_out_l_leg_hpz_a_k_f_p,ll_out_r_leg_hpz_a_k_f_p,ll_out_l_leg_hpz_a_k_qd_p,ll_out_r_leg_hpz_a_k_qd_p,ll_out_l_leg_hpz_a_ff_qd,ll_out_r_leg_hpz_a_ff_qd,ll_out_l_leg_hpz_a_ff_qd_d,ll_out_r_leg_hpz_a_ff_qd_d,captureKi,captureKiBleedoff</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+BackOscillation
+</Title>
+<Entry Boxes>kpPelvisOrientation,zetaPelvisOrientation,kpZAngularChestOrientation,zetaZAngularChestOrientation,ll_out_l_arm_shx_a_k_qd_p,ll_out_r_arm_shx_a_k_qd_p</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab3
+</Title>
+<Entry Boxes>ll_in_neck_ry_angleOffsetPreTransmission,q_d_neck_ry,ll_out_neck_ry_q_d,ll_out_neck_ry_q_offset,ll_in_neck_ry_jointAngleScalar,ll_out_r_arm_ely_a_k_qd_p,ll_out_r_arm_ely_k_qd_p,JOINT_L_LEG_HPZKVelActuatorValve,JOINT_R_LEG_HPZKVelActuatorValve,ll_out_l_arm_ely_k_qd_p,ll_out_l_arm_ely_a_k_qd_p,bdi_calibrate_state,requestedBehavior</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+CalibrateValveOffsets
+</Title>
+<Entry Boxes>ll_out_l_leg_hpy_k_f_p,ll_out_l_leg_hpy_a_k_q_p</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+SliderBoard
+</Title>
+<Entry Boxes>sliderBoardMode,manualModeICPOffset</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+KVelActuatorValve
+</Title>
+<Entry Boxes>JOINT_L_LEG_HPXKVelActuatorValve,JOINT_R_LEG_HPXKVelActuatorValve,JOINT_L_LEG_KNYKVelActuatorValve,JOINT_R_LEG_KNYKVelActuatorValve,JOINT_L_LEG_HPYKVelActuatorValve,JOINT_R_LEG_HPYKVelActuatorValve,JOINT_L_LEG_HPZKVelActuatorValve,JOINT_R_LEG_HPZKVelActuatorValve,alphaDesiredVelocityLegs,JOINT_BACK_BKZKVelActuatorValve,JOINT_BACK_BKYKVelActuatorValve,JOINT_BACK_BKXKVelActuatorValve</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Stiffness
+</Title>
+<Entry Boxes>l_leg_hpystiffness,r_leg_hpystiffness,l_leg_knystiffness,r_leg_knystiffness,l_leg_hpxstiffness,r_leg_hpxstiffness</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab8
+</Title>
+<Entry Boxes>jointVelocityAlphaFilter,armJointVelocityAlphaFilter,jointBacklashSlopTime,armJointBacklashSlopTime</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
  <Main Viewport> 
@@ -109,14 +272,14 @@
 
 <Extra Panels>
 <Main Viewport>
-Plotter,
+Plotter,Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-7.532432321889552</Camera X>
- <Camera Y>5.878163199559785</Camera Y>
- <Camera Z>5.66514732799767</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -140,8 +303,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-3.336852751197918</Fix X>
-<Fix Y>-0.5660418163746728</Fix Y>
-<Fix Z>0.8208107499769006</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>
