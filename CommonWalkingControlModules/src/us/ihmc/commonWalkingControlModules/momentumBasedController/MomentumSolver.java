@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,7 +103,11 @@ public class MomentumSolver implements MomentumSolverInterface
 
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
-         columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indices = listToPackIndices.toArray();
+         
+         columnsForJoints.put(joint, indices);
          aHats.put(joint, new DenseMatrix64F(size, joint.getDegreesOfFreedom()));
       }
 

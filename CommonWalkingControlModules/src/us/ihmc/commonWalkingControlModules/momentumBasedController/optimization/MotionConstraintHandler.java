@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,6 +75,7 @@ public class MotionConstraintHandler
    private final BooleanYoVariable removeNullspaceFromJ;
    private final GeometricJacobianHolder geometricJacobianHolder;
    private final boolean jacobiansHaveToBeUpdated;
+   private final TIntArrayList indicesIntoCompactBlock = new TIntArrayList();
    
    public MotionConstraintHandler(String name, InverseDynamicsJoint[] jointsInOrder, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder, YoVariableRegistry parentRegistry)
    {
@@ -87,7 +90,11 @@ public class MotionConstraintHandler
 
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
-         columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indeces = listToPackIndices.toArray();
+         
+         columnsForJoints.put(joint, indeces);
       }
 
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
@@ -430,15 +437,17 @@ public class MotionConstraintHandler
 
       for (InverseDynamicsJoint joint : joints)
       {
-         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
+//         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
+         indicesIntoCompactBlock.clear();
+         ScrewTools.computeIndicesForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
 
          if (indicesIntoFullBlock == null)    // don't do anything for joints that are not in the list
             return;
 
-         for (int i = 0; i < indicesIntoCompactBlock.length; i++)
+         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
          {
-            int compactBlockIndex = indicesIntoCompactBlock[i];
+            int compactBlockIndex = indicesIntoCompactBlock.get(i);
             int fullBlockIndex = indicesIntoFullBlock[i];
             CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullBlock, 0, fullBlockIndex);
          }

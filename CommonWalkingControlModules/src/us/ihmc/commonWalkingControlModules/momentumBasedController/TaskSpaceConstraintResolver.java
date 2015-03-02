@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class TaskSpaceConstraintResolver
    private final DenseMatrix64F taskSpaceAccelerationMatrix;
    private final DenseMatrix64F sJInverse;
    private final DenseMatrix64F sJ;
+   private final TIntArrayList columnIndices = new TIntArrayList();
 
    private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
 
@@ -99,8 +102,11 @@ public class TaskSpaceConstraintResolver
       CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), sJ);
 
       // aTaskSpace
-      int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, constrainedJoints);
-      aTaskSpace.reshape(aTaskSpace.getNumRows(), columnIndices.length);
+      
+//      int[] columnIndices = ScrewTools.computeIndicesForJoint(jointsInOrder, constrainedJoints); <-- was garbage heavy
+      columnIndices.clear();
+      ScrewTools.computeIndicesForJoint(jointsInOrder, columnIndices, constrainedJoints);
+      aTaskSpace.reshape(aTaskSpace.getNumRows(), columnIndices.size());
       MatrixTools.extractColumns(centroidalMomentumMatrix, columnIndices, aTaskSpace, 0);
 
       // convectiveTerm

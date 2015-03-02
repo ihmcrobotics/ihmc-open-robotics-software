@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -91,7 +93,11 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
-         columnsForJoints.put(joint, ScrewTools.computeIndicesForJoint(jointsInOrder, joint));
+         TIntArrayList listToPackIndices = new TIntArrayList();
+         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         int[] indices = listToPackIndices.toArray();
+         
+         columnsForJoints.put(joint, indices);
       }
 
       solver = LinearSolverFactory.pseudoInverse(true);
@@ -133,6 +139,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
    private final DenseMatrix64F taskSpaceAccelerationMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F JBlock = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F pBlock = new DenseMatrix64F(1, 1);
+   private final TIntArrayList indicesIntoBlock = new TIntArrayList();
 
    public void setDesiredSpatialAcceleration(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
@@ -171,12 +178,15 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
       for (InverseDynamicsJoint joint : baseToEndEffectorJacobian.getJointsInOrder())
       {
-         int[] indicesIntoBlock = ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), joint);
+         //old garbage-full way
+//         int[] indicesIntoBlock = ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), joint); 
+         indicesIntoBlock.clear();
+         ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), indicesIntoBlock, joint);
          int[] indicesIntoBigMatrix = columnsForJoints.get(joint);
 
-         for (int i = 0; i < indicesIntoBlock.length; i++)
+         for (int i = 0; i < indicesIntoBlock.size(); i++)
          {
-            int blockIndex = indicesIntoBlock[i];
+            int blockIndex = indicesIntoBlock.get(i);
             int bigMatrixIndex = indicesIntoBigMatrix[i];
             CommonOps.extract(JBlock, 0, JBlock.getNumRows(), blockIndex, blockIndex + 1, AJ, ajIndex, bigMatrixIndex);
          }
