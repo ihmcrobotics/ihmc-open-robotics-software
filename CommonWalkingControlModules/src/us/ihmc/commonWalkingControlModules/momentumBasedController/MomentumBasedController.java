@@ -133,6 +133,7 @@ public class MomentumBasedController
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> preRateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedDesiredAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
 
+   private final ArrayList<OneDoFJoint> jointsWithDesiredAcceleration = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredAccelerationYoVariables = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -313,6 +314,7 @@ public class MomentumBasedController
       {
          if (joint instanceof OneDoFJoint)
          {
+            jointsWithDesiredAcceleration.add((OneDoFJoint) joint);
             desiredAccelerationYoVariables.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "qdd_d", registry));
             rateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new RateLimitedYoVariable(joint.getName() + "_rl_qdd_d", registry, 10000.0, controlDT));
             preRateLimitedDesiredAccelerations.put((OneDoFJoint) joint, new DoubleYoVariable(joint.getName() + "_prl_qdd_d", registry));
@@ -444,6 +446,9 @@ public class MomentumBasedController
       momentumControlModuleBridge.reset();
    }
 
+   private final Wrench admissibleGroundReactionWrench = new Wrench();
+   private final TotalWrenchCalculator totalWrenchCalculator = new TotalWrenchCalculator();
+
    // TODO: Temporary method for a big refactor allowing switching between high level behaviors
    public void doSecondaryControl()
    {
@@ -546,9 +551,7 @@ public class MomentumBasedController
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenches);
 
-      SpatialForceVector totalGroundReactionWrench = new SpatialForceVector(centerOfMassFrame);
-      Wrench admissibleGroundReactionWrench = TotalWrenchCalculator.computeTotalWrench(externalWrenches.values(),
-            totalGroundReactionWrench.getExpressedInFrame());
+      totalWrenchCalculator.computeTotalWrench(admissibleGroundReactionWrench, externalWrenches.values(), centerOfMassFrame);
       admissibleDesiredGroundReactionTorque.set(admissibleGroundReactionWrench.getAngularPartX(), admissibleGroundReactionWrench.getAngularPartY(),
             admissibleGroundReactionWrench.getAngularPartZ());
       admissibleDesiredGroundReactionForce.set(admissibleGroundReactionWrench.getLinearPartX(), admissibleGroundReactionWrench.getLinearPartY(),
@@ -783,8 +786,9 @@ public class MomentumBasedController
       desiredPelvisForce.set(pelvisJointWrench.getLinearPartX(), pelvisJointWrench.getLinearPartY(), pelvisJointWrench.getLinearPartZ());
       desiredPelvisTorque.set(pelvisJointWrench.getAngularPartX(), pelvisJointWrench.getAngularPartY(), pelvisJointWrench.getAngularPartZ());
 
-      for (OneDoFJoint joint : desiredAccelerationYoVariables.keySet())
+      for (int i = 0; i < jointsWithDesiredAcceleration.size(); i++)
       {
+         OneDoFJoint joint = jointsWithDesiredAcceleration.get(i);
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
    }

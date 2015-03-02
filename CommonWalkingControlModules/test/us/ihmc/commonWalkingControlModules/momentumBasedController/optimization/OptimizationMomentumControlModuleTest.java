@@ -615,7 +615,9 @@ public class OptimizationMomentumControlModuleTest
       RandomMatrices.setRandom(rho, random);
       CommonOps.add(rho, rhoMin);
       Map<RigidBody, Wrench> rigidBodyWrenchMap = contactPointWrenchMatrixCalculator.computeWrenches(convertContactStates(contactStates), rho);
-      Wrench ret = TotalWrenchCalculator.computeTotalWrench(rigidBodyWrenchMap.values(), centerOfMassFrame);
+      TotalWrenchCalculator totalWrenchCalculator = new TotalWrenchCalculator();
+      Wrench ret = new Wrench();
+      totalWrenchCalculator.computeTotalWrench(ret, rigidBodyWrenchMap.values(), centerOfMassFrame);
       ret.setLinearPartZ(ret.getLinearPartZ() - totalMass * gravityZ);
 
       return ret;
