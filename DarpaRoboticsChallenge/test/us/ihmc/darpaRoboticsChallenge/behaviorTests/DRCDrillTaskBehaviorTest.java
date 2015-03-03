@@ -54,8 +54,8 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
    }
 
    // Testing parameters:
-   private static final Vector3d initialRobotPosition = new Vector3d(0.0, 0.0, 0.0);
-   private static final double initialRobotYaw = 0.0;
+   private static final Vector3d initialRobotPosition = new Vector3d(0.0, 0.5, 0.0);
+   private static final double initialRobotYaw = Math.PI / 4.0;
    private static final RobotSide grabSide = RobotSide.LEFT;
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
@@ -141,6 +141,10 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
       BambooTools.reportTestFinishedMessage();
    }
 
+   /**
+    * This class sends a drill transform to the behavior just like a user would do from the UI. The drill transform is sent after
+    * the startBehaviorTime has passed in simulation. 
+    */
    private class DrillTaskUser implements RobotController
    {
       private final double startBehaviorTime = 1.0;

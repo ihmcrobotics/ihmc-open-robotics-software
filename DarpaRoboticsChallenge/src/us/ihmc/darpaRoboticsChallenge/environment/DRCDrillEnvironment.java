@@ -36,8 +36,6 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
    private final double drillRadius = 0.03;
    private final double drillMass = 1.5;
    
-   private final RigidBodyTransform initialDrillTransform;
-   
    public DRCDrillEnvironment()
    {
       double forceVectorScale = 1.0 / 500.0;
@@ -45,7 +43,7 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground", tableCenter, 0.1));
       
-      initialDrillTransform = new RigidBodyTransform(new AxisAngle4d(), tableCenter);
+      RigidBodyTransform initialDrillTransform = new RigidBodyTransform(new AxisAngle4d(), tableCenter);
       drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform , drillRadius, drillHeight, drillMass, "models/drill.obj");
       final int groundContactGroupIdentifier = 0;
       drillRobot.createAvailableContactPoints(groundContactGroupIdentifier, 30, forceVectorScale, true);
