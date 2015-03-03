@@ -224,6 +224,7 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
+      wbSolver.setNumberOfMaximumAutomaticReseeds(0);
 
       RobotSide robotSide = RobotSide.RIGHT;
 
@@ -339,7 +340,7 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
-      wbSolver.setNumberOfMaximumAutomaticReseeds(5);
+      wbSolver.setNumberOfMaximumAutomaticReseeds(0);
 
       RobotSide robotSide = RobotSide.LEFT;
       
