@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Vector3d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
@@ -106,6 +108,13 @@ public class DrillTaskBehavior extends BehaviorInterface
 
          if (drillTransform != null)
          {
+            // move the drill transform from the top of the drill to the middle since we want to grab there:
+            Vector3d drillPositionOffset = new Vector3d(0.0, 0.0, - drillHeight / 2.0);
+            Vector3d drillPosition = new Vector3d();
+            drillTransform.getTranslation(drillPosition);
+            drillPosition.add(drillPositionOffset);
+            drillTransform.setTranslation(drillPosition);
+            
             drillPose = new FramePose(worldFrame, drillTransform);
             hasInputBeenSet.set(true);
             setupPipeline();
@@ -139,7 +148,6 @@ public class DrillTaskBehavior extends BehaviorInterface
       FrameVector approachDirection = new FrameVector(worldFrame, Math.cos(approachYaw), Math.sin(approachYaw), 0.0);
 
       FramePoint drillPosition = drillPose.getFramePointCopy();
-      drillPosition.add(0.0, 0.0, drillHeight / 2.0);
       FramePoint handPosition = offsetPosition(drillPosition, approachDirection, 0.3);
       FrameOrientation handOrientation = new FrameOrientation(worldFrame);
       handOrientation.setYawPitchRoll(approachYaw, 0.0, -((grabSide == RobotSide.RIGHT) ? 1.0 : -1.0) * Math.PI / 2);
@@ -163,6 +171,14 @@ public class DrillTaskBehavior extends BehaviorInterface
 
       // stage: close hand
       pipeLine.submitSingleTaskStage(new FingerStateTask(grabSide, FingerState.CLOSE, fingerStateBehavior, yoTime));
+      pipeLine.requestNewStage();
+      
+      // stage: tell controller about weight in hand
+      
+      // stage: lift up drill
+      handPose.setZ(handPose.getZ() + 0.2);
+      pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(grabSide, yoTime, wholeBodyIKBehavior, handPose, handPoseTrajectoryTime, 3,
+            ControlledDoF.DOF_3P3R, true));
       pipeLine.requestNewStage();
       
       // stage: walk back a little
