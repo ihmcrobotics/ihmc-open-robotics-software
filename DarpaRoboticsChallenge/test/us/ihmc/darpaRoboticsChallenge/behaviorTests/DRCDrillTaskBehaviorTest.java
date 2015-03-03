@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertTrue;
 
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -185,6 +186,18 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
          {
             RigidBodyTransform drillTransform = new RigidBodyTransform();
             drillRobot.getBodyTransformToWorld(drillTransform);
+            
+            Matrix3d drillRotation = new Matrix3d();
+            drillTransform.getRotation(drillRotation);
+            
+            Vector3d drillPosition = new Vector3d();
+            drillTransform.getTranslation(drillPosition);
+            
+            Vector3d drillPositionOffset = new Vector3d(0.0, 0.0, 0.3);
+            drillRotation.transform(drillPositionOffset);
+            
+            drillPosition.add(drillPositionOffset);
+            drillTransform.setTranslation(drillPosition);
 
             DrillTaskPacket drillTaskPacket = new DrillTaskPacket(drillTransform);
             drcBehaviorTestHelper.sendPacketAsIfItWasFromUI(drillTaskPacket);
