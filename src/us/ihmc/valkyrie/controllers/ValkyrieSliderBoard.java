@@ -7,20 +7,28 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import net.java.games.input.Component;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.InverseDynamicsJointController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.joystick.BooleanYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
+import us.ihmc.simulationconstructionset.joystick.JoyStickNotFoundException;
+import us.ihmc.simulationconstructionset.joystick.JoystickUpdater;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.kinematics.urdf.Interface;
 import us.ihmc.valkyrie.kinematics.urdf.Transmission;
 import us.ihmc.valkyrie.kinematics.urdf.URDFRobotRoot;
+import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -30,7 +38,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
  */
 public class ValkyrieSliderBoard
 {
-   public enum ValkyrieSliderBoardType {ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING, GRAVITY_COMPENSATION}
+   public enum ValkyrieSliderBoardType
+   {
+      ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING, GRAVITY_COMPENSATION
+   }
 
    private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint;
 
@@ -39,8 +50,7 @@ public class ValkyrieSliderBoard
    private final IntegerYoVariable remoteTurboIndex;
 
    @SuppressWarnings("unchecked")
-   public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel,
-                              ValkyrieSliderBoardType sliderBoardType)
+   public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel, ValkyrieSliderBoardType sliderBoardType)
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
@@ -51,47 +61,101 @@ public class ValkyrieSliderBoard
 
       switch (sliderBoardType)
       {
-         case ON_BOARD_POSITION :
-            setupSliderBoardForOnBoardPositionControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
+      case ON_BOARD_POSITION:
+         setupSliderBoardForOnBoardPositionControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
 
-            break;
+         break;
 
-         case TORQUE_PD_CONTROL :
-            setupSliderBoardForForceControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
+      case TORQUE_PD_CONTROL:
+         setupSliderBoardForForceControl(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
 
-            break;
+         break;
 
-         case WALKING :
-            new WalkControllerSliderBoard(scs, registry);
+      case WALKING:
+         new WalkControllerSliderBoard(scs, registry);
+         setupJoyStick(registry);
+         break;
 
-            break;
+      case TUNING:
+         try
+         {
+            setupSliderBoardForForceControlTuning(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
+         }
+         catch (JAXBException e)
+         {
+            e.printStackTrace();
+         }
 
-         case TUNING :
-            try
-            {
-               setupSliderBoardForForceControlTuning(registry, drcRobotModel.getGeneralizedRobotModel(), sliderBoardConfigurationManager);
-            }
-            catch (JAXBException e)
-            {
-               e.printStackTrace();
-            }
-            
-            break;
-         case GRAVITY_COMPENSATION :
-            
-            new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, drcRobotModel.createFullRobotModel(), registry, CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
-            
-            break;
+         break;
+      case GRAVITY_COMPENSATION:
+
+         new InverseDynamicsJointController.GravityCompensationSliderBoard(scs, drcRobotModel.createFullRobotModel(), registry,
+               CommonNames.doIHMCControlRatio.toString(), 0.0, 1.0);
+
+         break;
       }
 
       sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
    }
 
-   private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
-           final SliderBoardConfigurationManager sliderBoardConfigurationManager)
+   public static void setupJoyStick(YoVariableHolder registry)
    {
-      for (ValkyrieSliderBoardSelectableJoints jointId :
-              ValkyrieSliderBoardSelectableJoints.values())
+      final JoystickUpdater joystickUpdater;
+      try
+      {
+         joystickUpdater = new JoystickUpdater();
+      }
+      catch (JoyStickNotFoundException ex)
+      {
+         System.err.println("Joystick not found. Proceeding without joystick");
+         return;
+      }
+      Thread thread = new Thread(joystickUpdater);
+      thread.start();
+
+      double deadZone = 0.02;
+      double desiredVelocityX_Bias = 0.0;
+      double desiredVelocityY_Bias = 0.0;
+      double desiredHeadingDot_Bias = 0.0;
+      final double minVelocityX = -0.10;
+
+      DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      if (desiredVelocityX == null || joystickUpdater == null)
+         return;
+
+      desiredVelocityX.set(desiredVelocityX_Bias);
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER), -0.4
+            + desiredVelocityX_Bias, 0.4 + desiredVelocityX_Bias, deadZone, true));
+      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (v.getValueAsDouble() < minVelocityX)
+               v.setValueFromDouble(minVelocityX, false);
+         }
+      });
+
+      DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
+      desiredVelocityY.set(desiredVelocityY_Bias);
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.2
+            + desiredVelocityY_Bias, 0.2 + desiredVelocityY_Bias, deadZone, true));
+
+      DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
+      desiredHeadingDot.set(desiredHeadingDot_Bias);
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
+            -0.2 + desiredHeadingDot_Bias, 0.2 + desiredHeadingDot_Bias, deadZone, true));
+
+      joystickUpdater.listComponents();
+
+      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
+      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button._0), true));
+   }
+
+   private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
+         final SliderBoardConfigurationManager sliderBoardConfigurationManager)
+   {
+      for (ValkyrieSliderBoardSelectableJoints jointId : ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
          if (!jointName.contains("Ibeo"))
@@ -103,8 +167,8 @@ public class ValkyrieSliderBoard
             sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
 
             // sliders
-            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                    generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry, generalizedSDFRobotModel.getJointHolder(jointName)
+                  .getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
             sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
             sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
 
@@ -112,7 +176,6 @@ public class ValkyrieSliderBoard
          }
 
       }
-
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
@@ -126,8 +189,7 @@ public class ValkyrieSliderBoard
    }
 
    private void setupSliderBoardForForceControlTuning(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
-           final SliderBoardConfigurationManager sliderBoardConfigurationManager)
-           throws JAXBException
+         final SliderBoardConfigurationManager sliderBoardConfigurationManager) throws JAXBException
    {
       JAXBContext context = JAXBContext.newInstance(URDFRobotRoot.class);
       Unmarshaller um = context.createUnmarshaller();
@@ -143,7 +205,7 @@ public class ValkyrieSliderBoard
                boolean isForearm = false;
                for (Interface.Actuator a : i.getActuators())
                {
-                  if(a.getName().toLowerCase().contains("forearm"))
+                  if (a.getName().toLowerCase().contains("forearm"))
                   {
                      isForearm = true;
                   }
@@ -168,19 +230,19 @@ public class ValkyrieSliderBoard
 
                            String turboName = turbos.get(0);
                            // knobs
-                           sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
-                                   ValkyrieSliderBoardSelectableJoints.values().length - 1);
+                           sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
                            sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 20.0);
                            sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.5);
                            sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                            sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, -10.0, 0.0);
-                           sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
+                           sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0,
+                                 YoFunctionGeneratorMode.values().length - 1);
                            sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.1, 0.1);
                            // sliders
                            sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
-                                 generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+                                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName)
+                                       .getUpperLimit());
                            sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                            sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
                            sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
@@ -203,27 +265,27 @@ public class ValkyrieSliderBoard
                               String turboName = turbos.get(count);
 
                               // knobs
-                              sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0,
-                                      ValkyrieSliderBoardSelectableJoints.values().length - 1);
+                              sliderBoardConfigurationManager.setKnob(1, selectedJoint, 0, ValkyrieSliderBoardSelectableJoints.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(2, turboIndexMonitor, 0, 1);
                               sliderBoardConfigurationManager.setKnob(3, turboName + "_lowLevelKp", registry, 0.0, 0.1);
                               sliderBoardConfigurationManager.setKnob(4, turboName + "_lowLevelKd", registry, 0.0, 0.001);
                               sliderBoardConfigurationManager.setKnob(5, turboName + "_forceAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(6, turboName + "_forceDotAlpha", registry, 0.0, 1.0);
                               sliderBoardConfigurationManager.setKnob(7, turboName + "_parallelDamping", registry, -10.0, 0.0);
-                              sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0, YoFunctionGeneratorMode.values().length - 1);
+                              sliderBoardConfigurationManager.setKnob(8, "requestedFunctionGeneratorMode", registry, 0,
+                                    YoFunctionGeneratorMode.values().length - 1);
                               sliderBoardConfigurationManager.setKnob(9, turboName + "_effortFF", registry, -0.01, 0.01);
                               // sliders
                               sliderBoardConfigurationManager.setSlider(1, pdControllerBaseName + "_q_d", registry,
-                                      generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(),
-                                      generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+                                    generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName)
+                                          .getUpperLimit());
                               sliderBoardConfigurationManager.setSlider(2, "kp_" + pdControllerBaseName, registry, 0.0, 2000.0);
                               sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
-                              sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);                              
+                              sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
                               sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
-//                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
+                              //                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
 
-//                              sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
+                              //                              sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
                               sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                               sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
                               sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
@@ -276,7 +338,7 @@ public class ValkyrieSliderBoard
             }
 
             if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
-            {               
+            {
                int storedIndex = storedTurboIndex.get(selectedJoint.getEnumValue().toString()).getIntegerValue();
                remoteTurboIndex.set(storedIndex);
                System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
@@ -286,10 +348,7 @@ public class ValkyrieSliderBoard
       });
    }
 
-   static final String[] untunableOrNonRotaryJoints = new String[]
-   {
-      "WaistExtensor", "WaistLateral", "Ankle", "Neck", "Forearm", "Wrist"
-   };
+   static final String[] untunableOrNonRotaryJoints = new String[] { "WaistExtensor", "WaistLateral", "Ankle", "Neck", "Forearm", "Wrist" };
 
    private boolean isTunableRotaryJoint(String jointName)
    {
@@ -306,7 +365,7 @@ public class ValkyrieSliderBoard
       return ret;
    }
 
-   static final String[] tunableLinearActuatorJoint = new String[] {"WaistExtensor", "WaistLateral", "Ankle"};
+   static final String[] tunableLinearActuatorJoint = new String[] { "WaistExtensor", "WaistLateral", "Ankle" };
 
    private boolean isTunableLinearActuatorJoint(String jointName)
    {
@@ -322,10 +381,9 @@ public class ValkyrieSliderBoard
    }
 
    private void setupSliderBoardForOnBoardPositionControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
-           final SliderBoardConfigurationManager sliderBoardConfigurationManager)
+         final SliderBoardConfigurationManager sliderBoardConfigurationManager)
    {
-      for (ValkyrieSliderBoardSelectableJoints jointId :
-              ValkyrieSliderBoardSelectableJoints.values())
+      for (ValkyrieSliderBoardSelectableJoints jointId : ValkyrieSliderBoardSelectableJoints.values())
       {
          String jointName = jointId.toString();
          System.out.println(jointName);
@@ -336,12 +394,11 @@ public class ValkyrieSliderBoard
 
          // sliders
          sliderBoardConfigurationManager.setSlider(1, jointName + CommonNames.q_d, registry,
-                 generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
+               generalizedSDFRobotModel.getJointHolder(jointName).getLowerLimit(), generalizedSDFRobotModel.getJointHolder(jointName).getUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, jointName + CommonNames.qd_d, registry, -9, 9);
 
          sliderBoardConfigurationManager.saveConfiguration(jointId.toString());
       }
-
 
       selectedJoint.addVariableChangedListener(new VariableChangedListener()
       {
