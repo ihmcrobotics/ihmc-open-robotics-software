@@ -32,7 +32,7 @@ public class ValkyrieSliderBoard
 {
    public enum ValkyrieSliderBoardType {ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING, GRAVITY_COMPENSATION}
 
-   private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint, remoteSelectedJoint;
+   private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint;
 
    private final LinkedHashMap<String, IntegerYoVariable> storedTurboIndex = new LinkedHashMap<>();
 
@@ -44,7 +44,6 @@ public class ValkyrieSliderBoard
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
-      remoteSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable("ValkyrieSliderBoardController", "selectedJoint");
 
       remoteTurboIndex = (IntegerYoVariable) registry.getVariable("ValkyrieSliderBoardController", "turboIndex");
 
@@ -122,11 +121,6 @@ public class ValkyrieSliderBoard
          {
             System.out.println("loading configuration " + selectedJoint.getEnumValue());
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
-
-            if (remoteSelectedJoint != null)
-            {
-               remoteSelectedJoint.set(selectedJoint.getEnumValue());
-            }
          }
       });
    }
@@ -259,11 +253,6 @@ public class ValkyrieSliderBoard
                                     System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
                                     sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
                                  }
-
-                                 if (remoteSelectedJoint != null)
-                                 {
-                                    remoteSelectedJoint.set(selectedJoint.getEnumValue());
-                                 }
                               }
                            });
                         }
@@ -292,11 +281,6 @@ public class ValkyrieSliderBoard
                remoteTurboIndex.set(storedIndex);
                System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
                sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
-            }
-
-            if (remoteSelectedJoint != null)
-            {
-               remoteSelectedJoint.set(selectedJoint.getEnumValue());
             }
          }
       });
@@ -366,11 +350,6 @@ public class ValkyrieSliderBoard
          {
             System.out.println("loading configuration " + selectedJoint.getEnumValue());
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
-
-            if (remoteSelectedJoint != null)
-            {
-               remoteSelectedJoint.set(selectedJoint.getEnumValue());
-            }
          }
       });
    }
