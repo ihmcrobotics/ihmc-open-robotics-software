@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
@@ -114,20 +115,26 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       {
          if (hasSolutionBeenFound.getBooleanValue())
          {
-            sendSolutionToController(trajectoryTime.getDoubleValue());
+            sendSolutionToControllerAndUI(trajectoryTime.getDoubleValue());
             packetHasBeenSent.set(true);
          }
       }
    }
 
-   private void sendSolutionToController(double trajectoryDuration)
+   private void sendSolutionToControllerAndUI(double trajectoryDuration)
    {
       packetsToSend.clear();
       startTime.set(yoTime.getDoubleValue());
       wholeBodyNetworkModule.createPackets(desiredFullRobotModel, trajectoryDuration, packetsToSend);
       for (int i = 0; i < packetsToSend.size(); i++)
       {
-         sendPacketToController(packetsToSend.get(i));
+         Packet<?> packetToSend = packetsToSend.get(i);
+         
+         packetToSend.setDestination(PacketDestination.CONTROLLER);
+         sendPacketToController(packetToSend);
+         
+         packetToSend.setDestination(PacketDestination.UI);;
+         sendPacketToNetworkProcessor(packetToSend);
       }
    }
 

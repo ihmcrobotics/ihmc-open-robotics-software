@@ -8,7 +8,6 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
@@ -47,7 +46,6 @@ public class DrillTaskBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final FingerStateBehavior fingerStateBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
-   private final HandLoadBearingBehavior handLoadBearingBehavior;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
@@ -73,9 +71,6 @@ public class DrillTaskBehavior extends BehaviorInterface
 
       wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       behaviors.add(wholeBodyIKBehavior);
-      
-      handLoadBearingBehavior = new HandLoadBearingBehavior(outgoingCommunicationBridge);
-      behaviors.add(handLoadBearingBehavior);
 
       for (BehaviorInterface behavior : behaviors)
       {
