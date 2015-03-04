@@ -48,9 +48,6 @@ public class ValkyrieFlatGroundWalkingTrack
          flatGroundWalkingTrack.getDrcSimulation().start();
          flatGroundWalkingTrack.getDrcSimulation().simulate();
       }
-
-//      new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript,
-//                                    cheatWithGroundHeightAtForFootstep, robotModel);
    }
 
 }
