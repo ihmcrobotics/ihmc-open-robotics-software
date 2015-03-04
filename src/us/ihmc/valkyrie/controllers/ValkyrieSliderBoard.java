@@ -124,7 +124,7 @@ public class ValkyrieSliderBoard
          return;
 
       desiredVelocityX.set(desiredVelocityX_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER), -0.4
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.4
             + desiredVelocityX_Bias, 0.4 + desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
@@ -149,7 +149,7 @@ public class ValkyrieSliderBoard
       joystickUpdater.listComponents();
 
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
-      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button._0), true));
+      joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
    }
 
    private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
