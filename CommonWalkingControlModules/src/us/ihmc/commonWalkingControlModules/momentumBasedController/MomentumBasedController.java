@@ -1277,4 +1277,9 @@ public class MomentumBasedController
       for (int i = 0; i < robotMotionStatusChangedListeners.size(); i++)
          robotMotionStatusChangedListeners.get(i).robotMotionStatusHasChanged(newStatus, yoTime.getDoubleValue());
    }
+   
+   public SideDependentList<ProvidedMassMatrixToolRigidBody> getToolRigitBodies()
+   {
+      return toolRigidBodies;
+   }
 }
