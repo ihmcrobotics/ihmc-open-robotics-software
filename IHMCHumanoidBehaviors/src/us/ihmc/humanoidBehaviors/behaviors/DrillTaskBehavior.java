@@ -8,10 +8,12 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -46,6 +48,7 @@ public class DrillTaskBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final FingerStateBehavior fingerStateBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
+   private final ObjectWeightBehavior objectWeightBehavior;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
@@ -53,6 +56,7 @@ public class DrillTaskBehavior extends BehaviorInterface
    private final double standingDistance = 0.7;
    private final double handPoseTrajectoryTime = 1.0;
    public final double drillHeight = 0.3;
+   private final double drillWeight = 0.75;
 
    public DrillTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, SDFFullRobotModel fullRobotModel,
                             ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
@@ -71,6 +75,9 @@ public class DrillTaskBehavior extends BehaviorInterface
 
       wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
       behaviors.add(wholeBodyIKBehavior);
+      
+      objectWeightBehavior = new ObjectWeightBehavior(outgoingCommunicationBridge);
+      behaviors.add(objectWeightBehavior);
 
       for (BehaviorInterface behavior : behaviors)
       {
@@ -169,6 +176,8 @@ public class DrillTaskBehavior extends BehaviorInterface
       pipeLine.requestNewStage();
       
       // stage: tell controller about weight in hand
+      pipeLine.submitSingleTaskStage(new ObjectWeightTask(grabSide, drillWeight, objectWeightBehavior, yoTime));
+      pipeLine.requestNewStage();
       
       // stage: lift up drill
       handPose.setZ(handPose.getZ() + 0.2);
