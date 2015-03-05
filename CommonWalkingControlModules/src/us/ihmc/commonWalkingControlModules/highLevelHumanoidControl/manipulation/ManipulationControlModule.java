@@ -11,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
+import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -48,6 +50,9 @@ public class ManipulationControlModule
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
+   
+   private final ObjectWeightProvider objectWeightProvider;
+   private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies;
 
    private final DoubleYoVariable handSwingClearance = new DoubleYoVariable("handSwingClearance", registry);
 
@@ -67,6 +72,9 @@ public class ManipulationControlModule
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
+      
+      objectWeightProvider = variousWalkingProviders.getObjectWeightProvider();
+      toolRigidBodies = momentumBasedController.getToolRigitBodies();
 
       handControlModules = new SideDependentList<HandControlModule>();
 
@@ -142,6 +150,11 @@ public class ManipulationControlModule
       for (RobotSide robotSide : RobotSide.values)
       {
          handControlModules.get(robotSide).doControl();
+      }
+      
+      if(objectWeightProvider.isNewInformationAvailable())
+      {
+         toolRigidBodies.get(objectWeightProvider.getRobotSide()).setMass(objectWeightProvider.getWeight());
       }
    }
 
