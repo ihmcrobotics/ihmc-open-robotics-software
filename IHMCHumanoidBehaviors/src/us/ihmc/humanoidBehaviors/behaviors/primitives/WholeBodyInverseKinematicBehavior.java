@@ -37,8 +37,6 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    private final BooleanYoVariable hasComputationBeenDone;
    private final BooleanYoVariable hasSolutionBeenFound;
 
-   private final boolean DEBUG = false;
-
    public WholeBodyInverseKinematicBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
          WholeBodyControllerParameters wholeBodyControllerParameters, SDFFullRobotModel actualFullRobotModel, DoubleYoVariable yoTime)
    {
@@ -98,7 +96,8 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       }
       catch (Exception e)
       {
-         System.out.println(e); // TODO: handle exception
+         System.out.println(e);
+         hasComputationBeenDone.set(false);
       }
    }
    
@@ -110,7 +109,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      //TODO check all the status 
+      if (isPaused())
+      {
+         return;
+      }
+      
       if (!packetHasBeenSent.getBooleanValue() && hasComputationBeenDone.getBooleanValue())
       {
          if (hasSolutionBeenFound.getBooleanValue())
@@ -203,11 +206,16 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    public boolean isDone()
    {
       if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
+      {
          trajectoryTimeElapsed.set(false);
+      }
       else
+      {
          trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
-
-      return (trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue()) || (hasComputationBeenDone.getBooleanValue() && !hasSolutionBeenFound());
+      }
+      
+      // should use actual feedback from controller instead of just waiting until trajectory time is over
+      return (trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue() && hasComputationBeenDone.getBooleanValue());
    }
 
    @Override
