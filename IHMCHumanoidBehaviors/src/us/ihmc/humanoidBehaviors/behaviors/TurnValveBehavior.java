@@ -43,7 +43,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
    public static final ValveGraspLocation DEFAULT_GRASP_LOCATION = ValveGraspLocation.TWELVE_O_CLOCK;
-   public static final double DEFAULT_GRASP_APPROACH_CONE_ANGLE = Math.toRadians(30.0);
+   public static final double DEFAULT_GRASP_APPROACH_CONE_ANGLE = Math.toRadians(20.0);
    public static final double MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE = Math.toRadians(160.0);
    public static final double howFarToStandToTheRightOfValve = 2.0 * robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
    public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
