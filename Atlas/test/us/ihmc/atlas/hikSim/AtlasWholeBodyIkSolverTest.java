@@ -34,22 +34,19 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolverTestHelper;
 @BambooPlan(planType = {BambooPlanType.Fast})
 public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
 {
-   // private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-
-   // final static private boolean VISUALIZE_GUI =  simulationTestingParameters.getKeepSCSUp(); // do not commit this to true! will break bamboo
-   // private static final boolean VISUALIZE_RANDOMLY_GENERATED_POSES = (true & VISUALIZE_GUI);
-
    private final ArrayList<Matrix4d> rightHandToWorldArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> leftHandToWorldArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> rightHandToFootArray = new ArrayList<Matrix4d>();
    private final ArrayList<Matrix4d> leftHandToFootArray = new ArrayList<Matrix4d>();
 
+   private  WholeBodyIkSolver wholeBodySolver;
+   
    @Override
-   public WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper(boolean generateRandomHandPoses)
+   public WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper()
    {
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       SDFFullRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
-      WholeBodyIkSolver wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
+      wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 
       initializeFullRobotModelJointAngles(actualRobotModel, atlasRobotModel);
 
@@ -68,17 +65,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
       WholeBodyIkSolverTestHelper ret = new WholeBodyIkSolverTestHelper(atlasRobotModel, actualRobotModel, wholeBodySolver, robot,
                                            wholeBodyHalfCylinderTargetParameters);
 
-      int numberOfPoses = ret.getNumberOfRegressionPoses();
-
-      if (generateRandomHandPoses)
-         ret.setRandomHandPosesForRegression(getRandomHandPosesForRegression(numberOfPoses, wholeBodySolver));
-
       createHandTargetArrays();
-
-      ret.setLeftHandToFootArray(leftHandToFootArray);
-      ret.setLeftHandToWorldArray(leftHandToWorldArray);
-      ret.setRightHandToFootArray(rightHandToFootArray);
-      ret.setRightHandToWorldArray(rightHandToWorldArray);
 
       return ret;
    }
@@ -105,6 +92,32 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
          fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide,
                  ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(0));    // arm_wrx
       }
+   }
+   
+   @Override
+   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(RobotSide robotSide, int numberOfPoints)
+   {
+      ArrayList<Pair<FramePose, FramePose>> original = generatePointsForRegression(numberOfPoints);
+      ArrayList<Pair<FramePose, FramePose>> ret = new ArrayList<Pair<FramePose,FramePose>>();
+      
+      for(Pair<FramePose, FramePose> pair : original)
+      {
+         Pair<FramePose, FramePose> newPair;
+         if (robotSide == RobotSide.LEFT)
+            newPair = new Pair<FramePose, FramePose>(pair.first(), null);
+         else
+            newPair = new Pair<FramePose, FramePose>(null, pair.second());
+         
+         ret.add(newPair);
+      }
+      
+      return ret;
+   }
+
+   @Override
+   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(int numberOfPoints)
+   {
+      return getRandomHandPosesForRegression(numberOfPoints, wholeBodySolver);
    }
 
    private ArrayList<Pair<FramePose, FramePose>> getRandomHandPosesForRegression(int numberOfPoses, WholeBodyIkSolver wholeBodySolver)
@@ -179,17 +192,22 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
             handTargetArrayListToReturn.add(pairToPack);
             //System.out.println("getRandomHandPosesForRegression(): handTargetArrayListToReturn.size()=" + handTargetArrayListToReturn.size());
          }
-
-
-
-
       }
 
       return handTargetArrayListToReturn;
-
+   }
+   
+   @Override
+   public ArrayList<Matrix4d> getRightHandToWorldArray()
+   {
+      return rightHandToWorldArray;
    }
 
-
+   @Override
+   public ArrayList<Matrix4d> getLeftHandToWorldArray()
+   {
+      return leftHandToWorldArray;
+   }
 
    private void createHandTargetArrays()
    {
@@ -329,8 +347,6 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
               0.0, 0.0, 0.0, 1.0));
 
    }
-
-
 
 
 // 

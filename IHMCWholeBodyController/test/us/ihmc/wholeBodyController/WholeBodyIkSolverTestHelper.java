@@ -40,9 +40,6 @@ public class WholeBodyIkSolverTestHelper
 
    private SDFFullRobotModel actualRobotModel;
    private SDFFullRobotModel desiredRobotModel;
-   private ArrayList<SDFFullRobotModel> modelsWithLowerBodyPosedForRegressions;
-   private ArrayList<Pair<FramePose, FramePose>> randomHandPosesForRegression;
-   
    
    private WholeBodyIkSolver hikSolver;
    private Robot robot;
@@ -51,14 +48,11 @@ public class WholeBodyIkSolverTestHelper
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WholeBodyIkSolverTestFactory_Registry");
 
-   // private final ArrayList<Pair<FramePose, FramePose>> handArrayList = new ArrayList<Pair<FramePose, FramePose>>();
    private final double maxDistanceFromOriginInCartesianDirection = 5.0;
    private double randomRobotPositionX;
    private double randomRobotPositionY;
    private double randomRobotYaw;
    static private final double minAcceptableSuccessPercentage = 0.95;
-
-   // private static final boolean VISUALIZE_RANDOMLY_GENERATED_POSES = true; // commit true to break bamboo
 
    private final double ERROR_TOLERANCE = 0.01;
    private final boolean DEBUG = false;
@@ -66,13 +60,6 @@ public class WholeBodyIkSolverTestHelper
    private SimulationConstructionSet scs;
    private FullRobotModelVisualizer modelVisualizer;
    private BagOfBalls bagOfBalls;
-
-   // private WholeBodyControllerParameters robotModel;
-
-   private ArrayList<Matrix4d> rightHandToWorldArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> leftHandToWorldArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> rightHandToFootArray = new ArrayList<Matrix4d>();
-   private ArrayList<Matrix4d> leftHandToFootArray = new ArrayList<Matrix4d>();
 
    public WholeBodyIkSolverTestHelper(WholeBodyControllerParameters robotModel, SDFFullRobotModel actualRobotModel, WholeBodyIkSolver solver, Robot robot,
                                       WholeBodyHalfCylinderTargetParameters wholeBodyHalfCylinderTargetParameters)
@@ -92,48 +79,6 @@ public class WholeBodyIkSolverTestHelper
       bagOfBalls = new BagOfBalls(50, 0.03, "targets", YoAppearance.Transparent(), registry, listRegistry);
       scs.addYoGraphicsListRegistry(listRegistry);
    }
-
-   public ArrayList<Matrix4d> getRightHandToWorldArray()
-   {
-      return rightHandToWorldArray;
-   }
-
-   public void setRightHandToWorldArray(ArrayList<Matrix4d> rightHandToWorldArray)
-   {
-      this.rightHandToWorldArray = rightHandToWorldArray;
-   }
-
-   public ArrayList<Matrix4d> getLeftHandToWorldArray()
-   {
-      return leftHandToWorldArray;
-   }
-
-   public void setLeftHandToWorldArray(ArrayList<Matrix4d> leftHandToWorldArray)
-   {
-      this.leftHandToWorldArray = leftHandToWorldArray;
-   }
-
-   public ArrayList<Matrix4d> getRightHandToFootArray()
-   {
-      return rightHandToFootArray;
-   }
-
-   public void setRightHandToFootArray(ArrayList<Matrix4d> rightHandToFootArray)
-   {
-      this.rightHandToFootArray = rightHandToFootArray;
-   }
-
-   public ArrayList<Matrix4d> getLeftHandToFootArray()
-   {
-      return leftHandToFootArray;
-   }
-
-   public void setLeftHandToFootArray(ArrayList<Matrix4d> leftHandToFootArray)
-   {
-      this.leftHandToFootArray = leftHandToFootArray;
-   }
-
-
 
    public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
                                      ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased)
@@ -527,43 +472,10 @@ public class WholeBodyIkSolverTestHelper
    }
 
 
-   public void setRandomHandPosesForRegression(ArrayList<Pair<FramePose, FramePose>> randomHandPosesForRegression)
-   {
-      this.randomHandPosesForRegression = randomHandPosesForRegression;
-   }
-
    public int getNumberOfRegressionPoses()
    {
       return NUMBER_OF_REGRESSION_POSES;
    }
-
-   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(RobotSide robotSide)
-   {
-      ArrayList<Pair<FramePose, FramePose>> original = generatePointsForRegression();
-      ArrayList<Pair<FramePose, FramePose>> ret = new ArrayList<Pair<FramePose,FramePose>>();
-      
-      for(Pair<FramePose, FramePose> pair : original)
-      {
-         Pair<FramePose, FramePose> newPair;
-         if (robotSide == RobotSide.LEFT)
-            newPair = new Pair<FramePose, FramePose>(pair.first(), null);
-         else
-            newPair = new Pair<FramePose, FramePose>(null, pair.second());
-         
-         ret.add(newPair);
-      }
-      
-      return ret;
-   }
-   
-   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression()
-   {
-      if (this.randomHandPosesForRegression == null)
-         throw new RuntimeException("You need to set randomHandPosesForRegression before calling this method");
-      
-      return this.randomHandPosesForRegression;
-   }
-
 
 
    /**
