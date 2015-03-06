@@ -38,6 +38,15 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
    {
       super(outgoingCommunicationBridge);
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
+      
+      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds(6);
+      double positionErrorTolerance = 0.02;
+      double orientationErrorTolerance = 0.2;
+      wholeBodyIKSolver.taskEndEffectorPosition.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorPosition.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
+      
       wholeBodyTrajectory = new WholeBodyTrajectory(actualFullRobotModel, 1.5, 15, 0.1);
       
       this.actualFullRobotModel = actualFullRobotModel;
