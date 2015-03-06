@@ -91,7 +91,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private final double maximumJointVelocity = 1.5;
    private final double maximumJointAcceleration = 15.0;
-   private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = Math.toRadians(1.0);
+   private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = Math.toRadians(5.0);
    private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 25.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -231,7 +231,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    
    @AverageDuration(duration = 30.0)
    @Test(timeout = 90137)
-   public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
+   public void testMoveOneRandomJoint20Deg() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -250,7 +250,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       ArmJointName randomArmJoint = armJointNames[randomArmJointIndex];
       double currentJointAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, randomArmJoint).getQ();
       int poseNumber = 1;
-      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, currentJointAngle + Math.toRadians(10.0), true);
+      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, currentJointAngle + Math.toRadians(20.0), true);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
@@ -289,8 +289,9 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       double[][] armPoses = createArmPosesInitializedToRobot(numberOfArmPoses, robotSide);
 
       ArmJointName randomArmJoint = ArmJointName.WRIST_ROLL;
+      double currentJointAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, randomArmJoint).getQ();
       int poseNumber = 1;
-      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, Math.PI / 2, true);
+      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, currentJointAngle + Math.toRadians(20.0), true);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
@@ -320,15 +321,16 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       SideDependentList<double[][]> armPosesLeftAndRightSide = new SideDependentList<double[][]>();
       ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
-      double swingTrajectoryTime = 20.0;
-      int numberOfArmPoses = 3;
+      double swingTrajectoryTime = 5.0;
+      int numberOfArmPoses = 4;
 
       for (RobotSide robotSide : RobotSide.values)
       {
          final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                drcBehaviorTestHelper.getYoTime());
 
-         double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
+//         double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
+         double[][] armPoses = createRandomArmPoseWithWayPointsFromCurrentArmPose(numberOfArmPoses, robotSide);
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
          handPoseListBehavior.initialize();
          handPoseListBehavior.setInput(handPoseListPacket);
@@ -442,6 +444,30 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       return desiredPose;
    }
 
+   private double[][] createRandomArmPoseWithWayPointsFromCurrentArmPose(int numberOfPoses, RobotSide robotSide)
+   {
+      double[] currentArmPose = getCurrentArmPose(robotSide);
+      double[] randomArmPose = createRandomArmPose(robotSide);
+
+      double[][] armPoses = new double[numberOfArmJoints][numberOfPoses];
+      double[] intermediateArmPose = new double[numberOfArmJoints];
+
+      for (int poseNumber = 0; poseNumber < numberOfPoses; poseNumber++)
+      {
+         double alpha = ((double) poseNumber) / (numberOfPoses-1);
+
+         for (int i = 0; i < numberOfArmJoints; i++)
+         {
+            intermediateArmPose[i] = (alpha) * randomArmPose[i] + (1.0 - alpha) * currentArmPose[i];
+         }
+
+         setArmPose(armPoses, poseNumber, intermediateArmPose);
+      }
+
+      return armPoses;
+   }
+
+   
    private double[][] createRandomArmPoses(int numberOfPoses, RobotSide robotSide)
    {
       double[][] armPoses = new double[numberOfArmJoints][numberOfPoses];
