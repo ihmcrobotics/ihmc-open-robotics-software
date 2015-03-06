@@ -69,7 +69,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
                                            wholeBodyHalfCylinderTargetParameters);
 
       int numberOfPoses = ret.getNumberOfRegressionPoses();
-      
+
       if (generateRandomHandPoses)
          ret.setRandomHandPosesForRegression(getRandomHandPosesForRegression(numberOfPoses, wholeBodySolver));
 
@@ -111,10 +111,9 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
    {
       ArrayList<Pair<FramePose, FramePose>> handTargetArrayListToReturn = new ArrayList<Pair<FramePose, FramePose>>();
 
+      Random random = new Random(10L);
       while (handTargetArrayListToReturn.size() < numberOfPoses)
       {
-         //System.out.println("getRandomHandPosesForRegression, count=" + handTargetArrayListToReturn.size() );
-         
          AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
          SDFFullRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
 
@@ -122,7 +121,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
          actualRobotModel.getRootJoint().setPosition(rootPosition);
          actualRobotModel.getRootJoint().setRotation(0.0, 0.0, 0.0);
 
-         Random random = new Random();
+       
          for (RobotSide robotSide : RobotSide.values)
          {
             actualRobotModel.getOneDoFJointByName(atlasRobotModel.getJointMap().getLegJointName(robotSide, LegJointName.HIP_YAW)).setQ(0.0);    // leg_hpz
@@ -156,7 +155,8 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
          boolean isSelfColliding = wholeBodySolver.checkCollisions(actualRobotModel);
 
          // if CoM is close enough to stable and there are no self collisions then accept the proposed pose as feasible and add it to the list of targets to try with the IK solver.
-         if (error < EPS & !isSelfColliding)
+       if (error < EPS & !isSelfColliding)
+//         if ((error > 0.07 &  error < 0.10)& !isSelfColliding)
          {
             Vector3d vector = new Vector3d();
             Quat4d rotation = new Quat4d();
@@ -175,7 +175,9 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
             FramePose rightHandTarget = new FramePose(ReferenceFrame.getWorldFrame(), point, rotation);
 
             Pair<FramePose, FramePose> pairToPack = new Pair<FramePose, FramePose>(leftHandTarget, rightHandTarget);
+
             handTargetArrayListToReturn.add(pairToPack);
+            //System.out.println("getRandomHandPosesForRegression(): handTargetArrayListToReturn.size()=" + handTargetArrayListToReturn.size());
          }
 
 
