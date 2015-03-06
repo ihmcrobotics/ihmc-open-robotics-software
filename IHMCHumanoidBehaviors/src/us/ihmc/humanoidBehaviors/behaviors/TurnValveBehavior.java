@@ -37,6 +37,11 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       TWELVE_O_CLOCK, THREE_O_CLOCK, SIX_O_CLOCK, NINE_O_CLOCK, CENTER
    }
+   
+   public enum ValveTurnDirection
+   {
+      CLOCKWISE, COUNTERCLOCKWISE
+   }
 
    private static final boolean DEBUG = false;
    private final boolean USE_WHOLE_BODY_INVERSE_KINEMATICS = false;
@@ -143,7 +148,19 @@ public class TurnValveBehavior extends BehaviorInterface
 
    public void setInput(TurnValvePacket turnValvePacket)
    {
-      setInput(turnValvePacket.getValveTransformToWorld(), DEFAULT_GRASP_LOCATION, turnValvePacket.getGraspApproachConeAngle(), Axis.X,
+      double turnValveAngle = turnValvePacket.getTurnValveAngle();
+      
+      ValveGraspLocation valveGraspLocation;
+      if (turnValveAngle > 0.0)
+      {
+         valveGraspLocation = ValveGraspLocation.TWELVE_O_CLOCK;
+      }
+      else
+      {
+         valveGraspLocation = ValveGraspLocation.SIX_O_CLOCK;
+      }
+      
+      setInput(turnValvePacket.getValveTransformToWorld(), valveGraspLocation, turnValvePacket.getGraspApproachConeAngle(), Axis.X,
             turnValvePacket.getValveRadius(), turnValvePacket.getTurnValveAngle());
    }
 
@@ -156,7 +173,7 @@ public class TurnValveBehavior extends BehaviorInterface
             moveHandToHomeBehavior, yoTime);
 
       walkToValveTask = createWalkToValveTaskIfNecessary(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
-
+      
       ArrayList<Task> graspTurnAndUngraspValveTasks = new ArrayList<>();
       int numberOfGraspUngraspCycles = (int) Math.ceil(Math.abs(totalAngleToRotateValve / MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE));
       double totalAngleToRotateValveRemaining = totalAngleToRotateValve;

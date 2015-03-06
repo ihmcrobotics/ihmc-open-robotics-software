@@ -20,8 +20,8 @@ public class GraspTurnAndUnGraspValveTask extends BehaviorTask
    private final boolean DEBUG = false;
 
    public GraspTurnAndUnGraspValveTask(GraspTurnAndUnGraspValveBehavior graspTurnAndUnGraspValveBehavior, RigidBodyTransform valveTransformToWorld,
-         ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame, double valveRadius, double turnValveAngle,
-         DoubleYoVariable yoTime)
+         ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame,
+         double valveRadius, double turnValveAngle, DoubleYoVariable yoTime)
    {
       super(graspTurnAndUnGraspValveBehavior, yoTime);
       this.graspValveTurnAndUnGraspBehavior = graspTurnAndUnGraspValveBehavior;
@@ -36,7 +36,7 @@ public class GraspTurnAndUnGraspValveTask extends BehaviorTask
    @Override
    protected void setBehaviorInput()
    {
-      graspValveTurnAndUnGraspBehavior.setInput(valveTransformToWorld, valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius,
-            turnValveAngle);
+      graspValveTurnAndUnGraspBehavior.setInput(valveTransformToWorld, valveGraspLocation, graspApproachConeAngle,
+            valvePinJointAxisInValveFrame, valveRadius, turnValveAngle);
    }
 }
