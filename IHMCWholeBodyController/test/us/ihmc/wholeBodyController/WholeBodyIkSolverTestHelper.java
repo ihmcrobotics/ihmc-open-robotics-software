@@ -537,6 +537,25 @@ public class WholeBodyIkSolverTestHelper
       return NUMBER_OF_REGRESSION_POSES;
    }
 
+   public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression(RobotSide robotSide)
+   {
+      ArrayList<Pair<FramePose, FramePose>> original = generatePointsForRegression();
+      ArrayList<Pair<FramePose, FramePose>> ret = new ArrayList<Pair<FramePose,FramePose>>();
+      
+      for(Pair<FramePose, FramePose> pair : original)
+      {
+         Pair<FramePose, FramePose> newPair;
+         if (robotSide == RobotSide.LEFT)
+            newPair = new Pair<FramePose, FramePose>(pair.first(), null);
+         else
+            newPair = new Pair<FramePose, FramePose>(null, pair.second());
+         
+         ret.add(newPair);
+      }
+      
+      return ret;
+   }
+   
    public ArrayList<Pair<FramePose, FramePose>> generatePointsForRegression()
    {
       if (this.randomHandPosesForRegression == null)
