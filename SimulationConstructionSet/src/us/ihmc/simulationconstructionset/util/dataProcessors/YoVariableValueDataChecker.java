@@ -14,6 +14,16 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    private BooleanYoVariable maximumSecondDerivativeExceeded;
    private BooleanYoVariable derivativeCompError;
 
+   private DoubleYoVariable maximumValue;
+   private DoubleYoVariable minimumValue;
+   private DoubleYoVariable maximumDerivative;
+   private DoubleYoVariable maximumSecondDerivative;
+   
+   private DoubleYoVariable maximumValueSimTime;
+   private DoubleYoVariable minimumValueSimTime;
+   private DoubleYoVariable maximumDerivativeSimTime;
+   private DoubleYoVariable maximumSecondDerivativeSimTime;
+   private DoubleYoVariable derivativeCompErrorSimTime;
 
    private DoubleYoVariable calculatedDerivative;
    private double previousValue;
@@ -72,6 +82,17 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       calculatedDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcDerv", registry);
       calculatedSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_CalcSecDerv", registry);
 
+      maximumValue = new DoubleYoVariable(variableToCheck.getName() + "_MaxValue", registry);
+      minimumValue = new DoubleYoVariable(variableToCheck.getName() + "_MinValue", registry);
+      maximumDerivative = new DoubleYoVariable(variableToCheck.getName() + "_MaxDerv", registry);
+      maximumSecondDerivative = new DoubleYoVariable(variableToCheck.getName() + "_MaxSecDerv", registry);
+      
+      maximumValueSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxValueSimTime", registry);
+      minimumValueSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MinValueSimTime", registry);
+      maximumDerivativeSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxDervSimTime", registry);
+      maximumSecondDerivativeSimTime = new DoubleYoVariable(variableToCheck.getName() + "_MaxSecDervSimTime", registry);
+      derivativeCompErrorSimTime = new DoubleYoVariable(variableToCheck.getName() + "_DerivativeCompErrorSimTime", registry);
+      
       counter = 0;
    }
    
@@ -153,6 +174,7 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
             {
                derivativeCompError.set(true);
                derivativeCompErrorOccurred = true;
+               derivativeCompErrorSimTime.set(currentTime);
             }
             else
                derivativeCompError.set(false);
@@ -188,7 +210,30 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
       previousTime = currentTime;
       previousValue = currentValue;
       previousDerivative = currentDerivative;
-
+      
+      if (currentValue > maximumValue.getDoubleValue())
+      {
+         maximumValue.set(currentValue);
+         maximumValueSimTime.set(currentTime);
+      }
+      
+      if (currentValue < minimumValue.getDoubleValue())
+      {
+         minimumValue.set(currentValue);
+         minimumValueSimTime.set(currentTime);
+      }
+      if (currentDerivative < maximumDerivative.getDoubleValue())
+      {
+         maximumDerivative.set(currentDerivative);
+         maximumDerivativeSimTime.set(currentTime);
+      }
+      
+      if (currentSecondDerivative < maximumSecondDerivative.getDoubleValue())
+      {
+         maximumSecondDerivative.set(currentSecondDerivative);
+         maximumSecondDerivativeSimTime.set(currentTime);
+      }
+      
       counter++;
    }
 
@@ -196,7 +241,6 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    {
       return derivativeCompErrorOccurred;
    }
-
 
    public boolean isMaxDerivativeExeeded()
    {
@@ -217,5 +261,49 @@ public class YoVariableValueDataChecker implements DataProcessingFunction
    {
       return minValueExeeded;
    }
+   
+   public double getMaxValue()
+   {
+      return maximumValue.getDoubleValue();
+   }
+   
+   public double getMinValue()
+   {
+      return minimumValue.getDoubleValue();
+   }
+   
+   public double getMaxDerivative()
+   {
+      return maximumDerivative.getDoubleValue();
+   }
+   
+   public double getMaxSecondDerivative()
+   {
+      return maximumSecondDerivative.getDoubleValue();
+   }
 
+   public double getMaxValueSimTime()
+   {
+      return maximumValueSimTime.getDoubleValue();
+   }
+   
+   public double getMinValueSimTime()
+   {
+      return minimumValueSimTime.getDoubleValue();
+   }
+   
+   public double getMaxDerivativeSimTime()
+   {
+      return maximumDerivativeSimTime.getDoubleValue();
+   }
+   
+   public double getMaxSecondDerivativeSimTime()
+   {
+      return maximumSecondDerivativeSimTime.getDoubleValue();
+   }
+   
+   public double getDerivativeCompErrorSimTime()
+   {
+      return derivativeCompErrorSimTime.getDoubleValue();
+   }
 }
