@@ -7,6 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFJointHolder
@@ -68,10 +69,23 @@ public class SDFJointHolder
       
       if(sdfJoint.getAxis().getLimit() != null)
       {
-         hasLimits = true;
-         upperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
-         lowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
+         double sdfUpperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
+         double sdfLowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
          
+         if (sdfUpperLimit > sdfLowerLimit)
+         {
+            hasLimits = true;
+            upperLimit = sdfUpperLimit;
+            lowerLimit = sdfLowerLimit;
+         }
+         else
+         {
+            SysoutTool.println(sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Manually disabling joint limits.");
+            hasLimits = false;
+            upperLimit = Double.POSITIVE_INFINITY;
+            lowerLimit = Double.NEGATIVE_INFINITY;  
+         }
+
          if(sdfJoint.getAxis().getLimit().getVelocity() != null)
          {
             velocityLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getVelocity());
