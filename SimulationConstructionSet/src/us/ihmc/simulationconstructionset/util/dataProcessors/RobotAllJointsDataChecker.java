@@ -35,6 +35,9 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          if (Double.isNaN(range))
             throw new RuntimeException("upper joint limit - lower joint limit - NaN!");
          
+         if (range == 0.0)
+            throw new RuntimeException("upper joint limit = lower joint limit!");
+         
          double limitAdjustment = range * TOLERANCE_FACTOR;
          
          valueDataCheckerParameters.setMaximumValue(upperLimit + limitAdjustment);
@@ -112,7 +115,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (listOfCheckers.get(joint).isDerivativeCompErrorOccurred())
+         if (isDerivativeCompErrorOccurred(joint))
             return true;
       }
       return false;
@@ -122,7 +125,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (listOfCheckers.get(joint).isMaxDerivativeExeeded())
+         if (isMaxDerivativeExeeded(joint))
             return true;
       }
       return false;
@@ -132,7 +135,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (listOfCheckers.get(joint).isMaxSecondDerivativeExeeded())
+         if (isMaxSecondDerivativeExeeded(joint))
             return true;
       }
       return false;
@@ -142,7 +145,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (listOfCheckers.get(joint).isMaxValueExeeded())
+         if (isMaxValueExeeded(joint))
             return true;
       }
       return false;
@@ -152,10 +155,168 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (listOfCheckers.get(joint).isMinValueExeeded())
+         if (isMinValueExeeded(joint))
             return true;
       }
       return false;
+   }
+   
+   public OneDegreeOfFreedomJoint getJointWhichHasDerivativeCompError()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (isDerivativeCompErrorOccurred(joint))
+            return joint;
+      }
+      return null;
+   }
+
+   public OneDegreeOfFreedomJoint getJointWhichExceededMaxDerivative()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (isMaxDerivativeExeeded(joint))
+            return joint;
+      }
+      return null;
+   }
+
+   public OneDegreeOfFreedomJoint getJointWhichExceededMaxSecondDerivative()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (isMaxSecondDerivativeExeeded(joint))
+            return joint;
+      }
+      return null;
+   }
+
+   public OneDegreeOfFreedomJoint getJointWhichExceededMaxValue()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (isMaxValueExeeded(joint))
+            return joint;
+      }
+      return null;
+   }
+
+   public OneDegreeOfFreedomJoint getJointWhichExceededMinValue()
+   {
+      for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
+      {
+         if (isMinValueExeeded(joint))
+            return joint;
+      }
+      return null;
+   }
+   
+   public double getMaxValueOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxValue();
+   }
+   
+   public double getMinValueOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMinValue();
+   }
+   
+   public double getMaxDerivativeOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxDerivative();
+   }
+   
+   public double getMaxSecondDerivativeOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxSecondDerivative();
+   }
+   
+   public double getSimTimeMaxValueOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxValueSimTime();
+   }
+   
+   public double getSimTimeMinValueOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMinValueSimTime();
+   }
+   
+   public double getSimTimeMaxDerivativeOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxDerivativeSimTime();
+   }
+   
+   public double getSimTimeMaxSecondDerivativeOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getMaxSecondDerivativeSimTime();
+   }
+   
+   public double getSimTimeDeriveCompErrorOfJoint(OneDegreeOfFreedomJoint joint)
+   {
+      return listOfCheckers.get(joint).getDerivativeCompErrorSimTime();
+   }
+   
+   public String getDerivativeCompError()
+   {
+      if (hasDerivativeCompErrorOccurredAnyJoint())
+      {
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichHasDerivativeCompError();
+         return failedJoint.getName() + " experienced a derivative computation error / discontinuity at t = " + getSimTimeDeriveCompErrorOfJoint(failedJoint) +  " seconds.";
+      }
+      return "";
+   }
+
+   public String getMaxDerivativeExceededError()
+   {
+      if (hasMaxDerivativeExeededAnyJoint())
+      {
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichExceededMaxDerivative();
+         return failedJoint.getName() + " reached " + getMaxDerivativeOfJoint(failedJoint) + " radians/sec, at t = "
+               + getSimTimeMaxDerivativeOfJoint(failedJoint) + ", which exceeds the maximum joint velocity.";
+      }
+      return "";
+   }
+
+   public String getMaxSecondDerivativeExceededError()
+   {
+      if (hasMaxSecondDerivativeExeededAnyJoint())
+      {
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichExceededMaxSecondDerivative();
+         return failedJoint.getName() + " reached " + getMaxSecondDerivativeOfJoint(failedJoint) + " radians/sec/sec, at t = "
+               + getSimTimeMaxSecondDerivativeOfJoint(failedJoint) + ", which exceeds the maximum joint acceleration.";
+      }
+      return "";
+   }
+
+   public String getMaxValueExceededError()
+   {
+      if (hasMaxValueExeededAnyJoint())
+      {
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichExceededMaxValue();
+         return failedJoint.getName() + " reached " + getMaxValueOfJoint(failedJoint) + " radians, at t = " + getSimTimeMaxValueOfJoint(failedJoint)
+               + ", which is outside the allowable range of [" + failedJoint.getJointLowerLimit() + ", " + failedJoint.getJointUpperLimit() + "]";
+      }
+      return "";
+   }
+
+   public String getMinValueExceededError()
+   {
+      if (hasMinValueExeededAnyJoint())
+      {
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichExceededMinValue();
+         return failedJoint.getName() + " reached " + getMinValueOfJoint(failedJoint) + " radians, at t = " + getSimTimeMinValueOfJoint(failedJoint)
+               + ", which is outside the allowable range of [" + failedJoint.getJointLowerLimit() + ", " + failedJoint.getJointUpperLimit() + "]";
+      }
+      return "";
+   }
+   
+   public void cropInitialSimPoints(int numberOfDataPointsToCrop)
+   {
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+      scs.stepForwardNow(numberOfDataPointsToCrop);
+      scs.setInPoint();
+      scs.cropBuffer();
    }
    
    public void cropFirstPoint()
