@@ -85,8 +85,8 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
    private static final boolean DEBUG = false;
 
-   private final double POSITION_THRESHOLD = 0.01;
-   private final double ORIENTATION_THRESHOLD = 0.03;
+   public static final double POSITION_THRESHOLD = 0.01;
+   public static final double ORIENTATION_THRESHOLD = 0.03;
    public static final double JOINT_POSITION_THRESHOLD = 0.05;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
