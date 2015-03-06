@@ -80,11 +80,11 @@ public class SDFJointHolder
          }
          else
          {
-            SysoutTool.println(sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Manually disabling joint limits.");
-            hasLimits = false;
-            upperLimit = Double.POSITIVE_INFINITY;
-            lowerLimit = Double.NEGATIVE_INFINITY;  
-         }
+            hasLimits = true;
+            upperLimit = 1e-3;
+            lowerLimit = -1e-3;
+            SysoutTool.println(sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
+           }
 
          if(sdfJoint.getAxis().getLimit().getVelocity() != null)
          {
