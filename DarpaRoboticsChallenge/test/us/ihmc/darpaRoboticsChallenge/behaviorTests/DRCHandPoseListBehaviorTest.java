@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -29,8 +30,10 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -86,6 +89,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
    private static final boolean DEBUG = false;
 
+   private final double maximumJointVelocity = 1.5;
+   private final double maximumJointAcceleration = 15.0;
    private final double JOINT_POSITION_THRESHOLD_AFTER_SETTLING = Math.toRadians(1.0);
    private final double JOINT_POSITION_THRESHOLD_BETWEEN_POSES = 25.0 * JOINT_POSITION_THRESHOLD_AFTER_SETTLING;
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
@@ -218,6 +223,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       assertHandPosesAreWithinThresholds(initialHandPose, getCurrentHandPose(robotSide), 8.0 * DRCHandPoseBehaviorTest.POSITION_THRESHOLD, 8.0 * DRCHandPoseBehaviorTest.ORIENTATION_THRESHOLD);
       assertTrue(success);
       assertTrue(handPoseListBehavior.isDone());
+      
+      assertAllRobotJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -241,8 +248,9 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       int randomArmJointIndex = RandomTools.generateRandomInt(new Random(), 0, numberOfArmJoints - 1);
       ArmJointName randomArmJoint = armJointNames[randomArmJointIndex];
+      double currentJointAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, randomArmJoint).getQ();
       int poseNumber = 1;
-      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, Math.PI / 2, true);
+      setSingleJoint(armPoses, poseNumber, robotSide, randomArmJoint, currentJointAngle + Math.toRadians(10.0), true);
 
       HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
       handPoseListBehavior.initialize();
@@ -256,6 +264,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
       assertTrue(success);
       assertTrue(handPoseListBehavior.isDone());
+      
+      assertAllRobotJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -294,6 +304,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
       assertTrue(success);
       assertTrue(handPoseListBehavior.isDone());
+      
+      assertAllRobotJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -347,6 +359,8 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
 
       assertTrue(success);
+      
+      assertAllRobotJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
 
       BambooTools.reportTestFinishedMessage();
    }
@@ -385,8 +399,11 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          qMax = qMin;
          qMin = temp;
       }
+      
+      double qTotal = Math.abs(qMax-qMin);
+      double safetyBuffer = 0.02*qTotal;
 
-      q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
+      q = MathTools.clipToMinMax(desiredJointAngle, qMin - safetyBuffer, qMax + safetyBuffer);
       return q;
    }
 
@@ -537,5 +554,24 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
             orientationThreshold);
+   }
+   
+   private void assertAllRobotJointsMovedSmoothlyWithinKinematicAndDynamicLimits()
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      RobotAllJointsDataChecker checker = new RobotAllJointsDataChecker(scs, drcBehaviorTestHelper.getRobot());
+      
+      checker.setMaximumDerivativeForAllJoints(10.2 * maximumJointVelocity);
+      checker.setMaximumSecondDerivativeForAllJoints(1.2 * maximumJointAcceleration);
+      
+      checker.cropInitialSimPoints(10);
+
+      scs.applyDataProcessingFunction(checker);
+      
+      assertFalse(checker.getDerivativeCompError(), checker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(checker.getMaxDerivativeExceededError(), checker.hasMaxDerivativeExeededAnyJoint());
+//      assertFalse(checker.getMaxSecondDerivativeExceededError(), checker.hasMaxSecondDerivativeExeededAnyJoint());
+      assertFalse(checker.getMaxValueExceededError(), checker.hasMaxValueExeededAnyJoint());
+      assertFalse(checker.getMinValueExceededError(), checker.hasMinValueExeededAnyJoint());
    }
 }
