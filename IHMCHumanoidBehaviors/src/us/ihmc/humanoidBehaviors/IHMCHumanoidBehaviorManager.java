@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
-import us.ihmc.humanoidBehaviors.behaviors.DrillTaskBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
@@ -178,9 +178,9 @@ public class IHMCHumanoidBehaviorManager
       
       if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
-            DrillTaskBehavior drillTaskBehavior = new DrillTaskBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
+            DrillPickUpBehavior drillPickUpBehavior = new DrillPickUpBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
                wholeBodyControllerParameters);
-         dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK, drillTaskBehavior);
+         dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_PICK_UP, drillPickUpBehavior);
       }
    }
 

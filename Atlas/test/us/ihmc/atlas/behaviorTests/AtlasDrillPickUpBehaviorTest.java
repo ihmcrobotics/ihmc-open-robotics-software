@@ -2,18 +2,18 @@ package us.ihmc.atlas.behaviorTests;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCDrillTaskBehaviorTest;
+import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCDrillPickUpBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = {BambooPlanType.InDevelopment})
-public class AtlasDrillTaskBehaviorTest extends DRCDrillTaskBehaviorTest 
+public class AtlasDrillPickUpBehaviorTest extends DRCDrillPickUpBehaviorTest 
 {
    private final AtlasRobotModel robotModel;
    
-   public AtlasDrillTaskBehaviorTest() 
+   public AtlasDrillPickUpBehaviorTest() 
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       boolean useHighResolutionContactPointGrid = false;
