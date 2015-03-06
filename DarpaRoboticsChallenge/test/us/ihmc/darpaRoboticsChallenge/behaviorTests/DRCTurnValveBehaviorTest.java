@@ -34,6 +34,7 @@ import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -197,7 +198,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double graspApproachConeAngle = Math.toRadians(0.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       turnValveBehavior.initialize();
-      turnValveBehavior.setInput(valveTransformToWorld, ValveGraspLocation.CENTER, 0.0, Axis.X, valveRadius, 1.5 * turnValveThisMuchToCloseIt);
+      turnValveBehavior.setInput(valveTransformToWorld, ValveGraspLocation.CENTER, graspApproachConeAngle, Axis.X, valveRadius, 1.5 * turnValveThisMuchToCloseIt);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
@@ -280,8 +281,11 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
-      valveRobot.getAndLockAvailableContactPoint();
-
+     
+      // Disable contact with valve
+      ContactController valveContactController = (ContactController) valveRobot.getControllers().get(0).getController();
+      valveContactController.setContactParameters(0.0, 0.0, 0.0, 0.0);
+            
       RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
@@ -319,7 +323,10 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       CommonAvatarEnvironmentInterface testEnvironment = drcBehaviorTestHelper.getTestEnviroment();
       ContactableValveRobot valveRobot = (ContactableValveRobot) testEnvironment.getEnvironmentRobots().get(0);
-      valveRobot.getAndLockAvailableContactPoint();
+      
+      // Disable contact with valve
+      ContactController valveContactController = (ContactController) valveRobot.getControllers().get(0).getController();
+      valveContactController.setContactParameters(0.0, 0.0, 0.0, 0.0);
 
       RobotSide robotSideOfGraspingHand = RobotSide.RIGHT;
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();

@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -17,6 +20,8 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -27,7 +32,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
@@ -36,6 +40,8 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -119,6 +125,103 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
+   @AverageDuration(duration = 30.0)
+   @Test(timeout = 90137)
+   public void testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      SysoutTool.println("Initializing Simulation", DEBUG);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
+
+      double swingTrajectoryTime = 3.0;
+      int numberOfArmPoses = 2;
+      RobotSide robotSide = RobotSide.LEFT;
+      FramePose initialHandPose = getCurrentHandPose(robotSide);
+
+      double[] currentArmPose = getCurrentArmPose(robotSide);
+      double[] randomArmPose = createRandomArmPose(robotSide);
+      double[] intermediateArmPose = new double[numberOfArmJoints];
+      for (int i=0; i<numberOfArmJoints; i++)
+      {
+         intermediateArmPose[i] = 0.5*randomArmPose[i] + 0.5*currentArmPose[i]; 
+      }
+      
+      double[][] armPoses = new double[numberOfArmJoints][numberOfArmPoses];
+      setArmPose(armPoses, 0, intermediateArmPose);
+      setArmPose(armPoses, 1, randomArmPose);
+      
+      SysoutTool.println("Initializing Joint Space HandPoseListBehavior", DEBUG);
+      HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
+
+      handPoseListBehavior.initialize();
+      handPoseListBehavior.setInput(handPoseListPacket);
+      assertTrue(handPoseListBehavior.hasInputBeenSet());
+
+      SysoutTool.println("Executing Joint Space HandPoseListBehavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseListBehavior);
+      assertTrue(success);
+      SysoutTool.println("Joint Space HandPoseListBehavior should be done", DEBUG);
+
+      assertRobotAchievedFinalDesiredArmPose(armPoses, robotSide);
+      assertTrue(success);
+      assertTrue(handPoseListBehavior.isDone());
+
+      FramePose finalHandPose = getCurrentHandPose(robotSide);
+      
+      SysoutTool.println("Pausing behavior for half a second", DEBUG);
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      int numberOfTaskSpacePoses = 5;
+      
+      FramePose[] desiredPosesInWorld = new FramePose[numberOfTaskSpacePoses];
+      desiredPosesInWorld[0] = new FramePose();
+      desiredPosesInWorld[0].interpolate(initialHandPose, finalHandPose, 0.8);
+      desiredPosesInWorld[1] = new FramePose();
+      desiredPosesInWorld[1].interpolate(initialHandPose, finalHandPose, 0.6);
+      desiredPosesInWorld[2] = new FramePose();
+      desiredPosesInWorld[2].interpolate(initialHandPose, finalHandPose, 0.4);
+      desiredPosesInWorld[3] = new FramePose();
+      desiredPosesInWorld[3].interpolate(initialHandPose, finalHandPose, 0.2);
+      desiredPosesInWorld[4] = new FramePose();
+      desiredPosesInWorld[4].interpolate(initialHandPose, finalHandPose, 0.0);
+
+      assertHandPosesAreWithinThresholds(initialHandPose, desiredPosesInWorld[desiredPosesInWorld.length-1], 0.0, 0.0);
+      
+      Point3d[] positions = new Point3d[numberOfTaskSpacePoses];
+      Quat4d[] orientations = new Quat4d[numberOfTaskSpacePoses];
+      
+      for (int i=0; i<numberOfTaskSpacePoses; i++)
+      {
+         positions[i] = new Point3d();
+         orientations[i] = new Quat4d();
+         desiredPosesInWorld[i].getPose(positions[i], orientations[i]);
+      }
+      
+      SysoutTool.println("Initializing HandPoseListBehavior using Task-Space Hand Poses", DEBUG);
+      handPoseListPacket = new HandPoseListPacket(robotSide, Frame.WORLD, DataType.HAND_POSE, positions, orientations, false, swingTrajectoryTime, null);
+
+      handPoseListBehavior.initialize();
+      handPoseListBehavior.setInput(handPoseListPacket);
+      assertTrue(handPoseListBehavior.hasInputBeenSet());
+
+      SysoutTool.println("Executing Task Space HandPoseListBehavior", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handPoseListBehavior, swingTrajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
+      assertTrue(success);
+      SysoutTool.println("Task Space HandPoseListBehavior should be done", DEBUG);
+
+      assertHandPosesAreWithinThresholds(initialHandPose, getCurrentHandPose(robotSide), 8.0 * DRCHandPoseBehaviorTest.POSITION_THRESHOLD, 8.0 * DRCHandPoseBehaviorTest.ORIENTATION_THRESHOLD);
+      assertTrue(success);
+      assertTrue(handPoseListBehavior.isDone());
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
    @AverageDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testMoveOneRandomJoint90Deg() throws SimulationExceededMaximumTimeException
@@ -409,5 +512,30 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    {
       int lastPoseIndex = armPoses[0].length - 1;
       assertRobotAchievedDesiredArmPose(armPoses, robotSide, lastPoseIndex, JOINT_POSITION_THRESHOLD_AFTER_SETTLING);
+   }
+   
+   private FramePose getCurrentHandPose(RobotSide robotSideToTest)
+   {
+      FramePose ret = new FramePose();
+      drcBehaviorTestHelper.updateRobotModel();
+      ret.setToZero(drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideToTest));
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
+      return ret;
+   }
+   
+   private void assertHandPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)
+   {
+      double positionDistance = desiredPose.getPositionDistance(actualPose);
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
+
+      if (DEBUG)
+      {
+         System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
+         System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
+      }
+
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
    }
 }

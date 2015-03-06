@@ -2,7 +2,6 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
@@ -80,10 +79,9 @@ public class HandPoseListBehavior extends BehaviorInterface
          consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
       }
       
-      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+      if (!isDone.getBooleanValue() && status == Status.COMPLETED && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
-         if (status == Status.COMPLETED || outgoingHandPoseListPacket.getDataType() == DataType.JOINT_ANGLES)
          if (DEBUG)
             SysoutTool.println(outgoingHandPoseListPacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
@@ -113,6 +111,9 @@ public class HandPoseListBehavior extends BehaviorInterface
       {
          outgoingHandPoseListPacket.setDestination(PacketDestination.CONTROLLER);
 
+         if (DEBUG)
+            SysoutTool.println("sending handPoseList packet to controller and network processor: " + outgoingHandPoseListPacket);
+         
          sendPacketToController(outgoingHandPoseListPacket);
          sendPacketToNetworkProcessor(outgoingHandPoseListPacket);
          hasPacketBeenSent.set(true);
@@ -124,12 +125,19 @@ public class HandPoseListBehavior extends BehaviorInterface
    @Override
    public void initialize()
    {
-      status = null;
-      trajectoryTime.set(Double.NaN);
-      trajectoryTimeElapsed.set(Double.NaN);
+      hasPacketBeenSent.set(false);
+      outgoingHandPoseListPacket = null;
+
+      isPaused.set(false);
+      isStopped.set(false);
+
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
-      isPaused.set(false);
+
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
+      startTime.set(Double.NaN);
+      status = null;
       isDone.set(false);
    }
 
