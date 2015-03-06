@@ -81,8 +81,8 @@ public class SDFJointHolder
          else
          {
             hasLimits = true;
-            upperLimit = 1e-3;
-            lowerLimit = -1e-3;
+            upperLimit = Double.POSITIVE_INFINITY;
+            lowerLimit = Double.NEGATIVE_INFINITY;
             SysoutTool.println(sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
            }
 
