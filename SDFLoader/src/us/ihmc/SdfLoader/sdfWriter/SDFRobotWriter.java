@@ -34,6 +34,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.TransformTools;
 
@@ -188,6 +189,10 @@ public abstract class SDFRobotWriter
 
       String upper = String.valueOf(scsJoint.getJointUpperLimit());
       sdfJointLimit.setUpper(upper);
+      
+      double jointRange = scsJoint.getJointUpperLimit() - scsJoint.getJointLowerLimit();
+      if (jointRange == 0.0)
+         SysoutTool.println(scsJoint.getName() + " upper joint limit equals lower joint limit!");
 
       return sdfJointLimit;
    }
