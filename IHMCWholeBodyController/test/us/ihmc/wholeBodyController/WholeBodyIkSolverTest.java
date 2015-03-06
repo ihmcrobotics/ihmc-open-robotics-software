@@ -25,6 +25,7 @@ public abstract class WholeBodyIkSolverTest
 {
    private SimulationTestingParameters simulationTestingParameters;
    private SimulationConstructionSet scs;
+   private final boolean USE_RANDOM_START_LOCATIONS = true;
 
    public abstract WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper(boolean generateRandomHandPoses);
 
@@ -78,7 +79,7 @@ public abstract class WholeBodyIkSolverTest
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.LEFT,
                                                                  wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_NONE, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -110,7 +111,7 @@ public abstract class WholeBodyIkSolverTest
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.RIGHT,
                                                                  wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -140,7 +141,7 @@ public abstract class WholeBodyIkSolverTest
       scs.maximizeMainWindow();
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createHalfCylinderOfTargetPoints(RobotSide.RIGHT);
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -172,7 +173,7 @@ public abstract class WholeBodyIkSolverTest
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.LEFT,
                                                                  wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -202,7 +203,7 @@ public abstract class WholeBodyIkSolverTest
       scs.maximizeMainWindow();
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createHalfCylinderOfTargetPoints(RobotSide.LEFT);
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -235,7 +236,7 @@ public abstract class WholeBodyIkSolverTest
       scs.maximizeMainWindow();
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.RIGHT,
                                                                  wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P2R, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -266,7 +267,7 @@ public abstract class WholeBodyIkSolverTest
       scs.maximizeMainWindow();
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.LEFT,
                                                                  wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -297,7 +298,7 @@ public abstract class WholeBodyIkSolverTest
       scs.maximizeMainWindow();
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayListForOneHand(RobotSide.RIGHT,
                                                                  wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P3R, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -330,7 +331,7 @@ public abstract class WholeBodyIkSolverTest
       ArrayList<Pair<FramePose, FramePose>> handTargetArray =
          wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayList(wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray(),
             wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -362,7 +363,7 @@ public abstract class WholeBodyIkSolverTest
       ArrayList<Pair<FramePose, FramePose>> handTargetArray =
          wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayList(wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray(),
             wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -394,7 +395,7 @@ public abstract class WholeBodyIkSolverTest
       ArrayList<Pair<FramePose, FramePose>> handTargetArray =
          wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayList(wholeBodyTrajectoryTestHelper.getLeftHandToWorldArray(),
             wholeBodyTrajectoryTestHelper.getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -424,7 +425,7 @@ public abstract class WholeBodyIkSolverTest
       scs.startOnAThread();
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.generatePointsForRegression(RobotSide.LEFT);
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_NONE, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -454,7 +455,7 @@ public abstract class WholeBodyIkSolverTest
       scs.startOnAThread();
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.generatePointsForRegression(RobotSide.RIGHT);
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_NONE, ControlledDoF.DOF_3P, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -486,7 +487,7 @@ public abstract class WholeBodyIkSolverTest
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.generatePointsForRegression();
 
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P, ControlledDoF.DOF_3P, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -517,7 +518,7 @@ public abstract class WholeBodyIkSolverTest
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.generatePointsForRegression();
 
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, true, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();
@@ -546,7 +547,7 @@ public abstract class WholeBodyIkSolverTest
       scs.startOnAThread();
 
       ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.generatePointsForRegression();
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, true, false);
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
    }
 
 
