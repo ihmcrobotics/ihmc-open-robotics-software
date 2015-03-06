@@ -11,11 +11,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public interface HandPoseProvider
 {
    public abstract FramePose getDesiredHandPose(RobotSide robotSide);
+   
+   public abstract FramePose[] getDesiredHandPoses(RobotSide robotSide);
 
    public abstract ReferenceFrame getDesiredReferenceFrame(RobotSide robotSide);
 
    public abstract double getTrajectoryTime();
-
+   
    public abstract boolean checkForNewPose(RobotSide robotSide);
 
    public abstract boolean checkForNewPoseList(RobotSide robotSide);
@@ -24,7 +26,9 @@ public interface HandPoseProvider
 
    public abstract boolean checkForHomePosition(RobotSide robotSide);
 
-   public abstract HandPosePacket.DataType checkPacketDataType(RobotSide robotSide);
+   public abstract HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide);
+
+   public abstract HandPosePacket.DataType checkHandPoseListPacketDataType(RobotSide robotSide);
 
    public abstract Map<OneDoFJoint, Double> getFinalDesiredJointAngleMaps(RobotSide robotSide);
 

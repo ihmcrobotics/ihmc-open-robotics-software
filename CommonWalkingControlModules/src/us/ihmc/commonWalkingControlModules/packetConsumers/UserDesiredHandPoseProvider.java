@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -101,7 +102,7 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    }
 
    @Override
-   public HandPosePacket.DataType checkPacketDataType(RobotSide robotSide)
+   public HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide)
    {
       return userHandPoseDataType.getEnumValue();
    }
@@ -210,6 +211,20 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    {
       // TODO Auto-generated method stub
       
+   }
+
+   @Override
+   public FramePose[] getDesiredHandPoses(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public DataType checkHandPoseListPacketDataType(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 
 }

@@ -2,13 +2,18 @@ package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -43,19 +48,20 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    private final FullRobotModel fullRobotModel;
 
    private final TaskExecutor taskExecutor;
-   private final HandPoseBehavior handPoseBehavior;
+   private final HandPoseListBehavior handPoseListBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyInverseKinematicBehavior;
 
    private final DoubleYoVariable yoTime;
    private final BooleanYoVariable hasInputBeenSet;
 
    public RotateHandAboutAxisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime, boolean useWholeBodyInverseKinematics)
+         ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime,
+         boolean useWholeBodyInverseKinematics)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
       this.taskExecutor = new TaskExecutor();
-      handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
+      handPoseListBehavior = new HandPoseListBehavior(outgoingCommunicationBridge, yoTime);
       this.wholeBodyInverseKinematicBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters,
             fullRobotModel, yoTime);
       this.yoTime = yoTime;
@@ -108,29 +114,40 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
       ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, graspedObjectFrame,
             axisOrientationInGraspedObjectFrame, numberOfDiscreteHandPosesToUse);
+      
+      Point3d[] desiredPositions = new Point3d[numberOfDiscreteHandPosesToUse];
+      Quat4d[] desiredOrientations = new Quat4d[numberOfDiscreteHandPosesToUse];
 
+      int i = 0;
       taskExecutor.clear();
-      for (FramePose desiredHandPose : handPosesTangentToSemiCircularPath)
-      {
-         Frame packetFrame;
-         if (desiredHandPose.getReferenceFrame().isWorldFrame())
-         {
-            packetFrame = Frame.WORLD;
-         }
-         else
-         {
-            throw new RuntimeException("Hand Pose must be defined in World reference frame.");
-         }
-         if (USE_WHOLE_BODY_IK)
-         {
-            taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose,
-                  trajectoryTimePerHandPose, 0, ControlledDoF.DOF_3P2R, true));
-         }
-         else
-         {
-            taskExecutor.submit(new HandPoseTask(robotSide, trajectoryTimePerHandPose, desiredHandPose, packetFrame, handPoseBehavior, yoTime));
-         }
-      }
+            for (FramePose desiredHandPose : handPosesTangentToSemiCircularPath)
+            {
+               Frame packetFrame;
+               if (desiredHandPose.getReferenceFrame().isWorldFrame())
+               {
+                  packetFrame = Frame.WORLD;
+               }
+               else
+               {
+                  throw new RuntimeException("Hand Pose must be defined in World reference frame.");
+               }
+               if (USE_WHOLE_BODY_IK)
+               {
+                  taskExecutor.submit(new WholeBodyInverseKinematicTask(robotSide, yoTime, wholeBodyInverseKinematicBehavior, desiredHandPose,
+                        trajectoryTimePerHandPose, 0, ControlledDoF.DOF_3P2R, true));
+               }
+               else
+               {
+                  desiredPositions[i] = new Point3d();
+                  desiredOrientations[i] = new Quat4d();
+                  
+                  desiredHandPose.getPose(desiredPositions[i], desiredOrientations[i]);
+                  i++;
+               }
+            }
+
+      taskExecutor.submit(new HandPoseListTask(new HandPoseListPacket(robotSide, Frame.WORLD, DataType.HAND_POSE, desiredPositions, desiredOrientations, false,
+            totalTrajectoryTime, null), handPoseListBehavior, yoTime));
 
       hasInputBeenSet.set(true);
    }
@@ -158,38 +175,38 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
+      handPoseListBehavior.consumeObjectFromNetworkProcessor(object);
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromController(object);
+      handPoseListBehavior.consumeObjectFromController(object);
    }
 
    @Override
    public void stop()
    {
-      handPoseBehavior.stop();
+      handPoseListBehavior.stop();
    }
 
    @Override
    public void enableActions()
    {
-      handPoseBehavior.enableActions();
+      handPoseListBehavior.enableActions();
    }
 
    @Override
    public void pause()
    {
-      handPoseBehavior.pause();
+      handPoseListBehavior.pause();
       isPaused.set(true);
    }
 
    @Override
    public void resume()
    {
-      handPoseBehavior.resume();
+      handPoseListBehavior.resume();
       isPaused.set(false);
    }
 
@@ -203,13 +220,13 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
    public void finalize()
    {
       hasInputBeenSet.set(false);
-      handPoseBehavior.finalize();
+      handPoseListBehavior.finalize();
    }
 
    @Override
    public void initialize()
    {
-      handPoseBehavior.initialize();
+      handPoseListBehavior.initialize();
       hasInputBeenSet.set(false);
    }
 
