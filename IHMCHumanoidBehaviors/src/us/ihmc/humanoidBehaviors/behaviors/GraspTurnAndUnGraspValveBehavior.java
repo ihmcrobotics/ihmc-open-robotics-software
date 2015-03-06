@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
+import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
@@ -94,7 +95,17 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       double valveRotationRateRadPerSec = Math.PI / 2.0;
       double trajectoryTimeMoveHandAwayFromValve = 2.0;
 
-      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, valveGraspLocation, graspApproachConeAngle,
+      ValveTurnDirection valveTurnDirection;
+      if (turnValveAngle > 0.0)
+      {
+         valveTurnDirection = ValveTurnDirection.CLOCKWISE;
+      }
+      else
+      {
+         valveTurnDirection = ValveTurnDirection.COUNTERCLOCKWISE;
+      }
+         
+      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, valveGraspLocation, valveTurnDirection, graspApproachConeAngle,
             valvePinJointAxisInValveFrame, valveRadius, yoTime);
 
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
