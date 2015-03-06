@@ -84,6 +84,7 @@ public class ObjectWeightBehavior extends BehaviorInterface
    public void finalize()
    {
       defaultFinalize();
+      hasInputBeenSet.set(false);
    }
 
    @Override
