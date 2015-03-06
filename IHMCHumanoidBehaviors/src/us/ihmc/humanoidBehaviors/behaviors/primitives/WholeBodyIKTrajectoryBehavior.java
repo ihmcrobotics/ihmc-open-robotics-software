@@ -102,8 +102,8 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
             else
             {
                sendPacket.set(false);
+               System.out.println("No solution found!");
             }
-            System.out.println("solution found = " + sendPacket.getBooleanValue());
          }
          catch (Exception e)
          {
