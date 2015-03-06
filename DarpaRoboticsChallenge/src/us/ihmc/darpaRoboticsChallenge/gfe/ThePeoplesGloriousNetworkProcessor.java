@@ -24,6 +24,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -71,9 +72,14 @@ public class ThePeoplesGloriousNetworkProcessor
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      setupInputs(namespace + "/inputs", referenceFrames, fullRobotModel);
+      setupInputs(namespace + "/inputs", robotDataReceiver, fullRobotModel);
       setupOutputs(namespace + "/outputs");
       rosMainNode.execute();
+
+      while(!rosMainNode.isStarted())
+      {
+         ThreadTools.sleep(100);
+      }
 
       controllerCommunicationBridge.connect();
    }
@@ -87,7 +93,6 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupOutputs(String namespace)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new RobotDataReceiver(fullRobotModel, null);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       RobotPoseBuffer robotPoseBuffer = new RobotPoseBuffer(controllerCommunicationBridge, 1000, timestampProvider);
 
@@ -129,7 +134,7 @@ public class ThePeoplesGloriousNetworkProcessor
       }
    }
 
-   private void setupInputs(String namespace, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel)
+   private void setupInputs(String namespace, RobotDataReceiver robotDataReceiver, FullRobotModel fullRobotModel)
    {
       Map<String, Class> inputPacketList = IHMCMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
 
@@ -142,7 +147,7 @@ public class ThePeoplesGloriousNetworkProcessor
          rosMainNode.attachSubscriber(namespace + "/" + e.getKey(), subscriber);
       }
       
-      TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(referenceFrames, fullRobotModel, controllerCommunicationBridge);
+      TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel, controllerCommunicationBridge);
       rosMainNode.attachSubscriber(namespace + "/TimestampedPoseFootStepGenerator", footPoseGenerator);
    }
 }
