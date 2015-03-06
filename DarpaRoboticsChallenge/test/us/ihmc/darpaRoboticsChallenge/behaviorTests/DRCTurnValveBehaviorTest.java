@@ -89,9 +89,6 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
    }
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
-
-   private final double DESIRED_VALVE_CLOSE_PERCENTAGE = 60.0; //79.0
-
    private static final boolean DEBUG = false;
 
    @Before
@@ -150,7 +147,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       double graspApproachConeAngle = TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE;
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.5 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());
@@ -200,7 +197,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double graspApproachConeAngle = Math.toRadians(0.0);
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
       turnValveBehavior.initialize();
-      turnValveBehavior.setInput(valveTransformToWorld, ValveGraspLocation.CENTER, 0.0, Axis.X, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
+      turnValveBehavior.setInput(valveTransformToWorld, ValveGraspLocation.CENTER, 0.0, Axis.X, valveRadius, 1.5 * turnValveThisMuchToCloseIt);
       assertTrue(turnValveBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
@@ -247,7 +244,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       double graspApproachConeAngle = TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE;
       double valveRadius = ValveType.BIG_VALVE.getValveRadius();
-      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.05 * turnValveThisMuchToCloseIt);
+      TurnValvePacket turnValvePacket = new TurnValvePacket(valveTransformToWorld, graspApproachConeAngle, valveRadius, 1.5 * turnValveThisMuchToCloseIt);
       turnValveBehavior.initialize();
       turnValveBehavior.setInput(turnValvePacket);
       assertTrue(turnValveBehavior.hasInputBeenSet());

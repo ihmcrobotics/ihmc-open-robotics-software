@@ -29,7 +29,7 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
+public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
 
@@ -52,7 +52,7 @@ public class GraspValveTurnAndUnGraspBehavior extends BehaviorInterface
    private final double maxObservedWristForce = 0.0;
    private final double maxObservedCapturePointError = 0.0;
 
-   public GraspValveTurnAndUnGraspBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
+   public GraspTurnAndUnGraspValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
          BooleanYoVariable tippingDetectedBoolean, boolean useWholeBodyInverseKinematics)
    {

@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -176,7 +177,9 @@ public class ManipulationControlModule
 
       if (handPoseProvider.checkForNewPose(robotSide))
       {
-         if (handPoseProvider.checkPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
+         DataType packetDataType = handPoseProvider.checkHandPosePacketDataType(robotSide);
+         
+         if (handPoseProvider.checkHandPosePacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
             handControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(),
                   handPoseProvider.getDesiredReferenceFrame(robotSide), handSwingClearance.getDoubleValue());
@@ -189,8 +192,16 @@ public class ManipulationControlModule
       }
       else if (handPoseProvider.checkForNewPoseList(robotSide))
       {
-         handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide),
-               handPoseProvider.getTrajectoryTime());
+         if (handPoseProvider.checkHandPoseListPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
+         {
+            handControlModules.get(robotSide).moveTaskSpaceWithWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
+                  handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide), handSwingClearance.getDoubleValue());
+         }
+         else
+         {
+            handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide),
+                  handPoseProvider.getTrajectoryTime());
+         }
       }
       else if (handPoseProvider.checkForNewWholeBodyPoseList(robotSide))
       {

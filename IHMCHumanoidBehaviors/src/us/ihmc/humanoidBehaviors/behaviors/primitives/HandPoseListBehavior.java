@@ -2,10 +2,14 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -13,6 +17,7 @@ public class HandPoseListBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
 
+   private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;
 
    private HandPoseListPacket outgoingHandPoseListPacket;
@@ -21,9 +26,9 @@ public class HandPoseListBehavior extends BehaviorInterface
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable startTime;
    private final DoubleYoVariable trajectoryTime;
+   private final DoubleYoVariable trajectoryTimeElapsed;
 
    private final BooleanYoVariable hasInputBeenSet;
-   private final BooleanYoVariable trajectoryTimeElapsed;
 
    private final BooleanYoVariable hasStatusBeenReceived;
 
@@ -45,10 +50,13 @@ public class HandPoseListBehavior extends BehaviorInterface
       startTime.set(Double.NaN);
       trajectoryTime = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed = new DoubleYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
+      trajectoryTimeElapsed.set(Double.NaN);
       hasInputBeenSet = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
-      trajectoryTimeElapsed = new BooleanYoVariable(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
       hasStatusBeenReceived = new BooleanYoVariable(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new BooleanYoVariable(behaviorNameFirstLowerCase + "IsDone", registry);
+      
+      this.attachControllerListeningQueue(inputListeningQueue, HandPoseStatus.class);
    }
 
    public void setInput(HandPoseListPacket handPoseListPacket)
@@ -60,9 +68,37 @@ public class HandPoseListBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue());
+      
       if (!hasPacketBeenSent.getBooleanValue() && outgoingHandPoseListPacket != null)
       {
-         sendHandPoseToController();
+         sendHandPoseListToController();
+      }
+      
+      if (inputListeningQueue.isNewPacketAvailable())
+      {
+         consumeHandPoseStatus(inputListeningQueue.getNewestPacket());
+      }
+      
+      if (!isDone.getBooleanValue() && hasInputBeenSet() && !isPaused.getBooleanValue() && !isStopped.getBooleanValue()
+            && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
+      {
+         if (status == Status.COMPLETED || outgoingHandPoseListPacket.getDataType() == DataType.JOINT_ANGLES)
+         if (DEBUG)
+            SysoutTool.println(outgoingHandPoseListPacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
+         isDone.set(true);
+      }
+   }
+   
+   private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
+   {
+      if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPoseListPacket.getRobotSide()))
+      {
+         if (DEBUG)
+            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = "
+                  + yoTime.getDoubleValue());
+         status = handPoseStatus.getStatus();
+         hasStatusBeenReceived.set(true);
       }
    }
 
@@ -71,11 +107,11 @@ public class HandPoseListBehavior extends BehaviorInterface
       return status;
    }
 
-   private void sendHandPoseToController()
+   private void sendHandPoseListToController()
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         outgoingHandPoseListPacket.setDestination(PacketDestination.UI);
+         outgoingHandPoseListPacket.setDestination(PacketDestination.CONTROLLER);
 
          sendPacketToController(outgoingHandPoseListPacket);
          sendPacketToNetworkProcessor(outgoingHandPoseListPacket);
@@ -89,7 +125,8 @@ public class HandPoseListBehavior extends BehaviorInterface
    public void initialize()
    {
       status = null;
-      trajectoryTimeElapsed.set(false);
+      trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
@@ -105,11 +142,11 @@ public class HandPoseListBehavior extends BehaviorInterface
       isPaused.set(false);
       isStopped.set(false);
 
-      trajectoryTimeElapsed.set(false);
       hasInputBeenSet.set(false);
       hasStatusBeenReceived.set(false);
 
       trajectoryTime.set(Double.NaN);
+      trajectoryTimeElapsed.set(Double.NaN);
       startTime.set(Double.NaN);
       status = null;
       isDone.set(false);
@@ -134,19 +171,14 @@ public class HandPoseListBehavior extends BehaviorInterface
       hasPacketBeenSent.set(false);
       if (hasInputBeenSet())
       {
-         sendHandPoseToController();
+         sendHandPoseListToController();
       }
    }
 
    @Override
    public boolean isDone()
    {
-      if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
-         trajectoryTimeElapsed.set(false);
-      else
-         trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
-
-      return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
+      return isDone.getBooleanValue();
    }
 
    @Override

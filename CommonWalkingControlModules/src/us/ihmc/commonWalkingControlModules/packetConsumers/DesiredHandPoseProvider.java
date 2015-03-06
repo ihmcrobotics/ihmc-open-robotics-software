@@ -5,6 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -28,6 +31,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
 
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
+   private final SideDependentList<FramePose[]> desiredHandPosesList = new SideDependentList<FramePose[]>();
    private final SideDependentList<Map<OneDoFJoint, Double>> finalDesiredJointAngleMaps = new SideDependentList<Map<OneDoFJoint, Double>>();
    private final SideDependentList<Map<OneDoFJoint, double[]>> desiredJointAngleForWaypointTrajectoryMaps = new SideDependentList<>();
    private double trajectoryTime = 1.0;
@@ -130,6 +134,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
                FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
                pose.changeFrame(packetReferenceFrames.get(robotSide));
                desiredHandPoses.put(robotSide, pose);
+
             }
 
             Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
@@ -169,9 +174,15 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    }
 
    @Override
-   public HandPosePacket.DataType checkPacketDataType(RobotSide robotSide)
+   public HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide)
    {
       return packets.get(robotSide).get().getDataType();
+   }
+
+   @Override
+   public HandPosePacket.DataType checkHandPoseListPacketDataType(RobotSide robotSide)
+   {
+      return handPoseListPackets.get(robotSide).get().getDataType();
    }
 
    @Override
@@ -196,6 +207,48 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       updateFromNewestPacket(robotSide);
 
       return desiredHandPoses.get(robotSide);
+   }
+
+   @Override
+   public FramePose[] getDesiredHandPoses(RobotSide robotSide)
+   {
+      HandPoseListPacket object = handPoseListPackets.get(robotSide).getAndSet(null);
+      if (object == null)
+         return null;
+
+      switch (object.getReferenceFrame())
+      {
+      case WORLD:
+         packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
+
+         break;
+
+      case CHEST:
+         packetReferenceFrames.put(robotSide, chestFrame);
+
+         break;
+
+      default:
+         throw new RuntimeException("Unknown frame");
+      }
+
+      Point3d[] desiredPositions = object.getPositions();
+      Quat4d[] desiredOrientations = object.getOrientations();
+      int numberOfPoses = desiredPositions.length;
+
+      desiredHandPosesList.clear();
+      desiredHandPosesList.put(robotSide, new FramePose[numberOfPoses]);
+      FramePose[] desiredPoses = desiredHandPosesList.get(robotSide);
+
+      for (int i = 0; i < numberOfPoses; i++)
+      {
+         desiredPoses[i] = new FramePose(ReferenceFrame.getWorldFrame(), desiredPositions[i], desiredOrientations[i]);
+         desiredPoses[i].changeFrame(packetReferenceFrames.get(robotSide));
+      }
+
+      trajectoryTime = object.getTrajectoryTime();
+
+      return desiredHandPosesList.get(robotSide);
    }
 
    @Override
@@ -268,7 +321,6 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return handPoseListConsumer;
    }
-
 
    @Override
    public boolean checkForNewWholeBodyPoseList(RobotSide robotSide)

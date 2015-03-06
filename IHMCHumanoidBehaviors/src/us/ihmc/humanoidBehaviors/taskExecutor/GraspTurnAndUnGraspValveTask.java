@@ -1,14 +1,14 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import us.ihmc.humanoidBehaviors.behaviors.GraspValveTurnAndUnGraspBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.GraspTurnAndUnGraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class GraspValveTurnAndUnGraspTask extends BehaviorTask
+public class GraspTurnAndUnGraspValveTask extends BehaviorTask
 {
-   private final GraspValveTurnAndUnGraspBehavior graspValveTurnAndUnGraspBehavior;
+   private final GraspTurnAndUnGraspValveBehavior graspValveTurnAndUnGraspBehavior;
    private final RigidBodyTransform valveTransformToWorld;
    private final Axis valvePinJointAxisInValveFrame;
    private final double valveRadius;
@@ -19,12 +19,12 @@ public class GraspValveTurnAndUnGraspTask extends BehaviorTask
 
    private final boolean DEBUG = false;
 
-   public GraspValveTurnAndUnGraspTask(GraspValveTurnAndUnGraspBehavior graspValveTurnAndUnGraspBehavior, RigidBodyTransform valveTransformToWorld,
+   public GraspTurnAndUnGraspValveTask(GraspTurnAndUnGraspValveBehavior graspTurnAndUnGraspValveBehavior, RigidBodyTransform valveTransformToWorld,
          ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame, double valveRadius, double turnValveAngle,
          DoubleYoVariable yoTime)
    {
-      super(graspValveTurnAndUnGraspBehavior, yoTime);
-      this.graspValveTurnAndUnGraspBehavior = graspValveTurnAndUnGraspBehavior;
+      super(graspTurnAndUnGraspValveBehavior, yoTime);
+      this.graspValveTurnAndUnGraspBehavior = graspTurnAndUnGraspValveBehavior;
       this.valveTransformToWorld = new RigidBodyTransform(valveTransformToWorld);
       this.valveGraspLocation = valveGraspLocation;
       this.graspApproachConeAngle = graspApproachConeAngle;

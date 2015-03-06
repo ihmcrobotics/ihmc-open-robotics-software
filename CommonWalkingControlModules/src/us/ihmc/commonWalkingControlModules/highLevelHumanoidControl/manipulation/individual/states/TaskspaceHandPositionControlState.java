@@ -113,16 +113,25 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
    {
       if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
          return false;
+      
       return getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
    }
-
+   
    @Override
    public void doAction()
    {
-      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()) && poseTrajectoryGenerator.isDone())
-         doneTrajectoryTime.set(getTimeInCurrentState());
+      if (poseTrajectoryGenerator.isDone())
+         recordDoneTrajectoryTime();
 
       super.doAction();
+   }
+   
+   private void recordDoneTrajectoryTime()
+   {
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
+      {
+         doneTrajectoryTime.set(getTimeInCurrentState());
+      }
    }
 
    private void updateVisualizers()

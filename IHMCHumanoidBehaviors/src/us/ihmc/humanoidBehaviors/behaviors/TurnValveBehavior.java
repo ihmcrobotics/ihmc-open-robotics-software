@@ -12,7 +12,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTurnAndUnGraspTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.GraspTurnAndUnGraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
@@ -26,6 +26,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.utilities.taskExecutor.Task;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -39,8 +40,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private static final boolean DEBUG = false;
    private final boolean USE_WHOLE_BODY_INVERSE_KINEMATICS = false;
-   
-   
+
    public static final RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
    public static final ValveGraspLocation DEFAULT_GRASP_LOCATION = ValveGraspLocation.TWELVE_O_CLOCK;
    public static final double DEFAULT_GRASP_APPROACH_CONE_ANGLE = Math.toRadians(30.0);
@@ -59,7 +59,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final HandPoseBehavior moveHandToHomeBehavior;
    private final WalkToLocationBehavior walkToLocationBehavior;
    private WalkToLocationTask walkToValveTask;
-   private final GraspValveTurnAndUnGraspBehavior graspValveTurnAndUnGraspBehavior;
+   private final GraspTurnAndUnGraspValveBehavior graspValveTurnAndUnGraspBehavior;
    private final ScriptBehavior scriptBehavior;
 
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -89,7 +89,7 @@ public class TurnValveBehavior extends BehaviorInterface
       childBehaviors.add(moveHandToHomeBehavior);
       walkToLocationBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
       childBehaviors.add(walkToLocationBehavior);
-      graspValveTurnAndUnGraspBehavior = new GraspValveTurnAndUnGraspBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
+      graspValveTurnAndUnGraspBehavior = new GraspTurnAndUnGraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             wholeBodyControllerParameters, tippingDetectedBoolean, USE_WHOLE_BODY_INVERSE_KINEMATICS);
       childBehaviors.add(graspValveTurnAndUnGraspBehavior);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
@@ -157,27 +157,26 @@ public class TurnValveBehavior extends BehaviorInterface
 
       walkToValveTask = createWalkToValveTaskIfNecessary(valveTransformToWorld, 0.7 * walkingControllerParameters.getMaxStepLength());
 
-      pipeLine.submitSingleTaskStage(moveHandToHomeTask);
-      if (walkToValveTask != null)
-         pipeLine.submitSingleTaskStage(walkToValveTask);
-
+      ArrayList<Task> graspTurnAndUngraspValveTasks = new ArrayList<>();
       int numberOfGraspUngraspCycles = (int) Math.ceil(Math.abs(totalAngleToRotateValve / MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE));
       double totalAngleToRotateValveRemaining = totalAngleToRotateValve;
-
+      
       for (int i = 0; i < numberOfGraspUngraspCycles; i++)
       {
          double angleToRotateOnThisGraspUngraspCycle = MathTools.clipToMinMax(totalAngleToRotateValveRemaining, MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE);
 
-         GraspValveTurnAndUnGraspTask graspValveTurnAndUnGraspTask = new GraspValveTurnAndUnGraspTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
-               valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotateOnThisGraspUngraspCycle, yoTime);
-
-         pipeLine.submitSingleTaskStage(graspValveTurnAndUnGraspTask);
+         graspTurnAndUngraspValveTasks.add(new GraspTurnAndUnGraspValveTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
+               valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotateOnThisGraspUngraspCycle, yoTime));
 
          totalAngleToRotateValveRemaining -= angleToRotateOnThisGraspUngraspCycle;
       }
 
       pipeLine.submitSingleTaskStage(moveHandToHomeTask);
-
+      if (walkToValveTask != null)
+         pipeLine.submitSingleTaskStage(walkToValveTask);
+      pipeLine.submitAll(graspTurnAndUngraspValveTasks);
+      pipeLine.submitSingleTaskStage(moveHandToHomeTask);
+      
       hasInputBeenSet.set(true);
    }
 
@@ -204,9 +203,8 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private WalkToLocationTask createWalkToValveTaskIfNecessary(RigidBodyTransform valveTransformToWorld, double stepLength)
    {
+      FramePose2d initialMidFeetZUpFramePose = getInitialRobotMidFeetZupPose(initialMidFeetPose);
       FramePose2d targetMidFeetZUpFramePose = computeDesiredWalkToLocation(valveTransformToWorld);
-
-      FramePose2d initialMidFeetZUpFramePose = getInitialRobotMidFeetZupPose();
 
       double positionDistanceToValve = initialMidFeetZUpFramePose.getPositionDistance(targetMidFeetZUpFramePose);
       double orientationDistanceToValve = initialMidFeetZUpFramePose.getOrientationDistance(targetMidFeetZUpFramePose);
@@ -217,11 +215,9 @@ public class TurnValveBehavior extends BehaviorInterface
       if (!isItNecessaryToWalkToValve)
          return null;
 
-      double maxDistanceToWalkNotAlignedWithWalkingPath = 4.0 * walkingControllerParameters.getMaxStepLength();
-
-      boolean valveIsNearby = positionDistanceToValve < maxDistanceToWalkNotAlignedWithWalkingPath;
+      boolean reduceNumberOfStepsByWalkingNotAlignedWithWalkingPath = positionDistanceToValve < 4.0 * walkingControllerParameters.getMaxStepLength();
       WalkingOrientation walkingOrientation;
-      if (valveIsNearby)
+      if (reduceNumberOfStepsByWalkingNotAlignedWithWalkingPath)
       {
          walkingOrientation = WalkingOrientation.START_TARGET_ORIENTATION_MEAN;
       }
@@ -233,7 +229,7 @@ public class TurnValveBehavior extends BehaviorInterface
       double sleepTimeBeforeNextTask = 1.0; // Add sleep time to prevent ICP fall detection from intervening during final transition into double support at the end of the walking task
       WalkToLocationTask ret = new WalkToLocationTask(targetMidFeetZUpFramePose, walkToLocationBehavior, walkingOrientation, stepLength, yoTime,
             sleepTimeBeforeNextTask);
-      
+
       if (DEBUG)
       {
          SysoutTool.println("initialMidFeetZUpFramePose: " + initialMidFeetZUpFramePose);
@@ -263,19 +259,19 @@ public class TurnValveBehavior extends BehaviorInterface
       return targetMidFeetZUpFramePose;
    }
 
-   private final FramePose2d initialMidFeetPose = new FramePose2d();
-
-   private FramePose2d getInitialRobotMidFeetZupPose()
+   private FramePose2d getInitialRobotMidFeetZupPose(FramePose2d framePoseToPack)
    {
       fullRobotModel.updateFrames();
-      initialMidFeetPose.setPose(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
+      framePoseToPack.setPose(referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame());
 
-      return initialMidFeetPose;
+      return framePoseToPack;
    }
+
+   private final FramePose2d initialMidFeetPose = new FramePose2d();
 
    private double getWalkingDistanceToValve(FramePose2d targetMidFeetFramePose)
    {
-      return getInitialRobotMidFeetZupPose().getPositionDistance(targetMidFeetFramePose);
+      return getInitialRobotMidFeetZupPose(initialMidFeetPose).getPositionDistance(targetMidFeetFramePose);
    }
 
    private boolean isWalkingTargetBehindRobot(FramePose2d targetMidFeetFramePose)
@@ -289,7 +285,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
    private boolean isRobotAlreadyFacingValve(FramePose2d targetMidFeetFramePose)
    {
-      double orientationDistance = targetMidFeetFramePose.getOrientationDistance(getInitialRobotMidFeetZupPose());
+      double orientationDistance = targetMidFeetFramePose.getOrientationDistance(getInitialRobotMidFeetZupPose(initialMidFeetPose));
       return orientationDistance < Math.toRadians(5.0);
    }
 
