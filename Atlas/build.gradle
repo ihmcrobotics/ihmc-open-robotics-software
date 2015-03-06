@@ -14,7 +14,7 @@ apply plugin: 'application'
 
 applicationName = "IHMCAtlasAPI"
 mainClassName = "us.ihmc.atlas.AtlasROSAPINetworkProcessor"
-applicationDefaultJvmArgs = ["-Xmx2048m"]
+applicationDefaultJvmArgs = ["-Xmx4g"]
 
 startScripts {
     outputs.upToDateWhen { false }

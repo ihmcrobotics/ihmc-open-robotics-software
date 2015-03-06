@@ -36,8 +36,8 @@ public class AtlasROSAPISimulator
       simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
       
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(startUI);
-      networkProcessorParameters.setUseRosModule(true);
+//      networkProcessorParameters.setUseUiModule(startUI);
+//      networkProcessorParameters.setUseRosModule(true);
       
       simulationStarter.startSimulation(networkProcessorParameters, true);
 
