@@ -2,20 +2,21 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.util.ArrayList;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
+import us.ihmc.communication.packets.behaviors.DrillPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyIKTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ObjectWeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
-import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyIKTrajectoryTask;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -33,32 +34,31 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class DrillTaskBehavior extends BehaviorInterface
+public class DrillPickUpBehavior extends BehaviorInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final DoubleYoVariable yoTime;
-   private final ConcurrentListeningQueue<DrillTaskPacket> drillTaskBehaviorInputPacketListener;
+   private final ConcurrentListeningQueue<DrillPacket> drillPickUpBehaviorInputPacketListener;
    private final ReferenceFrame midZupFrame;
    private BooleanYoVariable hasInputBeenSet = new BooleanYoVariable("hasInputBeenSet", registry);
 
    private FramePose drillPose;
-   private final FramePose2d pickUpPoseToWalkTo = new FramePose2d(worldFrame);;
 
    private final ArrayList<BehaviorInterface> behaviors = new ArrayList<BehaviorInterface>();
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final FingerStateBehavior fingerStateBehavior;
-   private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
    private final ObjectWeightBehavior objectWeightBehavior;
+   
+   private final WholeBodyIKTrajectoryBehavior wholeBodyIKTrajectoryBehavior;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
    private RobotSide grabSide = RobotSide.RIGHT;
    private final double standingDistance = 0.7;
-   private final double handPoseTrajectoryTime = 1.0;
-   public final double drillHeight = 0.3;
+   private final double drillHeight = 0.3;
    private final double drillWeight = 0.75;
 
-   public DrillTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, SDFFullRobotModel fullRobotModel,
+   public DrillPickUpBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, DoubleYoVariable yoTime, SDFFullRobotModel fullRobotModel,
                             ReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
@@ -72,20 +72,20 @@ public class DrillTaskBehavior extends BehaviorInterface
 
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       behaviors.add(fingerStateBehavior);
-
-      wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
-      behaviors.add(wholeBodyIKBehavior);
       
       objectWeightBehavior = new ObjectWeightBehavior(outgoingCommunicationBridge);
       behaviors.add(objectWeightBehavior);
+      
+      wholeBodyIKTrajectoryBehavior = new WholeBodyIKTrajectoryBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
+      behaviors.add(wholeBodyIKTrajectoryBehavior);
 
       for (BehaviorInterface behavior : behaviors)
       {
          registry.addChild(behavior.getYoVariableRegistry());
       }
 
-      drillTaskBehaviorInputPacketListener = new ConcurrentListeningQueue<DrillTaskPacket>();
-      super.attachNetworkProcessorListeningQueue(drillTaskBehaviorInputPacketListener, DrillTaskPacket.class);
+      drillPickUpBehaviorInputPacketListener = new ConcurrentListeningQueue<DrillPacket>();
+      super.attachNetworkProcessorListeningQueue(drillPickUpBehaviorInputPacketListener, DrillPacket.class);
    }
 
    @Override
@@ -103,10 +103,10 @@ public class DrillTaskBehavior extends BehaviorInterface
 
    private void checkInput()
    {
-      if (drillTaskBehaviorInputPacketListener.isNewPacketAvailable())
+      if (drillPickUpBehaviorInputPacketListener.isNewPacketAvailable())
       {
-         RigidBodyTransform drillTransform = drillTaskBehaviorInputPacketListener.getNewestPacket().getDrillTransform();
-         drillTaskBehaviorInputPacketListener.clear();
+         RigidBodyTransform drillTransform = drillPickUpBehaviorInputPacketListener.getNewestPacket().getDrillTransform();
+         drillPickUpBehaviorInputPacketListener.clear();
 
          if (drillTransform != null)
          {
@@ -140,9 +140,9 @@ public class DrillTaskBehavior extends BehaviorInterface
       double walkingYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
       double x = drillPosition2d.getX() - walkingDirection.getX() * standingDistance;
       double y = drillPosition2d.getY() - walkingDirection.getY() * standingDistance;
-      pickUpPoseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, walkingYaw);
+      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2d(x, y), walkingYaw);
 
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(pickUpPoseToWalkTo, walkToLocationBehavior, 0.0, 0.3, yoTime));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(poseToWalkTo, walkToLocationBehavior, 0.0, 0.3, yoTime));
       pipeLine.requestNewStage();
 
       // stage: bring hand in position close to drill
@@ -158,8 +158,8 @@ public class DrillTaskBehavior extends BehaviorInterface
       handPose.setPosition(handPosition);
       handPose.setOrientation(handOrientation);
 
-      pipeLine.submitTaskForPallelPipesStage(wholeBodyIKBehavior,
-              new WholeBodyInverseKinematicTask(grabSide, yoTime, wholeBodyIKBehavior, handPose, handPoseTrajectoryTime, 3, ControlledDoF.DOF_3P3R, true));
+      pipeLine.submitTaskForPallelPipesStage(wholeBodyIKTrajectoryBehavior, new WholeBodyIKTrajectoryTask(wholeBodyIKTrajectoryBehavior, yoTime,
+            grabSide, handPose, ControlledDoF.DOF_3P3R));
       pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, new FingerStateTask(grabSide, FingerState.OPEN, fingerStateBehavior, yoTime));
       pipeLine.requestNewStage();
 
@@ -167,8 +167,7 @@ public class DrillTaskBehavior extends BehaviorInterface
       handPose.setPosition(drillPosition);
       handPose.setOrientation(handOrientation);
 
-      pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(grabSide, yoTime, wholeBodyIKBehavior, handPose, handPoseTrajectoryTime, 3,
-              ControlledDoF.DOF_3P3R, true));
+      pipeLine.submitSingleTaskStage(new WholeBodyIKTrajectoryTask(wholeBodyIKTrajectoryBehavior, yoTime, grabSide, handPose, ControlledDoF.DOF_3P3R));
       pipeLine.requestNewStage();
 
       // stage: close hand
@@ -179,19 +178,20 @@ public class DrillTaskBehavior extends BehaviorInterface
       pipeLine.submitSingleTaskStage(new ObjectWeightTask(grabSide, drillWeight, objectWeightBehavior, yoTime));
       pipeLine.requestNewStage();
       
+      // stage: turn drill if necessary
+      
       // stage: lift up drill
       handPose.setZ(handPose.getZ() + 0.2);
-      pipeLine.submitSingleTaskStage(new WholeBodyInverseKinematicTask(grabSide, yoTime, wholeBodyIKBehavior, handPose, handPoseTrajectoryTime, 3,
-            ControlledDoF.DOF_3P3R, true));
+      pipeLine.submitSingleTaskStage(new WholeBodyIKTrajectoryTask(wholeBodyIKTrajectoryBehavior, yoTime, grabSide, handPose, ControlledDoF.DOF_3P3R));
       pipeLine.requestNewStage();
       
       // stage: walk back a little
       walkingDirection.normalize();
       x = drillPosition2d.getX() - walkingDirection.getX() * (standingDistance + 0.5);
       y = drillPosition2d.getY() - walkingDirection.getY() * (standingDistance + 0.5);
-      pickUpPoseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, walkingYaw);
+      poseToWalkTo.setPoseIncludingFrame(worldFrame, x, y, walkingYaw);
       
-      pipeLine.submitSingleTaskStage(new WalkToLocationTask(pickUpPoseToWalkTo, walkToLocationBehavior, Math.PI, 0.3, yoTime));
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(poseToWalkTo, walkToLocationBehavior, Math.PI, 0.3, yoTime));
       pipeLine.requestNewStage();
    }
 

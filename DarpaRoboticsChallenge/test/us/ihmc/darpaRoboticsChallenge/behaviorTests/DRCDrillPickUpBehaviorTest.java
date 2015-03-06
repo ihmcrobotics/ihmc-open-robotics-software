@@ -13,14 +13,14 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.behaviors.DrillTaskPacket;
+import us.ihmc.communication.packets.behaviors.DrillPacket;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDrillEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCBehaviorTestHelper;
-import us.ihmc.humanoidBehaviors.behaviors.DrillTaskBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
@@ -43,7 +43,7 @@ import com.jme3.math.Vector3f;
  * @author unknownid
  *
  */
-public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterface
+public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -60,7 +60,7 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
 
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private ContactableCylinderRobot drillRobot;
-   private DrillTaskBehavior drillTaskBehavior;
+   private DrillPickUpBehavior drillPickUpBehavior;
 
    @Before
    public void setUp()
@@ -123,13 +123,13 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null, startingLocation,
               simulationTestingParameters, getRobotModel(), controllerCommunicator);
-      drillTaskBehavior = new DrillTaskBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(),
+      drillPickUpBehavior = new DrillPickUpBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(),
               drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getReferenceFrames(), getRobotModel());
-      drillTaskBehavior.setGrabSide(grabSide);
+      drillPickUpBehavior.setGrabSide(grabSide);
 
       // add behavior trigger and run simulation
       drcBehaviorTestHelper.getDRCSimulationFactory().getRobot().setController(new DrillTaskUser());
-      drcBehaviorTestHelper.executeBehaviorUntilDoneUsingBehaviorDispatcher(drillTaskBehavior);
+      drcBehaviorTestHelper.executeBehaviorUntilDoneUsingBehaviorDispatcher(drillPickUpBehavior);
 
       // check if drill is in hand:
       Vector3f wristHandOffset = getRobotModel().getJmeTransformWristToHand(grabSide).getTranslation();
@@ -203,8 +203,8 @@ public abstract class DRCDrillTaskBehaviorTest implements MultiRobotTestInterfac
             drillPosition.add(drillPositionOffset);
             drillTransform.setTranslation(drillPosition);
 
-            DrillTaskPacket drillTaskPacket = new DrillTaskPacket(drillTransform);
-            drcBehaviorTestHelper.sendPacketAsIfItWasFromUI(drillTaskPacket);
+            DrillPacket drillPacket = new DrillPacket(drillTransform);
+            drcBehaviorTestHelper.sendPacketAsIfItWasFromUI(drillPacket);
 
             packetHasBeenSent.set(true);
             sendDrillPacket.set(false);
