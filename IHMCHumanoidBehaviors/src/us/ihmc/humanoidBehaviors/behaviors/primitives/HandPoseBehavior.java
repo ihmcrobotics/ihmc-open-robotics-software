@@ -319,13 +319,6 @@ public class HandPoseBehavior extends BehaviorInterface
    public boolean isDone()
    {
       return isDone.getBooleanValue();
-
-      // if (Double.isNaN(startTime.getDoubleValue()) || Double.isNaN(trajectoryTime.getDoubleValue()))
-      // trajectoryTimeElapsed.set(false);
-      // else
-      // trajectoryTimeElapsed.set(yoTime.getDoubleValue() - startTime.getDoubleValue() > trajectoryTime.getDoubleValue());
-      //
-      // return trajectoryTimeElapsed.getBooleanValue() && !isPaused.getBooleanValue();
    }
 
    private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
