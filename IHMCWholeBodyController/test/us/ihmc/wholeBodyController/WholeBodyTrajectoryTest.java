@@ -49,6 +49,8 @@ public abstract class WholeBodyTrajectoryTest
    private SimulationTestingParameters simulationTestingParameters;
    private SimulationConstructionSet scs;
    private FullRobotModelVisualizer modelVisualizer;
+   
+   private final static int MAX_NUMBER_OF_RESEEDS = 6;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -224,7 +226,7 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
-      wbSolver.setNumberOfMaximumAutomaticReseeds(0);
+      wbSolver.setNumberOfMaximumAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
 
       RobotSide robotSide = RobotSide.RIGHT;
 
@@ -340,7 +342,7 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
-      wbSolver.setNumberOfMaximumAutomaticReseeds(0);
+      wbSolver.setNumberOfMaximumAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
 
       RobotSide robotSide = RobotSide.LEFT;
       
