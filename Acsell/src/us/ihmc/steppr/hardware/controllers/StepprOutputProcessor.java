@@ -6,6 +6,7 @@ import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
+import us.ihmc.steppr.hardware.state.StepprAnkleAngleCalculator;
 import us.ihmc.steppr.hardware.state.StepprAnkleInterpolator;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -22,7 +23,7 @@ public class StepprOutputProcessor implements OutputProcessor
    private final SimpleMovingAverageFilteredYoVariable totalPredictedRobotPowerAverage = new SimpleMovingAverageFilteredYoVariable(
          totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
 
-   private final StepprAnkleInterpolator ankleInterpolator = new StepprAnkleInterpolator();
+   private final StepprAnkleAngleCalculator ankleInterpolator = new StepprAnkleInterpolator();
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
    public StepprOutputProcessor(FullRobotModel controllerFullRobotModel)
@@ -92,17 +93,19 @@ public class StepprOutputProcessor implements OutputProcessor
 
       OneDoFJoint oneDofAnkleX = wholeBodyControlJoints.get(ankleX);
       OneDoFJoint oneDofAnkleY = wholeBodyControlJoints.get(ankleY);
-      double qRightMotor = ankleInterpolator.calculateRightMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
-      double qLeftMotor = ankleInterpolator.calculateLeftMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
+      
+      ankleInterpolator.updateAnkleState(oneDofAnkleX, oneDofAnkleY);
+      //double qRightMotor = ankleInterpolator.calculateRightMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
+      //double qLeftMotor = ankleInterpolator.calculateLeftMotorAngle(oneDofAnkleX.getQ(), oneDofAnkleY.getQ());
 
-      ankleInterpolator.calculateDesiredTau(qRightMotor, qLeftMotor, oneDofAnkleX.getTau(), oneDofAnkleY.getTau());
-      ankleInterpolator.calculateActuatordQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
+      //ankleInterpolator.calculateDesiredTau(qRightMotor, qLeftMotor, oneDofAnkleX.getTau(), oneDofAnkleY.getTau());
+      //ankleInterpolator.calculateActuatordQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
 
       predictedMotorPower.get(ankleRightActuator).set(
-            calcPower(ankleInterpolator.getTauRightActuator(), ankleInterpolator.getMotorVelocityRight(), ankleRightActuator.getKm()));
+            calcPower(ankleInterpolator.getComputedTauRightActuator(), ankleInterpolator.getComputedMotorVelocityRight(), ankleRightActuator.getKm()));
 
       predictedMotorPower.get(ankleLeftActuator).set(
-            calcPower(ankleInterpolator.getTauLeftActuator(), ankleInterpolator.getMotorVelocityLeft(), ankleLeftActuator.getKm()));
+            calcPower(ankleInterpolator.getComputedTauLeftActuator(), ankleInterpolator.getComputedMotorVelocityLeft(), ankleLeftActuator.getKm()));
 
    }
 
