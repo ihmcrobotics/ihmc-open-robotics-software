@@ -98,8 +98,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
-         double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, SideDependentList<ReferenceFrame> ankleZUpFrames,
+         final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.ankleZUpFrames = ankleZUpFrames;
@@ -184,8 +184,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFMaxViz);
          yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
 
-         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize,
-               YoAppearance.Gold());
+         YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
          yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
 
       }
@@ -318,17 +317,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
-      if (desiredComHeightProvider != null)
-      {
-         if( desiredComHeightProvider.isNewComHeightInformationAvailable())
-         {
-            offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
-         }
-         else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
-         {
-           System.out.println("ERROR: LookAheadCoMHeightTrajectoryGenerator: TODO"); 
-         }
-      }
       Footstep transferFromFootstep = transferToAndNextFootstepsData.getTransferFromFootstep();
       Footstep transferToFootstep = transferToAndNextFootstepsData.getTransferToFootstep();
 
@@ -341,7 +329,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       if (CONSIDER_NEXT_FOOTSTEP)
          nextFootstep = transferToAndNextFootstepsData.getNextFootstep();
-
 
       if (nextFootstep != null)
          hasBeenInitializedWithNextStep.set(true);
@@ -701,39 +688,36 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       if (desiredComHeightProvider != null)
       {
-         if( desiredComHeightProvider.isNewComHeightInformationAvailable() )
+         if (desiredComHeightProvider.isNewComHeightInformationAvailable())
          {
             offsetHeightAboveGround.set(desiredComHeightProvider.getComHeightOffset());
-            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());        
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(desiredComHeightProvider.getComHeightTrajectoryTime());
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
-            // System.out.format("offsetHeightAboveGround A:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), desiredComHeightProvider.getComHeightTrajectoryTime(), desiredComHeightProvider.getComHeightOffset() );
-            
          }
-         else if( desiredComHeightProvider.isNewComHeightMultipointAvailable() )
+         else if (desiredComHeightProvider.isNewComHeightMultipointAvailable())
          {
             WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
-        
+
             double midAnkleZ = 0.0;
             ankleZUpFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(anklePosition);
             midAnkleZ += anklePosition.getZ() * 0.5;
             ankleZUpFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation(anklePosition);
             midAnkleZ += anklePosition.getZ() * 0.5;
-               
-            
-            int lastIndex  = pelvisTrajectory.getTimeAtWaypoints().length -1;
+
+            int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
             double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - midAnkleZ;
             // TODO (Sylvain) Check if that's the right way to do it
-//            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
+            //            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
 
             // it is not really the last time, since we have the "settling"
-            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[ lastIndex -1 ];
-                          
-            offsetHeightAboveGround.set( lastHeight );
-            offsetHeightAboveGroundTrajectoryTimeProvider.set( totalTime );
+            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex - 1];
+
+            offsetHeightAboveGround.set(lastHeight);
+            offsetHeightAboveGroundTrajectoryTimeProvider.set(totalTime);
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
-          //  System.out.format("offsetHeightAboveGround B:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), totalTime, lastHeight );
+            //  System.out.format("offsetHeightAboveGround B:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), totalTime, lastHeight );
          }
       }
       offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
