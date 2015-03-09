@@ -1,13 +1,23 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import javax.vecmath.Point3d;
+
 import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.FootstepParameters;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.pathGeneration.footstepSnapper.*;
+import us.ihmc.pathGeneration.footstepSnapper.AtlasFootstepSnappingParameters;
+import us.ihmc.pathGeneration.footstepSnapper.ConvexHullFootstepSnapper;
+import us.ihmc.pathGeneration.footstepSnapper.FootstepSnapperTest;
+import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
+import us.ihmc.pathGeneration.footstepSnapper.SimpleFootstepValueFunction;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundReaderAndWriter;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
@@ -15,11 +25,6 @@ import us.ihmc.utilities.dataStructures.quadTree.Box;
 import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
 import us.ihmc.utilities.math.geometry.InsufficientDataException;
-
-import javax.vecmath.Point3d;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
 
 /**
  * Created by agrabertilton on 3/4/15.
