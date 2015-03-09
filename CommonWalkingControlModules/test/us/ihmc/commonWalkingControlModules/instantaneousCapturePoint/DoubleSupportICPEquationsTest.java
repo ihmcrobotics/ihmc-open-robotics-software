@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 import java.util.Random;
-
-import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
@@ -14,7 +13,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class DoubleSupportICPEquationsTest
 {
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testSingleSupportICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -36,7 +35,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testCoefficientCalculations()
    {
       Random random = new Random(8723L);
@@ -64,7 +63,7 @@ public class DoubleSupportICPEquationsTest
 
 
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testZMPICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -95,7 +94,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testSingleCoefficientDetermination(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -120,7 +119,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testICPSumFormula(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -147,7 +146,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test(timeout = 30000)
+   @Test (timeout=191118523421744114L)
    public void testICPICalculation()
    {
       Random random = new Random(8723L);
