@@ -1,17 +1,20 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 
 /**
  * Created by agrabertilton on 3/4/15.
  */
 public class DoubleSupportICPEquationsTest
 {
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testSingleSupportICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -32,7 +35,8 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-14);
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testCoefficientCalculations()
    {
       Random random = new Random(8723L);
@@ -59,7 +63,8 @@ public class DoubleSupportICPEquationsTest
    }
 
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testZMPICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -89,7 +94,8 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-10);
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testSingleCoefficientDetermination(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -113,7 +119,8 @@ public class DoubleSupportICPEquationsTest
       }
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testICPSumFormula(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -139,7 +146,8 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpSum, matrixCalculation, 1e-10);
    }
 
-   @Test
+   @AverageDuration(duration = 0.1)
+   @Test(timeout = 30000)
    public void testICPICalculation()
    {
       Random random = new Random(8723L);
