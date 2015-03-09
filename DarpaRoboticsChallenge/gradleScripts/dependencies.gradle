@@ -65,8 +65,10 @@ dependencies {
     compile project(':ThirdParty')
     compile project(':IHMCWholeBodyController')
 	compile project(':IHMCStateEstimation')
+	compile project(':PathGeneration')
 
 	testCompile project(':CommonWalkingControlModules').sourceSets.test.output
 	testCompile project(':IHMCUtilities').sourceSets.test.output
 	testCompile project(':IHMCCommunication').sourceSets.test.output
+	testCompile project(':PathGeneration').sourceSets.test.output
 }
