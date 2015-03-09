@@ -84,6 +84,7 @@ public class HeadOrientationControlModule
    private final OneDoFJoint[] headOrientationControlJoints;
    private final NumericalInverseKinematicsCalculator numericalInverseKinematicsCalculator;
    private final DenseMatrix64F desiredJointAngles;
+   private final DoubleYoVariable[] yoDesiredJointAngles;
 
    private final BooleanYoVariable doPositionControl = new BooleanYoVariable("doPositionControlForNeck", registry);
    private final boolean[] doIntegrateDesiredAccerations;
@@ -116,6 +117,14 @@ public class HeadOrientationControlModule
       headOrientationControlJoints = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames), OneDoFJoint.class);
 
       jacobianId = momentumBasedController.getOrCreateGeometricJacobian(headOrientationControlJoints, headFrame);
+
+      yoDesiredJointAngles = new DoubleYoVariable[headOrientationControlJoints.length];
+
+      for (int i = 0; i < headOrientationControlJoints.length; i++)
+      {
+         String jointName = headOrientationControlJoints[i].getName();
+         yoDesiredJointAngles[i] = new DoubleYoVariable(jointName + "QDesired", parentRegistry);
+      }
 
       TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
       double dt = momentumBasedController.getControlDT();
@@ -214,7 +223,9 @@ public class HeadOrientationControlModule
       for (int i = 0; i < headOrientationControlJoints.length; i++)
       {
          OneDoFJoint joint = headOrientationControlJoints[i];
-         joint.setqDesired(desiredJointAngles.get(i, 0));
+         double qDesired = desiredJointAngles.get(i, 0);
+         joint.setqDesired(qDesired);
+         yoDesiredJointAngles[i].set(qDesired);
       }
    }
 
@@ -255,6 +266,7 @@ public class HeadOrientationControlModule
          OneDoFJoint joint = headOrientationControlJoints[i];
          joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccerations[i]);
          joint.setUnderPositionControl(false);
+         yoDesiredJointAngles[i].set(Double.NaN);
       }
    }
 
