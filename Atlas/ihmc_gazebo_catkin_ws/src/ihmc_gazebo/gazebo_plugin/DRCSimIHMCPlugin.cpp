@@ -187,7 +187,8 @@ public:
     void OnUpdate(const common::UpdateInfo & info) {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
-            if (!initialized) {
+            if (!initialized) 
+            {
                 if (!receivedControlMessage) {
 
                     jointController->Update();
@@ -205,11 +206,13 @@ public:
                         }
                     }
 
+					jointController->Reset();
                     initialized = true;
                 }
                 lock.unlock();	// make sure to unlock
                 return;
             }
+            
             if (cyclesRemainingTillControlMessage == 0) {
                 // Block for control message
                 while (!receivedControlMessage) {
@@ -285,11 +288,11 @@ public:
             data.put(wrench.body2Force.z);
 
         }
-
         tcpDataServer.send(data);
     }
 
-    void readControlMessage(char* buffer, std::size_t bytes_transffered) {
+    void readControlMessage(char* buffer, std::size_t bytes_transffered) 
+    {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
             if (bytes_transffered == 16 + joints.size() * 8) {
