@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -28,6 +30,8 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
 
 public class WholeBodyTrajectory
 {
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
    private double maxJointVelocity;
    private double maxJointAcceleration;
    private double maxDistanceInTaskSpaceBetweenWaypoints;
@@ -35,11 +39,12 @@ public class WholeBodyTrajectory
    private final HashMap<String,Integer> jointNameToTrajectoryIndex = new HashMap<String,Integer>();
    private final HashMap<String, Double> desiredJointAngles = new HashMap<String, Double> ();
    private RigidBodyTransform worldToFoot; 
-
+   private final SDFFullRobotModel fullRobotModel;
 
    public WholeBodyTrajectory(SDFFullRobotModel fullRobotModel, double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
    {
       currentRobotModel = new SDFFullRobotModel( fullRobotModel );
+      this.fullRobotModel = fullRobotModel;
 
       this.maxJointVelocity = maxJointVelocity;
       this.maxJointAcceleration = maxJointAcceleration;
@@ -82,8 +87,8 @@ public class WholeBodyTrajectory
          ReferenceFrame initialTargetFrame = initialRobotState.getHandControlFrame( side );
          ReferenceFrame finalTargetFrame   = finalRoboState.getHandControlFrame( side );
 
-         ReferenceFrame attachment = wbSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame() );
-         ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame() );
+         ReferenceFrame attachment = wbSolver.getDesiredGripperAttachmentFrame(side, worldFrame );
+         ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, worldFrame );
          RigidBodyTransform attachmentToPalm = palm.getTransformToDesiredFrame( attachment );
 
          previousOption.set( side, wbSolver.getNumberOfControlledDoF(side) );
@@ -187,7 +192,7 @@ public class WholeBodyTrajectory
                double alpha = ((double)s)/(numSegments);
                interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
 
-               FramePose target =  new FramePose( ReferenceFrame.getWorldFrame(), interpolatedTransform );
+               FramePose target =  new FramePose( worldFrame, interpolatedTransform );
 
                wbSolver.setGripperPalmTarget( initialRobotState,  side, target );
 
@@ -332,7 +337,7 @@ public class WholeBodyTrajectory
 
          currentRobotModel.updateFrames();
 
-         TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(),  currentRobotModel.getElevator() );
+         TwistCalculator twistCalculator = new TwistCalculator(worldFrame,  currentRobotModel.getElevator() );
          twistCalculator.compute();
 
          //-----  store pelvis data --------
@@ -378,16 +383,35 @@ public class WholeBodyTrajectory
       
       // check if parts of the trajectory packet can be set to null to decrease packet size:
       double epsilon = 1e-5;
+      Vector3d zeroVector = new Vector3d();
+      
+      RigidBodyTransform pelvisToWorld = fullRobotModel.getRootJoint().getFrameAfterJoint().getTransformToWorldFrame();
+      Point3d pelvisPosition = new Point3d();
+      Quat4d pelvisOrientation = new Quat4d();
+      pelvisToWorld.get(pelvisOrientation, pelvisPosition);
+      
+      RigidBodyTransform chestToWorld =  fullRobotModel.getChest().getParentJoint().getFrameAfterJoint().getTransformToWorldFrame();
+      Point3d chestPosition = new Point3d();
+      Quat4d chestOrientation = new Quat4d();
+      chestToWorld.get(chestOrientation, chestPosition);
       
       boolean rightArmVelocityContent = false;
       boolean rightArmPositionContent = false;
       boolean leftArmVelocityContent = false;
       boolean leftArmPositionContent = false;
       
+      boolean pelvisLinearVelocityContent = false;
+      boolean pelvisWorldPositionContent = false;
+      boolean pelvisAngularVelocityContent = false;
+      boolean pelvisWorldOrientationContent = false;
+      
+      boolean chestWorldOrientationContent = false;
+      boolean chestAngulatVelocityContent = false;
+      
       for (int n = 0; n < numWaypoints; n++)
       {
          int J = 0;
-         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get(RobotSide.RIGHT))
+         for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.RIGHT))
          {   
             if (!MathTools.epsilonEquals(packet.rightArmJointAngle[J][n], armJoint.getQ(), epsilon))
             {
@@ -401,7 +425,7 @@ public class WholeBodyTrajectory
          }
          
          J = 0;
-         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get(RobotSide.LEFT))
+         for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.LEFT))
          {   
             if (!MathTools.epsilonEquals(packet.leftArmJointAngle[J][n], armJoint.getQ(), epsilon))
             {
@@ -413,27 +437,83 @@ public class WholeBodyTrajectory
             }
             J++;
          }
+         
+         if(!packet.pelvisLinearVelocity[n].epsilonEquals(zeroVector, epsilon));
+         {
+            pelvisLinearVelocityContent = true;
+         }
+         if(!packet.pelvisWorldPosition[n].epsilonEquals(pelvisPosition, epsilon))
+         {
+            pelvisWorldPositionContent = true;
+         }
+         if(!packet.pelvisWorldOrientation[n].epsilonEquals(pelvisOrientation, epsilon))
+         {
+            pelvisWorldOrientationContent = true;
+         }
+         if(!packet.pelvisAngularVelocity[n].epsilonEquals(zeroVector, epsilon))
+         {
+            pelvisLinearVelocityContent = true;
+         }
+         
+         if(!packet.chestWorldOrientation[n].epsilonEquals(chestOrientation, epsilon))
+         {
+            chestWorldOrientationContent = true;
+         }
+         if(!packet.chestAngularVelocity[n].epsilonEquals(zeroVector, epsilon))
+         {
+            chestAngulatVelocityContent = true;
+         }
       }
       
       if (!rightArmPositionContent)
       {
-//         System.out.println("no right arm position");
+//         System.out.println("no right arm position content");
          packet.rightArmJointAngle = null;
       }
       if (!rightArmVelocityContent)
       {
-//         System.out.println("no right arm velocity");
+//         System.out.println("no right arm velocity content");
          packet.rightArmJointVelocity = null;
       }
       if (!leftArmPositionContent)
       {
-//         System.out.println("no left arm position");
+//         System.out.println("no left arm position content");
          packet.leftArmJointAngle = null;
       }
       if (!leftArmVelocityContent)
       {
-//         System.out.println("no left arm velocity");
+//         System.out.println("no left arm velocity content");
          packet.leftArmJointVelocity = null;
+      }
+      if (!pelvisLinearVelocityContent)
+      {
+//         System.out.println("no pelvis linear velocity");
+         packet.pelvisLinearVelocity = null;
+      }
+      if(!pelvisWorldPositionContent)
+      {
+//         System.out.println("no pelvis position content");
+         packet.pelvisWorldPosition = null;
+      }
+      if(!pelvisWorldOrientationContent)
+      {
+//         System.out.println("no pelvis orientation content");
+         packet.pelvisWorldOrientation = null;
+      }
+      if(!pelvisAngularVelocityContent)
+      {
+//         System.out.println("no pelvis angular velocity content");
+         packet.pelvisAngularVelocity = null;
+      }
+      if(!chestWorldOrientationContent)
+      {
+//         System.out.println("no chest orientation content");
+         packet.chestWorldOrientation = null;
+      }
+      if(!chestAngulatVelocityContent)
+      {
+//         System.out.println("no chest angular velocity content");
+         packet.chestAngularVelocity = null;
       }
       
       return packet;
