@@ -1,5 +1,7 @@
 package us.ihmc.robotiq.communication;
 
+import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ModbusTCPConnection
@@ -94,8 +97,22 @@ public class ModbusTCPConnection
 			int outBytes = HEADER_LENGTH + data.length; 
 			outStream.write(outBuffer, 0, outBytes);
 			outStream.flush();
-			
-			int inBytes = inStream.read(inBuffer, 0, 32);
+
+			int inBytes = 0;
+			while(inBytes < HEADER_LENGTH) // Read the whole header
+			{
+				int bytesToRead = HEADER_LENGTH - inBytes;
+				inBytes += inStream.read(inBuffer, inBytes, bytesToRead);
+			}
+
+			int inLength = ByteBuffer.wrap(new byte[]{inBuffer[4], inBuffer[5]}).getShort();
+			int totalLength = inLength + HEADER_LENGTH;
+
+			while(inBytes < totalLength)
+			{
+				int bytesToRead = totalLength - inBytes;
+				inBytes += inStream.read(inBuffer, inBytes, bytesToRead);
+			}
 			
 			return Arrays.copyOfRange(inBuffer, HEADER_LENGTH, inBytes); //return the reply with the proper length (removes header)
 		}

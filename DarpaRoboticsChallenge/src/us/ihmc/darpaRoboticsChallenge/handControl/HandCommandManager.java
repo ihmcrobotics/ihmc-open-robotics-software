@@ -13,7 +13,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class HandCommandManager
 {
-   private final boolean DEBUG = false;
+   private final boolean DEBUG = true;
 	private final String SERVER_ADDRESS = "localhost";
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
