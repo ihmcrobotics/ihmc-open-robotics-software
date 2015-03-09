@@ -4,17 +4,30 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.atlas.AtlasWholeBodyIK;
+import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTests;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTest;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
+import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
 
 @BambooPlan(planType = { BambooPlanType.Slow, BambooPlanType.VideoA })
-public class AtlasObstacleCourseWholeBodyTrajectoryTests extends DRCObstacleCourseWholeBodyTrajectoryTests
+public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCourseWholeBodyTrajectoryTest
 {
    private final DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
    private final int numberOfArmJoints = robotModel.getJointMap().getArmJointNames().length;
@@ -127,6 +140,12 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTests extends DRCObstacleCour
          e.printStackTrace();
       }
       return packet;
+   }
+
+   @Override
+   public WholeBodyIkSolver createRobotSpecificWholeBodyIKSolver()
+   {
+      return new AtlasWholeBodyIK(robotModel);
    }
 
 }

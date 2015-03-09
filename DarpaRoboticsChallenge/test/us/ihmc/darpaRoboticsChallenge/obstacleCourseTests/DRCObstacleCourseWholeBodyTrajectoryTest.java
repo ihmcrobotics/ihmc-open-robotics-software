@@ -2,8 +2,10 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -13,8 +15,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationControlModule;
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -36,12 +38,19 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.ZUpFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.trajectory.TrajectoryND;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
+import us.ihmc.wholeBodyController.WholeBodyTrajectory;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
@@ -49,7 +58,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements MultiRobotTestInterface
+public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    
@@ -80,7 +89,6 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements Multi
    }
 
    @Ignore("Invoked manually to test memory & thread leaks")
-
    @AverageDuration(duration = 50.0)
    @Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
@@ -130,11 +138,19 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements Multi
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
    
+   private void setupCameraForArmTests()
+   {
+      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
+      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+   
    public abstract WholeBodyTrajectoryPacket getRobotSpecificWholeBodyTrajectoryPacket(double trajectoryTime);
    
    @AverageDuration(duration = 38.0)
    @Test(timeout = 124050)
-   public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
+   public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -187,7 +203,6 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements Multi
       FrameOrientation desiredChestFrameOrientation = new FrameOrientation();
       Quat4d desiredChestQuat = new Quat4d();
 
-
       DoubleYoVariable controllerDesiredInWorldQx = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qx");
       DoubleYoVariable controllerDesiredInWorldQy = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qy");
       DoubleYoVariable controllerDesiredInWorldQz = (DoubleYoVariable) scs.getVariable(ChestOrientationControlModule.class.getSimpleName(), "desiredChestInWorld" + "Qz");
@@ -204,13 +219,20 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements Multi
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 8;
-//      ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
-      
-      
-      WholeBodyTrajectoryPacket packet = getRobotSpecificWholeBodyTrajectoryPacket(trajectoryTime);
+      WholeBodyTrajectoryPacket packet = new WholeBodyTrajectoryPacket(3, 6);
       
       //FIXME Davide currently has trajectory generation for orientations such that only the final destination is used. This might change later so fix it then.... -Will
-      packet.chestWorldOrientation[packet.chestWorldOrientation.length - 1] = desiredChestQuat;
+      packet.chestWorldOrientation[0] = new Quat4d();
+      packet.chestWorldOrientation[1] = new Quat4d();
+      packet.chestWorldOrientation[2] = desiredChestQuat;
+      
+      packet.pelvisWorldPosition[0] = new Point3d(0.0, 0.0, 0.7873);
+      packet.pelvisWorldPosition[1] = new Point3d(0.0, 0.0, 0.7873);
+      packet.pelvisWorldPosition[2] = new Point3d(0.0, 0.0, 0.7873);
+      
+      packet.timeAtWaypoint[0] = trajectoryTime/3;
+      packet.timeAtWaypoint[1] = trajectoryTime*2/3;
+      packet.timeAtWaypoint[2] = trajectoryTime;
       
       drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
       
@@ -297,10 +319,89 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTests implements Multi
       assertTrue("The chest controller goes bad when turning", chestAxisAngleError.length() < 0.01);
 
       ThreadTools.sleep(2000);
-
+  
       assertTrue(success);
       
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @AverageDuration(duration = 38.0)
+   @Test(timeout = 124050)
+   public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
 
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCStandingTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+      
+      setupCameraForArmTests();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+//      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      
+      WholeBodyTrajectory wholeBodyTrajectoryGenerator = new WholeBodyTrajectory(drcSimulationTestHelper.getSDFFullRobotModel(), 0.5, 5, 0.2);
+      WholeBodyIkSolver wbSolver = createRobotSpecificWholeBodyIKSolver();         
+      wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
+      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
+      SDFFullRobotModel actualRobot = new SDFFullRobotModel(drcSimulationTestHelper.getSDFFullRobotModel());
+      SDFFullRobotModel finalRobotState = new SDFFullRobotModel(actualRobot);
+      
+      RigidBodyTransform rBT1 = new RigidBodyTransform(new Matrix4d(0.05, 1.00, -0.03, 0.335, 0.98, -0.05, 0.21, 0.044, 0.21, -0.04, -0.98, 0.907, 0.0, 0.0, 0.0, 1.0));
+      RigidBodyTransform lBT1 = new RigidBodyTransform(new Matrix4d(0.00, 0.57, -0.82, 0.193,-0.91, -0.34, -0.24, 0.17, -0.41, 0.75, 0.52, 0.742, 0.0, 0.0, 0.0, 1.0));
+      RigidBodyTransform rBT2 = new RigidBodyTransform(new Matrix4d(0.05, 1.0, -0.03, 0.336, 0.98, -0.04, 0.21, 0.044, 0.2, -0.04, -0.98, 0.908, 0.0, 0.0, 0.0, 1.0));
+      RigidBodyTransform lBT2 = new RigidBodyTransform(new Matrix4d(-0.14, -0.91, 0.40, 0.328, -0.96, 0.03, -0.28, 0.006, 0.25, -0.42, -0.87, 1.190, 0.0, 0.0, 0.0, 1.0));
+      
+      FramePose rightEndEffectorPose1 = new FramePose(ReferenceFrame.constructFrameWithUnchangingTransformToParent("r1", ReferenceFrame.getWorldFrame(), rBT1));
+      FramePose leftEndEffectorPose1 = new FramePose(ReferenceFrame.constructFrameWithUnchangingTransformToParent("l1", ReferenceFrame.getWorldFrame(), lBT1));
+      FramePose rightEndEffectorPose2 = new FramePose(ReferenceFrame.constructFrameWithUnchangingTransformToParent("r2", ReferenceFrame.getWorldFrame(), rBT2));
+      FramePose leftEndEffectorPose2 = new FramePose(ReferenceFrame.constructFrameWithUnchangingTransformToParent("l2", ReferenceFrame.getWorldFrame(), lBT2));
+      
+      ArrayList<SideDependentList<FramePose>> list = new ArrayList<SideDependentList<FramePose>>();
+      
+      list.add(new SideDependentList<FramePose>(leftEndEffectorPose1, rightEndEffectorPose1));
+      list.add(new SideDependentList<FramePose>(leftEndEffectorPose2, rightEndEffectorPose2));
+      
+      for(SideDependentList<FramePose> sideDependentList : list){
+         for(RobotSide robotSide : RobotSide.values){
+            wbSolver.setGripperPalmTarget(drcSimulationTestHelper.getSDFFullRobotModel(), robotSide, sideDependentList.get(robotSide));
+         }
+         try
+         {
+            wbSolver.compute(actualRobot, finalRobotState, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+
+         TrajectoryND trajND = null;
+         
+         try
+         {
+            trajND = wholeBodyTrajectoryGenerator.createTaskSpaceTrajectory(wbSolver, drcSimulationTestHelper.getSDFFullRobotModel(), finalRobotState);
+         }
+         catch (Exception e)
+         {
+            e.printStackTrace();
+         }
+
+         WholeBodyTrajectoryPacket packet = wholeBodyTrajectoryGenerator.convertTrajectoryToPacket(trajND);
+         
+         drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
+         
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + packet.timeAtWaypoint[packet.timeAtWaypoint.length] );
+         
+         assertTrue(success);
+      }
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
+   public abstract WholeBodyIkSolver createRobotSpecificWholeBodyIKSolver();
+
+   
 }
