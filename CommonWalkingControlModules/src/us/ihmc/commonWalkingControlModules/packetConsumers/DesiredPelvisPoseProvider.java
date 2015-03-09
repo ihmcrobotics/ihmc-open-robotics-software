@@ -43,18 +43,32 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          {
             //System.out.println("DesiredPelvisPoseProvider: PACKET received");
 
-            if (packet != null && packet.pelvisWorldPosition != null )
+            if (packet != null)
             {
                double[] timeAtWaypoints = packet.timeAtWaypoint;
                Point3d[] positions = packet.pelvisWorldPosition;
                Vector3d[] velocities = packet.pelvisLinearVelocity;
-               WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(worldFrame, timeAtWaypoints, positions, velocities);
-               desiredPelvisPositionWithWaypoints.set(positionTrajectoryData);
+               if (positions != null)
+               {
+                  if (velocities == null)
+                  {
+                     velocities = new Vector3d[packet.numWaypoints];
+                     for (int i = 0; i < packet.numWaypoints; ++i)
+                     {
+                        velocities[i] = new Vector3d();
+                     }
+                  }
+                  WaypointPositionTrajectoryData positionTrajectoryData = new WaypointPositionTrajectoryData(worldFrame, timeAtWaypoints, positions, velocities);
+                  desiredPelvisPositionWithWaypoints.set(positionTrajectoryData);
+               }
 
                Quat4d[] orientations = packet.pelvisWorldOrientation;
                // TODO: angular velocity is not used yet
-               WaypointOrientationTrajectoryData orientationTrajectoryData = new WaypointOrientationTrajectoryData(worldFrame, timeAtWaypoints, orientations, null);
-               desiredPelvisOrientationWithWaypoints.set(orientationTrajectoryData);
+               if (orientations != null)
+               {
+                  WaypointOrientationTrajectoryData orientationTrajectoryData = new WaypointOrientationTrajectoryData(worldFrame, timeAtWaypoints, orientations, null);
+                  desiredPelvisOrientationWithWaypoints.set(orientationTrajectoryData);
+               }
             }
          }
             };
