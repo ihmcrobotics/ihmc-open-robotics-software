@@ -153,7 +153,7 @@ public class ManipulationControlModule
          handControlModules.get(robotSide).doControl();
       }
       
-      if(objectWeightProvider.isNewInformationAvailable())
+      if(objectWeightProvider != null && objectWeightProvider.isNewInformationAvailable())
       {
          toolRigidBodies.get(objectWeightProvider.getRobotSide()).setMass(objectWeightProvider.getWeight());
       }
