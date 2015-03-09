@@ -328,14 +328,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
       {
-         if (robotSide == RobotSide.LEFT)
-         {
-            return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngle != null;
-         }
-         else
-         {
-            return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngle != null;
-         }
+         return true;
       }
       else
       {

@@ -8,6 +8,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -167,9 +168,9 @@ public class WholeBodyTrajectory
 
                double initialAngle = initialRobotState.getOneDoFJointByName(jointName).getQ();
                double finalAngle   = finalRoboState.getOneDoFJointByName(jointName).getQ(); 
-               double currentAngle = currentRobotModel.getOneDoFJointByName(jointName).getQ(); 
-
-               //double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
+//               double currentAngle = currentRobotModel.getOneDoFJointByName(jointName).getQ(); 
+//
+//               double interpolatedAngle = currentAngle*(1.0 -alpha) + finalAngle*alpha ;
                double interpolatedAngle = initialAngle*(1.0 -alpha) + finalAngle*alpha ;
 
                thisWaypointAngles.set(index,interpolatedAngle );
@@ -353,7 +354,6 @@ public class WholeBodyTrajectory
       }
       
       // add one last point to give to the controller the time to converge.
-      
       int w = numWaypoints;
       if( w > 0)
       {
@@ -375,6 +375,67 @@ public class WholeBodyTrajectory
          packet.chestWorldOrientation[w].set( packet.chestWorldOrientation[w-1] );
          packet.chestAngularVelocity[w].set(  packet.chestAngularVelocity[w-1] );
       }
+      
+      // check if parts of the trajectory packet can be set to null to decrease packet size:
+      double epsilon = 1e-5;
+      
+      boolean rightArmVelocityContent = false;
+      boolean rightArmPositionContent = false;
+      boolean leftArmVelocityContent = false;
+      boolean leftArmPositionContent = false;
+      
+      for (int n = 0; n < numWaypoints; n++)
+      {
+         int J = 0;
+         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get(RobotSide.RIGHT))
+         {   
+            if (!MathTools.epsilonEquals(packet.rightArmJointAngle[J][n], armJoint.getQ(), epsilon))
+            {
+               rightArmPositionContent = true;
+            }
+            if (!MathTools.epsilonEquals(packet.rightArmJointVelocity[J][n], 0.0, epsilon))
+            {
+               rightArmVelocityContent = true;
+            }
+            J++;
+         }
+         
+         J = 0;
+         for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get(RobotSide.LEFT))
+         {   
+            if (!MathTools.epsilonEquals(packet.leftArmJointAngle[J][n], armJoint.getQ(), epsilon))
+            {
+               leftArmPositionContent = true;
+            }
+            if (!MathTools.epsilonEquals(packet.leftArmJointVelocity[J][n], 0.0, epsilon))
+            {
+               leftArmVelocityContent = true;
+            }
+            J++;
+         }
+      }
+      
+      if (!rightArmPositionContent)
+      {
+//         System.out.println("no right arm position");
+         packet.rightArmJointAngle = null;
+      }
+      if (!rightArmVelocityContent)
+      {
+//         System.out.println("no right arm velocity");
+         packet.rightArmJointVelocity = null;
+      }
+      if (!leftArmPositionContent)
+      {
+//         System.out.println("no left arm position");
+         packet.leftArmJointAngle = null;
+      }
+      if (!leftArmVelocityContent)
+      {
+//         System.out.println("no left arm velocity");
+         packet.leftArmJointVelocity = null;
+      }
+      
       return packet;
    }
 }
