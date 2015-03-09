@@ -9,6 +9,7 @@ import java.util.Random;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -154,6 +155,11 @@ public class DRCSimulationTestHelper
    public FullRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
+   }
+   
+   public SDFFullRobotModel getSDFFullRobotModel()
+   {
+      return (SDFFullRobotModel) fullRobotModel;
    }
    
    public CommonAvatarEnvironmentInterface getTestEnviroment()
