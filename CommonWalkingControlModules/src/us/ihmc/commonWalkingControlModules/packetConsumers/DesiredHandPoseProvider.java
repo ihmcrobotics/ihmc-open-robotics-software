@@ -117,18 +117,18 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
             {
                switch (object.getReferenceFrame())
                {
-               case WORLD:
-                  packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
+                  case WORLD :
+                     packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
 
-                  break;
+                     break;
 
-               case CHEST:
-                  packetReferenceFrames.put(robotSide, chestFrame);
+                  case CHEST :
+                     packetReferenceFrames.put(robotSide, chestFrame);
 
-                  break;
+                     break;
 
-               default:
-                  throw new RuntimeException("Unkown frame");
+                  default :
+                     throw new RuntimeException("Unkown frame");
                }
 
                FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
@@ -219,18 +219,18 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
 
       switch (object.getReferenceFrame())
       {
-      case WORLD:
-         packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
+         case WORLD :
+            packetReferenceFrames.put(robotSide, ReferenceFrame.getWorldFrame());
 
-         break;
+            break;
 
-      case CHEST:
-         packetReferenceFrames.put(robotSide, chestFrame);
+         case CHEST :
+            packetReferenceFrames.put(robotSide, chestFrame);
 
-         break;
+            break;
 
-      default:
-         throw new RuntimeException("Unknown frame");
+         default :
+            throw new RuntimeException("Unknown frame");
       }
 
       Point3d[] desiredPositions = object.getPositions();
@@ -328,7 +328,14 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
       {
-         return wholeBodyTrajectoryHandPoseListPackets.get().hasArmTrajectory(robotSide);
+         if (robotSide == RobotSide.LEFT)
+         {
+            return wholeBodyTrajectoryHandPoseListPackets.get().leftArmJointAngle != null;
+         }
+         else
+         {
+            return wholeBodyTrajectoryHandPoseListPackets.get().rightArmJointAngle != null;
+         }
       }
       else
       {

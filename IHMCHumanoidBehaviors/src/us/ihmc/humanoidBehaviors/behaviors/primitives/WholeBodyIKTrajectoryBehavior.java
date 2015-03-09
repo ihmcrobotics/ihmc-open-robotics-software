@@ -119,7 +119,8 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
          wholeBodyTrajectoryPacket.setDestination(PacketDestination.UI);
          sendPacketToNetworkProcessor(wholeBodyTrajectoryPacket);
          
-         trajectoryTime = wholeBodyTrajectoryPacket.getTrajectoryTime();
+         int numWaypoints = wholeBodyTrajectoryPacket.numWaypoints;
+         trajectoryTime = wholeBodyTrajectoryPacket.timeAtWaypoint[numWaypoints-1] - wholeBodyTrajectoryPacket.timeAtWaypoint[0];
          startTime = yoTime.getDoubleValue();
          sendPacket.set(false);
       }

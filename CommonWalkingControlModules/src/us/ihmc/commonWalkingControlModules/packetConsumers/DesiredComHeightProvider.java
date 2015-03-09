@@ -65,7 +65,7 @@ public class DesiredComHeightProvider
    
    public void receivedPacketImplementation(WholeBodyTrajectoryPacket packet)
    {
-      if (packet != null && packet.hasPelvisTrajectory() )
+      if (packet != null && packet.pelvisWorldPosition != null )
       {
          double[] timeAtWaypoints = packet.timeAtWaypoint;
          Point3d[] positions = packet.pelvisWorldPosition;

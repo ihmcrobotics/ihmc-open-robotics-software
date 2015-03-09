@@ -43,7 +43,7 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          {
             //System.out.println("DesiredPelvisPoseProvider: PACKET received");
 
-            if (packet != null && packet.hasPelvisTrajectory() )
+            if (packet != null && packet.pelvisWorldPosition != null )
             {
                double[] timeAtWaypoints = packet.timeAtWaypoint;
                Point3d[] positions = packet.pelvisWorldPosition;
