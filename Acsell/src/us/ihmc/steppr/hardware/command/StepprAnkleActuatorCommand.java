@@ -12,9 +12,9 @@ public class StepprAnkleActuatorCommand
    private final YoVariableRegistry registry;
    private final RightActuatorCommand rightActuatorCommand;
    private final LeftActuatorCommand leftActuatorCommand;
-   
-   private final StepprJointCommand ankleY;
+
    private final StepprJointCommand ankleX;
+   private final StepprJointCommand ankleY;
    
 
    public StepprAnkleActuatorCommand(String name, StepprJointCommand ankleY, StepprJointCommand ankleX, StepprActuator rightActuator, StepprActuator leftActuator, YoVariableRegistry parentRegistry)
@@ -32,17 +32,14 @@ public class StepprAnkleActuatorCommand
    
    public void update()
    {
-      double mRight = ankleX.getMotorAngle(0);
-      double mLeft = ankleX.getMotorAngle(1);
+
+      ankleCalculator.updateAnkleState(ankleX, ankleY);
+
+      rightActuatorCommand.setQdd_d(ankleCalculator.getComputedActuatorQddRight());
+      leftActuatorCommand.setQdd_d(ankleCalculator.getComputedActuatorQddLeft());
       
-      ankleCalculator.calculateActuatordQdd(mRight, mLeft, ankleX.getQd(), ankleY.getQd(), ankleX.getQdd_d(), ankleY.getQdd_d());
-      rightActuatorCommand.setQdd_d(ankleCalculator.getActuatorQddRight());
-      leftActuatorCommand.setQdd_d(ankleCalculator.getActuatorQddLeft());
-      
-      ankleCalculator.calculateDesiredTau(mRight, mLeft, ankleX.getTauDesired(), ankleY.getTauDesired());
-      
-      rightActuatorCommand.setTauDesired(ankleCalculator.getTauRightActuator());
-      leftActuatorCommand.setTauDesired(ankleCalculator.getTauLeftActuator());
+      rightActuatorCommand.setTauDesired(ankleCalculator.getComputedTauRightActuator());
+      leftActuatorCommand.setTauDesired(ankleCalculator.getComputedTauLeftActuator());
  
       rightActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));
       leftActuatorCommand.setDamping(ankleY.getDamping() / (ankleCalculator.getRatio() * ankleCalculator.getRatio()));

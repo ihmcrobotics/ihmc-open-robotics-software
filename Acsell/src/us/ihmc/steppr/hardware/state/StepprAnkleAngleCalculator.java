@@ -1,44 +1,72 @@
 package us.ihmc.steppr.hardware.state;
 
+import us.ihmc.steppr.hardware.command.StepprJointCommand;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+
 public interface StepprAnkleAngleCalculator
 {
+   @Deprecated
    void updateAnkleState(double motorAngleRight, double motorAngleLeft, double motorVelocityRight, double motorVelocityLeft, double tauMeasureAnkleRight,
          double tauMeasureAnkleLeft);
-
+   
+   public void updateAnkleState(StepprActuatorState rightActuator, StepprActuatorState leftActuator);
+   
+   public void updateAnkleState(StepprJointCommand ankleX, StepprJointCommand ankleY);
+   
+   public void updateAnkleState(OneDoFJoint ankleX, OneDoFJoint ankleY);
+   
    public double getQAnkleX();
 
    public double getQAnkleY();
 
-   public double getQdAnkleX();
+//   public double getQdAnkleX();
 
-   public double getQdAnkleY();
+//   public double getQdAnkleY();
 
-   public void calculateDesiredTau(double motorAngleRight, double motorAngleLeft, double tauDesiredAnkleX, double tauDesiredAnkleY);
+//   public void calculateDesiredTau(double motorAngleRight, double motorAngleLeft, double tauDesiredAnkleX, double tauDesiredAnkleY);
 
-   public double getTauRightActuator();
+   public double getComputedTauRightActuator();
 
-   public double getTauLeftActuator();
+   public double getComputedTauLeftActuator();
 
    public double getRatio();
 
-   double calculateRightMotorAngle(double ankleX, double ankleY);
+//   double calculateRightMotorAngle(double ankleX, double ankleY);
 
-   double calculateLeftMotorAngle(double ankleX, double ankleY);
+//   double calculateLeftMotorAngle(double ankleX, double ankleY);
 
-   double getTauAnkleX();
+   double getComputedTauAnkleX();
 
-   double getTauAnkleY();
+   double getComputedTauAnkleY();
 
-   double getMotorVelocityLeft();
+   double getComputedMotorVelocityLeft();
 
-   double getMotorVelocityRight();
+   double getComputedMotorVelocityRight();
 
-   void calculateActuatordQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY);
+   //void calculateActuatordQd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY);
 
-   void calculateActuatordQdd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY, double qddAnkleX, double qddAnkleY);
+   //void calculateActuatordQdd(double motorAngleRight, double motorAngleLeft, double qdAnkleX, double qdAnkleY, double qddAnkleX, double qddAnkleY);
 
-   double getActuatorQddLeft();
+   double getComputedActuatorQddLeft();
 
-   double getActuatorQddRight();
+   double getComputedActuatorQddRight();
+
+   double getComputedQAnkleX();
+
+   double getComputedQAnkleY();
+
+   double getComputedQrightActuator();
+
+   double getComputedQleftActuator();
+
+	double getComputedQdAnkleX();
+	
+	double getComputedQdAnkleY();
+	
+	double getComputedQdRightActuator();
+	
+	double getComputedQdLeftActuator();
+
+
 
 }
