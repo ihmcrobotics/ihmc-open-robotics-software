@@ -39,7 +39,7 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
          {
             if (packet != null)
             {
-               if(packet.hasChestTrajectory() )
+               if(packet.chestWorldOrientation != null )
                {
 
                   WaypointOrientationTrajectoryData data = new WaypointOrientationTrajectoryData(worldFrame, 
