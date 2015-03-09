@@ -1,6 +1,7 @@
 package us.ihmc.atlas.drcsimGazebo;
 
 import java.io.IOException;
+import java.net.URI;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -15,7 +16,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
@@ -26,8 +29,9 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.robotDataCommunication.YoVariableServer;
-import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -56,6 +60,7 @@ public class DRCSimGazeboControllerFactory
        */
       KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboSimControllerCommunicator" );
+//      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
 
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
@@ -103,22 +108,28 @@ public class DRCSimGazeboControllerFactory
 
       try
       {
-         drcNetworkProcessorServer.connect();
+    	  drcNetworkProcessorServer.connect();
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
 
-      yoVariableServer.start();
+//      yoVariableServer.start();
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
       
       if(USE_GUI)
       {
-//         URI rosMasterURI = robotModel.getNetworkParameters().getRosURI();
-//         new DRCNetworkProcessor(rosMasterURI, robotModel);
+    	 KryoPacketClientEndPointCommunicator packetCommunicator = new KryoPacketClientEndPointCommunicator("localhost", NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboControllerPluginClientEndpoint");
+         DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
+         URI rosURI = NetworkParameters.getROSURI();
+         networkModuleParameters.setRosUri(rosURI);
+         networkModuleParameters.setUseUiModule(true);
+         networkModuleParameters.setUseRosModule(true);
+         networkModuleParameters.setControllerCommunicator(packetCommunicator);
+         new DRCNetworkProcessor(robotModel, networkModuleParameters);
       }
       try
       {
