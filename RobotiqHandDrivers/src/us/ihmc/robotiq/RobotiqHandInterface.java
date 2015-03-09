@@ -955,7 +955,13 @@ public final class RobotiqHandInterface
 		
 		try
 		{
-			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(dataToSend, 0, dataLength));
+			byte[] dataToSendCopy = new byte[dataLength];
+			for(int i = 0; i < dataLength; i++)
+			{
+				dataToSendCopy[i] = dataToSend[i];
+			}
+			return connection.transcieve(RobotiqHandParameters.UNIT_ID, dataToSendCopy);
+//			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(dataToSend, 0, dataLength));
 		}
 		catch (IOException e)
 		{
@@ -1005,8 +1011,14 @@ public final class RobotiqHandInterface
 //		System.out.println(position[FINGER_A]);
 //		System.out.println(position[FINGER_B]);
 //		System.out.println(position[FINGER_C]);
-		
-		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
+
+		byte[] dataToSendCopy = new byte[dataLength];
+		for(int i = 0; i < dataLength; i++)
+		{
+			dataToSendCopy[i] = dataToSend[i];
+		}
+		sendRequest(SET_REGISTERS, REGISTER_START, dataToSendCopy);
+//		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
 	}
 	
 	private byte[] getStatus() throws RobotiqConnectionException
