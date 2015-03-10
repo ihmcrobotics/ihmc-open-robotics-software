@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
@@ -28,7 +28,7 @@ public class ContactableDoorRobotTest
    
    RigidBodyTransform doorToWorldTransform = new RigidBodyTransform();
    
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 100000)
    public void testPointIsClose()
    {      
@@ -49,7 +49,7 @@ public class ContactableDoorRobotTest
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {

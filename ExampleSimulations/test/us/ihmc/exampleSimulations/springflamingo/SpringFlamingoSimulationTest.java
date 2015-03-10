@@ -17,7 +17,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
 @BambooPlan(planType={BambooPlanType.UI})
@@ -45,7 +45,7 @@ public class SpringFlamingoSimulationTest
       testFixture = null;
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSpringFlamingoSimulationAndGUI() throws SimulationExceededMaximumTimeException
    {
@@ -116,7 +116,7 @@ public class SpringFlamingoSimulationTest
    }
 	
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testRewindability() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{

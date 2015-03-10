@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -82,7 +82,7 @@ public class AtlasSDFVerificationTest
 
    @Ignore
    @QuarantinedTest("February 16, 2015. This passes locally, but not on Bamboo. It does some crazy file writing, but in the wrong order seemingly. Someone please fix...")
-	@AverageDuration(duration = 10.4)
+	@EstimatedDuration(duration = 10.4)
 	@Test(timeout = 41302)
    public void testSimpleLegSwing() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException, IOException, ControllerFailureException
    {

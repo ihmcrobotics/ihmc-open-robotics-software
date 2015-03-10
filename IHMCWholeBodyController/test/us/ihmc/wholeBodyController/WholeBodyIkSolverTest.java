@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -64,7 +64,7 @@ public abstract class WholeBodyIkSolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testLeftHandIn3P3RModeManual()
    {
@@ -98,7 +98,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testRightHandIn3PModeManual()
    {
@@ -129,7 +129,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-   @AverageDuration(duration = 6.0)
+   @EstimatedDuration(duration = 6.0)
    @Test(timeout = 20000)
    public void testRightHandIn3PMode()
    {
@@ -160,7 +160,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testLeftHandIn3PModeManual()
    {
@@ -191,7 +191,7 @@ public abstract class WholeBodyIkSolverTest
       scs.cropBuffer();
    }
 
-   @AverageDuration(duration = 6.0)
+   @EstimatedDuration(duration = 6.0)
    @Test(timeout = 20000)
    public void testLeftHandIn3PMode()
    {
@@ -224,7 +224,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore    // 3/6/15: test is failing
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testRightHandIn3P2RModeManual()
    {
@@ -255,7 +255,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testLeftHandIn3P2RModeManual()
    {
@@ -286,7 +286,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
 // PASS
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testRightHandIn3P3RModeManual()
    {
@@ -318,7 +318,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 // PASS 
-   @AverageDuration(duration = 5.0)
+   @EstimatedDuration(duration = 5.0)
    @Test(timeout = 20000)
    public void testBothHandsIn3PModeManual()
    {
@@ -350,7 +350,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // May FAIL
-   @AverageDuration(duration = 7.0)
+   @EstimatedDuration(duration = 7.0)
    @Test(timeout = 20000)
    public void testBothHandsIn3P2RModeManual()
    {
@@ -381,7 +381,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    @Ignore    // 3/6/15: test is failing
-   @AverageDuration(duration = 6.0)
+   @EstimatedDuration(duration = 6.0)
    @Test(timeout = 20000)
    public void testBothHandsIn3P3RModeManual()
    {
@@ -412,7 +412,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // @Ignore
-   @AverageDuration(duration = 45.0)
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testLeftHandIn3PModeRegression()
    {
@@ -444,7 +444,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // @Ignore
-   @AverageDuration(duration = 45.0)
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testRightHandIn3PModeRegression()
    {
@@ -476,7 +476,7 @@ public abstract class WholeBodyIkSolverTest
 
 
 
-   @AverageDuration(duration = 45.0)
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3PModeRegression()
    {
@@ -506,7 +506,7 @@ public abstract class WholeBodyIkSolverTest
 
 
    // @Ignore
-   @AverageDuration(duration = 45.0)
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothtHandsIn3P2RModeRegression()
    {
@@ -536,7 +536,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    // @Ignore
-   @AverageDuration(duration = 45.0)
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testBothHandsIn3P3RModeRegression()
    {

@@ -10,7 +10,7 @@ import org.junit.Test;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -20,7 +20,7 @@ public class YoFrameQuaternionControlFlowOutputPortTest
 
    private static final double EPS = 1e-15;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void simpleWritingReadingTest()
    {

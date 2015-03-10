@@ -17,7 +17,7 @@ import org.ddogleg.nn.FactoryNearestNeighbor;
 import org.ddogleg.nn.NearestNeighbor;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * @author Peter Abeles
@@ -26,7 +26,7 @@ public class IcpCloud3DTest {
 
    Random rand = new Random(234);
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void perfect_nomotion() {
 
@@ -57,7 +57,7 @@ public class IcpCloud3DTest {
       assertTrue(found.getT().normSq()<=1e-8);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void perfect_translation() {
 
@@ -93,7 +93,7 @@ public class IcpCloud3DTest {
       assertEquals(expected.getT().z,found.getT().z,1e-8);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void perfect_tran_rot() {
 

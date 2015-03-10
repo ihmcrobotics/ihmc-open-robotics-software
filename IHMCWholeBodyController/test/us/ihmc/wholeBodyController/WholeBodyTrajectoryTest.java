@@ -1,6 +1,7 @@
 package us.ihmc.wholeBodyController;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataC
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -81,7 +82,7 @@ public abstract class WholeBodyTrajectoryTest
 
 
    @Ignore
-   @AverageDuration(duration = 4.1)
+   @EstimatedDuration(duration = 4.1)
    @Test(timeout = 22445)
    public void testTrajectory() throws Exception
    {
@@ -204,7 +205,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-   @AverageDuration(duration = 4.1)
+   @EstimatedDuration(duration = 4.1)
    @Test(timeout = 22445)
    public void testPointToPointRight() throws Exception
    {
@@ -321,7 +322,7 @@ public abstract class WholeBodyTrajectoryTest
    }
 
    //@Ignore
-   @AverageDuration(duration = 4.1)
+   @EstimatedDuration(duration = 4.1)
    @Test(timeout = 22445)
    public void testPointToPointLeft() throws Exception
    {

@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -101,7 +101,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-	@AverageDuration(duration = 29.1)
+	@EstimatedDuration(duration = 29.1)
    @Test(timeout = 87234)
    public void testSimpleFootPoseBehavior() throws SimulationExceededMaximumTimeException
    {
@@ -135,7 +135,7 @@ public abstract class DRCFootPoseBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 21.5)
+	@EstimatedDuration(duration = 21.5)
    @Test(timeout = 64598)
    public void testSimulataneousLeftAndRightFootPoses() throws SimulationExceededMaximumTimeException
    {

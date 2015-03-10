@@ -4,9 +4,9 @@ import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
 import com.jme3.material.Material;
@@ -21,7 +21,7 @@ import com.jme3.scene.shape.Sphere;
 public class JMEGraphics3DWorldTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testShowGui()
    {
@@ -33,7 +33,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testWithoutGui()
    {
@@ -45,7 +45,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void addASphere()
    {
@@ -58,7 +58,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void addASphereAfterGuiStarted()
    {
@@ -71,7 +71,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void addAJMESphere()
    {
@@ -94,7 +94,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetCameraPosition()
    {
@@ -108,7 +108,7 @@ public class JMEGraphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void fixCameraOnSphere()
    {

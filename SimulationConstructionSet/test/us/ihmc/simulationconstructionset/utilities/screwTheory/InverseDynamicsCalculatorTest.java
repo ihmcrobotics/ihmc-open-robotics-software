@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.util.robotExplorer.RobotExplorer;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -65,7 +65,7 @@ public class InverseDynamicsCalculatorTest
    {
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOneFreeRigidBody()
    {
@@ -119,7 +119,7 @@ public class InverseDynamicsCalculatorTest
       compareWrenches(inputWrench, outputWrench);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testChainNoGravity()
    {
@@ -139,7 +139,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTreeWithNoGravity()
    {
@@ -165,7 +165,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTreeWithGravity()
    {
@@ -191,7 +191,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoingInverseDynamicsTermPerTerm()
    {
@@ -235,7 +235,7 @@ public class InverseDynamicsCalculatorTest
       assertAccelerationsEqual(jointMap);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoingNothing()
    {
@@ -265,7 +265,7 @@ public class InverseDynamicsCalculatorTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGravityCompensationForChain()
    {
@@ -284,7 +284,7 @@ public class InverseDynamicsCalculatorTest
       assertZeroAccelerations(jointMap);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testChainWithGravity()
    {

@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
@@ -55,7 +55,7 @@ public class OneStepCaptureRegionCalculatorTest
    
    @SuppressWarnings("unused")
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -67,7 +67,7 @@ public class OneStepCaptureRegionCalculatorTest
             midFootAnkleXOffset, footWidth, kineamaticStepRange, ankleZUpFrames, registry, null);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPointsInsideCaptureRegion()
    {
@@ -149,7 +149,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testProjectedFootCorners()
    {
@@ -223,7 +223,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCalculationWithICPInFootPolygon()
    {
@@ -297,7 +297,7 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCalculationWithHighSwingTime()
    {

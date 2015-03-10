@@ -1,18 +1,19 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 
 import java.util.Random;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import org.junit.Test;
+
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * Created by agrabertilton on 3/4/15.
  */
 public class DoubleSupportICPEquationsTest
 {
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testSingleSupportICPDerivatives()
    {
@@ -34,7 +35,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-14);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testCoefficientCalculations()
    {
@@ -62,7 +63,7 @@ public class DoubleSupportICPEquationsTest
    }
 
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testZMPICPDerivatives()
    {
@@ -93,7 +94,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpDot - w * icp, -w * zmp, 1e-10);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testSingleCoefficientDetermination(){
       Random random = new Random(4575L);
@@ -118,7 +119,7 @@ public class DoubleSupportICPEquationsTest
       }
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testICPSumFormula(){
       Random random = new Random(4575L);
@@ -145,7 +146,7 @@ public class DoubleSupportICPEquationsTest
       assertEquals(icpSum, matrixCalculation, 1e-10);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test (timeout=30000)
    public void testICPICalculation()
    {

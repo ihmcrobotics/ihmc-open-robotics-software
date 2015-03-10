@@ -16,7 +16,7 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 
 import com.thoughtworks.xstream.XStream;
@@ -32,7 +32,7 @@ public class TestbedAutomaticAlignmentTest {
 
    @Ignore
    @QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void expectedSolution() {
 
@@ -61,7 +61,7 @@ public class TestbedAutomaticAlignmentTest {
 
 	@Ignore
 	@QuarantinedTest("Need the file savedTestbedCloud00_scans.csv to run this, which is huge. So manual test really.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void multipleRuns() {
 
@@ -94,7 +94,7 @@ public class TestbedAutomaticAlignmentTest {
       assertTrue(MatrixFeatures.isIdentical(first.getR(), second.getR(), 0.01));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void findLineLocation() {
 
@@ -120,7 +120,7 @@ public class TestbedAutomaticAlignmentTest {
       assertEquals(found[1],end,1e-8);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void adjustSign() {
 

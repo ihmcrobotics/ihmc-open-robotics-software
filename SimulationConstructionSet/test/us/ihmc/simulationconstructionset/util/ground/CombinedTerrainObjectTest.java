@@ -5,7 +5,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -14,7 +14,7 @@ public class CombinedTerrainObjectTest
 
    //TODO: Flesh out this test case to be a really good one.
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTwoIntersectingBoxes()
    {

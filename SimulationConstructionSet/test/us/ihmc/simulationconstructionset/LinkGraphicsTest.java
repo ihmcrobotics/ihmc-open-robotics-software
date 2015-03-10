@@ -12,9 +12,9 @@ import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = {BambooPlanType.UI})
 public class LinkGraphicsTest
@@ -46,7 +46,7 @@ public class LinkGraphicsTest
    private static final double
       WEDGE_X = 0.4, WEDGE_Y = 0.3, WEDGE_Z = 0.2;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGraphicsWithALargeNumberOfExampleShapes()
    {
@@ -54,7 +54,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGraphicsWithASmallNumberOfExampleShapes()
    {
@@ -62,7 +62,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGraphicsWithArcTorus()
    {
@@ -70,7 +70,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGrapicsWithMeshData()
    {
@@ -78,7 +78,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGrapicsWithCone()
    {
@@ -86,7 +86,7 @@ public class LinkGraphicsTest
       startSimAndDisplayLink(link);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinkGrapicsWithExtrudedPolygon()
    {

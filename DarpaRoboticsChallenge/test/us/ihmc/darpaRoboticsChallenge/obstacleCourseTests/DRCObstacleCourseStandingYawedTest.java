@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
    public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
@@ -53,7 +53,7 @@ import us.ihmc.utilities.math.geometry.BoundingBox3d;
       }
 
 
-	@AverageDuration(duration = 15.2)
+	@EstimatedDuration(duration = 15.2)
 	@Test(timeout = 45519)
       public void testStandingYawed() throws SimulationExceededMaximumTimeException
       {

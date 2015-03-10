@@ -56,7 +56,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -171,7 +171,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       Files.delete(file);
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testSimpleScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -197,7 +197,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithTwoComHeightScriptPackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -236,7 +236,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testStopScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -280,7 +280,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPauseAndResumeScript() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -330,7 +330,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithOneHandPosePacket() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -358,7 +358,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testScriptWithTwoHandPosePackets() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

@@ -59,9 +59,9 @@ import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualize;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -263,7 +263,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       simpleWrenchContactPoint = null;
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationConstructionSetMiscellaneous() throws AWTException
    {
@@ -338,7 +338,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationManagement()
    {
@@ -417,7 +417,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
 
    @Ignore // Only run this one locally since it doesn't work on Bamboo on Linux necessarily.
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFrameMethodsThatOnlyWorkOnSomeOperatingSystems()
    {
@@ -454,7 +454,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Frame.MAXIMIZED_BOTH, frameStateFromSCS2, epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFrameMethods()
    {
@@ -509,7 +509,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(component, componentFromSCS);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCameraMethods()
    {
@@ -676,7 +676,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertBooleansAreOpposite(initialCameraKeyModeStatus, finalCameraKeyModeStatus);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test3DGraphicsMethods()
    {
@@ -732,7 +732,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertIfGUIComponentsAreDisableOrEnabled(scs, true);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariableMethods() throws AWTException
    {
@@ -790,7 +790,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(arrayOfVariablesRegExprRobot, arrayOfVariablesRegExprSCS);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTimingMethods() throws AWTException
    {
@@ -819,7 +819,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(Math.PI, timeFromSCS, epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationTickControl()
    {
@@ -963,7 +963,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertEquals(keyPoint - 1, currentIndexFromSCS6, epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testVariablesMethods()
    {
@@ -1018,7 +1018,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertYoVariableListContainsArrayListOfVariables(yoVariableListFromSCS3, yoVariableArrayLists);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGroupMethods()
    {
@@ -1066,7 +1066,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertNotNull(extraPanelConfigurationPanelFromSCS);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationListeners()
    {
@@ -1121,7 +1121,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       assertTrue(toggleKeyPointModeCommandListenerHasBeenCalled.getBooleanValue());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDataExporting()
    {

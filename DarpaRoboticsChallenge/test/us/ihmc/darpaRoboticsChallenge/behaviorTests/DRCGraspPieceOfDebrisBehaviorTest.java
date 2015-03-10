@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -268,7 +268,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertTrue(debrisPositionAfterGrasping.getZ() > zThreshold);
    }
    
-   @AverageDuration(duration = 90.0)
+   @EstimatedDuration(duration = 90.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -304,7 +304,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
    }
    
    @Ignore
-   @AverageDuration(duration = 70.0)
+   @EstimatedDuration(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingStandingDebrisWithLeftHand() throws SimulationExceededMaximumTimeException
    {
@@ -339,7 +339,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 70.0)
+   @EstimatedDuration(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingHorizontalDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {
@@ -370,7 +370,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
       assertChestAndPelvisAreCloseToHomePosition();
    }
 
-   @AverageDuration(duration = 70.0)
+   @EstimatedDuration(duration = 70.0)
    @Test(timeout = 300000)
    public void testGraspingLeaningAgainstAWallDebrisWithRightHand() throws SimulationExceededMaximumTimeException
    {

@@ -7,14 +7,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.AngleTools;
 
 public class WheelRotationEstimatorTest
 {
    private static final double eps = 1e-7;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAngleDefinitions()
    {
@@ -34,7 +34,7 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testIndexBounds()
    {
@@ -56,7 +56,7 @@ public class WheelRotationEstimatorTest
       
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAngleTautology()
    {

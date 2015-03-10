@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -59,7 +59,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    }
 
 
-	@AverageDuration(duration = 49.6)
+	@EstimatedDuration(duration = 49.6)
 	@Test(timeout = 158814)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 43.6)
+	@EstimatedDuration(duration = 43.6)
 	@Test(timeout = 140655)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {

@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -19,7 +19,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class JointWrenchSensorTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testStaticallyHangingMasses() throws UnreasonableAccelerationException
    {
@@ -67,7 +67,7 @@ public class JointWrenchSensorTest
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {
@@ -114,7 +114,7 @@ public class JointWrenchSensorTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOffsetAtCenterOfMassWithCantileveredBeam() throws UnreasonableAccelerationException
    {

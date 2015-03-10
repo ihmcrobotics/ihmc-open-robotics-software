@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class TypicalMotionConstraintsTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
@@ -120,7 +120,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularity()
    {
@@ -239,7 +239,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
@@ -373,7 +373,7 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDoubleSupportKneesStraightThree()
    {

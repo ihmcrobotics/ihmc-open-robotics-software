@@ -9,7 +9,7 @@ import javax.vecmath.Point3d;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -30,7 +30,7 @@ public class PushRecoveryTrajectoryGeneratorTest
 
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testSimpleTrajectories()
    {

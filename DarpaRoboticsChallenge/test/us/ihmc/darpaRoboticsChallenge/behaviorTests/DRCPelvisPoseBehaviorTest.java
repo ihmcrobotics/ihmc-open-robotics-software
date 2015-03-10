@@ -34,7 +34,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -107,7 +107,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testSingleRandomPelvisRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -125,7 +125,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisPitchRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -144,7 +144,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisRollRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -163,7 +163,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisYawRotationNoTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -182,7 +182,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisXTranslation() throws SimulationExceededMaximumTimeException
    {
@@ -201,7 +201,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testPelvisYTranslation() throws SimulationExceededMaximumTimeException
    {

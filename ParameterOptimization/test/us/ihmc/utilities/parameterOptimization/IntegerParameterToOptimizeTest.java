@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class IntegerParameterToOptimizeTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetBitsOfResolution()
    {
@@ -38,7 +38,7 @@ public class IntegerParameterToOptimizeTest
       assertEquals(expectedNumberOfBits, integerParameterToOptimize.getBitsOfResolution());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroToOneConversions()
    {

@@ -31,7 +31,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.SysoutTool;
@@ -131,7 +131,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       }
    }
 
-   @AverageDuration(duration = 90.0)
+   @EstimatedDuration(duration = 90.0)
    @Test(timeout = 300000)
    public void testWholeBodyInverseKinematicsMoveToPoseAcheivedInJointSpace() throws SimulationExceededMaximumTimeException
    {
@@ -209,7 +209,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 90.0)
+   @EstimatedDuration(duration = 90.0)
    @Test(timeout = 300000)
    public void testRandomRightHandPose() throws SimulationExceededMaximumTimeException
    {

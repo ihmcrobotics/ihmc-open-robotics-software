@@ -12,9 +12,9 @@ import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar120FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.graphics3DAdapter.jme.lidar.manual.JMELidarSphere270FovTest;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.test.JUnitTools;
 
@@ -54,7 +54,7 @@ public class JMEGPULidarTest implements LidarTestListener
       lidarTest.getWorld().stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test60DegreeFieldOfView()
    {
@@ -62,7 +62,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test120DegreeFieldOfView()
    {
@@ -70,7 +70,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test360DegreeFieldOfView()
    {
@@ -78,7 +78,7 @@ public class JMEGPULidarTest implements LidarTestListener
       doATest(parameters);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test270DegreeFieldOfView()
    {

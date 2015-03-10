@@ -9,12 +9,12 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class KryoStreamSerializerTest
 {
 
-	@AverageDuration(duration = 0.1)
+	@EstimatedDuration(duration = 0.1)
 	@Test(timeout = 30000)
    public void test() throws IOException
    {

@@ -10,8 +10,8 @@ import org.junit.Test;
 
 import std_msgs.String;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -20,7 +20,7 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 @BambooPlan(planType=BambooPlanType.Flaky)
 public class RosTopicPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=2000)
    public void testPubSubMultipleMessages() throws URISyntaxException, InterruptedException
    {

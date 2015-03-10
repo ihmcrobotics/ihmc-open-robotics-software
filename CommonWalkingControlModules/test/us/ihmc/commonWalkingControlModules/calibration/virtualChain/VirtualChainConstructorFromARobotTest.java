@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -34,7 +34,7 @@ public class VirtualChainConstructorFromARobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOneAtZero()
    {
@@ -109,7 +109,7 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOnePartTwo()
    {
@@ -117,7 +117,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotOne);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTwo()
    {
@@ -125,7 +125,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotTwo);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testThree()
    {
@@ -133,7 +133,7 @@ public class VirtualChainConstructorFromARobotTest
       testRobotInRandomPositions(testRobotThree);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFour()
    {

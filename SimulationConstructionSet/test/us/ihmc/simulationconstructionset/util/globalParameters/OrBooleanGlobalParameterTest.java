@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class OrBooleanGlobalParameterTest
 {
@@ -25,7 +25,7 @@ public class OrBooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetThrowsException()
    {
@@ -54,7 +54,7 @@ public class OrBooleanGlobalParameterTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameter()
    {
@@ -77,7 +77,7 @@ public class OrBooleanGlobalParameterTest
       assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAndBooleanGlobalParameterUpdate()
    {
@@ -113,7 +113,7 @@ public class OrBooleanGlobalParameterTest
       assertEquals(valueA || valueB, multiplicativeDoubleGlobalParameter.getValue());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFamilyTree()
    {

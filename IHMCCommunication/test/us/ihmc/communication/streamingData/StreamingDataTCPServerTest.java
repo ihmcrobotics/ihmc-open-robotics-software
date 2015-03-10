@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
 @BambooPlan(planType = {BambooPlanType.Flaky})
 public class StreamingDataTCPServerTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=90000)
    public void testTypicalUsage()
    {
@@ -50,7 +50,7 @@ public class StreamingDataTCPServerTest
       streamingDataTCPServer.closeAndBlockTillFullyClosed();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=90000)
    public void testMultipleProducersAndConsumersRobustly()
    {
@@ -103,7 +103,7 @@ public class StreamingDataTCPServerTest
       
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=90000)
    public void testPersistentConsumerToServerRestart()
    {

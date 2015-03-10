@@ -19,7 +19,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -219,7 +219,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		icpVelocityLineSegment = null;
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testCapturePointPlannerWithSmootherNoPushOrCancelPlan()
 	{
@@ -301,7 +301,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		assertEquals(expectedICP.getY(), icpPosition.getY(), 1e-4);
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testCapturePointPlannerWithCancelPlan()
 	{

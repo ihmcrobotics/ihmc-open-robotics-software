@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -59,7 +59,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
 
 
 
-	@AverageDuration(duration = 44.2)
+	@EstimatedDuration(duration = 44.2)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
@@ -92,7 +92,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 45.8)
+	@EstimatedDuration(duration = 45.8)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -136,7 +136,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 23.3)
+	@EstimatedDuration(duration = 23.3)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
@@ -169,7 +169,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 30.0)
+	@EstimatedDuration(duration = 30.0)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -213,7 +213,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 64.7)
+	@EstimatedDuration(duration = 64.7)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainCinderblockFieldPartOneScript() throws SimulationExceededMaximumTimeException
    {
@@ -245,7 +245,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 83.9)
+	@EstimatedDuration(duration = 83.9)
 	@Test(timeout = 1200000)
    public void testTrialsTerrainCinderblockFieldPartTwoScript() throws SimulationExceededMaximumTimeException
    {
@@ -277,7 +277,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Ignore
 	@QuarantinedTest("Need to rerecord")
    @Test(timeout=1200000)
@@ -312,7 +312,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration
+	@EstimatedDuration
    @Ignore
    @QuarantinedTest("Need to rerecord")
    @Test(timeout=1200000)
@@ -347,7 +347,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 90.6)
+	@EstimatedDuration(duration = 90.6)
 	@Test(timeout = 1800000)
    public void testTrialsTerrainCinderblockEntireFieldScript() throws SimulationExceededMaximumTimeException
    {
@@ -433,7 +433,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
     * BambooTools.reportTestFinishedMessage(); }
     */
 
-	@AverageDuration(duration = 43.4)
+	@EstimatedDuration(duration = 43.4)
 	@Test(timeout = 1200000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {

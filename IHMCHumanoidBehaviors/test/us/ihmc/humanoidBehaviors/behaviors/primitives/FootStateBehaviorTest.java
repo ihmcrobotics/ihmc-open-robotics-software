@@ -8,12 +8,12 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootStatePacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootStateBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class FootStateBehaviorTest
 {
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testSetInput()
    {

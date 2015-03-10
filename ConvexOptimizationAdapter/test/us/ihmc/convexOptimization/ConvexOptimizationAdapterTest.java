@@ -13,7 +13,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.MatrixTools;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
@@ -28,7 +28,7 @@ public abstract class ConvexOptimizationAdapterTest
    
    @SuppressWarnings("unchecked")
    @Ignore
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void qpsFileTest() throws IOException
    {
@@ -62,7 +62,7 @@ public abstract class ConvexOptimizationAdapterTest
       }
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase()
    {
@@ -78,7 +78,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], getTestErrorEpsilon());
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testASimpleRedundantEqualityCase2d()
    {
@@ -95,7 +95,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
   public void JOptimizerWebpageLPExample() throws Exception
   {
@@ -144,7 +144,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(0, sol2[1], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testASimpleInequalityCase() throws Exception
    {
@@ -159,7 +159,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(2.0, solution[0], 1e-7);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testASimpleMaximizationInequalityCase()
    {
@@ -176,7 +176,7 @@ public abstract class ConvexOptimizationAdapterTest
    
    @Ignore // Need to implement addQuadraticInequalities
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinearCostQuadraticInequalityOptimizationProblem()
    {
@@ -200,7 +200,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(Math.sqrt(2.0), solution[1], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem()
    {
@@ -222,7 +222,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(1.0, solution[1], getTestErrorEpsilon());
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
    @Test(timeout = 300000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
@@ -244,7 +244,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
    
    @Ignore //Not implemented yet!
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -274,7 +274,7 @@ public abstract class ConvexOptimizationAdapterTest
    }
 
    @Ignore //Not implemented yet!
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

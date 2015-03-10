@@ -7,13 +7,13 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class PointCloudWorldPacketGeneratorTest
 {
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 10000)
    public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {

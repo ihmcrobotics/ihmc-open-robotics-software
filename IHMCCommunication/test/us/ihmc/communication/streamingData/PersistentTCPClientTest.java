@@ -13,12 +13,12 @@ import java.net.Socket;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class PersistentTCPClientTest
 {
 
-	@AverageDuration(duration = 0.6)
+	@EstimatedDuration(duration = 0.6)
 	@Test(timeout = 30000)
    public void test() throws IOException
    {

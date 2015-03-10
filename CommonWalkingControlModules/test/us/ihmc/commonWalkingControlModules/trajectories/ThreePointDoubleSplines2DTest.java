@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class ThreePointDoubleSplines2DTest
 {
@@ -30,7 +30,7 @@ public class ThreePointDoubleSplines2DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleFlatExample()
    {
@@ -49,7 +49,7 @@ public class ThreePointDoubleSplines2DTest
       assertFlatAndAtHeight(zHeight, zSlopeAndSecondDerivative);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testInitialInALineExample()
    {
@@ -72,7 +72,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testInitialInALineExampleTwo()
    {
@@ -112,7 +112,7 @@ public class ThreePointDoubleSplines2DTest
       assertEquals(0.0, zSlopeAndSecondDerivative[2], 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testInitialInALineExampleThree()
    {
@@ -160,7 +160,7 @@ public class ThreePointDoubleSplines2DTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAFewQueriesOnFlatExampleOne()
    {
@@ -194,7 +194,7 @@ public class ThreePointDoubleSplines2DTest
    
    @Ignore // Not passing!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAFewQueries()
    {

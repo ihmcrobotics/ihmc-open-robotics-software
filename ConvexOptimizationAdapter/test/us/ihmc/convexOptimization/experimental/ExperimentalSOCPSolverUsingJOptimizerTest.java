@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
 import com.joptimizer.functions.LinearMultivariateRealFunction;
@@ -20,7 +20,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
 
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASimpleSecondOrderConeProblem()
    {
@@ -54,7 +54,7 @@ public class ExperimentalSOCPSolverUsingJOptimizerTest
    
    @Ignore //At time of test writing JOptimizer wasn't working for SOCPs...
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testARotatedSecondOrderConeProblem()
    {

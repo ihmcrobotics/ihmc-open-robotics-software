@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.util.environments.ContactableSelectable
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -134,7 +134,7 @@ public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotT
       debrisRobots = new ArrayList<>();
    }
 
-   @AverageDuration(duration = 90.0)
+   @EstimatedDuration(duration = 90.0)
    @Test(timeout = 3000000)
    public void testRemovingthreeDebris() throws SimulationExceededMaximumTimeException
    {

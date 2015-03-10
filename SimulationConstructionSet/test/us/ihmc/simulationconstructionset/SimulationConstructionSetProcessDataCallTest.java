@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -12,7 +12,7 @@ public class SimulationConstructionSetProcessDataCallTest
 {   
    private YoVariableRegistry registry;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=1000)
    public void testForwardCount()
    {
@@ -68,7 +68,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=1000)
    public void testBackwardCount()
    {
@@ -124,7 +124,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=1000)
    public void testForwardCopy()
    {
@@ -180,7 +180,7 @@ public class SimulationConstructionSetProcessDataCallTest
       }    
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=1000)
    public void testBackwardCopy()
    {

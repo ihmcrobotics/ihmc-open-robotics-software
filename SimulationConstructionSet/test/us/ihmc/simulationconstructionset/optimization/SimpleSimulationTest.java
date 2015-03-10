@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.parameterOptimization.IndividualToEvaluate;
 import us.ihmc.utilities.parameterOptimization.ListOfParametersToOptimize;
 import us.ihmc.utilities.parameterOptimization.OptimizationProblem;
@@ -15,7 +15,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 public class SimpleSimulationTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleSimulation()
    {

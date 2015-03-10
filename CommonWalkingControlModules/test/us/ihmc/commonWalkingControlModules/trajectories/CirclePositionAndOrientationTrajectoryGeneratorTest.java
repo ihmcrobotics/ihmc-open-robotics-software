@@ -15,7 +15,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -67,7 +67,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       trajectoryGenerator.initialize();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOrientation()
    {
@@ -77,7 +77,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), frame);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCompute()
    {
@@ -110,7 +110,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
 
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    //TODO: implement a real test
    public void testGetPosition()
@@ -119,7 +119,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       trajectoryGenerator.getPosition().getX();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testIsDone()
    {
@@ -130,7 +130,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertTrue(trajectoryGenerator.isDone());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGet_FramePoint()
    {
@@ -141,7 +141,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertEquals(frame, positionToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGet_FrameOrientation()
    {
@@ -152,7 +152,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertEquals(frame, orientationToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackVelocity()
    {
@@ -168,7 +168,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, velocityToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackAcceleration()
    {
@@ -184,7 +184,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, accelerationToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackAngularVelocity()
    {
@@ -200,7 +200,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackAngularAcceleration()
    {
@@ -216,7 +216,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackLinearData()
    {
@@ -258,7 +258,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, accelerationToPack.getReferenceFrame());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPackAngularData()
    {

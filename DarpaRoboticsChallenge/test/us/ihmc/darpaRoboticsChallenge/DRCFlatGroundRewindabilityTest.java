@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewinda
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
@@ -51,7 +51,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    
-	@AverageDuration(duration = 15.0)
+	@EstimatedDuration(duration = 15.0)
 	@Test(timeout=300000)
    public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
    {
@@ -74,7 +74,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout=300000)
    public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -116,7 +116,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    
    @Ignore
    @QuarantinedTest("Bamboo link: https://bamboo.ihmc.us/browse/RC-FASTLOOP-ATLASAFAST/test/case/115277833")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=2400000)
    public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
    {
@@ -172,7 +172,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
 
 
 	@Ignore // This takes a long time. Use it for debugging where the broken changes were made when the tests above fail.
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=2400000)
 	public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
 	{

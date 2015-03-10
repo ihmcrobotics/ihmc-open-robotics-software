@@ -40,7 +40,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -118,7 +118,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
    }
 
-   @AverageDuration(duration = 31.9)
+   @EstimatedDuration(duration = 31.9)
    @Test(timeout = 95822)
    public void testTwoStepsForwards() throws SimulationExceededMaximumTimeException
    {
@@ -174,7 +174,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 31.9)
+   @EstimatedDuration(duration = 31.9)
    @Test(timeout = 95822)
    public void testSideStepping() throws SimulationExceededMaximumTimeException
    {
@@ -231,7 +231,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 31.9)
+   @EstimatedDuration(duration = 31.9)
    @Test(timeout = 95822)
    public void testStepLongerThanMaxStepLength() throws SimulationExceededMaximumTimeException
    {
@@ -303,7 +303,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       return footStepsAreTooFarApart;
    }
 
-   @AverageDuration(duration = 31.9)
+   @EstimatedDuration(duration = 31.9)
    @Test(timeout = 95822)
    public void testStop() throws SimulationExceededMaximumTimeException
    {

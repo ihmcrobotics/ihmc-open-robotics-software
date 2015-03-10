@@ -8,7 +8,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -18,7 +18,7 @@ public class ElasticityCompensatorYoVariableTest
 {
    private static final double EPSILON = 1e-10;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroJointTau1()
    {
@@ -52,7 +52,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroJointTau2()
    {
@@ -84,7 +84,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroJointTau3()
    {
@@ -108,7 +108,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroJointTau4()
    {
@@ -131,7 +131,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroStiffness4()
    {
@@ -162,7 +162,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testZeroMaximumDeflection4()
    {
@@ -187,7 +187,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDefaultMaximumDeflection4()
    {
@@ -214,7 +214,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testInfiniteMaximumDeflection4()
    {
@@ -240,7 +240,7 @@ public class ElasticityCompensatorYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomMaximumDeflection4()
    {

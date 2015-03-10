@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 
 
@@ -28,7 +28,7 @@ public class BooleanGlobalParameterTest
       GlobalParameter.clearGlobalRegistry();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetValue()
    {
@@ -40,7 +40,7 @@ public class BooleanGlobalParameterTest
       assertEquals(DEFAULT_VALUE, booleanGlobalParameter.getValue());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetValue()
    {
@@ -68,7 +68,7 @@ public class BooleanGlobalParameterTest
       assertEquals(newValue, booleanGlobalParameter.getValue());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testThatCantHaveParentsUnlessOverwriteUpdateMethodOne()
    {
@@ -79,7 +79,7 @@ public class BooleanGlobalParameterTest
       parent.set(false);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000,expected = RuntimeException.class)
    public void testCantSetChild()
    {

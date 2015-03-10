@@ -13,7 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -29,7 +29,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class PelvisPosePacketTransformerTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPelvisPosePacketTransformer()
    {

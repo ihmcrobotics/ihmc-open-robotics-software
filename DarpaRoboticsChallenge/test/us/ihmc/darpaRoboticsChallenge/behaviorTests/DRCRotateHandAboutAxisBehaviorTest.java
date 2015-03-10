@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -116,7 +116,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       }
    }
 
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testRotateInJointSpaceAndUnRotateInTaskSpace() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {
@@ -161,7 +161,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       BambooTools.reportTestFinishedMessage();
    }
    
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
    public void testRotateInJointSpaceAndUnRotateInTaskSpaceUsingWholeBodyInverseKinematics() throws FileNotFoundException, SimulationExceededMaximumTimeException
    {

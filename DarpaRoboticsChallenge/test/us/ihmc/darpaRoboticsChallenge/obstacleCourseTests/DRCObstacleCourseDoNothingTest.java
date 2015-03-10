@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestInterface
 {
@@ -64,7 +64,7 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB("DRCObstacleCourseDoNothingTest after class.");
    }
 
-	@AverageDuration(duration = 15.0)
+	@EstimatedDuration(duration = 15.0)
    @Test(timeout = 55056)
    public void testDoNothing1() throws SimulationExceededMaximumTimeException
    {

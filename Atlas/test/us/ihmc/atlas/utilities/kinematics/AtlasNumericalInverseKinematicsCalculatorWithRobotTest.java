@@ -12,7 +12,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.NumericalInverseKinematicsCalculatorWithRobotTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -33,7 +33,7 @@ public class AtlasNumericalInverseKinematicsCalculatorWithRobotTest extends Nume
 
    
    @Ignore
-   @AverageDuration(duration = 0.0)
+   @EstimatedDuration(duration = 0.0)
    @Test(timeout = 120000)
    public void testTroublesomeCaseOne()
    {

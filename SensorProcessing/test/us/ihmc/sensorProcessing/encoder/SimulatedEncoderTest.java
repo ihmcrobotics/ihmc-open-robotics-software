@@ -6,7 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class SimulatedEncoderTest
@@ -21,14 +21,14 @@ public class SimulatedEncoderTest
    {
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleTest()
    {
       assertEquals(1, 1);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConstructor()
    {
@@ -37,7 +37,7 @@ public class SimulatedEncoderTest
       new SimulatedEncoder(ticksPerPosition, "simEncTest", parentRegistry);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetTicksOne()
    {
@@ -53,7 +53,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetTicksTwo()
    {
@@ -76,7 +76,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetTicksThree()
    {
@@ -99,7 +99,7 @@ public class SimulatedEncoderTest
       assertEquals(expecetedTicks, simulatedEncoder.getEncoderTicks());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetTicksFour()
    {
@@ -140,7 +140,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetPositionFromEncoderTwo()
    {
@@ -158,7 +158,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetPositionFromEncoderThree()
    {
@@ -174,7 +174,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetPositionFromEncoderFour()
    {
@@ -190,7 +190,7 @@ public class SimulatedEncoderTest
       assertEquals(expectedPosition, simulatedEncoder.getPositionFromEncoder(), 0.01);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConverTicksToDistance()
    {
