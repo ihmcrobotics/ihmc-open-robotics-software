@@ -95,8 +95,8 @@ public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterf
    /**
     * @throws SimulationExceededMaximumTimeException
     */
-   @AverageDuration(duration = 30.0)
-   @Test(timeout = 120000)
+   @AverageDuration(duration = 75.0)
+   @Test(timeout = 225000)
    public void testDrillPickUp() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
