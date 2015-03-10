@@ -13,7 +13,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class DoubleSupportICPEquationsTest
 {
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testSingleSupportICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -35,7 +35,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testCoefficientCalculations()
    {
       Random random = new Random(8723L);
@@ -63,7 +63,7 @@ public class DoubleSupportICPEquationsTest
 
 
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testZMPICPDerivatives()
    {
       Random random = new Random(8723L);
@@ -94,7 +94,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testSingleCoefficientDetermination(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -119,7 +119,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testICPSumFormula(){
       Random random = new Random(4575L);
       double w = Math.abs(random.nextDouble()) + 0.1;
@@ -146,7 +146,7 @@ public class DoubleSupportICPEquationsTest
    }
 
    @AverageDuration(duration = 0.1)
-   @Test (timeout=191118523421744114L)
+   @Test (timeout=30000)
    public void testICPICalculation()
    {
       Random random = new Random(8723L);
