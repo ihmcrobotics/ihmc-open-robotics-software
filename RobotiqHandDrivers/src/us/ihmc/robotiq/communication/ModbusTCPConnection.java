@@ -1,8 +1,5 @@
 package us.ihmc.robotiq.communication;
 
-import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
-
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ModbusTCPConnection
@@ -43,13 +39,8 @@ public class ModbusTCPConnection
 		connection = new Socket();
 		connection.connect(new InetSocketAddress(ipAddress, port), 200);
 		outStream = connection.getOutputStream();
-		inStream = new BufferedInputStream(connection.getInputStream());
-		connection.setSoTimeout(500);
-	}
-	
-	public void transcieve(int unitID, byte[] data) throws IOException
-	{
-		transcieve((byte)unitID, data);
+		inStream = connection.getInputStream();
+		connection.setSoTimeout(1000);
 	}
 	
 	public byte[] transcieve(byte unitID, byte[] data) throws IOException
@@ -96,23 +87,15 @@ public class ModbusTCPConnection
 			
 			int outBytes = HEADER_LENGTH + data.length; 
 			outStream.write(outBuffer, 0, outBytes);
-			outStream.flush();
 
 			int inBytes = 0;
-			while(inBytes < HEADER_LENGTH) // Read the whole header
+			while(inBytes < HEADER_LENGTH)
 			{
-				int bytesToRead = HEADER_LENGTH - inBytes;
+				int bytesToRead = inBuffer.length - inBytes;
 				inBytes += inStream.read(inBuffer, inBytes, bytesToRead);
 			}
-
-			int inLength = ByteBuffer.wrap(new byte[]{inBuffer[4], inBuffer[5]}).getShort();
-			int totalLength = inLength + HEADER_LENGTH;
-
-			while(inBytes < totalLength)
-			{
-				int bytesToRead = totalLength - inBytes;
-				inBytes += inStream.read(inBuffer, inBytes, bytesToRead);
-			}
+			
+//			int inBytes = inStream.read(inBuffer, 0, 32);
 			
 			return Arrays.copyOfRange(inBuffer, HEADER_LENGTH, inBytes); //return the reply with the proper length (removes header)
 		}

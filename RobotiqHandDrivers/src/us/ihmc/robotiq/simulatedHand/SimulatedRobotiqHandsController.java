@@ -275,6 +275,18 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   
                case STOP:
                   individualRobotiqHandController.stop();
+                  
+               case PINCH_GRIP:
+                  // TODO
+                  break;
+                  
+               case BASIC_GRIP:
+                  //TODO
+                  break;
+                  
+               case WIDE_GRIP:
+                  //TODO
+                  break;
 
                default:
                   break;
