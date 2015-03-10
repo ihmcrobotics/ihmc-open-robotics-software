@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
@@ -77,4 +78,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract Pair<Class<?>, String[]> getOperatorInterfaceStarter();
    
    public abstract Class<?> getSpectatorInterfaceClass();
+
+   public abstract HeightCalculatorParameters getHeightCalculatorParameters();
 }

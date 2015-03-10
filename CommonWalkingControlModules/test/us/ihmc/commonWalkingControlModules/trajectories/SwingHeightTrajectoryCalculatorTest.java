@@ -311,7 +311,8 @@ public class SwingHeightTrajectoryCalculatorTest
       double verticalBuffer = 0.05;    // 5cm
       double pathWidth = 0.12;    // 12cm
       SteppingParameters steppingParameters = new DummySteppingParameters();
-      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(horizontalBuffer, verticalBuffer, pathWidth, steppingParameters);
+      HeightCalculatorParameters calculatorParameters = new HeightCalculatorParameters(horizontalBuffer, verticalBuffer, pathWidth);
+      SwingTrajectoryHeightCalculator generator = new SwingTrajectoryHeightCalculator(calculatorParameters, steppingParameters);
       return generator;
    }
 

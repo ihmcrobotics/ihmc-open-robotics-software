@@ -12,6 +12,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCRobotSDFLoader;
@@ -77,6 +78,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasRobotMultiContactControllerParameters multiContactControllerParameters;
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
+   private final AtlasHeightCalculatorParameters heightCalculatorParameters;
 
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
@@ -113,6 +115,7 @@ public class AtlasRobotModel implements DRCRobotModel
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
+      heightCalculatorParameters = new AtlasHeightCalculatorParameters();
    }
 
    @Override
@@ -393,5 +396,11 @@ public class AtlasRobotModel implements DRCRobotModel
    public Class<?> getSpectatorInterfaceClass()
    {
       return AtlasSpectatorInterface.class;
+   }
+
+   @Override
+   public HeightCalculatorParameters getHeightCalculatorParameters()
+   {
+      return heightCalculatorParameters;
    }
 }
