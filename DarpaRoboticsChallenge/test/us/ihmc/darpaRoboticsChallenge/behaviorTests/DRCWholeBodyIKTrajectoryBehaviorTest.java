@@ -132,7 +132,7 @@ public abstract class DRCWholeBodyIKTrajectoryBehaviorTest implements MultiRobot
       finalHandPosition.add(getRobotModel().getArmControllerParameters().getWristHandCenterOffset(), 0.0, 0.0);
       finalHandPoseRight.setPosition(finalHandPosition);
       finalHandPoseRight.changeFrame(worldFrame);
-      assertTrue(finalHandPoseRight.getFramePointCopy().epsilonEquals(desiredRight.getFramePointCopy(), 0.02));
+      assertTrue(finalHandPoseRight.getFramePointCopy().epsilonEquals(desiredRight.getFramePointCopy(), 0.01));
    }
    
    @EstimatedDuration(duration = 25.0)
