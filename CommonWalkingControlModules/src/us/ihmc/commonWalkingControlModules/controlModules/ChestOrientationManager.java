@@ -51,16 +51,16 @@ public class ChestOrientationManager
       this.chestOrientationProvider = chestOrientationProvider;
       this.pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
 
+      registry = new YoVariableRegistry(getClass().getSimpleName());
+      ReferenceFrame chestCoMFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
+      yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestCoMFrame, registry);
+      
       if (chestOrientationProvider != null)
       {
          chestOrientationExpressedInFrame = chestOrientationProvider.getChestOrientationExpressedInFrame();
 
-         registry = new YoVariableRegistry(getClass().getSimpleName());
          isTrackingOrientation = new BooleanYoVariable("isTrackingOrientation", registry);
          receivedNewChestOrientationTime = new DoubleYoVariable("receivedNewChestOrientationTime", registry);
-
-         ReferenceFrame chestCoMFrame = chestOrientationControlModule.getChest().getBodyFixedFrame();
-         yoControlledAngularAcceleration = new YoFrameVector("controlledChestAngularAcceleration", chestCoMFrame, registry);
 
          isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
          isUsingWaypointTrajectory.set(false);
@@ -75,19 +75,18 @@ public class ChestOrientationManager
          boolean doVelocityAtWaypoints = false;
          waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("chestWaypoint", 15, doVelocityAtWaypoints, allowMultipleFrames, chestOrientationExpressedInFrame, registry);
          waypointOrientationTrajectoryGenerator.registerNewTrajectoryFrame(pelvisZUpFrame);
-         parentRegistry.addChild(registry);
       }
       else
       {
          chestOrientationExpressedInFrame = null;
-         registry = null;
          isTrackingOrientation = null;
          receivedNewChestOrientationTime = null;
          isUsingWaypointTrajectory = null;
          simpleOrientationTrajectoryGenerator = null;
          waypointOrientationTrajectoryGenerator = null;
-         yoControlledAngularAcceleration = null;
       }
+      
+      parentRegistry.addChild(registry);
    }
 
    private final FrameOrientation desiredOrientation = new FrameOrientation();
