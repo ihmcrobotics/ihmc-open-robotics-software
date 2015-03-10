@@ -4,7 +4,6 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.HeadOrientationControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.SelectionMatrixComputer;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -75,7 +74,7 @@ public class HeadOrientationControlModule
 
    private final RigidBodyTransform desiredHeadTransform = new RigidBodyTransform();
 
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   private final DenseMatrix64F selectionMatrix;
    private final DenseMatrix64F nullspaceMultipliers = new DenseMatrix64F(0, 1);
 
    private final int jacobianId;
@@ -89,7 +88,6 @@ public class HeadOrientationControlModule
    private final BooleanYoVariable doPositionControl = new BooleanYoVariable("doPositionControlForNeck", registry);
    private final boolean[] doIntegrateDesiredAccerations;
 
-   private final SelectionMatrixComputer selectionMatrixComputer = new SelectionMatrixComputer();
    /*
     * TODO Sylvain. In walking, the head in controlled with respect to the
     * elevator (see WalkingHighLevelHumanoidController.setupManagers()). This
@@ -152,16 +150,29 @@ public class HeadOrientationControlModule
 
          baseFrame = momentumBasedController.getJacobian(jacobianId).getBaseFrame();
          InverseDynamicsJoint[] cloneOfControlledJoints = ScrewTools.cloneJointPath(headOrientationControlJoints);
-         GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfControlledJoints[cloneOfControlledJoints.length - 1].getSuccessor().getBodyFixedFrame());
+         int numberOfDoFs = cloneOfControlledJoints.length;
+         RigidBody cloneOfHead = cloneOfControlledJoints[numberOfDoFs - 1].getSuccessor();
+         ReferenceFrame cloneOfHeadFrame = cloneOfHead.getBodyFixedFrame();
+         GeometricJacobian jacobian = new GeometricJacobian(cloneOfControlledJoints, cloneOfHeadFrame);
          
-         int maxIterations = 5;
+         int maxIterations = 2;
          double lambdaLeastSquares = 0.0009;
-         double tolerance = 0.0025;
-         double maxStepSize = 0.2;
-         double minRandomSearchScalar = 0.01;
-         double maxRandomSearchScalar = 0.8;
+         double tolerance = 1e-12;
+         double maxStepSize = 0.01;
+         double minRandomSearchScalar = 1.0;
+         double maxRandomSearchScalar = 1.0;
          numericalInverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterations, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-         desiredJointAngles = new DenseMatrix64F(cloneOfControlledJoints.length, 1);
+         desiredJointAngles = new DenseMatrix64F(numberOfDoFs, 1);
+
+         selectionMatrix = new DenseMatrix64F(numberOfDoFs, SpatialMotionVector.SIZE);
+         for (int i = 0; i < numberOfDoFs; i++)
+         {
+            FrameVector jointAxis = headOrientationControlJoints[i].getJointAxis();
+            jointAxis.changeFrame(baseFrame);
+            selectionMatrix.set(i, 0, jointAxis.getX());
+            selectionMatrix.set(i, 1, jointAxis.getY());
+            selectionMatrix.set(i, 2, jointAxis.getZ());
+         }
       }
       else
       {
@@ -170,6 +181,7 @@ public class HeadOrientationControlModule
          baseFrame = null;
          numericalInverseKinematicsCalculator = null;
          desiredJointAngles = null;
+         selectionMatrix = null;
       }
 
       setHeadOrientationLimits(headOrientationControllerParameters);
@@ -205,8 +217,6 @@ public class HeadOrientationControlModule
       packDesiredAngularVelocity(desiredAngularVelocity);
       packDesiredAngularAccelerationFeedForward(desiredAngularAcceleration);
 
-      selectionMatrixComputer.computeSelectionMatrix(jacobianId, momentumBasedController, selectionMatrix);
-
       if (doPositionControl.getBooleanValue())
          computeJointsDesiredOrientationAndAngularVelocity();
 
@@ -220,6 +230,7 @@ public class HeadOrientationControlModule
       desiredOrientation.getTransform3D(desiredHeadTransform);
       numericalInverseKinematicsCalculator.solve(desiredHeadTransform);
       numericalInverseKinematicsCalculator.getBest(desiredJointAngles);
+
       for (int i = 0; i < headOrientationControlJoints.length; i++)
       {
          OneDoFJoint joint = headOrientationControlJoints[i];
@@ -300,7 +311,7 @@ public class HeadOrientationControlModule
             throw new RuntimeException("Case " + headTrackingMode.getEnumValue() + " not handled.");
       }
 
-      orientationToPack.changeFrame(worldFrame);
+      orientationToPack.changeFrame(baseFrame);
 
       enforceLimits(orientationToPack);
    }
