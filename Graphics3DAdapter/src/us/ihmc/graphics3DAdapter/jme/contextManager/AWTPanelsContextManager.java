@@ -56,27 +56,25 @@ public class AWTPanelsContextManager extends JMEContextManager implements MouseL
 
             if (e != null)
                selectedAwtPanel = (Canvas) e.getComponent();
-
             else
                selectedAwtPanel = getCurrentViewport().getCanvas();
 
-
-            JmeContext context = jmeRenderer.getContext();
-            if(context instanceof AwtPanelsContext)
+            if (selectedAwtPanel != null)
             {
-               ((AwtPanelsContext) context).setInputSource((AwtPanel) selectedAwtPanel);               
+               JmeContext context = jmeRenderer.getContext();
+               if (context instanceof AwtPanelsContext)
+               {
+                  ((AwtPanelsContext) context).setInputSource((AwtPanel) selectedAwtPanel);
+               }
+               else if (context instanceof PBOAwtPanelsContext)
+               {
+                  ((PBOAwtPanelsContext) context).setInputSource((PBOAwtPanel) selectedAwtPanel);
+               }
+
+               setCurrentViewport(panelViewports.get(selectedAwtPanel));
+
+               selectedAwtPanel.requestFocus();
             }
-            else if(context instanceof PBOAwtPanelsContext)
-            {
-               ((PBOAwtPanelsContext) context).setInputSource((PBOAwtPanel) selectedAwtPanel);               
-
-            }
-            
-
-            setCurrentViewport(panelViewports.get(selectedAwtPanel));
-
-
-            selectedAwtPanel.requestFocus();
          }
       }
    }

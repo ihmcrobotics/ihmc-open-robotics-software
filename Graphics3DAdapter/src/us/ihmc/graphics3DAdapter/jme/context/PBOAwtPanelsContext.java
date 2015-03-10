@@ -19,16 +19,16 @@ public class PBOAwtPanelsContext implements JmeContext
 {
    private static final boolean DEBUG = false;
    
-   protected JmeContext actualContext;
-   protected AppSettings settings = new AppSettings(true);
-   protected SystemListener listener;
-   protected ArrayList<PBOAwtPanel> panels = new ArrayList<PBOAwtPanel>();
-   protected PBOAwtPanel inputSource;
+   private JmeContext actualContext;
+   private AppSettings settings = new AppSettings(true);
+   private SystemListener listener;
+   private ArrayList<PBOAwtPanel> panels = new ArrayList<>();
+   private PBOAwtPanel inputSource;
 
-   protected AwtMouseInput mouseInput = new AwtMouseInput();
-   protected AwtKeyInput keyInput = new AwtKeyInput();
+   private AwtMouseInput mouseInput = new AwtMouseInput();
+   private AwtKeyInput keyInput = new AwtKeyInput();
 
-   protected boolean lastThrottleState = false;
+   private boolean lastThrottleState = false;
 
    private ArrayList<PBOAwtPanelListener> pboAwtPanelListeners = new ArrayList<>();
 
@@ -244,7 +244,6 @@ boolean alreadyDestroying = false;
          }
          
          panels.clear();
-         panels = null;
       }
 
       actualContext = null;
