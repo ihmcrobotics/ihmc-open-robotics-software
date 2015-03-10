@@ -197,7 +197,7 @@ public class RobotiqHandSensorData implements HandSensorData
 	public double[][] getFingerJointAngles()
 	{
 		double[][] fingerJointAngles = new double[3][];
-		
+		//TODO: verify SCISSOR sign
 		temp[0] = ((4.0/45) - (double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE) * Math.PI; //32 degrees
 		temp[1] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[2] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
