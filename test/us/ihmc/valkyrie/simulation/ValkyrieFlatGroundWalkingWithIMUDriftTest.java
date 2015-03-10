@@ -12,7 +12,7 @@ import us.ihmc.sensorProcessing.signalCorruption.OrientationConstantAccelerating
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -24,7 +24,7 @@ public class ValkyrieFlatGroundWalkingWithIMUDriftTest extends DRCFlatGroundWalk
 
    @Ignore
    @QuarantinedTest("Need to fix the signal corruptors for the simulated sensors.")
-	@AverageDuration(duration = 50.3)
+	@EstimatedDuration(duration = 50.3)
 	@Test(timeout = 150919)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
