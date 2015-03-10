@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobian;
 import us.ihmc.valkyrie.kinematics.transmissions.InterpolatedPushRodTransmission;
 import us.ihmc.valkyrie.kinematics.transmissions.PushRodTransmissionJoint;
@@ -65,7 +65,7 @@ public class ClosedFormJacobianTest
         0.051849035209403, 0.044875400766635
     };
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void testJacobianMatchesMATLABAnkle() 
     {
@@ -83,7 +83,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void testJacobianMatchesMATLABWaist() 
     {
@@ -101,7 +101,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void testEfficientMatchesInefficientJacobianAnkle() 
     {
@@ -126,7 +126,7 @@ public class ClosedFormJacobianTest
     // The following test is just for achieving proper renishaw jacobian matrix signs/element indices. It should never be used in Bamboo.
     @Ignore
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout=9000)
     public void testEfficientKindaMatchesInefficientJacobianAnkle() {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
@@ -148,7 +148,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void testEfficientMatchesInefficientJacobianWaist() 
     {
@@ -170,7 +170,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 1.0)
+	@EstimatedDuration(duration = 1.0)
 	@Test(timeout = 9000)
     public void testEfficentMatchesInterpolatedJacobianAnkle() 
     {
@@ -194,7 +194,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.5)
+	@EstimatedDuration(duration = 0.5)
 	@Test(timeout = 9000)
     public void testEfficentMatchesInterpolatedJacobianWaist() 
     {
@@ -219,7 +219,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void cosineTestAnkles() 
     {
@@ -257,7 +257,7 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 9000)
     public void consineTestWaist() 
     {

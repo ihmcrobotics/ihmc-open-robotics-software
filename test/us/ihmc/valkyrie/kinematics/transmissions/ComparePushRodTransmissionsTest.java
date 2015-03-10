@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
 import us.ihmc.valkyrie.roboNet.DummyTurboDriver;
@@ -26,7 +26,7 @@ public class ComparePushRodTransmissionsTest
    private static final boolean DEBUG = false;
    private static final boolean VISUALIZE = false;
 
-	@AverageDuration(duration = 0.1)
+	@EstimatedDuration(duration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientAnkle()
    {
@@ -49,7 +49,7 @@ public class ComparePushRodTransmissionsTest
    }
 
    @Ignore
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTiming()
    {
@@ -71,7 +71,7 @@ public class ComparePushRodTransmissionsTest
       testTimingTwoPushRodTransmissionInterfaces(random, epsilon, inefficientPushrodTransmission, efficientPushrodTransmission, registry, yoGraphicsListRegistry);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void testCompareInefficientToEfficientWaist()
    {
@@ -97,7 +97,7 @@ public class ComparePushRodTransmissionsTest
    // Or figure out if the interpolated is just plain wrong.
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCompareInefficientToInterpolatedAnkles()
    {
@@ -126,7 +126,7 @@ public class ComparePushRodTransmissionsTest
    
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCompareInefficientToInterpolatedWaist()
    {

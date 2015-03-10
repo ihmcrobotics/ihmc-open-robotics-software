@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
@@ -21,7 +21,7 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean DEBUG = false;
    private final boolean visualizeAndKeepUp = false;
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
    {
@@ -43,7 +43,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
    {
@@ -64,7 +64,7 @@ public class InefficientPushrodTransmissionJacobianTest
       assertJacobianEquals(jacobian, -0.04520035766057378, 0.04520035766057378, -0.06336787027660956, -0.06336787027660956); // Regression. Need to double check with Solid Works numbers.
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionForAnkles()
    {
@@ -164,7 +164,7 @@ public class InefficientPushrodTransmissionJacobianTest
 
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testInefficientPushrodTransmissionForWaist()
    {
