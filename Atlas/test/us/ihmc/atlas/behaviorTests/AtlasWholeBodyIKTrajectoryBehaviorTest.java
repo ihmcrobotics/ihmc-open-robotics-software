@@ -8,10 +8,17 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajectoryBehaviorTest
 {
+   private final AtlasRobotModel robotModel;
+   
+   public AtlasWholeBodyIKTrajectoryBehaviorTest()
+   {
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false); 
+   }
+   
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      return robotModel;
    }
 
    @Override
