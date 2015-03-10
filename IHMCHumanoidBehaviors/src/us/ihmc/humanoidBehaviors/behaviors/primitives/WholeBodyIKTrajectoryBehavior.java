@@ -48,7 +48,10 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
       wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
       wholeBodyIKSolver.taskEndEffectorRotation.get(RobotSide.LEFT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
       
-      wholeBodyTrajectory = new WholeBodyTrajectory(actualFullRobotModel, 1.5, 15, 0.1);
+      double maxJointVelocity = 1.5;
+      double maxJointAcceleration = 15.0;
+      double maxDistanceInTaskSpaceBetweenWaypoints = 0.1;
+      wholeBodyTrajectory = new WholeBodyTrajectory(actualFullRobotModel, maxJointVelocity, maxJointAcceleration, maxDistanceInTaskSpaceBetweenWaypoints);
       
       this.actualFullRobotModel = actualFullRobotModel;
       this.desiredFullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
