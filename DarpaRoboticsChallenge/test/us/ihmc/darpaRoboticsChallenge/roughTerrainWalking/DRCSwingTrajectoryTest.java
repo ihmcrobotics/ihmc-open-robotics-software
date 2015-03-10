@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -133,7 +133,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
    }
 
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testMultipleHeightFootsteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -185,7 +185,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testReallyHighFootstep() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -215,7 +215,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testNegativeSwingHeight() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

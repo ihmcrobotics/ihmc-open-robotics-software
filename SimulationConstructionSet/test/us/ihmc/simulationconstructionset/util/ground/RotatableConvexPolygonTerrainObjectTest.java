@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.Plane3d;
 import us.ihmc.utilities.test.JUnitTools;
@@ -50,7 +50,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       inclinedTopFaceOctagon3dSecond = new RotatableConvexPolygonTerrainObject(normalYZVector, convexPolygon, 3.0);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testHeightAt()
    {
@@ -66,7 +66,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertEquals(0.0, flatTopFaceOctagon3d.heightAt(5.0, 5.0, 5.0), epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testIsClose()
    {
@@ -80,7 +80,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testClosestIntersectionTo()
    {
@@ -157,7 +157,7 @@ public class RotatableConvexPolygonTerrainObjectTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testIsInsideTheFace()
    {
@@ -181,7 +181,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       assertFalse(flatTopFaceOctagon3d.isInsideTheFace(facePlane, faceVertices3d, pointToCheck));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSurfaceNormalAt()
    {
@@ -200,7 +200,7 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expected, normalToPack, epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testClosestIntersectionAndNormalAt()
    {
@@ -326,28 +326,28 @@ public class RotatableConvexPolygonTerrainObjectTest
       JUnitTools.assertTuple3dEquals(expectedVector, normalToPack, epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetXMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetXMax()
    {
       assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetYMin()
    {
       assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetYMax()
    {

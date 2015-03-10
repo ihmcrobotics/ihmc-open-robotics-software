@@ -28,7 +28,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.imageProcessing.configuration.ConfigurationLoader;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -88,7 +88,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    @Ignore
    @QuarantinedTest("Should get this working again.")
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void perfect() throws IOException
    {
@@ -135,7 +135,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    @Ignore
    @QuarantinedTest("Should get this working again.")
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void smallError() throws IOException
    {
@@ -186,7 +186,7 @@ public class KinematicCalibrationHeadLoopResidualTest
 
    @Ignore
    @QuarantinedTest("Should get this working again.")
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void optimize() throws IOException
    {

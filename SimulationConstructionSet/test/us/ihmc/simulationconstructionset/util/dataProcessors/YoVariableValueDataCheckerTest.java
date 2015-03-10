@@ -11,9 +11,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -37,7 +36,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
    public void testSimpleSmoothDerviativeNoExeeded()
    {
@@ -86,7 +85,7 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isMinValueExeeded());
    }
    
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvided()
    {
@@ -142,7 +141,7 @@ public class YoVariableValueDataCheckerTest
       assertTrue(!yoVariableValueDataChecker.isDerivativeCompErrorOccurred());
    }
    
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
    public void testSimpleSmoothDerviativeNoExeededWithSecondDerivateProvidedAndError()
    {
@@ -197,7 +196,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
    public void testSimpleSmoothDerviativeExceed()
    {
@@ -243,7 +242,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testMinGreaterThanMax()
    {
@@ -271,7 +270,7 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(2.0);
    }
    
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testMaxGreaterThanMin() 
    {
@@ -298,7 +297,7 @@ public class YoVariableValueDataCheckerTest
    }
    
    
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
       public void testErrorThresholdOnDerivativeComparison()
    {
@@ -324,7 +323,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
       public void testMaximumDerivative()
    {
@@ -350,7 +349,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testMaximumSecondDerivative()
    {
@@ -364,7 +363,7 @@ public class YoVariableValueDataCheckerTest
       assertEquals(valueDataCheckerParametersOriginal.getMaximumSecondDerivative(), value, EPSILON);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
       public void testMaximumValue()
    {
@@ -391,7 +390,7 @@ public class YoVariableValueDataCheckerTest
    }
 
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    
    public void testMinimumValue()
@@ -406,7 +405,7 @@ public class YoVariableValueDataCheckerTest
       assertFalse(valueDataCheckerParametersOriginal.getMinimumValue() == value);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testSetMinGreaterThanMax()
    {
@@ -428,7 +427,7 @@ public class YoVariableValueDataCheckerTest
       yoVariableValueDataChecker.setMinimumValue(value + 1.0);
    }
    
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000, expected=RuntimeException.class)
    public void testSetMaxLessThanMin()
    {

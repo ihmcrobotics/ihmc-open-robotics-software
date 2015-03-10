@@ -6,12 +6,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class GenotypeTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGenotype()
    {
@@ -90,7 +90,7 @@ public class GenotypeTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) 
    public void testGenotypeAtExactlyOneAndZero()
    {
@@ -106,7 +106,7 @@ public class GenotypeTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) 
    public void testGenotypeNearOneAndZero()
    {
@@ -122,7 +122,7 @@ public class GenotypeTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPhenotypeTwo()
    {
@@ -147,7 +147,7 @@ public class GenotypeTest
       } 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) 
    public void testPhenotypeReconstruction()
    {

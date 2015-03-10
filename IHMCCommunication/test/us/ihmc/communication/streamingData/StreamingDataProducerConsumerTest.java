@@ -3,12 +3,12 @@ package us.ihmc.communication.streamingData;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class StreamingDataProducerConsumerTest
 {
 
-	@AverageDuration(duration = 1.7)
+	@EstimatedDuration(duration = 1.7)
 	@Test(timeout = 30000)
    public void testTypicalUsage()
    {
@@ -24,7 +24,7 @@ public class StreamingDataProducerConsumerTest
       }
    }
 
-	@AverageDuration(duration = 1.7)
+	@EstimatedDuration(duration = 1.7)
 	@Test(timeout = 30000)
    public void testMultipleProducersAndConsumers()
    {

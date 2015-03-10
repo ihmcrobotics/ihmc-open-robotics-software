@@ -21,7 +21,9 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalcula
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -29,8 +31,6 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 /**
  * User: Matt
@@ -54,7 +54,7 @@ public class FootstepPathCoordinatorTest
     * This test only verifies that polling returns the first footstep in the list *
     */
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPoll() throws Exception
    {
@@ -83,7 +83,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testIsEmpty() throws Exception
    {
@@ -117,7 +117,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testUpdatePath() throws Exception
    {
@@ -160,7 +160,7 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetPaused() throws Exception
    {

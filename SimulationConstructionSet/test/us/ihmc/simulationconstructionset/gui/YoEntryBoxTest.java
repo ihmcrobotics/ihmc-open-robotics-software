@@ -14,9 +14,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -127,7 +127,7 @@ public class YoEntryBoxTest
    // GT - these values are twice the minimum working values for Trogdor.
    @Ignore // This test is for humans to view
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testEnumDisplay() throws SimulationExceededMaximumTimeException, InterruptedException
    {
@@ -141,7 +141,7 @@ public class YoEntryBoxTest
       scs.closeAndDispose();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSwitchToEnumEntry() throws SimulationExceededMaximumTimeException, InterruptedException
    {

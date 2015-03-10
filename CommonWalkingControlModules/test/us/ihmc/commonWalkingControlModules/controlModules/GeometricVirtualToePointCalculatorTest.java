@@ -14,7 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.VirtualToePointCalculator;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2dAndConnectingEdges;
@@ -48,7 +48,7 @@ public class GeometricVirtualToePointCalculatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleCaseWithRectangularFeetAllSquaredUp()
    {
@@ -101,7 +101,7 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootTranslation(leftFootPoints, rightFootPoints, copDesired, footTranslation, upcomingSupportSide);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRotationWhenOnEdge()
    {
@@ -114,7 +114,7 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootRotation(leftFootPoints, rightFootPoints, copDesired, upcomingSupportSide);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTranslationIntoFoot()
    {
@@ -129,7 +129,7 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToCoPMotion(leftFootPoints, rightFootPoints, startCoPDesired, endCoPDesired, upcomingSupportSide);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTranslationOfFoot()
    {

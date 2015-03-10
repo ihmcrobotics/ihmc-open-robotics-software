@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
 
@@ -19,7 +19,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class DRCArmKinematicsCalibrationTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void estimateCameraPose()
    {

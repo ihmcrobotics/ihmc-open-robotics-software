@@ -6,7 +6,7 @@ import java.rmi.registry.Registry;
 import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ManualTest;
 
 @ManualTest
@@ -23,7 +23,7 @@ public class SimulationDispatcherClientTest
    
 // private static final String serverURL = "//10.100.0.74/RemoteSimulationRunner0";
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test()
    {

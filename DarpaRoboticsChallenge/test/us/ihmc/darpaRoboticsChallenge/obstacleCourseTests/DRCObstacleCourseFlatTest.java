@@ -36,7 +36,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
@@ -90,7 +90,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    @Ignore("Invoked manually to test memory & thread leaks")
 
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -102,7 +102,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       }
    }
 
-	@AverageDuration(duration = 14.9)
+	@EstimatedDuration(duration = 14.9)
 	@Test(timeout = 54656)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -134,7 +134,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    }
 
    @SuppressWarnings("deprecation")
-	@AverageDuration(duration = 38.0)
+	@EstimatedDuration(duration = 38.0)
 	@Test(timeout = 124050)
    public void testChestControlWithPackets() throws SimulationExceededMaximumTimeException
    {
@@ -303,7 +303,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 22.0)
+	@EstimatedDuration(duration = 22.0)
 	@Test(timeout = 75988)
    public void testStandingTooHighToCheckIfSingularityStuffIsWorkingProperly() throws SimulationExceededMaximumTimeException
    {
@@ -344,7 +344,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 58.9)
+	@EstimatedDuration(duration = 58.9)
 	@Test(timeout = 186582)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -388,7 +388,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 50.3)
+	@EstimatedDuration(duration = 50.3)
 	@Test(timeout = 160819)
    public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -435,7 +435,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 22.6)
+	@EstimatedDuration(duration = 22.6)
 	@Test(timeout = 77869)
    public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -478,7 +478,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 47.6)
+	@EstimatedDuration(duration = 47.6)
 	@Test(timeout = 152706)
    public void testLongStepsMaxHeightPauseAndResume() throws SimulationExceededMaximumTimeException
    {
@@ -508,7 +508,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 37.7)
+	@EstimatedDuration(duration = 37.7)
 	@Test(timeout = 122996)
    public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -551,7 +551,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 38.1)
+	@EstimatedDuration(duration = 38.1)
 	@Test(timeout = 124432)
    public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
    {
@@ -599,7 +599,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    // TODO re-enable that test when we have polygon to polygon contact model for SCS
    @Ignore
 
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testStandingOnUnevenTerrainForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -644,7 +644,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
    
    @Ignore("Added for fixing DRC-866. Does not work for fast walking")
 
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void testRotatedStepInTheAir() throws SimulationExceededMaximumTimeException
    {
@@ -673,7 +673,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 44.4)
+	@EstimatedDuration(duration = 44.4)
 	@Test(timeout = 143110)
    public void testWalkingUpToRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -707,7 +707,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 45.0)
+	@EstimatedDuration(duration = 45.0)
 	@Test(timeout = 144855)
    public void testWalkingUpToRampWithLongStepsAndOccasionallyStraightKnees() throws SimulationExceededMaximumTimeException
    {
@@ -746,7 +746,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 37.4)
+	@EstimatedDuration(duration = 37.4)
 	@Test(timeout = 122232)
    public void testTurningInPlaceAndPassingPI() throws SimulationExceededMaximumTimeException
    {

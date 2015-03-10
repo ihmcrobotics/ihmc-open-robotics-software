@@ -23,7 +23,7 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationNetworkTestHelper;
 import us.ihmc.graphics3DAdapter.jme.util.JMELidarScanVisualizer;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 {
@@ -46,7 +46,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) 
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect()
    {

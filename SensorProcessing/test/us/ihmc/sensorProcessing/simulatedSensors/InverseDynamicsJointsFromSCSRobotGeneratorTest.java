@@ -28,12 +28,10 @@ import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -88,7 +86,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
    private static final boolean DO_ASSERTS = true;
    private static final boolean DO_TWIST_ASSERTS = true;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSinglePinJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -122,7 +120,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTwoPinJoints() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -175,7 +173,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSingleFloatingJoint() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -213,7 +211,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
       blockingSimulationRunner.simulateAndBlock(2.0);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomLinearChainRobot() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

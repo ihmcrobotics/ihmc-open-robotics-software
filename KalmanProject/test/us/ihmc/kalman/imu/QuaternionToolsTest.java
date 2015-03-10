@@ -1,6 +1,6 @@
 package us.ihmc.kalman.imu;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import Jama.Matrix;
 
@@ -28,7 +28,7 @@ public class QuaternionToolsTest
    {
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testEuler2quat()
    {
@@ -45,7 +45,7 @@ public class QuaternionToolsTest
 //    }
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testQuat2euler()
    {
@@ -58,7 +58,7 @@ public class QuaternionToolsTest
 
    @Ignore
    @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testBackAndForthOne()
    {
@@ -122,7 +122,7 @@ public class QuaternionToolsTest
 
    @Ignore
    @QuarantinedTest("Pretty old and uses Roll Pitch Yaw which is always flaky.")
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testBackAndForthTwo()
    {

@@ -30,7 +30,9 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -39,8 +41,6 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 /**
  * User: Matt
@@ -67,7 +67,7 @@ public class FootstepDataTest
     * @throws IOException 
     */
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) //(timeout = 6000)
    public void testPassingFootstepData() throws IOException
    {
@@ -100,7 +100,7 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 6000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -130,7 +130,7 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 6000)
    public void testPassingPauseCommand() throws IOException
    {
@@ -170,7 +170,7 @@ public class FootstepDataTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 6000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -241,7 +241,7 @@ public class FootstepDataTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 6000)
    public void testPassingFootstepStatus() throws IOException
    {

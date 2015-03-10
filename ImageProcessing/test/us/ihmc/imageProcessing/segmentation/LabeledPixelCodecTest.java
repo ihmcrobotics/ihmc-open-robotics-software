@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * @author Peter Abeles
@@ -20,7 +20,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class LabeledPixelCodecTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 300000)
    public void write_read() throws IOException
    {

@@ -21,7 +21,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -83,7 +83,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration(duration = 60.0)
+	@EstimatedDuration(duration = 60.0)
 	@Test(timeout = 300190)
    public void testMultiStepForwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -119,7 +119,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 52.7)
+	@EstimatedDuration(duration = 52.7)
 	@Test(timeout = 263313)
    public void testMultiStepBackwardAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

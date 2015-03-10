@@ -28,9 +28,9 @@ import us.ihmc.loaders.jme.NormalCalculator;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 /**
  * Test the normal calculation routine based on the normals in the the teapotBinary.STL model.
@@ -42,7 +42,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 public class NormalCalculatorTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testNormalsBasedOnTeapot() throws IOException
    {

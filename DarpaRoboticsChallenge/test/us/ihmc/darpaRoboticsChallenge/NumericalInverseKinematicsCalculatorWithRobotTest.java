@@ -17,7 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationContro
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
@@ -195,7 +195,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    }
 
 
-   @AverageDuration(duration = 0.5)
+   @EstimatedDuration(duration = 0.5)
    @Test(timeout = 120000)
    public void testSimpleCase()
    {
@@ -215,7 +215,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
 
 
-   @AverageDuration(duration = 17.0)
+   @EstimatedDuration(duration = 17.0)
    @Test(timeout = 120000)
    public void testRandomFeasibleRobotPoses()
    {

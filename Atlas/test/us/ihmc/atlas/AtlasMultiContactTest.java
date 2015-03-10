@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
@@ -75,7 +75,7 @@ public class AtlasMultiContactTest
       }
    }
 
-	@AverageDuration(duration = 38.4)
+	@EstimatedDuration(duration = 38.4)
 	@Test(timeout = 192109)
    public void testMultiContactLocomotion() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

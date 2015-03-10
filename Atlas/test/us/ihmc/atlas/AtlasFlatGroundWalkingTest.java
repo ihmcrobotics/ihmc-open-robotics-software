@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
 @BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
@@ -18,7 +18,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@AverageDuration(duration = 119.9)
+	@EstimatedDuration(duration = 119.9)
 	@Test(timeout = 1009754)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -31,7 +31,7 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
       setupAndTestFlatGroundSimulationTrack(robotModel, runName, doPelvisYawWarmup);
    }
 
-	@AverageDuration(duration = 0.7)
+	@EstimatedDuration(duration = 0.7)
 	@Test(timeout = 300000)
    public void testFlatGroundWalkingRunsSameWayTwice() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

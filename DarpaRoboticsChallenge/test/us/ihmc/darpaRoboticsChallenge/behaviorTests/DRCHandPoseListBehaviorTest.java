@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.SysoutTool;
@@ -130,7 +130,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       }
    }
 
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testRandomJointSpaceMoveAndTaskSpaceMoveBackToHome() throws SimulationExceededMaximumTimeException
    {
@@ -229,7 +229,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
    
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testMoveOneRandomJoint20Deg() throws SimulationExceededMaximumTimeException
    {
@@ -271,7 +271,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
    }
 
    
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testWristRoll() throws SimulationExceededMaximumTimeException
    {
@@ -311,7 +311,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
       BambooTools.reportTestFinishedMessage();
    }
    
-   @AverageDuration(duration = 65.4)
+   @EstimatedDuration(duration = 65.4)
    @Test(timeout = 196338)
    public void testMultipleArmPoses() throws SimulationExceededMaximumTimeException
    {

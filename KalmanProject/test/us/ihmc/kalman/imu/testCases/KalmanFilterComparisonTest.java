@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.kalman.imu.QuaternionBasedArrayFullIMUKalmanFilter;
 import us.ihmc.kalman.imu.QuaternionBasedJamaFullIMUKalmanFilter;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class KalmanFilterComparisonTest
 {
@@ -18,7 +18,7 @@ public class KalmanFilterComparisonTest
    {
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testRepeatability()
    {

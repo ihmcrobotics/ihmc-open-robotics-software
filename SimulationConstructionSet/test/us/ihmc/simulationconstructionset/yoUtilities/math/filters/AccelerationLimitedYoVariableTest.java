@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoVariable;
@@ -89,7 +89,7 @@ public class AccelerationLimitedYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
          public void makeSureGUIIsNotUpWhenRunning()
          {
@@ -117,7 +117,7 @@ public class AccelerationLimitedYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_ZeroVelocity()
    {
@@ -166,7 +166,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_ConstantVelocity()
    {
@@ -204,7 +204,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_ConstantAcceleration_PlusInitialize()
    {
@@ -253,7 +253,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_Sine_Plus_Reset_Plus_Update()
    {
@@ -306,7 +306,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_RiseTimeSquareWave()
    {
@@ -360,7 +360,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_SquareWaves()
    {
@@ -403,7 +403,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test_Chirp_Plus_UpdateWithoutNoArguments()
    {
@@ -459,7 +459,7 @@ public class AccelerationLimitedYoVariableTest
       shutdownSCSStuff(scs);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetAndGetGainsByPolePlacement()
    {
@@ -482,7 +482,7 @@ public class AccelerationLimitedYoVariableTest
       assertEquals(velocityGainResult, processed.getVelocityGain().getDoubleValue(), EPSILON);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testUpdate()
    {
@@ -506,7 +506,7 @@ public class AccelerationLimitedYoVariableTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetAndSetMaximumRateaAndAcceleration()
    {
@@ -535,7 +535,7 @@ public class AccelerationLimitedYoVariableTest
 
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDump()
    {
@@ -599,7 +599,7 @@ public class AccelerationLimitedYoVariableTest
       ThreadTools.sleepForever();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testErrorTooHigh()
    {

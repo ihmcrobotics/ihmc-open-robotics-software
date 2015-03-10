@@ -23,7 +23,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -75,7 +75,7 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-	@AverageDuration(duration = 34.5)
+	@EstimatedDuration(duration = 34.5)
 	@Test(timeout = 172343)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
@@ -99,7 +99,7 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 32.9)
+	@EstimatedDuration(duration = 32.9)
 	@Test(timeout = 164603)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
@@ -123,7 +123,7 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 32.7)
+	@EstimatedDuration(duration = 32.7)
 	@Test(timeout = 163619)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {

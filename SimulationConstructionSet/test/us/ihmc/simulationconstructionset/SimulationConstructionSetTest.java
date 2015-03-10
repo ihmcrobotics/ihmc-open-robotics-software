@@ -9,7 +9,7 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.gui.SimulationGUITestFixture;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.ManualTest;
 
 @ManualTest
@@ -28,7 +28,7 @@ public class SimulationConstructionSetTest
    
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationConstructionSetNewViewportWindowUsingGUITestFixture() throws AWTException
    {
@@ -60,7 +60,7 @@ public class SimulationConstructionSetTest
 
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimulationConstructionSetMovieGenerationUsingGUITestFixture() throws AWTException
    {

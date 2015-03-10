@@ -40,7 +40,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
@@ -71,7 +71,7 @@ import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody
 public abstract class DRCOptimizationMomentumControlModuleTest implements MultiRobotTestInterface
 {
 
-	@AverageDuration(duration = 0.6)
+	@EstimatedDuration(duration = 0.6)
 	@Test(timeout = 11824)
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
@@ -166,7 +166,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
       }
    }
 
-	@AverageDuration(duration = 0.6)
+	@EstimatedDuration(duration = 0.6)
 	@Test(timeout = 11724)
    public void testStandingInDoubleSupport() throws NoConvergenceException
    {

@@ -13,7 +13,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import bubo.clouds.detect.tools.PointCloudShapeTools;
 
 /**
@@ -23,7 +23,7 @@ public class IhmcPointCloudOpsTest
 {
    Random rand = new Random(234);
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void convert()
    {
@@ -41,7 +41,7 @@ public class IhmcPointCloudOpsTest
       assertTrue(UtilPlane3D_F64.equals(orig,found,1e-8));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void adjustBoxNormals()
    {

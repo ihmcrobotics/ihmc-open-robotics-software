@@ -10,7 +10,7 @@ import javax.vecmath.Quat4d;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -29,7 +29,7 @@ public class CapturePointToolsTest
 	Random random = new Random();
 	YoVariableRegistry registry = new YoVariableRegistry("");
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeConstantCMPPointsWithBeginningAndEndBetweenFeetWith2Steps()
    {
@@ -75,7 +75,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeConstantCMPPointsOnFeetAndEndBetweenFeetWith2Steps()
    {
@@ -123,7 +123,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeConstantCentersOfPressuresOnFeet()
 	{
@@ -165,7 +165,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeConstantCentersOfPressureWithStartBetweenFeetAndRestOnFeet()
    {
@@ -215,7 +215,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeConstantCentersOfPressureWithEndBetweenFeetAndRestOnFeet()
    {
@@ -266,7 +266,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeConstantCentersOfPressureWithEndAndBeginningBetweenFeet()
    {
@@ -322,7 +322,7 @@ public class CapturePointToolsTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeDesiredEndOfStepCapturePointLocations()
 	{
@@ -388,7 +388,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeDesiredCapturePointLocations()
 	{
@@ -453,7 +453,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeDesiredCapturePointVelocity()
 	{
@@ -490,7 +490,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeDesiredCapturePointAcceleration()
 	{
@@ -525,7 +525,7 @@ public class CapturePointToolsTest
 		}
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void testComputeConstantCenterOfPressureFromInitialAndFinalCapturePointLocations()
 	{

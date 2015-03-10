@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -45,7 +45,7 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testValveIsClosing()
    {
@@ -88,7 +88,7 @@ public class ContactableValveRobotTest
       blockingSimulationRunner.destroySimulation();
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testGetValveTransformToWorld()
    {

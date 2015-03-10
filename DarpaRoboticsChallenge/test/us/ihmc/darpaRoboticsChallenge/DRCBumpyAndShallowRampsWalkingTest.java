@@ -34,7 +34,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -80,7 +80,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    }
    
 
-	@AverageDuration(duration = 70.5)
+	@EstimatedDuration(duration = 70.5)
 	@Test(timeout = 352587)
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -165,7 +165,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
 	@Ignore
 	@QuarantinedTest("This has never worked. Would be nice if we can get it to work.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDRCOverRandomBlocks() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -295,7 +295,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
-	@AverageDuration(duration = 87.3)
+	@EstimatedDuration(duration = 87.3)
 	@Test(timeout = 436492)
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

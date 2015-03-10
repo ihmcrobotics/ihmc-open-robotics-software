@@ -18,7 +18,7 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -35,7 +35,7 @@ public class JointStateUpdaterTest
    private static final Random random = new Random(1776L);
    private static final double EPS = 1e-10;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConstructorNormalCase()
    {
@@ -62,7 +62,7 @@ public class JointStateUpdaterTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testInitializingAndReading()
    {

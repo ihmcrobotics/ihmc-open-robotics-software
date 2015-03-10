@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class ThreePointDoubleSplines1DTest
 {
@@ -26,7 +26,7 @@ public class ThreePointDoubleSplines1DTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleFlatExample()
    {
@@ -56,7 +56,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(0.0, secondDerivativeAtQuery, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPerfectLineExample()
    {
@@ -87,7 +87,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(0.0, secondDerivativeAtQuery, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFooExample()
    {
@@ -98,7 +98,7 @@ public class ThreePointDoubleSplines1DTest
       fooExample(xAtOne, xAtTwo, xAtThree);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testFooExamplePointsOutOfOrder()
    {
@@ -167,7 +167,7 @@ public class ThreePointDoubleSplines1DTest
       assertEquals(secondDerivativeAtThree, secondDerivativeAtQuery, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCompareOutOfOrderSplineWithNormalOne()
    {

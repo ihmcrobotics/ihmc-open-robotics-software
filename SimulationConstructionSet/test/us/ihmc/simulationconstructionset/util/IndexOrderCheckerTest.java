@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
@@ -20,7 +20,7 @@ public class IndexOrderCheckerTest
       indexOrderChecker = new IndexOrderChecker("test", registry, 1);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testNoOverflow()
    {
@@ -32,7 +32,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOverflowOne()
    {
@@ -43,7 +43,7 @@ public class IndexOrderCheckerTest
       assertEquals(0, indexOrderChecker.getMissedIndices());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testOverflowTwo()
    {
@@ -55,7 +55,7 @@ public class IndexOrderCheckerTest
       assertEquals(increment - 1, indexOrderChecker.getMissedIndices());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testABunch()
    {

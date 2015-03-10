@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class GroundContactPointBasedWrenchCalculatorTest
@@ -27,7 +27,7 @@ public class GroundContactPointBasedWrenchCalculatorTest
    WrenchCalculatorInterface calculator;
    OneDegreeOfFreedomJoint joint;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testWrenchCalculation()
    {

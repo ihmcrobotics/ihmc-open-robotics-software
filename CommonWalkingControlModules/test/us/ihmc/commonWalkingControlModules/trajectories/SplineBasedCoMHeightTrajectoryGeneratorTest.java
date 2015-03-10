@@ -15,7 +15,10 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.NonFlatGroundPlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -25,9 +28,6 @@ import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 public class SplineBasedCoMHeightTrajectoryGeneratorTest
 {
@@ -46,7 +46,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void raisedFlatSingleSupportCoMHeightTrajectoryTest()
    {
@@ -72,7 +72,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void raisedFlatDoubleSupportCoMHeightTrajectoryTest()
    {
@@ -98,7 +98,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               coMQueries, expectedHeights, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void raisedSlopedSingleSupportCoMHeightTrajectoryTest()
    {
@@ -127,7 +127,7 @@ public class SplineBasedCoMHeightTrajectoryGeneratorTest
               doubleSupport, coMQueries, expectedHeights, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void raisedSlopedDoubleSupportCoMHeightTrajectoryTest()
    {

@@ -30,7 +30,7 @@ import us.ihmc.loaders.jme.BinarySTLReader;
 import us.ihmc.loaders.jme.STLReader;
 import us.ihmc.loaders.jme.STLReaderFactory;
 import us.ihmc.loaders.jme.Triangle;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * Test loading of STL files based on a hand crafted STL files with three triangles and known values.
@@ -45,7 +45,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 public class STLReaderTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASCIILoad() throws IOException
    {
@@ -57,7 +57,7 @@ public class STLReaderTest
       checkData(reader);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testBinaryLoad() throws IOException
    {

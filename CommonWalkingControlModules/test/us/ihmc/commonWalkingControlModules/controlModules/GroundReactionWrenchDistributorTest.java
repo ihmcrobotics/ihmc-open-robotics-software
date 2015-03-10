@@ -39,7 +39,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -73,7 +73,7 @@ public class GroundReactionWrenchDistributorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
@@ -87,7 +87,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithLeeGoswamiDistributor()
    {
@@ -101,7 +101,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithOptimizationBasedDistributor()
    {
@@ -115,7 +115,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleWrenchDistributionWithContactPointDistributor()
    {
@@ -127,7 +127,7 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {
@@ -141,7 +141,7 @@ public class GroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithGeometricFlatGroundDistributor()
    {
@@ -157,7 +157,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithLeeGoswamiDistributor()
    {
@@ -176,7 +176,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithLeeGoswamiDistributor()
    {
@@ -195,7 +195,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithContactPointDistributor()
    {
@@ -211,7 +211,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithOptimizationBasedtDistributor()
    {
@@ -229,7 +229,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithContactPointDistributor()
    {
@@ -245,7 +245,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithOptimizationBasedDistributor()
    {
@@ -263,7 +263,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithLeeGoswamiDistributor()
    {
@@ -277,7 +277,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithContactPointDistributor()
    {
@@ -291,7 +291,7 @@ public class GroundReactionWrenchDistributorTest
 
    @Ignore // Fix or delete!
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleNonFlatGroundExampleWithOptimizationBasedWrenchDistributor()
    {
@@ -306,7 +306,7 @@ public class GroundReactionWrenchDistributorTest
    @Ignore
    // Cylindrical grasping stuff has been put the grave yard.
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleExampleWithCylindersUsingOptimizationBasedWrenchDistributor()
    {
@@ -322,7 +322,7 @@ public class GroundReactionWrenchDistributorTest
    
    @Ignore // LeeGoswami algorithm not currently used. Decide to either continue support or delete. 
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTroublesomeExamplesWithLeeGoswamiDistributor()
    {
@@ -335,7 +335,7 @@ public class GroundReactionWrenchDistributorTest
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTroublesomeExamplesWithGeometricFlatGroundDistributor()
    {
@@ -351,7 +351,7 @@ public class GroundReactionWrenchDistributorTest
    @Ignore
    // This Troublesome example is not demonstrated to work with the contact point distributor, predecessor of the OptimizationBasedDistributor
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testTroublesomeExamplesWithOptimizationBasedDistributor()
    {
@@ -367,7 +367,7 @@ public class GroundReactionWrenchDistributorTest
    @Ignore
    // Cylindrical grasping stuff has been put the grave yard.
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomMultiContactOptimizationBased()
    {

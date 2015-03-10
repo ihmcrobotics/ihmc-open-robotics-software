@@ -10,7 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -91,7 +91,7 @@ public class YoVariableHolderImplementationTest
       yoVariableHolderImplementation = null;
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariable()
    {
@@ -112,7 +112,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariable1()
    {
@@ -159,7 +159,7 @@ public class YoVariableHolderImplementationTest
       assert testPassed;
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariables()
    {
@@ -189,7 +189,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariables1()
    {
@@ -221,7 +221,7 @@ public class YoVariableHolderImplementationTest
       assertEquals(0, variables.size());
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testGetVariables2()
    {
@@ -257,7 +257,7 @@ public class YoVariableHolderImplementationTest
 
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testHasUniqueVariable()
    {
@@ -277,7 +277,7 @@ public class YoVariableHolderImplementationTest
       assertTrue(!yoVariableHolderImplementation.hasUniqueVariable("registryC.variableTwo"));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testHasUniqueVariable1()
    {

@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
@@ -22,7 +21,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.dataStructures.DoubleHashHeightMap;
 import us.ihmc.utilities.math.dataStructures.HeightMapWithPoints;
 import us.ihmc.utilities.math.geometry.BoundingBox2d;
@@ -40,7 +39,7 @@ public class SwingHeightTrajectoryCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testHeightFromPose()
    {
@@ -72,7 +71,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testHeightFromOffsetBox()
    {
@@ -108,7 +107,7 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
        @Test(timeout = 300000)
        public void testWithBoxOutOfRange()
 {
@@ -143,7 +142,7 @@ public class SwingHeightTrajectoryCalculatorTest
    assertTrue(swingHeight < boxHeight + verticalBuffer);
 }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testWithMultipleBoxes()
    {
@@ -223,7 +222,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
@@ -265,7 +264,7 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {

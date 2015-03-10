@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -100,7 +100,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-	@AverageDuration(duration = 16.4)
+	@EstimatedDuration(duration = 16.4)
    @Test(timeout = 49112)
    public void testSingleRandomChestOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -116,7 +116,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 16.1)
+	@EstimatedDuration(duration = 16.1)
    @Test(timeout = 48244)
    public void testSingleChestPitchOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -136,7 +136,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 16.6)
+	@EstimatedDuration(duration = 16.6)
    @Test(timeout = 49935)
    public void testSingleChestRollOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -156,7 +156,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 16.9)
+	@EstimatedDuration(duration = 16.9)
    @Test(timeout = 50793)
    public void testSingleChestYawOrientationMove() throws SimulationExceededMaximumTimeException
    {
@@ -176,7 +176,7 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 	
-	@AverageDuration(duration = 15)
+	@EstimatedDuration(duration = 15)
 	@Test(timeout = 50000)
 	public void testTranformOrientation() throws SimulationExceededMaximumTimeException
 	{

@@ -5,9 +5,8 @@ import org.junit.Test;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = {BambooPlanType.Fast})
@@ -25,7 +24,7 @@ public class RobotAllJointsDataCheckerTest
       }
    }
 
-   @AverageDuration(duration = 2.0)
+   @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
    public void test()
    {

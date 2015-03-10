@@ -7,14 +7,14 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class Graphics3DObjectTest
 {
    private static final double CUBE_SIDE = 2.0;
    private static final double CUBE_X = 5.0;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testValidCubeGraphics()
    {

@@ -51,7 +51,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.compare.CompareTools;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -327,7 +327,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-	@AverageDuration(duration = 28.3)
+	@EstimatedDuration(duration = 28.3)
 	@Test(timeout = 300000)
    public void testPelvisCorrectionControllerOutOfTheLoop() throws SimulationExceededMaximumTimeException
    {
@@ -371,7 +371,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
    }
 
-	@AverageDuration(duration = 42.4)
+	@EstimatedDuration(duration = 42.4)
 	@Test(timeout = 127292)
    public void testPelvisCorrectionDuringSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
    {
@@ -399,7 +399,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    }
 
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testBigYawInDoubleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -426,7 +426,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
 //	@Ignore
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testBigYawInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -455,7 +455,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 	
 //	@Ignore
 	@QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLocalizationOffsetOutsideOfFootInSingleSupport() throws SimulationExceededMaximumTimeException
    {
@@ -511,7 +511,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
 //   @Ignore
    @QuarantinedTest("Work in progress. Fix these tests in order to make Atlas more robust to Localization drift.")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testWalkingDuringBigPelvisCorrection() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

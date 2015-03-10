@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.badlogic.gdx.math.Matrix4;
@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Matrix4;
 public class GdxUtilTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void convert_t2m()
 	{
@@ -46,7 +46,7 @@ public class GdxUtilTest
       assertEquals(m[15],a[15],1e-6f);
 	}
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
 	public void convert_m2t()
 	{

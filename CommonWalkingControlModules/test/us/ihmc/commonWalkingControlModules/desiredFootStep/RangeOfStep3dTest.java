@@ -13,7 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -37,7 +37,7 @@ public class RangeOfStep3dTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testExampleUsage()
    {
@@ -60,14 +60,14 @@ public class RangeOfStep3dTest
       assertEquals(range.getEllipsoid3d().getZRadius(), 0.5 * verticalLength, 1e-7);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAtCenter()
    {
       testAtTranslation(2013L, ReferenceFrame.getWorldFrame(), new Vector3d(0.0, 0.0, 0.0));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAtRandomTranslation()
    {
@@ -85,7 +85,7 @@ public class RangeOfStep3dTest
       testAtTranslation(5318008L, frame, new Vector3d(xTranslation, yTranslation, zTranslation));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test90DegreeRotation()
    {
@@ -187,7 +187,7 @@ public class RangeOfStep3dTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testUnderRotation()
    {

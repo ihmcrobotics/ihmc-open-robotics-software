@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -34,7 +34,7 @@ public class FootstepDataTansformerTest
 {
    private static Random random = new Random(100L);
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void test()
    {
@@ -93,7 +93,7 @@ public class FootstepDataTansformerTest
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testDistance()
    {

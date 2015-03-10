@@ -7,9 +7,9 @@ import org.junit.Test;
 import us.ihmc.simulationconstructionset.gui.CombinedVarPanel;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.VarPanel;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -18,7 +18,7 @@ public class SimulationConstructionSetRootRegistryTest
 {
    private static final boolean SHOW_GUI = false;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=20000)
    public void testRootRegistryNothingFancy()
    {
@@ -58,7 +58,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=20000) 
    public void testVarGroups()
    {
@@ -105,7 +105,7 @@ public class SimulationConstructionSetRootRegistryTest
       scs.closeAndDispose();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=20000)
    public void testRootRegistryAddYoVariablesAfterConstruction()
    {

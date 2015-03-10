@@ -36,7 +36,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -102,7 +102,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration(duration = 27.7)
+   @EstimatedDuration(duration = 27.7)
    @Test(timeout = 83115)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -129,7 +129,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-   @AverageDuration(duration = 27.7)
+   @EstimatedDuration(duration = 27.7)
    @Test(timeout = 83115)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
@@ -169,7 +169,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
    
-   @AverageDuration(duration = 27.7)
+   @EstimatedDuration(duration = 27.7)
    @Test(timeout = 83115)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {

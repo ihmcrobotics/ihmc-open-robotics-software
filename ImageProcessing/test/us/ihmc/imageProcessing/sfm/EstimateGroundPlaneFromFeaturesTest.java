@@ -17,7 +17,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.StereoParameters;
@@ -32,7 +32,7 @@ public class EstimateGroundPlaneFromFeaturesTest
     * Create a set of observations with perfect data and see if it can reconstruct the plane and transform
     */
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void perfect()
    {

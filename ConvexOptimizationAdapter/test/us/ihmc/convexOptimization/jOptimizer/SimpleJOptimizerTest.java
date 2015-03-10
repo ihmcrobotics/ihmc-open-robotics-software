@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 
@@ -29,7 +29,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testReallyReallySimpleOptimizationProblem() throws Exception
    {
@@ -53,7 +53,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASimpleRedundantEqualityCase() throws Exception
    {
@@ -75,7 +75,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-   @AverageDuration
+   @EstimatedDuration
 	@Test(timeout=300000)
    public void testAnotherReallySimpleOptimizationProblem() throws Exception
    {
@@ -93,7 +93,7 @@ public class SimpleJOptimizerTest
       assertEquals(2.0, solution[0], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testReallySimpleOptimizationProblem() throws Exception
    {
@@ -113,7 +113,7 @@ public class SimpleJOptimizerTest
       assertEquals(5.0, solution[0], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -140,7 +140,7 @@ public class SimpleJOptimizerTest
 	
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLinearCostFullyLinearConstrainedEqualityOptimizationProblem() throws Exception
    {
@@ -159,7 +159,7 @@ public class SimpleJOptimizerTest
       assertEquals(1.0, solution[1], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testZeroCostLinearEqualityOptimizationProblem() throws Exception
    {
@@ -177,7 +177,7 @@ public class SimpleJOptimizerTest
       assertEquals(4.0, solution[0] + solution[1], 1e-5);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testLinearCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -207,7 +207,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testQuadraticCostLinearEqualityQuadraticInequalityOptimizationProblem() throws Exception
    {
@@ -287,7 +287,7 @@ public class SimpleJOptimizerTest
 
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSquaring() throws Exception
    {
@@ -360,7 +360,7 @@ public class SimpleJOptimizerTest
    
    @Ignore
    @QuarantinedTest("JOptimizer has not been properly implemented and very simple tests fail")
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testASecondOrderLorenzConeProblemUsingSOCP() throws Exception
    {

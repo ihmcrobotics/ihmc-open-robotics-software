@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -28,7 +28,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private final long lastTimeStamp = 2000;
    private final int numberOfTicksOfDelay = 100;
 
-   @AverageDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.1)
    @Test(timeout = 300000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {

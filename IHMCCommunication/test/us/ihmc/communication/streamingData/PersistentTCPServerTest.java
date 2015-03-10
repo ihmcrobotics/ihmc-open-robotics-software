@@ -14,12 +14,12 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class PersistentTCPServerTest
 {
 
-	@AverageDuration(duration = 0.3)
+	@EstimatedDuration(duration = 0.3)
 	@Test(timeout = 30000)
    public void testPersistentTCPServer() throws UnknownHostException, IOException
    {

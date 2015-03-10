@@ -6,12 +6,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class SimpleActiveSetQPSolverTest
 {
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testSimpleUnconstrainedOptimization()
    {
@@ -34,7 +34,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testSimpleEqualityConstrainedOptimization()
    {
@@ -64,7 +64,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(1.0, solution[1], 1e-7);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testSimpleInequalityConstrainedOptimizationWithActiveConstraint()
    {
@@ -94,7 +94,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(-1.0, solution[1], 1e-7);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testSimpleInequalityConstrainedOptimizationWithInactiveConstraint()
    {
@@ -124,7 +124,7 @@ public class SimpleActiveSetQPSolverTest
       assertEquals(2.0, solution[1], 1e-7);
    }
 
-	@AverageDuration(duration = 0.0)
+	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 3000)
    public void testNoValidSolutionDueToNonSolvableEqualityConstraints()
    {
@@ -156,7 +156,7 @@ public class SimpleActiveSetQPSolverTest
 
    @Ignore // Fails when conflicting constraints are active... Need to fix this case.
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConflictingInequalityAndEqualityConstraintsIfActive()
    {

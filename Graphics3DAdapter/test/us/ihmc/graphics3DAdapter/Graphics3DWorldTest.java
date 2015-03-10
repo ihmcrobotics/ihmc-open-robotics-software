@@ -6,16 +6,16 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class Graphics3DWorldTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testShowGui()
    {
@@ -25,7 +25,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testWithoutGui()
    {
@@ -35,7 +35,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void addASphere()
    {
@@ -46,7 +46,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void addASphereAfterGuiStarted()
    {
@@ -57,7 +57,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSetCameraPosition()
    {
@@ -69,7 +69,7 @@ public class Graphics3DWorldTest
       world.stop();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void fixCameraOnSphere()
    {

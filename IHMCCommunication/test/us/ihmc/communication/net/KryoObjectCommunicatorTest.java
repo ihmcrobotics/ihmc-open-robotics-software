@@ -16,7 +16,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
@@ -28,7 +28,7 @@ public class KryoObjectCommunicatorTest
 
    @Ignore("This test causes problems on Linux due to a bug in the way Java does its epoll wrapper")
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testAutomaticReconnect() throws IOException, InterruptedException
    {
@@ -99,7 +99,7 @@ public class KryoObjectCommunicatorTest
       server.close();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000) 
    public void testStateListener() throws IOException, InterruptedException
    {
@@ -151,7 +151,7 @@ public class KryoObjectCommunicatorTest
       client.close();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConnectionLimiter() throws IOException, InterruptedException
    {
@@ -225,7 +225,7 @@ public class KryoObjectCommunicatorTest
       
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSendAndReceive() throws IOException, InterruptedException
    {

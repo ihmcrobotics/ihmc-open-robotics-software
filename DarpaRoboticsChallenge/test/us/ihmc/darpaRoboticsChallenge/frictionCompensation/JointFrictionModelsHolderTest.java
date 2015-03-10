@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.frictionModels.AsymmetricCoulombViscousFrictionModel;
 import us.ihmc.utilities.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.utilities.frictionModels.FrictionModel;
@@ -59,7 +59,7 @@ public class JointFrictionModelsHolderTest
    private String name = "simpleHolder";
    private YoVariableRegistry registry = new YoVariableRegistry("simpleRegistry");
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testConstructorAndFrictionStateSelection()
    {

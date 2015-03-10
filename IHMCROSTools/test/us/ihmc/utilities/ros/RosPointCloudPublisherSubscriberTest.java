@@ -15,8 +15,8 @@ import javax.vecmath.Point3d;
 import org.junit.Test;
 
 import sensor_msgs.PointCloud2;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.ros.publisher.RosPointCloudPublisher;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -25,14 +25,14 @@ import us.ihmc.utilities.ros.types.PointType;
 @BambooPlan(planType=BambooPlanType.Flaky)
 public class RosPointCloudPublisherSubscriberTest extends IHMCRosTestWithRosCore
 {
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 2000)
    public void testPubSubSinglePointXYZICloud() throws URISyntaxException, InterruptedException
    {
       testPubSubSingleCloud(PointType.XYZI);
    }
 
-   @AverageDuration
+   @EstimatedDuration
    @Test(timeout = 2000)
    public void testPubSubSinglePointXYZRGBCloud() throws URISyntaxException, InterruptedException
    {

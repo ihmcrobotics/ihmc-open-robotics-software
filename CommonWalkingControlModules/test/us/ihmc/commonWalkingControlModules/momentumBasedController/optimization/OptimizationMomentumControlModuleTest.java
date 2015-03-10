@@ -36,8 +36,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.M
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ContactPointWrenchMatrixCalculator;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -61,7 +62,6 @@ import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.utilities.test.JUnitTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 /**
  * @author twan
@@ -76,7 +76,7 @@ public class OptimizationMomentumControlModuleTest
    private final double controlDT = 1e-5;    // 5e-3;
    private final double gravityZ = 9.81;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testMomentumAndJointSpaceConstraints() throws NoConvergenceException
    {
@@ -131,7 +131,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-3);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testMomentumAndTaskSpaceConstraints()
    {
@@ -207,7 +207,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testMomentumAndPointAccelerationConstraints() throws NoConvergenceException
    {
@@ -289,7 +289,7 @@ public class OptimizationMomentumControlModuleTest
       JUnitTools.assertFrameVectorEquals(desiredPointAccelerationBack, desiredPointAcceleration, 1e-3);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSingleRigidBody() throws NoConvergenceException
    {
@@ -352,7 +352,7 @@ public class OptimizationMomentumControlModuleTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testPrimaryAndSecondaryConstraints() throws NoConvergenceException
    {
@@ -447,7 +447,7 @@ public class OptimizationMomentumControlModuleTest
       assertRootJointWrenchZero(externalWrenchSolution, rootJoint, gravityZ, 1e-2);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testNullspaceMultipliers() throws NoConvergenceException
    {

@@ -16,7 +16,7 @@ import org.junit.Test;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -43,7 +43,7 @@ public class CenterOfPressureResolverTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithNoTorque()
    {      
@@ -63,7 +63,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCenterOfPressureResolverSimpleCaseWithVerticalForce()
    {      
@@ -83,7 +83,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testCenterOfPressureResolverNoForceInZ()
    {      
@@ -103,7 +103,7 @@ public class CenterOfPressureResolverTest
             expectedCenterOfPressure, expectedNormalTorque);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomExamples()
    {

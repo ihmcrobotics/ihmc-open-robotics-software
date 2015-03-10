@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -102,7 +102,7 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
    {

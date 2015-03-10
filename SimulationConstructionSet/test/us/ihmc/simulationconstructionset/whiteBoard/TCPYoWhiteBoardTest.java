@@ -5,8 +5,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType=BambooPlanType.Flaky)
@@ -14,7 +14,7 @@ import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 300000)
    public void testTCPWhiteBoardOne() throws IOException
    {
@@ -34,7 +34,7 @@ public class TCPYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 501, 1001);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 300000)
    public void testTCPWhiteBoardTwo() throws IOException
    {

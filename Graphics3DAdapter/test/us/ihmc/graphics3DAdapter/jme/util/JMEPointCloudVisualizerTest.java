@@ -8,9 +8,9 @@ import javax.vecmath.Point3f;
 import org.junit.Test;
 
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType={BambooPlanType.UI})
 public class JMEPointCloudVisualizerTest
@@ -20,7 +20,7 @@ public class JMEPointCloudVisualizerTest
       new JMEPointCloudVisualizerTest().testJMEPointCloudVisualizer();
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testJMEPointCloudVisualizer()
    {

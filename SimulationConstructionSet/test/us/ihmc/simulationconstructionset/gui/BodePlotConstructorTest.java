@@ -3,7 +3,7 @@ package us.ihmc.simulationconstructionset.gui;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.linearDynamicSystems.TransferFunction;
 import us.ihmc.utilities.test.HumanAssistedTestFrame;
 
@@ -14,7 +14,7 @@ public class BodePlotConstructorTest
 {
    @Ignore
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testSimpleFilter()
    {
@@ -44,7 +44,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    @Ignore
    public void testSingleFreqPhaseShift()
@@ -75,7 +75,7 @@ public class BodePlotConstructorTest
       humanAssistedTestFrame.setVisible(false);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    @Ignore
    public void testSecondOrderResponse()

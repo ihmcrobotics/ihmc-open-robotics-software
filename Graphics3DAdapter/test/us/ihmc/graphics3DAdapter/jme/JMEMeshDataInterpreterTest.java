@@ -8,9 +8,9 @@ import javax.vecmath.TexCoord2f;
 import org.junit.Test;
 
 import us.ihmc.graphics3DAdapter.graphics.MeshDataHolder;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 import com.jme3.math.Triangle;
 import com.jme3.math.Vector3f;
@@ -20,7 +20,7 @@ import com.jme3.scene.Mesh;
 public class JMEMeshDataInterpreterTest
 {
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 300000)
    public void testForASingleTriangle()
    {
@@ -45,7 +45,7 @@ public class JMEMeshDataInterpreterTest
       assertJMEVectorEqualsPoint(triangle.get3(), vertices[2]);  
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout = 300000)
    public void testForASimpleCube()
    {

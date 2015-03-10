@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -92,7 +92,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
    
    // cropped to 1.5 - 6.3 seconds
    @Ignore
-	@AverageDuration(duration = 50.0)
+	@EstimatedDuration(duration = 50.0)
 	@Test(timeout=300000)
    public void TestForVideo() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -112,7 +112,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 34.9)
+	@EstimatedDuration(duration = 34.9)
 	@Test(timeout = 174536)
    public void TestPushLeftEarlySwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -132,7 +132,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 34.4)
+	@EstimatedDuration(duration = 34.4)
 	@Test(timeout = 171862)
    public void TestPushRightLateSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -152,7 +152,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 50.9)
+	@EstimatedDuration(duration = 50.9)
 	@Test(timeout = 254660)
    public void TestPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -181,7 +181,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 33.5)
+	@EstimatedDuration(duration = 33.5)
 	@Test(timeout = 167410)
    public void TestPushTowardsTheBack() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -201,7 +201,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 34.3)
+	@EstimatedDuration(duration = 34.3)
 	@Test(timeout = 171329)
    public void TestPushTowardsTheFront() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -221,7 +221,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 51.3)
+	@EstimatedDuration(duration = 51.3)
 	@Test(timeout = 256611)
    public void TestPushRightInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -251,7 +251,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 61.9)
+	@EstimatedDuration(duration = 61.9)
 	@Test(timeout = 309687)
    public void TestPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {
@@ -281,7 +281,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       BambooTools.reportTestFinishedMessage();
    }
 
-	@AverageDuration(duration = 34.0)
+	@EstimatedDuration(duration = 34.0)
 	@Test(timeout = 169978)
    public void TestPushRightRandomTransferState() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
    {

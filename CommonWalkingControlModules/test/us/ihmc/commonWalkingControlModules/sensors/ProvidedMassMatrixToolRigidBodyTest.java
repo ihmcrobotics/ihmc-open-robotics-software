@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -22,7 +22,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    private final double gravity = 9.81;
    private final double mass = 2.0;
    
-   @AverageDuration(duration = 30.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 120000)
    public void testprovidedMassMatrixToolRigidBody()
    {

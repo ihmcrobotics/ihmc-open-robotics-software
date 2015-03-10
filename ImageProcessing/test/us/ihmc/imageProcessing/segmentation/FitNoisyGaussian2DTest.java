@@ -9,7 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.CovarianceRandomDraw;
 import org.junit.Test;
 
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 /**
  * @author Peter Abeles
@@ -22,7 +22,7 @@ public class FitNoisyGaussian2DTest {
     * Test with no noise added
     */
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void perfectTest() {
       double meanX = 5;
@@ -58,7 +58,7 @@ public class FitNoisyGaussian2DTest {
     * Test with a few outliers added
     */
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void obviousOutliers() {
       double meanX = 5;

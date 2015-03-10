@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
@@ -89,7 +89,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    }
 
    @Ignore("Invoked manually to test memory & thread leaks")
-   @AverageDuration(duration = 50.0)
+   @EstimatedDuration(duration = 50.0)
    @Test(timeout=300000)
    public void testForMemoryLeaks() throws Exception
    {
@@ -101,7 +101,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       }
    }
    
-   @AverageDuration(duration = 14.9)
+   @EstimatedDuration(duration = 14.9)
    @Test(timeout = 54656)
    public void testStandingForACoupleSeconds() throws SimulationExceededMaximumTimeException
    {
@@ -148,7 +148,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
    
    public abstract WholeBodyTrajectoryPacket getRobotSpecificWholeBodyTrajectoryPacket(double trajectoryTime);
    
-   @AverageDuration(duration = 38.0)
+   @EstimatedDuration(duration = 38.0)
    @Test(timeout = 124050)
    public void testChestControlWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {
@@ -325,7 +325,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       BambooTools.reportTestFinishedMessage();
    }
    
-   @AverageDuration(duration = 38.0)
+   @EstimatedDuration(duration = 38.0)
    @Test(timeout = 124050)
    public void testArmMovementsWithTrajectoryPacket() throws SimulationExceededMaximumTimeException
    {

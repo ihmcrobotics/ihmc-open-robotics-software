@@ -16,7 +16,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.test.JUnitTools;
@@ -28,7 +28,7 @@ public class NewDoubleSupportICPComputerTest
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeICPCornerPoints()
    {
@@ -93,7 +93,7 @@ public class NewDoubleSupportICPComputerTest
       }
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testComputeSingleSupportICP()
    {

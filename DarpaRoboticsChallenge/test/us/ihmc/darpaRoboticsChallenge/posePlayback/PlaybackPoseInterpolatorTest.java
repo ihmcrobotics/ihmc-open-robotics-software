@@ -16,7 +16,7 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 
@@ -25,7 +25,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
 {
    private static final boolean SHOW_GUI = false;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testMoveElbowExample()
    {
@@ -41,7 +41,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       playASequence(sdfRobot, sequence);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testRandomExample()
    {
@@ -75,7 +75,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
 //      playASequence(sdfRobot, sequence);
 //   }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLoadingAndPlayingASequence()
    {
@@ -88,7 +88,7 @@ public abstract class PlaybackPoseInterpolatorTest implements MultiRobotTestInte
       playASequence(sdfRobot, sequence);
    }
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testLoadingAndPlayingAnotherSequence()
    {

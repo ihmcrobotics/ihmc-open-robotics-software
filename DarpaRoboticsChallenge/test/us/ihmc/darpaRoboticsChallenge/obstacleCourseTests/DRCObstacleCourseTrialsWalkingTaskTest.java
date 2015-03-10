@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
@@ -53,7 +53,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
-	@AverageDuration(duration = 26.2)
+	@EstimatedDuration(duration = 26.2)
 	@Test(timeout = 78650)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
    {

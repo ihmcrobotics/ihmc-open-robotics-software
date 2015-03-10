@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -55,7 +55,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
    }
 
 
-	@AverageDuration(duration = 32.5)
+	@EstimatedDuration(duration = 32.5)
 	@Test(timeout = 97534)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
