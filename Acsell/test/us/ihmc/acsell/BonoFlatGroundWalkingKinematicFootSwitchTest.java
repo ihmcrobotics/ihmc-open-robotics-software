@@ -13,14 +13,14 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.AverageDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class BonoFlatGroundWalkingKinematicFootSwitchTest extends DRCFlatGroundWalkingTest
 {
 
    private BonoRobotModel robotModel;
 
-	@AverageDuration
+	@EstimatedDuration
 	@Test(timeout=300000)
    public void testBONOFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
