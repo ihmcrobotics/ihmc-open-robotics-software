@@ -13,6 +13,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeOption;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
 import us.ihmc.wholeBodyController.WholeBodyTrajectory;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -54,7 +55,19 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
       this.yoTime = yoTime;
    }
    
+   public void setLockLevel(LockLevel lockLevel)
+   {
+      wholeBodyIKSolver.setLockLevel(lockLevel);
+   }
+   
+   public void setMaxReseeds(int maxReseeds)
+   {
+      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds(maxReseeds);
+   }
+   
    /**
+    * Use this function to set the input and use the behavior to calculate a IK trajectory
+    * 
     * @param controlledDoFLeft
     * @param palmTargetLeft set null if no left target
     * @param controlledDoFRight
@@ -75,6 +88,19 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
          wholeBodyIKSolver.setGripperPalmTarget(actualFullRobotModel, RobotSide.RIGHT, palmTargetRight);
          hasInputBeenSet.set(true);
       }
+   }
+   
+   /**
+    * Use this function to set the input to a pre-calculated trajectory packet and send it to the controller
+    * 
+    * @param wholeBodyTrajectoryPacket
+    */
+   public void setInput(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket)
+   {
+      this.wholeBodyTrajectoryPacket = wholeBodyTrajectoryPacket;
+      hasInputBeenSet.set(true);
+      hasComputationBeenDone.set(true);
+      sendPacket.set(true);
    }
 
    @Override

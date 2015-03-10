@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyIKTrajectoryBehavior;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -14,6 +15,8 @@ public class WholeBodyIKTrajectoryTask extends BehaviorTask
    private final FramePose palmTargetLeft;
    private final ControlledDoF controlledDoFRight;
    private final FramePose palmTargetRight;
+
+   private final WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket;
 
    /**
     * Constructor for moving both arms of the robot.
@@ -34,6 +37,8 @@ public class WholeBodyIKTrajectoryTask extends BehaviorTask
       this.controlledDoFRight = controlledDoFRight;
       this.palmTargetLeft = new FramePose(palmTargetLeft);
       this.palmTargetRight = new FramePose(palmTargetRight);
+      
+      wholeBodyTrajectoryPacket = null;
    }
    
    /**
@@ -72,11 +77,41 @@ public class WholeBodyIKTrajectoryTask extends BehaviorTask
          this.palmTargetLeft = null;
          this.palmTargetRight = null;
       }
+      
+      wholeBodyTrajectoryPacket = null;
+   }
+   
+   /**
+    * Constructor to make the behavior execute a pre-calculated trajectory
+    * 
+    * @param wholeBodyIKTrajectoryBehavior
+    * @param yoTime
+    * @param wholeBodyTrajectoryPacket
+    */
+   public WholeBodyIKTrajectoryTask(WholeBodyIKTrajectoryBehavior wholeBodyIKTrajectoryBehavior, DoubleYoVariable yoTime,
+         WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket)
+   {
+      super(wholeBodyIKTrajectoryBehavior, yoTime);
+      this.wholeBodyIKTrajectoryBehavior = wholeBodyIKTrajectoryBehavior;
+      
+      this.controlledDoFLeft = null;
+      this.controlledDoFRight = null;
+      this.palmTargetLeft = null;
+      this.palmTargetRight = null;
+      
+      this.wholeBodyTrajectoryPacket = wholeBodyTrajectoryPacket;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      wholeBodyIKTrajectoryBehavior.setInput(controlledDoFLeft, palmTargetLeft, controlledDoFRight, palmTargetRight);
+      if (wholeBodyTrajectoryPacket == null)
+      {
+         wholeBodyIKTrajectoryBehavior.setInput(controlledDoFLeft, palmTargetLeft, controlledDoFRight, palmTargetRight);
+      }
+      else
+      {
+         wholeBodyIKTrajectoryBehavior.setInput(wholeBodyTrajectoryPacket);
+      }
    }
 }
