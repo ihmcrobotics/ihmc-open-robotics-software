@@ -36,8 +36,8 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperTest
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;
-      boolean assertPointConditions = true;
-      boolean visualizeAndKeepUp = false;
+      boolean assertPointConditions = false;
+      boolean visualizeAndKeepUp = true;
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters();
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
