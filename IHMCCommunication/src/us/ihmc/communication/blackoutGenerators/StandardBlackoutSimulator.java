@@ -68,20 +68,25 @@ public abstract class StandardBlackoutSimulator implements CommunicationBlackout
          while(enableBlackouts)
          {
             StandardBlackoutSimulator.this.lock();
-            long currentTime = StandardBlackoutSimulator.this.getCurrentTime(TimeUnit.MILLISECONDS);
-            
-            if(currentTime - currentBlackoutStartTime < 0)
-               blackout = false;
-            else if(currentTime - currentBlackoutStartTime >= currentBlackoutLength)
+            try
             {
-               blackout = false;
-               currentBlackoutStartTime = currentTime + GOOD_COMMS_PERIOD_IN_MILLI;
-               currentBlackoutLength = StandardBlackoutSimulator.this.getBlackoutGenerator().calculateNextBlackoutLength(currentTime - generatorStartTime, TimeUnit.MILLISECONDS);
+               long currentTime = StandardBlackoutSimulator.this.getCurrentTime(TimeUnit.MILLISECONDS);
+               
+               if(currentTime - currentBlackoutStartTime < 0)
+                  blackout = false;
+               else if(currentTime - currentBlackoutStartTime >= currentBlackoutLength)
+               {
+                  blackout = false;
+                  currentBlackoutStartTime = currentTime + GOOD_COMMS_PERIOD_IN_MILLI;
+                  currentBlackoutLength = StandardBlackoutSimulator.this.getBlackoutGenerator().calculateNextBlackoutLength(currentTime - generatorStartTime, TimeUnit.MILLISECONDS);
+               }
+               else
+                  blackout = true;
             }
-            else
-               blackout = true;
-            
-            StandardBlackoutSimulator.this.unlock();
+            finally
+            {
+               StandardBlackoutSimulator.this.unlock();
+            }
          }
       }
    }
