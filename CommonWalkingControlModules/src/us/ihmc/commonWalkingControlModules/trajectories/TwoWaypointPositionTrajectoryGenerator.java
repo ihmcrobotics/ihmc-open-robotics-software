@@ -30,7 +30,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 {
    // JPratt. February 27, 2015: Added this since new Atlas was having trouble with network stuff.
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
-   protected static final boolean REGISTER_YOVARIABLES = true;
+   protected static final boolean REGISTER_YOVARIABLES = false;
    
    private final static int arcLengthCalculatorDivisionsPerPolynomial = 20;
    private final static double EPSILON = 1e-3;
