@@ -1,5 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
+import java.util.ArrayList;
+
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -13,43 +16,40 @@ import us.ihmc.humanoidBehaviors.taskExecutor.DropDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspPieceOfDebrisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.taskExecutor.TaskExecutor;
+import us.ihmc.utilities.taskExecutor.PipeLine;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class RemoveSingleDebrisBehavior extends BehaviorInterface
 {
-
+   private static final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.80;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final TaskExecutor taskExecutor = new TaskExecutor();
+   private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
+   private final ArrayList<BehaviorInterface> childBehaviors = new ArrayList<BehaviorInterface>();
    private final GraspPieceOfDebrisBehavior graspPieceOfDebris;
    private final DropDebrisBehavior dropPieceOfDebris;
    private final WalkToLocationBehavior walkCloseToObjectBehavior;
 
+   private final BooleanYoVariable haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
+   private final BooleanYoVariable isObjectTooFar = new BooleanYoVariable("isObjectTooFar", registry);
    private final DoubleYoVariable yoTime;
-   private final BooleanYoVariable haveInputsBeenSet;
-   private final BooleanYoVariable isObjectTooFar;
-
    private final WalkingControllerParameters walkingControllerParameters;
-
-   private final FramePose2d targetPose2dInWorld;
-   private RobotSide robotSide;
-
    private final SDFFullRobotModel fullRobotModel;
-
    private final ReferenceFrame midZupFrame;
 
-   private final double OPTIMAL_DISTANCE_TO_GRAB_OBJECT = 0.80; //0.85
+   private RobotSide grabSide;
+   private FramePoint graspPosition;
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
@@ -59,36 +59,46 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
       this.fullRobotModel = fullRobotModel;
       this.walkingControllerParameters = walkingControllerParameters;
+      this.yoTime = yoTime;
+      this.midZupFrame = referenceFrames.getMidFeetZUpFrame();
 
+      // set up child behaviors
       graspPieceOfDebris = new GraspPieceOfDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames.getMidFeetZUpFrame(),
             wholeBodyControllerParameters, yoTime);
+      childBehaviors.add(graspPieceOfDebris);
+      
       dropPieceOfDebris = new DropDebrisBehavior(outgoingCommunicationBridge, referenceFrames, wholeBodyControllerParameters, yoTime);
+      childBehaviors.add(dropPieceOfDebris);
+      
       walkCloseToObjectBehavior = new WalkToLocationBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, walkingControllerParameters);
+      childBehaviors.add(walkCloseToObjectBehavior);
 
-      this.yoTime = yoTime;
-      haveInputsBeenSet = new BooleanYoVariable("hasInputsBeenSet", registry);
-      isObjectTooFar = new BooleanYoVariable("isObjectTooFar", registry);
-
-      midZupFrame = referenceFrames.getMidFeetZUpFrame();
-      targetPose2dInWorld = new FramePose2d(worldFrame);
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         registry.addChild(behavior.getYoVariableRegistry());
+      }
    }
 
    @Override
    public void doControl()
    {
-      taskExecutor.doControl();
+      if (isPaused())
+      {
+         return;
+      }
+      
+      pipeLine.doControl();
    }
 
    public void setInputs(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector)
    {
-      calculateLocation(graspPosition);
-      if (isObjectTooFar.getBooleanValue())
-         taskExecutor.submit(new WalkToLocationTask(targetPose2dInWorld, walkCloseToObjectBehavior, 0.0, walkingControllerParameters.getMaxStepLength(), yoTime, 1.0));
+      this.graspPosition = new FramePoint(worldFrame, graspPosition);
+      
+      submitWalkingTask();
+      grabSide = determineSideToUse(graspPosition);
 
-      robotSide = determineSideToUse(graspPosition);
-
-      taskExecutor.submit(new GraspPieceOfDebrisTask(graspPieceOfDebris, debrisTransform, graspPosition, graspVector, robotSide, yoTime));
-      taskExecutor.submit(new DropDebrisTask(dropPieceOfDebris, robotSide, yoTime));
+      pipeLine.submitSingleTaskStage(new GraspPieceOfDebrisTask(graspPieceOfDebris, debrisTransform, graspPosition, graspVector, grabSide, yoTime));
+      pipeLine.submitSingleTaskStage(new DropDebrisTask(dropPieceOfDebris, grabSide, yoTime));
 
       haveInputsBeenSet.set(true);
    }
@@ -106,83 +116,86 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
 
    public RobotSide getSideToUse()
    {
-      return robotSide;
+      return grabSide;
    }
    
-   private void calculateLocation(Point3d graspPosition)
+   private void submitWalkingTask()
    {
-      //
-      FramePoint graspPositionInMidZUpFrame = new FramePoint(worldFrame);
-      graspPositionInMidZUpFrame.set(graspPosition);
-      graspPositionInMidZUpFrame.changeFrame(midZupFrame);
-      //      
-      
-      if (!(graspPositionInMidZUpFrame.getX() > OPTIMAL_DISTANCE_TO_GRAB_OBJECT))
-         return;
+      FramePoint2d graspPosition2d = new FramePoint2d(worldFrame, graspPosition.getX(), graspPosition.getY());
+      FramePoint2d robotPosition = new FramePoint2d(midZupFrame, 0.0, 0.0);
+      robotPosition.changeFrame(worldFrame);
+      FrameVector2d walkingDirection = new FrameVector2d(worldFrame);
+      walkingDirection.set(graspPosition2d);
+      walkingDirection.sub(robotPosition);
+      walkingDirection.normalize();
+      double walkingYaw = Math.atan2(walkingDirection.getY(), walkingDirection.getX());
+      double x = graspPosition2d.getX() - walkingDirection.getX() * OPTIMAL_DISTANCE_TO_GRAB_OBJECT;
+      double y = graspPosition2d.getY() - walkingDirection.getY() * OPTIMAL_DISTANCE_TO_GRAB_OBJECT;
+      FramePose2d poseToWalkTo = new FramePose2d(worldFrame, new Point2d(x, y), walkingYaw);
 
-      isObjectTooFar.set(true);
-
-      targetPose2dInWorld.changeFrame(midZupFrame);
-      targetPose2dInWorld.setX(graspPositionInMidZUpFrame.getX() - OPTIMAL_DISTANCE_TO_GRAB_OBJECT);
-      targetPose2dInWorld.setY(0.0);
-      FrameOrientation2d frameOrientation2d = new FrameOrientation2d(midZupFrame);
-      frameOrientation2d.setYaw(0.0);
-      targetPose2dInWorld.setOrientation(frameOrientation2d);
-      targetPose2dInWorld.changeFrame(worldFrame);
+      double stepLength = walkingControllerParameters.getDefaultStepLength();
+      pipeLine.submitSingleTaskStage(new WalkToLocationTask(poseToWalkTo, walkCloseToObjectBehavior, 0.0, stepLength, yoTime));
+      pipeLine.requestNewStage();
    }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      graspPieceOfDebris.consumeObjectFromNetworkProcessor(object);
-      dropPieceOfDebris.consumeObjectFromNetworkProcessor(object);
-      walkCloseToObjectBehavior.consumeObjectFromNetworkProcessor(object);
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromNetworkProcessor(object);
+      }
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      graspPieceOfDebris.consumeObjectFromController(object);
-      dropPieceOfDebris.consumeObjectFromController(object);
-      walkCloseToObjectBehavior.consumeObjectFromController(object);
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromController(object);
+      }
    }
 
    @Override
    public void stop()
    {
-      graspPieceOfDebris.stop();
-      dropPieceOfDebris.stop();
-      walkCloseToObjectBehavior.stop();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.stop();
+      }
    }
 
    @Override
    public void enableActions()
    {
-      graspPieceOfDebris.enableActions();
-      dropPieceOfDebris.enableActions();
-      walkCloseToObjectBehavior.enableActions();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.enableActions();
+      }
    }
    
    @Override
    public void pause()
    {
-      graspPieceOfDebris.pause();
-      dropPieceOfDebris.pause();
-      walkCloseToObjectBehavior.pause();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.pause();
+      }
    }
 
    @Override
    public void resume()
    {
-      graspPieceOfDebris.resume();
-      dropPieceOfDebris.resume();
-      walkCloseToObjectBehavior.resume();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.resume();
+      }
    }
 
    @Override
    public boolean isDone()
    {
-      return (taskExecutor.isDone() && hasInputBeenSet());
+      return pipeLine.isDone() && hasInputBeenSet();
    }
 
    @Override
@@ -195,7 +208,6 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    public void initialize()
    {
       isObjectTooFar.set(false);
-
       haveInputsBeenSet.set(false);
    }
 
