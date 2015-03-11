@@ -123,7 +123,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean isNeckPositionControlled()
    {
-      return true;
+      return runningOnRealRobot;
    }
 
    @Override
