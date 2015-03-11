@@ -26,6 +26,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -74,7 +75,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    }
 
 	@EstimatedDuration(duration = 0.3)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000000)
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;
@@ -93,13 +94,18 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       setupRobotParameters();
       generateFootsteps(new FramePose2d(WORLD_FRAME), new FramePoint2d(WORLD_FRAME, destination.x, destination.y), SIDESTEP ? Math.PI / 2 : 0.0);
       FootstepValidityMetric footstepValidityMetric = new SemiCircularStepValidityMetric(fullRobotModel.getFoot(RobotSide.LEFT), 0.00, 1.2, 1.5);
-      assertAllStepsLevelAndZeroHeight();
+      assertAllStepsLevelAndAtStartSoleHeight();
       assertAllStepsValid(footstepValidityMetric);
       assertLastStepIsPointingCorrectly(footSteps.get(footSteps.size() - 1), destination);
       if (VISUALIZE)
-         FootstepGeneratorVisualizer.visualizeFootsteps(new Robot("null"), footSteps, null); //broken
-      if (VISUALIZE)
+      {
+         List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+         for (Footstep footstep : footSteps){
+            contactablePlaneBodies.add(contactableFeet.get(footstep.getRobotSide()));
+         }
+         FootstepGeneratorVisualizer.visualizeFootsteps(new Robot("null"), footSteps, contactablePlaneBodies); //broken
          ThreadTools.sleepForever();
+      }
    }
 
    private void generateFootsteps(FramePose2d startPose, FramePoint2d endPoint, double pathOrientation)
@@ -137,11 +143,16 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
       }
    }
 
-   private void assertAllStepsLevelAndZeroHeight()
+   private void assertAllStepsLevelAndAtStartSoleHeight()
    {
       for (Footstep footstep : footSteps)
       {
-         assertEquals(walkingParamaters.getAnkleHeight(), footstep.getZ(), eps);
+         ReferenceFrame soleFrame = soleFrames.get(footstep.getRobotSide());
+         FramePoint soleFrameInWorldPoint = new FramePoint(soleFrame);
+         soleFrameInWorldPoint.changeFrame(WORLD_FRAME);
+         double expectedAnkleZHeight = soleFrameInWorldPoint.getZ() + walkingParamaters.getAnkleHeight();
+
+         assertEquals(expectedAnkleZHeight, footstep.getZ(), eps);
       }
    }
 
