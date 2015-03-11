@@ -89,10 +89,12 @@ public class ModbusTCPConnection
 			outStream.write(outBuffer, 0, outBytes);
 
 			int inBytes = 0;
-			while(inBytes < HEADER_LENGTH)
+			int readAttempts = 0;
+			while(inBytes < HEADER_LENGTH && readAttempts < 5)
 			{
 				int bytesToRead = inBuffer.length - inBytes;
 				inBytes += inStream.read(inBuffer, inBytes, bytesToRead);
+				readAttempts++;
 			}
 			
 //			int inBytes = inStream.read(inBuffer, 0, 32);
