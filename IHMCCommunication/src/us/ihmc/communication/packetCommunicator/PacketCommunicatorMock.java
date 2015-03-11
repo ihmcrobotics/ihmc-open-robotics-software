@@ -18,7 +18,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class PacketCommunicatorMock
 {
-   public static final int BUFFER_SIZE = 2097152 * 4;
+   public static final int BUFFER_SIZE = 2097152 * 20;
    
    private final NetworkedObjectCommunicator communicator;
    private final HashMap<Class<?>, HashMap<PacketConsumer<?>, ObjectConsumer<?>>> consumers = new HashMap<>();
@@ -35,7 +35,11 @@ public class PacketCommunicatorMock
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList, BUFFER_SIZE, BUFFER_SIZE), netClassList.getPacketClassList());
+      return createTCPPacketCommunicatorServer(port, BUFFER_SIZE, BUFFER_SIZE, netClassList);
+   }
+   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
+   {
+      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createInterprocessPacketCommunicator(int port, NetClassList netClassList)

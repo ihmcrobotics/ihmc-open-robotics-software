@@ -14,11 +14,9 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.producers.RobotPoseBuffer;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotPosePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
@@ -94,13 +92,10 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      RobotPoseBuffer robotPoseBuffer = new RobotPoseBuffer(controllerCommunicationBridge, 1000, timestampProvider);
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotPosePublisher(controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, robotPoseBuffer, sensorInformation, namespace,
-            tfPublisher);
-      new RosRobotJointStatePublisher(fullRobotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace);
+      new RosRobotJointStatePublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
 
       if(scsSensorCommunicationBridge != null)
       {
