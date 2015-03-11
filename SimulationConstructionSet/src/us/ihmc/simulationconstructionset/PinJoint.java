@@ -391,12 +391,14 @@ public class PinJoint extends OneDegreeOfFreedomJoint
    
    public void setDampingParameterOnly(double b_damp) // Hack for Gazebo
    {
-      this.b_damp.set(b_damp);
+      if (this.b_damp != null) 
+         this.b_damp.set(b_damp);
    }
    
    public void setStictionParameterOnly(double f_stiction) // Hack for Gazebo
    {
-      this.f_stiction.set(f_stiction);
+      if (this.f_stiction != null)
+         this.f_stiction.set(f_stiction);
    }
 
    @Override
