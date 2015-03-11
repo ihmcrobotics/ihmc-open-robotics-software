@@ -247,6 +247,15 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return loader.createRobot(getJointMap(), createCollisionMeshes);
    }
+   
+   public SDFRobot createSdfRobotWithNoJointDamping()
+   {
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = false;
+      boolean enableDamping = false;
+      AtlasJointMap jointMap = getJointMap();
+      return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+   }
 
    @Override
    public double getSimulateDT()
