@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientation
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -122,7 +123,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public boolean isNeckPositionControlled()
    {
-      return false;
+      return true;
    }
 
    @Override
@@ -130,7 +131,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       String[] defaultHeadOrientationControlJointNames = new String[]
       {
-//       jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH)
+            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+//            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
+//            jointMap.getNeckJointName(NeckJointName.NECK_YAW),
+//            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
       };
 
       return defaultHeadOrientationControlJointNames;
@@ -268,7 +272,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       if (!runningOnRealRobot)
          return 0.6;    // 0.5; //0.35;
 
-      return 0.6;
+      return 0.4;
    }
 
    @Override
