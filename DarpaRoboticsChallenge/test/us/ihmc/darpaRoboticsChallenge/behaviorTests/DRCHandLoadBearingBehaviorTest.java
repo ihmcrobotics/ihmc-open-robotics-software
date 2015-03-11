@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
@@ -31,13 +32,12 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandLoadBearingBehavior;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestInterface
@@ -102,6 +102,7 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
             DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
    }
 
+   @SuppressWarnings("unchecked")
    @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90137)
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
@@ -112,6 +113,12 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
 
       ScriptedHandstepGenerator scriptedHandstepGenerator = drcBehaviorTestHelper.createScriptedHandstepGenerator();
 
+      EnumYoVariable<HandControlState> leftHandControlModule = (EnumYoVariable<HandControlState>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
+      EnumYoVariable<HandControlState> rightHandControlModule = (EnumYoVariable<HandControlState>) drcBehaviorTestHelper.getSimulationConstructionSet().getVariable("leftHandControlModule");
+      
+      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlState.JOINT_SPACE));
+      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlState.JOINT_SPACE));
+      
       double bodyY = 0.0;
 
       double leftHandstepY = bodyY + 0.25;
@@ -148,8 +155,10 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
             + EXTRA_SIM_TIME_FOR_SETTLING);
       SysoutTool.println("Behavior Should be done", DEBUG);
 
+      assertTrue(leftHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));
+      assertTrue(rightHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));
+      
       assertTrue(success);
-//      assertTrue(handLoadBearingBehavior.isDone());
 
       BambooTools.reportTestFinishedMessage();
    }
