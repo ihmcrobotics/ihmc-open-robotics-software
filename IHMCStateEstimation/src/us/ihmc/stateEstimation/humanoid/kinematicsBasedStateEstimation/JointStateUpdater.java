@@ -102,6 +102,8 @@ public class JointStateUpdater
 
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
+         double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
+         
          oneDoFJoint.setQ(positionSensorData);
 
          if (enableIMUBasedPelvisToTorsoEncodersVelocityFilter.getBooleanValue()
@@ -114,6 +116,8 @@ public class JointStateUpdater
          {
             oneDoFJoint.setQd(velocitySensorData);
          }
+         
+         oneDoFJoint.setTauMeasured(torqueSensorData);
       }
 
       rootBody.updateFramesRecursively();

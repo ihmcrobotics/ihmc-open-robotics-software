@@ -79,7 +79,7 @@ public class JointConfigurationGatherer
 
       jointConfigurationData.setRootTranslation(rootTranslation);
       jointConfigurationData.setRootOrientation(rootOrientation);
-      jointConfigurationData.setJointAngles(joints);
+      jointConfigurationData.setJointState(joints);
       jointConfigurationData.setTimestamp(timestamp);
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)

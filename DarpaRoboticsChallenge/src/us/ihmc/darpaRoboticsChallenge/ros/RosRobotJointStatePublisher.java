@@ -65,7 +65,7 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
             throw new RuntimeException("Joint names do not match for RobotConfigurationData");
          }
 
-         jointStatePublisher.publish(nameList, robotConfigurationData.getJointAngles(), null, null, t);
+         jointStatePublisher.publish(nameList, robotConfigurationData.getJointAngles(), robotConfigurationData.getJointVelocities(), robotConfigurationData.getJointTorques(), t);
 
          RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getOrientation(), robotConfigurationData.getTranslation());
          tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, "pelvis");

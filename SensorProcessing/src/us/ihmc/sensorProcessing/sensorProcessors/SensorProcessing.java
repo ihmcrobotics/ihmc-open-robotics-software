@@ -695,6 +695,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return outputJointAccelerations.get(oneDoFJoint).getDoubleValue();
    }
 
+   @Override
    public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
    {
       return outputJointTaus.get(oneDoFJoint).getDoubleValue();
