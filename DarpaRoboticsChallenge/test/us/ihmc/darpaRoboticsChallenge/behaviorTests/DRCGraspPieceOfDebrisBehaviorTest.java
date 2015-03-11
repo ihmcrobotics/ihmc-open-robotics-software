@@ -156,7 +156,7 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       debrisPose.getRigidBodyTransform(debrisTransform);
 
-      graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspVectorPosition.getPointCopy(), graspVector.getVectorCopy(), graspingSide);
+      graspPieceOfDebrisBehavior.setInput(debrisTransform, graspVectorPosition.getPointCopy(), graspVector.getVectorCopy(), graspingSide);
    }
 
    private void putArmsAtCompactHomePositionAndPrepareSimulation() throws SimulationExceededMaximumTimeException

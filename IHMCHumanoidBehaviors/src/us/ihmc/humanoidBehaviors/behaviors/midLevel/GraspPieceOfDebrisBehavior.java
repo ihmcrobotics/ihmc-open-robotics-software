@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
+import java.util.ArrayList;
+
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -36,40 +38,36 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double trajectoryTime = 2.5;
+   private static final double wristOffset = 0.14;
+   private static final double offsetToThePointOfGrabbing = 0.05;
+   
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
 
+   private final ArrayList<BehaviorInterface> childBehaviors = new ArrayList<BehaviorInterface>();
    private final HandPoseBehavior handPoseBehavior;
    private final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior;
    private final FingerStateBehavior fingerStateBehavior;
    private final WholeBodyPacketBehavior wholeBodyPacketBehavior;
-
    private final ChestOrientationBehavior chestOrientationBehavior;
    private final PelvisPoseBehavior pelvisPoseBehavior;
 
-   private final BooleanYoVariable haveInputsBeenSet;
+   private final BooleanYoVariable haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet" + behaviorName, registry);
+   private final BooleanYoVariable hasTasksBeenSetUp = new BooleanYoVariable("hasTasksBeenSetUp" + behaviorName, registry);
 
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame midFeetZUpFrame;
+   private final SDFFullRobotModel actualFullRobotModel;
+   private final WholeBodyIkSolver wholeBodyIKSolver;
+   private final SDFFullRobotModel graspingDebrisRobot;
+   private final SDFFullRobotModel approachingDebrisRobot;
+   private final DoubleYoVariable yoTime;
 
    private RigidBodyTransform debrisTransform;
    private Point3d graspPosition;
    private Vector3d graspVector;
    private RobotSide robotSide;
-   private final double trajectoryTime = 2.5;
-   private final double wristOffset = 0.14;
-   private final double offsetToThePointOfGrabbing = 0.05;
-
-   private final SDFFullRobotModel actualFullRobotModel;
-
-   private final DoubleYoVariable yoTime;
-
    private Quat4d rotationToBePerformedInWorldFrame = new Quat4d();
-
-   private final WholeBodyIkSolver wholeBodyIKSolver;
-   private final SDFFullRobotModel graspingDebrisRobot;
-   private final SDFFullRobotModel approachingDebrisRobot;
-
-   private final BooleanYoVariable hasTasksBeenSetUp;
 
    public GraspPieceOfDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrame midFeetZUpFrame, WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
@@ -80,22 +78,36 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       this.yoTime = yoTime;
       this.midFeetZUpFrame = midFeetZUpFrame;
 
+      // set up child behaviors
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
-      wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
-      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
-      wholeBodyPacketBehavior = new WholeBodyPacketBehavior(outgoingCommunicationBridge, yoTime, wholeBodyControllerParameters);
-      chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
-      pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
-
-      haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet" + behaviorName, registry);
-      hasTasksBeenSetUp = new BooleanYoVariable("hasTasksBeenSetUp" + behaviorName, registry);
+      childBehaviors.add(handPoseBehavior);
       
+      wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(outgoingCommunicationBridge, wholeBodyControllerParameters, fullRobotModel, yoTime);
+      childBehaviors.add(wholeBodyIKBehavior);
+      
+      fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(fingerStateBehavior);
+      
+      wholeBodyPacketBehavior = new WholeBodyPacketBehavior(outgoingCommunicationBridge, yoTime, wholeBodyControllerParameters);
+      childBehaviors.add(wholeBodyPacketBehavior);
+      
+      chestOrientationBehavior = new ChestOrientationBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(chestOrientationBehavior);
+      
+      pelvisPoseBehavior = new PelvisPoseBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(pelvisPoseBehavior);
+      
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         registry.addChild(behavior.getYoVariableRegistry());
+      }
+
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
       graspingDebrisRobot = wholeBodyControllerParameters.createFullRobotModel();
       approachingDebrisRobot = wholeBodyControllerParameters.createFullRobotModel();
    }
 
-   public void setGraspPose(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector, RobotSide robotSide)
+   public void setInput(RigidBodyTransform debrisTransform, Point3d graspPosition, Vector3d graspVector, RobotSide robotSide)
    {
       if (graspVector.length() == 0.0)
       {
@@ -106,6 +118,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       this.graspPosition = graspPosition;
       this.graspVector = graspVector;
       this.robotSide = robotSide;
+      
       haveInputsBeenSet.set(true);
    }
 
@@ -222,38 +235,46 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
-      if(!hasTasksBeenSetUp.getBooleanValue())
+      if (isPaused())
+      {
+         return;
+      }
+      
+      if(hasInputBeenSet() && !hasTasksBeenSetUp.getBooleanValue())
       {
          setTasks(debrisTransform, graspPosition, graspVector);
          hasTasksBeenSetUp.set(true);
       }
       else
       {
-      if (pipeLine.getCurrentStage() instanceof WholeBodyInverseKinematicTask)
-      {
-         if (!wholeBodyIKBehavior.hasSolutionBeenFound())
+         if (pipeLine.getCurrentStage() instanceof WholeBodyInverseKinematicTask)
          {
-            pipeLine.clearAll();
+            if (!wholeBodyIKBehavior.hasSolutionBeenFound())
+            {
+               pipeLine.clearAll();
+            }
          }
-      }
-      pipeLine.doControl();
+         
+         pipeLine.doControl();
       }
    }
 
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromNetworkProcessor(object);
-      wholeBodyIKBehavior.consumeObjectFromNetworkProcessor(object);
-      wholeBodyPacketBehavior.consumeObjectFromNetworkProcessor(object);
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromNetworkProcessor(object);
+      }
    }
 
    @Override
    protected void passReceivedControllerObjectToChildBehaviors(Object object)
    {
-      handPoseBehavior.consumeObjectFromController(object);
-      wholeBodyIKBehavior.consumeObjectFromController(object);
-      wholeBodyPacketBehavior.consumeObjectFromController(object);
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.consumeObjectFromController(object);
+      }
    }
 
    public RobotSide getSideToUse()
@@ -264,47 +285,43 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    @Override
    public void stop()
    {
-      handPoseBehavior.stop();
-      wholeBodyIKBehavior.stop();
-      fingerStateBehavior.stop();
-      chestOrientationBehavior.stop();
-      pelvisPoseBehavior.stop();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.stop();
+      }
    }
 
    @Override
    public void enableActions()
    {
-      handPoseBehavior.enableActions();
-      wholeBodyIKBehavior.enableActions();
-      fingerStateBehavior.enableActions();
-      chestOrientationBehavior.enableActions();
-      pelvisPoseBehavior.enableActions();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.enableActions();
+      }
    }
 
    @Override
    public void pause()
    {
-      handPoseBehavior.pause();
-      wholeBodyIKBehavior.pause();
-      fingerStateBehavior.pause();
-      chestOrientationBehavior.pause();
-      pelvisPoseBehavior.pause();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.pause();
+      }
    }
 
    @Override
    public void resume()
    {
-      handPoseBehavior.resume();
-      wholeBodyIKBehavior.resume();
-      fingerStateBehavior.resume();
-      chestOrientationBehavior.resume();
-      pelvisPoseBehavior.resume();
+      for (BehaviorInterface behavior : childBehaviors)
+      {
+         behavior.resume();
+      }
    }
 
    @Override
    public boolean isDone()
    {
-      return (pipeLine.isDone() && hasInputBeenSet());
+      return pipeLine.isDone() && hasInputBeenSet();
    }
 
    @Override
