@@ -33,7 +33,6 @@ import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody
 public class FootControlHelper
 {
    private static final double EPSILON_POINT_ON_EDGE = 5e-3;
-   private static final double minJacobianDeterminant = 0.035;
 
    private final RobotSide robotSide;
    private final RigidBody rootBody;
@@ -59,6 +58,8 @@ public class FootControlHelper
    private final DoubleYoVariable jacobianDeterminant;
    private final BooleanYoVariable jacobianDeterminantInRange;
 
+   private final DoubleYoVariable minJacobianDeterminantForSingularityEscape;
+   
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final DenseMatrix64F selectionMatrix;
@@ -117,6 +118,9 @@ public class FootControlHelper
       ankleRollAndHipYawAlignmentTreshold = new DoubleYoVariable(namePrefix + "AkleRollAndHipYawAlignmentThreshold", registry);
       ankleRollAndHipYawAlignmentTreshold.set(0.9);
 
+      minJacobianDeterminantForSingularityEscape = new DoubleYoVariable("minJacobianDeterminantForSingularityEscape", registry);
+      minJacobianDeterminantForSingularityEscape.set(0.035);
+      
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
 
@@ -146,7 +150,7 @@ public class FootControlHelper
    public void computeNullspaceMultipliers()
    {
       jacobianDeterminant.set(jacobian.det());
-      jacobianDeterminantInRange.set(Math.abs(jacobianDeterminant.getDoubleValue()) < minJacobianDeterminant);
+      jacobianDeterminantInRange.set(Math.abs(jacobianDeterminant.getDoubleValue()) < minJacobianDeterminantForSingularityEscape.getDoubleValue());
       computeJointsAlignmentFactor();
 
       if (jacobianDeterminantInRange.getBooleanValue() && ankleRollAndHipYawAlignmentFactor.getDoubleValue() < ankleRollAndHipYawAlignmentTreshold.getDoubleValue())
