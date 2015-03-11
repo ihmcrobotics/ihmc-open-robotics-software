@@ -15,8 +15,8 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
-import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.controllers.JointLowLevelPositionControlSimulator;
+import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -107,7 +107,7 @@ public class DRCSimulationFactory
       
       createRobotController(drcRobotModel, controllerFactory, globalDataProducer, simulatedRobot, scs, scsInitialSetup, robotInitialSetup);
 
-      SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot);
+      SimulatedRobotCenterOfMassVisualizer simulatedRobotCenterOfMassVisualizer = new SimulatedRobotCenterOfMassVisualizer(simulatedRobot, drcRobotModel.getSimulateDT());
       simulatedRobot.setController(simulatedRobotCenterOfMassVisualizer);
       
       simulatedRobot.setDynamicIntegrationMethod(scsInitialSetup.getDynamicIntegrationMethod());

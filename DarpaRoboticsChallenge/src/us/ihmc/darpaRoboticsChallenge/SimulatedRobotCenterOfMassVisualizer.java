@@ -7,6 +7,8 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -17,15 +19,20 @@ public class SimulatedRobotCenterOfMassVisualizer implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry("ExactCoMCalcualtor");
    private final YoFramePoint exactCenterOfMassPosition = new YoFramePoint("exactCenterOfMassPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector exactCenterOfMassVelocity = new YoFrameVector("exactCenterOfMassVelocity", ReferenceFrame.getWorldFrame(), registry);
-
+   private final FilteredVelocityYoFrameVector exactCenterOfMassAcceleration;
+   
+   
    private final Point3d tempCenterOfMassPoint = new Point3d();
    private final Vector3d tempCenterOfMassVelocity = new Vector3d();
    private final Vector3d tempAngularMomentum = new Vector3d();
 
 
-   public SimulatedRobotCenterOfMassVisualizer(Robot robot)
+   public SimulatedRobotCenterOfMassVisualizer(Robot robot, double dt)
    {
       this.robot = robot;
+      DoubleYoVariable alphaSimCoMAcceleration = new DoubleYoVariable("alphaSimCoMAcceleration", registry);
+      exactCenterOfMassAcceleration = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("exactCenterOfMassAcceleration", "", alphaSimCoMAcceleration, dt, registry, exactCenterOfMassVelocity);
+      alphaSimCoMAcceleration.set(0.99);
    }
 
 
@@ -37,6 +44,8 @@ public class SimulatedRobotCenterOfMassVisualizer implements RobotController
       exactCenterOfMassPosition.set(tempCenterOfMassPoint);
       tempCenterOfMassVelocity.scale(1.0 / mass);
       exactCenterOfMassVelocity.set(tempCenterOfMassVelocity);
+      
+      exactCenterOfMassAcceleration.update();
    }
 
 
