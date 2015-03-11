@@ -37,7 +37,7 @@ public class AtlasFootstepSnapperTest extends FootstepSnapperTest
    {
       boolean assertPositionConditions = true;
       boolean assertPointConditions = false;
-      boolean visualizeAndKeepUp = true;
+      boolean visualizeAndKeepUp = false;
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       FootstepParameters atlasFootstepParameters = robotModel.getWalkingControllerParameters();
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
