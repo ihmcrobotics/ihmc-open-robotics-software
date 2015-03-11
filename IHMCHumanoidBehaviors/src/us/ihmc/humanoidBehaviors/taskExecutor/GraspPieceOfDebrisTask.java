@@ -30,7 +30,7 @@ public class GraspPieceOfDebrisTask extends BehaviorTask
    @Override
    protected void setBehaviorInput()
    {
-      graspPieceOfDebrisBehavior.setGraspPose(debrisTransform, graspPosition, graspVector, robotSide);
+      graspPieceOfDebrisBehavior.setInput(debrisTransform, graspPosition, graspVector, robotSide);
    }
 
 }
