@@ -75,7 +75,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    }
 
 	@EstimatedDuration(duration = 0.3)
-	@Test(timeout = 30000000)
+	@Test(timeout = 3000)
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;
