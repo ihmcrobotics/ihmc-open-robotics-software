@@ -358,6 +358,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    @Override
    public String[] getPositionControlledJointsForSimulation()
    {
-      return null;
+      String[] ret = new String[]
+      {
+            getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+      };
+      
+      return ret;
    }
 }
