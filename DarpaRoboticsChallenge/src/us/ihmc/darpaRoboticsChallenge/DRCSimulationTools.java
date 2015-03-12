@@ -33,7 +33,8 @@ public abstract class DRCSimulationTools
    }
 
    @SuppressWarnings({ "hiding", "unchecked" })
-   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter, T... possibleStartingLocations)
+   public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter,
+         T... possibleStartingLocations)
    {
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
@@ -55,38 +56,46 @@ public abstract class DRCSimulationTools
       else if (modulesToStart.size() == 1)
          simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(false);
 
-      
       boolean automaticallyStartSimulation = true;
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(modulesToStart.contains(Modules.NETWORK_PROCESSOR));
-      networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-      networkProcessorParameters.setUseBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-      networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
-      networkProcessorParameters.setUsePerceptionModule(true);
-      networkProcessorParameters.setUseRosModule(modulesToStart.contains(Modules.ROS_MODULE));
-      
+      DRCNetworkModuleParameters networkProcessorParameters;
+      if (modulesToStart.contains(Modules.NETWORK_PROCESSOR))
+      {
+         networkProcessorParameters = new DRCNetworkModuleParameters();
+         networkProcessorParameters.setUseUiModule(true);
+         networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+         networkProcessorParameters.setUseBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+         networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+         networkProcessorParameters.setUsePerceptionModule(true);
+         networkProcessorParameters.setUseRosModule(modulesToStart.contains(Modules.ROS_MODULE));
+      }
+      else
+      {
+         networkProcessorParameters = null;
+      }
+
       if (modulesToStart.contains(Modules.SIMULATION))
          simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
 
-      if(modulesToStart.contains(Modules.OPERATOR_INTERFACE))
+      if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
       {
          simulationStarter.setSpawnOperatorInterfaceInDifferentProcess(modulesToStart.contains(Modules.SIMULATION));
-         
+
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
       }
-      
+
       if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
-            simulationStarter.startBehaviorVisualizer();
-      
+         simulationStarter.startBehaviorVisualizer();
+
       if (modulesToStart.contains(Modules.SPECTATOR_INTERFACE))
          simulationStarter.startSpectatorInterface();
    }
 
    @SuppressWarnings({ "hiding", "unchecked", "rawtypes" })
-   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack, T... possibleStartingLocations)
+   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
+         T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
-      JPanel checkBoxesPanel = new JPanel(new GridLayout(3, 2));
+      JPanel checkBoxesPanel = new JPanel(new GridLayout(2, 4));
 
       String configFile = System.getProperty("user.home") + "/.ihmc/drcSimulationDefaultOptions.config";
       Properties properties = new Properties();
@@ -106,13 +115,20 @@ public abstract class DRCSimulationTools
 
       for (Modules module : Modules.values())
       {
-         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyName(), Boolean.toString(module.getDefaultValue())));
-         JCheckBox checkBox = new JCheckBox(module.getName(), selected);
+         boolean enabled;
+         if (module.isAlwaysEnabled()) // So Simulation, operator and spectator interfaces, and behavior visualizer can never get disabled
+            enabled = true;
+         else
+            enabled = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForEnable(), Boolean.toString(module.getDefaultValueForEnable())));
+         boolean selected = Boolean.parseBoolean(properties.getProperty(module.getPropertyNameForSelected(), Boolean.toString(module.getDefaultValueForSelected())));
+         JCheckBox checkBox = new JCheckBox(module.getName());
+         checkBox.setSelected(selected);
+         checkBox.setEnabled(enabled);
          checkBoxesPanel.add(checkBox);
          moduleCheckBoxes.put(module, checkBox);
       }
 
-      moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).addChangeListener(new ChangeListener()
+      ChangeListener networkProcessorCheckBoxChangeListener = new ChangeListener()
       {
          @Override
          public void stateChanged(ChangeEvent e)
@@ -120,10 +136,12 @@ public abstract class DRCSimulationTools
             boolean isNetworkProcessorSelected = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isSelected();
             boolean isNetworkProcessorEnabled = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isEnabled();
             moduleCheckBoxes.get(Modules.BEHAVIOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.SENSOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
-      });
+      };
 
-      moduleCheckBoxes.get(Modules.SIMULATION).addChangeListener(new ChangeListener()
+      ChangeListener simulationCheckBoxChangeListener = new ChangeListener()
       {
          @Override
          public void stateChanged(ChangeEvent e)
@@ -131,7 +149,13 @@ public abstract class DRCSimulationTools
             boolean isSimulationSelected = moduleCheckBoxes.get(Modules.SIMULATION).isSelected();
             moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).setEnabled(isSimulationSelected);
          }
-      });
+      };
+      moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).addChangeListener(networkProcessorCheckBoxChangeListener);
+      moduleCheckBoxes.get(Modules.SIMULATION).addChangeListener(simulationCheckBoxChangeListener);
+
+      // Call the listeners
+      networkProcessorCheckBoxChangeListener.stateChanged(null);
+      simulationCheckBoxChangeListener.stateChanged(null);
 
       JComboBox obstacleCourseStartingLocationComboBox = null;
 
@@ -161,7 +185,8 @@ public abstract class DRCSimulationTools
       userPromptPanel.add(userMessageLabel, BorderLayout.CENTER);
       userPromptPanel.add(checkBoxesPanel, BorderLayout.SOUTH);
 
-      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+            null, null);
       if (selectedOption != JOptionPane.OK_OPTION)
       {
          System.exit(-1);
@@ -174,8 +199,9 @@ public abstract class DRCSimulationTools
          boolean enabled = moduleCheckBoxes.get(module).isEnabled();
          if (selected && enabled)
             modulesToStartListToPack.add(module);
-         
-         properties.setProperty(module.getPropertyName(), String.valueOf(selected && enabled));
+
+         properties.setProperty(module.getPropertyNameForEnable(), String.valueOf(enabled));
+         properties.setProperty(module.getPropertyNameForSelected(), String.valueOf(selected));
       }
 
       FileOutputStream newConfigOutputStream;
@@ -197,14 +223,32 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, BEHAVIOR_MODULE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, SPECTATOR_INTERFACE;
+      SIMULATION, OPERATOR_INTERFACE, SPECTATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE;
 
-      public String getPropertyName()
+      public String getPropertyNameForEnable()
       {
-         return "start" + FormattingTools.underscoredToCamelCase(toString(), true);
+         return "enable" + FormattingTools.underscoredToCamelCase(toString(), true);
       }
 
-      public boolean getDefaultValue()
+      public String getPropertyNameForSelected()
+      {
+         return "select" + FormattingTools.underscoredToCamelCase(toString(), true);
+      }
+
+      public boolean isAlwaysEnabled()
+      {
+         if (this == SIMULATION || this == OPERATOR_INTERFACE || this == BEHAVIOR_VISUALIZER || this == SPECTATOR_INTERFACE)
+            return true;
+         else
+            return false;
+      }
+
+      public boolean getDefaultValueForEnable()
+      {
+         return true;
+      }
+
+      public boolean getDefaultValueForSelected()
       {
          if (this == SIMULATION || this == OPERATOR_INTERFACE || this == NETWORK_PROCESSOR || this == SENSOR_MODULE)
             return true;
