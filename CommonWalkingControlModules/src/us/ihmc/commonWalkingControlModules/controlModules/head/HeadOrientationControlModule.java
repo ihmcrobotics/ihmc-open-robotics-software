@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -41,7 +40,6 @@ public class HeadOrientationControlModule
 
    private final YoFrameQuaternion orientationToTrack;
    private final YoFramePoint pointToTrack;
-   private final ReferenceFrame chestFrame;
    private final ReferenceFrame headFrame;
    private final OriginAndPointFrame pointTrackingFrame;
    private final YoGraphicReferenceFrame pointTrackingFrameFiz;
@@ -128,7 +126,6 @@ public class HeadOrientationControlModule
       double dt = momentumBasedController.getControlDT();
       pointTrackingFrame = new OriginAndPointFrame("headPointTrackingFrame", worldFrame);
 
-      this.chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
       orientationToTrack = new YoFrameQuaternion("headOrientationToTrack", headOrientationExpressedInFrame, registry);
       pointToTrack = new YoFramePoint("headPointToTrack", worldFrame, registry);
 
@@ -312,35 +309,6 @@ public class HeadOrientationControlModule
       }
 
       orientationToPack.changeFrame(baseFrame);
-
-      enforceLimits(orientationToPack);
-   }
-
-   private final double[] tempRPY = new double[3];
-   private void enforceLimits(FrameOrientation orientation)
-   {
-      ReferenceFrame initialReferenceFrame = orientation.getReferenceFrame();
-
-      // Limit pitch with respect to the chest frame
-      {
-         orientation.changeFrame(chestFrame);
-         orientation.getYawPitchRoll(tempRPY);
-         double[] tempRPY = orientation.getYawPitchRoll();
-         tempRPY[1] = MathTools.clipToMinMax(tempRPY[1], pitchLowerLimit.getDoubleValue(), pitchUpperLimit.getDoubleValue());
-
-         orientation.setYawPitchRoll(tempRPY);
-      }
-
-      // Limit roll and yaw
-      {
-         orientation.changeFrame(elevator.getBodyFixedFrame());
-         orientation.getYawPitchRoll(tempRPY);
-         tempRPY[0] = MathTools.clipToMinMax(tempRPY[0], -yawLimit.getDoubleValue(), yawLimit.getDoubleValue());
-         tempRPY[2] = MathTools.clipToMinMax(tempRPY[2], -rollLimit.getDoubleValue(), rollLimit.getDoubleValue());
-
-         orientation.setYawPitchRoll(tempRPY);
-         orientation.changeFrame(initialReferenceFrame);
-      }
    }
 
    private void setHeadOrientationLimits(HeadOrientationControllerParameters headOrientationControllerParameters)
