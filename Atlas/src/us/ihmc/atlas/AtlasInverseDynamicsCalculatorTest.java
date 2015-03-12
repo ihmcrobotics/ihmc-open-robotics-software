@@ -5,29 +5,35 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
@@ -41,6 +47,8 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class AtlasInverseDynamicsCalculatorTest
 {
    private static final boolean VISUALIZE = false;
+   private static final double MAX_EXTERNAL_FORCE = 10.0;
+   private static final double MAX_JOINT_VELOCITY = 1.0;
 
    @EstimatedDuration(duration = 0.5)
    @Test(timeout = 30000)
@@ -91,6 +99,7 @@ public class AtlasInverseDynamicsCalculatorTest
       for (int i = 0; i < numberOfTicks; i++)
       {
          setRobotStateRandomly(random, robot);
+         setRobotExternalForcesRandomly(random, robot);
          setRobotTorquesRandomly(random, robot);
 
          robot.doDynamicsButDoNotIntegrate();
@@ -102,8 +111,11 @@ public class AtlasInverseDynamicsCalculatorTest
 
          fullRobotModel.updateFrames();
 
+
+         setFullRobotModelWrenchesToMatchRobot(fullRobotModel, inverseDynamicsCalculator, robot);
+
+
          twistCalculator.compute();
-         inverseDynamicsCalculator.reset();
          inverseDynamicsCalculator.compute();
 
          double epsilon = 1e-7;
@@ -135,6 +147,8 @@ public class AtlasInverseDynamicsCalculatorTest
          }
       }
    }
+
+
 
    private boolean checkTorquesMatchBetweenFullRobotModelAndSimulatedRobot(YoFrameVector computedRootJointForces, YoFrameVector computedRootJointTorques,
            LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques, SDFFullRobotModel fullRobotModel, SDFRobot robot, double epsilon)
@@ -199,6 +213,37 @@ public class AtlasInverseDynamicsCalculatorTest
       }
    }
 
+   private void setFullRobotModelWrenchesToMatchRobot(SDFFullRobotModel fullRobotModel, InverseDynamicsCalculator inverseDynamicsCalculator, SDFRobot robot)
+   {
+      inverseDynamicsCalculator.reset();
+
+      ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators = new ArrayList<WrenchCalculatorInterface>();
+      robot.getForceSensors(groundContactPointBasedWrenchCalculators);
+
+      for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
+      {
+         if (groundContactPointBasedWrenchCalculator instanceof GroundContactPointBasedWrenchCalculator)
+         {
+            OneDegreeOfFreedomJoint joint = groundContactPointBasedWrenchCalculator.getJoint();
+            OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
+
+            RigidBody rigidBodyToApplyWrenchTo = oneDoFJoint.getSuccessor();
+            ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
+
+            groundContactPointBasedWrenchCalculator.calculate();
+            DenseMatrix64F wrenchFromSimulation = groundContactPointBasedWrenchCalculator.getWrench();
+            ReferenceFrame frameAtJoint = rigidBodyToApplyWrenchTo.getParentJoint().getFrameAfterJoint();
+
+            Wrench wrench = new Wrench(frameAtJoint, frameAtJoint, wrenchFromSimulation);
+            wrench.changeBodyFrameAttachedToSameBody(bodyFixedFrame);
+            wrench.changeFrame(bodyFixedFrame);
+
+            inverseDynamicsCalculator.setExternalWrench(rigidBodyToApplyWrenchTo, wrench);
+         }
+      }
+
+   }
+
    private void setRootJointVelocityAndAngularVelocity(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
    {
       FrameVector angularVelocityFrameVector = new FrameVector();
@@ -221,16 +266,6 @@ public class AtlasInverseDynamicsCalculatorTest
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       floatingJoint.getTransformToWorld(transformToWorld);
       sixDoFJoint.setPositionAndRotation(transformToWorld);
-   }
-
-   private void setRootJointPositionAndOrientationTwo(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
-   {
-      Tuple3d position = new Vector3d();
-      floatingJoint.getPosition(position);
-      sixDoFJoint.setPosition(position);
-
-      double[] yawPitchRoll = floatingJoint.getYawPitchRoll();
-      sixDoFJoint.setRotation(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
    }
 
    private void setRobotStateRandomly(Random random, SDFRobot robot)
@@ -258,8 +293,20 @@ public class AtlasInverseDynamicsCalculatorTest
          upperLimit = upperLimit - 0.05 * delta;
 
          oneDegreeOfFreedomJoint.setQ(RandomTools.generateRandomDouble(random, lowerLimit, upperLimit));
-         double maxVelocity = 1.0;
-         oneDegreeOfFreedomJoint.setQd(RandomTools.generateRandomDouble(random, maxVelocity));
+         oneDegreeOfFreedomJoint.setQd(RandomTools.generateRandomDouble(random, MAX_JOINT_VELOCITY));
+      }
+   }
+
+   private void setRobotExternalForcesRandomly(Random random, SDFRobot robot)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<GroundContactPoint> footGroundContactPoints = robot.getFootGroundContactPoints(robotSide);
+
+         for (GroundContactPoint groundContactPoint : footGroundContactPoints)
+         {
+            groundContactPoint.setForce(RandomTools.generateRandomVector(random, MAX_EXTERNAL_FORCE));
+         }
       }
    }
 
