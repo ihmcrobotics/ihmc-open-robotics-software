@@ -45,13 +45,13 @@ private:
 
     bool initialized;
     bool receivedControlMessage;
-    bool forceControl;
     int cyclesRemainingTillControlMessage;
     int64_t lastReceivedTimestamp;
 
     int simulationCyclesPerControlCycle;
     std::vector<double> desiredTorques;
     std::vector<double> desiredPositions;
+    std::vector<bool> jointsUnderPositionControl;
 
     bool acceptAnyPacketSize; // hack
 
@@ -65,7 +65,6 @@ public:
         receivedControlMessage(false),
         cyclesRemainingTillControlMessage(0),
         simulationCyclesPerControlCycle(-1),
-		forceControl(true),
 		acceptAnyPacketSize(true)
     {
         std::cout << "IHMC Plugin Loaded" << std::endl;
@@ -188,8 +187,9 @@ public:
 
         desiredTorques.resize(joints.size(), 0.0);
         desiredPositions.resize(joints.size(), 0.0);
+        jointsUnderPositionControl.resize(joints.size(), 0.0);
     }
-public:
+ public:
 
     void OnUpdate(const common::UpdateInfo & info) {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
@@ -229,14 +229,12 @@ public:
                 receivedControlMessage = false;
             }
             for (unsigned int i = 0; i < joints.size(); i++) {
-            	if(true) { // forceControl) {
-                    joints.at(i)->SetForce(0, desiredTorques[i]);
-                    std::cout << "torque" << i << " = " << desiredTorques[i] << std::endl;
-            	} else {
+            	if(jointsUnderPositionControl[i]) {
             		joints.at(i)->SetPosition(0, desiredPositions[i]);
+            	} else {
+                    joints.at(i)->SetForce(0, desiredTorques[i]);
             	}
             }
-            std::cout << "" << std::endl;
             cyclesRemainingTillControlMessage--;
         }
 
@@ -303,15 +301,21 @@ public:
             	int64_t* longBuffer = ((int64_t*) (buffer));
                 simulationCyclesPerControlCycle = longBuffer[0];
                 lastReceivedTimestamp = longBuffer[1];
-                forceControl = longBuffer[2] > 0;
+                int64_t positionControlData = longBuffer[2]; // if the i_th entry of this value in binary is 1, joint i position controlled
+
+                for (unsigned int i = 0; i < joints.size(); i++) {
+                	jointsUnderPositionControl[i] = positionControlData % 2 == 1;
+                	positionControlData /= 2;
+                }
 
                 // Pointer arithmetic is evil
+                // ^ this is a fact
                 double* jointData = (double*) (buffer + 24);
                 for (unsigned int i = 0; i < joints.size(); i++) {
-                    if(forceControl) {
-                    	desiredTorques[i] = jointData[i];
-                    } else {
+                    if(jointsUnderPositionControl[i]) {
                     	desiredPositions[i] = jointData[i];
+                    } else {
+                    	desiredTorques[i] = jointData[i];
                     }
                 }
 

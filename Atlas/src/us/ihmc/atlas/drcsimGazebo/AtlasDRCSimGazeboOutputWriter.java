@@ -21,8 +21,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 {
-   private final boolean useForceControl = true;
-
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1235);
 
    private SocketChannel channel;
@@ -53,23 +51,32 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       jointCommand.putLong(estimatorTicksPerControlTick);
       jointCommand.putLong(timestamp);
       
-      if(useForceControl)
-    	  jointCommand.putLong(1);
-      else
-    	  jointCommand.putLong(0);
+      // if the i_th value of the binary rep of this is 1, it's position controlled
+      long jointsUnderPositionControl = 0;
+      
+      for(int i = 0; i < joints.size(); i++)
+      {
+    	  if(joints.get(i).isUnderPositionControl())
+    	  {
+        	  jointsUnderPositionControl += 1 << i;    		  
+    	  }
+      }
+            
+      jointCommand.putLong(jointsUnderPositionControl);
 
       for (int i = 0; i < joints.size(); i++)
-      {
-    	 if(useForceControl)
+      {    	      	
+    	 OneDoFJoint joint = joints.get(i);
+    	 if(joint.isUnderPositionControl())
     	 {
-             jointCommand.putDouble(joints.get(i).getTau());    		 
+    		 jointCommand.putDouble(joint.getqDesired());
     	 }
     	 else
     	 {
-    		 jointCommand.putDouble(joints.get(i).getQ());
+             jointCommand.putDouble(joint.getTau());    		 
     	 }
       }
-
+      
       jointCommand.flip();
 
       try
