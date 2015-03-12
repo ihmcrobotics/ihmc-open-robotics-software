@@ -161,7 +161,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       }
 
       long timestamp = TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue());
-      sensorProcessing.startComputation(timestamp, timestamp);
+      sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();
    }

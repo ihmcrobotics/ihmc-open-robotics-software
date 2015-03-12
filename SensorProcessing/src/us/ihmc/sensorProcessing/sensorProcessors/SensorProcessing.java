@@ -39,6 +39,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
    private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
+   private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> inputJointVelocities = new LinkedHashMap<>();
@@ -143,13 +144,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly
 
    public void initialize()
    {
-      startComputation(0, 0);
+      startComputation(0, 0, -1);
    }
 
-   public void startComputation(long timestamp, long visionSensorTimestamp)
+   public void startComputation(long timestamp, long visionSensorTimestamp, long sensorHeadPPSTimestamp)
    {
       this.timestamp.set(timestamp);
       this.visionSensorTimestamp.set(visionSensorTimestamp);
+      this.sensorHeadPPSTimetamp.set(sensorHeadPPSTimestamp);
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
@@ -635,6 +637,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public long getVisionSensorTimestamp()
    {
       return visionSensorTimestamp.getLongValue();
+   }
+   
+   @Override
+   public long getSensorHeadPPSTimestamp()
+   {
+      return sensorHeadPPSTimetamp.getLongValue();
    }
 
    public void setJointPositionSensorValue(OneDoFJoint oneDoFJoint, double value)

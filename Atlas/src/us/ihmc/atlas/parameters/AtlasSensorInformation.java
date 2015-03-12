@@ -32,7 +32,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * PPS Parameters
     */
-   private static final int PPS_PROVIDER_PORT = 5050;
    private static final String MULTISENSE_SL_PPS_TOPIC = multisense_namespace + "/stamped_pps";
    
    /**
@@ -232,11 +231,6 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public String getCameraStringBase()
    {
       return multisense_namespace;
-   }
-
-   public int getPPSProviderPort()
-   {
-      return PPS_PROVIDER_PORT;
    }
 
    public String getPPSRosTopic()

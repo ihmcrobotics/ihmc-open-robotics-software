@@ -5,7 +5,6 @@ package us.ihmc.darpaRoboticsChallenge;
 @Deprecated
 public class DRCConfigParameters
 {
-   public static final boolean USE_LOGGER = true;
    public static final boolean MAKE_SLIDER_BOARD = false; 
 
    public static final boolean USE_HYDRA = false;

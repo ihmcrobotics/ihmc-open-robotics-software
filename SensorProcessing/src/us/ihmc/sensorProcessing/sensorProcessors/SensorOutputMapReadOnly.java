@@ -21,4 +21,6 @@ public interface SensorOutputMapReadOnly
 
    public long getVisionSensorTimestamp();
 
+   public long getSensorHeadPPSTimestamp();
+
 }
