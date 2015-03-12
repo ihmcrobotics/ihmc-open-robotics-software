@@ -67,7 +67,7 @@ public class JointConfigurationGatherer
    }
 
    // fills a DRCJointConfigurationData object on the ConcurrentRingBuffer
-   public void packEstimatorJoints(long timestamp, RobotConfigurationData jointConfigurationData)
+   public void packEstimatorJoints(long timestamp, long sensorHeadPPSTimestamp, RobotConfigurationData jointConfigurationData)
    {
       if (jointConfigurationData == null)
       {
@@ -81,6 +81,7 @@ public class JointConfigurationGatherer
       jointConfigurationData.setRootOrientation(rootOrientation);
       jointConfigurationData.setJointState(joints);
       jointConfigurationData.setTimestamp(timestamp);
+      jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {

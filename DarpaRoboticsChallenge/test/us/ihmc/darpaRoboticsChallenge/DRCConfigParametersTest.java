@@ -20,7 +20,7 @@ public class DRCConfigParametersTest
       
       assertFalse("Do not check in MomentumBasedController.SPY_ON_MOMENTUM_BASED_CONTROLLER = true!!", MomentumBasedController.SPY_ON_MOMENTUM_BASED_CONTROLLER);      
       
-      assertTrue("Do not add parameters to DRCConfigParameters.", DRCConfigParameters.class.getFields().length <= 14);
+      assertTrue("Do not add parameters to DRCConfigParameters.", DRCConfigParameters.class.getFields().length <= 8);
 
       assertFalse("Do not check in SEND_ROBOT_DATA_TO_ROS = true!!", DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS);      
    }

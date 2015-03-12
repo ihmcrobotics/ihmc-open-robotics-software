@@ -2,30 +2,34 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.time;
 
 import org.ros.message.Time;
 
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 
-public class SimulationRosClockPPSTimestampOffsetProvider implements
-      PPSTimestampOffsetProvider {
-   
+public class SimulationRosClockPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
+{
+
    private RosClockPublisher clockPubisher;
    private long previousTimestamp = 0;
-   
+
    public SimulationRosClockPPSTimestampOffsetProvider()
    {
       clockPubisher = new RosClockPublisher();
    }
-   
-   public long getCurrentTimestampOffset() {
+
+   public long getCurrentTimestampOffset()
+   {
       return 0;
    }
 
-   public long requestNewestRobotTimestamp() {
+   public long requestNewestRobotTimestamp()
+   {
       return 0;
    }
 
-   public long adjustTimeStampToRobotClock(long timeStamp) {
+   public long adjustTimeStampToRobotClock(long timeStamp)
+   {
       return timeStamp;
    }
 
@@ -34,7 +38,8 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements
       rosMainNode.attachPublisher("/clock", clockPubisher);
    }
 
-   public boolean offsetIsDetermined() {
+   public boolean offsetIsDetermined()
+   {
       return true;
    }
 
@@ -47,10 +52,17 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements
 
    public void publishRosClock(long timestamp)
    {
-      if (timestamp <= previousTimestamp) return; // Do not set timestamps from the past, screws up ROS.
-      
+      if (timestamp <= previousTimestamp)
+         return; // Do not set timestamps from the past, screws up ROS.
+
       Time time = Time.fromNano(timestamp);
       clockPubisher.publish(time);
       previousTimestamp = timestamp;
+   }
+
+   @Override
+   public void receivedPacket(RobotConfigurationData packet)
+   {
+      
    }
 }

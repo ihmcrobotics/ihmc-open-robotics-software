@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
+import org.ros.message.Time;
 import org.ros.namespace.GraphName;
 import org.ros.node.ConnectedNode;
 import org.ros.node.DefaultNodeMainExecutor;
@@ -48,10 +49,11 @@ public class RosMainNode implements NodeMain
    private final String graphName;
    private ParameterTree parameters;
    
-   private boolean isShutdownInProgress=false;
+   private boolean isShutdownInProgress = false;
    
-   NodeMainExecutor nodeMainExecutor=null;
+   private NodeMainExecutor nodeMainExecutor = null;
   
+   private ConnectedNode connectedNode = null;
   
    public RosMainNode(URI masterURI, String graphName)
    {
@@ -195,8 +197,18 @@ public class RosMainNode implements NodeMain
          connectedNode.getParameterTree().addParameterListener(entry.getKey(), entry.getValue());
       }
       
+      this.connectedNode = connectedNode;
       isStarted = true;
       
+   }
+   
+   public Time getCurrentTime()
+   {
+      if(connectedNode == null)
+      {
+         throw new RuntimeException("ROS Node is not connected");
+      }
+      return connectedNode.getCurrentTime();
    }
    
 

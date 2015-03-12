@@ -1,17 +1,10 @@
 package us.ihmc.atlas.ros;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import multisense_ros.StampedPps;
-
-import org.zeromq.ZMQ;
-
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.PPSRequestType;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -19,26 +12,23 @@ import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
-   private final int ppsPort;
+   public static final boolean DEBUG = true;
+
+   private final Object lock = new Object();
+
    private final String ppsTopic;
    private RosTimestampSubscriber ppsSubscriber;
    private final AtomicLong currentTimeStampOffset = new AtomicLong(0);
-   private final AtomicLong lastTimeStampOffset = new AtomicLong(0);
-   private ZMQ.Socket requester;
+   private volatile boolean offsetIsDetermined = false;
 
-   private final byte[] requestPayload = { PPSRequestType.GET_NEW_PPS_TIMESTAMP };
-   private final ByteBuffer responseBuffer = ByteBuffer.allocate(8);
-
-   private final AtomicBoolean offsetIsDetermined = new AtomicBoolean(false);
-   private boolean isRosMainNodeAttached=false;
    private static AtlasPPSTimestampOffsetProvider instance = null;
+
+   private RosMainNode rosMainNode;
+   private long multisensePPSTimestamp = -1;
 
    private AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
    {
-      ppsPort = sensorInformation.getPPSProviderPort();
       ppsTopic = sensorInformation.getPPSRosTopic();
-
-      setupZMQSocket();
 
       setupPPSSubscriber();
    }
@@ -50,36 +40,24 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
          @Override
          public void onNewMessage(StampedPps message)
          {
-            long robotPPSTimestamp=requestNewestRobotTimestamp();
-            long multisensePPSTimestamp=message.getHostTime().totalNsecs();
-            currentTimeStampOffset.set( robotPPSTimestamp-multisensePPSTimestamp);
-            if(offsetIsDetermined.get() && Math.abs(currentTimeStampOffset.get()-lastTimeStampOffset.get())>1e7)
+            synchronized (lock)
             {
-               System.out.println(getClass().getSimpleName() + " UnstablePPSOffset"+
-               String.format("robot %d ns, multisense %d ns,diff, %.4f s",
-                     robotPPSTimestamp, multisensePPSTimestamp,
-                     TimeTools.nanoSecondstoSeconds(currentTimeStampOffset.get())));
+               multisensePPSTimestamp = message.getHostTime().totalNsecs();
             }
-            lastTimeStampOffset.set(currentTimeStampOffset.get());
-            offsetIsDetermined.set(true);
          }
       };
    }
 
-   private void setupZMQSocket()
-   {
-      ZMQ.Context context = ZMQ.context(1);
-      requester = context.socket(ZMQ.REQ);
-      requester.connect("tcp://" + NetworkParameters.getHost(NetworkParameterKeys.robotController) + ":" + ppsPort);
-   }
-
    @Override
-   public synchronized void attachToRosMainNode(RosMainNode rosMainNode)
+   public void attachToRosMainNode(RosMainNode rosMainNode)
    {
-      if(!isRosMainNodeAttached)
+      synchronized (lock)
       {
-         rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
-         isRosMainNodeAttached=true;
+         if (this.rosMainNode == null)
+         {
+            rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
+            this.rosMainNode = rosMainNode;
+         }
       }
    }
 
@@ -102,25 +80,57 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    }
 
    @Override
-   public long requestNewestRobotTimestamp()
-   {
-      requester.send(requestPayload, 0);
-      responseBuffer.rewind();
-      responseBuffer.put(requester.recv());
-      return responseBuffer.getLong(0);
-   }
-
-   @Override
    public boolean offsetIsDetermined()
    {
-      return offsetIsDetermined.get();
+      return offsetIsDetermined;
    }
 
    public synchronized static PPSTimestampOffsetProvider getInstance(AtlasSensorInformation sensorInformation)
    {
-      if(instance == null)
-            instance=new AtlasPPSTimestampOffsetProvider(sensorInformation);
+      if (instance == null)
+         instance = new AtlasPPSTimestampOffsetProvider(sensorInformation);
       return instance;
+   }
+
+   @Override
+   public void receivedPacket(RobotConfigurationData packet)
+   {
+      synchronized (lock)
+      {
+         if (rosMainNode != null)
+         {
+            long lastPPSTimestampFromRobot = packet.getSensorHeadPPSTimestamp();
+
+            long ppsFromRobotAge = packet.getTimestamp() - lastPPSTimestampFromRobot;
+            long ppsFromROSAge = rosMainNode.getCurrentTime().totalNsecs() - multisensePPSTimestamp;
+
+            // Check if timestamps are approximately the same age. If not, we discard this measurement and wait for the next one.
+            if (Math.abs(ppsFromRobotAge - ppsFromROSAge) > TimeTools.milliSecondsToNanoSeconds(100))
+            {
+               if (DEBUG)
+               {
+                  System.out.println("[AtlasPPSTimestampOffsetProvider] Last received pps (robot age: " + TimeTools.nanoSecondstoSeconds(ppsFromRobotAge)
+                        + ", ros age:" + TimeTools.nanoSecondstoSeconds(ppsFromROSAge) + ") are not of the same signal. Ignoring this measurement.");
+               }
+               return;
+            }
+            else
+            {
+               // Timestamps are probably from the same pulse, updating offset
+               long newOffset = lastPPSTimestampFromRobot - multisensePPSTimestamp;
+               long lastTimestampOffset = currentTimeStampOffset.getAndSet(newOffset);
+
+               if (offsetIsDetermined && Math.abs(newOffset - lastTimestampOffset) > TimeTools.milliSecondsToSeconds(1))
+               {
+                  System.err.println("[AtlasPPSTimestampOffsetProvider] Unstable PPS offset. New offset: " + newOffset + ", previous offset: "
+                        + lastTimestampOffset);
+               }
+
+               offsetIsDetermined = true;
+            }
+
+         }
+      }
    }
 
 }
