@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllers.RobotControllerUpdatablesAdapter;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.DoNothingBehavior;
@@ -230,22 +229,11 @@ public class MomentumBasedControllerFactory
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(initialBehavior, highLevelBehaviors, momentumBasedController,
             variousWalkingProviders, centerOfPressureDataHolderForEstimator);
       highLevelHumanoidControllerManager.setupControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
-      highLevelHumanoidControllerManager.addYoVariableRegistry(this.registry);
+      highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
 
       createRegisteredControllers();
 
-      RobotController ret = highLevelHumanoidControllerManager;
-
-      ret.getYoVariableRegistry().addChild(registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         RobotControllerUpdatablesAdapter highLevelHumanoidControllerUpdatables = new RobotControllerUpdatablesAdapter(ret);
-
-         ret = highLevelHumanoidControllerUpdatables;
-      }
-
-      return ret;
+      return highLevelHumanoidControllerManager;
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
