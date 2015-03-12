@@ -116,7 +116,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    public void doAction()
    {
 
-      if( desiredJointsProvider.checkForNewPacket() )
+      if(desiredJointsProvider != null && desiredJointsProvider.checkForNewPacket() )
       {
          initializeFromPacket( desiredJointsProvider.getNewPacket() );
       }
