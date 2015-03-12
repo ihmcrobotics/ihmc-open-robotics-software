@@ -33,7 +33,7 @@ public class DRCSimGazeboLauncher
             "source /opt/ros/indigo/setup.bash;" +
             "source /usr/share/drcsim/setup.sh;" +
             "source $PWD/ihmc_gazebo_catkin_ws/devel/setup.bash;" +
-            "roslaunch ihmc_gazebo ihmc_atlas.launch";
+            "roslaunch ihmc_gazebo ihmc_atlas_standing.launch";
       ThreadTools.runCommandLine(commandline2);
    }
 }
