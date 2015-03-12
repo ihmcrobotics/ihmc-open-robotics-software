@@ -115,7 +115,7 @@ public class DRCSimGazeboControllerFactory
          e.printStackTrace();
       }
 
-//      yoVariableServer.start();
+      yoVariableServer.start();
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
