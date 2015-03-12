@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -225,6 +228,34 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    {
       // TODO Auto-generated method stub
       return null;
+   }
+
+   @Override
+   public boolean checkForNewRotateAboutAxisPacket(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public Point3d getRotationAxisOriginInWorld(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public Vector3d getRotationAxisInWorld(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public double getRotationAngleRightHandRule(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return 0;
    }
 
 }

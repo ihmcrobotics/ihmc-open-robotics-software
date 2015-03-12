@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,6 +24,14 @@ public interface HandPoseProvider
    public abstract boolean checkForNewPose(RobotSide robotSide);
 
    public abstract boolean checkForNewPoseList(RobotSide robotSide);
+   
+   public abstract boolean checkForNewRotateAboutAxisPacket(RobotSide robotSide);
+   
+   public abstract Point3d getRotationAxisOriginInWorld(RobotSide robotSide);
+   
+   public abstract Vector3d getRotationAxisInWorld(RobotSide robotSide);
+   
+   public abstract double getRotationAngleRightHandRule(RobotSide robotSide);
 
    public abstract boolean checkForNewPauseCommand(RobotSide robotSide);
 
@@ -45,5 +56,6 @@ public interface HandPoseProvider
    public abstract double[][] getDesiredWholeBodyTrajectoryVelocityArray(RobotSide robotSide);
    
    public abstract void setWholeBodyTrajectoryPacketAtomicReferenceToNull(RobotSide robotSide);
+
    
 }
