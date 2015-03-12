@@ -16,6 +16,8 @@ geometry_msgs/Vector3 actualFootPositionInWorld
 
 geometry_msgs/Quaternion actualFootOrientationInWorld
 
+bool isDoneWalking
+
 int8 destination
 
 
