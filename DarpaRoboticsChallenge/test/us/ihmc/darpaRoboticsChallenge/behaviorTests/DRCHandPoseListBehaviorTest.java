@@ -310,10 +310,10 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       BambooTools.reportTestFinishedMessage();
    }
-   
+      
    @EstimatedDuration(duration = 65.4)
    @Test(timeout = 196338)
-   public void testMultipleArmPoses() throws SimulationExceededMaximumTimeException
+   public void testMultipleArmPosesOnBothArms() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -329,7 +329,6 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          final HandPoseListBehavior handPoseListBehavior = new HandPoseListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                drcBehaviorTestHelper.getYoTime());
 
-//         double[][] armPoses = createRandomArmPoses(numberOfArmPoses, robotSide);
          double[][] armPoses = createRandomArmPoseWithWayPointsFromCurrentArmPose(numberOfArmPoses, robotSide);
          HandPoseListPacket handPoseListPacket = new HandPoseListPacket(robotSide, armPoses, swingTrajectoryTime);
          handPoseListBehavior.initialize();
