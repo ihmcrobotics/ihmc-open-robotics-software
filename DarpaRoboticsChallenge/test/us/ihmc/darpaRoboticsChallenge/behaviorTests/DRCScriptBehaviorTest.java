@@ -32,11 +32,15 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -117,7 +121,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
    private final double POSITION_THRESHOLD = 0.007;
    private final double ORIENTATION_THRESHOLD = 0.007;
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
@@ -403,17 +407,20 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
-      double trajectoryTime1 = 4.0; //FIXME: Test fails if trajectory time is too short
-      double trajectoryTime2 = 3.0;
+      double trajectoryTime1 = 2.0;
+      double settlingTime = 1.0;
+      double trajectoryTime2 = 2.0;
 
       double[] desiredArmPose1 = createRandomArmPose(robotSide);
       double[] desiredArmPose2 = getCurrentArmPose(robotSide);
 
       HandPosePacket handPosePacket1 = new HandPosePacket(robotSide, trajectoryTime1, desiredArmPose1);
+      PelvisPosePacket trivialPacketToAllowRobotToSettle = new PelvisPosePacket(null, null, true, settlingTime);
       HandPosePacket handPosePacket2 = new HandPosePacket(robotSide, trajectoryTime2, desiredArmPose2);
 
       ArrayList<Packet<?>> scriptPackets = new ArrayList<Packet<?>>();
       scriptPackets.add(handPosePacket1);
+      scriptPackets.add(trivialPacketToAllowRobotToSettle);
       scriptPackets.add(handPosePacket2);
       recordScriptFile(scriptPackets, fileName);
 
@@ -424,17 +431,22 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime1);
       assertTrue(success);
       
+      SysoutTool.println("Allow robot to settle by sending trivial pelvis pose packet", DEBUG);
+      success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trivialPacketToAllowRobotToSettle.getTrajectoryTime());
+      assertTrue(success);
+      
       SysoutTool.println("Checking that first script packet executed properly", DEBUG);
       double[] armPoseAfterHandPosePacket1 = getCurrentArmPose(robotSide);
       assertArmPosesAreWithinThresholds(desiredArmPose1, armPoseAfterHandPosePacket1, robotSide);
       assertTrue(!scriptBehavior.isDone());
 
+      SysoutTool.println("Continue Executing Behavior", DEBUG);
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime2 + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
       SysoutTool.println("Behavior Should Be Done", DEBUG);
 
       
-      SysoutTool.println("Checking that second script packet executed properly", DEBUG);
+      SysoutTool.println("Checking that last script packet executed properly", DEBUG);
       double[] armPoseAfterHandPosePacket2 = getCurrentArmPose(robotSide);
       assertArmPosesAreWithinThresholds(desiredArmPose2, armPoseAfterHandPosePacket2, robotSide);
       assertTrue(scriptBehavior.isDone());
