@@ -463,6 +463,36 @@ public class FloatingJoint extends Joint
          roll.set(0.0);
       }
    }
+   
+   public double[] getYawPitchRoll()
+   {
+      double[] yawPitchRollToReturn = new double[3];
+      
+      double pitchArgument = -2.0 * q_qx.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qs.getDoubleValue() * q_qy.getDoubleValue();
+
+      double pitch = 0.0, roll = 0.0, yaw = 0.0;
+      
+      pitch = Math.asin(pitchArgument);
+
+      if (Math.abs(pitch) < 0.49 * Math.PI)
+      {
+         yaw = Math.atan2(2.0 * q_qx.getDoubleValue() * q_qy.getDoubleValue() + 2.0 * q_qz.getDoubleValue() * q_qs.getDoubleValue(),
+                            1.0 - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue() - 2.0 * q_qz.getDoubleValue() * q_qz.getDoubleValue());    // Math.asin(q_qs.val * q_qz.val * 2.0);
+         roll = Math.atan2(2.0 * q_qy.getDoubleValue() * q_qz.getDoubleValue() + 2.0 * q_qx.getDoubleValue() * q_qs.getDoubleValue(),
+                             1.0 - 2.0 * q_qx.getDoubleValue() * q_qx.getDoubleValue() - 2.0 * q_qy.getDoubleValue() * q_qy.getDoubleValue());    // Math.asin(q_qs.val * q_qx.val * 2.0);
+      }
+      else
+      {
+         yaw = 2.0 * Math.atan2(q_qz.getDoubleValue(), q_qs.getDoubleValue());
+         roll = 0.0;
+      }
+      
+      yawPitchRollToReturn[0] = yaw;
+      yawPitchRollToReturn[1] = pitch;
+      yawPitchRollToReturn[2] = roll;
+      
+      return yawPitchRollToReturn;
+   }
 
    public void update()
    {

@@ -29,6 +29,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TranslationReferenceFrame;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.InverseDynamicsMechanismExplorer;
@@ -70,13 +71,14 @@ public class InverseDynamicsCalculatorTest
    public void testOneFreeRigidBody()
    {
       Robot robot = new Robot("robot");
-      robot.setGravity(0.0);
+      double gravity = -9.81;
+      robot.setGravity(gravity);
 
       ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
       ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", inertialFrame, new RigidBodyTransform());
       RigidBody elevator = new RigidBody("elevator", elevatorFrame);
 
-      FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(), robot);
+      FloatingJoint rootJoint = new FloatingJoint("root", new Vector3d(0.1, 0.2, 0.3), robot);
       robot.addRootJoint(rootJoint);
 
       SixDoFJoint rootInverseDynamicsJoint = new SixDoFJoint("root", elevator, elevatorFrame);
@@ -85,6 +87,7 @@ public class InverseDynamicsCalculatorTest
       rootJoint.setLink(link);
       Vector3d comOffset = new Vector3d();
       link.getComOffset(comOffset);
+//      System.out.println("comOffset = " + comOffset);
 
       RigidBody body = copyLinkAsRigidBody(link, rootInverseDynamicsJoint, "body");
 
@@ -94,27 +97,37 @@ public class InverseDynamicsCalculatorTest
       setRandomVelocity(rootJoint, rootInverseDynamicsJoint);
 
       ReferenceFrame bodyFixedFrame = body.getBodyFixedFrame();
-      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", comOffset, robot.getRobotsYoVariableRegistry());
+      
+      TranslationReferenceFrame forceApplicationFrame = new TranslationReferenceFrame("forceApplicationFrame", bodyFixedFrame);
+      Vector3d translationFromCoM = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      forceApplicationFrame.updateTranslation(translationFromCoM);
+      
+      Vector3d externalForcePointOffset = new Vector3d(comOffset);
+      externalForcePointOffset.add(translationFromCoM);
+      ExternalForcePoint externalForcePoint = new ExternalForcePoint("rootExternalForcePoint", externalForcePointOffset, robot.getRobotsYoVariableRegistry());
       rootJoint.addExternalForcePoint(externalForcePoint);
       externalForcePoint.setForce(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       Vector3d externalForce = new Vector3d();
       externalForcePoint.getForce(externalForce); // in world frame
-      RigidBodyTransform worldToBody = elevatorFrame.getTransformToDesiredFrame(bodyFixedFrame);
+      RigidBodyTransform worldToBody = elevatorFrame.getTransformToDesiredFrame(forceApplicationFrame);
       worldToBody.transform(externalForce);
 
-      Wrench inputWrench = new Wrench(bodyFixedFrame, bodyFixedFrame, externalForce, new Vector3d());
+      Wrench inputWrench = new Wrench(forceApplicationFrame, forceApplicationFrame, externalForce, new Vector3d());
       doRobotDynamics(robot);
 
       copyAccelerationFromForwardToInverse(rootJoint, rootInverseDynamicsJoint);
 
       TwistCalculator twistCalculator = new TwistCalculator(inertialFrame, elevator);
-      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, 0.0);
+      InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, -gravity);
       twistCalculator.compute();
       inverseDynamicsCalculator.compute();
 
       Wrench outputWrench = new Wrench(null, null);
       rootInverseDynamicsJoint.packWrench(outputWrench);
+      
+      outputWrench.changeBodyFrameAttachedToSameBody(forceApplicationFrame);
+      outputWrench.changeFrame(forceApplicationFrame);
 
       compareWrenches(inputWrench, outputWrench);
    }
