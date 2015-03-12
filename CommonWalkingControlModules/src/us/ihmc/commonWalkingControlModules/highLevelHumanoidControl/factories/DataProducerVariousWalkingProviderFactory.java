@@ -36,6 +36,7 @@ import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
@@ -138,6 +139,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
     
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(HandPoseListPacket.class, handPoseProvider.getHandPoseListConsumer());
+      objectCommunicator.attachListener(HandRotateAboutAxisPacket.class, handPoseProvider.getHandRotateAboutAxisConsumer());
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, handPoseProvider.getWholeBodyTrajectoryPacketConsumer());
 
