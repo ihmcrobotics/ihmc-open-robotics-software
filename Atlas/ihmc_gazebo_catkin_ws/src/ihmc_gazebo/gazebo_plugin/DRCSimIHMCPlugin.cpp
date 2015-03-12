@@ -45,11 +45,15 @@ private:
 
     bool initialized;
     bool receivedControlMessage;
+    bool forceControl;
     int cyclesRemainingTillControlMessage;
     int64_t lastReceivedTimestamp;
 
     int simulationCyclesPerControlCycle;
     std::vector<double> desiredTorques;
+    std::vector<double> desiredPositions;
+
+    bool acceptAnyPacketSize; // hack
 
     ros::NodeHandle* rosNode;
 
@@ -60,7 +64,9 @@ public:
         initialized(false),
         receivedControlMessage(false),
         cyclesRemainingTillControlMessage(0),
-        simulationCyclesPerControlCycle(-1)
+        simulationCyclesPerControlCycle(-1),
+		forceControl(true),
+		acceptAnyPacketSize(true)
     {
         std::cout << "IHMC Plugin Loaded" << std::endl;
     }
@@ -181,6 +187,7 @@ public:
         }
 
         desiredTorques.resize(joints.size(), 0.0);
+        desiredPositions.resize(joints.size(), 0.0);
     }
 public:
 
@@ -222,8 +229,14 @@ public:
                 receivedControlMessage = false;
             }
             for (unsigned int i = 0; i < joints.size(); i++) {
-                joints.at(i)->SetForce(0, desiredTorques[i]);
+            	if(true) { // forceControl) {
+                    joints.at(i)->SetForce(0, desiredTorques[i]);
+                    std::cout << "torque" << i << " = " << desiredTorques[i] << std::endl;
+            	} else {
+            		joints.at(i)->SetPosition(0, desiredPositions[i]);
+            	}
             }
+            std::cout << "" << std::endl;
             cyclesRemainingTillControlMessage--;
         }
 
@@ -249,17 +262,6 @@ public:
             math::Quaternion imuRotation = imu->GetOrientation();
             math::Vector3 angularVelocity = imu->GetAngularVelocity();
             math::Vector3 linearAcceleration = imu->GetLinearAcceleration();
-
-            //			data.put((double) 1);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
-            //			data.put((double) 0);
 
             data.put(imuRotation.w);
             data.put(imuRotation.x);
@@ -288,6 +290,7 @@ public:
             data.put(wrench.body2Force.z);
 
         }
+
         tcpDataServer.send(data);
     }
 
@@ -295,22 +298,28 @@ public:
     {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
-            if (bytes_transffered == 16 + joints.size() * 8) {
-                int64_t* longBuffer = ((int64_t*) (buffer));
+            if (acceptAnyPacketSize || bytes_transffered == 24 + joints.size() * 8) {
+
+            	int64_t* longBuffer = ((int64_t*) (buffer));
                 simulationCyclesPerControlCycle = longBuffer[0];
                 lastReceivedTimestamp = longBuffer[1];
+                forceControl = longBuffer[2] > 0;
 
                 // Pointer arithmetic is evil
-                double* jointTorques = (double*) (buffer + 16);
+                double* jointData = (double*) (buffer + 24);
                 for (unsigned int i = 0; i < joints.size(); i++) {
-                    desiredTorques[i] = jointTorques[i];
+                    if(forceControl) {
+                    	desiredTorques[i] = jointData[i];
+                    } else {
+                    	desiredPositions[i] = jointData[i];
+                    }
                 }
 
                 receivedControlMessage = true;
                 condition.notify_all();
 
             } else {
-                std::cerr << "Received invalid control packet. Expected length " << (16 + joints.size() * 8) << ", got " << bytes_transffered << std::endl;
+                std::cerr << "Received invalid control packet. Expected length " << (24 + joints.size() * 8) << ", got " << bytes_transffered << std::endl;
             }
         }
         lock.unlock();

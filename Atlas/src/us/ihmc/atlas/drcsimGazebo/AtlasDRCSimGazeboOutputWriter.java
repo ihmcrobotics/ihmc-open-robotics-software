@@ -21,6 +21,8 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 {
+   private final boolean useForceControl = true;
+
    private final SocketAddress address = new InetSocketAddress("127.0.0.1", 1235);
 
    private SocketChannel channel;
@@ -50,10 +52,22 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 
       jointCommand.putLong(estimatorTicksPerControlTick);
       jointCommand.putLong(timestamp);
+      
+      if(useForceControl)
+    	  jointCommand.putLong(1);
+      else
+    	  jointCommand.putLong(0);
 
       for (int i = 0; i < joints.size(); i++)
       {
-         jointCommand.putDouble(joints.get(i).getTau());
+    	 if(useForceControl)
+    	 {
+             jointCommand.putDouble(joints.get(i).getTau());    		 
+    	 }
+    	 else
+    	 {
+    		 jointCommand.putDouble(joints.get(i).getQ());
+    	 }
       }
 
       jointCommand.flip();
@@ -86,7 +100,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       });
 
-      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 16);
+      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 24);
       jointCommand.order(ByteOrder.nativeOrder());
 
       try
