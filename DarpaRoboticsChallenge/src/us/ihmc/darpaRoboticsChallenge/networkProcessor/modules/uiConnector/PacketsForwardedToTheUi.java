@@ -9,6 +9,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.ControlStatusPacket;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
@@ -47,6 +48,7 @@ public class PacketsForwardedToTheUi
       SnapFootstepPacket.class,
       VideoPacket.class,
       HandPosePacket.class,
+      HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       IntrinsicCameraParametersPacket.class,
       PointCloudWorldPacket.class,
