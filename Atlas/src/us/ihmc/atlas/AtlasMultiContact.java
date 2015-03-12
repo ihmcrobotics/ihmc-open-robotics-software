@@ -165,7 +165,7 @@ public class AtlasMultiContact
             HandPoseProvider desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
             HandLoadBearingProvider desiredHandLoadBearingProvider = new DesiredHandLoadBearingProvider();
             return new VariousWalkingProviders(null, null, null, null, null, desiredPelvisPoseProvider, desiredHandPoseProvider,
-                  desiredHandLoadBearingProvider, null, null, null, null, null, null, null, null, null, null);
+                  desiredHandLoadBearingProvider, null, null, null, null, null, null, null, null, null, null, null);
          }
       };
    }

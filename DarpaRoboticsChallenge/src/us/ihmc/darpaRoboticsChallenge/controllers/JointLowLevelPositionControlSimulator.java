@@ -28,10 +28,16 @@ public class JointLowLevelPositionControlSimulator implements RobotController
 
       
       double subtreeMass = TotalMassCalculator.computeSubTreeMass(highLevelControllerOutputJoint.getSuccessor());
-      jointController.setProportionalGain(50.0 * subtreeMass);
+      /*jointController.setProportionalGain(50.0 * subtreeMass);
       jointController.setIntegralGain(35.0 * subtreeMass);
       jointController.setMaxIntegralError(0.3);
-      jointController.setDerivativeGain(7.0 * subtreeMass);
+      jointController.setDerivativeGain(7.0 * subtreeMass);*/
+      
+      jointController.setProportionalGain(4000.0);
+      jointController.setIntegralGain(150.0);
+      jointController.setMaxIntegralError(0.4);
+      jointController.setDerivativeGain(40.0);
+      jointController.setMaximumOutputLimit( 400.0 );
    }
 
    public void doControl()
