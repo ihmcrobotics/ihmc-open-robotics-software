@@ -12,7 +12,7 @@ import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
-   public static final boolean DEBUG = true;
+   public static final boolean DEBUG = false;
 
    private final Object lock = new Object();
 
@@ -110,7 +110,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
                if (DEBUG)
                {
                   System.out.println("[AtlasPPSTimestampOffsetProvider] Last received pps (robot age: " + TimeTools.nanoSecondstoSeconds(ppsFromRobotAge)
-                        + ", ros age:" + TimeTools.nanoSecondstoSeconds(ppsFromROSAge) + ") are not of the same signal. Ignoring this measurement.");
+                        + ", ros age:" + TimeTools.nanoSecondstoSeconds(ppsFromROSAge) + ") are not of the same signal. Ignoring this measurement. Current offset is " + currentTimeStampOffset.get());
                }
                return;
             }
@@ -120,7 +120,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
                long newOffset = lastPPSTimestampFromRobot - multisensePPSTimestamp;
                long lastTimestampOffset = currentTimeStampOffset.getAndSet(newOffset);
 
-               if (offsetIsDetermined && Math.abs(newOffset - lastTimestampOffset) > TimeTools.milliSecondsToSeconds(1))
+               if (offsetIsDetermined && Math.abs(newOffset - lastTimestampOffset) > TimeTools.milliSecondsToNanoSeconds(1))
                {
                   System.err.println("[AtlasPPSTimestampOffsetProvider] Unstable PPS offset. New offset: " + newOffset + ", previous offset: "
                         + lastTimestampOffset);
