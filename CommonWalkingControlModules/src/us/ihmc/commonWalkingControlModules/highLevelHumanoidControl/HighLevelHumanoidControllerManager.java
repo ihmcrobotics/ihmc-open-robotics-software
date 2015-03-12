@@ -98,7 +98,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void addYoVariableRegistry(YoVariableRegistry registryToAdd)
    {
-      this.registry.areEqual(registryToAdd);
+      this.registry.addChild(registryToAdd);
    }
    
    public void requestHighLevelState(HighLevelState requestedHighLevelState)
