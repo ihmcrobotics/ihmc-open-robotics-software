@@ -25,6 +25,7 @@ import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 
 public class PacketsForwardedToTheUi
@@ -53,7 +54,8 @@ public class PacketsForwardedToTheUi
       IntrinsicCameraParametersPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
-      WholeBodyTrajectoryPacket.class
+      WholeBodyTrajectoryPacket.class,
+      JointAnglesPacket.class
    };
    
    public static final HashMap<Class, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class, Long>();

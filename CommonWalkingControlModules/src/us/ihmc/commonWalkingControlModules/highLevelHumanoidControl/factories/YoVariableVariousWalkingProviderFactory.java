@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.UserDesiredFootstepPr
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
@@ -33,6 +34,8 @@ import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelState
 import us.ihmc.commonWalkingControlModules.packetProviders.SystemErrControlStatusProducer;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
@@ -40,8 +43,6 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
 public class YoVariableVariousWalkingProviderFactory implements VariousWalkingProviderFactory
 {
@@ -78,11 +79,13 @@ public class YoVariableVariousWalkingProviderFactory implements VariousWalkingPr
 
       HandPoseStatusProducer handPoseStatusProducer = null;
       ObjectWeightProvider objectWeightProvider = null;
+      
+      DesiredJointsPositionProvider desiredJointsPositionProvider = null;
 
       VariousWalkingProviders variousProviders = new VariousWalkingProviders(footstepPovider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer,
-            capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider);
+            capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider);
 
       return variousProviders;
    }
