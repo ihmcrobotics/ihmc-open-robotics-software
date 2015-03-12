@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.sensors.CenterOfMassJacobianUpdater;
-import us.ihmc.commonWalkingControlModules.sensors.CommonHumanoidReferenceFramesUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
@@ -303,7 +302,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       modularSensorProcessor.addSensorProcessor(new ReferenceFrameUpdater(referenceFrames));
       modularSensorProcessor.addSensorProcessor(new TwistUpdater(twistCalculator));
       modularSensorProcessor.addSensorProcessor(new CenterOfMassJacobianUpdater(centerOfMassJacobian));
-      modularSensorProcessor.addSensorProcessor(new CommonHumanoidReferenceFramesUpdater(referenceFrames));
 
       return modularSensorProcessor;
    }
