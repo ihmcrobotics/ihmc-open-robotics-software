@@ -217,6 +217,19 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          }
       }
    }
+   
+   private void updateFromNewestHandRotateAboutAxisPacket(RobotSide robotSide)
+   {
+      HandRotateAboutAxisPacket object = handRotateAboutAxisPackets.get(robotSide).getAndSet(null);
+
+      if (object != null)
+      {
+         trajectoryTime = object.getTrajectoryTime();
+         rotationAxisOriginsInWorld.get(robotSide).set(object.getRotationAxisOriginInWorld());
+         rotationAxesInWorld.get(robotSide).set(object.getRotationAxisInWorld());
+         rotationAnglesRightHandRules.put(robotSide, object.getRotationAngleRightHandRule());
+      }
+   }
 
    @Override
    public boolean checkForNewPose(RobotSide robotSide)
@@ -280,7 +293,6 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    public FramePose getDesiredHandPose(RobotSide robotSide)
    {
       updateFromNewestHandPosePacket(robotSide);
-
       return desiredHandPoses.get(robotSide);
    }
 
@@ -308,25 +320,21 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public Point3d getRotationAxisOriginInWorld(RobotSide robotSide)
    {
-      HandRotateAboutAxisPacket object = handRotateAboutAxisPackets.get(robotSide).getAndSet(null);
-
-      trajectoryTime = object.getTrajectoryTime();
-      rotationAxisOriginsInWorld.get(robotSide).set(object.getRotationAxisOriginInWorld());
-      rotationAxesInWorld.get(robotSide).set(object.getRotationAxisInWorld());
-      rotationAnglesRightHandRules.put(robotSide, object.getRotationAngleRightHandRule());
-      
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAxisOriginsInWorld.get(robotSide);
    }
 
    @Override
    public Vector3d getRotationAxisInWorld(RobotSide robotSide)
    {
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAxesInWorld.get(robotSide);
    }
 
    @Override
    public double getRotationAngleRightHandRule(RobotSide robotSide)
    {
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAnglesRightHandRules.get(robotSide);
    }
    
