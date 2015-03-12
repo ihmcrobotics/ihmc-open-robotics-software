@@ -312,7 +312,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          postProcessedSensors.setLinearAccelerationSensorValue(imuDefinition, linearAcceleration);
       }
 
-      postProcessedSensors.startComputation(rawSensorMap.getTimestamp(), rawSensorMap.getVisionSensorTimestamp());
+      postProcessedSensors.startComputation(rawSensorMap.getTimestamp(), rawSensorMap.getVisionSensorTimestamp(), -1);
       stateEstimator.doControl();
 
       SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();

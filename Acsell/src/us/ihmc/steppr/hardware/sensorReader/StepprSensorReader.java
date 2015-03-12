@@ -130,7 +130,7 @@ public class StepprSensorReader implements SensorReader
          sensorProcessing.setAngularVelocitySensorValue(pelvisIMU, angularVelocity);
          sensorProcessing.setLinearAccelerationSensorValue(pelvisIMU, linearAcceleration);
 
-         sensorProcessing.startComputation(timestamp, timestamp);
+         sensorProcessing.startComputation(timestamp, timestamp, -1);
       }
       catch (IOException e)
       {
