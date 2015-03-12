@@ -117,29 +117,30 @@ public class SwingTrajectoryHeightCalculator
          }
       });
 
-      double[] zHeightsFromStart = new double[pointsBetweenFeet.size()];
-      int index = 0;
-      for (Point3d point : pointsBetweenFeet)
-      {
-         zHeightsFromStart[index] = point.z - z0;
-         index ++;
+      if (pointsBetweenFeet.size() >= 1){
+    	  double[] zHeightsFromStart = new double[pointsBetweenFeet.size()];
+    	  int index = 0;
+    	  for (Point3d point : pointsBetweenFeet)
+    	  {
+    		  zHeightsFromStart[index] = point.z - z0;
+    		  index ++;
+    	  }
+
+    	  //use the max height
+    	  //TODO filter using the first few points
+    	  int numberOfOutliersToIgnore = calculatorParameters.getNumberOfOutliersToIgnore();
+    	  double zHeightForOutlierQualification = calculatorParameters.getzHeightForOutlierQualification();
+    	  int firstInvalidIndex = zHeightsFromStart.length - numberOfOutliersToIgnore;
+
+    	  int indexOfMax;
+    	  for (indexOfMax = 0; indexOfMax < numberOfOutliersToIgnore && indexOfMax < firstInvalidIndex; indexOfMax++){
+    		  if (zHeightsFromStart[indexOfMax] - zHeightsFromStart[indexOfMax + numberOfOutliersToIgnore] < zHeightForOutlierQualification){
+    			  break;
+    		  }
+    	  }
+    	  maxZDiffFromStart = Math.max(maxZDiffFromStart, zHeightsFromStart[indexOfMax]);
       }
-
-      //use the max height
-      //TODO filter using the first few points
-      int numberOfOutliersToIgnore = calculatorParameters.getNumberOfOutliersToIgnore();
-      double zHeightForOutlierQualification = calculatorParameters.getzHeightForOutlierQualification();
-      int firstInvalidIndex = zHeightsFromStart.length - numberOfOutliersToIgnore;
-
-      int indexOfMax;
-      for (indexOfMax = 0; indexOfMax < numberOfOutliersToIgnore && indexOfMax < firstInvalidIndex; indexOfMax++){
-         if (zHeightsFromStart[indexOfMax] - zHeightsFromStart[indexOfMax + numberOfOutliersToIgnore] < zHeightForOutlierQualification){
-            break;
-         }
-      }
-
-      maxZDiffFromStart = Math.max(maxZDiffFromStart, zHeightsFromStart[indexOfMax]);
-
+      
       double swingHeight = maxZDiffFromStart + calculatorParameters.getVerticalBuffer();
       //crop based on stance foot
       double distanceAboveStanceFoot = startPoint.getZ() + swingHeight - stanceHeight;
