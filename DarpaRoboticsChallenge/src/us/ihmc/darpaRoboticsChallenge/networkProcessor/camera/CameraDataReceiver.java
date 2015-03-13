@@ -83,10 +83,11 @@ public abstract class CameraDataReceiver extends Thread
                {
                   continue;
                }
+               cameraFrame.update();
                cameraFrame.getTransformToWorldFrame().get(cameraOrientation, cameraPosition);
                if (DEBUG)
                {
-
+                  System.out.println(cameraFrame.getTransformToParent());
                   System.out.println(cameraPosition);
                   System.out.println(cameraOrientation);
                }
@@ -115,7 +116,6 @@ public abstract class CameraDataReceiver extends Thread
       }
       catch (InterruptedException e)
       {
-         e.printStackTrace();
       }
    }
 

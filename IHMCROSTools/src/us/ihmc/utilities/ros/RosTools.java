@@ -13,16 +13,16 @@ import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ros.node.NodeConfiguration;
-
-import us.ihmc.communication.net.NetworkTools;
 
 public class RosTools
 {
@@ -75,7 +75,7 @@ public class RosTools
 
    public static NodeConfiguration createNodeConfiguration(URI master)
    {
-      InetAddress listenAddress = NetworkTools.getMyIP(master);
+      InetAddress listenAddress = getMyIP(master);
       
 
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(listenAddress.getHostAddress(), master);
@@ -83,16 +83,81 @@ public class RosTools
 
       return nodeConfiguration;
    }
+   
+   public static InetAddress getMyIP(URI master)
+   {
+
+      try
+      {
+         return getMyIP(master.getHost(), master.getPort());
+      }
+      catch (UnknownHostException e)
+      {
+         throw new RuntimeException("Unknown hostname for ROS master: " + master.getHost());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException("Cannot connect to ROS host " + master.getHost() + "\n" + e.getMessage());
+      }
+   }
+
+   public static InetAddress getMyIP(String host, int port) throws IOException, UnknownHostException
+   {
+      InetAddress inetAddress = InetAddress.getByName(host);
+      InetAddress listenAddress;
+      if (inetAddress.isLoopbackAddress())
+      {
+         listenAddress = inetAddress;
+      }
+      else
+      {
+         Socket testSocket = new Socket(host, port);
+         listenAddress = testSocket.getLocalAddress();
+         testSocket.close();
+         /*
+          * At first the following code looks like a better solution, however
+          * InetAddress.isReachable does not work without being a super user.
+          */
+
+         //            // Find first local address the master host is reachable from
+         //            final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+         //            
+         //            while(networkInterfaces.hasMoreElements()) {
+         //               NetworkInterface iface = networkInterfaces.nextElement();
+         //               
+         //               if(iface.isLoopback())
+         //               {
+         //                  continue;
+         //               }
+         //               
+         //               if(inetAddress.isReachable(iface, 0, 100))
+         //               {
+         //                  for(InterfaceAddress ifaceAddr : iface.getInterfaceAddresses())
+         //                  {
+         //                     if(ifaceAddr.getAddress().getAddress().length == 4)
+         //                     {
+         //                        listenAddress = ifaceAddr.getAddress();
+         //                     }
+         //                  }
+         //               }
+         //             }
+
+      }
+      return listenAddress;
+
+   }
+   
+   
 
    public static InetAddress getMyIP(String rosMasterURI)
    {
       try
       {
-         return NetworkTools.getMyIP(new URI(rosMasterURI));
+         return getMyIP(new URI(rosMasterURI));
       }
       catch (URISyntaxException e)
       {
-         throw new RuntimeException(e);
+         throw new RuntimeException("Invalid ROS Master URI", e);
       }
    }
 
