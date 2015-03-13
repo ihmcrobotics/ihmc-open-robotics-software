@@ -342,4 +342,9 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+   @Override public String getSimpleRobotName()
+   {
+      return "STEPPR";
+   }
 }
