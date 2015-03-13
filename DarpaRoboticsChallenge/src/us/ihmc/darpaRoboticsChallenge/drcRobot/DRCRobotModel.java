@@ -80,4 +80,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract Class<?> getSpectatorInterfaceClass();
 
    public abstract HeightCalculatorParameters getHeightCalculatorParameters();
+
+   public abstract String getSimpleRobotName();
 }
