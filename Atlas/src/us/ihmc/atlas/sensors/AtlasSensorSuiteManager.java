@@ -19,7 +19,6 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSCheatingPoin
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
-import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
@@ -88,9 +87,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
-
-      ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(rosCoreURI);
-      rosTransformProvider.connect();
 
 //      DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
