@@ -52,7 +52,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
       CameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(fullRobotModelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
-      new SCSCheatingPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
+      if (sensorInformation.getLidarParameters().length > 0)
+      {
+         new SCSCheatingPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
+      }
       pointCloudDataReceiver.start();
       cameraDataReceiver.start();
    }
