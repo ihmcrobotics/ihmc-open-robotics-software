@@ -401,4 +401,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return null;
    }
+
+   @Override public String getSimpleRobotName()
+   {
+      return "Valkyrie";
+   }
 }
