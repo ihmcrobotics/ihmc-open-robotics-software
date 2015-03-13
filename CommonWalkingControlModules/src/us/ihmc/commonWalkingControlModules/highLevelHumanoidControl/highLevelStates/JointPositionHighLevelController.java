@@ -26,7 +26,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    private final HashSet<OneDoFJoint> jointsBeenControlled = new HashSet<OneDoFJoint>();
    private final FullRobotModel fullRobotModel;
 
-   public final static HighLevelState controllerState = HighLevelState.JOINT_PID_CONTROL;
+   public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
 
    private final HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectoryGenerator; 
    private final YoVariableDoubleProvider trajectoryTimeProvider;

@@ -28,7 +28,7 @@ public class JointPDHighLevelHumanoidController extends HighLevelBehavior
    private final DoubleYoVariable alphaQD;
    private final FullRobotModel fullRobotModel;
 
-   public final static HighLevelState controllerState = HighLevelState.JOINT_PID_CONTROL;
+   public final static HighLevelState controllerState = HighLevelState.JOINT_PD_CONTROL;
 
    public JointPDHighLevelHumanoidController(MomentumBasedController momentumBasedController, double initialKpGains, double initialKdGains)
    {

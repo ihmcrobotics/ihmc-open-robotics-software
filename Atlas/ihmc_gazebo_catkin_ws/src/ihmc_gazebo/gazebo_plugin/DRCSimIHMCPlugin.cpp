@@ -154,15 +154,15 @@ public:
         }
         else if( startupParameter.find( "standing" ) != std::string::npos )
         {
-            initialAngles[1] = 0.1; // back pitch
+            initialAngles[1] = 0.0; // back pitch
             initialAngles[7]  = initialAngles[20] = -0.0; // shoulder X
 
             initialAngles[6]  = - 1.0; // shoulder Y
             initialAngles[19] = - initialAngles[6];
 
-            initialAngles[13] = initialAngles[26] = -0.6; // hip y
-            initialAngles[15] = initialAngles[28] = 1.1;  // knee
-            initialAngles[11] = initialAngles[24] = -0.5; // ankle y
+            initialAngles[13] = initialAngles[26] = -0.35; // hip y
+            initialAngles[15] = initialAngles[28] = 0.7;  // knee
+            initialAngles[11] = initialAngles[24] = -0.35; // ankle y
         }
 
 
@@ -172,22 +172,25 @@ public:
             if(joints.at(i)->GetName() != "hokuyo_joint")
             {
                 joints.at(i)->SetPosition(0, initialAngles[i]);
-                joints.at(i)->SetUpperLimit(0, initialAngles[i] + 0.02);
-                joints.at(i)->SetLowerLimit(0, initialAngles[i] - 0.02);
+                joints.at(i)->SetUpperLimit(0, initialAngles[i] + 3.02);
+                joints.at(i)->SetLowerLimit(0, initialAngles[i] - 3.02);
             }
         }
 
         std::map< std::string, physics::JointPtr > jointsByName =	jointController->GetJoints ();
-
-        for (std::map< std::string, physics::JointPtr>::iterator  J = jointsByName.begin(); J != jointsByName.end(); J++)
-        {
-            jointController->SetPositionPID( J->first, common::PID( 3000, 0, 10, 50, -50, 200, -200) );
-            jointController->SetPositionTarget( J->first, J->second->GetAngle(0).Radian () );
-        }
+        int i=0;
 
         desiredTorques.resize(joints.size(), 0.0);
         desiredPositions.resize(joints.size(), 0.0);
         jointsUnderPositionControl.resize(joints.size(), 0.0);
+
+        for (std::map< std::string, physics::JointPtr>::iterator  J = jointsByName.begin(); J != jointsByName.end(); J++)
+        {
+            jointController->SetPositionPID( J->first, common::PID( 4000, 5, 15, 50, -50, 300, -300) );
+            desiredPositions[i] = J->second->GetAngle(0).Radian ();
+            jointController->SetPositionTarget( J->first, desiredPositions[i] );
+            i++;
+        }
     }
  public:
 
@@ -206,14 +209,12 @@ public:
                     for (unsigned int i = 0; i < joints.size(); i++) {
                         if(joints.at(i)->GetName() != "hokuyo_joint")
                         {
-                            joints.at(i)->SetLowerLimit(0, -3.14);
-                            joints.at(i)->SetUpperLimit(0, 3.14);
-                            joints.at(i)->SetEffortLimit(0, -1);
-                            joints.at(i)->SetDamping(0, 0.1);
+                         //   joints.at(i)->SetEffortLimit(0, -1);
+                           // joints.at(i)->SetDamping(0, 0.1);
                         }
                     }
 
-					jointController->Reset();
+					//jointController->Reset();
                     initialized = true;
                 }
                 lock.unlock();	// make sure to unlock
@@ -228,13 +229,34 @@ public:
                 cyclesRemainingTillControlMessage = simulationCyclesPerControlCycle;
                 receivedControlMessage = false;
             }
-            for (unsigned int i = 0; i < joints.size(); i++) {
+
+          /*  for (unsigned int i = 0; i < joints.size(); i++) {
+            	joints.at(i)->SetPosition(0, desiredPositions[i]);
+            }*/
+
+            int i=0;
+            std::map< std::string, physics::JointPtr > jointsByName =	jointController->GetJoints ();
+
+           // std::cout << "-----------"<<  std::endl;
+            for (std::map< std::string, physics::JointPtr>::iterator  J = jointsByName.begin(); J != jointsByName.end(); J++)
+            {
+                jointController->SetPositionTarget( J->first, desiredPositions[i] );
+                printf("%.3f ",  desiredPositions[i]  );
+                i++;
+            }
+            printf("\n");
+
+            jointController->Update();
+
+            /*for (unsigned int i = 0; i < joints.size(); i++) {
             	if(jointsUnderPositionControl[i]) {
             		joints.at(i)->SetPosition(0, desiredPositions[i]);
+            		jointController->Update();
             	} else {
+            		jointController->Reset();
                     joints.at(i)->SetForce(0, desiredTorques[i]);
             	}
-            }
+            }*/
             cyclesRemainingTillControlMessage--;
         }
 
@@ -314,10 +336,13 @@ public:
                 for (unsigned int i = 0; i < joints.size(); i++) {
                     if(jointsUnderPositionControl[i]) {
                     	desiredPositions[i] = jointData[i];
+                   // 	std::cout << "SENT: "<<desiredPositions[i] << std::endl;
                     } else {
                     	desiredTorques[i] = jointData[i];
                     }
                 }
+
+                std::cout << "" << std::endl;
 
                 receivedControlMessage = true;
                 condition.notify_all();
