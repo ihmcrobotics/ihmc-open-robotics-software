@@ -27,7 +27,7 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
+import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -102,7 +102,7 @@ public class ThePeoplesGloriousNetworkProcessor
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher);
       }
 
-      Map<String, Class> inputPacketList = IHMCMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
+      Map<String, Class> inputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
 
       for (Map.Entry<String, Class> e : inputPacketList.entrySet())
       {
@@ -131,7 +131,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupInputs(String namespace, RobotDataReceiver robotDataReceiver, FullRobotModel fullRobotModel)
    {
-      Map<String, Class> inputPacketList = IHMCMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
+      Map<String, Class> inputPacketList = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
 
       for (Map.Entry<String, Class> e : inputPacketList.entrySet())
       {
