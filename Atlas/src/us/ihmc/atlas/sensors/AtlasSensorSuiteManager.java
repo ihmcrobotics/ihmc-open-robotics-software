@@ -20,7 +20,6 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.ros.jni.wrapper.ROSNativeTransformTools;
-import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
@@ -90,16 +89,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
 
-      RosNativeNetworkProcessor rosNativeNetworkProcessor;
-      if (RosNativeNetworkProcessor.hasNativeLibrary() && rosCoreURI != null)
-      {
-         rosNativeNetworkProcessor = RosNativeNetworkProcessor.getInstance(rosCoreURI.toString());
-         rosNativeNetworkProcessor.connect();
-      }
-      else
-      {
-         rosNativeNetworkProcessor = null;
-      }
       ROSNativeTransformTools rosTransformProvider = ROSNativeTransformTools.getInstance(rosCoreURI);
       rosTransformProvider.connect();
 
@@ -109,7 +98,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       DRCRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
 
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, pointCloudDataReceiver, robotConfigurationDataBuffer, rosMainNode,
-            sensorSuitePacketCommunicator, rosNativeNetworkProcessor, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
+            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
       pointCloudDataReceiver.start();
 
