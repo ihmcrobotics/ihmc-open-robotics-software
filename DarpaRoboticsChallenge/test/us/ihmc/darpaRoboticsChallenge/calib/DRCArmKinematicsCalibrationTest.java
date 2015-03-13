@@ -28,7 +28,7 @@ public class DRCArmKinematicsCalibrationTest
       if (image == null)
          fail("can't find the test image.");
 
-      DRCArmKinematicsCalibration alg = new DRCArmKinematicsCalibration(null);
+      DRCArmKinematicsCalibration alg = new DRCArmKinematicsCalibration();
 
       // if param has not been set it should fail
       assertFalse(alg.estimateCameraPose(image));
