@@ -12,7 +12,6 @@ import org.ros.node.service.ServiceResponseListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
-import us.ihmc.ros.jni.wrapper.RosNativeNetworkProcessor;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -54,7 +53,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
      multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);    
    }
 
-   public void setupNativeROSCommunicator(RosNativeNetworkProcessor rosNativeNetworkProcessor, double lidarSpindleVelocity)
+   public void setupNativeROSCommunicator(double lidarSpindleVelocity)
    {
       String rosPrefix = "/opt/ros";
       if (useRosHydro(rosPrefix))

@@ -73,7 +73,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
    public static void main(String[] args)
    {
-      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(RobotSide.RIGHT);
+      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(RobotSide.LEFT);
       JFrame frame = new JFrame();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       
@@ -86,7 +86,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.RIGHT,
+            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.LEFT,
                   (FingerState)(stateToSend.getSelectedItem())));
          }
       });
