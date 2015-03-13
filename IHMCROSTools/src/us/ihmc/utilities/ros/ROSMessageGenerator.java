@@ -16,7 +16,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.DocumentedPacket;
-import us.ihmc.utilities.ros.msgToPacket.IHMCMessageMap;
+import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class ROSMessageGenerator
 {
@@ -31,7 +31,7 @@ public class ROSMessageGenerator
    public static void main(String... args)
    {
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
-      for (Class clazz : IHMCMessageMap.PACKET_LIST)
+      for (Class clazz : IHMCRosApiMessageMap.PACKET_LIST)
       {
          messageGenerator.createNewRosMessage(clazz, true);
       }
