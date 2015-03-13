@@ -39,9 +39,8 @@ public class DRCArmKinematicsCalibration
 
    Se3_F64 targetToOrigin = new Se3_F64();
 
-   public DRCArmKinematicsCalibration(FullRobotModel robotModel)
+   public DRCArmKinematicsCalibration()
    {
-      this.robotModel = robotModel;
    }
 
    public void setIntrinsic(IntrinsicParameters intrinsic)
