@@ -43,7 +43,7 @@ public class AtlasROSAPISimulator
 
       URI rosUri = NetworkParameters.getROSURI();
 
-      PacketCommunicator sensorCommunicator = simulationStarter.getSCSSensorOutputPacketCommunicator();
+      PacketCommunicator sensorCommunicator = simulationStarter.createSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
