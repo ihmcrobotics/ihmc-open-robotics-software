@@ -423,4 +423,9 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return heightCalculatorParameters;
    }
+
+   @Override public String getSimpleRobotName()
+   {
+      return "Atlas";
+   }
 }
