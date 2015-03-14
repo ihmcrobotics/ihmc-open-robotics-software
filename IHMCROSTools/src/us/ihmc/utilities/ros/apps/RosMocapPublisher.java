@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import javax.vecmath.Quat4d;
 
-import optitrack.CallFrequencyCalculator;
 import optitrack.MocapDataClient;
 import optitrack.MocapRigidBody;
 import optitrack.MocapRigidbodiesListener;
@@ -13,6 +12,7 @@ import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.time.CallFrequencyCalculator;
 
 public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
 {
