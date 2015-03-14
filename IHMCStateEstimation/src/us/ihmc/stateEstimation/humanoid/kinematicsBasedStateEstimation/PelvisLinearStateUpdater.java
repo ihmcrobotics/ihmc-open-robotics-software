@@ -375,12 +375,11 @@ public class PelvisLinearStateUpdater
 
    private void defaultActionOutOfStates()
    {
-      if (imuBasedLinearStateCalculator.isEstimationEnabled())
+      if (stateMachine.isCurrentState(EstimationState.IMU_ONLY))
       {
-         computeLinearStateFromMergingMeasurements();
-      }
-      else if (stateMachine.isCurrentState(EstimationState.IMU_ONLY))
-      {
+         if (!ALLOW_USING_IMU_ONLY)
+            throw new RuntimeException("Should not be in IMU_ONLY state with ALLOW_USING_IMU_ONLY set to false.");
+
          imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
          yoRootJointVelocity.set(rootJointVelocity);
          imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
@@ -390,7 +389,11 @@ public class PelvisLinearStateUpdater
          rootJointPosition.set(pelvisPositionIMUPart);
          yoRootJointPosition.set(rootJointPosition);
       }
-      else
+      else if (imuBasedLinearStateCalculator.isEstimationEnabled())
+      {
+         computeLinearStateFromMergingMeasurements();
+      }
+      else 
       {
          yoRootJointPosition.getFrameTuple(rootJointPosition);
          kinematicsBasedLinearStateCalculator.getRootJointPositionAndVelocity(rootJointPosition, rootJointVelocity);
