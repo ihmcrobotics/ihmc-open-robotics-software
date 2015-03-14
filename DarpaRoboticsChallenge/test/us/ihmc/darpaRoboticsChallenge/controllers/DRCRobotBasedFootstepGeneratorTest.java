@@ -67,7 +67,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    }
 
 	@EstimatedDuration(duration = 0.7)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testStraightLinePath()
    {
       Point3d destination = new Point3d(5.0, 0.0, 0.0);
@@ -75,7 +75,7 @@ public abstract class DRCRobotBasedFootstepGeneratorTest implements MultiRobotTe
    }
 
 	@EstimatedDuration(duration = 0.3)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testAngledPaths()
    {
       double maxAngle = Math.PI;
