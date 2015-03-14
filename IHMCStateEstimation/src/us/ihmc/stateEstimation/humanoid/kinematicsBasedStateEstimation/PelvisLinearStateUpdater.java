@@ -54,6 +54,7 @@ import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 public class PelvisLinearStateUpdater
 {
    private static boolean VISUALIZE = false;
+   private static final boolean ALLOW_USING_IMU_ONLY = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    
@@ -92,7 +93,7 @@ public class PelvisLinearStateUpdater
    private enum SlippageCompensatorMode {LOAD_THRESHOLD, MIN_PELVIS_ACCEL};
    private final EnumYoVariable<SlippageCompensatorMode> slippageCompensatorMode = new EnumYoVariable<SlippageCompensatorMode>("slippageCompensatorMode", registry, SlippageCompensatorMode.class);
    
-   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT};
+   private enum EstimationState {TRUST_BOTH_FEET, TRUST_LEFT_FOOT, TRUST_RIGHT_FOOT, IMU_ONLY};
 
    private final SideDependentList<EstimationState> robotSideToEstimationState = new SideDependentList<EstimationState>(
          EstimationState.TRUST_LEFT_FOOT, EstimationState.TRUST_RIGHT_FOOT);
@@ -293,6 +294,21 @@ public class PelvisLinearStateUpdater
       stateMachine.addState(trustBothFeetState);
       stateMachine.addState(trustLeftFootState);
       stateMachine.addState(trustRightFootState);
+
+      if (ALLOW_USING_IMU_ONLY)
+      {
+         TrustIMUOnlyState trustIMUOnlyState = new TrustIMUOnlyState();
+
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustBothFeetState, trustIMUOnlyState);
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustLeftFootState, trustIMUOnlyState);
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustRightFootState, trustIMUOnlyState);
+
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustIMUOnlyState, trustBothFeetState);
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustIMUOnlyState, trustLeftFootState);
+         StateMachineTools.addRequestedStateTransition(requestedState, false, trustIMUOnlyState, trustRightFootState);
+
+         stateMachine.addState(trustIMUOnlyState);
+      }
    }
 
    public void updateRootJointPositionAndLinearVelocity()
@@ -331,17 +347,30 @@ public class PelvisLinearStateUpdater
       }
       
       if (numberOfEndEffectorsTrusted == 2)
+      {
          requestedState.set(EstimationState.TRUST_BOTH_FEET);
-      else if (areFeetTrusted.get(RobotSide.LEFT).getBooleanValue())
-         requestedState.set(EstimationState.TRUST_LEFT_FOOT);
+      }
+      else if (numberOfEndEffectorsTrusted == 1)
+      {
+         if (areFeetTrusted.get(RobotSide.LEFT).getBooleanValue())
+            requestedState.set(EstimationState.TRUST_LEFT_FOOT);
+         else
+            requestedState.set(EstimationState.TRUST_RIGHT_FOOT);
+      }
+      else if (numberOfEndEffectorsTrusted == 0)
+      {
+         if (ALLOW_USING_IMU_ONLY)
+            requestedState.set(EstimationState.IMU_ONLY);
+         else
+            throw new RuntimeException("No foot trusted!");
+      }
       else
-         requestedState.set(EstimationState.TRUST_RIGHT_FOOT);
+      {
+         throw new RuntimeException("Computation of the number of end effectors to be trusted for state estimation is broken, computed: " + numberOfEndEffectorsTrusted);
+      }
       
       if (stateMachine.getCurrentStateEnum() == requestedState.getEnumValue())
          requestedState.set(null);
-
-      if (numberOfEndEffectorsTrusted == 0)
-         throw new RuntimeException("No foot trusted!");
    }
 
    private void defaultActionOutOfStates()
@@ -349,6 +378,17 @@ public class PelvisLinearStateUpdater
       if (imuBasedLinearStateCalculator.isEstimationEnabled())
       {
          computeLinearStateFromMergingMeasurements();
+      }
+      else if (stateMachine.isCurrentState(EstimationState.IMU_ONLY))
+      {
+         imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(rootJointVelocity);
+         yoRootJointVelocity.set(rootJointVelocity);
+         imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
+
+         yoRootJointPosition.getFrameTuple(rootJointPosition);
+         imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
+         rootJointPosition.set(pelvisPositionIMUPart);
+         yoRootJointPosition.set(rootJointPosition);
       }
       else
       {
@@ -409,6 +449,12 @@ public class PelvisLinearStateUpdater
          areFeetTrusted.get(RobotSide.LEFT).set(false);
          areFeetTrusted.get(RobotSide.RIGHT).set(true);
          numberOfEndEffectorsTrusted = 1;
+      }
+      else if (ALLOW_USING_IMU_ONLY)
+      {
+         areFeetTrusted.get(RobotSide.LEFT).set(false);
+         areFeetTrusted.get(RobotSide.RIGHT).set(false);
+         numberOfEndEffectorsTrusted = 0;
       }
       // Else keep the old states
       else
@@ -496,6 +542,34 @@ public class PelvisLinearStateUpdater
          yoRootJointPosition.getFrameTuple(tempRootJointPosition);
          kinematicsBasedLinearStateCalculator.estimatePelvisLinearStateForSingleSupport(tempRootJointPosition, trustedSide);
          imuDriftCompensator.esimtateDriftIfPossible(trustedSide);
+      }
+      
+      @Override
+      public void doTransitionIntoAction()
+      {
+         requestedState.set(null);
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+
+   private class TrustIMUOnlyState extends State<EstimationState>
+   {
+      private final FramePoint tempRootJointPosition = new FramePoint(worldFrame);
+
+      public TrustIMUOnlyState()
+      {
+         super(EstimationState.IMU_ONLY);
+      }
+
+      @Override
+      public void doAction()
+      {
+         yoRootJointPosition.getFrameTuple(tempRootJointPosition);
+         kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(tempRootJointPosition);
       }
       
       @Override
