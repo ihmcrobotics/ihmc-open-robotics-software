@@ -1,14 +1,7 @@
 package us.ihmc.wholeBodyController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
@@ -18,14 +11,12 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularConta
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CoMBasedMomentumRateOfChangeControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredRateOfChangeOfMomentumCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -34,26 +25,14 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
-import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
-import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
-import us.ihmc.utilities.screwTheory.Momentum;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.ScrewTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationCalculator;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
-import us.ihmc.utilities.screwTheory.Wrench;
+import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.yoUtilities.controllers.AxisAngleOrientationController;
+import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
+
+import java.util.*;
 
 /**
  * @author twan
@@ -82,6 +61,7 @@ public class SimpleStanceController implements RobotController
    private final YoFrameVector desiredPelvisTorque;
    private final YoFrameVector desiredPelvisForce;
    private final OneDoFJoint[] oneDoFJoints;
+   private final List<OneDoFJoint> positionControlJoints;
    private final SixDoFJoint rootJoint;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
    private final MomentumRateOfChangeData momentumRateOfChangeData;
@@ -117,8 +97,13 @@ public class SimpleStanceController implements RobotController
       this.inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
 
       this.pelvisOrientationController = new AxisAngleOrientationController("pelvis", pelvis.getBodyFixedFrame(), controlDT, registry);
-      pelvisOrientationController.setProportionalGains(5.0, 5.0, 5.0);
-      pelvisOrientationController.setDerivativeGains(1.0, 1.0, 1.0);
+      double kpPelvis = 20.0;
+      double zetaPelvis = 0.7;
+      double kdPelvis = GainCalculator.computeDerivativeGain(kpPelvis, zetaPelvis);
+      pelvisOrientationController.setProportionalGains(kpPelvis, kpPelvis, kpPelvis);
+      pelvisOrientationController.setDerivativeGains(kdPelvis, kdPelvis, kdPelvis);
+//      pelvisOrientationController.setProportionalGains(5.0, 5.0, 5.0);
+//      pelvisOrientationController.setDerivativeGains(1.0, 1.0, 1.0);
 
       centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getSuccessor());
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -132,6 +117,12 @@ public class SimpleStanceController implements RobotController
 
       InverseDynamicsJoint[] allJoints = ScrewTools.computeSupportAndSubtreeJoints(rootJoint.getSuccessor());
       oneDoFJoints = ScrewTools.filterJoints(allJoints, OneDoFJoint.class);
+      positionControlJoints = new ArrayList<>(Arrays.asList(oneDoFJoints));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+         positionControlJoints.removeAll(Arrays.asList(ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), OneDoFJoint.class)));
+      }
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
@@ -172,6 +163,8 @@ public class SimpleStanceController implements RobotController
       inverseDynamicsCalculator.reset();
 
       constrainFeet();
+
+      constrainPositionControlJoints();
 
       FrameVector desiredPelvisAngularAcceleration = constrainPelvis();
 
@@ -288,6 +281,23 @@ public class SimpleStanceController implements RobotController
 //    momentumControlModule.setDesiredJointAcceleration(fullRobotModel.getRootJoint(), jointAcceleration);
 
       return output;
+   }
+
+   private void constrainPositionControlJoints()
+   {
+      for (OneDoFJoint joint : positionControlJoints)
+      {
+         doPDControl(joint, 100.0, 20.0, 0.0, 0.0);
+      }
+   }
+
+   public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity)
+   {
+      double desiredAcceleration = kp * (desiredPosition - joint.getQ()) + kd * (desiredVelocity - joint.getQd());
+      DenseMatrix64F desiredAccelerationMatrix = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+      desiredAccelerationMatrix.set(0, 0, desiredAcceleration);
+      DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, desiredAccelerationMatrix);
+      momentumControlModule.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
    public void initialize()
