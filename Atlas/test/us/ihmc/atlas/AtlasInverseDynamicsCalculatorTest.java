@@ -86,75 +86,75 @@ public class AtlasInverseDynamicsCalculatorTest
 
 
    
-   @Ignore("This is just for Jerry to help debug. Will be deleted or converted to a good test later.")
-   @EstimatedDuration(duration = 0.5)
-   @Test(timeout = 30000)
-   public void testDebugDataFile() throws UnreasonableAccelerationException
-   {
-      boolean visualize = true;
-      final AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize);
-
-
-      Robot robot = testHelper.getRobot();
-      SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
-      SimulationTestingParameters simulationTestingParameters = testHelper.getSimulationTestingParameters();
-      final SDFFullRobotModel fullRobotModel = testHelper.getFullRobotModel();
-
-
-      String dataFile = "D:/EclipseWorkspace/Atlas/DataFiles/150312_DebugAtlasPelvisInverseDynamicsProblem.data.gz";
-      scs.readData(dataFile );
-
-      scs.tick();
-
-      testHelper.setGhostStateToMatchRobot();
-
-      ThreadTools.sleep(1000L);
-
-      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
-      {
-
-         @Override
-         public void processData()
-         {
-            testHelper.setFullRobotModelStateToMatchRobot();
-
-            //          testHelper.setFullRobotModelAccelerationToMatchRobot();
-            testHelper.setFullRobotModelAccelerationToMatchRecordedYoVariables();
-
-
-            //            testHelper.setFullRobotModelStateAndAccelerationToMatchRobot();
-
-
-
-            testHelper.setFullRobotModelWrenchesToMatchRobot();
-            testHelper.computeTwistCalculatorAndInverseDynamicsCalculator();
-
-            double epsilon = 1e-7;
-            boolean torquesMatch = testHelper.checkTorquesMatchBetweenFullRobotModelAndSimulatedRobot(epsilon);
-
-            boolean computedRootJointWrenchIsZero = testHelper.checkComputedRootJointWrenchIsZero(1e-10);
-
-
-            ///
-
-            //            testHelper.setGhostRobotAccelerationBasedOnDesiredAccelerationOfFullRobotModel();
-            //            testHelper.ghostRobotRecursiveEulerIntegrate(0.006);
-         }
-
-         @Override
-         public void initializeProcessing()
-         {
-
-         }
-      };
-      scs.applyDataProcessingFunction(dataProcessingFunction);
-
-      System.out.println("Done applying data processing function!");
-      testHelper.startSimulationOnAThread();
-
-
-      ThreadTools.sleepForever();
-   }
+//   @Ignore("This is just for Jerry to help debug. Will be deleted or converted to a good test later.")
+//   @EstimatedDuration(duration = 0.5)
+//   @Test(timeout = 30000)
+//   public void testDebugDataFile() throws UnreasonableAccelerationException
+//   {
+//      boolean visualize = true;
+//      final AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize);
+//
+//
+//      Robot robot = testHelper.getRobot();
+//      SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
+//      SimulationTestingParameters simulationTestingParameters = testHelper.getSimulationTestingParameters();
+//      final SDFFullRobotModel fullRobotModel = testHelper.getFullRobotModel();
+//
+//
+//      String dataFile = "D:/EclipseWorkspace/Atlas/DataFiles/150312_DebugAtlasPelvisInverseDynamicsProblem.data.gz";
+//      scs.readData(dataFile );
+//
+//      scs.tick();
+//
+//      testHelper.setGhostStateToMatchRobot();
+//
+//      ThreadTools.sleep(1000L);
+//
+//      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+//      {
+//
+//         @Override
+//         public void processData()
+//         {
+//            testHelper.setFullRobotModelStateToMatchRobot();
+//
+//            //          testHelper.setFullRobotModelAccelerationToMatchRobot();
+//            testHelper.setFullRobotModelAccelerationToMatchRecordedYoVariables();
+//
+//
+//            //            testHelper.setFullRobotModelStateAndAccelerationToMatchRobot();
+//
+//
+//
+//            testHelper.setFullRobotModelWrenchesToMatchRobot();
+//            testHelper.computeTwistCalculatorAndInverseDynamicsCalculator();
+//
+//            double epsilon = 1e-7;
+//            boolean torquesMatch = testHelper.checkTorquesMatchBetweenFullRobotModelAndSimulatedRobot(epsilon);
+//
+//            boolean computedRootJointWrenchIsZero = testHelper.checkComputedRootJointWrenchIsZero(1e-10);
+//
+//
+//            ///
+//
+//            //            testHelper.setGhostRobotAccelerationBasedOnDesiredAccelerationOfFullRobotModel();
+//            //            testHelper.ghostRobotRecursiveEulerIntegrate(0.006);
+//         }
+//
+//         @Override
+//         public void initializeProcessing()
+//         {
+//
+//         }
+//      };
+//      scs.applyDataProcessingFunction(dataProcessingFunction);
+//
+//      System.out.println("Done applying data processing function!");
+//      testHelper.startSimulationOnAThread();
+//
+//
+//      ThreadTools.sleepForever();
+//   }
 
 
 
