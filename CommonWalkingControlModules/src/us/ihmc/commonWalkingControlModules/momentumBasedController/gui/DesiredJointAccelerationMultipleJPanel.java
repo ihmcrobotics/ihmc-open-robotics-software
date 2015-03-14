@@ -22,7 +22,7 @@ public class DesiredJointAccelerationMultipleJPanel extends AbstractMultipleReus
       tableTools = new TableTools();
       ArrayList<String> header = new ArrayList<String>(4);
       header.add("Joint Name");
-      header.add("Desired Joint Accaleration");
+      header.add("Desired Joint Acceleration");
       header.add("Achieved Joint Acceleration");
       header.add("Error");
       header.add("Largest Error");

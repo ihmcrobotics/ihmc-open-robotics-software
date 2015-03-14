@@ -26,7 +26,7 @@ public class DesiredSpatialAccelerationMultipleJPanel extends AbstractMultipleRe
       columnHeader.add("AchievedSpatialAcceleration");
       columnHeader.add("ErrorSpatialAcceleration");
 
-      jTable = tableTools.createJTableModelForDesiredJointAcceleration(columnHeader, 4);
+      jTable = tableTools.createJTableModelForDesiredJointAcceleration(columnHeader, 6);
       model = tableTools.getModel();
       tableTools.setPreferredWidth(0, 80);
       tableTools.setPreferredWidth(1, 80);
