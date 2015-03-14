@@ -49,6 +49,8 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 public class FootstepDataTest
 {
    private static final RobotSide robotSide = RobotSide.LEFT;
+   //TODO: Make listeners or something blocking so we don't have to do arbitrary sleep times...
+   private static final long SLEEP_TIME = 500;
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -77,7 +79,7 @@ public class FootstepDataTest
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
@@ -89,7 +91,7 @@ public class FootstepDataTest
 //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       tcpClient.close();
       tcpServer.close();
@@ -112,7 +114,7 @@ public class FootstepDataTest
 
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test footsteps
@@ -120,7 +122,7 @@ public class FootstepDataTest
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps,random.nextDouble(), random.nextDouble());
 
       tcpServer.send(footstepsData);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       tcpClient.close();
       tcpServer.close();
@@ -141,7 +143,7 @@ public class FootstepDataTest
 
       PauseConsumer pauseConsumer = new PauseConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
       // create test commands
@@ -155,7 +157,7 @@ public class FootstepDataTest
          tcpServer.send(new PauseCommand(isPaused));
       }
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       tcpServer.close();
       tcpClient.close();
@@ -191,7 +193,7 @@ public class FootstepDataTest
       PacketCommunicator streamingDataTCPClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, pathPort);
       streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 //      pathQueueBasedStreamingDataProducer.startProducingData();
 //      pauseQueueBasedStreamingDataProducer.startProducingData();
 
@@ -202,7 +204,7 @@ public class FootstepDataTest
       FootstepDataList footstepsData = convertFootstepsToFootstepData(sentFootsteps, random.nextDouble(), random.nextDouble());
 
       streamingDataTCPServer.send(footstepsData);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       // send some commands
       ArrayList<Boolean> commands = new ArrayList<Boolean>();
@@ -214,7 +216,7 @@ public class FootstepDataTest
          streamingDataTCPServer.send(new PauseCommand(isPaused));
       }
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       // send another footstep path
       ArrayList<Footstep> sentFootsteps2 = createRandomFootsteps(50);
@@ -222,7 +224,7 @@ public class FootstepDataTest
 
       streamingDataTCPServer.send(footstepsData);
       sentFootsteps.addAll(sentFootsteps2);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       streamingDataTCPClient.close();
       streamingDataTCPServer.close();
@@ -251,7 +253,7 @@ public class FootstepDataTest
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
       PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       // create test footsteps
       Random random = new Random(777);
@@ -270,7 +272,7 @@ public class FootstepDataTest
          tcpServer.send(footstepStatus);
       }
 
-      ThreadTools.sleep(100);
+      ThreadTools.sleep(SLEEP_TIME);
 
       tcpServer.close();
       tcpClient.close();
