@@ -37,6 +37,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
@@ -795,6 +796,62 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       BambooTools.reportTestFinishedMessage();
    }
+	
+	@Ignore
+	@QuarantinedTest("150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...")
+	@EstimatedDuration(duration = 20.0)
+	@Test(timeout = 300000)
+	public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException
+	{
+	   // March 2015: Low pelvis orientation gains cause the pelvis to flip out. Trying to track down why this happens. 
+	   
+	   BambooTools.reportTestStartedMessage();
+
+	   FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+	   drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", "", selectedLocation, simulationTestingParameters, getRobotModel());
+
+	   SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+
+	   setupCameraForElvisPelvis();
+
+	   ThreadTools.sleep(1000);
+	   boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+	   final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
+
+	   SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
+	   {
+	      @Override
+	      public boolean isSimulationDone()
+	      {
+	         return (Math.abs(pelvisOrientationError.getDoubleValue()) > 0.22);
+	      }
+	   };
+
+	   simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
+
+      DoubleYoVariable kpPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("kpPelvisOrientation");
+      DoubleYoVariable zetaPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("zetaPelvisOrientation");
+	   
+      kpPelvisOrientation.set(20.0);
+      zetaPelvisOrientation.set(0.7);
+      
+	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);
+
+	   drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+	   drcSimulationTestHelper.checkNothingChanged();
+
+	   assertTrue(success);
+
+	   Point3d center = new Point3d(-0.09807959403314585, 0.002501752329158081, 0.7867972043876718);
+	   Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+	   BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+	   drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+	   BambooTools.reportTestFinishedMessage();
+	}
 
 
    private void setupCameraForWalkingUpToRamp()
@@ -820,7 +877,14 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
+   
+   private void setupCameraForElvisPelvis()
+   {
+      Point3d cameraFix = new Point3d(0.0, 0.0, 0.9);
+      Point3d cameraPosition = new Point3d(0.0, -1.8, 0.9);
 
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
 
    private FootstepDataList createFootstepsForRotatedStepInTheAir(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
