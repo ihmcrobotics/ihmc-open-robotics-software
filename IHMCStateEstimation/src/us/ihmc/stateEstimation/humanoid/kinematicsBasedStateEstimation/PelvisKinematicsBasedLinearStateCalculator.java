@@ -409,6 +409,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
       updateFootPosition(trustedSide.getOppositeSide(), pelvisPosition);
    }
 
+   public void updateFeetPositionsWhenTrustingIMUOnly(FramePoint pelvisPosition)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         updateFootPosition(robotSide, pelvisPosition);
+   }
+
    private void estimatePelvisLinearState(RobotSide trustedSide)
    {
       singleElementRobotSideArray[0] = trustedSide;
