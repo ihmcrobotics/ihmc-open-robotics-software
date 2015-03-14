@@ -55,8 +55,8 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
    
    
-   private final SDFRobot robot, ghostRobot;
-   private final SDFFullRobotModel fullRobotModel, ghostFullRobotModel;
+   private final SDFRobot robot; //, ghostRobot;
+   private final SDFFullRobotModel fullRobotModel; //, ghostFullRobotModel;
    private final SimulationConstructionSet scs;
    private final TwistCalculator twistCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
@@ -71,12 +71,12 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       robot = atlasRobotModel.createSdfRobotWithNoJointDamping();
       
       atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.SIM, headless);
-      ghostFullRobotModel = atlasRobotModel.createFullRobotModel();
-      ghostRobot = atlasRobotModel.createSdfRobotWithNoJointDamping();
-      YoVariableRegistry oldGhostRegistry = ghostRobot.getRobotsYoVariableRegistry();
-      YoVariableRegistry ghostRegistry = new YoVariableRegistry("Ghost");
-      ghostRegistry.addChild(oldGhostRegistry);
-      ghostRobot.setRobotsYoVariableRegistry(ghostRegistry);
+//      ghostFullRobotModel = atlasRobotModel.createFullRobotModel();
+//      ghostRobot = atlasRobotModel.createSdfRobotWithNoJointDamping();
+//      YoVariableRegistry oldGhostRegistry = ghostRobot.getRobotsYoVariableRegistry();
+//      YoVariableRegistry ghostRegistry = new YoVariableRegistry("Ghost");
+//      ghostRegistry.addChild(oldGhostRegistry);
+//      ghostRobot.setRobotsYoVariableRegistry(ghostRegistry);
       
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
@@ -97,7 +97,8 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
       if (visualize)
       {
-         scs = new SimulationConstructionSet(new Robot[]{robot, ghostRobot}, simulationTestingParameters);
+         scs = new SimulationConstructionSet(new Robot[]{robot}, simulationTestingParameters);
+//         scs = new SimulationConstructionSet(new Robot[]{robot, ghostRobot}, simulationTestingParameters);
          double simulateDT = 0.00001;
          int recordFrequency = 1;
          scs.setDT(simulateDT, recordFrequency);
@@ -350,40 +351,40 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       }
    }
    
-   public void setGhostStateToMatchRobot()
-   {
-      FloatingJoint rootJoint = robot.getRootJoint();
-      FloatingJoint ghostRootJoint = ghostRobot.getRootJoint();
-      
-      Tuple3d position = new Vector3d();
-      Tuple3d velocity = new Vector3d();
-      rootJoint.getPositionAndVelocity(position, velocity);
-      ghostRootJoint.setPositionAndVelocity(position, velocity);
-      
-      Vector3d angularVelocityInBody = rootJoint.getAngularVelocityInBody();
-      ghostRootJoint.setAngularVelocityInBody(angularVelocityInBody);
-      
-      Quat4d rotation = new Quat4d();
-      rootJoint.getQuaternion(rotation);
-      rootJoint.setQuaternion(rotation);
-
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
-      
-      ArrayList<OneDegreeOfFreedomJoint> ghostOneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      ghostRobot.getAllOneDegreeOfFreedomJoints(ghostOneDegreeOfFreedomJoints);
-
-      for (int i=0; i<oneDegreeOfFreedomJoints.size(); i++)
-      {
-         OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJoints.get(i);
-         OneDegreeOfFreedomJoint ghostOneDegreeOfFreedomJoint = ghostOneDegreeOfFreedomJoints.get(i);
-
-         ghostOneDegreeOfFreedomJoint.setQ(oneDegreeOfFreedomJoint.getQ().getDoubleValue());
-         ghostOneDegreeOfFreedomJoint.setQd(oneDegreeOfFreedomJoint.getQD().getDoubleValue());
-      }
-      
-      ghostRobot.update();
-   }
+//   public void setGhostStateToMatchRobot()
+//   {
+//      FloatingJoint rootJoint = robot.getRootJoint();
+//      FloatingJoint ghostRootJoint = ghostRobot.getRootJoint();
+//      
+//      Tuple3d position = new Vector3d();
+//      Tuple3d velocity = new Vector3d();
+//      rootJoint.getPositionAndVelocity(position, velocity);
+//      ghostRootJoint.setPositionAndVelocity(position, velocity);
+//      
+//      Vector3d angularVelocityInBody = rootJoint.getAngularVelocityInBody();
+//      ghostRootJoint.setAngularVelocityInBody(angularVelocityInBody);
+//      
+//      Quat4d rotation = new Quat4d();
+//      rootJoint.getQuaternion(rotation);
+//      rootJoint.setQuaternion(rotation);
+//
+//      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+//      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+//      
+//      ArrayList<OneDegreeOfFreedomJoint> ghostOneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+//      ghostRobot.getAllOneDegreeOfFreedomJoints(ghostOneDegreeOfFreedomJoints);
+//
+//      for (int i=0; i<oneDegreeOfFreedomJoints.size(); i++)
+//      {
+//         OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = oneDegreeOfFreedomJoints.get(i);
+//         OneDegreeOfFreedomJoint ghostOneDegreeOfFreedomJoint = ghostOneDegreeOfFreedomJoints.get(i);
+//
+//         ghostOneDegreeOfFreedomJoint.setQ(oneDegreeOfFreedomJoint.getQ().getDoubleValue());
+//         ghostOneDegreeOfFreedomJoint.setQd(oneDegreeOfFreedomJoint.getQD().getDoubleValue());
+//      }
+//      
+//      ghostRobot.update();
+//   }
 
    public void setRobotExternalForcesRandomly(Random random, double maxExternalForce)
    {
@@ -411,17 +412,17 @@ public class AtlasInverseDynamicsCalculatorTestHelper
    }
    
 
-   public void setGhostRobotAccelerationBasedOnDesiredAccelerationOfFullRobotModel()
-   {
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
-      ghostRobot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
-
-      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
-      {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
-         oneDegreeOfFreedomJoint.setQdd(oneDoFJoint.getQddDesired());
-      }      
-   }
+//   public void setGhostRobotAccelerationBasedOnDesiredAccelerationOfFullRobotModel()
+//   {
+//      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+//      ghostRobot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+//
+//      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
+//      {
+//         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+//         oneDegreeOfFreedomJoint.setQdd(oneDoFJoint.getQddDesired());
+//      }      
+//   }
 
    public void copyAccelerationFromForwardToInverseBroken(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
@@ -496,11 +497,11 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       return fullRobotModel;
    }
 
-   public void ghostRobotRecursiveEulerIntegrate(double dt)
-   {
-      ghostRobot.rootJointsRecursiveEulerIntegrate(dt);
-      scs.tickAndUpdate();
-   }
+//   public void ghostRobotRecursiveEulerIntegrate(double dt)
+//   {
+//      ghostRobot.rootJointsRecursiveEulerIntegrate(dt);
+//      scs.tickAndUpdate();
+//   }
 
 
 
