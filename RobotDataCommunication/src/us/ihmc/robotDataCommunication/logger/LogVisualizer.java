@@ -9,6 +9,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -24,11 +25,15 @@ import us.ihmc.robotDataCommunication.logger.util.FileSelectionDialog;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class LogVisualizer
 {
-   protected final SimulationConstructionSet scs;
+   private static final boolean PRINT_OUT_YOVARIABLE_NAMES = false;
+
+   private final SimulationConstructionSet scs;
    private YoVariableLogPlaybackRobot robot;
    private SimulationOverheadPlotter plotter;
 
@@ -56,12 +61,25 @@ public class LogVisualizer
  
          scs.setFastSimulate(true, 50);
          readLogFile(logFile, showOverheadView);
+
+         if (PRINT_OUT_YOVARIABLE_NAMES) printOutYoVariableNames();
       }
       else
       {
          scs = null;
       }
 
+   }
+
+   private void printOutYoVariableNames()
+   {
+      YoVariableRegistry rootRegistry = scs.getRootRegistry();
+      ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      
+      for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
+      {
+         System.out.println(yoVariable.getName());
+      }
    }
 
    private void readLogFile(File selectedFile, boolean showOverheadView) throws IOException
