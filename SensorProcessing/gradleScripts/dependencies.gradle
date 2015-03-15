@@ -39,6 +39,7 @@ dependencies {
     compile project(':SimulationConstructionSet')
     compile project(':IHMCUtilities')
     compile project(':KalmanProject')
+    compile project(':SDFLoader')
     compile project(':ThirdParty')
     
     testCompile project(':IHMCUtilities').sourceSets.test.output
