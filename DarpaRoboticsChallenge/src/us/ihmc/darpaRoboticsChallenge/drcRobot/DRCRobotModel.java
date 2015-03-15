@@ -29,10 +29,10 @@ import com.jme3.math.Transform;
 
 public interface DRCRobotModel extends WholeBodyControllerParameters
 {
-   //TODO: RobotBoundingBoxes.java
+   // TODO: RobotBoundingBoxes.java
 
-//   public abstract boolean isRunningOnRealRobot();
-   
+// public abstract boolean isRunningOnRealRobot();
+
    public abstract FootstepPlanningParameterization getFootstepParameters();
 
    public abstract WalkingControllerParameters getDrivingControllerParameters();
@@ -49,14 +49,18 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract ScsCollisionConfigure getPhysicsConfigure(SDFRobot robotModel);
 
+   public abstract void setEnableJointDamping(boolean enableJointDamping);
+
+   public abstract boolean getEnableJointDamping();
+
    public abstract void setJointDamping(SDFRobot simulatedRobot);
 
    public abstract HandModel getHandModel();
 
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
-   
+
    public abstract RigidBodyTransform getTransform3dWristToHand(RobotSide side);
-   
+
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
@@ -64,19 +68,20 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager();
-      
+
    public abstract SideDependentList<HandCommandManager> createHandCommandManager();
-   
-   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
+
+   public abstract MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot,
+           ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
    public abstract DRCHandType getDRCHandType();
-   
+
    public abstract LogSettings getLogSettings();
-   
+
    public abstract LogModelProvider getLogModelProvider();
 
    public abstract Pair<Class<?>, String[]> getOperatorInterfaceStarter();
-   
+
    public abstract Class<?> getSpectatorInterfaceClass();
 
    public abstract HeightCalculatorParameters getHeightCalculatorParameters();

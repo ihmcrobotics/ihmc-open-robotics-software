@@ -91,6 +91,8 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
    private final AtlasHeightCalculatorParameters heightCalculatorParameters;
 
+   private boolean enableJointDamping = true;
+
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()
    {
@@ -228,6 +230,18 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
+   public void setEnableJointDamping(boolean enableJointDamping)
+   {
+      this.enableJointDamping  = enableJointDamping;
+   }
+
+   @Override
+   public boolean getEnableJointDamping()
+   {
+      return enableJointDamping;
+   }
+
+   @Override
    public HandModel getHandModel()
    {
       if (selectedVersion.hasRobotiqHands())
@@ -252,20 +266,15 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return loader.createFullRobotModel(getJointMap(), sensorInformation.getSensorFramesToTrack());
    }
-
+   
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
-   {
-      return loader.createRobot(getJointMap(), createCollisionMeshes);
-   }
-   
-   public SDFRobot createSdfRobotWithNoJointDamping()
-   {
+   { 
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      boolean enableDamping = false;
       AtlasJointMap jointMap = getJointMap();
-      return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableDamping);
+      boolean enableJointDamping = getEnableJointDamping();
+      return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
    }
 
    @Override
