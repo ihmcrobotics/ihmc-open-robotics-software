@@ -5,6 +5,7 @@ import java.io.InputStream;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -72,7 +73,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final boolean runningOnRealRobot;
    
    @Override
-   public WholeBodyIkSolver createWholeBodyIkSolver()  {
+   public WholeBodyIkSolver createWholeBodyIkSolver()  
+   {
       return null;
    }
 
@@ -84,6 +86,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
          "models/V1/meshes/2013_05_16/"};
 
    private final JaxbSDFLoader loader;
+
+   private boolean enableJointDamping = true;
 
    public ValkyrieRobotModel(boolean runningOnRealRobot, boolean headless)
    {
@@ -243,6 +247,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       System.err.println("Joint Damping not setup for Valkyrie. ValkyrieRobotModel setJointDamping!");
    }
+   
+   @Override
+   public void setEnableJointDamping(boolean enableJointDamping)
+   {
+      this.enableJointDamping   = enableJointDamping;
+   }
+
+   @Override
+   public boolean getEnableJointDamping()
+   {
+      return enableJointDamping;
+   }
 
    @Override
    public HandModel getHandModel()
@@ -270,8 +286,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
-   {
-      SDFRobot sdfRobot = loader.createRobot(jointMap, createCollisionMeshes);
+   { 
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = false;
+      SDFJointNameMap jointMap = getJointMap();
+      boolean enableJointDamping = getEnableJointDamping();
+
+      SDFRobot sdfRobot =  loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
 
       if (PRINT_MODEL)
       {
