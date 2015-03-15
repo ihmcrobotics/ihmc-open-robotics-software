@@ -9,7 +9,8 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWholeBodyTrajectoryTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseWobblyFootTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasPelvisLowGainsTest.class
 })
 
 public class AtlasIVideoATestSuite
