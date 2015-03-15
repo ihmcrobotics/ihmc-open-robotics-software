@@ -70,10 +70,16 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       BambooTools.reportTestStartedMessage();
 
+      // Use perfect sensors and run single threaded to make sure state estimation isn't what's causing the problem.
+      simulationTestingParameters.setUsePefectSensors(true);
+      simulationTestingParameters.setRunMultiThreaded(false);
+      
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
 
       DRCRobotModel robotModel = getRobotModel();
+      
+      // Disable joint damping to make sure that damping isn't causing the problem.
       robotModel.setEnableJointDamping(false);
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCPelvisFlippingOutBugTest", "", selectedLocation, simulationTestingParameters,
               robotModel);
@@ -101,7 +107,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       DoubleYoVariable kpPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("kpPelvisOrientation");
       DoubleYoVariable zetaPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("zetaPelvisOrientation");
 
-      kpPelvisOrientation.set(20.0);
+      // kp = 20.0, zeta = 0.7 causes problems when running multithreaded. kp = 1.0, zeta = 0.7 causes problems when running single threaded.
+      kpPelvisOrientation.set(1.0);
       zetaPelvisOrientation.set(0.7);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(12.0);

@@ -7,6 +7,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 public class SimulationTestingParameters extends SimulationConstructionSetParameters
 {
    private boolean runMultiThreaded = true;
+   private boolean usePefectSensors = false;
+
    private boolean createSCSMovies = false;
    private boolean checkNothingChangedInSimulation = false;
    private boolean keepSCSUp = false;
@@ -33,6 +35,13 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
          setRunMultiThreaded(runMultiThreaded);
       }
       
+      property = System.getProperty("use.perfect.sensors");
+      if (property != null)
+      {
+         Boolean usePerfectSensors = Boolean.parseBoolean(property);
+         setUsePefectSensors(usePerfectSensors);
+      }
+      
       property = System.getProperty("create.scs.movies");
       if (property != null)
       {
@@ -56,6 +65,16 @@ public class SimulationTestingParameters extends SimulationConstructionSetParame
       System.out.println(toString());
       Properties properties = System.getProperties();
       System.out.println(properties.toString());
+   }
+   
+   public boolean getUsePefectSensors()
+   {
+      return usePefectSensors;
+   }
+
+   public void setUsePefectSensors(boolean usePefectSensors)
+   {
+      this.usePefectSensors = usePefectSensors;
    }
    
    public void setRunMultiThreaded(boolean runMultiThreaded)
