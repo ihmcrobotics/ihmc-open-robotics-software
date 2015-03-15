@@ -85,7 +85,9 @@ public class DRCSimulationFactory
       this.globalDataProducer = globalDataProducer;
       
       simulatedDRCRobotTimeProvider = new SimulatedDRCRobotTimeProvider(drcRobotModel.getSimulateDT());
-      simulatedRobot = drcRobotModel.createSdfRobot(false);
+
+      boolean createCollisionMeshes = false;
+      simulatedRobot = drcRobotModel.createSdfRobot(createCollisionMeshes);
 
       this.controllerFactory = controllerFactory;
 
@@ -131,7 +133,7 @@ public class DRCSimulationFactory
       robotInitialSetup.initializeRobot(simulatedRobot, drcRobotModel.getJointMap());
       simulatedRobot.update();
 
-      setupJointDamping(simulatedRobot, drcRobotModel);
+//      setupJointDamping(simulatedRobot, drcRobotModel);
    }
 
    private Robot[] setupEnvironmentAndListSimulatedRobots(SDFRobot simulatedRobot, CommonAvatarEnvironmentInterface environment)

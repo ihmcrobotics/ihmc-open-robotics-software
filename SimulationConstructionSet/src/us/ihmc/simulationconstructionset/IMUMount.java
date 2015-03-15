@@ -21,6 +21,7 @@ public class IMUMount
    private Robot robot;
 
    private final YoFrameVector angularVelocityInBody;
+   private final YoFrameVector angularAccelerationInBody;
 
    private final YoFrameVector linearVelocityInBody;
    private final YoFrameVector linearVelocityInWorld;
@@ -51,6 +52,7 @@ public class IMUMount
       linearVelocityInWorld = new YoFrameVector(name + "LinearVelocityWorld", null, registry);
 
       angularVelocityInBody = new YoFrameVector(name + "AngularVelocity", null, registry);
+      angularAccelerationInBody = new YoFrameVector(name + "AngularAcceleration", null, registry);
 
       linearAccelerationInBody = new YoFrameVector(name + "LinearAcceleration", null, registry);
       linearAccelerationInWorld = new YoFrameVector(name + "LinearAccelerationWorld", null, registry);
@@ -147,6 +149,7 @@ public class IMUMount
       // Angular Acceleration
       parentJoint.physics.getAngularAccelerationsInBodyFrame(tempAngularAccelerationInBody);
       tempIMURotation.transform(tempAngularAccelerationInBody);
+      angularAccelerationInBody.set(tempAngularAccelerationInBody);
    }
    
    public void setOrientation(Quat4d orientation)
@@ -172,6 +175,16 @@ public class IMUMount
    public void getAngularVelocityInBody(Vector3d angularVelocityInBodyToPack)
    {
       angularVelocityInBody.get(angularVelocityInBodyToPack);
+   }
+   
+   public void setAngularAccelerationInBody(Vector3d angularAccelerationInBody)
+   {
+      this.angularAccelerationInBody.set(angularAccelerationInBody);
+   }
+   
+   public void getAngularAccelerationInBody(Vector3d angularAccelerationInBodyToPack)
+   {
+      angularAccelerationInBody.get(angularAccelerationInBodyToPack);
    }
 
    public void setLinearAccelerationInBody(Vector3d linearAccelerationInBody)

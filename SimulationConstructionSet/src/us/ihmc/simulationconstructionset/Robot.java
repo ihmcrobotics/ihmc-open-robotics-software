@@ -47,8 +47,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
  */
 public class Robot implements YoVariableHolder, GroundContactPointsHolder
 {
-
-   protected final YoVariableRegistry yoVariableRegistry;
+   protected YoVariableRegistry yoVariableRegistry;
    protected final ArrayList<YoGraphicsListRegistry> yoGraphicsListRegistries = new ArrayList<YoGraphicsListRegistry>();
    private ArrayList<Joint> rootJoints;
 
@@ -851,6 +850,11 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    {
       return yoVariableRegistry;
    }
+   
+   public void setRobotsYoVariableRegistry(YoVariableRegistry registry)
+   {
+     this.yoVariableRegistry = registry;
+   }
 
    /**
     * Saves the current state of each joint.  Different joint types have different relevant values, pin and slider joints
@@ -877,7 +881,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     *
     * @param dt Time step size for Euler integration
     */
-   private void rootJointsRecursiveEulerIntegrate(double dt)
+   public void rootJointsRecursiveEulerIntegrate(double dt)
    {
       ArrayList<Joint> children = this.getRootJoints();
 

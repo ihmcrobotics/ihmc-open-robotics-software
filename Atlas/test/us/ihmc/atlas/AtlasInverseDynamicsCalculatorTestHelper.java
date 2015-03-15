@@ -16,6 +16,8 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -68,7 +70,23 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       boolean headless = false;
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.SIM, headless);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
-      robot = atlasRobotModel.createSdfRobotWithNoJointDamping();
+      
+      boolean createCollisionMeshes = false;
+      atlasRobotModel.setEnableJointDamping(false);
+      robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+      
+      List<GroundContactPoint> footGroundContactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
+      Joint leftAnkleJoint = footGroundContactPoints.get(0).getParentJoint();
+      
+      footGroundContactPoints = robot.getFootGroundContactPoints(RobotSide.RIGHT);
+      Joint rightAnkleJoint = footGroundContactPoints.get(0).getParentJoint();
+      
+      IMUMount leftIMUMount = new IMUMount("leftIMU", new RigidBodyTransform(), robot);
+      leftAnkleJoint.addIMUMount(leftIMUMount);
+      IMUMount rightIMUMount = new IMUMount("rightIMU", new RigidBodyTransform(), robot);
+      rightAnkleJoint.addIMUMount(rightIMUMount);
+      
+      
       
       atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.SIM, headless);
 //      ghostFullRobotModel = atlasRobotModel.createFullRobotModel();
