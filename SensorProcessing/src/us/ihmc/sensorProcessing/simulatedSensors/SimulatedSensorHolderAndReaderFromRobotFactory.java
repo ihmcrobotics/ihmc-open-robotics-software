@@ -256,22 +256,4 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    {
       return true;
    }
-
-//   private void getCenterOfMassPostion(FramePoint estimatedCoMPosition)
-//   {
-//      estimatedCoMPosition.setX(estimatedCoMPosition.getX() + 0.0855);
-//      estimatedCoMPosition.setZ(estimatedCoMPosition.getZ() + 0.9904); //1.2); 
-//      
-//      Point3d comPoint = new Point3d();
-//      try
-//      {
-//         robot.doDynamicsButDoNotIntegrate();
-//      }
-//      catch (UnreasonableAccelerationException e)
-//      {
-//         throw new RuntimeException("UnreasonableAccelerationException in getCenterOfMassPostion");
-//      }
-//      robot.computeCenterOfMass(comPoint);
-//      
-//   }
 }

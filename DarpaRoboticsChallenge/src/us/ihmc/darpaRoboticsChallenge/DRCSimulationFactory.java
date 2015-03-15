@@ -25,6 +25,7 @@ import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -161,7 +162,17 @@ public class DRCSimulationFactory
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
 
-      SensorReaderFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
+      SensorReaderFactory sensorReaderFactory;
+
+      if (scsInitialSetup.usePerfectSensors())
+      {
+         sensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, stateEstimatorParameters.getEstimatorDT());
+      }
+      else
+      {
+         sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot, stateEstimatorParameters);
+      }
+
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
 
       if (scsInitialSetup.getRunMultiThreaded())

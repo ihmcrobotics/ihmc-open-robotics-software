@@ -1,27 +1,20 @@
-package us.ihmc.darpaRoboticsChallenge.sensors;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.simulatedSensors.ControllerDispatcher;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
-import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
-import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
-public class DRCPerfectSensorReader implements SensorReader, RobotController
+public class DRCPerfectSensorReader implements SensorReader
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
-   private final IntegerYoVariable step = new IntegerYoVariable("step", registry);
-   private final long estimateDTinNs;
    private RawSensorReader rawSensorReader;
-   private ControllerDispatcher controllerDispatcher;
+   private SensorOutputMapReadOnly sensorOutputMapReadOnly;
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
@@ -29,8 +22,6 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
    
    public DRCPerfectSensorReader(double estimateDT)
    {
-      this.estimateDTinNs = TimeTools.secondsToNanoSeconds(estimateDT);
-      step.set(9807);
    }
 
    public void setSensorReader(RawSensorReader rawSensorReader)
@@ -38,14 +29,15 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       this.rawSensorReader = rawSensorReader;
    }
 
-   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   public void setSensorOutputMapReadOnly(SensorOutputMapReadOnly sensorOutputMapReadOnly)
    {
-      throw new RuntimeException("Should not get there");
+      this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
    }
 
-   public void setControllerDispatcher(ControllerDispatcher controllerDispatcher)
+   @Override
+   public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
-      this.controllerDispatcher = controllerDispatcher;
+      return sensorOutputMapReadOnly;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
@@ -53,35 +45,14 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
       this.forceSensorDataHolder = forceSensorDataHolder;
    }
 
-   public void initialize()
-   {
-      read();
-   }
-
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
-   public String getName()
-   {
-      return "DRCPerfectSensorReader";
-   }
-
-   public String getDescription()
-   {
-      return getName();
-   }
-
-   @Deprecated
-   public void doControl()
-   {
-      read();
-   }
-
+   @Override
    public void read()
    {
-      step.increment();
       if(rawSensorReader != null)
       {
          rawSensorReader.read();
@@ -95,11 +66,6 @@ public class DRCPerfectSensorReader implements SensorReader, RobotController
             forceTorqueSensor.calculate();  
             forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
          }
-      }
-      
-      if(controllerDispatcher != null)
-      {
-         controllerDispatcher.startEstimator(estimateDTinNs * step.getIntegerValue(), System.nanoTime());
       }
    }
    
