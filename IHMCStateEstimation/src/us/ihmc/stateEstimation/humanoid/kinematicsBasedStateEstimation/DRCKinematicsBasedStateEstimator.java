@@ -63,14 +63,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          RobotMotionStatusHolder robotMotionStatusFromController, SideDependentList<ContactablePlaneBody> bipedFeet,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
+      estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
-      this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
+      pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
@@ -131,11 +131,13 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       yoGraphicsListRegistry.registerYoGraphics("imuFrame", dynamicGraphicMeasurementFrames);
    }
 
+   @Override
    public StateEstimator getStateEstimator()
    {
       return this;
    }
 
+   @Override
    public void initialize()
    {
       if (fusedIMUSensor != null)
@@ -146,6 +148,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisLinearStateUpdater.initialize();
    }
 
+   @Override
    public void doControl()
    {
       yoTime.set(TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
@@ -177,90 +180,108 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       }
    }
 
+   @Override
    public void initializeEstimatorToActual(Point3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
       // Do nothing for the orientation since the IMU is trusted
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void getEstimatedOrientation(FrameOrientation estimatedOrientationToPack)
    {
       pelvisRotationalStateUpdater.getEstimatedOrientation(estimatedOrientationToPack);
    }
 
+   @Override
    public void setEstimatedOrientation(FrameOrientation estimatedOrientation)
    {
       // Do nothing, IMU is trusted
    }
 
+   @Override
    public void getEstimatedAngularVelocity(FrameVector estimatedAngularVelocityToPack)
    {
       pelvisRotationalStateUpdater.getEstimatedAngularVelocity(estimatedAngularVelocityToPack);
    }
 
+   @Override
    public void setEstimatedAngularVelocity(FrameVector estimatedAngularVelocity)
    {
       // Do nothing, IMU is trusted
    }
 
+   @Override
    public void getEstimatedCoMPosition(FramePoint estimatedCoMPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMPosition(estimatedCoMPositionToPack);
    }
 
+   @Override
    public void setEstimatedCoMPosition(FramePoint estimatedCoMPosition)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(estimatedCoMPosition);
    }
 
+   @Override
    public void getEstimatedCoMVelocity(FrameVector estimatedCoMVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedCoMVelocity(estimatedCoMVelocityToPack);
    }
 
+   @Override
    public void setEstimatedCoMVelocity(FrameVector estimatedCoMVelocity)
    {
    }
 
+   @Override
    public void getEstimatedPelvisPosition(FramePoint estimatedPelvisPositionToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisPosition(estimatedPelvisPositionToPack);
    }
 
+   @Override
    public void getEstimatedPelvisLinearVelocity(FrameVector estimatedPelvisLinearVelocityToPack)
    {
       pelvisLinearStateUpdater.getEstimatedPelvisLinearVelocity(estimatedPelvisLinearVelocityToPack);
    }
 
+   @Override
    public DenseMatrix64F getCovariance()
    {
       return null;
    }
 
+   @Override
    public DenseMatrix64F getState()
    {
       return null;
    }
 
+   @Override
    public void setState(DenseMatrix64F x, DenseMatrix64F covariance)
    {
    }
 
+   @Override
    public void initializeOrientationEstimateToMeasurement()
    {
       // Do nothing
