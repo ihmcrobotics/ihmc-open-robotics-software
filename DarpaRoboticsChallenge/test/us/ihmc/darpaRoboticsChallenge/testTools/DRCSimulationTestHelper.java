@@ -100,7 +100,8 @@ public class DRCSimulationTestHelper
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
-      
+      simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
+
       simulationStarter.setScriptFile(scriptFileName);
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
