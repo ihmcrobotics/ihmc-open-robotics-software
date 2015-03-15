@@ -31,6 +31,8 @@ public class DRCSCSInitialSetup
    
 //   private SensorNoiseParameters simulatedSensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createSensorNoiseParametersZeroNoise();
    private SensorNoiseParameters simulatedSensorNoiseParameters = null; // Same as zero noise, but doesn't create sensor corruptors
+
+   private boolean usePerfectSensors = false;
    private boolean initializeEstimatorToActual = false;
    
 //   private final CommonTerrain commonTerrain;
@@ -198,7 +200,17 @@ public class DRCSCSInitialSetup
    {
       this.initializeEstimatorToActual = initializeEstimatorToActual;
    }
-   
+
+   public boolean usePerfectSensors()
+   {
+      return usePerfectSensors;
+   }
+
+   public void setUsePerfectSensors(boolean usePerfectSensors)
+   {
+      this.usePerfectSensors = usePerfectSensors;
+   }
+
    public GroundProfile3D getGroundProfile3D()
    {
       return groundProfile3D;

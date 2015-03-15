@@ -365,16 +365,16 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                }
             }
 
-            if (enableDamping)
-            {
-               pinJoint.setDamping(joint.getDamping());
-               pinJoint.setStiction(joint.getFriction());
-            }
-            else
-            {
-               pinJoint.setDampingParameterOnly(joint.getDamping());
-               pinJoint.setStictionParameterOnly(joint.getFriction());
-            }
+//            if (enableDamping)
+//            {
+//               pinJoint.setDamping(joint.getDamping());
+//               pinJoint.setStiction(joint.getFriction());
+//            }
+//            else
+//            {
+//               pinJoint.setDampingParameterOnly(joint.getDamping());
+//               pinJoint.setStictionParameterOnly(joint.getFriction());
+//            }
 
             if (enableTorqueVelocityLimits)
             {

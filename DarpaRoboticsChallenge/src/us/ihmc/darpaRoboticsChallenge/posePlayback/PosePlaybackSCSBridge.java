@@ -7,7 +7,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPose;
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseInterpolator;
@@ -16,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceRead
 import us.ihmc.commonWalkingControlModules.posePlayback.PlaybackPoseSequenceWriter;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.utilities.ThreadTools;

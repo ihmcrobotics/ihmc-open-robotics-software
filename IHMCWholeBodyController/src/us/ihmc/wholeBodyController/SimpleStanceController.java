@@ -2,9 +2,9 @@ package us.ihmc.wholeBodyController;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFPerfectSimulatedOutputWriter;
-import us.ihmc.SdfLoader.SDFPerfectSimulatedSensorReader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.*
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OptimizationMomentumControlModule;
+import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;

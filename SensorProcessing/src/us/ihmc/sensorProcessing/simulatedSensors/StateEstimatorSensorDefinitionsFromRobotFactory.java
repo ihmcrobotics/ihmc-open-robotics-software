@@ -18,43 +18,44 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 {
    private final SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap;
    private final LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions;
-   private final Map<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions;
+   private final Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions;
 
    private final StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
 
-   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, 
-           ArrayList<IMUMount> imuMounts, ArrayList<WrenchCalculatorInterface> forceSensors)
+   public StateEstimatorSensorDefinitionsFromRobotFactory(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap, ArrayList<IMUMount> imuMounts,
+         ArrayList<WrenchCalculatorInterface> forceSensors)
    {
       this.scsToInverseDynamicsJointMap = scsToInverseDynamicsJointMap;
       this.imuDefinitions = generateIMUDefinitions(imuMounts);
       this.forceSensorDefinitions = generateForceSensorDefinitions(forceSensors);
 
-      
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
       createAndAddForceSensorDefinitions(forceSensorDefinitions);
       createAndAddOneDoFSensors();
       createAndAddIMUSensors(imuDefinitions);
    }
-   
+
    private void createAndAddForceSensorDefinitions(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions)
    {
-      for(ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions.values())
+      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions.values())
       {
          stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
       }
    }
 
-   private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
+   private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(
+         ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
    {
-      LinkedHashMap<WrenchCalculatorInterface,ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
-      for(WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
+      LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
+      for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
          OneDoFJoint sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(forceTorqueSensorJoint);
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), new RigidBodyTransform());
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(),
+               sensorParentJoint.getSuccessor(), new RigidBodyTransform());
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
-         
+
       }
       return forceSensorDefinitions;
    }
@@ -87,7 +88,8 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
 
    public void createAndAddOneDoFSensors()
    {
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(
+            scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
@@ -107,7 +109,6 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
          stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
       }
    }
-
 
    public Map<WrenchCalculatorInterface, ForceSensorDefinition> getForceSensorDefinitions()
    {

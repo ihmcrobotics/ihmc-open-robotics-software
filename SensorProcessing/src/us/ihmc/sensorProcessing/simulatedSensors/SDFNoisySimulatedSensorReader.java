@@ -1,10 +1,11 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;

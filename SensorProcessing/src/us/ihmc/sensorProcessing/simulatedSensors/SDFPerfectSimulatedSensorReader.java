@@ -1,12 +1,17 @@
-package us.ihmc.SdfLoader;
+package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -16,8 +21,9 @@ import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-public class SDFPerfectSimulatedSensorReader implements RawSensorReader
+public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly
 {
    private final String name;
    private final SDFRobot robot;
@@ -26,16 +32,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
 
    private final ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
-   
-   
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
+   private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
+   private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
+
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), referenceFrames);
    }
-   
+
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, CommonHumanoidReferenceFrames referenceFrames)
    {
-      this.name = robot.getName() + "SimulatedSensorReader";
+      name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.referenceFrames = referenceFrames;
 
@@ -45,42 +54,46 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
 
       for (InverseDynamicsJoint joint : jointsArray)
       {
-         
-         if(joint instanceof OneDoFJoint)
+
+         if (joint instanceof OneDoFJoint)
          {
             OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
-   
+
             Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint, oneDoFJoint);
-            this.revoluteJoints.add(jointPair);
+            revoluteJoints.add(jointPair);
          }
       }
-
    }
 
+   @Override
    public void initialize()
    {
       read();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
-      return null;
+      return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return getName();
    }
 
-   private RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
 
+   @Override
    public void read()
    {
       // Think about adding root body acceleration to the fullrobotmodel
@@ -88,6 +101,11 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
       readAndUpdateRootJointPositionAndOrientation();
       updateReferenceFrames();
       readAndUpdateRootJointAngularAndLinearVelocity();
+
+      long timestamp = TimeTools.secondsToNanoSeconds(robot.getTime());
+      this.timestamp.set(timestamp);
+      this.visionSensorTimestamp.set(timestamp);
+      this.sensorHeadPPSTimetamp.set(timestamp);
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
@@ -141,5 +159,53 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader
    protected void packRootTransform(SDFRobot robot, RigidBodyTransform transformToPack)
    {
       robot.getRootJointToWorldTransform(transformToPack);
+   }
+
+   @Override
+   public long getTimestamp()
+   {
+      return timestamp.getLongValue();
+   }
+
+   @Override
+   public long getVisionSensorTimestamp()
+   {
+      return visionSensorTimestamp.getLongValue();
+   }
+
+   @Override
+   public long getSensorHeadPPSTimestamp()
+   {
+      return sensorHeadPPSTimetamp.getLongValue();
+   }
+
+   @Override
+   public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQ();
+   }
+
+   @Override
+   public double getJointVelocityProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQd();
+   }
+
+   @Override
+   public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQdd();
+   }
+
+   @Override
+   public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getTau();
+   }
+
+   @Override
+   public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+   {
+      return new ArrayList<>();
    }
 }
