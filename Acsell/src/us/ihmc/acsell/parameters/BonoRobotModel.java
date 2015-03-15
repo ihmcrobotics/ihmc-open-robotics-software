@@ -5,6 +5,7 @@ import java.io.InputStream;
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.acsell.controlParameters.BonoArmControlParameters;
 import us.ihmc.acsell.controlParameters.BonoCapturePointPlannerParameters;
@@ -27,9 +28,9 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -68,8 +69,11 @@ public class BonoRobotModel implements DRCRobotModel
    private final BonoWalkingControllerParameters walkingControllerParameters;
    private final BonoWalkingControllerParameters multiContactControllerParameters;
    
+   private boolean enableJointDamping = true;
+
    @Override
-   public WholeBodyIkSolver createWholeBodyIkSolver()  {
+   public WholeBodyIkSolver createWholeBodyIkSolver()  
+   {
       return null;
    }
 
@@ -186,6 +190,18 @@ public class BonoRobotModel implements DRCRobotModel
    {
       System.err.println("Joint Damping not setup for Bono. BonoRobotModel setJointDamping!");
    }
+   
+   @Override
+   public void setEnableJointDamping(boolean enableJointDamping)
+   {
+      this.enableJointDamping  = enableJointDamping;
+   }
+
+   @Override
+   public boolean getEnableJointDamping()
+   {
+      return enableJointDamping;
+   }
 
    @Override
    public HandModel getHandModel()
@@ -219,8 +235,12 @@ public class BonoRobotModel implements DRCRobotModel
 
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
-   {
-      return loader.createRobot(getJointMap(), createCollisionMeshes);
+   { 
+      boolean useCollisionMeshes = false;
+      boolean enableTorqueVelocityLimits = false;
+      SDFJointNameMap jointMap = getJointMap();
+      boolean enableJointDamping = getEnableJointDamping();
+      return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
    }
 
    @Override
