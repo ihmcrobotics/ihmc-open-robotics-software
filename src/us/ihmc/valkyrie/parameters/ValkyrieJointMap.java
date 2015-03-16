@@ -74,7 +74,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public ValkyrieJointMap()
    {
       if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
-         armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_YAW, ArmJointName.WRIST_ROLL, ArmJointName.WRIST_PITCH };
+         armJoints = new ArmJointName[]{ ArmJointName.SHOULDER_PITCH, ArmJointName.SHOULDER_ROLL, ArmJointName.SHOULDER_YAW, ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_YAW, ArmJointName.WRIST_ROLL, ArmJointName.FIRST_WRIST_PITCH };
       else
          armJoints = new ArmJointName[]{};
       
@@ -96,7 +96,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
             armJointNames.put(forcedSideJointNames[LeftElbowExtensor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
             armJointNames.put(forcedSideJointNames[LeftForearmSupinator], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_YAW));
             armJointNames.put(forcedSideJointNames[LeftWristExtensor], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
-            armJointNames.put(forcedSideJointNames[LeftWrist], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_PITCH));
+            armJointNames.put(forcedSideJointNames[LeftWrist], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
          }
          String prefix = getRobotSidePrefix(robotSide);
 
@@ -146,7 +146,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
-         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.WRIST_PITCH));
+         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(ArmJointName.FIRST_WRIST_PITCH));
       }
    }
 
@@ -286,7 +286,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
       for (RobotSide robotSide : RobotSide.values)
-         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
       return lastSimulatedJoints;
    }
 
