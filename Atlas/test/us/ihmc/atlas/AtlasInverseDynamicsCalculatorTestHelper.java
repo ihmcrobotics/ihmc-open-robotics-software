@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
+import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -12,6 +13,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.IMUMount;
@@ -23,10 +25,12 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -59,8 +63,16 @@ public class AtlasInverseDynamicsCalculatorTestHelper
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointTorques = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> computedJointAccelerations = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
 
-   public AtlasInverseDynamicsCalculatorTestHelper(boolean visualize)
+   private final YoFrameVector computedRootJointLinearAcceleration = new YoFrameVector("qdd_computed_root_linear", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector computedRootJointAngularAcceleration;
+   
+   private final ExternalForcePoint rootJointExternalForcePoint;
+
+   private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
+
+   public AtlasInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
    {
       boolean headless = false;
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
@@ -69,6 +81,11 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       boolean createCollisionMeshes = false;
       atlasRobotModel.setEnableJointDamping(false);
       robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+      robot.setGravity(gravityZ);
+      
+      FloatingJoint rootJoint = robot.getRootJoint();
+      rootJointExternalForcePoint = new ExternalForcePoint("rootJointExternalForce", robot);
+      rootJoint.addExternalForcePoint(rootJointExternalForcePoint);
       
       List<GroundContactPoint> footGroundContactPoints = robot.getFootGroundContactPoints(RobotSide.LEFT);
       Joint leftAnkleJoint = footGroundContactPoints.get(0).getParentJoint();
@@ -81,8 +98,18 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       IMUMount rightIMUMount = new IMUMount("rightIMU", new RigidBodyTransform(), robot);
       rightAnkleJoint.addIMUMount(rightIMUMount);
       
+      ExternalForcePoint leftFootExternalForcePoint = new ExternalForcePoint("leftFootExternalForcePoint", robot);
+      leftAnkleJoint.addExternalForcePoint(leftFootExternalForcePoint);
+      
+      ExternalForcePoint rightFootExternalForcePoint = new ExternalForcePoint("rightFootExternalForcePoint", robot);
+      rightAnkleJoint.addExternalForcePoint(rightFootExternalForcePoint);
+      
+      feetExternalForcePoints = new SideDependentList<ExternalForcePoint>(leftFootExternalForcePoint, rightFootExternalForcePoint);
+      
       atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
       
+      computedRootJointAngularAcceleration = new YoFrameVector("qdd_computed_root_angular", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
+
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
 
@@ -92,6 +119,9 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
          DoubleYoVariable computedJointTorque = new DoubleYoVariable("tau_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
          computedJointTorques.put(oneDoFJoint, computedJointTorque);
+         
+         DoubleYoVariable computedJointAcceleration = new DoubleYoVariable("qdd_computed_" + oneDegreeOfFreedomJoint.getName(), registry);
+         computedJointAccelerations.put(oneDoFJoint, computedJointAcceleration);
       }
 
       twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
@@ -120,6 +150,75 @@ public class AtlasInverseDynamicsCalculatorTestHelper
          scs.startOnAThread();
    }
 
+   public void setRobotTorquesToMatchFullRobotModel()
+   {
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+
+      SixDoFJoint rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame bodyFixedFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      
+      Wrench rootJointWrench = new Wrench(bodyFixedFrame, bodyFixedFrame);
+      rootJoint.packWrench(rootJointWrench);
+
+      FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
+      FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
+      
+      rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
+      rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
+
+      computedRootJointForces.set(rootJointForce);
+      computedRootJointTorques.set(rootJointTorque);
+      
+      rootJointExternalForcePoint.setForce(rootJointForce.getVectorCopy());
+      rootJointExternalForcePoint.setMoment(rootJointTorque.getVectorCopy());
+      
+      FramePoint rootJointPosition = new FramePoint(bodyFixedFrame);
+      rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      rootJointExternalForcePoint.setOffsetWorld(rootJointPosition.getPointCopy());
+      Vector3d offsetInJoint = rootJointExternalForcePoint.getOffsetCopy();
+      
+      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+
+         double inverseDynamicsTorque = oneDoFJoint.getTau();
+         oneDegreeOfFreedomJoint.setTau(inverseDynamicsTorque);
+         
+         DoubleYoVariable computedJointTorque = computedJointTorques.get(oneDoFJoint);
+         computedJointTorque.set(inverseDynamicsTorque);
+      }      
+   }
+   
+   public boolean checkAccelerationsMatchBetweenFullRobotModelAndSimulatedRobot(double epsilon)
+   {
+      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      FloatingJoint floatingJoint = robot.getRootJoint();
+      boolean allAccelerationsMatch = checkFullRobotModelRootJointAccelerationmatchesRobot(floatingJoint, sixDoFJoint, epsilon);
+
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+      
+      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+
+         double inverseDynamicsAcceleration = oneDoFJoint.getQddDesired();
+         double simulatedRobotAcceleration = oneDegreeOfFreedomJoint.getQDD().getDoubleValue();
+
+         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         computedJointAcceleration.set(inverseDynamicsAcceleration);
+
+         boolean accelerationsMatch = Math.abs(inverseDynamicsAcceleration - simulatedRobotAcceleration) < epsilon;
+         if (!accelerationsMatch)
+            allAccelerationsMatch = false;
+      }
+
+      return allAccelerationsMatch;
+   }
+   
+   
    public boolean checkTorquesMatchBetweenFullRobotModelAndSimulatedRobot(double epsilon)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -129,13 +228,30 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       Wrench rootJointWrench = new Wrench(rootJoint.getFrameAfterJoint(), rootJoint.getFrameAfterJoint());
       rootJoint.packWrench(rootJointWrench);
 
-      Vector3d rootJointForce = rootJointWrench.getLinearPart();
-      Vector3d rootJointTorque = rootJointWrench.getAngularPart();
+      FrameVector rootJointForce = rootJointWrench.getLinearPartAsFrameVectorCopy();
+      FrameVector rootJointTorque = rootJointWrench.getAngularPartAsFrameVectorCopy();
 
+      rootJointForce.changeFrame(ReferenceFrame.getWorldFrame());
+      rootJointTorque.changeFrame(ReferenceFrame.getWorldFrame());
+      
       computedRootJointForces.set(rootJointForce);
       computedRootJointTorques.set(rootJointTorque);
+      
+      Vector3d simulatedRootJointForce = new Vector3d();
+      Vector3d simulatedRootJointTorque = new Vector3d();
 
-      boolean allTorquesMatch = true;
+      rootJointExternalForcePoint.getForce(simulatedRootJointForce);
+      rootJointExternalForcePoint.getMoment(simulatedRootJointTorque);
+      
+      Vector3d forceErrorVector = rootJointForce.getVectorCopy();
+      forceErrorVector.sub(simulatedRootJointForce);
+      double rootJointForceError = forceErrorVector.length();
+      
+      Vector3d torqueErrorVector = rootJointTorque.getVectorCopy();
+      torqueErrorVector.sub(simulatedRootJointTorque);
+      double rootJointTorqueError = forceErrorVector.length();
+
+      boolean allTorquesMatch = ((rootJointForceError < epsilon) && (rootJointTorqueError < epsilon));
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
@@ -195,6 +311,22 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       }
    }
 
+   public void setFullRobotModelAccelerationRandomly(Random random, double maxPelvisLinearAcceleration, double maxPelvisAngularAcceleration, double maxJointAcceleration)
+   {
+      SixDoFJoint sixDoFJoint = fullRobotModel.getRootJoint();
+      setSixDoFJointAccelerationRandomly(sixDoFJoint, random, maxPelvisLinearAcceleration, maxPelvisAngularAcceleration);
+      
+      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
+
+      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
+      {
+         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
+         oneDoFJoint.setQddDesired(RandomTools.generateRandomDouble(random, maxJointAcceleration));
+      }      
+   }
+   
+   
    public void setFullRobotModelAccelerationToMatchRobot()
    {
       robot.update();
@@ -212,7 +344,12 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(oneDegreeOfFreedomJoint.getName());
-         oneDoFJoint.setQddDesired(oneDegreeOfFreedomJoint.getQDD().getDoubleValue());
+         
+         double robotJointAcceleration = oneDegreeOfFreedomJoint.getQDD().getDoubleValue();
+         oneDoFJoint.setQddDesired(robotJointAcceleration);
+         
+         DoubleYoVariable computedJointAcceleration = computedJointAccelerations.get(oneDoFJoint);
+         computedJointAcceleration.set(robotJointAcceleration);
       }
    }
 
@@ -244,6 +381,56 @@ public class AtlasInverseDynamicsCalculatorTestHelper
             inverseDynamicsCalculator.setExternalWrench(rigidBodyToApplyWrenchTo, wrench);
          }
       }
+      
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = fullRobotModel.getFoot(robotSide);
+
+         Wrench wrench = new Wrench();
+         inverseDynamicsCalculator.getExternalWrench(foot, wrench);
+         
+         ReferenceFrame footFrame = foot.getBodyFixedFrame();
+
+         ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
+         
+         
+         Vector3d externalForce = new Vector3d();
+         Vector3d externalMoment = new Vector3d();
+         
+         footExternalForcePoint.getForce(externalForce);
+         footExternalForcePoint.getMoment(externalMoment);
+//         System.out.println("externalMoment = " + externalMoment);
+
+         FrameVector externalForcePointForce = new FrameVector(ReferenceFrame.getWorldFrame(), externalForce);
+         FrameVector externalForcePointMoment = new FrameVector(ReferenceFrame.getWorldFrame(), externalMoment);
+         
+         externalForcePointForce.changeFrame(footFrame);
+         externalForcePointMoment.changeFrame(footFrame);
+         
+         Point3d position = new Point3d();
+         footExternalForcePoint.getPosition(position);
+         FramePoint pointOfApplication = new FramePoint(ReferenceFrame.getWorldFrame(), position);
+         pointOfApplication.changeFrame(footFrame);
+         
+         Vector3d torqueFromLeverArm = new Vector3d();
+         Vector3d leverArm = pointOfApplication.getVectorCopy();
+         torqueFromLeverArm.cross(leverArm, externalForcePointForce.getVectorCopy());
+         
+         externalForcePointMoment.add(torqueFromLeverArm);
+         
+         
+         
+         FrameVector totalTorqueOnFoot = wrench.getAngularPartAsFrameVectorCopy();
+         FrameVector totalForceOnFoot = wrench.getLinearPartAsFrameVectorCopy();
+         
+         totalTorqueOnFoot.add(externalForcePointMoment);
+         totalForceOnFoot.add(externalForcePointForce);
+
+         wrench.setAngularPart(totalTorqueOnFoot);
+         wrench.setLinearPart(totalForceOnFoot);
+         
+         inverseDynamicsCalculator.setExternalWrench(foot, wrench);
+      }
    }
 
    public void setRootJointVelocityAndAngularVelocity(SixDoFJoint sixDoFJoint, FloatingJoint floatingJoint)
@@ -270,11 +457,11 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setPositionAndRotation(transformToWorld);
    }
 
-   public void setRobotStateRandomly(Random random, double maxJointVelocity)
+   public void setRobotStateRandomly(Random random, double maxJointVelocity, double maxRootJointLinearAndAngularVelocity)
    {
       FloatingJoint rootJoint = robot.getRootJoint();
-      rootJoint.setVelocity(RandomTools.generateRandomVector(random));
-      rootJoint.setAngularVelocityInBody(RandomTools.generateRandomVector(random));
+      rootJoint.setVelocity(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
+      rootJoint.setAngularVelocityInBody(RandomTools.generateRandomVector(random, maxRootJointLinearAndAngularVelocity));
 
       rootJoint.setPosition(RandomTools.generateRandomVector(random));
       double yaw = RandomTools.generateRandomDouble(random, Math.PI / 20.0);
@@ -299,7 +486,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       }
    }
 
-   public void setRobotExternalForcesRandomly(Random random, double maxExternalForce)
+   public void setRobotExternalForcesRandomly(Random random, double maxGroundContactPointForce, double maxFootExternalForce, double maxFootExternalTorque)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -307,20 +494,29 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
          for (GroundContactPoint groundContactPoint : footGroundContactPoints)
          {
-            groundContactPoint.setForce(RandomTools.generateRandomVector(random, maxExternalForce));
+            groundContactPoint.setForce(RandomTools.generateRandomVector(random, maxGroundContactPointForce));
          }
+         
+         ExternalForcePoint footExternalForcePoint = feetExternalForcePoints.get(robotSide);
+         footExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxFootExternalForce));
+         footExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxFootExternalTorque));
       }
    }
+   
+   public void setRobotRootJointExternalForcesRandomly(Random random, double maxRootJointForceAndTorque)
+   {
+      rootJointExternalForcePoint.setForce(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
+      rootJointExternalForcePoint.setMoment(RandomTools.generateRandomVector(random, maxRootJointForceAndTorque));
+   }
 
-   public void setRobotTorquesRandomly(Random random)
+   public void setRobotTorquesRandomly(Random random, double maxJointTorque)
    {
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
 
       for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
       {
-         double maxTorque = 10.0;
-         oneDegreeOfFreedomJoint.setTau(RandomTools.generateRandomDouble(random, maxTorque));
+         oneDegreeOfFreedomJoint.setTau(RandomTools.generateRandomDouble(random, maxJointTorque));
       }
    }
 
@@ -343,10 +539,28 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       sixDoFJoint.setDesiredAcceleration(jointAcceleration);
    }
 
+   public void setSixDoFJointAccelerationRandomly(SixDoFJoint sixDoFJoint, Random random, double maxRootJointLinearAcceleration, double maxRootJointAngularAcceleration)
+   {
+      // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
+      ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
+      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+
+      Twist bodyTwist = new Twist();
+      sixDoFJoint.packJointTwist(bodyTwist);
+
+      FrameVector originAcceleration = new FrameVector(elevatorFrame, RandomTools.generateRandomVector(random, maxRootJointLinearAcceleration));
+      FrameVector angularAcceleration = new FrameVector(bodyFrame, RandomTools.generateRandomVector(random, maxRootJointAngularAcceleration));
+//      originAcceleration.changeFrame(elevatorFrame);
+
+      SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+
+      spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
+      sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+   }
+   
    public void copyAccelerationFromForwardToInverse(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint)
    {
       // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
-      // TODO: Get this to work when the FloatingJoint has an offset.
       ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
       SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
 
@@ -364,6 +578,36 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
       spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
       sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
+   }
+   
+   public boolean checkFullRobotModelRootJointAccelerationmatchesRobot(FloatingJoint floatingJoint, SixDoFJoint sixDoFJoint, double epsilon)
+   {
+      // Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use setBasedOnOriginAcceleration instead.
+      ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
+      SixDoFJointReferenceFrame bodyFrame = sixDoFJoint.getFrameAfterJoint();
+
+      Twist bodyTwist = new Twist();
+      sixDoFJoint.packJointTwist(bodyTwist);
+
+      FrameVector originAcceleration = new FrameVector(elevatorFrame);
+      FrameVector angularAcceleration = new FrameVector(bodyFrame);
+
+      floatingJoint.getLinearAccelerationInWorld(originAcceleration.getVector());
+      floatingJoint.getAngularAccelerationInBody(angularAcceleration.getVector());
+      originAcceleration.changeFrame(elevatorFrame);
+
+      //TODO: These should be from the inverse dynamics to the SCS frames...
+      originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+      computedRootJointLinearAcceleration.set(originAcceleration);
+      computedRootJointAngularAcceleration.set(angularAcceleration);
+      
+      SpatialAccelerationVector spatialAccelerationVectorOfSimulatedRootJoint = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
+      spatialAccelerationVectorOfSimulatedRootJoint.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
+      
+      SpatialAccelerationVector spatialAccelerationVectorOfInverseDynamicsRootJoint = new SpatialAccelerationVector();
+      sixDoFJoint.packDesiredJointAcceleration(spatialAccelerationVectorOfInverseDynamicsRootJoint);
+      
+      return spatialAccelerationVectorOfInverseDynamicsRootJoint.epsilonEquals(spatialAccelerationVectorOfInverseDynamicsRootJoint, epsilon);
    }
 
    public void computeTwistCalculatorAndInverseDynamicsCalculator()
@@ -391,4 +635,5 @@ public class AtlasInverseDynamicsCalculatorTestHelper
    {
       return fullRobotModel;
    }
+ 
 }

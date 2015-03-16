@@ -18,18 +18,28 @@ public class AtlasInverseDynamicsCalculatorTest
 {
    @EstimatedDuration(duration = 0.5)
    @Test(timeout = 30000)
-   public void testAtlasInverseDynamics() throws UnreasonableAccelerationException
+   public void testAtlasInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
       Random random = new Random(1776L);
 
-      double maxExternalForce = 10.0;
+      double maxGroundContactPointForce = 10.0;
+      double maxFeetExternalForce = 10.0;
+      double maxFeetExternalTorque = 10.0;
+      double maxRootJointExternalForceAndTorque = 10.0;
+      
       double maxJointVelocity = 1.0;
+      double maxRootJointLinearAndAngularVelocity = 1.0;
 
+      double maxJointTorque = 10.0;
+      
       boolean visualize = false;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize);
+      boolean makeAssertions = true;
+      
+      double gravityZ = 9.81;
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
-      int numberOfTicks = 100;
+      int numberOfTicks = 1000;
 
       Robot robot = testHelper.getRobot();
       SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
@@ -38,9 +48,17 @@ public class AtlasInverseDynamicsCalculatorTest
 
       for (int i = 0; i < numberOfTicks; i++)
       {
-         testHelper.setRobotStateRandomly(random, maxJointVelocity);
-         testHelper.setRobotExternalForcesRandomly(random, maxExternalForce);
-         testHelper.setRobotTorquesRandomly(random);
+         if (i > numberOfTicks / 2)
+         {
+            // For half of the ticks, don't exert external forces on the root body and make sure that the computed wrench on the body is zero
+            maxRootJointExternalForceAndTorque = 0.0;
+         }
+         
+         testHelper.setRobotStateRandomly(random, maxJointVelocity, maxRootJointLinearAndAngularVelocity);
+         testHelper.setRobotExternalForcesRandomly(random, maxGroundContactPointForce, maxFeetExternalForce, maxFeetExternalTorque);
+
+         testHelper.setRobotTorquesRandomly(random, maxJointTorque);
+         testHelper.setRobotRootJointExternalForcesRandomly(random, maxRootJointExternalForceAndTorque);
 
          robot.doDynamicsButDoNotIntegrate();
          testHelper.setFullRobotModelStateAndAccelerationToMatchRobot();
@@ -54,16 +72,87 @@ public class AtlasInverseDynamicsCalculatorTest
          double epsilon = 1e-7;
          boolean torquesMatch = testHelper.checkTorquesMatchBetweenFullRobotModelAndSimulatedRobot(epsilon);
 
-         assertTrue(torquesMatch);
+         if (makeAssertions) assertTrue(torquesMatch);
 
          boolean computedRootJointWrenchIsZero = testHelper.checkComputedRootJointWrenchIsZero(1e-10);
-         assertTrue(computedRootJointWrenchIsZero);
+         if (makeAssertions && (Math.abs(maxRootJointExternalForceAndTorque) < 1e-7)) assertTrue(computedRootJointWrenchIsZero);
 
 
          if (scs != null)
             scs.tickAndUpdate();
       }
 
+      cropSCSBuffer(scs, simulationTestingParameters);
+   }
+   
+   
+   @EstimatedDuration(duration = 0.5)
+   @Test(timeout = 30000)
+   public void testAtlasInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
+   {
+      Random random = new Random(1984L);
+
+      double maxPelvisLinearAcceleration = 1.0;
+      double maxPelvisAngularAcceleration = 1.0;
+      double maxJointAcceleration = 1.0;
+      
+      double maxGroundContactPointForce = 10.0;
+      double maxFeetExternalForce = 10.0;
+      double maxFeetExternalTorque = 10.0;
+      
+      double maxJointVelocity = 1.0;
+      double maxRootJointLinearAndAngularVelocity = 1.0;
+
+      boolean visualize = false;
+      boolean makeAssertions = true;
+      
+      double gravityZ = 9.81;
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
+      testHelper.startSimulationOnAThread();
+      
+            
+      int numberOfTicks = 100;
+
+      Robot robot = testHelper.getRobot();
+      SimulationConstructionSet scs = testHelper.getSimulationConstructionSet();
+      SimulationTestingParameters simulationTestingParameters = testHelper.getSimulationTestingParameters();
+      FullRobotModel fullRobotModel = testHelper.getFullRobotModel();
+
+      for (int i = 0; i < numberOfTicks; i++)
+      {
+         fullRobotModel.updateFrames();
+
+         testHelper.setRobotStateRandomly(random, maxJointVelocity, maxRootJointLinearAndAngularVelocity);
+         testHelper.setRobotExternalForcesRandomly(random, maxGroundContactPointForce, maxFeetExternalForce, maxFeetExternalTorque);
+
+         testHelper.setFullRobotModelStateToMatchRobot();
+         testHelper.setFullRobotModelWrenchesToMatchRobot();
+
+         testHelper.setFullRobotModelAccelerationRandomly(random, maxPelvisLinearAcceleration, maxPelvisAngularAcceleration, maxJointAcceleration);
+         
+         fullRobotModel.updateFrames();
+
+         testHelper.computeTwistCalculatorAndInverseDynamicsCalculator();
+         testHelper.setRobotTorquesToMatchFullRobotModel();
+         
+         robot.doDynamicsButDoNotIntegrate();
+
+         
+         double epsilon = 1e-7;
+         boolean accelerationsMatch = testHelper.checkAccelerationsMatchBetweenFullRobotModelAndSimulatedRobot(epsilon);
+         if (makeAssertions) assertTrue(accelerationsMatch);
+
+
+         if (scs != null)
+            scs.tickAndUpdate();
+      }
+
+      cropSCSBuffer(scs, simulationTestingParameters);
+   }
+   
+   
+   private void cropSCSBuffer(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
+   {
       if (scs != null)
       {
          scs.gotoInPointNow();
