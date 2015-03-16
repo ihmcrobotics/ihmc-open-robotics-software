@@ -338,15 +338,15 @@ public class AtlasRobotModel implements DRCRobotModel
          SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
          switch (selectedVersion)
          {
-         case ATLAS_DUAL_ROBOTIQ:
+         case ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ:
             handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
             handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
             return handCommandManagers;
-         case ATLAS_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+         case ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS:
             break;
-         case DRC_NO_HANDS:
+         case DRC_NO_HANDS_UNPLUGGED_V4:
             break;
-         case GAZEBO_ATLAS_NO_HANDS:
+         case GAZEBO_ATLAS_UNPLUGGED_V4_NO_HANDS:
             break;
          default:
             break;

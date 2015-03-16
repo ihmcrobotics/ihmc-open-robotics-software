@@ -488,7 +488,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public static void main(String[] arg) throws InterruptedException, IOException
    {
-	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
 	  
 	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.REAL_ROBOT, true);
 	  

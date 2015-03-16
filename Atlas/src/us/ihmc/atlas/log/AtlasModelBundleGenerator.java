@@ -18,7 +18,7 @@ public class AtlasModelBundleGenerator
 {
    public static void main(String[] args) throws IOException
    {
-      AtlasRobotModel model = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.REAL_ROBOT, false);
+      AtlasRobotModel model = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.REAL_ROBOT, false);
       LogModelProvider logModelProvider = model.getLogModelProvider();
       Properties properties = new Properties();
       properties.setProperty("modelName", logModelProvider.getModelName());

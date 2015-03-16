@@ -13,7 +13,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 @BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
 
    @Override
    public DRCRobotModel getRobotModel()

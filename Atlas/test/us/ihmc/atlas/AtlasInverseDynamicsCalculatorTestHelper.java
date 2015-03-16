@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
@@ -65,7 +63,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
    public AtlasInverseDynamicsCalculatorTestHelper(boolean visualize)
    {
       boolean headless = false;
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.SIM, headless);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       boolean createCollisionMeshes = false;
@@ -83,7 +81,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       IMUMount rightIMUMount = new IMUMount("rightIMU", new RigidBodyTransform(), robot);
       rightAnkleJoint.addIMUMount(rightIMUMount);
       
-      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasTarget.SIM, headless);
+      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
       
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
       robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);

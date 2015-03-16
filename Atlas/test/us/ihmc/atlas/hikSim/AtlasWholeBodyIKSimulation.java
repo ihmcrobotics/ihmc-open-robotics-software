@@ -84,7 +84,7 @@ public class AtlasWholeBodyIKSimulation
 
    public static void main(String[] args) throws Exception
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       new AtlasWholeBodyIKSimulation(atlasRobotModel);
    }
 }

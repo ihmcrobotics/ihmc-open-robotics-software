@@ -59,7 +59,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
 
    public AtlasWholeBodyTrajectoryPacketDevelopmentSim() throws Exception
    {
-      this.robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      this.robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       this.desiredFullRobotModel = robotModel.createFullRobotModel();
       this.hikIngEgCtrlSim = new WholeBodyIKIngressEgressControllerSimulation(robotModel);
       this.registry = hikIngEgCtrlSim.getSimulationConstructionSet().getRootRegistry();

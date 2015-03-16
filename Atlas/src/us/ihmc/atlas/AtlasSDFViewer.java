@@ -7,7 +7,7 @@ public class AtlasSDFViewer
 {
    public static void main(String[] args)
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
       SimulationConstructionSet scs = new SimulationConstructionSet(robotModel.createSdfRobot(false));
       scs.startOnAThread();
    }

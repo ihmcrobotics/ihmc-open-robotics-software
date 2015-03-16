@@ -11,7 +11,7 @@ public class AtlasRobotConfigurationDataBufferTest extends RobotConfigurationDat
    @Override
    public FullRobotModel getFullRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false).createFullRobotModel();
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasTarget.SIM, false).createFullRobotModel();
    }
 
 }
