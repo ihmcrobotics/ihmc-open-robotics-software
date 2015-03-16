@@ -376,11 +376,11 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       switch (atlasVersion)
       {
-      case ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
          createHandKnobContactPoints();
          break;
 
-      case ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ:
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
          for (RobotSide robotSide : RobotSide.values)
          {
             createRobotiqHandContactPoints(robotSide, useHighResolutionPointGrid);

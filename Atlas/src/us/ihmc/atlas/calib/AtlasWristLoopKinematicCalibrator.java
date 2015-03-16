@@ -80,7 +80,7 @@ public class AtlasWristLoopKinematicCalibrator extends AtlasCalibrationDataViewe
 
    public static void main(String[] arg)
    {
-	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
+	  final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 	  
 	  DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.REAL_ROBOT, true);
 

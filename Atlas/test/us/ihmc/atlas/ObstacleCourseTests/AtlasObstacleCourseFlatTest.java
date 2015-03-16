@@ -16,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
 {
 
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    @Override
    public DRCRobotModel getRobotModel()
    {

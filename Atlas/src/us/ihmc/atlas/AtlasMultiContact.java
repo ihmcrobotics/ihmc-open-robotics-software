@@ -52,7 +52,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasMultiContact
 {
-   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS;
 
    private final DRCSimulationFactory drcSimulation;
    private final MultiContactTestEnvironment environment;

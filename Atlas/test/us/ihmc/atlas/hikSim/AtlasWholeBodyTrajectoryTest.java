@@ -19,7 +19,7 @@ public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
    @Override 
    public WholeBodyTrajectoryTestHelper getWholeBodyTrajectoryTestHelper()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
 
       SDFFullRobotModel actualRobotModel =  atlasRobotModel.createFullRobotModel();
 

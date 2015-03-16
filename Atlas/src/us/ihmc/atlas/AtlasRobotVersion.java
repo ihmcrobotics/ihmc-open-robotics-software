@@ -12,12 +12,8 @@ import com.jme3.math.Vector3f;
 
 public enum AtlasRobotVersion
 {
-   ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS,
-   DRC_NO_HANDS_UNPLUGGED_V4,
-   ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ,
-   GAZEBO_ATLAS_UNPLUGGED_V4_NO_HANDS,
    ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS,
-   DRC_NO_HANDS_UNPLUGGED_V5,
+   ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
    GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS;
 
@@ -28,14 +24,10 @@ public enum AtlasRobotVersion
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ:
          case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return DRCHandType.ROBOTIQ;
 
-         case DRC_NO_HANDS_UNPLUGGED_V4:
-         case ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-         case GAZEBO_ATLAS_UNPLUGGED_V4_NO_HANDS:
-         case DRC_NO_HANDS_UNPLUGGED_V5:
+         case ATLAS_UNPLUGGED_V5_NO_HANDS:
          case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
          case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS:
          default:
@@ -47,7 +39,7 @@ public enum AtlasRobotVersion
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ:
+         case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return 0.16;
          default:
             return 0.0;
@@ -63,18 +55,11 @@ public enum AtlasRobotVersion
    {
       switch (this)
       {
-         case ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-         case DRC_NO_HANDS_UNPLUGGED_V4:
-            return "models/GFE/atlas_unplugged_v4.sdf";
          case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-         case DRC_NO_HANDS_UNPLUGGED_V5:
+         case ATLAS_UNPLUGGED_V5_NO_HANDS:
             return "models/GFE/atlas_unplugged_v5.sdf";
-         case ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ:
-            return "models/GFE/atlas_unplugged_v4_dual_robotiq.sdf";
          case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
-         case GAZEBO_ATLAS_UNPLUGGED_V4_NO_HANDS:
-            return "models/GFE/atlas_unplugged_v4.sdf";
          case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS:
             return "models/GFE/atlas_unplugged_v5.sdf";
          default:
