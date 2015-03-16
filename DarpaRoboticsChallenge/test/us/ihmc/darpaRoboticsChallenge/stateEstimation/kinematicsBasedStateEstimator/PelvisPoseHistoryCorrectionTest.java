@@ -1008,7 +1008,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
             elbowRoll.setKp(200.0);
             elbowRoll.setKd(20.0);
             elbowRoll.setqDesired(qDesireds.get(elbowRoll));
-            OneDegreeOfFreedomJoint wristPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_PITCH));
+            OneDegreeOfFreedomJoint wristPitch = robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH));
             wristPitch.setKp(20.0);
             wristPitch.setKd(2.0);
             wristPitch.setqDesired(qDesireds.get(wristPitch));

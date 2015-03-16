@@ -57,7 +57,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_kny").setQ(legInitialJointPositions.get(LegJointName.KNEE));
          robot.getOneDegreeOfFreedomJoint(prefix + "_leg_aky").setQ(legInitialJointPositions.get(LegJointName.ANKLE_PITCH));
 
-         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_PITCH));
+         robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wry").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
          robot.getOneDegreeOfFreedomJoint(prefix + "_arm_wrx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.WRIST_ROLL));
          robot.getOneDegreeOfFreedomJoint(prefix + "_arm_shz").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_YAW));
          robot.getOneDegreeOfFreedomJoint(prefix + "_arm_shx").setQ(armInitialJointPositions.get(robotSide).get(ArmJointName.SHOULDER_ROLL));
@@ -125,14 +125,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.5149);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.5455);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 1.8304);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.58);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.58);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.55);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.34);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 1.36);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.94);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.18);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.19);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.19);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.07);
          break;
 
@@ -148,14 +148,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.5149);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.5455);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 1.8304);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.58);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.58);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.55);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.7885);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 1.028);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.979);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.872);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.532);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.532);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.07);
          break;
 
@@ -171,14 +171,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.955);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 2.075);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.5);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.5);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.8634);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 1.1138);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.09);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.75);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.35);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.35);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.2);
          break;
 
@@ -194,14 +194,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3606);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.9403);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 1.1807);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.1928);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.1928);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.0703);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.6352);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.7261);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.6198);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -2.3613);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -1.1842);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -1.1842);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4331);
          break;
 
@@ -217,14 +217,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3599);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.9402);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 1.1802);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.193);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.193);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.0705);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.78);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.7);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.3731);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.53);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.53);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.15);
          break;
 
@@ -240,14 +240,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.1378);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.78);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.7);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.3731);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -0.53);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -0.53);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.15);
          break;
 
@@ -263,14 +263,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.1378);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.2559);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.4528);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.7677);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.6732);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.2165);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.2165);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -1.0039);
          break;
 
@@ -286,20 +286,20 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.1378);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.9122);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.6542);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.5442);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -1.206);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -1.1752);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -1.1752);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.4202);
          //         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, -0.1772);
 //         rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -0.3346);
 //         rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.2);
 //         rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -2.03);
-//         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, -2.03);
+//         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, -2.03);
 //         rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.69);
          break;
 
@@ -315,14 +315,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.0);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.0);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.0);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.0);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.0);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.0);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.0);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.0);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.0);
          break;
 
@@ -338,14 +338,14 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          leftArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, -1.3976);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 0.9252);
          leftArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, 0.8858);
-         leftArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.1378);
+         leftArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.1378);
          leftArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, 0.4528);
 
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_YAW, 0.48);
          rightArmInitialJointPositions.put(ArmJointName.SHOULDER_ROLL, 0.76);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_PITCH, 1.29);
          rightArmInitialJointPositions.put(ArmJointName.ELBOW_ROLL, -0.48);
-         rightArmInitialJointPositions.put(ArmJointName.WRIST_PITCH, 0.33);
+         rightArmInitialJointPositions.put(ArmJointName.FIRST_WRIST_PITCH, 0.33);
          rightArmInitialJointPositions.put(ArmJointName.WRIST_ROLL, -0.34);
          break;
 

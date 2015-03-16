@@ -27,14 +27,14 @@ public class ArmsDampedArmControlModule extends PDArmControlModule
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setProportionalGain(100.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setProportionalGain(100.0);
-         armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setProportionalGain(100.0);
+         armControllers.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH).setProportionalGain(100.0);
 
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setDerivativeGain(10.0);
          armControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setDerivativeGain(10.0);
-         armControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setDerivativeGain(10.0);
+         armControllers.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH).setDerivativeGain(10.0);
       }
    }
 }

@@ -37,14 +37,14 @@ public class ArmsSidewaysUsingIDArmControlModule extends IDArmControlModule
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setProportionalGain(gainScaling * 100.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setProportionalGain(gainScaling * 100.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setProportionalGain(gainScaling * 100.0);
-         armDesiredQddControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setProportionalGain(gainScaling * 100.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH).setProportionalGain(gainScaling * 100.0);
 
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_PITCH).setDerivativeGain(gainScaling * 10.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_ROLL).setDerivativeGain(gainScaling * 20.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.SHOULDER_YAW).setDerivativeGain(gainScaling * 10.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.ELBOW_PITCH).setDerivativeGain(gainScaling * 10.0);
          armDesiredQddControllers.get(robotSide).get(ArmJointName.WRIST_ROLL).setDerivativeGain(gainScaling * 10.0);
-         armDesiredQddControllers.get(robotSide).get(ArmJointName.WRIST_PITCH).setDerivativeGain(gainScaling * 10.0);
+         armDesiredQddControllers.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH).setDerivativeGain(gainScaling * 10.0);
       }
    }
 }
