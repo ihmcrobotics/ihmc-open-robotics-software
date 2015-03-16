@@ -17,7 +17,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -126,18 +126,18 @@ public class FootstepListBehavior extends BehaviorInterface
 
             if (DEBUG)
             {
-               SysoutTool.println("** \n Recieved new FootStepStatus : " + lastFootstepStatus);
-               SysoutTool.println("current footstep number: " + currentStepNumber + ", total number of footsteps: " + numberOfFootsteps.getIntegerValue());
-               SysoutTool.println("Reached last step? : " + hasLastStepBeenReached.getBooleanValue());
-               SysoutTool.println("FootstepStatus: is done walking? : " + footStepStatusIsDoneWalking.getBooleanValue());
+               PrintTools.debug(this, "** \n Recieved new FootStepStatus : " + lastFootstepStatus);
+               PrintTools.debug(this, "current footstep number: " + currentStepNumber + ", total number of footsteps: " + numberOfFootsteps.getIntegerValue());
+               PrintTools.debug(this, "Reached last step? : " + hasLastStepBeenReached.getBooleanValue());
+               PrintTools.debug(this, "FootstepStatus: is done walking? : " + footStepStatusIsDoneWalking.getBooleanValue());
 
                if (!isDone.getBooleanValue() && isDone())
                {
-                  SysoutTool.println("*****  Setting isDone = true  *******");
+                  PrintTools.debug(this, "*****  Setting isDone = true  *******");
                }
                else
                {
-                  SysoutTool.println("is Behavior done? : " + isDone.getBooleanValue());
+                  PrintTools.debug(this, "is Behavior done? : " + isDone.getBooleanValue());
                }
             }
          }
@@ -148,7 +148,7 @@ public class FootstepListBehavior extends BehaviorInterface
    public void initialize()
    {
       if (DEBUG)
-         SysoutTool.println("Initialize");
+         PrintTools.debug(this, "Initialize");
       packetHasBeenSent.set(false);
       hasLastStepBeenReached.set(false);
       footStepStatusIsDoneWalking.set(false);
@@ -162,7 +162,7 @@ public class FootstepListBehavior extends BehaviorInterface
    public void finalize()
    {
       if (DEBUG)
-         SysoutTool.println("Finalize");
+         PrintTools.debug(this, "Finalize");
       footstepStatusQueue.clear();
       outgoingFootstepDataList = null;
       packetHasBeenSent.set(false);
@@ -189,7 +189,7 @@ public class FootstepListBehavior extends BehaviorInterface
       sendPacketToController(new PauseCommand(true));
       isPaused.set(true);
       if (DEBUG)
-         SysoutTool.println("Pausing Behavior");
+         PrintTools.debug(this, "Pausing Behavior");
    }
 
    @Override
@@ -199,7 +199,7 @@ public class FootstepListBehavior extends BehaviorInterface
       isPaused.set(false);
       isStopped.set(false);
       if (DEBUG)
-         SysoutTool.println("Resuming Behavior");
+         PrintTools.debug(this, "Resuming Behavior");
    }
 
    @Override
@@ -209,7 +209,7 @@ public class FootstepListBehavior extends BehaviorInterface
       if (!isDone.getBooleanValue() && ret)
       {
          if (DEBUG)
-            SysoutTool.println("*****  Setting isDone = true  *******");
+            PrintTools.debug(this, "*****  Setting isDone = true  *******");
       }
       isDone.set(ret);
       return ret;
@@ -283,7 +283,7 @@ public class FootstepListBehavior extends BehaviorInterface
       for (double stepLength : getFootstepLengths(footStepList, fullRobotModel, walkingControllerParameters))
       {
          if (DEBUG)
-            SysoutTool.println("step length : " + stepLength + " max step length : " + walkingControllerParameters.getMaxStepLength());
+            PrintTools.debug(this, "step length : " + stepLength + " max step length : " + walkingControllerParameters.getMaxStepLength());
          if (stepLength > walkingControllerParameters.getMaxStepLength())
          {
             return true;

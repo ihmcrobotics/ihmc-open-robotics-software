@@ -7,7 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.xmlDescription.SDFJoint;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFJointHolder
@@ -83,7 +83,7 @@ public class SDFJointHolder
             hasLimits = true;
             upperLimit = Double.POSITIVE_INFINITY;
             lowerLimit = Double.NEGATIVE_INFINITY;
-            SysoutTool.println(sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
+            PrintTools.debug(this, sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
            }
 
          if(sdfJoint.getAxis().getLimit().getVelocity() != null)

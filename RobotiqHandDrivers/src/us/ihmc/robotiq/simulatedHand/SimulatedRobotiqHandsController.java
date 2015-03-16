@@ -17,7 +17,7 @@ import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -217,7 +217,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             FingerState fingerState = fingerStateProvider.pullPacket().getFingerState();
             
             if (DEBUG)
-               SysoutTool.println("Recieved new FingerState Packet: " + fingerState);
+               PrintTools.debug(this, "Recieved new FingerState Packet: " + fingerState);
             switch (fingerState)
             {
                case OPEN:

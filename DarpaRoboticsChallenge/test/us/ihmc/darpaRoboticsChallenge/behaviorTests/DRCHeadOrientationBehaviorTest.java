@@ -33,7 +33,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -192,7 +192,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       if (DEBUG)
       {
-         SysoutTool.println(" initial Head Pose :\n" + initialHeadPose);
+         PrintTools.debug(this, " initial Head Pose :\n" + initialHeadPose);
       }
 
       FramePose desiredHeadPose = new FramePose();
@@ -221,11 +221,11 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Head Pose : \n" + framePose1);
-         SysoutTool.println(" final Head Pose : \n" + framePose2);
+         PrintTools.debug(this, " desired Head Pose : \n" + framePose1);
+         PrintTools.debug(this, " final Head Pose : \n" + framePose2);
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       if (!Double.isNaN(POSITION_THRESHOLD))

@@ -61,7 +61,6 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -298,7 +297,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
          for (Footstep footStep : footsteps)
          {
             footStep.getPositionInWorldFrame(footstepPositionInWorld);
-            SysoutTool.println("" + footstepPositionInWorld);
+            PrintTools.debug(this, "" + footstepPositionInWorld);
          }
       }
 
@@ -497,11 +496,11 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Midfeet Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Midfeet Pose :\n" + framePose2 + "\n");
+         PrintTools.debug(this, " desired Midfeet Pose :\n" + framePose1 + "\n");
+         PrintTools.debug(this, " actual Midfeet Pose :\n" + framePose2 + "\n");
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
@@ -515,10 +514,10 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Pelvis Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Pelvis Pose :\n" + framePose2 + "\n");
+         PrintTools.debug(this, " desired Pelvis Pose :\n" + framePose1 + "\n");
+         PrintTools.debug(this, " actual Pelvis Pose :\n" + framePose2 + "\n");
 
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance,

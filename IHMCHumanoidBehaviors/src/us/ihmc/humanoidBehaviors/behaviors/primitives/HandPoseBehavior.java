@@ -13,7 +13,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -113,7 +112,7 @@ public class HandPoseBehavior extends BehaviorInterface
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
-            SysoutTool.println(outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
+            PrintTools.debug(this, outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
          numberOfConsecutiveCollisions.set(0);
       }
@@ -159,9 +158,9 @@ public class HandPoseBehavior extends BehaviorInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("COLLISION DETECTED! Severity [1-3]: " + collisionSeverityOneToThree);
-         SysoutTool.println("PercentTimeRemainingAtInitialCollision: " + percentTimeRemainingAtCollision.getDoubleValue());
-         SysoutTool.println("Number of consecutive collisions: " + numberOfConsecutiveCollisions.getIntegerValue());
+         PrintTools.debug(this, "COLLISION DETECTED! Severity [1-3]: " + collisionSeverityOneToThree);
+         PrintTools.debug(this, "PercentTimeRemainingAtInitialCollision: " + percentTimeRemainingAtCollision.getDoubleValue());
+         PrintTools.debug(this, "Number of consecutive collisions: " + numberOfConsecutiveCollisions.getIntegerValue());
       }
 
       //TODO: Reduce number of retries if collision severity *increases*
@@ -200,7 +199,7 @@ public class HandPoseBehavior extends BehaviorInterface
          handPosePacket.setDestination(PacketDestination.UI);
 
          if (DEBUG)
-            SysoutTool.println("sending handPose packet to controller and network processor: " + handPosePacket);
+            PrintTools.debug(this, "sending handPose packet to controller and network processor: " + handPosePacket);
          sendPacketToController(handPosePacket);
          sendPacketToNetworkProcessor(handPosePacket);
 
@@ -229,7 +228,7 @@ public class HandPoseBehavior extends BehaviorInterface
    {
       if (hasInputBeenSet())
       {
-         SysoutTool.println("WARNING:  INITIALIZING BEHAVIOR *AFTER* INPUT HAS BEEN SET!");
+         PrintTools.debug(this, "WARNING:  INITIALIZING BEHAVIOR *AFTER* INPUT HAS BEEN SET!");
       }
       inputListeningQueue.clear();
       status = null;
@@ -327,8 +326,7 @@ public class HandPoseBehavior extends BehaviorInterface
       if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
       {
          if (DEBUG)
-            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = "
-                  + yoTime.getDoubleValue());
+            PrintTools.debug(this, "Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = " + yoTime.getDoubleValue());
          status = handPoseStatus.getStatus();
          hasStatusBeenReceived.set(true);
       }

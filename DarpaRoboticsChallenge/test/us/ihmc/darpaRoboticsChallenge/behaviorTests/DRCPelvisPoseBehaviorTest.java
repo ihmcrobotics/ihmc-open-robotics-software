@@ -34,7 +34,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -275,7 +275,7 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       if (DEBUG)
       {
-         SysoutTool.println(" initial Pelvis Pose :\n" + initialPelvisPose + "\n");
+         PrintTools.debug(this, " initial Pelvis Pose :\n" + initialPelvisPose + "\n");
       }
       FramePose desiredPelvisPose = new FramePose();
 
@@ -318,11 +318,11 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Pelvis Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Pelvis Pose :\n" + framePose2 + "\n");
+         PrintTools.debug(this, " desired Pelvis Pose :\n" + framePose1 + "\n");
+         PrintTools.debug(this, " actual Pelvis Pose :\n" + framePose2 + "\n");
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       if (!Double.isNaN(POSITION_THRESHOLD))
@@ -338,10 +338,10 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Pelvis Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Pelvis Pose :\n" + framePose2 + "\n");
+         PrintTools.debug(this, " desired Pelvis Pose :\n" + framePose1 + "\n");
+         PrintTools.debug(this, " actual Pelvis Pose :\n" + framePose2 + "\n");
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
       }
 
       if (!Double.isNaN(POSITION_THRESHOLD))
@@ -356,10 +356,10 @@ public abstract class DRCPelvisPoseBehaviorTest implements MultiRobotTestInterfa
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Pelvis Pose :\n" + framePose1 + "\n");
-         SysoutTool.println(" actual Pelvis Pose :\n" + framePose2 + "\n");
+         PrintTools.debug(this, " desired Pelvis Pose :\n" + framePose1 + "\n");
+         PrintTools.debug(this, " actual Pelvis Pose :\n" + framePose2 + "\n");
 
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);

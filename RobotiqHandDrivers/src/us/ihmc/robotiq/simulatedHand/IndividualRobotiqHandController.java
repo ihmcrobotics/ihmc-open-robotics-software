@@ -9,7 +9,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -317,7 +317,7 @@ public class IndividualRobotiqHandController
          desiredAngles.get(fingerJoint).set(q_d);
          
          if (DEBUG && alpha > 0.0 && alpha < 1.0)
-            SysoutTool.println(fingerJoint.getName() + "Desired q : " + q_d);
+            PrintTools.debug(this, fingerJoint.getName() + "Desired q : " + q_d);
       }
    }
 }

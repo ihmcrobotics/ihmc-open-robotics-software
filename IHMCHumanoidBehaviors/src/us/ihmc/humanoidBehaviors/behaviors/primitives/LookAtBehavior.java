@@ -9,7 +9,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -77,7 +77,7 @@ public class LookAtBehavior extends BehaviorInterface
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime)
       {
          if (DEBUG)
-            SysoutTool.println("setting isDone = true");
+            PrintTools.debug(this, "setting isDone = true");
          isDone.set(true);
       }
    }

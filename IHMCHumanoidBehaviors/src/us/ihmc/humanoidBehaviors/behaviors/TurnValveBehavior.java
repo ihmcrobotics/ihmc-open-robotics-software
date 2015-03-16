@@ -132,7 +132,7 @@ public class TurnValveBehavior extends BehaviorInterface
 
       if (walkToValveTask != null && walkToValveTask.isDone())
       {
-         SysoutTool.println("PAUSING BECAUSE CAPTURE POINT ERROR EXCEEDS THRESHOLD");
+         PrintTools.debug(this, "PAUSING BECAUSE CAPTURE POINT ERROR EXCEEDS THRESHOLD");
          pauseIfCapturePointErrorIsTooLarge();
       }
    }
@@ -143,7 +143,7 @@ public class TurnValveBehavior extends BehaviorInterface
       {
          this.pause();
          if (DEBUG)
-            SysoutTool.println("TurnValveBehavior: Tipping detected! Pausing behavior.");
+            PrintTools.debug(this, "TurnValveBehavior: Tipping detected! Pausing behavior.");
       }
    }
 
@@ -250,11 +250,11 @@ public class TurnValveBehavior extends BehaviorInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("initialMidFeetZUpFramePose: " + initialMidFeetZUpFramePose);
-         SysoutTool.println("targetMidFeetZUpFramePose: " + targetMidFeetZUpFramePose);
-         SysoutTool.println("positionDistanceToValve: " + positionDistanceToValve);
-         SysoutTool.println("orientationDistanceToValve: " + orientationDistanceToValve);
-         SysoutTool.println("walkingOrientation: " + walkingOrientation);
+         PrintTools.debug(this, "initialMidFeetZUpFramePose: " + initialMidFeetZUpFramePose);
+         PrintTools.debug(this, "targetMidFeetZUpFramePose: " + targetMidFeetZUpFramePose);
+         PrintTools.debug(this, "positionDistanceToValve: " + positionDistanceToValve);
+         PrintTools.debug(this, "orientationDistanceToValve: " + orientationDistanceToValve);
+         PrintTools.debug(this, "walkingOrientation: " + walkingOrientation);
       }
 
       return ret;
@@ -334,10 +334,10 @@ public class TurnValveBehavior extends BehaviorInterface
    @Override
    public void enableActions()
    {
-      //      SysoutTool.println("Current Child Behavior: " + currentBehavior.getName());
+      //      PrintTools.debug(this, "Current Child Behavior: " + currentBehavior.getName());
 
-      SysoutTool.println("max wrist force : " + maxObservedWristForce);
-      SysoutTool.println("max capture point error : " + maxObservedCapturePointError);
+      PrintTools.debug(this, "max wrist force : " + maxObservedWristForce);
+      PrintTools.debug(this, "max capture point error : " + maxObservedCapturePointError);
    }
 
    @Override

@@ -14,7 +14,7 @@ import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParameters;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -148,9 +148,9 @@ public class WalkToLocationBehavior extends BehaviorInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("FrameHeadingVector : " + frameHeadingVector);
-         SysoutTool.println("WalkPathVector : " + walkPathVector);
-         SysoutTool.println("OrientationToWalkPath : " + ret);
+         PrintTools.debug(this, "FrameHeadingVector : " + frameHeadingVector);
+         PrintTools.debug(this, "WalkPathVector : " + walkPathVector);
+         PrintTools.debug(this, "OrientationToWalkPath : " + ret);
       }
 
       return ret;
@@ -256,7 +256,7 @@ public class WalkToLocationBehavior extends BehaviorInterface
       haveFootstepsBeenGenerated.set(true);
 
       if (DEBUG)
-         SysoutTool.println("Walk Distance: " + walkDistance.getDoubleValue());
+         PrintTools.debug(this, "Walk Distance: " + walkDistance.getDoubleValue());
    }
 
    @Override

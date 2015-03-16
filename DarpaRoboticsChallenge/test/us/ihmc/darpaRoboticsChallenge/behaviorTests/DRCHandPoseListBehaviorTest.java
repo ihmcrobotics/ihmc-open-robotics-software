@@ -42,7 +42,6 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -541,14 +540,14 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
          assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(jointPositionThreshold) + " degrees.", q_desired, q_actual, jointPositionThreshold);
       
          if (DEBUG)
-            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
+            PrintTools.debug(this, armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".  Error = " + error);
          
          if (error > maxJointAngleError)
             maxJointAngleError = error;
       }
 
       if (DEBUG)
-         SysoutTool.println("Maximum Position Error: " + Math.toDegrees(maxJointAngleError) + " degrees in " + jointAngleErrors.get(maxJointAngleError) );
+         PrintTools.debug(this, "Maximum Position Error: " + Math.toDegrees(maxJointAngleError) + " degrees in " + jointAngleErrors.get(maxJointAngleError) );
    }
 
    private void assertRobotAchievedFinalDesiredArmPose(double[][] armPoses, RobotSide robotSide)

@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -396,7 +396,7 @@ public class HandControlModule
 
    public void moveInCircle(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame)
    {
-      SysoutTool.println("Moving hand in circle");
+      PrintTools.debug(this, "Moving hand in circle");
       currentHandPosition.get(tempPosition);
       currentHandOrientation.get(tempOrientation);
       

@@ -31,7 +31,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -220,11 +220,8 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       success = success && drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(chestOrientBehavior, totalSimTime);
       FramePose finalChestPose = getCurrentChestPose();
 
-      if (DEBUG)
-      {
-         SysoutTool.println(" initial Chest Pose :\n" + initialChestPose);
-         SysoutTool.println(" final Chest Pose :\n" + finalChestPose);
-      }
+      PrintTools.debug(this, " initial Chest Pose :\n" + initialChestPose);
+      PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
       FramePose desiredChestPose = new FramePose();
       desiredChestPose.setPose(initialChestPose.getFramePointCopy().getPoint(), chestOrientationPacket.orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
@@ -250,14 +247,11 @@ public abstract class DRCChestOrientationBehaviorTest implements MultiRobotTestI
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
 
-      if (DEBUG)
-      {
-         SysoutTool.println(" desired Chest Pose :\n" + framePose1);
-         SysoutTool.println(" actual Chest Pose :\n" + framePose2);
+      PrintTools.debug(this, " desired Chest Pose :\n" + framePose1);
+      PrintTools.debug(this, " actual Chest Pose :\n" + framePose2);
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
-      }
+      PrintTools.debug(this, " positionDistance = " + positionDistance);
+      PrintTools.debug(this, " orientationDistance = " + orientationDistance);
 
       if (!Double.isNaN(POSITION_THRESHOLD))
       {

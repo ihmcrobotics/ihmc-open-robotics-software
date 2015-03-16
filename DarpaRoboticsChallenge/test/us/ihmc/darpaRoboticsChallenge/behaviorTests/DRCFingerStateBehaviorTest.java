@@ -36,7 +36,6 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -232,7 +231,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       FingerState fingerState = closedFingerConfigs.get(RandomTools.generateRandomInt(new Random(), 0, closedFingerConfigs.size() - 1));
       if (DEBUG)
       {
-         SysoutTool.println(fingerState.name());
+         PrintTools.debug(this, fingerState.name());
       }
 
       return new FingerStatePacket(robotSide, fingerState);
@@ -254,7 +253,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
          ret += q;
          if (DEBUG)
          {
-            SysoutTool.println(fingerJoint.getName() + " q : " + q);
+            PrintTools.debug(this, fingerJoint.getName() + " q : " + q);
          }
       }
 

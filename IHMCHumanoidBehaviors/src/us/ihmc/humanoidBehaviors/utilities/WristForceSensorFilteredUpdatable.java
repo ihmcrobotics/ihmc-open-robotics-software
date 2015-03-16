@@ -240,7 +240,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       {
          maxFilteredForce = Math.abs(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
          if (DEBUG)
-            SysoutTool.println("maxFilteredForce = " + maxFilteredForce);
+            PrintTools.debug(this, "maxFilteredForce = " + maxFilteredForce);
       }
    }
 
