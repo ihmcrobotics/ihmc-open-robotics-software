@@ -98,7 +98,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    private HandPosePacket createRandomHandPosePacketWithRobotSide(RobotSide robotSide)
    {
 
-      Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.2, -0.3, 0.5, 0.2, 0.3);
+      Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.3, 0.7, 0.5, 0.3, 1.3);
       Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
 
       HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 0.4);
