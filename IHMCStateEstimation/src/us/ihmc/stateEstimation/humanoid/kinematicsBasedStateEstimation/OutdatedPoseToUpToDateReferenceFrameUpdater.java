@@ -84,4 +84,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    {
       return upToDateTimeStampedTransformBuffer.isInRange(timeStamp);
    }
+   
+   public long getUpToDateTimeStampedBufferNewestTimestamp()
+   {
+      return upToDateTimeStampedTransformBuffer.getNewestTimestamp();
+   }
 }
