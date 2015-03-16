@@ -8,6 +8,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry2;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
@@ -44,6 +45,7 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_elx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.ELBOW_ROLL));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_wry]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
          robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_wrx]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.WRIST_ROLL));
+         robot.getOneDegreeOfFreedomJoint(forcedSideJointNames[l_arm_wry2]).setQ(defaultArmPosition.get(robotSide).get(ArmJointName.SECOND_WRIST_PITCH));
       }
 
       // left leg
@@ -68,6 +70,7 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.ELBOW_ROLL, 1.4);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.FIRST_WRIST_PITCH, 0.0);
       defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.WRIST_ROLL, 0.5);
+      defaultArmPosition.get(RobotSide.LEFT).put(ArmJointName.SECOND_WRIST_PITCH, 0.0);
 
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SHOULDER_YAW, 0.3);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SHOULDER_ROLL, 1.0);
@@ -75,6 +78,7 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<SD
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.ELBOW_ROLL, -1.6);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.FIRST_WRIST_PITCH, 0.0);
       defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.WRIST_ROLL, 0.0);
+      defaultArmPosition.get(RobotSide.RIGHT).put(ArmJointName.SECOND_WRIST_PITCH, 0.0);
 
       return defaultArmPosition;
    }
