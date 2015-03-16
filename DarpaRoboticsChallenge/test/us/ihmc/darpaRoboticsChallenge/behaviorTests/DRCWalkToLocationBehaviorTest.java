@@ -39,7 +39,6 @@ import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -324,8 +323,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
             numberOfStepsAlignedWithMeanOrientation++;
       }
 
-      SysoutTool.println("Total number of footsteps: " + numberOfFootsteps + ", number Of Footsteps aligned with mean orientation: "
-            + numberOfStepsAlignedWithMeanOrientation);
+      PrintTools.info(this, "Total number of footsteps: " + numberOfFootsteps + ", number Of Footsteps aligned with mean orientation: " + numberOfStepsAlignedWithMeanOrientation);
       assertTrue("Number Of Footsteps aligned with mean orientation !> total number of footsteps",
             numberOfStepsAlignedWithMeanOrientation > 0.5 * numberOfFootsteps);
 
