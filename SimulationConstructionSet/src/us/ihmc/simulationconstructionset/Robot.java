@@ -513,7 +513,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
    }
    
-   protected void updateIMUMountAccelerations()
+   public void updateIMUMountAccelerations()
    {
       for (int i = 0; i < rootJoints.size(); i++)
       {
