@@ -45,6 +45,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -193,7 +194,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       FramePose2d finalMidFeetPose = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
       //      FramePose2d finalMidFeetPose = getCurrentMidFeetPose2d(referenceFrames);
 
-      SysoutTool.println(" initial Midfeet Pose :\n" + initialMidFeetPose + "\n", DEBUG);
+      PrintTools.debug(this, " initial Midfeet Pose :\n" + initialMidFeetPose + "\n");
       assertPosesAreWithinThresholds(desiredMidFeetPose, finalMidFeetPose);
 
       return walkToGoalBehavior;
@@ -251,7 +252,7 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       boolean ret = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationRunTime);
 
-      SysoutTool.println("done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue(), DEBUG);
+      PrintTools.debug(this, "done with behavior: " + behavior.getName() + "   t = " + yoTime.getDoubleValue());
 
       return ret;
    }

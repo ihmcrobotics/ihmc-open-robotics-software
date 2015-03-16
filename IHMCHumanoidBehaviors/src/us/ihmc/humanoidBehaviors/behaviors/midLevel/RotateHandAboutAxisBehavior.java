@@ -18,6 +18,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -166,7 +167,7 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
          //         FramePose nextDesiredHandPose = copyHandPoseAndRotateAboutAxis(previousDesiredHandPose);
          FramePose nextDesiredHandPose = previousDesiredHandPose.getRotatedAboutAxisCopy(graspedObjectFrame, axisOrientationInGraspedObjectFrame,
                radiansToRotateBetweenHandPoses);
-         SysoutTool.println("Adding Desired Hand Pose Position: " + nextDesiredHandPose.printOutPosition(), DEBUG);
+         PrintTools.debug(this, "Adding Desired Hand Pose Position: " + nextDesiredHandPose.printOutPosition());
          desiredHandPoses.add(i, nextDesiredHandPose);
       }
       return desiredHandPoses;

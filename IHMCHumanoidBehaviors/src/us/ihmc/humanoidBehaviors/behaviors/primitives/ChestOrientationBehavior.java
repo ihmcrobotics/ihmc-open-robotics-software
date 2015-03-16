@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -111,8 +111,8 @@ public class ChestOrientationBehavior extends BehaviorInterface
       boolean trajectoryTimeUndefined = Double.isNaN(trajectoryTime.getDoubleValue());
       double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
       
-      SysoutTool.println("StartTimeUndefined: " + startTimeUndefined + ".  TrajectoryTimeUndefined: " + trajectoryTimeUndefined, DEBUG);
-      SysoutTool.println("TrajectoryTimeElapsed: " + trajectoryTimeElapsed, DEBUG);
+      PrintTools.debug(this, "StartTimeUndefined: " + startTimeUndefined + ".  TrajectoryTimeUndefined: " + trajectoryTimeUndefined);
+      PrintTools.debug(this, "TrajectoryTimeElapsed: " + trajectoryTimeElapsed);
 
       if ( startTimeUndefined || trajectoryTimeUndefined )
          trajectoryTimeHasElapsed.set(false);

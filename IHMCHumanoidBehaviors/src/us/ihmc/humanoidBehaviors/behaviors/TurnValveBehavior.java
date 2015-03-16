@@ -18,6 +18,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -167,7 +168,7 @@ public class TurnValveBehavior extends BehaviorInterface
    public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
          Axis valvePinJointAxisInValveFrame, double valveRadius, double totalAngleToRotateValve)
    {
-      SysoutTool.println("Not using script behavior.", DEBUG);
+      PrintTools.debug(this, "Not using script behavior.");
 
       HandPoseTask moveHandToHomeTask = new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
             moveHandToHomeBehavior, yoTime);
@@ -201,7 +202,7 @@ public class TurnValveBehavior extends BehaviorInterface
    {
       RigidBodyTransform valveTransformToWorld = scriptBehaviorInputPacket.getReferenceTransform();
 
-      SysoutTool.println("New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName(), DEBUG);
+      PrintTools.debug(this, "New Script Behavior Input Packet Received.  Script File : " + scriptBehaviorInputPacket.getScriptName());
 
       HandPoseTask moveHandToHomeTask = new HandPoseTask(robotSideOfHandToUse, PacketControllerTools.createGoToHomeHandPosePacket(robotSideOfHandToUse, 1.0),
             moveHandToHomeBehavior, yoTime);

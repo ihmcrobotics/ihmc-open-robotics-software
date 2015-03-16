@@ -60,6 +60,7 @@ import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -233,7 +234,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
       communicationBridge.sendPacketToNetworkProcessor(requestPelvisPoseBehaviorPacket);
-      SysoutTool.println("Requesting PelvisPoseBehavior", DEBUG);
+      PrintTools.debug(this, "Requesting PelvisPoseBehavior");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -245,9 +246,9 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       pelvisPoseBehavior.initialize();
       pelvisPoseBehavior.setInput(pelvisPosePacket);
       assertTrue(pelvisPoseBehavior.hasInputBeenSet());
-      SysoutTool.println("Setting PelvisPoseBehavior Input", DEBUG);
+      PrintTools.debug(this, "Setting PelvisPoseBehavior Input");
 
-      SysoutTool.println("Starting to Excecute Behavior", DEBUG);
+      PrintTools.debug(this, "Starting to Excecute Behavior");
       while (!pelvisPoseBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -278,7 +279,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       communicationBridge.sendPacketToNetworkProcessor(requestWalkToObjectBehaviorPacket);
-      SysoutTool.println("Requesting WalkToLocationBehavior", DEBUG);
+      PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -288,7 +289,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
-      SysoutTool.println("Setting WalkToLocationBehavior Target", DEBUG);
+      PrintTools.debug(this, "Setting WalkToLocationBehavior Target");
 
       if (DEBUG)
       {
@@ -301,7 +302,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
          }
       }
 
-      SysoutTool.println("Starting to Excecute Behavior", DEBUG);
+      PrintTools.debug(this, "Starting to Excecute Behavior");
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -333,7 +334,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       communicationBridge.sendPacketToNetworkProcessor(requestWalkToObjectBehaviorPacket);
-      SysoutTool.println("Requesting WalkToLocationBehavior", DEBUG);
+      PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -343,7 +344,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
-      SysoutTool.println("Setting WalkToLocationBehavior Target", DEBUG);
+      PrintTools.debug(this, "Setting WalkToLocationBehavior Target");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
@@ -351,7 +352,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorControlModePacket stopModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.STOP);
       communicationBridge.sendPacketToNetworkProcessor(stopModePacket);
-      SysoutTool.println("Sending Stop Request", DEBUG);
+      PrintTools.debug(this, "Sending Stop Request");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
@@ -382,7 +383,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       communicationBridge.sendPacketToNetworkProcessor(requestWalkToObjectBehaviorPacket);
-      SysoutTool.println("Requesting WalkToLocationBehavior", DEBUG);
+      PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -392,7 +393,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       walkToLocationBehavior.initialize();
       walkToLocationBehavior.setTarget(targetMidFeetPose);
       assertTrue(walkToLocationBehavior.hasInputBeenSet());
-      SysoutTool.println("Setting WalkToLocationBehavior Target", DEBUG);
+      PrintTools.debug(this, "Setting WalkToLocationBehavior Target");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
@@ -400,7 +401,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorControlModePacket pauseModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.PAUSE);
       communicationBridge.sendPacketToNetworkProcessor(pauseModePacket);
-      SysoutTool.println("Sending Pause Request", DEBUG);
+      PrintTools.debug(this, "Sending Pause Request");
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
@@ -412,7 +413,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
       HumanoidBehaviorControlModePacket resumeModePacket = new HumanoidBehaviorControlModePacket(HumanoidBehaviorControlModeEnum.RESUME);
       communicationBridge.sendPacketToNetworkProcessor(resumeModePacket);
-      SysoutTool.println("Sending Resume Request", DEBUG);
+      PrintTools.debug(this, "Sending Resume Request");
 
       while (!walkToLocationBehavior.isDone() && yoTime.getDoubleValue() < 20.0)
       {

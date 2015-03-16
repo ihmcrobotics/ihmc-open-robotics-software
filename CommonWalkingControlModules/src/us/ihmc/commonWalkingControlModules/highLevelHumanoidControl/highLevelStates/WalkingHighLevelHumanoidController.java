@@ -45,7 +45,7 @@ import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -682,7 +682,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
          if (isInDoubleSupport && !upcomingFootstepList.hasNextFootsteps() && !upcomingFootstepList.isPaused())
          {
-            SysoutTool.println("WALKING COMPLETE", DEBUG);
+            PrintTools.debug(this, "WALKING COMPLETE");
             upcomingFootstepList.notifyWalkingComplete();
          }
          

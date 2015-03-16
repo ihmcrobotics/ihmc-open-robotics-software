@@ -38,6 +38,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -122,7 +123,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -132,11 +133,11 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
       OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
 
-      SysoutTool.println("Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName, DEBUG);
+      PrintTools.debug(this, "Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName);
       FramePose initialHandPose = getCurrentHandPose(robotSide);
       Axis handFrameAxisAlignedWithWristPitchJoint = getReferenceFrameAxisThatIsAlignedWithParentArmJoint(robotSide, handFrame, wristPitchJointName);
       FramePose handPoseAfterJointSpaceRotation = getCurrentHandPose(robotSide);
-      SysoutTool.println("Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint, DEBUG);
+      PrintTools.debug(this, "Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint);
 
       double jointSpaceRotation = initialHandPose.getOrientationDistance(handPoseAfterJointSpaceRotation);
       assertEquals("", Math.toRadians(90.0), Math.abs(jointSpaceRotation), Math.toRadians(1.0));
@@ -167,7 +168,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -177,11 +178,11 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
       OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
 
-      SysoutTool.println("Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName, DEBUG);
+      PrintTools.debug(this, "Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName);
       FramePose initialHandPose = getCurrentHandPose(robotSide);
       Axis handFrameAxisAlignedWithWristPitchJoint = getReferenceFrameAxisThatIsAlignedWithParentArmJoint(robotSide, handFrame, wristPitchJointName);
       FramePose handPoseAfterJointSpaceRotation = getCurrentHandPose(robotSide);
-      SysoutTool.println("Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint, DEBUG);
+      PrintTools.debug(this, "Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint);
 
       double jointSpaceRotation = initialHandPose.getOrientationDistance(handPoseAfterJointSpaceRotation);
       assertEquals("", Math.toRadians(90.0), Math.abs(jointSpaceRotation), Math.toRadians(1.0));

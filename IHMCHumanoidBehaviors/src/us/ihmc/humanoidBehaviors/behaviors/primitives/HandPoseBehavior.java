@@ -12,6 +12,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -134,7 +135,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
             resume();
             isPausedDueToCollision.set(false);
-            SysoutTool.println("Re-Attemping HandPoseBehavior", DEBUG);
+            PrintTools.debug(this, "Re-Attemping HandPoseBehavior");
          }
       }
 
@@ -181,7 +182,7 @@ public class HandPoseBehavior extends BehaviorInterface
          stopArmMotion();
          finalize();
          isDone.set(true);
-         SysoutTool.println("Giving Up on Re-Attempting HandPoseBehavior \n", DEBUG);
+         PrintTools.debug(this, "Giving Up on Re-Attempting HandPoseBehavior \n");
       }
 
       numberOfConsecutiveCollisions.add(1);

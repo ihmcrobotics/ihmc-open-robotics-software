@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -79,7 +79,7 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
 
       if (hasThresholdBeenCrossed(pausePercent))
       {
-         SysoutTool.println("Requesting Pause", DEBUG);
+         PrintTools.debug(this, "Requesting Pause");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
          pauseStartTime = elapsedTime;
       }
@@ -87,12 +87,12 @@ public class TrajectoryBasedStopThreadUpdatable extends StopThreadUpdatable
       {
          assertTrue(!behavior.isDone());
 
-         SysoutTool.println("Requesting Resume", DEBUG);
+         PrintTools.debug(this, "Requesting Resume");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
       }
       else if (hasThresholdBeenCrossed(stopPercent))
       {
-         SysoutTool.println("Requesting Stop", DEBUG);
+         PrintTools.debug(this, "Requesting Stop");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
       }
       else if (behavior.isDone())

@@ -34,6 +34,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -137,11 +138,11 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Setting Hand Pose Behavior Input in Joint Space", DEBUG);
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Joint Space");
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
@@ -151,36 +152,36 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       HandPosePacket jointSpaceHandPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredJointSpaceHandPose);
       handPoseBehavior.setInput(jointSpaceHandPosePacket);
 
-      SysoutTool.println("Starting Joint Space Hand Pose Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Joint Space Hand Pose Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Joint Space Hand Pose Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Joint Space Hand Pose Behavior Should Be Done");
 
       assertTrue(success);
       assertCurrentArmPoseIsWithinThresholds(robotSide, desiredJointSpaceHandPose);
       assertTrue(handPoseBehavior.isDone());
 
-      SysoutTool.println("Recording HandPose Acheived in Joint Space", DEBUG);
+      PrintTools.debug(this, "Recording HandPose Acheived in Joint Space");
       FramePose handPoseAcheivedInJointSpace = getCurrentHandPose(robotSide);
 
       HandPosePacket goToHomePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime);
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(goToHomePacket);
-      SysoutTool.println("Moving arm back to home pose", DEBUG);
+      PrintTools.debug(this, "Moving arm back to home pose");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Arm should be back to home pose", DEBUG);
+      PrintTools.debug(this, "Arm should be back to home pose");
       assertTrue(success);
       
       
-      SysoutTool.println("Setting Hand Pose Behavior Input in Task Space", DEBUG);
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Task Space");
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseAcheivedInJointSpace.getPose(handPoseTargetTransform);
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
       assertTrue(handPoseBehavior.hasInputBeenSet());
 
-      SysoutTool.println("Starting Task Space Hand Pose Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Task Space Hand Pose Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Task Space Hand Pose Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Task Space Hand Pose Behavior Should Be Done");
 
       assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseAcheivedInJointSpace);
@@ -190,7 +191,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       double handPoseBehaviorPositionError = finalTaskSpaceHandPose.getPositionDistance(handPoseAcheivedInJointSpace);
       double handPoseBehaviorOrientationError = finalTaskSpaceHandPose.getOrientationDistance(handPoseAcheivedInJointSpace);
       
-      SysoutTool.println("Initializing Whole Body Inverse Kinematic Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Whole Body Inverse Kinematic Behavior");
       final WholeBodyInverseKinematicBehavior wholeBodyIKBehavior = new WholeBodyInverseKinematicBehavior(
             drcBehaviorTestHelper.getBehaviorCommunicationBridge(), wholeBodyControllerParameters, fullRobotModel, yoTime);
       wholeBodyIKBehavior.initialize();
