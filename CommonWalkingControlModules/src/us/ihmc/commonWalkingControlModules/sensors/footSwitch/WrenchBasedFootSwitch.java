@@ -66,6 +66,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final YoFrameVector yoFootTorque;
    private final YoFrameVector yoFootForceInFoot;
    private final YoFrameVector yoFootTorqueInFoot;
+   private final YoFrameVector yoFootForceInWorld;
+   private final YoFrameVector yoFootTorqueInWorld;
   
    
    private final double robotTotalWeight;
@@ -91,6 +93,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
       yoFootForceInFoot = new YoFrameVector(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
       yoFootTorqueInFoot = new YoFrameVector(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
+      yoFootForceInWorld = new YoFrameVector(namePrefix + "ForceWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+      yoFootTorqueInWorld = new YoFrameVector(namePrefix + "TorqueWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
       if(showForceSensorFrames && yoGraphicsListRegistry!=null)
       {
@@ -263,28 +267,43 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   private void readSensorData(Wrench footWrench)
-   {
-      forceSensorData.packWrench(footWrench);
+   private void readSensorData(Wrench footWrenchToPack)
+   {      
+      forceSensorData.packWrench(footWrenchToPack);
 
-      footForce.setToZero(footWrench.getExpressedInFrame());
-      footWrench.packLinearPart(footForce);
+      // First in measurement frame for all the frames...
+      footForce.setToZero(footWrenchToPack.getExpressedInFrame());
+      footWrenchToPack.packLinearPart(footForce);
       yoFootForce.set(footForce);
+      
+      footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
+      footWrenchToPack.packAngularPart(footTorque);
+      yoFootTorque.set(footTorque);
+      
+      // Now change to frame after the parent joint (ankle or wrist for example):
+      footWrenchToPack.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
+
+      footForce.setToZero(footWrenchToPack.getExpressedInFrame());
+      footWrenchToPack.packLinearPart(footForce);
+      footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
+      footWrenchToPack.packAngularPart(footTorque);
+
       footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootForceInFoot.set(footForce);
-      footForceMagnitude.set(footForce.length());
 
-      // magnitude of force part is independent of frame
-      footForceMagnitude.set(footForce.length());
-
-      footTorque.setToZero(footWrench.getExpressedInFrame());
-      footWrench.packAngularPart(footTorque);
-      yoFootTorque.set(footTorque);
       footTorque.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootTorqueInFoot.set(footTorque);
-
+      
+      footForce.changeFrame(ReferenceFrame.getWorldFrame());
+      footTorque.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      yoFootForceInWorld.set(footForce);
+      yoFootTorqueInWorld.set(footTorque);
+      
+      // magnitude of force part is independent of frame
+      footForceMagnitude.set(footForce.length());
+      
       updateSensorVisualizer();
-
    }
    
    private void updateSensorVisualizer()
