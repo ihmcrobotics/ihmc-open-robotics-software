@@ -45,12 +45,11 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+      addFullCourse3dModel();
+      
       createDoor();
-
       createValve();
       createDrill();
-      addFullCourse3dModel();
-
    }
 
    private void addFullCourse3dModel()
@@ -61,10 +60,7 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
 
    private void createDrill()
    {
-
-      double tableHeight = 1.4;
       Vector3d tableCenter = new Vector3d(-0.851, -6.833, 1.118);
-      Vector2d wallPosition = new Vector2d(0.0, -2.05);
 
       double drillHeight = 0.3;
       double drillRadius = 0.03;
@@ -180,17 +176,4 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
    }
-
-   public enum DoorType
-   {
-      NO_TORQUE(0.0), THREE_LBS_TO_MOVE(11.4), FIVE_LBS_TO_MOVE(18.9);
-
-      double tau;
-
-      private DoorType(double tau)
-      {
-         this.tau = tau;
-      }
-   }
-
 }

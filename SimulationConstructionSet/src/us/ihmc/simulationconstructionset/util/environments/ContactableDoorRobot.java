@@ -39,7 +39,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 public class ContactableDoorRobot extends Robot implements SelectableObject, SelectedListener, Contactable
 {
    public static final Vector2d DEFAULT_HANDLE_OFFSET = new Vector2d(0.83, 0.98);
-   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(0.8509, 0.045, 2.04);
+   public static final Vector3d DEFAULT_DOOR_DIMENSIONS = new Vector3d(0.9144, 0.045, 2.04);
    public static final double DEFAULT_MASS = 2.28; // 5lbs
    public static final double DEFAULT_HANDLE_DOOR_SEPARATION = 0.06;
    public static final double DEFAULT_HANDLE_HINGE_RADIUS = 0.01;
