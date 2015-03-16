@@ -17,7 +17,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasFlatGroundWalkingTrack
 {
-   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
+   private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
 
    private static final boolean USE_BUMPY_GROUND = false;
    private static final boolean USE_FEET_PERTURBER = false;

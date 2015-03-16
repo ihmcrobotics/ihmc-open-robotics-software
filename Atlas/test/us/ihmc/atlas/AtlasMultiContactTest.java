@@ -118,7 +118,7 @@ public class AtlasMultiContactTest
 
    private AtlasMultiContact setupSimulation()
    {
-      final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS;
+      final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS;
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
       AtlasMultiContact drcMultiContact = new AtlasMultiContact(new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasTarget.SIM, false), guiInitialSetup,

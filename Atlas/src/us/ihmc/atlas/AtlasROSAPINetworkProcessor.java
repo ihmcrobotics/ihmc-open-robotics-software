@@ -21,7 +21,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class AtlasROSAPINetworkProcessor
 {
    private static String defaultRosNameSpace = "atlas";
-   private static String defaultRobotModel = "DRC_NO_HANDS_UNPLUGGED_V4";
+   private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {

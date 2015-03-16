@@ -75,7 +75,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
    public AtlasInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
    {
       boolean headless = false;
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
       fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       boolean createCollisionMeshes = false;
@@ -106,7 +106,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       
       feetExternalForcePoints = new SideDependentList<ExternalForcePoint>(leftFootExternalForcePoint, rightFootExternalForcePoint);
       
-      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasTarget.SIM, headless);
+      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
       
       computedRootJointAngularAcceleration = new YoFrameVector("qdd_computed_root_angular", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
 

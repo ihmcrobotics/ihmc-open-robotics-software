@@ -13,7 +13,7 @@ public class AtlasWallWorldDemo
 
    public static void main(final String[] args) throws JSAPException
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
       CommonAvatarEnvironmentInterface environment = new DRCWallWorldEnvironment(-10.0, 10.0);
 
       AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();

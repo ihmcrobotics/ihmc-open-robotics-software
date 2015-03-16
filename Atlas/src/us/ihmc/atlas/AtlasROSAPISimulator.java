@@ -23,7 +23,7 @@ import com.martiansoftware.jsap.JSAPResult;
 public class AtlasROSAPISimulator
 {
    private static String defaultPrefix = "/ihmc_msgs/atlas";
-   private static String defaultRobotModel = "DRC_NO_HANDS_UNPLUGGED_V4";
+   private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    private final boolean startUI = false;
    
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException

@@ -14,7 +14,7 @@ public class AtlasObstacleCourseDoNothingTest extends DRCObstacleCourseDoNothing
    @Override
    public DRCRobotModel getRobotModel()
    {
-      return new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
    }
 
    @Override

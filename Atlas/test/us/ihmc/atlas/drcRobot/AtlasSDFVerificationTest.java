@@ -76,7 +76,7 @@ public class AtlasSDFVerificationTest
    }
    
    
-   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
    private static final double SIM_DURATION = 5.0;
 
 

@@ -24,7 +24,7 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    @Override
    public DRCRobotModel getRobotModel()
    {
-      final AtlasRobotVersion atlasVersion = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
+      final AtlasRobotVersion atlasVersion = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 
       DRCRobotModel robotModel = new AtlasRobotModel(atlasVersion, AtlasRobotModel.AtlasTarget.SIM, false)
       {
