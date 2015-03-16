@@ -212,7 +212,7 @@ public class DRCSimulationFactory
     	  pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(globalDataProducer.getObjectCommunicator());
     	  globalDataProducer.attachListener(StampedPosePacket.class, pelvisPoseCorrectionCommunicator);
       }
-      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
+      drcEstimatorThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
 
       drcControllerThread = new DRCControllerThread(drcRobotModel, drcRobotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, drcOutputWriter,
             globalDataProducer, yoVariableServer, gravity, drcRobotModel.getEstimatorDT());
@@ -364,9 +364,9 @@ public class DRCSimulationFactory
       return simulatedDRCRobotTimeProvider;
    }
    
-   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externelPelvisCorrectorSubscriber)
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
-      drcEstimatorThread.setExternelPelvisCorrectorSubscriber(externelPelvisCorrectorSubscriber);
+      drcEstimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
    }
    
    public ThreadDataSynchronizerInterface getThreadDataSynchronizer()

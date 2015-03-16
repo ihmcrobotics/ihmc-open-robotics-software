@@ -36,6 +36,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
 
+   public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
@@ -45,7 +47,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
 
-   private final PelvisPoseHistoryCorrection pelvisPoseHistoryCorrection;
+   private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
    private final double estimatorDT;
 
@@ -70,7 +72,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
-      pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
+      if(USE_NEW_PELVIS_POSE_CORRECTOR)
+         this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
+      else
+         this.pelvisPoseHistoryCorrection = new PelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, 1000);
 
       List<IMUSensorReadOnly> imuProcessedOutputs = new ArrayList<>();
       List<String> imuSensorsToUse = Arrays.asList(imuSensorsToUseInStateEstimator);
@@ -287,8 +292,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       // Do nothing
    }
 
-   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
-      pelvisPoseHistoryCorrection.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+      pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
 }

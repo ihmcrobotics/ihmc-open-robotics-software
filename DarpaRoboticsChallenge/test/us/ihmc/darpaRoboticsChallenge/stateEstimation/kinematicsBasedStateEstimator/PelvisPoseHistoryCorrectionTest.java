@@ -848,7 +848,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       DRCSimulationFactory drcSimulationFactory = drcSimulationTestHelper.getDRCSimulationFactory();
-      drcSimulationFactory.setExternelPelvisCorrectorSubscriber(externalPelvisPosePublisher);
+      drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
 
       setupCameraForWalkingUpToRamp();
    }
@@ -871,7 +871,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
 
       externalPelvisPosePublisher = new ExternalPelvisPoseCreator();
       DRCSimulationFactory drcSimulationFactory = drcFlatGroundWalkingTrack.getDrcSimulation();
-      drcSimulationFactory.setExternelPelvisCorrectorSubscriber(externalPelvisPosePublisher);
+      drcSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisPosePublisher);
       BooleanYoVariable walk = (BooleanYoVariable) simulationConstructionSet.getVariable("walk");
       walk.set(true);
       return drcFlatGroundWalkingTrack;

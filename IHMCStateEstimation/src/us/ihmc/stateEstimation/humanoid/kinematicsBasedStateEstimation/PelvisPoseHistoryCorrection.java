@@ -31,7 +31,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
  *
  */
 
-public class PelvisPoseHistoryCorrection
+public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
    private static final boolean USE_ROTATION_CORRECTION = false;
 
@@ -233,10 +233,10 @@ public class PelvisPoseHistoryCorrection
 //      manualRotationOffsetInRadZ.set(-0.00052);
    }
 
-   /**
-    * Converges the state estimator pelvis pose towards an external position provided by an external Pelvis Pose Subscriber
-    * @param l 
+   /* (non-Javadoc)
+    * @see us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrectionInterface#doControl(long)
     */
+   @Override
    public void doControl(long timestamp)
    {
       if (pelvisPoseCorrectionCommunicator != null)
@@ -428,6 +428,10 @@ public class PelvisPoseHistoryCorrection
       totalRotationErrorFrame.setAndUpdate(rotationErrorInPastTransform);
    }
 
+   /* (non-Javadoc)
+    * @see us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrectionInterface#manuallyTriggerLocalizationUpdate()
+    */
+   @Override
    public void manuallyTriggerLocalizationUpdate()
    {
       confidenceFactor.set(1.0);
@@ -463,7 +467,11 @@ public class PelvisPoseHistoryCorrection
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 
-   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   /* (non-Javadoc)
+    * @see us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrectionInterface#setExternelPelvisCorrectorSubscriber(us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface)
+    */
+   @Override
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
    }
