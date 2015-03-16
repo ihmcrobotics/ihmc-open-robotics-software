@@ -177,22 +177,25 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       Vector64F joint_weights = new Vector64F( getNumberOfJoints() );
       joint_weights.zero();
 
-      // use only the joints of legs to achieve this task. Ignore torso and arms
-      for (int legJointIndex: legJointIds.get(LEFT))
+      // use only the joints of one leg
+      for (int legJointIndex: legJointIds.get( this.getSideOfTheFootRoot() ))
       {
          joint_weights.set(legJointIndex, 1);
       }
-      for (int legJointIndex: legJointIds.get(RIGHT))
-      {
-         joint_weights.set(legJointIndex, 1);
-      }
+ 
+      taskPelvisOrientation.setWeightsJointSpace(joint_weights);
 
+      //--------------------------------------------------
+      for (int legJointIndex: legJointIds.get( getSideOfTheFootRoot().getOppositeSide() ))
+      {
+         joint_weights.set(legJointIndex, 1);
+      }
+      
       taskLegPose.setWeightsJointSpace(joint_weights);
-
-      //TODO
+      
       Vector64F target_left_foot = new Vector64F(7, 0, 2 * 0.11, 0, 0, 0, 0, 1);
       taskLegPose.setTarget(target_left_foot);
-
+               
       //--------------------------------------------------
       // Don't move the arm to keep the balance. But torso need to be activated
       joint_weights.set(back_bkz, 1);
@@ -240,7 +243,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       // this is used to keep the pelvis straight
       // what you want is:
       //  q(r_leg_hpy) = - q(leg_aky) - q(leg_kny);
-      weights_jointpose.set(rleg_hpy, 2);
+      weights_jointpose.set(rleg_hpy, 0.5);
       coupledJointWeights.set(rleg_hpy, rleg_aky, -1);
       coupledJointWeights.set(rleg_hpy, rleg_kny, -1);
 
