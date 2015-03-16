@@ -99,6 +99,7 @@ public class PelvisLinearStateUpdater
          EstimationState.TRUST_LEFT_FOOT, EstimationState.TRUST_RIGHT_FOOT);
    
    private final EnumYoVariable<EstimationState> requestedState = new EnumYoVariable<EstimationState>("requestedEstimationState", "", registry, EstimationState.class, true);
+   private final BooleanYoVariable requestStopEstimationOfPelvisLinearState = new BooleanYoVariable("userRequestStopEstimationOfPelvisLinearState", registry);
    
    private final StateMachine<EstimationState> stateMachine;
 
@@ -313,6 +314,9 @@ public class PelvisLinearStateUpdater
 
    public void updateRootJointPositionAndLinearVelocity()
    {
+	   if (requestStopEstimationOfPelvisLinearState.getBooleanValue())
+		   return;
+
       defaultActionIntoStates();
       
       stateMachine.checkTransitionConditions();
