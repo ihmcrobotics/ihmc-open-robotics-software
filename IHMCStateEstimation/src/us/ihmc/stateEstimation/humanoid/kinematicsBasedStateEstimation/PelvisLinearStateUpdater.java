@@ -192,6 +192,8 @@ public class PelvisLinearStateUpdater
       forceZInPercentThresholdToFilterFoot.set(stateEstimatorParameters.getForceInPercentOfWeightThresholdToTrustFoot()); 
       
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
+      
+//      requestStopEstimationOfPelvisLinearState.set(true);
 
       imuDriftCompensator = new IMUDriftCompensator(footFrames, inverseDynamicsStructure, footSwitches, estimatorDT, registry);
       imuDriftCompensator.activateEstimation(stateEstimatorParameters.estimateIMUDrift());
