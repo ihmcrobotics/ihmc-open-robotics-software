@@ -187,6 +187,7 @@ public abstract class JointPhysics< J extends Joint>
    // Vectors used in the application of external force and ground contact points
    private final Vector3d externalForceVector = new Vector3d();
    private final Vector3d externalForceR = new Vector3d();
+   private final Vector3d tempExternalMomentVector = new Vector3d();
    private final Vector3d externalMomentVector = new Vector3d();
 
 
@@ -226,29 +227,7 @@ public abstract class JointPhysics< J extends Joint>
             for (int y = 0; y < groundContactPoints.size(); y++)
             {
                GroundContactPoint point = groundContactPoints.get(y);
-               
-               if (!point.isForceZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
-               {
-                  point.getForce(externalForceVector);
-                  externalForceVector.negate();
-
-                  // Rotate it into Link Coordinates:
-
-                  Ri_0.transform(externalForceVector);
-
-                  // externalForceR.sub(point.offset, this.link.comOffset);    // JEP+++ 12/19/01.  Something wrong here!
-
-                  point.getOffset(externalForceR);
-                  externalForceR.sub(owner.link.physics.comOffset);
-
-                  // jointDependentComputeExternalForceR(p.offset, this.link.comOffset, externalForceR);
-                  externalMomentVector.cross(externalForceR, externalForceVector);
-
-                  // Add it to Z_hat:
-
-                  Z_hat_i.top.add(externalForceVector);
-                  Z_hat_i.bottom.add(externalMomentVector);
-               }
+               applyForcesAndMomentsFromExternalForcePoints(point);
             }
          }
       }
@@ -266,28 +245,7 @@ public abstract class JointPhysics< J extends Joint>
             // mark it as inactive so that it needs to be re-activated the next
             point.active = false;
             
-            if (!point.isForceZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
-            {
-               point.getForce(externalForceVector);
-               externalForceVector.negate();
-
-               // Rotate it into Link Coordinates:
-
-               Ri_0.transform(externalForceVector);
-
-//             externalForceR.sub(p.offset, this.link.comOffset);    // JEP+++ 12/19/01.  Something wrong here!
-
-               point.getOffset(externalForceR);
-               externalForceR.sub(owner.link.physics.comOffset);
-
-               // jointDependentComputeExternalForceR(p.offset, this.link.comOffset, externalForceR);
-               externalMomentVector.cross(externalForceR, externalForceVector);
-
-               // Add it to Z_hat:
-
-               Z_hat_i.top.add(externalForceVector);
-               Z_hat_i.bottom.add(externalMomentVector);
-            }
+            applyForcesAndMomentsFromExternalForcePoints(point);
          }
       }
 
@@ -334,10 +292,40 @@ public abstract class JointPhysics< J extends Joint>
       // Zero these temporary variables out so that rewindability tests which use reflexion don't pick them up as changed state variables.
       externalForceVector.set(0.0, 0.0, 0.0);
       externalForceR.set(0.0, 0.0, 0.0);
+      tempExternalMomentVector.set(0.0, 0.0, 0.0);
       externalMomentVector.set(0.0, 0.0, 0.0);
    }
 
 
+   private void applyForcesAndMomentsFromExternalForcePoints(ExternalForcePoint point)
+   {
+      if (!point.isForceZero())    // +++JEP OPTIMIZE: Don't do the math if the forces are zero!
+      {
+         point.getForce(externalForceVector);
+         externalForceVector.negate();
+
+         // Rotate it into Link Coordinates:
+
+         Ri_0.transform(externalForceVector);
+
+//       externalForceR.sub(p.offset, this.link.comOffset);    // JEP+++ 12/19/01.  Something wrong here!
+
+         point.getOffset(externalForceR);
+         externalForceR.sub(owner.link.physics.comOffset);
+
+         // jointDependentComputeExternalForceR(p.offset, this.link.comOffset, externalForceR);
+         externalMomentVector.cross(externalForceR, externalForceVector);
+         point.getMoment(tempExternalMomentVector);
+         Ri_0.transform(tempExternalMomentVector);
+
+         externalMomentVector.sub(tempExternalMomentVector);
+         
+         // Add it to Z_hat:
+
+         Z_hat_i.top.add(externalForceVector);
+         Z_hat_i.bottom.add(externalMomentVector);
+      }
+   }
 
    private double sIs;    // sIs is s_hat_i_prime I_hat_A_i s_hat_i
    private double Qi_etc;    // Qi - s_hat_i_prime (Z_hat_i + I_hat_i * c_hat_i)

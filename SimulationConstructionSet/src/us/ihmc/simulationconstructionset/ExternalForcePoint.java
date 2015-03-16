@@ -13,6 +13,7 @@ public class ExternalForcePoint extends KinematicPoint
    private static final long serialVersionUID = -7715587266631433612L;
    
    private final YoFrameVector force;
+   private final YoFrameVector moment;
    private final YoFrameVector impulse;
 
    private Matrix3d R0_coll = new Matrix3d(), Rcoll_0 = new Matrix3d(), Rk_coll = new Matrix3d(), Rk_coll2 = new Matrix3d();
@@ -41,10 +42,12 @@ public class ExternalForcePoint extends KinematicPoint
    public ExternalForcePoint(String name, Vector3d offset, YoVariableRegistry registry)
    {
       super(name, offset, registry);
-      
+ 
       force = new YoFrameVector(name + "_f", "", ReferenceFrame.getWorldFrame(), registry);
+      moment = new YoFrameVector(name + "_m", "", ReferenceFrame.getWorldFrame(), registry);
       impulse = new YoFrameVector(name + "_p", "", ReferenceFrame.getWorldFrame(), registry);
    }
+
    public String toString()
    {
       return ("name: " + name + "x: " + getX() + ", y: " + getY() + ", z: " + getZ());
@@ -52,7 +55,7 @@ public class ExternalForcePoint extends KinematicPoint
 
    public boolean isForceZero()
    {
-      return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0));
+      return ((force.getX() == 0.0) && (force.getY() == 0.0) && (force.getZ() == 0.0) && (moment.getX() == 0.0) && (moment.getY() == 0.0) && (moment.getZ() == 0.0));
    }
    
    public void reset() 
@@ -208,6 +211,11 @@ public class ExternalForcePoint extends KinematicPoint
    {
       force.get(vectorToPack);
    }
+   
+   public void getMoment(Vector3d vectorToPack)
+   {
+      moment.get(vectorToPack);
+   }
 
    public void setForce(Vector3d force)
    {
@@ -217,6 +225,16 @@ public class ExternalForcePoint extends KinematicPoint
    public void setForce(double fx, double fy, double fz)
    {
       this.force.set(fx, fy, fz);
+   }
+   
+   public void setMoment(Vector3d moment)
+   {
+      this.moment.set(moment);
+   }
+
+   public void setMoment(double mx, double my, double mz)
+   {
+      this.moment.set(mx, my, mz);
    }
    
    public void getImpulse(Vector3d vectorToPack)
