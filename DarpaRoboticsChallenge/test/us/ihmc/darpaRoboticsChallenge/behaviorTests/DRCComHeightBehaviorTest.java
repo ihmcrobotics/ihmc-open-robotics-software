@@ -30,7 +30,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -185,11 +185,8 @@ public abstract class DRCComHeightBehaviorTest implements MultiRobotTestInterfac
    {
       double actualHeightOffset = finalComPoint.getZ() - nominalComHeightAboveGround;
 
-      if (DEBUG)
-      {
-         SysoutTool.println("desiredHeightOffset: " + desiredHeightOffset);
-         SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
-      }
+      PrintTools.debug(this, "desiredHeightOffset: " + desiredHeightOffset);
+      PrintTools.debug(this, "actualHeightOffset: " + actualHeightOffset);
 
       assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, POSITION_THRESHOLD);;
    }

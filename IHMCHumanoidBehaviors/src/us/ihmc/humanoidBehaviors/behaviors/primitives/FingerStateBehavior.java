@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -45,7 +45,7 @@ public class FingerStateBehavior extends BehaviorInterface
       hasInputBeenSet.set(true);
       
       if (DEBUG)
-         SysoutTool.println("Input has been set: " + outgoingFingerStatePacket);
+         PrintTools.debug(this, "Input has been set: " + outgoingFingerStatePacket);
    }
 
    @Override
@@ -67,7 +67,7 @@ public class FingerStateBehavior extends BehaviorInterface
          startTime.set(yoTime.getDoubleValue());
          
          if (DEBUG)
-            SysoutTool.println("Sending FingerState Packet to Controller: " + outgoingFingerStatePacket);
+            PrintTools.debug(this, "Sending FingerState Packet to Controller: " + outgoingFingerStatePacket);
       }
    }
 
@@ -112,7 +112,7 @@ public class FingerStateBehavior extends BehaviorInterface
       isPaused.set(true);
       
       if (DEBUG)
-         SysoutTool.println("Pausing Behavior");
+         PrintTools.debug(this, "Pausing Behavior");
    }
 
    @Override
@@ -125,7 +125,7 @@ public class FingerStateBehavior extends BehaviorInterface
          sendFingerStateToController();
       }
       if (DEBUG)
-         SysoutTool.println("Resuming Behavior");
+         PrintTools.debug(this, "Resuming Behavior");
    }
 
    @Override
@@ -144,7 +144,7 @@ public class FingerStateBehavior extends BehaviorInterface
    {
       if (hasInputBeenSet())
       {
-         SysoutTool.println("Re-Initializing Behavior");
+         PrintTools.debug(this, "Re-Initializing Behavior");
       }
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);

@@ -37,7 +37,6 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -479,7 +478,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
          if (DEBUG)
          {
-            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+            PrintTools.debug(this, armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
          assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(JOINT_POSITION_THRESHOLD)
                + " degrees.", q_desired, q_actual, JOINT_POSITION_THRESHOLD);

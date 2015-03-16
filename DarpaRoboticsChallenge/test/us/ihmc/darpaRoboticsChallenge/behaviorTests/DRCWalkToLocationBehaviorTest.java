@@ -190,7 +190,7 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
       WalkToLocationBehavior walkToLocationBehavior = createAndSetupWalkToLocationBehavior(desiredMidFeetPose2d, walkingOrientationRelativeToPathDirection);
       int numberOfFootsteps = walkToLocationBehavior.getNumberOfFootSteps();
       if (DEBUG)
-         SysoutTool.println("Number of Footsteps: " + numberOfFootsteps);
+         PrintTools.debug(this, "Number of Footsteps: " + numberOfFootsteps);
       assertTrue(numberOfFootsteps <= 4.0);
 
       PrintTools.debug(this, "Starting to Execute Behavior");
@@ -686,11 +686,11 @@ public abstract class DRCWalkToLocationBehaviorTest implements MultiRobotTestInt
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Midfeet Pose :\n" + desiredPose + "\n");
-         SysoutTool.println(" actual Midfeet Pose :\n" + actualPose + "\n");
+         PrintTools.debug(this, " desired Midfeet Pose :\n" + desiredPose + "\n");
+         PrintTools.debug(this, " actual Midfeet Pose :\n" + actualPose + "\n");
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);

@@ -25,7 +25,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WholeBodyInverseKinematicTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -133,8 +133,8 @@ public class GraspValveBehavior extends BehaviorInterface
 //
 //      if (DEBUG)
 //      {
-//         SysoutTool.println("graspClockwiseOffsetFromTwelveOClock : " + graspClockwiseOffsetFromTwelveOClock);
-//         SysoutTool.println("graspPose in valve frame : " + graspPose);
+//         PrintTools.debug(this, "graspClockwiseOffsetFromTwelveOClock : " + graspClockwiseOffsetFromTwelveOClock);
+//         PrintTools.debug(this, "graspPose in valve frame : " + graspPose);
 //      }
 //      graspPose.changeFrame(worldFrame);
 //
@@ -242,9 +242,9 @@ public class GraspValveBehavior extends BehaviorInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("graspClockwiseOffsetFromTwelveOClock : " + graspClockwiseOffsetFromTwelveOClock);
-         SysoutTool.println("preGraspHandFramePose in valve frame: " + preGraspHandFramePose);
-         SysoutTool.println("graspPose in valve frame : " + finalGraspHandFramePose);
+         PrintTools.debug(this, "graspClockwiseOffsetFromTwelveOClock : " + graspClockwiseOffsetFromTwelveOClock);
+         PrintTools.debug(this, "preGraspHandFramePose in valve frame: " + preGraspHandFramePose);
+         PrintTools.debug(this, "graspPose in valve frame : " + finalGraspHandFramePose);
       }
 
       preGraspHandFramePose.changeFrame(worldFrame);

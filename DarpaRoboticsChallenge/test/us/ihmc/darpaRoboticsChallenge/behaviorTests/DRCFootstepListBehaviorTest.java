@@ -42,7 +42,6 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -294,7 +293,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       if(DEBUG)
       for (double footStepLength : footStepLengths)
       {
-         SysoutTool.println("foot step length : " + footStepLength);
+         PrintTools.debug(this, "foot step length : " + footStepLength);
       }
       
       boolean footStepsAreTooFarApart = footstepListBehavior.areFootstepsTooFarApart(createFootstepDataList(desiredFootsteps), fullRobotModel, getRobotModel().getWalkingControllerParameters());
@@ -442,11 +441,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       if (DEBUG)
       {
-         SysoutTool.println(" desired Midfeet Pose :\n" + desiredPose + "\n");
-         SysoutTool.println(" actual Midfeet Pose :\n" + actualPose + "\n");
+         PrintTools.debug(this, " desired Midfeet Pose :\n" + desiredPose + "\n");
+         PrintTools.debug(this, " actual Midfeet Pose :\n" + actualPose + "\n");
 
-         SysoutTool.println(" positionDistance = " + positionDistance);
-         SysoutTool.println(" orientationDistance = " + orientationDistance);
+         PrintTools.debug(this, " positionDistance = " + positionDistance);
+         PrintTools.debug(this, " orientationDistance = " + orientationDistance);
       }
 
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);

@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -83,7 +83,7 @@ public class HandPoseListBehavior extends BehaviorInterface
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
-            SysoutTool.println(outgoingHandPoseListPacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
+            PrintTools.debug(this, outgoingHandPoseListPacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
       }
    }
@@ -93,8 +93,7 @@ public class HandPoseListBehavior extends BehaviorInterface
       if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPoseListPacket.getRobotSide()))
       {
          if (DEBUG)
-            SysoutTool.println("Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = "
-                  + yoTime.getDoubleValue());
+            PrintTools.debug(this, "Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = " + yoTime.getDoubleValue());
          status = handPoseStatus.getStatus();
          hasStatusBeenReceived.set(true);
       }
@@ -112,7 +111,7 @@ public class HandPoseListBehavior extends BehaviorInterface
          outgoingHandPoseListPacket.setDestination(PacketDestination.CONTROLLER);
 
          if (DEBUG)
-            SysoutTool.println("sending handPoseList packet to controller and network processor: " + outgoingHandPoseListPacket);
+            PrintTools.debug(this, "sending handPoseList packet to controller and network processor: " + outgoingHandPoseListPacket);
          
          sendPacketToController(outgoingHandPoseListPacket);
          sendPacketToNetworkProcessor(outgoingHandPoseListPacket);

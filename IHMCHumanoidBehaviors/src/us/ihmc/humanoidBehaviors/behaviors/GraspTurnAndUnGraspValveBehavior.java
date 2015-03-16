@@ -19,7 +19,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -166,8 +166,8 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
    @Override
    public void enableActions()
    {
-      SysoutTool.println("max wrist force : " + maxObservedWristForce);
-      SysoutTool.println("max capture point error : " + maxObservedCapturePointError);
+      PrintTools.debug(this, "max wrist force : " + maxObservedWristForce);
+      PrintTools.debug(this, "max capture point error : " + maxObservedCapturePointError);
    }
 
    @Override

@@ -45,7 +45,6 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -349,7 +348,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       graspValveBehavior.setGraspPose(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(), TurnValveBehavior.DEFAULT_GRASP_LOCATION, ValveTurnDirection.CLOCKWISE,
             TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE, Axis.X);
       FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
-      SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
+      PrintTools.debug(this, "Desired Final Grasp Pose: " + desiredGraspPose);
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspValveBehavior);
       assertPosesAreWithinThresholds(desiredGraspPose, getCurrentHandPose(robotSideOfGraspingHand));
@@ -391,7 +390,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       graspValveBehavior.setGraspPoseWholeBodyIK(robotSideOfGraspingHand, valveTransformToWorld, valveRobot.getValveRadius(),
             TurnValveBehavior.DEFAULT_GRASP_LOCATION, ValveTurnDirection.CLOCKWISE, TurnValveBehavior.DEFAULT_GRASP_APPROACH_CONE_ANGLE, Axis.X);
       FramePose desiredGraspPose = graspValveBehavior.getDesiredFinalGraspPose();
-      SysoutTool.println("Desired Final Grasp Pose: " + desiredGraspPose);
+      PrintTools.debug(this, "Desired Final Grasp Pose: " + desiredGraspPose);
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(graspValveBehavior);
       assertPosesAreWithinThresholds(desiredGraspPose, getCurrentHandPose(robotSideOfGraspingHand));

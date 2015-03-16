@@ -97,7 +97,7 @@ public class ScriptBehavior extends BehaviorInterface
    {
       this(outgoingCommunicationBridge, fullRobotModel, yoTime, null, null);
 
-      SysoutTool.println("Warning: FootPosePackets and FootstepDataList packets are not supported when using this constructor!");
+      PrintTools.debug(this, "Warning: FootPosePackets and FootstepDataList packets are not supported when using this constructor!");
    }
 
    public ScriptBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel, DoubleYoVariable yoTime,
@@ -149,7 +149,7 @@ public class ScriptBehavior extends BehaviorInterface
             @Override
             public void stateChanged(State<PrimitiveBehaviorType> oldState, State<PrimitiveBehaviorType> newState, double time)
             {
-               SysoutTool.println("Switching from: " + oldState.getStateEnum() + " to: " + newState.getStateEnum() + " at t = " + time);
+               PrintTools.debug(this, "Switching from: " + oldState.getStateEnum() + " to: " + newState.getStateEnum() + " at t = " + time);
             }
          });
       }
@@ -337,13 +337,13 @@ public class ScriptBehavior extends BehaviorInterface
 
       if (footPoseBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOT_POSE)
       {
-         SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootPosePackets!");
+         PrintTools.debug(this, "Must use more elaborate ScriptBehavior constructor in order to import FootPosePackets!");
          return false;
       }
 
       if (footstepListBehavior == null && getPrimitiveBehaviorType(inputPacket) == PrimitiveBehaviorType.FOOTSTEP_LIST)
       {
-         SysoutTool.println("Must use more elaborate ScriptBehavior constructor in order to import FootstepDataList packets!");
+         PrintTools.debug(this, "Must use more elaborate ScriptBehavior constructor in order to import FootstepDataList packets!");
          return false;
       }
 

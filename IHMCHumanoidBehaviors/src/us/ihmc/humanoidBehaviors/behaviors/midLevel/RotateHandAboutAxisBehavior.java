@@ -19,7 +19,6 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -105,12 +104,12 @@ public class RotateHandAboutAxisBehavior extends BehaviorInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("Current Hand Pose in World: " + currentHandPoseInWorld);
-         SysoutTool.println("Grasped Object Transform To World: " + graspedObjectTransformToWorld);
-         SysoutTool.println("Grasped Object Reference Frame: " + graspedObjectFrame);
-         SysoutTool.println("Total Desired Rotation In Radians: " + totalRotationInRadians);
-         SysoutTool.println("Number Of Discrete Hand Poses To Use: " + numberOfDiscreteHandPosesToUse);
-         SysoutTool.println("Trajectory Time Per Hand Pose: " + trajectoryTimePerHandPose);
+         PrintTools.debug(this, "Current Hand Pose in World: " + currentHandPoseInWorld);
+         PrintTools.debug(this, "Grasped Object Transform To World: " + graspedObjectTransformToWorld);
+         PrintTools.debug(this, "Grasped Object Reference Frame: " + graspedObjectFrame);
+         PrintTools.debug(this, "Total Desired Rotation In Radians: " + totalRotationInRadians);
+         PrintTools.debug(this, "Number Of Discrete Hand Poses To Use: " + numberOfDiscreteHandPosesToUse);
+         PrintTools.debug(this, "Trajectory Time Per Hand Pose: " + trajectoryTimePerHandPose);
       }
 
       ArrayList<FramePose> handPosesTangentToSemiCircularPath = copyHandPoseAndRotateAboutAxisRecursively(currentHandPoseInWorld, graspedObjectFrame,

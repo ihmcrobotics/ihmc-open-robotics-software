@@ -64,7 +64,6 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -746,7 +745,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
          if (DEBUG)
          {
-            SysoutTool.println(armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
+            PrintTools.debug(this, armJointName + " qDesired = " + q_desired + ".  qActual = " + q_actual + ".");
          }
          assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(jointPositionThreshold) + " degrees.", q_desired, q_actual, jointPositionThreshold);
       }
@@ -785,8 +784,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       if (DEBUG)
       {
-         SysoutTool.println("desiredHeightOffset: " + desiredHeightOffset);
-         SysoutTool.println("actualHeightOffset: " + actualHeightOffset);
+         PrintTools.debug(this, "desiredHeightOffset: " + desiredHeightOffset);
+         PrintTools.debug(this, "actualHeightOffset: " + actualHeightOffset);
       }
 
       assertEquals("Actual CoM Height Offset :" + actualHeightOffset + " does not match desired offset: " + desiredHeightOffset + " within threshold of " + DRCComHeightBehaviorTest.POSITION_THRESHOLD, desiredHeightOffset, actualHeightOffset, DRCComHeightBehaviorTest.POSITION_THRESHOLD);

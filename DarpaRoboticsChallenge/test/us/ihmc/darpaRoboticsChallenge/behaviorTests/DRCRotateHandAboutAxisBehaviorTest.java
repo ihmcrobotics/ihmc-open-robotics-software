@@ -39,7 +39,6 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -211,7 +210,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
    {
       for (int i = 0; i < numberOfArmJoints; i++)
       {
-         SysoutTool.println("desired q_" + armJointNames[i] + " : " + armJointAngles[i]);
+         PrintTools.debug(this, "desired q_" + armJointNames[i] + " : " + armJointAngles[i]);
       }
    }
 
@@ -313,7 +312,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
 
          double dotProduct = initialHandFrameAxesInWorld.get(i).dot(finalHandFrameAxesInWorld.get(i));
          if (DEBUG)
-            SysoutTool.println(currentAxis + "dotProduct : " + dotProduct);
+            PrintTools.debug(this, currentAxis + "dotProduct : " + dotProduct);
 
          if (Math.abs(dotProduct) > maxDotProduct)
          {
