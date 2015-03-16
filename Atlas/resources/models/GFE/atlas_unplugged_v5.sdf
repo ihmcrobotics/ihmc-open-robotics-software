@@ -3,15 +3,15 @@
     <link name='pelvis'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0.0113715 0 0.0268706 0 -0 0</pose>
-        <mass>17.982</mass>
+        <pose>0.011608 0 0.0266707 0 -0 0</pose>
+        <mass>9.609</mass>
         <inertia>
-          <ixx>0.125569</ixx>
+          <ixx>0.125568</ixx>
           <ixy>0.0008</ixy>
-          <ixz>-0.000499757</ixz>
-          <iyy>0.0972062</iyy>
+          <ixz>-0.000500733</ixz>
+          <iyy>0.0972042</iyy>
           <iyz>-0.0005</iyz>
-          <izz>0.117937</izz>
+          <izz>0.117936</izz>
         </inertia>
       </inertial>
       <collision name='pelvis_collision'>
@@ -161,7 +161,7 @@
       <pose>-0.0125 0 0 0 -0 0</pose>
       <inertial>
         <pose>-0.0112984 -3.15366e-06 0.0746835 0 -0 0</pose>
-        <mass>2.409</mass>
+        <mass>2.27</mass>
         <inertia>
           <ixx>0.0039092</ixx>
           <ixy>-5.04491e-08</ixy>
@@ -218,7 +218,7 @@
       <pose>-0.0125 0 0.162 0 -0 0</pose>
       <inertial>
         <pose>-0.00816266 -0.0131245 0.0305974 0 -0 0</pose>
-        <mass>0.69</mass>
+        <mass>0.799</mass>
         <inertia>
           <ixx>0.000454181</ixx>
           <ixy>-6.10764e-05</ixy>
@@ -294,22 +294,22 @@
     <link name='utorso'>
       <pose>-0.0125 0 0.212 0 -0 0</pose>
       <inertial>
-        <pose>-0.0574333 0 0.3071 0 -0 0</pose>
-        <mass>63.93</mass>
+        <pose>-0.0616866 0.00229456 0.316809 0 -0 0</pose>
+        <mass>84.609</mass>
         <inertia>
-          <ixx>1.51477</ixx>
-          <ixy>0.00362</ixy>
-          <ixz>0.315632</ixz>
-          <iyy>1.56489</iyy>
-          <iyz>0.001</iyz>
-          <izz>1.312</izz>
+          <ixx>1.62389</ixx>
+          <ixy>-0.0319003</ixy>
+          <ixz>0.0816618</ixz>
+          <iyy>1.65538</iyy>
+          <iyz>0.0472154</iyz>
+          <izz>0.577362</izz>
         </inertia>
       </inertial>
       <collision name='utorso_collision'>
-        <pose>-0.052 0 0.25 0 -0 0</pose>
+        <pose>-0.102 0 0.25 0 -0 0</pose>
         <geometry>
           <box>
-            <size>0.500175 0.35 0.5</size>
+            <size>0.4 0.35 0.5</size>
           </box>
         </geometry>
         <surface>
@@ -325,10 +325,10 @@
         </surface>
       </collision>
       <collision name='utorso_collision_utorso_1'>
-        <pose>0.2 0 0.26 3.14159 1.44159 3.14159</pose>
+        <pose>0.2 0 0.46 0 1.5707 0</pose>
         <geometry>
           <box>
-            <size>0.50175 0.35 0.1</size>
+            <size>0.13 0.5 0.1</size>
           </box>
         </geometry>
         <surface>
@@ -344,10 +344,10 @@
         </surface>
       </collision>
       <collision name='utorso_collision_utorso_2'>
-        <pose>-0.06 0 0.6265 0 -0 0</pose>
+        <pose>0.2 0 0.285 3.14159 1.44159 3.14159</pose>
         <geometry>
           <box>
-            <size>0.456306 0.341719 0.12</size>
+            <size>0.2 0.23 0.1</size>
           </box>
         </geometry>
         <surface>
@@ -363,6 +363,44 @@
         </surface>
       </collision>
       <collision name='utorso_collision_utorso_3'>
+        <pose>0.15 0 0.1 3.14159 1.14159 3.14159</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.18 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_4'>
+        <pose>-0.035 0 0.6265 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.506306 0.341719 0.12</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_5'>
         <pose>0.208 0 0.8215 1.5707 -0 0</pose>
         <geometry>
           <cylinder>
@@ -382,7 +420,127 @@
           </friction>
         </surface>
       </collision>
-      <collision name='utorso_collision_utorso_4'>
+      <collision name='utorso_collision_utorso_6'>
+        <pose>0.208 -0.125 0.745 -0.38535 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_7'>
+        <pose>0.208 0.125 0.745 0.38535 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_8'>
+        <pose>0.063 -0.125 0.745 -0.38535 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_9'>
+        <pose>0.063 0.125 0.745 0.38535 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_10'>
+        <pose>0.14 0.06 0.8215 1.5707 5.55112e-17 1.5707</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_11'>
+        <pose>0.14 -0.06 0.8215 1.5707 5.55112e-17 1.5707</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_12'>
         <pose>-0.029 0 0.731 0 -0.65 0</pose>
         <geometry>
           <box>
@@ -401,7 +559,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='utorso_collision_utorso_5'>
+      <collision name='utorso_collision_utorso_13'>
         <pose>0.063 0 0.8215 1.5707 -0 0</pose>
         <geometry>
           <cylinder>
@@ -421,12 +579,12 @@
           </friction>
         </surface>
       </collision>
-      <collision name='utorso_collision_utorso_6'>
+      <collision name='utorso_collision_utorso_14'>
         <pose>0.261 0.156 0.6215 1.5707 -0 0</pose>
         <geometry>
           <cylinder>
             <length>0.016</length>
-            <radius>0.05</radius>
+            <radius>0.055</radius>
           </cylinder>
         </geometry>
         <surface>
@@ -441,12 +599,12 @@
           </friction>
         </surface>
       </collision>
-      <collision name='utorso_collision_utorso_7'>
+      <collision name='utorso_collision_utorso_15'>
         <pose>0.261 -0.156 0.6215 1.5707 -0 0</pose>
         <geometry>
           <cylinder>
             <length>0.016</length>
-            <radius>0.05</radius>
+            <radius>0.055</radius>
           </cylinder>
         </geometry>
         <surface>
@@ -598,7 +756,7 @@
       <pose>0.1281 0.2256 0.6896 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.084 0 -0 0</pose>
-        <mass>3.45</mass>
+        <mass>4.466</mass>
         <inertia>
           <ixx>0.011</ixx>
           <ixy>0</ixy>
@@ -714,7 +872,7 @@
       <pose>0.1281 0.3356 0.4446 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>3.012</mass>
+        <mass>3.899</mass>
         <inertia>
           <ixx>0.00319</ixx>
           <ixy>0</ixy>
@@ -847,8 +1005,8 @@
     <link name='l_uarm'>
       <pose>0.1281 0.5226 0.4286 0 -0 0</pose>
       <inertial>
-        <pose>0 0.065 0 0 -0 0</pose>
-        <mass>3.388</mass>
+        <pose>0 -0.065 0 0 -0 0</pose>
+        <mass>4.386</mass>
         <inertia>
           <ixx>0.00656</ixx>
           <ixy>0</ixy>
@@ -944,7 +1102,7 @@
       <pose>0.1281 0.6416 0.4378 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>2.509</mass>
+        <mass>3.248</mass>
         <inertia>
           <ixx>0.00265</ixx>
           <ixy>0</ixy>
@@ -1734,7 +1892,7 @@
       <pose>0.1281 -0.2256 0.6896 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.084 0 -0 0</pose>
-        <mass>3.45</mass>
+        <mass>4.466</mass>
         <inertia>
           <ixx>0.011</ixx>
           <ixy>0</ixy>
@@ -1850,7 +2008,7 @@
       <pose>0.1281 -0.3356 0.4446 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>3.012</mass>
+        <mass>3.899</mass>
         <inertia>
           <ixx>0.00319</ixx>
           <ixy>0</ixy>
@@ -1984,7 +2142,7 @@
       <pose>0.1281 -0.5226 0.4286 0 -0 0</pose>
       <inertial>
         <pose>0 0.065 0 0 -0 0</pose>
-        <mass>3.388</mass>
+        <mass>4.386</mass>
         <inertia>
           <ixx>0.00656</ixx>
           <ixy>0</ixy>
@@ -2080,7 +2238,7 @@
       <pose>0.1281 -0.6416 0.4378 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>2.509</mass>
+        <mass>3.248</mass>
         <inertia>
           <ixx>0.00265</ixx>
           <ixy>0</ixy>
@@ -2556,7 +2714,7 @@
       <pose>0 0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.00529262 -0.00344732 0.00313046 0 -0 0</pose>
-        <mass>0.648</mass>
+        <mass>1.959</mass>
         <inertia>
           <ixx>0.00074276</ixx>
           <ixy>-3.79607e-08</ixy>
@@ -2567,12 +2725,11 @@
         </inertia>
       </inertial>
       <collision name='l_uglut_collision'>
-        <pose>0 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <pose>0.01 0.005 0 0.52539 -0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.078396</length>
-            <radius>0.019096</radius>
-          </cylinder>
+          <box>
+            <size>0.05 0.1 0.1</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -2653,7 +2810,7 @@
       <pose>0 0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.0133341 0.0170484 -0.0312052 0 -0 0</pose>
-        <mass>0.866</mass>
+        <mass>0.898</mass>
         <inertia>
           <ixx>0.000691326</ixx>
           <ixy>-2.24344e-05</ixy>
@@ -2664,6 +2821,25 @@
         </inertia>
       </inertial>
       <collision name='l_lglut_collision'>
+        <pose>0.015 0.026 -0.028 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.125 0.05 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_lglut_collision_l_lglut_1'>
         <pose>0.05 0.027488 -0.067 1.5708 -0 0</pose>
         <geometry>
           <cylinder>
@@ -2683,7 +2859,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='l_lglut_collision_l_lglut_1'>
+      <collision name='l_lglut_collision_l_lglut_2'>
         <pose>0.0115 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
         <geometry>
           <cylinder>
@@ -2703,7 +2879,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='l_lglut_collision_l_lglut_2'>
+      <collision name='l_lglut_collision_l_lglut_3'>
         <pose>0.01 0.02 0.01 0 -0 0</pose>
         <geometry>
           <box>
@@ -2769,7 +2945,7 @@
       <pose>0.05 0.1115 -0.066 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.21 0 -0 0</pose>
-        <mass>9.209</mass>
+        <mass>8.204</mass>
         <inertia>
           <ixx>0.09</ixx>
           <ixy>0</ixy>
@@ -2924,7 +3100,7 @@
       <pose>0 0.1115 -0.44 0 -0 0</pose>
       <inertial>
         <pose>0.001 0 -0.187 0 -0 0</pose>
-        <mass>5.479</mass>
+        <mass>4.515</mass>
         <inertia>
           <ixx>0.077</ixx>
           <ixy>0</ixy>
@@ -3098,7 +3274,7 @@
       <pose>0 0.1115 -0.862 0 -0 0</pose>
       <inertial>
         <pose>0.027 0 -0.067 0 -0 0</pose>
-        <mass>2.05</mass>
+        <mass>2.41</mass>
         <inertia>
           <ixx>0.002</ixx>
           <ixy>0</ixy>
@@ -3232,7 +3408,7 @@
       <pose>0 -0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.00529262 0.00344732 0.00313046 0 -0 0</pose>
-        <mass>0.648</mass>
+        <mass>1.959</mass>
         <inertia>
           <ixx>0.00074276</ixx>
           <ixy>3.79607e-08</ixy>
@@ -3243,12 +3419,11 @@
         </inertia>
       </inertial>
       <collision name='r_uglut_collision'>
-        <pose>0 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <pose>0.01 -0.005 0 -0.52539 0 0</pose>
         <geometry>
-          <cylinder>
-            <length>0.078396</length>
-            <radius>0.019096</radius>
-          </cylinder>
+          <box>
+            <size>0.05 0.1 0.1</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -3329,7 +3504,7 @@
       <pose>0 -0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.0133341 -0.0170484 -0.0312052 0 -0 0</pose>
-        <mass>0.866</mass>
+        <mass>0.898</mass>
         <inertia>
           <ixx>0.000691326</ixx>
           <ixy>2.24344e-05</ixy>
@@ -3340,6 +3515,25 @@
         </inertia>
       </inertial>
       <collision name='r_lglut_collision'>
+        <pose>0.015 -0.026 -0.028 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.125 0.05 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_lglut_collision_r_lglut_1'>
         <pose>0.05 -0.027488 -0.067 1.5708 -0 0</pose>
         <geometry>
           <cylinder>
@@ -3359,7 +3553,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='r_lglut_collision_r_lglut_1'>
+      <collision name='r_lglut_collision_r_lglut_2'>
         <pose>0.0105 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
         <geometry>
           <cylinder>
@@ -3379,7 +3573,7 @@
           </friction>
         </surface>
       </collision>
-      <collision name='r_lglut_collision_r_lglut_2'>
+      <collision name='r_lglut_collision_r_lglut_3'>
         <pose>0.01 -0.02 0.01 0 -0 0</pose>
         <geometry>
           <box>
@@ -3445,7 +3639,7 @@
       <pose>0.05 -0.1115 -0.066 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.21 0 -0 0</pose>
-        <mass>9.209</mass>
+        <mass>8.204</mass>
         <inertia>
           <ixx>0.09</ixx>
           <ixy>0</ixy>
@@ -3600,7 +3794,7 @@
       <pose>0 -0.1115 -0.44 0 -0 0</pose>
       <inertial>
         <pose>0.001 0 -0.187 0 -0 0</pose>
-        <mass>5.479</mass>
+        <mass>4.515</mass>
         <inertia>
           <ixx>0.077</ixx>
           <ixy>-0</ixy>
@@ -3774,7 +3968,7 @@
       <pose>0 -0.1115 -0.862 0 -0 0</pose>
       <inertial>
         <pose>0.027 0 -0.067 0 -0 0</pose>
-        <mass>2.05</mass>
+        <mass>2.41</mass>
         <inertia>
           <ixx>0.002</ixx>
           <ixy>0</ixy>
