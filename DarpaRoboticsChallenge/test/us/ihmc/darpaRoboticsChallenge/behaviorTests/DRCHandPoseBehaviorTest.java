@@ -36,6 +36,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -129,19 +130,19 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       double[] desiredArmPose = createRandomArmPose(robotSide);
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredArmPose);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, desiredArmPose);
@@ -156,45 +157,45 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Setting Hand Pose Behavior Input in Joint Space", DEBUG);
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Joint Space");
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredJointSpaceHandPose);
 
-      SysoutTool.println("Starting Joint Space Hand Pose Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Joint Space Hand Pose Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Joint Space Hand Pose Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Joint Space Hand Pose Behavior Should Be Done");
 
       assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, desiredJointSpaceHandPose);
       assertTrue(handPoseBehavior.isDone());
 
-      SysoutTool.println("Recording HandPose Acheived in Joint Space", DEBUG);
+      PrintTools.debug(this, "Recording HandPose Acheived in Joint Space");
       FramePose handPoseAcheivedInJointSpace = getCurrentHandPose(robotSide);
 
       HandPosePacket goToHomePacket = PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime);
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(goToHomePacket);
-      SysoutTool.println("Moving arm back to home pose", DEBUG);
+      PrintTools.debug(this, "Moving arm back to home pose");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Arm should be back to home pose", DEBUG);
+      PrintTools.debug(this, "Arm should be back to home pose");
       assertTrue(success);
 
-      SysoutTool.println("Setting Hand Pose Behavior Input in Task Space", DEBUG);
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Task Space");
       RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
       handPoseAcheivedInJointSpace.getPose(handPoseTargetTransform);
       handPoseBehavior.initialize();
       handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
       assertTrue(handPoseBehavior.hasInputBeenSet());
 
-      SysoutTool.println("Starting Task Space Hand Pose Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Task Space Hand Pose Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Task Space Hand Pose Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Task Space Hand Pose Behavior Should Be Done");
 
       assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, handPoseAcheivedInJointSpace);
@@ -209,11 +210,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       RobotSide robotSide = RobotSide.LEFT;
       FramePose handPoseStart = getCurrentHandPose(robotSide);
       FramePose handPoseTarget = new FramePose(handPoseStart);
@@ -222,9 +223,9 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double swingTrajectoryTime = 2.0;
       final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, swingTrajectoryTime, handPoseTarget);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       assertTrue(success);
       double positionDistance = handPoseStart.getPositionDistance(handPoseTarget);
@@ -242,11 +243,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Initializing Behaviors", DEBUG);
+      PrintTools.debug(this, "Initializing Behaviors");
       double trajectoryTime = 3.0;
       SideDependentList<double[]> desiredArmPoses = new SideDependentList<double[]>();
       SideDependentList<BehaviorInterface> handPoseBehaviors = new SideDependentList<BehaviorInterface>();
@@ -260,9 +261,9 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
          handPoseBehaviors.put(robotSide, handPoseBehavior);
       }
 
-      SysoutTool.println("Starting Behaviors", DEBUG);
+      PrintTools.debug(this, "Starting Behaviors");
       success = drcBehaviorTestHelper.executeBehaviorsSimulateAndBlockAndCatchExceptions(handPoseBehaviors, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
-      SysoutTool.println("Behaviors Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behaviors Should Be Done");
 
       assertTrue(success);
       for (RobotSide robotSide : RobotSide.values)
@@ -283,11 +284,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       final RobotSide robotSide = RobotSide.LEFT;
       double[] handPoseTarget = createRandomArmPose(robotSide);
       double trajectoryTime = 4.0;
@@ -298,10 +299,10 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
       double resumeTime = 2.0;
       double stopTime = Double.POSITIVE_INFINITY;
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       StopThreadUpdatable stopThreadUpdatable = drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(handPoseBehavior, pauseTime, resumeTime, stopTime,
             frameToKeepTrackOf);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       FramePose handPoseAtPauseStart = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.PAUSE);
       FramePose handPoseAtPauseEnd = stopThreadUpdatable.getTestFramePoseCopyAtTransition(HumanoidBehaviorControlModeEnum.RESUME);
@@ -318,11 +319,11 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       final RobotSide robotSide = RobotSide.LEFT;
       double[] handPoseTarget = createRandomArmPose(robotSide);
       double trajectoryTime = 4.0;

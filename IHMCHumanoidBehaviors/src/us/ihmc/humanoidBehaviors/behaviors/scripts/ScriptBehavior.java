@@ -46,6 +46,7 @@ import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterf
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateWrapper;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -204,7 +205,7 @@ public class ScriptBehavior extends BehaviorInterface
             boolean isDone = behaviorState.isDone();
             if (isDone)
             {
-               SysoutTool.println(behaviorState.getBehavior().getName() + " is Done", DEBUG);
+               PrintTools.debug(this, behaviorState.getBehavior().getName() + " is Done");
             }
             return isDone;
          }
@@ -279,7 +280,7 @@ public class ScriptBehavior extends BehaviorInterface
    {
       if (scriptResourceStream != null && transformToWorld != null)
       {
-         SysoutTool.println("Starting Importing " + scriptFileName, DEBUG);
+         PrintTools.debug(this, "Starting Importing " + scriptFileName);
 
          if (childInputPackets == null)
             childInputPackets = new ArrayList<ScriptObject>();
@@ -288,7 +289,7 @@ public class ScriptBehavior extends BehaviorInterface
 
          this.behaviorOriginTransformToWorld = transformToWorld;
 
-         SysoutTool.println("Finishing Importing " + scriptFileName, DEBUG);
+         PrintTools.debug(this, "Finishing Importing " + scriptFileName);
 
          scriptIndex = 0;
          scriptStatus = ScriptBehaviorStatusEnum.SCRIPT_LOADED;
@@ -302,7 +303,7 @@ public class ScriptBehavior extends BehaviorInterface
       else
       {
 
-         SysoutTool.println("Script Resource Stream is null. Can't load script!", DEBUG);
+         PrintTools.debug(this, "Script Resource Stream is null. Can't load script!");
          scriptImported.set(false);
       }
    }
@@ -312,7 +313,7 @@ public class ScriptBehavior extends BehaviorInterface
       int numberOfEndOfScriptCommands = 0;
       for (ScriptObject inputPacket : packetsToAdd)
       {
-         SysoutTool.println(" Importing child : " + inputPacket.toString() + " to script behavior", DEBUG);
+         PrintTools.debug(this, " Importing child : " + inputPacket.toString() + " to script behavior");
 
          if (inputPacket.getScriptObject() instanceof EndOfScriptCommand)
          {
@@ -374,7 +375,7 @@ public class ScriptBehavior extends BehaviorInterface
             scriptFinished.set(true);
             scriptStatus = ScriptBehaviorStatusEnum.FINISHED;
 
-            SysoutTool.println("End of script", DEBUG);
+            PrintTools.debug(this, "End of script");
          }
          else
          {
@@ -384,7 +385,7 @@ public class ScriptBehavior extends BehaviorInterface
             PrimitiveBehaviorType behaviorType = getPrimitiveBehaviorType(inputPacket);
             requestedState.set(behaviorType);
 
-            SysoutTool.println("Requesting Behavior State : " + behaviorType, DEBUG);
+            PrintTools.debug(this, "Requesting Behavior State : " + behaviorType);
          }
       }
    }
@@ -539,14 +540,14 @@ public class ScriptBehavior extends BehaviorInterface
       else
       {
 
-         SysoutTool.println("FAILED TO SET BEHAVIOR INPUT", DEBUG);
+         PrintTools.debug(this, "FAILED TO SET BEHAVIOR INPUT");
       }
    }
 
    @Override
    public void initialize()
    {
-      SysoutTool.println("Initializing", DEBUG);
+      PrintTools.debug(this, "Initializing");
       scriptImported.set(false);
       scriptFinished.set(false);
       behaviorOriginTransformToWorld = null;
@@ -561,21 +562,21 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public void pause()
    {
-      SysoutTool.println("Pausing", DEBUG);
+      PrintTools.debug(this, "Pausing");
       stateMachine.pause();
    }
 
    @Override
    public void resume()
    {
-      SysoutTool.println("Resuming", DEBUG);
+      PrintTools.debug(this, "Resuming");
       stateMachine.resume();
    }
 
    @Override
    public void stop()
    {
-      SysoutTool.println("Stopping", DEBUG);
+      PrintTools.debug(this, "Stopping");
       stateMachine.stop();
       scriptFinished.set(true);
       finalize();
@@ -588,7 +589,7 @@ public class ScriptBehavior extends BehaviorInterface
    @Override
    public void finalize()
    {
-      SysoutTool.println("Finalizing", DEBUG);
+      PrintTools.debug(this, "Finalizing");
       scriptImported.set(false);
       scriptFinished.set(false);
       behaviorOriginTransformToWorld = null;

@@ -35,7 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -108,7 +108,7 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
    public void testHandLoadBearingBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       ScriptedHandstepGenerator scriptedHandstepGenerator = drcBehaviorTestHelper.createScriptedHandstepGenerator();
@@ -134,7 +134,7 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
          handstep.getSurfaceNormal(surfaceNormal);
 
          HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(), location, orientation, surfaceNormal, handstep.getSwingTrajectoryTime());
-         SysoutTool.println("Sending Handstep Packet to Controller", DEBUG);
+         PrintTools.debug(this, "Sending Handstep Packet to Controller");
          drcBehaviorTestHelper.getBehaviorCommunicationBridge().sendPacketToController(handstepPacket);
          success = success && drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       }
@@ -144,16 +144,16 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
 
       final HandLoadBearingBehavior handLoadBearingBehavior = new HandLoadBearingBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       HandLoadBearingPacket handLoadBearingPacket = new HandLoadBearingPacket(robotSide, true);
       handLoadBearingBehavior.initialize();
       handLoadBearingBehavior.setInput(handLoadBearingPacket);
       assertTrue(handLoadBearingBehavior.hasInputBeenSet());
 
-      SysoutTool.println("Starting to Execute Behavior", DEBUG);
+      PrintTools.debug(this, "Starting to Execute Behavior");
       success &= drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(handLoadBearingBehavior, swingTrajectoryTime
             + EXTRA_SIM_TIME_FOR_SETTLING);
-      SysoutTool.println("Behavior Should be done", DEBUG);
+      PrintTools.debug(this, "Behavior Should be done");
 
       assertTrue(leftHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));
       assertTrue(rightHandControlModule.getEnumValue().equals(HandControlState.LOAD_BEARING));

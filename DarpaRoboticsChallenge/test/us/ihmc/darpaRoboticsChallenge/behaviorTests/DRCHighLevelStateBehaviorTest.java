@@ -29,7 +29,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInterface
@@ -120,7 +120,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       {
          String jointName = joint.getName();
          double tau = joint.getTau().getDoubleValue();
-         SysoutTool.println(joint.getName() + " tau : " + tau, DEBUG);
+         PrintTools.debug(this, joint.getName() + " tau : " + tau);
 
          if (!jointName.contains("hokuyo"))
          {

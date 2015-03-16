@@ -36,12 +36,12 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FramePose2d;
@@ -51,7 +51,6 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInterface
@@ -124,11 +123,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Dispatching Behavior", DEBUG);
+      PrintTools.debug(this, "Dispatching Behavior");
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
@@ -147,7 +146,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps));
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
@@ -155,7 +154,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(footstepListBehavior.hasInputBeenSet());
       assertTrue(footstepListBehavior.isWalking());
 
-      SysoutTool.println("Begin Executing Behavior", DEBUG);
+      PrintTools.debug(this, "Begin Executing Behavior");
       while (!footstepListBehavior.isDone())
       {
          success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -163,7 +162,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!footstepListBehavior.isWalking());
       assertTrue(footstepListBehavior.isDone());
-      SysoutTool.println("Behavior should be done", DEBUG);
+      PrintTools.debug(this, "Behavior should be done");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -180,11 +179,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      SysoutTool.println("Dispatching Behavior", DEBUG);
+      PrintTools.debug(this, "Dispatching Behavior");
       drcBehaviorTestHelper.updateRobotModel();
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
@@ -204,7 +203,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps));
       
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
@@ -212,7 +211,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       assertTrue(footstepListBehavior.hasInputBeenSet());
       assertTrue(footstepListBehavior.isWalking());
 
-      SysoutTool.println("Begin Executing Behavior", DEBUG);
+      PrintTools.debug(this, "Begin Executing Behavior");
       while (!footstepListBehavior.isDone())
       {
          success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -220,7 +219,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       }
       assertTrue(!footstepListBehavior.isWalking());
       assertTrue(footstepListBehavior.isDone());
-      SysoutTool.println("Behavior should be done", DEBUG);
+      PrintTools.debug(this, "Behavior should be done");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -237,7 +236,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -248,7 +247,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
          initialFootPoses.put(robotSide, initialFootPose);
       }
 
-      SysoutTool.println("Dispatching Behavior", DEBUG);
+      PrintTools.debug(this, "Dispatching Behavior");
       FootstepListBehavior footstepListBehavior = new FootstepListBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), getRobotModel().getWalkingControllerParameters());
       drcBehaviorTestHelper.dispatchBehavior(footstepListBehavior);
 
@@ -309,7 +308,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Sim", DEBUG);
+      PrintTools.debug(this, "Initializing Sim");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -334,11 +333,11 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       areFootstepsTooFarApart(footstepListBehavior, desiredFootsteps);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       footstepListBehavior.initialize();
       footstepListBehavior.set(desiredFootsteps);
 
-      SysoutTool.println("Begin Executing Behavior", DEBUG);
+      PrintTools.debug(this, "Begin Executing Behavior");
       double pausePercent = Double.POSITIVE_INFINITY;
       double pauseDuration = Double.POSITIVE_INFINITY;
       double stepNumberToStopOn = desiredFootsteps.size() - 1.0;
@@ -347,7 +346,7 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       StopThreadUpdatable stopThreadUpdatable = new TrajectoryBasedStopThreadUpdatable(robotDataReceiver, footstepListBehavior, pausePercent, pauseDuration,
             stopPercent, desiredFinalFootPoses.get(RobotSide.LEFT), frameToKeepTrackOf);
       drcBehaviorTestHelper.executeBehaviorPauseAndResumeOrStop(footstepListBehavior, stopThreadUpdatable);
-      SysoutTool.println("Behavior should be done", DEBUG);
+      PrintTools.debug(this, "Behavior should be done");
 
       SideDependentList<FramePose2d> footPosesAtStop = new SideDependentList<FramePose2d>();
       for (RobotSide robotSide : RobotSide.values)

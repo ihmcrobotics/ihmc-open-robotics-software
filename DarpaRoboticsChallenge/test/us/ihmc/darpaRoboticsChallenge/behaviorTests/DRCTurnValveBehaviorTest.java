@@ -44,6 +44,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -142,8 +143,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
@@ -192,8 +193,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
@@ -241,8 +242,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
@@ -289,8 +290,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       double turnValveThisMuchToCloseIt = valveRobot.getNumberOfPossibleTurns() * 2.0 * Math.PI * (1.0 - initialValveClosePercentage / 100.0);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final TurnValveBehavior turnValveBehavior = createNewTurnValveBehavior();
 
@@ -342,8 +343,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
             drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
@@ -384,8 +385,8 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       valveRobot.getBodyTransformToWorld(valveTransformToWorld);
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame(), valveTransformToWorld);
-      SysoutTool.println("Valve Pose = " + valvePose, DEBUG);
-      SysoutTool.println("Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()), DEBUG);
+      PrintTools.debug(this, "Valve Pose = " + valvePose);
+      PrintTools.debug(this, "Robot Pose = " + getRobotPose(drcBehaviorTestHelper.getReferenceFrames()));
 
       final GraspValveBehavior graspValveBehavior = new GraspValveBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
             drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());

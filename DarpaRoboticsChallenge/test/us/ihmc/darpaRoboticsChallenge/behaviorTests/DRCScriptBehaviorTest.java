@@ -32,11 +32,8 @@ import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -66,6 +63,7 @@ import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.SimplePathParam
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation2d;
@@ -181,7 +179,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -195,9 +193,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       recordScriptFile(comHeightPacket, fileName);
       
-      SysoutTool.println("Initializing Behavior and Executing It", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior and Executing It");
       ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       assertTrue(scriptBehavior.isDone());
       assertProperHeightOffset(desiredFinalHeightOffset);
@@ -211,7 +209,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -231,22 +229,22 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptPackets.add(comHeightPacket1);
       recordScriptFile(scriptPackets, fileName);
       
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime);
       assertTrue(success);
       
-      SysoutTool.println("Checking that first script packet executed properly", DEBUG);
+      PrintTools.debug(this, "Checking that first script packet executed properly");
       assertProperHeightOffset(desiredIntermediateHeightOffset);
       assertTrue(!scriptBehavior.isDone());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
-      SysoutTool.println("Checking that second script packet executed properly", DEBUG);
+      PrintTools.debug(this, "Checking that second script packet executed properly");
       assertProperHeightOffset(desiredFinalHeightOffset);
       assertTrue(scriptBehavior.isDone());
 
@@ -259,7 +257,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -280,15 +278,15 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptPackets.add(handPosePacket);
       recordScriptFile(scriptPackets, fileName);
       
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       double[] initialHandPose = getCurrentArmPose(handPosePacket.getRobotSide());
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, 0.9 * trajectoryTime);
       assertTrue(success);
 
-      SysoutTool.println("Stopping Behavior", DEBUG);
+      PrintTools.debug(this, "Stopping Behavior");
       scriptBehavior.stop();
       assertProperHeightOffset(desiredHeightOffset);
 
@@ -308,7 +306,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -329,17 +327,17 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptPackets.add(handPosePacket);
       recordScriptFile(scriptPackets, fileName);
       
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       double[] initialArmPose = getCurrentArmPose(handPoseSide);
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, 0.99 * trajectoryTime);
       assertTrue(success);
 
-      SysoutTool.println("Pausing Behavior", DEBUG);
+      PrintTools.debug(this, "Pausing Behavior");
       scriptBehavior.pause();
-      SysoutTool.println("Waiting for Robot To Settle", DEBUG);
+      PrintTools.debug(this, "Waiting for Robot To Settle");
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
       assertProperHeightOffset(desiredIntermediateHeightOffset);
@@ -350,11 +348,11 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       assertHandPosePacketDidNotExecute(handPoseSide, initialArmPose, handPosePacket);
       assertTrue(!scriptBehavior.isDone());
 
-      SysoutTool.println("Resuming Behavior", DEBUG);
+      PrintTools.debug(this, "Resuming Behavior");
       scriptBehavior.resume();
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       
       double[] finalArmPose = getCurrentArmPose(handPoseSide);
@@ -370,7 +368,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -384,9 +382,9 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptPackets.add(handPosePacket);
 
       recordScriptFile(scriptPackets, fileName);
-      SysoutTool.println("Initializing and Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing and Starting Behavior");
       ScriptBehavior scriptBehavior = setupNewScriptBehaviorAndTestIt(file, trajectoryTime);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       assertTrue(scriptBehavior.isDone());
 
@@ -402,7 +400,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -424,29 +422,29 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       scriptPackets.add(handPosePacket2);
       recordScriptFile(scriptPackets, fileName);
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       ScriptBehavior scriptBehavior = setupNewScriptBehavior(file);
 
-      SysoutTool.println("Start Executing Behavior", DEBUG);
+      PrintTools.debug(this, "Start Executing Behavior");
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime1);
       assertTrue(success);
       
-      SysoutTool.println("Allow robot to settle by sending trivial pelvis pose packet", DEBUG);
+      PrintTools.debug(this, "Allow robot to settle by sending trivial pelvis pose packet");
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trivialPacketToAllowRobotToSettle.getTrajectoryTime());
       assertTrue(success);
       
-      SysoutTool.println("Checking that first script packet executed properly", DEBUG);
+      PrintTools.debug(this, "Checking that first script packet executed properly");
       double[] armPoseAfterHandPosePacket1 = getCurrentArmPose(robotSide);
       assertArmPosesAreWithinThresholds(desiredArmPose1, armPoseAfterHandPosePacket1, robotSide);
       assertTrue(!scriptBehavior.isDone());
 
-      SysoutTool.println("Continue Executing Behavior", DEBUG);
+      PrintTools.debug(this, "Continue Executing Behavior");
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(scriptBehavior, trajectoryTime2 + EXTRA_SIM_TIME_FOR_SETTLING);
       assertTrue(success);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
 
       
-      SysoutTool.println("Checking that last script packet executed properly", DEBUG);
+      PrintTools.debug(this, "Checking that last script packet executed properly");
       double[] armPoseAfterHandPosePacket2 = getCurrentArmPose(robotSide);
       assertArmPosesAreWithinThresholds(desiredArmPose2, armPoseAfterHandPosePacket2, robotSide);
       assertTrue(scriptBehavior.isDone());
@@ -564,7 +562,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       Point3d desiredHandPosition = new Point3d();
       currentHandPose.getPosition(desiredHandPosition);
       desiredHandPosition.setZ(desiredHandPosition.getZ() + 0.1);
-      SysoutTool.println("desired Hand Position : " + desiredHandPosition, DEBUG);
+      PrintTools.debug(this, "desired Hand Position : " + desiredHandPosition);
 
       Quat4d desiredHandOrientation = new Quat4d();
       currentHandPose.getOrientation(desiredHandOrientation);
@@ -651,7 +649,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       {
          double q = fingerJoint.getQ().getDoubleValue();
          totalFingerJointQ += q;
-         SysoutTool.println(fingerJoint.getName() + " q : " + q, DEBUG);
+         PrintTools.debug(this, fingerJoint.getName() + " q : " + q);
       }
 
       return totalFingerJointQ;
@@ -816,7 +814,7 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
 
       double orientationDistance = desiredPose.getOrientationDistance(actualPose);
 
-      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
+      PrintTools.debug(this, "orientationDistance=" + orientationDistance);
 
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);
    }
@@ -826,8 +824,8 @@ public abstract class DRCScriptBehaviorTest implements MultiRobotTestInterface
       double positionDistance = framePose1.getPositionDistance(framePose2);
       double orientationDistance = framePose1.getOrientationDistance(framePose2);
 
-      SysoutTool.println("positionDistance=" + positionDistance, DEBUG);
-      SysoutTool.println("orientationDistance=" + orientationDistance, DEBUG);
+      PrintTools.debug(this, "positionDistance=" + positionDistance);
+      PrintTools.debug(this, "orientationDistance=" + orientationDistance);
       
       assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + POSITION_THRESHOLD, 0.0, positionDistance, POSITION_THRESHOLD);
       assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + ORIENTATION_THRESHOLD, 0.0, orientationDistance, ORIENTATION_THRESHOLD);

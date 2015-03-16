@@ -31,12 +31,11 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
-
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.io.printing.SysoutTool;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -119,8 +118,8 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
 
-      SysoutTool.println("fingerJointQInitial: " + fingerJointQInitial, DEBUG);
-      SysoutTool.println("fingerJointQFinal : " + fingerJointQFinal, DEBUG);
+      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
+      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
 
 
       assertTrue(fingerJointQFinal > fingerJointQInitial);
@@ -135,7 +134,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -143,14 +142,14 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new FingerStatePacket(robotSide, FingerState.CLOSE), trajectoryTime);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(fingerStateBehavior, stopTime);
       assertTrue(success);
-      SysoutTool.println("Stopping Behavior", DEBUG);
+      PrintTools.debug(this, "Stopping Behavior");
       double fingerJointQAtStop = getTotalFingerJointQ(robotSide);
       fingerStateBehavior.stop();
       assertTrue(!fingerStateBehavior.isDone());
@@ -159,9 +158,9 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
 
-      SysoutTool.println("fingerJointQInitial: " + fingerJointQInitial, DEBUG);
-      SysoutTool.println("fingerJointQAtStop : " + fingerJointQAtStop, DEBUG);
-      SysoutTool.println("fingerJointQFinal : " + fingerJointQFinal, DEBUG);
+      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
+      PrintTools.debug(this, "fingerJointQAtStop : " + fingerJointQAtStop);
+      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
 
       assertTrue(Math.abs(fingerJointQFinal - fingerJointQAtStop) < 3.0);
       assertTrue(!fingerStateBehavior.isDone());
@@ -175,7 +174,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
    {
       BambooTools.reportTestStartedMessage();
 
-      SysoutTool.println("Initializing Simulation", DEBUG);
+      PrintTools.debug(this, "Initializing Simulation");
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -183,34 +182,34 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
       double trajectoryTime = 0.3; // [0.3] Hand closes quickly!
       double stopTime = trajectoryTime / 2.0;
 
-      SysoutTool.println("Initializing Behavior", DEBUG);
+      PrintTools.debug(this, "Initializing Behavior");
       FingerStateBehavior fingerStateBehavior = testFingerStateBehavior(new FingerStatePacket(robotSide, FingerState.CLOSE), trajectoryTime);
 
-      SysoutTool.println("Starting Behavior", DEBUG);
+      PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(fingerStateBehavior, stopTime);
       assertTrue(success);
-      SysoutTool.println("Pausing Behavior", DEBUG);
+      PrintTools.debug(this, "Pausing Behavior");
       double fingerJointQAtPause = getTotalFingerJointQ(robotSide);
       fingerStateBehavior.pause();
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(fingerStateBehavior, 1.0);
       assertTrue(success);
-      SysoutTool.println("Resuming Behavior", DEBUG);
+      PrintTools.debug(this, "Resuming Behavior");
       double fingerJointQAtResume = getTotalFingerJointQ(robotSide);
       fingerStateBehavior.resume();
       assertTrue(!fingerStateBehavior.isDone());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(fingerStateBehavior, 1.0);
       assertTrue(success);
-      SysoutTool.println("Behavior Should Be Done", DEBUG);
+      PrintTools.debug(this, "Behavior Should Be Done");
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
       fingerStateBehavior.resume();
 
-      SysoutTool.println("fingerJointQInitial: " + fingerJointQInitial, DEBUG);
-      SysoutTool.println("fingerJointQAtPause : " + fingerJointQAtPause, DEBUG);
-      SysoutTool.println("fingerJointQAtResume : " + fingerJointQAtResume, DEBUG);
-      SysoutTool.println("fingerJointQFinal : " + fingerJointQFinal, DEBUG);
+      PrintTools.debug(this, "fingerJointQInitial: " + fingerJointQInitial);
+      PrintTools.debug(this, "fingerJointQAtPause : " + fingerJointQAtPause);
+      PrintTools.debug(this, "fingerJointQAtResume : " + fingerJointQAtResume);
+      PrintTools.debug(this, "fingerJointQFinal : " + fingerJointQFinal);
 
       assertTrue(Math.abs(fingerJointQAtResume - fingerJointQAtPause) < 3.0);
       assertTrue(fingerJointQFinal > fingerJointQAtResume);
@@ -278,7 +277,7 @@ public abstract class DRCFingerStateBehaviorTest implements MultiRobotTestInterf
             mostDistalJoints.add(fingerJoint);
       }
       
-      SysoutTool.println("mostDistalJoints: " + mostDistalJoints, DEBUG);
+      PrintTools.debug(this, "mostDistalJoints: " + mostDistalJoints);
       
       BoundingBox3d boundingBoxOld = null;
 

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
-import us.ihmc.utilities.io.printing.SysoutTool;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 
 public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
@@ -41,19 +41,19 @@ public class TimeBasedStopThreadUpdatable extends StopThreadUpdatable
 
       if (hasThresholdBeenCrossed(pauseTime))
       {
-         SysoutTool.println("Requesting Pause", DEBUG);
+         PrintTools.debug(this, "Requesting Pause");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.PAUSE);
       }
       else if (hasThresholdBeenCrossed(resumeTime))
       {
          assertTrue(!behavior.isDone());
 
-         SysoutTool.println("Requesting Resume", DEBUG);
+         PrintTools.debug(this, "Requesting Resume");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.RESUME);
       }
       else if (hasThresholdBeenCrossed(stopTime))
       {
-         SysoutTool.println("Requesting Stop", DEBUG);
+         PrintTools.debug(this, "Requesting Stop");
          setRequestedBehaviorControlMode(HumanoidBehaviorControlModeEnum.STOP);
       }
       else if (behavior.isDone())
