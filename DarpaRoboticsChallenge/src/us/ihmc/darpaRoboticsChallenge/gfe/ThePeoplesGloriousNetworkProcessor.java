@@ -35,7 +35,7 @@ import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
-   private static final String nodeName = "/Controller";
+   private static final String nodeName = "/controller";
 
    private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -70,8 +70,8 @@ public class ThePeoplesGloriousNetworkProcessor
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      setupInputs(namespace + "/inputs", robotDataReceiver, fullRobotModel);
-      setupOutputs(namespace + "/outputs");
+      setupInputs(namespace, robotDataReceiver, fullRobotModel);
+      setupOutputs(namespace);
       rosMainNode.execute();
 
       while(!rosMainNode.isStarted())
@@ -102,16 +102,16 @@ public class ThePeoplesGloriousNetworkProcessor
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher);
       }
 
-      Map<String, Class> inputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
+      Map<String, Class> outputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
 
-      for (Map.Entry<String, Class> e : inputPacketList.entrySet())
+      for (Map.Entry<String, Class> e : outputPacketList.entrySet())
       {
          Message message = messageFactory.newFromType(e.getKey());
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.CreateIHMCPacketToMsgPublisher(message, false,
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false,
                controllerCommunicationBridge, e.getValue());
          publishers.add(publisher);
-         rosMainNode.attachPublisher(namespace + "/" + e.getKey(), publisher);
+         rosMainNode.attachPublisher(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);
       }
    }
 
@@ -136,13 +136,13 @@ public class ThePeoplesGloriousNetworkProcessor
       for (Map.Entry<String, Class> e : inputPacketList.entrySet())
       {
          Message message = messageFactory.newFromType(e.getKey());
-         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber.CreateIHMCMsgToPacketSubscriber(message,
+         IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message,
                controllerCommunicationBridge);
          subscribers.add(subscriber);
-         rosMainNode.attachSubscriber(namespace + "/" + e.getKey(), subscriber);
+         rosMainNode.attachSubscriber(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), subscriber);
       }
       
       TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel, controllerCommunicationBridge);
-      rosMainNode.attachSubscriber(namespace + "/TimestampedPoseFootStepGenerator", footPoseGenerator);
+      rosMainNode.attachSubscriber(namespace + "/control/endpoint_footstep_generator", footPoseGenerator);
    }
 }
