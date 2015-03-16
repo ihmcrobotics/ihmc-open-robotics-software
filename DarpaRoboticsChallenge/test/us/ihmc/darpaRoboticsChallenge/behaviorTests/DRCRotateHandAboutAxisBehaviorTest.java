@@ -129,7 +129,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
-      ArmJointName wristPitchJointName = ArmJointName.WRIST_PITCH;
+      ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
       OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
 
       SysoutTool.println("Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName, DEBUG);
@@ -174,7 +174,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       RobotSide robotSide = RobotSide.LEFT;
       double trajectoryTime = 2.0;
       ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
-      ArmJointName wristPitchJointName = ArmJointName.WRIST_PITCH;
+      ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
       OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
 
       SysoutTool.println("Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName, DEBUG);

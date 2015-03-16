@@ -37,14 +37,16 @@ public class AtlasOrderedJointMap
    public final static int l_arm_elx = 19;
    public final static int l_arm_wry = 20;
    public final static int l_arm_wrx = 21;
-   public final static int r_arm_shz = 22;
-   public final static int r_arm_shx = 23;
-   public final static int r_arm_ely = 24;
-   public final static int r_arm_elx = 25;
-   public final static int r_arm_wry = 26;
-   public final static int r_arm_wrx = 27;
+   public final static int l_arm_wry2 = 22;
+   public final static int r_arm_shz = 23;
+   public final static int r_arm_shx = 24;
+   public final static int r_arm_ely = 25;
+   public final static int r_arm_elx = 26;
+   public final static int r_arm_wry = 27;
+   public final static int r_arm_wrx = 28;
+   public final static int r_arm_wry2 = 29;
 
-   public final static int numberOfJoints = r_arm_wrx + 1;
+   public final static int numberOfJoints = r_arm_wry2 + 1;
 
    public static String[] jointNames = new String[numberOfJoints];
    static
@@ -71,12 +73,14 @@ public class AtlasOrderedJointMap
       jointNames[l_arm_elx] = "l_arm_elx";
       jointNames[l_arm_wry] = "l_arm_wry";
       jointNames[l_arm_wrx] = "l_arm_wrx";
+      jointNames[l_arm_wry2] = "l_arm_wry2";
       jointNames[r_arm_shz] = "r_arm_shz";
       jointNames[r_arm_shx] = "r_arm_shx";
       jointNames[r_arm_ely] = "r_arm_ely";
       jointNames[r_arm_elx] = "r_arm_elx";
       jointNames[r_arm_wry] = "r_arm_wry";
       jointNames[r_arm_wrx] = "r_arm_wrx";
+      jointNames[r_arm_wry2] = "r_arm_wry2";
    }
 
    public static LinkedHashMap<String, Integer> nameToIndexMap = new LinkedHashMap<String, Integer>();
@@ -114,12 +118,14 @@ public class AtlasOrderedJointMap
       jointNamesRight[l_arm_elx] = jointNames[r_arm_elx];
       jointNamesRight[l_arm_wry] = jointNames[r_arm_wry];
       jointNamesRight[l_arm_wrx] = jointNames[r_arm_wrx];
+      jointNamesRight[l_arm_wry2] = jointNames[r_arm_wry2];
       jointNamesRight[r_arm_shz] = jointNames[r_arm_shz];
       jointNamesRight[r_arm_shx] = jointNames[r_arm_shx];
       jointNamesRight[r_arm_ely] = jointNames[r_arm_ely];
       jointNamesRight[r_arm_elx] = jointNames[r_arm_elx];
       jointNamesRight[r_arm_wry] = jointNames[r_arm_wry];
       jointNamesRight[r_arm_wrx] = jointNames[r_arm_wrx];
+      jointNamesRight[r_arm_wry2] = jointNames[r_arm_wry2];
 
       forcedSideDependentJointNames.put(RobotSide.RIGHT, jointNamesRight);
 
@@ -146,12 +152,14 @@ public class AtlasOrderedJointMap
       jointNamesLeft[l_arm_elx] = jointNames[l_arm_elx];
       jointNamesLeft[l_arm_wry] = jointNames[l_arm_wry];
       jointNamesLeft[l_arm_wrx] = jointNames[l_arm_wrx];
+      jointNamesLeft[l_arm_wry2] = jointNames[l_arm_wry2];
       jointNamesLeft[r_arm_shz] = jointNames[l_arm_shz];
       jointNamesLeft[r_arm_shx] = jointNames[l_arm_shx];
       jointNamesLeft[r_arm_ely] = jointNames[l_arm_ely];
       jointNamesLeft[r_arm_elx] = jointNames[l_arm_elx];
       jointNamesLeft[r_arm_wry] = jointNames[l_arm_wry];
       jointNamesLeft[r_arm_wrx] = jointNames[l_arm_wrx];
+      jointNamesLeft[r_arm_wry2] = jointNames[l_arm_wry2];
 
       forcedSideDependentJointNames.put(RobotSide.LEFT, jointNamesLeft);
    }
@@ -179,12 +187,12 @@ public class AtlasOrderedJointMap
 
    public static String getLeftHandForceSensorName()
    {
-      return jointNames[l_arm_wrx];
+      return jointNames[l_arm_wry2];
    }
 
    public static String getRightHandForceSensorName()
    {
-      return jointNames[r_arm_wrx];
+      return jointNames[r_arm_wry2];
    }
 
    public static String getHokuyoJointName()

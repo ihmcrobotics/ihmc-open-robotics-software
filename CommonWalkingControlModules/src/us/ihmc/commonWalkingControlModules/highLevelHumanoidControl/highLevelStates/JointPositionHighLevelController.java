@@ -82,14 +82,14 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.SHOULDER_ROLL)  ).setFinalPosition( packet.leftArmJointAngle[1] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.ELBOW_PITCH)    ).setFinalPosition( packet.leftArmJointAngle[2] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.ELBOW_ROLL)     ).setFinalPosition( packet.leftArmJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.WRIST_PITCH)    ).setFinalPosition( packet.leftArmJointAngle[4] );
+      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH)    ).setFinalPosition( packet.leftArmJointAngle[4] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.WRIST_ROLL)     ).setFinalPosition( packet.leftArmJointAngle[5] );
 
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.SHOULDER_YAW) ).setFinalPosition(   packet.rightArmJointAngle[0] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL)  ).setFinalPosition( packet.rightArmJointAngle[1] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.ELBOW_PITCH)    ).setFinalPosition( packet.rightArmJointAngle[2] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.ELBOW_ROLL)     ).setFinalPosition( packet.rightArmJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.WRIST_PITCH)    ).setFinalPosition( packet.rightArmJointAngle[4] );
+      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH)    ).setFinalPosition( packet.rightArmJointAngle[4] );
       trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.WRIST_ROLL)     ).setFinalPosition( packet.rightArmJointAngle[5] );
 
       trajectoryGenerator.get( fullRobotModel.getSpineJoint( SpineJointName.SPINE_PITCH) ).setFinalPosition( packet.waistJointAngle[0] );

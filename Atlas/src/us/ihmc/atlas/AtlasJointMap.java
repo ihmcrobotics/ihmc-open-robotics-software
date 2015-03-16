@@ -11,6 +11,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry2;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
@@ -18,12 +19,7 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
 import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.ELBOW_PITCH;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.ELBOW_ROLL;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.SHOULDER_ROLL;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.SHOULDER_YAW;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.WRIST_PITCH;
-import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.WRIST_ROLL;
+import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.*;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.ANKLE_PITCH;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.ANKLE_ROLL;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.HIP_PITCH;
@@ -76,7 +72,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String headName = "head";
 
    private final LegJointName[] legJoints = { HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL };
-   private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL };
+   private final ArmJointName[] armJoints = { SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL, SECOND_WRIST_PITCH };
    private final SpineJointName[] spineJoints = { SPINE_PITCH, SPINE_ROLL, SPINE_YAW };
    private final NeckJointName[] neckJoints = { LOWER_NECK_PITCH };
 
@@ -117,8 +113,9 @@ public class AtlasJointMap implements DRCRobotJointMap
          armJointNames.put(forcedSideJointNames[l_arm_shx], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
          armJointNames.put(forcedSideJointNames[l_arm_ely], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_elx], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
-         armJointNames.put(forcedSideJointNames[l_arm_wry], new Pair<RobotSide, ArmJointName>(robotSide, WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_wry], new Pair<RobotSide, ArmJointName>(robotSide, FIRST_WRIST_PITCH));
          armJointNames.put(forcedSideJointNames[l_arm_wrx], new Pair<RobotSide, ArmJointName>(robotSide, WRIST_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_wry2], new Pair<RobotSide, ArmJointName>(robotSide, SECOND_WRIST_PITCH));
 
          String prefix = getRobotSidePrefix(robotSide);
 
@@ -165,7 +162,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
-         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(WRIST_ROLL));
+         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
       }
    }
 
@@ -314,7 +311,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       if(!atlasVersion.getHandModel().isHandSimulated())
       {
          for (RobotSide robotSide : RobotSide.values)
-            lastSimulatedJoints.add(armJointStrings.get(robotSide).get(WRIST_ROLL));
+            lastSimulatedJoints.add(armJointStrings.get(robotSide).get(SECOND_WRIST_PITCH));
       }
       return lastSimulatedJoints;
    }

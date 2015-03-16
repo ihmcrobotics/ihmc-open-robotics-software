@@ -88,7 +88,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
          fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH)).setQ(2.00);    // arm_ely
          fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide,
                  ArmJointName.ELBOW_ROLL)).setQ(robotSide.negateIfRightSide(0.9));    // arm_elx
-         fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000);    // arm_wry
+         fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setQ(0.000);    // arm_wry
          fullRobotModelToInitialize.getOneDoFJointByName(atlasRobotModel.getJointMap().getArmJointName(robotSide,
                  ArmJointName.WRIST_ROLL)).setQ(robotSide.negateIfRightSide(0));    // arm_wrx
       }
@@ -392,7 +392,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
     * ArmJointName.ELBOW_ROLL)).setQ( robotSide.negateIfRightSide( -0.8));
     * //arm_elx
     * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap()
-    * .getArmJointName(robotSide, ArmJointName.WRIST_PITCH)).setQ(0.000);
+    * .getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setQ(0.000);
     * //arm_wry
     * scsRobot.getOneDegreeOfFreedomJoint(atlasRobotModel.getJointMap()
     * .getArmJointName(robotSide, ArmJointName.WRIST_ROLL)).setQ(0.000);

@@ -8,7 +8,7 @@ public class AtlasDefaultArmConfigurations implements DefaultArmConfigurations
    @Override
    public double[] getArmDefaultConfigurationJointAngles(ArmConfigurations armConfiguration, RobotSide robotSide)
    {
-      //     SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, WRIST_PITCH, WRIST_ROLL
+      //     SHOULDER_YAW, SHOULDER_ROLL, ELBOW_PITCH, ELBOW_ROLL, FIRST_WRIST_PITCH, WRIST_ROLL
       double[] armJointAngles;
       switch (armConfiguration)
       {
