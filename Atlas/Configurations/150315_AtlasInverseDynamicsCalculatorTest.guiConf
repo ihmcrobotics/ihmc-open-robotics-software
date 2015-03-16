@@ -3,7 +3,7 @@
 	<Graph>
 		<Variables>root.atlas.t</Variables>
 		<GraphConfiguration>
-			<Name>config77</Name>
+			<Name>config91</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -15,7 +15,7 @@
 	<Graph>
 		<Variables>root.atlas.tau_back_bky</Variables>
 		<GraphConfiguration>
-			<Name>config78</Name>
+			<Name>config92</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -25,21 +25,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qd_l_leg_hpz</Variables>
+		<Variables>root.atlas.pelvis_imu_sensorAngularAccelerationX,root.atlas.pelvis_imu_sensorAngularAccelerationY</Variables>
 		<GraphConfiguration>
-			<Name>config79</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.qdd_l_arm_shz</Variables>
-		<GraphConfiguration>
-			<Name>config80</Name>
+			<Name>config93</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -57,171 +45,15 @@
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>5</Graph Array Window Size>
+<Graph Array Window Size>6</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>2</ScreenID>
-<WindowLocation>1947.0, 5.0</WindowLocation>
+<WindowLocation>1939.0, 1.0</WindowLocation>
 <WindowSize>975.0, 1216.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.atlas.tau_l_leg_hpz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_hpz</Variables>
-		<GraphConfiguration>
-			<Name>config81</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_hpz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpz</Variables>
-		<GraphConfiguration>
-			<Name>config82</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_l_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_hpx</Variables>
-		<GraphConfiguration>
-			<Name>config83</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpx</Variables>
-		<GraphConfiguration>
-			<Name>config84</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_l_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_hpy</Variables>
-		<GraphConfiguration>
-			<Name>config85</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpy</Variables>
-		<GraphConfiguration>
-			<Name>config86</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_l_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_kny</Variables>
-		<GraphConfiguration>
-			<Name>config87</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_kny</Variables>
-		<GraphConfiguration>
-			<Name>config88</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_l_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_aky</Variables>
-		<GraphConfiguration>
-			<Name>config89</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_aky</Variables>
-		<GraphConfiguration>
-			<Name>config90</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>20.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_l_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_akx</Variables>
-		<GraphConfiguration>
-			<Name>config91</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_r_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_akx</Variables>
-		<GraphConfiguration>
-			<Name>config92</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_back_bkz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bkz</Variables>
-		<GraphConfiguration>
-			<Name>config93</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.tau_back_bky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bky</Variables>
 		<GraphConfiguration>
 			<Name>config94</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -233,7 +65,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.tau_back_bkx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bkx</Variables>
+		<Variables>root.atlas.tau_r_leg_hpz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpz</Variables>
 		<GraphConfiguration>
 			<Name>config95</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -245,7 +77,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_x</Variables>
+		<Variables>root.atlas.tau_l_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_hpx</Variables>
 		<GraphConfiguration>
 			<Name>config96</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -257,7 +89,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_y</Variables>
+		<Variables>root.atlas.tau_r_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpx</Variables>
 		<GraphConfiguration>
 			<Name>config97</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -269,7 +101,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_z</Variables>
+		<Variables>root.atlas.tau_l_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config98</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -281,7 +113,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_x</Variables>
+		<Variables>root.atlas.tau_r_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config99</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,7 +125,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_y</Variables>
+		<Variables>root.atlas.tau_l_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config100</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -305,7 +137,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_z</Variables>
+		<Variables>root.atlas.tau_r_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config101</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -316,15 +148,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window1><Graph Array Window2>
-<ScreenID>3</ScreenID>
-<WindowLocation>5998.0, 59.0</WindowLocation>
-<WindowSize>1643.0, 1056.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.atlas.qdd_wx</Variables>
+		<Variables>root.atlas.tau_l_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config102</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -336,19 +161,19 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_wy</Variables>
+		<Variables>root.atlas.tau_r_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config103</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
+			<MaxScaling>20.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_wz</Variables>
+		<Variables>root.atlas.tau_l_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_l_leg_akx</Variables>
 		<GraphConfiguration>
 			<Name>config104</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -360,7 +185,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_x</Variables>
+		<Variables>root.atlas.tau_r_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_r_leg_akx</Variables>
 		<GraphConfiguration>
 			<Name>config105</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -372,7 +197,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_y</Variables>
+		<Variables>root.atlas.tau_back_bkz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bkz</Variables>
 		<GraphConfiguration>
 			<Name>config106</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -384,7 +209,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_z</Variables>
+		<Variables>root.atlas.tau_back_bky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bky</Variables>
 		<GraphConfiguration>
 			<Name>config107</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -395,15 +220,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window2><Graph Array Window3>
-<ScreenID>1</ScreenID>
-<WindowLocation>3850.0, 4.0</WindowLocation>
-<WindowSize>1034.0, 1216.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_hpz</Variables>
+		<Variables>root.atlas.tau_back_bkx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_back_bkx</Variables>
 		<GraphConfiguration>
 			<Name>config108</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -415,7 +233,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_hpz</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_x,root.atlas.rootJointExternalForce_fX</Variables>
 		<GraphConfiguration>
 			<Name>config109</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -427,7 +245,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_hpx</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_y,root.atlas.rootJointExternalForce_fY</Variables>
 		<GraphConfiguration>
 			<Name>config110</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -439,7 +257,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_hpx</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_force_z,root.atlas.rootJointExternalForce_fZ</Variables>
 		<GraphConfiguration>
 			<Name>config111</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -451,7 +269,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_hpy</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_x,root.atlas.rootJointExternalForce_mX</Variables>
 		<GraphConfiguration>
 			<Name>config112</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -463,7 +281,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_hpy</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_y,root.atlas.rootJointExternalForce_mY</Variables>
 		<GraphConfiguration>
 			<Name>config113</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -475,7 +293,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_kny</Variables>
+		<Variables>root.atlas.AtlasInverseDynamicsCalculatorTestHelper.tau_computed_root_torques_z,root.atlas.rootJointExternalForce_mZ</Variables>
 		<GraphConfiguration>
 			<Name>config114</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -487,7 +305,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_kny</Variables>
+		<Variables>root.atlas.rootJointExternalForce_x</Variables>
 		<GraphConfiguration>
 			<Name>config115</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -499,7 +317,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_aky</Variables>
+		<Variables>root.atlas.rootJointExternalForce_y</Variables>
 		<GraphConfiguration>
 			<Name>config116</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -511,7 +329,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_aky</Variables>
+		<Variables>root.atlas.rootJointExternalForce_z</Variables>
 		<GraphConfiguration>
 			<Name>config117</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -522,8 +340,15 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>1</ScreenID>
+<WindowLocation>3848.0, 1.0</WindowLocation>
+<WindowSize>1034.0, 1216.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.qdd_l_leg_akx</Variables>
+		<Variables>root.atlas.qdd_l_leg_hpz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_hpz</Variables>
 		<GraphConfiguration>
 			<Name>config118</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -535,7 +360,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_leg_akx</Variables>
+		<Variables>root.atlas.qdd_r_leg_hpz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_hpz</Variables>
 		<GraphConfiguration>
 			<Name>config119</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -547,7 +372,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_back_bkz</Variables>
+		<Variables>root.atlas.qdd_l_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_hpx</Variables>
 		<GraphConfiguration>
 			<Name>config120</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -559,7 +384,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_back_bky</Variables>
+		<Variables>root.atlas.qdd_r_leg_hpx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_hpx</Variables>
 		<GraphConfiguration>
 			<Name>config121</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -571,7 +396,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_back_bkx</Variables>
+		<Variables>root.atlas.qdd_l_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config122</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -582,15 +407,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window3><Graph Array Window4>
-<ScreenID>2</ScreenID>
-<WindowLocation>2938.0, 2.0</WindowLocation>
-<WindowSize>862.0, 1216.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationX</Variables>
+		<Variables>root.atlas.qdd_r_leg_hpy,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config123</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -602,7 +420,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.rightIMULinearAccelerationX</Variables>
+		<Variables>root.atlas.qdd_l_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config124</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -614,7 +432,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationY</Variables>
+		<Variables>root.atlas.qdd_r_leg_kny,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_kny</Variables>
 		<GraphConfiguration>
 			<Name>config125</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -626,7 +444,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.rightIMULinearAccelerationY</Variables>
+		<Variables>root.atlas.qdd_l_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config126</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -638,7 +456,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationZ</Variables>
+		<Variables>root.atlas.qdd_r_leg_aky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config127</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -650,7 +468,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.rightIMULinearAccelerationZ</Variables>
+		<Variables>root.atlas.qdd_l_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_l_leg_akx</Variables>
 		<GraphConfiguration>
 			<Name>config128</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -662,7 +480,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationWorldX</Variables>
+		<Variables>root.atlas.qdd_r_leg_akx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_r_leg_akx</Variables>
 		<GraphConfiguration>
 			<Name>config129</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -674,7 +492,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.qdd_back_bkz,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_back_bkz</Variables>
 		<GraphConfiguration>
 			<Name>config130</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -686,7 +504,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationWorldY</Variables>
+		<Variables>root.atlas.qdd_back_bky,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_back_bky</Variables>
 		<GraphConfiguration>
 			<Name>config131</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -698,7 +516,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.qdd_back_bkx,root.atlas.AtlasInverseDynamicsCalculatorTestHelper.qdd_computed_back_bkx</Variables>
 		<GraphConfiguration>
 			<Name>config132</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -709,8 +527,15 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>3</ScreenID>
+<WindowLocation>5799.0, 20.0</WindowLocation>
+<WindowSize>862.0, 1216.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.leftIMULinearAccelerationWorldZ</Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config133</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -722,7 +547,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config134</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -734,7 +559,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config135</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -746,7 +571,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config136</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -758,7 +583,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config137</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -770,7 +595,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config138</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -782,7 +607,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationWorldX</Variables>
 		<GraphConfiguration>
 			<Name>config139</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -794,7 +619,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationWorldX</Variables>
 		<GraphConfiguration>
 			<Name>config140</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -805,15 +630,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-</Graph Array Window4><Graph Array Window5>
-<ScreenID>0</ScreenID>
-<WindowLocation>-32000.0, -32000.0</WindowLocation>
-<WindowSize>816.0, 1072.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_shz</Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationWorldY</Variables>
 		<GraphConfiguration>
 			<Name>config141</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -825,7 +643,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_shz</Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationWorldY</Variables>
 		<GraphConfiguration>
 			<Name>config142</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -837,7 +655,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_shx</Variables>
+		<Variables>root.atlas.leftIMULinearAccelerationWorldZ</Variables>
 		<GraphConfiguration>
 			<Name>config143</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -849,7 +667,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_shx</Variables>
+		<Variables>root.atlas.rightIMULinearAccelerationWorldZ</Variables>
 		<GraphConfiguration>
 			<Name>config144</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -861,7 +679,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_ely</Variables>
+		<Variables>root.atlas.leftIMUAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config145</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -873,7 +691,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_ely</Variables>
+		<Variables>root.atlas.rightIMUAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config146</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -885,7 +703,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_elx</Variables>
+		<Variables>root.atlas.leftIMUAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config147</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -897,7 +715,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_elx</Variables>
+		<Variables>root.atlas.rightIMUAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config148</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -909,7 +727,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_wry</Variables>
+		<Variables>root.atlas.leftIMUAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config149</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -921,7 +739,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_wry</Variables>
+		<Variables>root.atlas.rightIMUAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config150</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -932,8 +750,15 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>0</ScreenID>
+<WindowLocation>-32000.0, -32000.0</WindowLocation>
+<WindowSize>816.0, 1072.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.qdd_l_arm_wrx</Variables>
+		<Variables>root.atlas.qdd_l_arm_shz</Variables>
 		<GraphConfiguration>
 			<Name>config151</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -945,7 +770,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.qdd_r_arm_wrx</Variables>
+		<Variables>root.atlas.qdd_r_arm_shz</Variables>
 		<GraphConfiguration>
 			<Name>config152</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -956,8 +781,358 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_l_arm_shx</Variables>
+		<GraphConfiguration>
+			<Name>config153</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_r_arm_shx</Variables>
+		<GraphConfiguration>
+			<Name>config154</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_l_arm_ely</Variables>
+		<GraphConfiguration>
+			<Name>config155</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_r_arm_ely</Variables>
+		<GraphConfiguration>
+			<Name>config156</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_l_arm_elx</Variables>
+		<GraphConfiguration>
+			<Name>config157</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_r_arm_elx</Variables>
+		<GraphConfiguration>
+			<Name>config158</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_l_arm_wry</Variables>
+		<GraphConfiguration>
+			<Name>config159</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_r_arm_wry</Variables>
+		<GraphConfiguration>
+			<Name>config160</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_l_arm_wrx</Variables>
+		<GraphConfiguration>
+			<Name>config161</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_r_arm_wrx</Variables>
+		<GraphConfiguration>
+			<Name>config162</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window5>
+</Graph Array Window4><Graph Array Window5>
+<ScreenID>1</ScreenID>
+<WindowLocation>4977.0, 47.0</WindowLocation>
+<WindowSize>746.0, 931.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.atlas.qdd_x</Variables>
+		<GraphConfiguration>
+			<Name>config163</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_y</Variables>
+		<GraphConfiguration>
+			<Name>config164</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_z</Variables>
+		<GraphConfiguration>
+			<Name>config165</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_wx</Variables>
+		<GraphConfiguration>
+			<Name>config166</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_wy</Variables>
+		<GraphConfiguration>
+			<Name>config167</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.qdd_wz</Variables>
+		<GraphConfiguration>
+			<Name>config168</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window5><Graph Array Window6>
+<ScreenID>3</ScreenID>
+<WindowLocation>6807.0, 24.0</WindowLocation>
+<WindowSize>816.0, 1139.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.atlas.leftIMULinearVelocityWorldX</Variables>
+		<GraphConfiguration>
+			<Name>config169</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMULinearVelocityWorldX</Variables>
+		<GraphConfiguration>
+			<Name>config170</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.leftIMULinearVelocityWorldY</Variables>
+		<GraphConfiguration>
+			<Name>config171</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMULinearVelocityWorldY</Variables>
+		<GraphConfiguration>
+			<Name>config172</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.leftIMULinearVelocityWorldZ</Variables>
+		<GraphConfiguration>
+			<Name>config173</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMULinearVelocityWorldZ</Variables>
+		<GraphConfiguration>
+			<Name>config174</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.leftIMUAngularVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config175</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMUAngularVelocityX</Variables>
+		<GraphConfiguration>
+			<Name>config176</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.leftIMUAngularVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config177</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMUAngularVelocityY</Variables>
+		<GraphConfiguration>
+			<Name>config178</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.leftIMUAngularVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config179</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.rightIMUAngularVelocityZ</Variables>
+		<GraphConfiguration>
+			<Name>config180</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window6>
 
 <Extra Panels>
 <Main Viewport>
