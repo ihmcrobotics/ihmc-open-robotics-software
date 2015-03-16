@@ -157,8 +157,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
-            DEBUG);
+      PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
@@ -207,8 +206,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
-            DEBUG);
+      PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
@@ -255,8 +253,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
-            DEBUG);
+      PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
@@ -304,8 +301,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
 
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(turnValveBehavior);
       double finalValveClosePercentage = valveRobot.getClosePercentage();
-      SysoutTool.println("Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage,
-            DEBUG);
+      PrintTools.debug(this, "Initial valve close percentage: " + initialValveClosePercentage + ".  Final valve close percentage: " + finalValveClosePercentage);
 
       drcBehaviorTestHelper.createMovie(getSimpleRobotName(), 1);
 
