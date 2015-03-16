@@ -31,6 +31,4 @@ uint8 trajectoryType
 # Contains information on how high the robot should step
 float64 swingHeight
 
-int8 destination
-
 

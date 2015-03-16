@@ -9,6 +9,4 @@ float64 trajectoryTime
 # toHomePosition can be used to move the chest back to its default starting position
 bool toHomeOrientation
 
-int8 destination
-
 

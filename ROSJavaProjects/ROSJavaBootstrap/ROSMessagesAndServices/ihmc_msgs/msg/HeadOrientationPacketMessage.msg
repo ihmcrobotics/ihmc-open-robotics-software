@@ -6,6 +6,4 @@ geometry_msgs/Quaternion quaternion
 # trajectoryTime specifies how fast or how slow to move to the desired pose
 float64 trajectoryTime
 
-int8 destination
-
 

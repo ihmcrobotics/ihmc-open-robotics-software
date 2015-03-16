@@ -18,6 +18,4 @@ geometry_msgs/Quaternion actualFootOrientationInWorld
 
 bool isDoneWalking
 
-int8 destination
-
 
