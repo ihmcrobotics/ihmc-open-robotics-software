@@ -265,10 +265,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
    
    
-   public void setExternelPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
+   public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       if (drcStateEstimator != null)
-         drcStateEstimator.setExternelPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+         drcStateEstimator.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
    }
    
    public  List<? extends IMUSensorReadOnly> getSimulatedIMUOutput()
