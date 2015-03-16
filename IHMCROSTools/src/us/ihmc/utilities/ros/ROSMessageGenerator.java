@@ -16,6 +16,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packets.DocumentedPacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class ROSMessageGenerator
@@ -86,8 +87,11 @@ public class ROSMessageGenerator
             Field[] fields = clazz.getFields();
             for (Field field : fields)
             {
-               outBuffer += printType(field);
-               outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
+               if(!field.getDeclaringClass().equals(Packet.class))
+               {
+                  outBuffer += printType(field);
+                  outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
+               }
             }
 
             fileStream.println(outBuffer);

@@ -36,6 +36,4 @@ float64 trajectoryTime
 # pitch, shoulder roll, elbow pitch, elbow roll, wrist pitch, wrist roll
 float64[] jointAngles
 
-int8 destination
-
 

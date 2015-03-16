@@ -5,6 +5,4 @@
 
 bool pause
 
-int8 destination
-
 
