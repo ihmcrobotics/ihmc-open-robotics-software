@@ -85,6 +85,7 @@ abstract public class WholeBodyIkSolver
       //---------------  tasks assigned to this solver --------------------------------
       public HierarchicalTask_COM        taskComPosition;
       public HierarchicalTask_JointsPose taskJointsPose;
+      public final HierarchicalTask_BodyPose taskPelvisOrientation;
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTask_BodyPose>();
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTask_BodyPose>();
       public final HierarchicalTask_BodyPose taskLegPose;
@@ -96,6 +97,7 @@ abstract public class WholeBodyIkSolver
 
       static public enum LockLevel{
          USE_WHOLE_BODY,           // can move the entire body
+         LOCK_PELVIS_ORIENTATION,  // pelvis can move but not rotate
          LOCK_LEGS,                // will lock just the leg to the position given bu actualRobotModel. Note that COM position is NOT controlled.
          LOCK_LEGS_AND_WAIST_X_Y,  // lock waist and legs but keep wait yaw free to move.
          LOCK_LEGS_AND_WAIST       // lock waist and legs
@@ -332,6 +334,8 @@ abstract public class WholeBodyIkSolver
 
          taskComPosition = new HierarchicalTask_COM(fk);
 
+         taskPelvisOrientation = new HierarchicalTask_BodyPose(fk, urdfModel, "pelvis");
+         
          for (RobotSide robotSide : RobotSide.values())
          {
             int currentHandId = urdfModel.getBodyId(getGripperPalmLinkName(robotSide));
@@ -369,6 +373,7 @@ abstract public class WholeBodyIkSolver
 
          taskLegPose.setName( "left Leg Pose");
          taskComPosition.setName( "COM Position");
+         taskPelvisOrientation.setName("PelvisOrientation");
 
          taskEndEffectorPosition.get(RIGHT).setName( "Right Hand Position" );
          taskEndEffectorPosition.get(LEFT).setName( "Left Hand Position" );
@@ -379,7 +384,8 @@ abstract public class WholeBodyIkSolver
          taskJointsPose.setName( "Whole body Posture" );
 
          // the order is important!! first to be added have higher priority
-         hierarchicalSolver.addTask(taskLegPose);
+         hierarchicalSolver.addTask(taskPelvisOrientation);
+         hierarchicalSolver.addTask(taskLegPose); 
          hierarchicalSolver.addTask(taskComPosition);
 
          hierarchicalSolver.addTask(taskEndEffectorPosition.get(RIGHT));
@@ -396,7 +402,7 @@ abstract public class WholeBodyIkSolver
 
          waistJointId = getWaistJointId();
 
-         //code moved there for esthetic reasons :|
+
          configureTasks();
          try{
             listOfVisibleAndEnableColliders = configureCollisionAvoidance( getURDFConfigurationFileName() );
@@ -412,7 +418,19 @@ abstract public class WholeBodyIkSolver
          return listOfVisibleAndEnableColliders.contains(bodyName);
       }
 
-
+      private void controlPelvisOrientation(SDFFullRobotModel actualSdfModel)
+      {
+         ReferenceFrame rootFrame = this.getRootFrame(actualSdfModel);
+         RigidBodyTransform pelvisPose = actualSdfModel.getRootJoint().getFrameAfterJoint().getTransformToDesiredFrame(rootFrame);
+         Quat4d pelvisOrientation = new Quat4d();
+         pelvisPose.getRotation(pelvisOrientation);
+         
+         Vector64F weightForRotationOnly = new Vector64F(6, 0,0,0,  1,1,1 );
+         taskPelvisOrientation.setWeightError( weightForRotationOnly );
+         taskPelvisOrientation.setWeightsTaskSpace( weightForRotationOnly );
+         
+         taskPelvisOrientation.setTarget( pelvisOrientation, new Vector3d() );
+      }
 
       // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
       private void setPreferedKneeAngle()
@@ -619,10 +637,15 @@ abstract public class WholeBodyIkSolver
          boolean enableLeg   = true;
          boolean enableWaistZ  = true;
          boolean enableWaistXY = true;
+         boolean enablePelvisRotation = true;
 
          switch( lockLevel )
          {
          case USE_WHOLE_BODY:break;
+         
+         case LOCK_PELVIS_ORIENTATION:
+            enablePelvisRotation = false;
+            break;
 
          case LOCK_LEGS:  
             enableLeg = false;
@@ -639,11 +662,11 @@ abstract public class WholeBodyIkSolver
             enableWaistXY = false;
             break;
          }
-
+         
+         taskPelvisOrientation.setEnabled( enableLeg && !enablePelvisRotation );
          taskComPosition.setEnabled( enableLeg  );
          taskLegPose.setEnabled( enableLeg );
 
-         OneDoFJoint joint;
 
          for (RobotSide side: RobotSide.values)
          {
@@ -884,6 +907,7 @@ abstract public class WholeBodyIkSolver
 
          try{
             adjustDesiredCOM(actualSdfModel);
+            controlPelvisOrientation( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
             adjustOtherFoot(actualSdfModel);
