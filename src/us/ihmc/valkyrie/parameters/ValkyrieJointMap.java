@@ -360,7 +360,8 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    {
       String[] ret = new String[]
       {
-            getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+            getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
+            getNeckJointName(NeckJointName.NECK_YAW)
       };
       
       return ret;

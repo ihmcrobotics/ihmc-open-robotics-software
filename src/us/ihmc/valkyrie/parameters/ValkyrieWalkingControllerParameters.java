@@ -131,10 +131,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       String[] defaultHeadOrientationControlJointNames = new String[]
       {
-            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
-//            jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
-//            jointMap.getNeckJointName(NeckJointName.NECK_YAW),
-//            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
+            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
+            jointMap.getNeckJointName(NeckJointName.NECK_YAW)
       };
 
       return defaultHeadOrientationControlJointNames;
