@@ -22,7 +22,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasROSAPISimulator
 {
-   private static String defaultRosNameSpace = "atlas";
+   private static String defaultPrefix = "/ihmc_msgs/atlas";
    private static String defaultRobotModel = "DRC_NO_HANDS_UNPLUGGED_V4";
    private final boolean startUI = false;
    
@@ -57,7 +57,7 @@ public class AtlasROSAPISimulator
       
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
-      rosNameSpace.setDefault(defaultRosNameSpace);
+      rosNameSpace.setDefault(defaultPrefix);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());

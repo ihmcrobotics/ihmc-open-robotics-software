@@ -13,6 +13,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -48,7 +49,7 @@ public class RosRobotJointStatePublisher implements PacketConsumer<RobotConfigur
 
       jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, fullRobotModel.getForceSensorDefinitions());
 
-      rosMainNode.attachPublisher("/" + rosNameSpace + "/joint_states", jointStatePublisher);
+      rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(RobotConfigurationData.class), jointStatePublisher);
       fieldComputer.attachListener(RobotConfigurationData.class, this);
    }
 
