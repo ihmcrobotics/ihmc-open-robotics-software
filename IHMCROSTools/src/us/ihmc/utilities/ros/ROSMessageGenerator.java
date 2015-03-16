@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
@@ -87,11 +88,13 @@ public class ROSMessageGenerator
             Field[] fields = clazz.getFields();
             for (Field field : fields)
             {
-               if(!field.getDeclaringClass().equals(Packet.class))
+               if(isConstant(field) || isDestinationField(field))
                {
-                  outBuffer += printType(field);
-                  outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
+                  continue;
                }
+
+               outBuffer += printType(field);
+               outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
             }
 
             fileStream.println(outBuffer);
@@ -103,6 +106,18 @@ public class ROSMessageGenerator
       }
 
       return messageName;
+   }
+
+   private boolean isDestinationField(Field field)
+   {
+      return field.getDeclaringClass().equals(Packet.class);
+   }
+
+   private boolean isConstant(Field field)
+   {
+      int modifier = field.getModifiers();
+
+      return Modifier.isFinal(modifier) && Modifier.isPublic(modifier) && Modifier.isStatic(modifier);
    }
 
    private String printType(Field field)
