@@ -76,7 +76,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
    public static void main(String[] args) throws IOException
    {
-      final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+      final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
       String[] vars = null;
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);

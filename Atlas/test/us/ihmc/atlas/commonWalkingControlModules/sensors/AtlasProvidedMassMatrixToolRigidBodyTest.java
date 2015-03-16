@@ -14,7 +14,7 @@ import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfig
 
 public class AtlasProvidedMassMatrixToolRigidBodyTest extends ProvidedMassMatrixToolRigidBodyTest
 {
-   AtlasRobotVersion version = AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ;
+   AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ;
    AtlasDefaultArmConfigurations config = new AtlasDefaultArmConfigurations();
    RobotSide side = RobotSide.LEFT;
    

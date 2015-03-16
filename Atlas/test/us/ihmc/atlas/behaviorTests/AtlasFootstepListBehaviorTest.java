@@ -15,7 +15,7 @@ public class AtlasFootstepListBehaviorTest extends DRCFootstepListBehaviorTest
    
    public AtlasFootstepListBehaviorTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false); 
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
    }
    
    

@@ -44,7 +44,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
    @Override
    public WholeBodyIkSolverTestHelper getWholeBodyIkSolverTestHelper()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       SDFFullRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
       wholeBodySolver = new AtlasWholeBodyIK(atlasRobotModel);
 
@@ -127,7 +127,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
       Random random = new Random(10L);
       while (handTargetArrayListToReturn.size() < numberOfPoses)
       {
-         AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+         AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
          SDFFullRobotModel actualRobotModel = atlasRobotModel.createFullRobotModel();
 
          Vector3d rootPosition = new Vector3d(0.0, 0.0, 0.93);

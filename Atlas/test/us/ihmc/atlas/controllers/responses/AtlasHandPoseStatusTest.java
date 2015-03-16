@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasHandPoseStatusTest extends HandPoseStatusTest
 {
-   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
    
    @Override
    public DRCRobotModel getRobotModel()

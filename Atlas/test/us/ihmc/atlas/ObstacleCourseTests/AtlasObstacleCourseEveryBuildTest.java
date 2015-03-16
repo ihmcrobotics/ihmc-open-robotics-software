@@ -12,7 +12,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
 {
 
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
    @Override
    public DRCRobotModel getRobotModel()
    {

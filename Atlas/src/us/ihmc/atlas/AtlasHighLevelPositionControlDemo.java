@@ -14,7 +14,7 @@ import com.martiansoftware.jsap.JSAPException;
 public class AtlasHighLevelPositionControlDemo
 {
    
- private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS, AtlasRobotModel.AtlasTarget.SIM, false);
+ private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4, AtlasRobotModel.AtlasTarget.SIM, false);
  private static final double ROBOT_FLOATING_HEIGHT = 0.3;
    
    public static void main(String[] args) throws JSAPException

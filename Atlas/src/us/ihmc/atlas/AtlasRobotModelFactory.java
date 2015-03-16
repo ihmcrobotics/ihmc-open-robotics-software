@@ -29,7 +29,7 @@ public class AtlasRobotModelFactory
    
    public static AtlasRobotModel createDefaultRobotModel()
    {
-      return createDRCRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ.toString(), AtlasRobotModel.AtlasTarget.SIM, false);
+      return createDRCRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ.toString(), AtlasRobotModel.AtlasTarget.SIM, false);
    }
 
    public static AtlasRobotModel createDRCRobotModel(String robotModelAsString, AtlasTarget runningOnRealRobot, boolean headless)
@@ -75,7 +75,7 @@ public class AtlasRobotModelFactory
    
    public static AtlasRobotModel selectModelFromGraphicSelector()
    {
-      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false));
+      return selectModelFromGraphicSelector(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false));
    }
 
    public static AtlasRobotModel selectModelFromGraphicSelector(DRCRobotModel defaultOption)

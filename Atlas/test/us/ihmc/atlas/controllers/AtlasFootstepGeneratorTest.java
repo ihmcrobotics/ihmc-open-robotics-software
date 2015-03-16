@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasFootstepGeneratorTest extends DRCRobotBasedFootstepGeneratorTest
 {
-   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS;
+   private static final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.DRC_NO_HANDS_UNPLUGGED_V4;
    private final static DRCRobotModel robotModel = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
 
    @Override

@@ -15,7 +15,7 @@ public class AtlasDrillPickUpBehaviorTest extends DRCDrillPickUpBehaviorTest
    
    public AtlasDrillPickUpBehaviorTest() 
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.SIM, false);
       boolean useHighResolutionContactPointGrid = false;
       robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
    }

@@ -8,7 +8,7 @@ public class AtlasWholeBodyVisualizer
 {
    public static void main(String[] args)
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ, AtlasTarget.SIM, false);
       WholeBodyVisualizier wholeBodyVisualizier = new WholeBodyVisualizier(robotModel);
    }
 }
