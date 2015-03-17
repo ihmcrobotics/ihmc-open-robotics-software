@@ -36,7 +36,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
       int numberOfTicks = 1000;
@@ -108,7 +108,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = new AtlasInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
 

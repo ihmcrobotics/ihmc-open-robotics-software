@@ -12,6 +12,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -45,6 +46,7 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public class DRCSimulationTestHelper
@@ -153,7 +155,13 @@ public class DRCSimulationTestHelper
       return drcSimulationFactory;
    }
    
-   public FullRobotModel getControllerFullRobotModel()
+   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
+   {
+      MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
+      controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
+   }
+   
+   public SDFFullRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
    }

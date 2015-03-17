@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -23,6 +24,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 /**
@@ -60,6 +62,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel fullRobotModel);
+   
 // @Ignore
 // @QuarantinedTest("150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...")
    @EstimatedDuration(duration = 20.0)
@@ -86,6 +90,11 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
       
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
 
+      // This is used for doing extra crazy debugging by spawing a whole new visualizer or analyzer to spy on the inverse dynamics calculator.
+      // But is not needed for the test itself. So return null if you aren't debugging.
+      InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener = getInverseDynamicsCalculatorListener(drcSimulationTestHelper.getControllerFullRobotModel());
+      if (inverseDynamicsCalculatorListener != null) drcSimulationTestHelper.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
+      
       setupCameraForElvisPelvis();
 
       ThreadTools.sleep(1000);

@@ -72,17 +72,26 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
    private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
 
-   public AtlasInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
+   public static AtlasInverseDynamicsCalculatorTestHelper createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(boolean visualize, double gravityZ)
    {
       boolean headless = false;
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
-      fullRobotModel = atlasRobotModel.createFullRobotModel();
+      SDFFullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
       
       boolean createCollisionMeshes = false;
       atlasRobotModel.setEnableJointDamping(false);
-      robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+      SDFRobot robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
       robot.setGravity(gravityZ);
       
+      return new AtlasInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);
+   }
+   
+   
+   public AtlasInverseDynamicsCalculatorTestHelper(SDFFullRobotModel fullRobotModel, SDFRobot robot, boolean visualize, double gravityZ)
+   {
+      this.fullRobotModel = fullRobotModel;
+      this.robot = robot;
+
       FloatingJoint rootJoint = robot.getRootJoint();
       rootJointExternalForcePoint = new ExternalForcePoint("rootJointExternalForce", robot);
       rootJoint.addExternalForcePoint(rootJointExternalForcePoint);
@@ -105,9 +114,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       rightAnkleJoint.addExternalForcePoint(rightFootExternalForcePoint);
       
       feetExternalForcePoints = new SideDependentList<ExternalForcePoint>(leftFootExternalForcePoint, rightFootExternalForcePoint);
-      
-      atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
-      
+            
       computedRootJointAngularAcceleration = new YoFrameVector("qdd_computed_root_angular", fullRobotModel.getRootJoint().getFrameAfterJoint(), registry);
 
       ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>();
@@ -756,6 +763,4 @@ public class AtlasInverseDynamicsCalculatorTestHelper
       return fullRobotModel;
    }
 
-  
- 
 }
