@@ -1,6 +1,6 @@
 package us.ihmc.graphics3DAdapter.jme.input;
 
-import us.ihmc.graphics3DAdapter.input.Key;
+import us.ihmc.utilities.inputDevices.keyboard.Key;
 
 import com.jme3.input.KeyInput;
 

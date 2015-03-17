@@ -16,12 +16,12 @@ import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.graphics3DAdapter.utils.GraphicsDemoTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class Graphics3DAdapterExampleTwo
