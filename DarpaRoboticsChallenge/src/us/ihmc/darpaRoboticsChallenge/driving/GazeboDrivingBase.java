@@ -18,7 +18,7 @@ import rosgraph_msgs.Clock;
 import sensor_msgs.CompressedImage;
 import std_msgs.Int8;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.keyboardAndMouse.RepeatingReleasedEventsFixer;
+import us.ihmc.utilities.inputDevices.keyboard.linux.RepeatingReleasedEventsFixer;
 import us.ihmc.utilities.ros.RosTools;
 
 /**
