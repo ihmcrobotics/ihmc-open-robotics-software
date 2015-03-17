@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class ChestOrientationBehavior extends BehaviorInterface
 {
-   private final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
    
    private ChestOrientationPacket outgoingChestOrientationPacket;
 
@@ -110,9 +110,12 @@ public class ChestOrientationBehavior extends BehaviorInterface
       boolean startTimeUndefined = Double.isNaN(startTime.getDoubleValue());
       boolean trajectoryTimeUndefined = Double.isNaN(trajectoryTime.getDoubleValue());
       double trajectoryTimeElapsed = yoTime.getDoubleValue() - startTime.getDoubleValue();
-      
-      PrintTools.debug(this, "StartTimeUndefined: " + startTimeUndefined + ".  TrajectoryTimeUndefined: " + trajectoryTimeUndefined);
-      PrintTools.debug(this, "TrajectoryTimeElapsed: " + trajectoryTimeElapsed);
+
+      if (DEBUG)
+      {
+         PrintTools.debug(this, "StartTimeUndefined: " + startTimeUndefined + ".  TrajectoryTimeUndefined: " + trajectoryTimeUndefined);
+         PrintTools.debug(this, "TrajectoryTimeElapsed: " + trajectoryTimeElapsed);
+      }
 
       if ( startTimeUndefined || trajectoryTimeUndefined )
          trajectoryTimeHasElapsed.set(false);

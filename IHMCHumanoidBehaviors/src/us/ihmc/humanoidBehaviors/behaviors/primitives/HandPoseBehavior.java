@@ -21,7 +21,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 
 public class HandPoseBehavior extends BehaviorInterface
 {
-   private final boolean DEBUG = false;
+   private static final boolean DEBUG = false;
 
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private final ConcurrentListeningQueue<HandCollisionDetectedPacket> collisionListeningQueue = new ConcurrentListeningQueue<HandCollisionDetectedPacket>();

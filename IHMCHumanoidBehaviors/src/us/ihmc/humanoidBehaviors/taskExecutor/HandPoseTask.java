@@ -17,8 +17,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandPoseTask extends BehaviorTask
 {
-   private static final boolean DEBUG = false;
-
    private final HandPosePacket handPosePacket;
    private final HandPoseBehavior handPoseBehavior;
 
