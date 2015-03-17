@@ -14,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
-import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -177,8 +176,6 @@ public class ManipulationControlModule
 
       if (handPoseProvider.checkForNewPose(robotSide))
       {
-         DataType packetDataType = handPoseProvider.checkHandPosePacketDataType(robotSide);
-         
          if (handPoseProvider.checkHandPosePacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
             handControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(),

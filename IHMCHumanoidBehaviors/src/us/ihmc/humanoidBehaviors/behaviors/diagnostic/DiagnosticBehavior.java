@@ -1422,6 +1422,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Put the arm down
       double halfPi = Math.PI / 2.0;
       ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+
       FrameOrientation upperArmDown2                   = new FrameOrientation(chestFrame, -0.7443, 0.2789, 0.2905 );
       FrameOrientation upperArmIntermediateOnWayUp     = new FrameOrientation(chestFrame, 0.0, 0.7853, halfPi );
       FrameOrientation upperArmUp1                     = new FrameOrientation(chestFrame, 0.6154, 0.5235, 2.5261 );
@@ -2154,6 +2155,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          handPoseBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
+         handPoseListBehaviors.get(robotSide).consumeObjectFromNetworkProcessor(object);
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
          turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
@@ -2166,6 +2168,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          handPoseBehaviors.get(robotSide).consumeObjectFromController(object);
+         handPoseListBehaviors.get(robotSide).consumeObjectFromController(object);
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
          turnInPlaceBehavior.consumeObjectFromController(object);

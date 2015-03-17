@@ -14,7 +14,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class HandPoseListBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private Status status;
@@ -83,7 +83,7 @@ public class HandPoseListBehavior extends BehaviorInterface
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
-            PrintTools.debug(this, outgoingHandPoseListPacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
+            PrintTools.debug(this, outgoingHandPoseListPacket.getRobotSide() + " HandPoseListBehavior setting isDone = true");
          isDone.set(true);
       }
    }
