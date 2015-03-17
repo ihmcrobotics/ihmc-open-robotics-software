@@ -4,6 +4,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 
 public interface SelectedListener
 {

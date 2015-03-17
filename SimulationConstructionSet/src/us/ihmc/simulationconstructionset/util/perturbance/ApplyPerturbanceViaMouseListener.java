@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.graphics3DAdapter.input.Key;
-import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.utilities.inputDevices.keyboard.Key;
+import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
