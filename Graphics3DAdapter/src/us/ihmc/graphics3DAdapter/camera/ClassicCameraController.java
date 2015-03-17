@@ -15,11 +15,11 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.input.Key;
 import us.ihmc.graphics3DAdapter.input.KeyListener;
 import us.ihmc.graphics3DAdapter.input.ModifierKeyInterface;
-import us.ihmc.graphics3DAdapter.input.Mouse3DListener;
 import us.ihmc.graphics3DAdapter.input.MouseButton;
 import us.ihmc.graphics3DAdapter.input.MouseListener;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
+import us.ihmc.utilities.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 
