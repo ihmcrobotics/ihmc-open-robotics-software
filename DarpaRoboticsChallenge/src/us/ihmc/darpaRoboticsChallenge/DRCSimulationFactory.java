@@ -374,7 +374,7 @@ public class DRCSimulationFactory
       return threadDataSynchronizer;
    }
    
-   public FullRobotModel getControllerFullRobotModel()
+   public SDFFullRobotModel getControllerFullRobotModel()
    {
       return threadDataSynchronizer.getControllerFullRobotModel();
    }
