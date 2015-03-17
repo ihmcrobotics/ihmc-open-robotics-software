@@ -40,7 +40,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
    @Override 
    public int getNumberDoFperArm(){
-      return 6;
+      return 7;
    }
    @Override 
    public int getNumberDoFperLeg(){
@@ -78,7 +78,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    {
       if( modelLocationPathString == null)
       {
-         String urdf_filename = "models/atlas_unplugged.wb.urdf";
+         String urdf_filename = "models/atlas_v5.wb.urdf";
 
          /// load the file. But first copy it on $HOME/.ihmc
          InputStream resource = getClass().getClassLoader().getResourceAsStream(urdf_filename);
