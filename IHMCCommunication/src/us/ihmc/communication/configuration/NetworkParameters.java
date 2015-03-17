@@ -29,6 +29,7 @@ public class NetworkParameters
    private NetworkParameters()
    {
       File file = new File(System.getProperty("networkParameterFile", defaultParameterFile));
+      System.out.println("Loading network parameters from " + file.getAbsolutePath());
       if (file.exists() && file.isFile())
       {
          try
