@@ -85,7 +85,7 @@ abstract public class WholeBodyIkSolver
       //---------------  tasks assigned to this solver --------------------------------
       public HierarchicalTask_COM        taskComPosition;
       public HierarchicalTask_JointsPose taskJointsPose;
-      public final HierarchicalTask_BodyPose taskPelvisOrientation;
+      public final HierarchicalTask_BodyPose taskPelvisPose;
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTask_BodyPose>();
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTask_BodyPose>();
       public final HierarchicalTask_BodyPose taskLegPose;
@@ -98,6 +98,7 @@ abstract public class WholeBodyIkSolver
       static public enum LockLevel{
          USE_WHOLE_BODY,           // can move the entire body
          LOCK_PELVIS_ORIENTATION,  // pelvis can move but not rotate
+         CONTROL_MANUALLY_PELVIS_POSE,
          LOCK_LEGS,                // will lock just the leg to the position given bu actualRobotModel. Note that COM position is NOT controlled.
          LOCK_LEGS_AND_WAIST_X_Y,  // lock waist and legs but keep wait yaw free to move.
          LOCK_LEGS_AND_WAIST       // lock waist and legs
@@ -334,7 +335,7 @@ abstract public class WholeBodyIkSolver
 
          taskComPosition = new HierarchicalTask_COM(fk);
 
-         taskPelvisOrientation = new HierarchicalTask_BodyPose(fk, urdfModel, "pelvis");
+         taskPelvisPose = new HierarchicalTask_BodyPose(fk, urdfModel, "pelvis");
          
          for (RobotSide robotSide : RobotSide.values())
          {
@@ -373,7 +374,7 @@ abstract public class WholeBodyIkSolver
 
          taskLegPose.setName( "left Leg Pose");
          taskComPosition.setName( "COM Position");
-         taskPelvisOrientation.setName("PelvisOrientation");
+         taskPelvisPose.setName("PelvisPose");
 
          taskEndEffectorPosition.get(RIGHT).setName( "Right Hand Position" );
          taskEndEffectorPosition.get(LEFT).setName( "Left Hand Position" );
@@ -384,7 +385,7 @@ abstract public class WholeBodyIkSolver
          taskJointsPose.setName( "Whole body Posture" );
 
          // the order is important!! first to be added have higher priority
-         hierarchicalSolver.addTask(taskPelvisOrientation);
+         hierarchicalSolver.addTask(taskPelvisPose);
          hierarchicalSolver.addTask(taskLegPose); 
          hierarchicalSolver.addTask(taskComPosition);
 
@@ -417,19 +418,42 @@ abstract public class WholeBodyIkSolver
       {
          return listOfVisibleAndEnableColliders.contains(bodyName);
       }
-
-      private void controlPelvisOrientation(SDFFullRobotModel actualSdfModel)
+      
+      public void setPelvisTarget(SDFFullRobotModel actualRobotModel, FramePose pelvisPose)
       {
-         ReferenceFrame rootFrame = this.getRootFrame(actualSdfModel);
-         RigidBodyTransform pelvisPose = actualSdfModel.getRootJoint().getFrameAfterJoint().getTransformToDesiredFrame(rootFrame);
-         Quat4d pelvisOrientation = new Quat4d();
-         pelvisPose.getRotation(pelvisOrientation);
+         PoseReferenceFrame pelvisPoseReferenceFrame = new PoseReferenceFrame("pelvisPoseReferenceFrame", pelvisPose);
          
-         Vector64F weightForRotationOnly = new Vector64F(6, 0,0,0,  1,1,1 );
-         taskPelvisOrientation.setWeightError( weightForRotationOnly );
-         taskPelvisOrientation.setWeightsTaskSpace( weightForRotationOnly );
+         RigidBodyTransform pelvisTransform;
+         pelvisTransform = pelvisPoseReferenceFrame.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
+
+         Quat4d quat = new Quat4d();
+         Vector3d pos = new Vector3d();
+         pelvisTransform.get(quat, pos);
+
+         taskPelvisPose.setTarget( quat, pos); 
+      }
+
+      private void controlPelvis(SDFFullRobotModel actualSdfModel)
+      {
+                  
+         Vector64F weightForRotationOnly; 
          
-         taskPelvisOrientation.setTarget( pelvisOrientation, new Vector3d() );
+            if( lockLevel == LockLevel.LOCK_PELVIS_ORIENTATION)
+            {
+               weightForRotationOnly = new Vector64F(6, 0,0,0,  1,1,1 );
+               
+               ReferenceFrame rootFrame = this.getRootFrame(actualSdfModel);
+               RigidBodyTransform pelvisPose = actualSdfModel.getRootJoint().getFrameAfterJoint().getTransformToDesiredFrame(rootFrame);
+               Quat4d pelvisOrientation = new Quat4d();
+               pelvisPose.getRotation(pelvisOrientation);
+               taskPelvisPose.setTarget( pelvisOrientation, new Vector3d() );
+            }
+            else{
+               weightForRotationOnly = new Vector64F(6, 1,1,1,  1,1,1 );
+            }
+            
+         taskPelvisPose.setWeightError( weightForRotationOnly );
+         taskPelvisPose.setWeightsTaskSpace( weightForRotationOnly );
       }
 
       // TODO: this is robot specific ! Move it to AtlasWholeBodyIk
@@ -641,8 +665,9 @@ abstract public class WholeBodyIkSolver
 
          switch( lockLevel )
          {
-         case USE_WHOLE_BODY:break;
+         case USE_WHOLE_BODY: break;   
          
+         case CONTROL_MANUALLY_PELVIS_POSE:        
          case LOCK_PELVIS_ORIENTATION:
             enablePelvisRotation = false;
             break;
@@ -663,8 +688,8 @@ abstract public class WholeBodyIkSolver
             break;
          }
          
-         taskPelvisOrientation.setEnabled( enableLeg && !enablePelvisRotation );
-         taskComPosition.setEnabled( enableLeg  );
+         taskPelvisPose.setEnabled( enableLeg && !enablePelvisRotation );
+         taskComPosition.setEnabled( enableLeg && lockLevel != LockLevel.CONTROL_MANUALLY_PELVIS_POSE  );
          taskLegPose.setEnabled( enableLeg );
 
 
@@ -907,7 +932,7 @@ abstract public class WholeBodyIkSolver
 
          try{
             adjustDesiredCOM(actualSdfModel);
-            controlPelvisOrientation( actualSdfModel );
+            controlPelvis( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
             adjustOtherFoot(actualSdfModel);

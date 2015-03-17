@@ -183,7 +183,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
          joint_weights.set(legJointIndex, 1);
       }
  
-      taskPelvisOrientation.setWeightsJointSpace(joint_weights);
+      taskPelvisPose.setWeightsJointSpace(joint_weights);
 
       //--------------------------------------------------
       for (int legJointIndex: legJointIds.get( getSideOfTheFootRoot().getOppositeSide() ))
