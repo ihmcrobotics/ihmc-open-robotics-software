@@ -44,6 +44,6 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected double getFootSlipTimeDeltaAfterTouchdown()
    {
-      return 0.05;
+      return 0.025;
    }
 }
