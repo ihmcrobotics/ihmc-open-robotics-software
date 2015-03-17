@@ -43,6 +43,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
+import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -117,6 +118,11 @@ public class MomentumBasedControllerFactory
    public HighLevelHumanoidControllerManager getHighLevelHumanoidControllerManager()
    {
       return highLevelHumanoidControllerManager;
+   }
+   
+   public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
+   {
+      momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
    
    public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
