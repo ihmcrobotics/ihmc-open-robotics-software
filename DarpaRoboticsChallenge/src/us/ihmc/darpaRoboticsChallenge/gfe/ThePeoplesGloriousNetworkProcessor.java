@@ -14,12 +14,15 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
+import us.ihmc.ihmcPerception.RosLocalizationUpdateSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ThreadTools;
@@ -72,6 +75,8 @@ public class ThePeoplesGloriousNetworkProcessor
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace);
+      setupRosLocalization();
+
       rosMainNode.execute();
 
       while(!rosMainNode.isStarted())
@@ -144,5 +149,12 @@ public class ThePeoplesGloriousNetworkProcessor
       
       TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel, controllerCommunicationBridge);
       rosMainNode.attachSubscriber(namespace + "/control/endpoint_footstep_generator", footPoseGenerator);
+   }
+
+   private void setupRosLocalization()
+   {
+      new RosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
+      RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
+      controllerCommunicationBridge.attachListener(LocalizationPacket.class, rosLocalizationServiceClient);
    }
 }
