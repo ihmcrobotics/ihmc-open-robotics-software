@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -105,6 +106,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
+   private final GlobalDataProducer globalDataProducer;
+
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
          GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity, double estimatorDT)
@@ -117,6 +120,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
+      this.globalDataProducer = dataProducer;
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -208,21 +212,23 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          try
          {
-            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController, yoGraphicsListRegistry, registry);
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController,
+                  yoGraphicsListRegistry, registry);
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
-         catch(Exception e)
+         catch (Exception e)
          {
             System.err.println("Couldn't create CenterOfMassCalibrationTool");
          }
       }
-      
+
       if (SHOW_WRIST_SENSOR_WRENCHES && yoGraphicsListRegistry != null)
       {
-          double forceVizScaling = 10.0;
-          String includeOnlySensorsContainingThisName = "arm";
-          ForceSensorDataVisualizer forceSensorDataVisualizer = new ForceSensorDataVisualizer(controllerModel, forceSensorDataHolderForController, includeOnlySensorsContainingThisName, forceVizScaling, yoGraphicsListRegistry, registry);
-          controllerFactory.addUpdatable(forceSensorDataVisualizer);
+         double forceVizScaling = 10.0;
+         String includeOnlySensorsContainingThisName = "arm";
+         ForceSensorDataVisualizer forceSensorDataVisualizer = new ForceSensorDataVisualizer(controllerModel, forceSensorDataHolderForController,
+               includeOnlySensorsContainingThisName, forceVizScaling, yoGraphicsListRegistry, registry);
+         controllerFactory.addUpdatable(forceSensorDataVisualizer);
       }
 
       if (SHOW_LEG_COM)
@@ -230,8 +236,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          for (RobotSide side : RobotSide.values)
          {
             String name = side.name() + "Leg";
-            CenterOfMassVisualizer comVisualizer = new CenterOfMassVisualizer(name, controllerModel.getLegJoint(side, LegJointName.HIP_PITCH), twistCalculator, registry,
-                  yoGraphicsListRegistry);
+            CenterOfMassVisualizer comVisualizer = new CenterOfMassVisualizer(name, controllerModel.getLegJoint(side, LegJointName.HIP_PITCH), twistCalculator,
+                  registry, yoGraphicsListRegistry);
             controllerFactory.addUpdatable(comVisualizer);
          }
       }
@@ -244,37 +250,37 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.setSensorProcessor(sensorProcessor);
       modularRobotController.addRobotController(robotController);
-      if(outputProcessor!=null)
+      if (outputProcessor != null)
          modularRobotController.setOutputProcessor(outputProcessor);
-         
 
       if (yoGraphicsListRegistry != null)
       {
-        if (SHOW_INERTIA_GRAPHICS)
-        {
+         if (SHOW_INERTIA_GRAPHICS)
+         {
             CommonInertiaEllipsoidsVisualizer commonInertiaElipsoidsVisualizer = new CommonInertiaEllipsoidsVisualizer(controllerModel.getElevator(),
                   yoGraphicsListRegistry);
             modularRobotController.addRobotController(commonInertiaElipsoidsVisualizer);
          }
 
-        if (SHOW_REFERENCE_FRAMES)
-        {
-              InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
-                    controllerModel.getElevator(), yoGraphicsListRegistry, 0.5);
-              modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
-        }
-        
-        if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
-        {
-              JointAxisVisualizer jointAxisVisualizer= new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
-              modularRobotController.addRobotController(jointAxisVisualizer);
-          
-        }
+         if (SHOW_REFERENCE_FRAMES)
+         {
+            InverseDynamicsMechanismReferenceFrameVisualizer inverseDynamicsMechanismReferenceFrameVisualizer = new InverseDynamicsMechanismReferenceFrameVisualizer(
+                  controllerModel.getElevator(), yoGraphicsListRegistry, 0.5);
+            modularRobotController.addRobotController(inverseDynamicsMechanismReferenceFrameVisualizer);
+         }
 
-        CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFramesForController, yoGraphicsListRegistry);
-        modularRobotController.addRobotController(referenceFramesVisualizer);
+         if (SHOW_JOINTAXIS_ZALIGN_FRAMES)
+         {
+            JointAxisVisualizer jointAxisVisualizer = new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
+            modularRobotController.addRobotController(jointAxisVisualizer);
+
+         }
+
+         CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFramesForController,
+               yoGraphicsListRegistry);
+         modularRobotController.addRobotController(referenceFramesVisualizer);
       }
-      
+
       if (CREATE_DYNAMICALLY_CONSISTENT_NULLSPACE_EVALUATOR)
       {
          RobotController dynamicallyConsistentNullspaceEvaluator = new ConstrainedCenterOfMassJacobianEvaluator(controllerModel);
@@ -314,46 +320,55 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void read(long currentClockTime)
    {
-      runController.set(threadDataSynchronizer.receiveEstimatorStateForController());
-      
-      
-      if (runController.getBooleanValue())
+      try
       {
-         // Skip the first estimatorTicksPerControlTick estimator ticks
-         if (threadDataSynchronizer.getEstimatorTick() < estimatorTicksPerControlTick)
-         {
-            runController.set(false);
-         }
-         else
-         {
-            long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
-            long timestamp = threadDataSynchronizer.getTimestamp();
-            controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
-            actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
+         runController.set(threadDataSynchronizer.receiveEstimatorStateForController());
 
-            if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
+         if (runController.getBooleanValue())
+         {
+            // Skip the first estimatorTicksPerControlTick estimator ticks
+            if (threadDataSynchronizer.getEstimatorTick() < estimatorTicksPerControlTick)
             {
-               if (expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
-               {
-                  controllerLeadsEstimatorTicks.increment();
-               }
-               else if (expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
-               {
-                  controllerLagsEstimatorTicks.increment();
-               }
-
-               lastExpectedEstimatorTick.set(expectedEstimatorTick.getLongValue());
-               lastEstimatorTick.set(threadDataSynchronizer.getEstimatorTick());
-               lastEstimatorClockStartTime.set(threadDataSynchronizer.getEstimatorClockStartTime());
-               lastControllerClockTime.set(currentClockTime);
-               timePassedSinceEstimator.set(currentClockTime - lastEstimatorStartTime.getLongValue());
-               timePassedBetweenEstimatorTicks.set(estimatorStartTime - lastEstimatorStartTime.getLongValue());
+               runController.set(false);
             }
+            else
+            {
+               long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
+               long timestamp = threadDataSynchronizer.getTimestamp();
+               controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+               actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
 
-            expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);
-            controllerStartTime.set(currentClockTime);
-            lastEstimatorStartTime.set(estimatorStartTime);
+               if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
+               {
+                  if (expectedEstimatorTick.getLongValue() > threadDataSynchronizer.getEstimatorTick())
+                  {
+                     controllerLeadsEstimatorTicks.increment();
+                  }
+                  else if (expectedEstimatorTick.getLongValue() < threadDataSynchronizer.getEstimatorTick())
+                  {
+                     controllerLagsEstimatorTicks.increment();
+                  }
+
+                  lastExpectedEstimatorTick.set(expectedEstimatorTick.getLongValue());
+                  lastEstimatorTick.set(threadDataSynchronizer.getEstimatorTick());
+                  lastEstimatorClockStartTime.set(threadDataSynchronizer.getEstimatorClockStartTime());
+                  lastControllerClockTime.set(currentClockTime);
+                  timePassedSinceEstimator.set(currentClockTime - lastEstimatorStartTime.getLongValue());
+                  timePassedBetweenEstimatorTicks.set(estimatorStartTime - lastEstimatorStartTime.getLongValue());
+               }
+
+               expectedEstimatorTick.set(threadDataSynchronizer.getEstimatorTick() + estimatorTicksPerControlTick);
+               controllerStartTime.set(currentClockTime);
+               lastEstimatorStartTime.set(estimatorStartTime);
+            }
          }
+
+      }
+      catch (Exception e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
+         throw new RuntimeException(e);
+
       }
 
    }
@@ -361,33 +376,52 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    @Override
    public void run()
    {
-      if (runController.getBooleanValue())
+
+      try
       {
-         if (firstTick.getBooleanValue())
+         if (runController.getBooleanValue())
          {
-            robotController.initialize();
-            outputWriter.initialize();
-            firstTick.set(false);
+            if (firstTick.getBooleanValue())
+            {
+               robotController.initialize();
+               outputWriter.initialize();
+               firstTick.set(false);
+            }
+            controllerTimer.startMeasurement();
+            robotController.doControl();
+            controllerTimer.stopMeasurement();
          }
-         controllerTimer.startMeasurement();
-         robotController.doControl();
-         controllerTimer.stopMeasurement();
+      }
+      catch (Exception e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_RUN, e.getMessage());
+         throw new RuntimeException(e);
       }
    }
 
    @Override
    public void write(long timestamp)
    {
-      if (runController.getBooleanValue())
+      try
       {
-         outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
-         totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
-         
-         threadDataSynchronizer.publishControllerData();         
-         if (robotVisualizer != null)
+         if (runController.getBooleanValue())
          {
-            robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
+            outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+            totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
+
+            threadDataSynchronizer.publishControllerData();
+            if (robotVisualizer != null)
+            {
+               robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
+            }
          }
+
+      }
+      catch (Exception e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_WRITE, e.getMessage());
+         throw new RuntimeException(e);
+
       }
    }
 
