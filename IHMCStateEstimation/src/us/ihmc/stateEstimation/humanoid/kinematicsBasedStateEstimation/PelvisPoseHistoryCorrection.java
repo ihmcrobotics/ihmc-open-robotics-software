@@ -431,7 +431,6 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    /* (non-Javadoc)
     * @see us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPoseHistoryCorrectionInterface#manuallyTriggerLocalizationUpdate()
     */
-   @Override
    public void manuallyTriggerLocalizationUpdate()
    {
       confidenceFactor.set(1.0);

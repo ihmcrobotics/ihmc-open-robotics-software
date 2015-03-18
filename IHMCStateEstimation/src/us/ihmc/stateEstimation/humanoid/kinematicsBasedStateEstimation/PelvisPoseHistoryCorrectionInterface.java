@@ -11,8 +11,6 @@ public interface PelvisPoseHistoryCorrectionInterface
     */
    public abstract void doControl(long timestamp);
 
-   public abstract void manuallyTriggerLocalizationUpdate();
-
    public abstract void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber);
 
 }

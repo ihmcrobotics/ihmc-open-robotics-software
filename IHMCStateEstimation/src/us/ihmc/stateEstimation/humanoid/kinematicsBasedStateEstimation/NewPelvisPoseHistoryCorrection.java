@@ -1,8 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -12,10 +9,8 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
@@ -23,6 +18,8 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean ENABLE_ROTATION_CORRECTION = false;
+   
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
    private final YoVariableRegistry registry;
@@ -40,10 +37,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final DoubleYoVariable alphaFilterBreakFrequency;
    
    private final DoubleYoVariable confidenceFactor;
-   
-   private final BooleanYoVariable manuallyTriggerLocalizationUpdate;
-   private final DoubleYoVariable manualTranslationOffsetX, manualTranslationOffsetY, manualTranslationOffsetZ;
-   private final DoubleYoVariable manualRotationOffsetInRadX, manualRotationOffsetInRadY, manualRotationOffsetInRadZ;
    
    private final FramePose iterativeClosestPointInPelvisReferenceFramePose;
    private final FramePose correctedPelvisPoseInPelvisReferenceFramePose;
@@ -93,7 +86,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       confidenceFactor = new DoubleYoVariable("PelvisErrorCorrectionConfidenceFactor", registry);
       
       
-      offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT);
+      offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
       
       iterativeClosestPointInPelvisReferenceFramePose = new FramePose(pelvisReferenceFrame);
@@ -105,23 +98,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       yoCorrectedPelvisPoseInPelvisReferenceFramePose = new YoFramePose("correctedPelvisPoseInPelvisReferenceFramePose", pelvisReferenceFrame, registry);
       yoCorrectedPelvisPoseInWorldFrame = new YoFramePose("correctedPelvisPoseInWorldFrame", worldFrame, registry);
       yoIterativeClosestPointPoseInWorldFrame = new YoFramePose("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
-      
-      manuallyTriggerLocalizationUpdate = new BooleanYoVariable("manuallyTriggerLocalizationUpdate", registry);
-      manuallyTriggerLocalizationUpdate.set(false);
-      
-      manualTranslationOffsetX = new DoubleYoVariable("manualTranslationOffset_X", registry);
-      manualTranslationOffsetY = new DoubleYoVariable("manualTranslationOffset_Y", registry);
-      manualTranslationOffsetZ = new DoubleYoVariable("manualTranslationOffset_Z", registry);
-      manualRotationOffsetInRadX = new DoubleYoVariable("manualRotationOffsetInRad_X", registry);
-      manualRotationOffsetInRadY = new DoubleYoVariable("manualRotationOffsetInRad_Y", registry);
-      manualRotationOffsetInRadZ = new DoubleYoVariable("manualRotationOffsetInRad_Z", registry);
-//      //defaultValues for testing with Atlas.
-//      manualTranslationOffsetX.set(-0.11404);
-//      manualTranslationOffsetY.set(0.00022);
-//      manualTranslationOffsetZ.set(0.78931);
-//      manualRotationOffsetInRadX.set(-0.00002);
-//      manualRotationOffsetInRadY.set(0.00024);
-//      manualRotationOffsetInRadZ.set(-0.00052);
    }
    
    
@@ -130,7 +106,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       if (pelvisPoseCorrectionCommunicator != null)
       {
          pelvisReferenceFrame.update();
-         checkForManualTrigger();
          checkForNewPacket();
 
          pelvisReferenceFrame.getTransformToParent(stateEstimatorPelvisTransformInWorld);
@@ -218,42 +193,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    {
       PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(iterativeClosestPointTransformInWorldFrame, errorTransformBetweenCurrentPositionAndCorrected);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
-   }
-   
-   /**
-    * triggers manual localization offset
-    */
-   private void checkForManualTrigger()
-   {
-      if (manuallyTriggerLocalizationUpdate.getBooleanValue())
-      {
-         manuallyTriggerLocalizationUpdate();
-         sendCorrectionUpdate = true;
-      }
-   }
-   
-   public void manuallyTriggerLocalizationUpdate()
-   {
-      confidenceFactor.set(1.0);
-
-      RigidBodyTransform pelvisPose = new RigidBodyTransform();
-
-      Quat4d rotation = new Quat4d();
-      pelvisPose.getRotation(rotation);
-      RotationFunctions.setQuaternionBasedOnYawPitchRoll(rotation, manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(),
-            manualRotationOffsetInRadX.getDoubleValue());
-      pelvisPose.setRotation(rotation);
-
-      Vector3d translation = new Vector3d();
-      pelvisPose.get(translation);
-      translation.setX(manualTranslationOffsetX.getDoubleValue());
-      translation.setY(manualTranslationOffsetY.getDoubleValue());
-      translation.setZ(manualTranslationOffsetZ.getDoubleValue());
-      pelvisPose.setTranslation(translation);
-
-      TimeStampedTransform3D manualTimeStampedTransform3D = new TimeStampedTransform3D(pelvisPose, (long) (outdatedPoseUpdater.getUpToDateTimeStampedBufferNewestTimestamp() - pelvisBufferSize.getIntegerValue() / 10));
-      addNewExternalPose(manualTimeStampedTransform3D);
-      manuallyTriggerLocalizationUpdate.set(false);
    }
    
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
