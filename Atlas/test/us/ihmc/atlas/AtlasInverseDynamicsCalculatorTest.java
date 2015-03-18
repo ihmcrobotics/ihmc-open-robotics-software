@@ -6,6 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -36,7 +39,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
       int numberOfTicks = 1000;
@@ -108,7 +111,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      AtlasInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
 
@@ -142,7 +145,6 @@ public class AtlasInverseDynamicsCalculatorTest
          if (makeAssertions)
             assertTrue(accelerationsMatch);
 
-
          if (scs != null)
             scs.tickAndUpdate();
       }
@@ -167,5 +169,19 @@ public class AtlasInverseDynamicsCalculatorTest
             ThreadTools.sleepForever();
          }
       }
+   }
+   
+   public static AtlasInverseDynamicsCalculatorTestHelper createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(boolean visualize, double gravityZ)
+   {
+      boolean headless = false;
+      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
+      SDFFullRobotModel fullRobotModel = atlasRobotModel.createFullRobotModel();
+
+      boolean createCollisionMeshes = false;
+      atlasRobotModel.setEnableJointDamping(false);
+      SDFRobot robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
+      robot.setGravity(gravityZ);
+
+      return new AtlasInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);
    }
 }
