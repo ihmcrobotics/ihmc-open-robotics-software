@@ -104,7 +104,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
             FingerStateProvider fingerStateProvider = new FingerStateProvider(robotSide);
             fingerStateProviders.put(robotSide, fingerStateProvider);
             if (globalDataProducer != null)
-               globalDataProducer.getObjectCommunicator().attachListener(FingerStatePacket.class, fingerStateProvider);
+               globalDataProducer.attachListener(FingerStatePacket.class, fingerStateProvider);
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
                   simulatedRobot, registry);

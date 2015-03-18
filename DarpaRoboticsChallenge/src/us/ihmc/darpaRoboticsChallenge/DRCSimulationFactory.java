@@ -209,7 +209,7 @@ public class DRCSimulationFactory
       
       if (globalDataProducer != null)
       {
-    	  pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(globalDataProducer.getObjectCommunicator());
+    	  pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(globalDataProducer);
     	  globalDataProducer.attachListener(StampedPosePacket.class, pelvisPoseCorrectionCommunicator);
       }
       drcEstimatorThread.setExternalPelvisCorrectorSubscriber(pelvisPoseCorrectionCommunicator);
