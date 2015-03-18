@@ -22,16 +22,39 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final int numberOfUpToDateTransforms = 10;
-   private final int numberOfOutdatedTransforms = 3;
-   private final long firstTimeStamp = 1000;
-   private final long lastTimeStamp = 2000;
-   private final int numberOfTicksOfDelay = 100;
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+   @EstimatedDuration(duration = 0.2)
+   @Test(timeout = 3000)
+   public void testGetUpToDateTimeStampedBufferNewestTimeStamp()
+   {
+      FramePose upToDatePoseInPresent = new FramePose(worldFrame);
+      PoseReferenceFrame upToDateReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", upToDatePoseInPresent);
+      int numberOfUpToDateTransforms = 20;
+      OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
+            numberOfUpToDateTransforms , upToDateReferenceFrameInPresent);
+      
+      Random random = new Random(42L);
+      long timeStamp;
+      RigidBodyTransform transform;
+      
+      for(int i = 0; i < 100; i++)
+      {
+         timeStamp = random.nextLong();
+         transform = generateRandomUpToDateTransforms(random);
+         outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(transform, timeStamp);
+         assertTrue(timeStamp == outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferNewestTimestamp());
+      }
+   }
+   
+   @EstimatedDuration(duration = 0.2)
+   @Test(timeout = 3000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
+      int numberOfUpToDateTransforms = 10;
+      int numberOfOutdatedTransforms = 3;
+      long firstTimeStamp = 1000;
+      long lastTimeStamp = 2000;
+      int numberOfTicksOfDelay = 100;
       Random random = new Random(1987L);
 
       Vector3d[] translationOffsets = new Vector3d[numberOfOutdatedTransforms];
@@ -87,6 +110,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
                TimeStampedTransform3D outdatedTimeStampedTransform = new TimeStampedTransform3D();
                outdatedTimeStampedTransformBuffer.findTransform(outdatedTimeStamps[outdatedTimeStampsIndex], outdatedTimeStampedTransform);
                lastUpdatedOfOutdatedPoseInPresent.changeFrame(upToDateReferenceFrameInPresent);
+               assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.upToDateTimeStampedBufferIsInRange(outdatedTimeStampedTransform.getTimeStamp()));
                outdatedPoseToUpToDateReferenceFrameUpdater.updateOutdatedTransform(outdatedTimeStampedTransform, lastUpdatedOfOutdatedPoseInPresent);
                outdatedTimeStampsIndex++;
             }
@@ -147,5 +171,5 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       upToDateTransform.setRotation(RandomTools.generateRandomQuaternion(random));
       return upToDateTransform;
    }
-
+   
 }
