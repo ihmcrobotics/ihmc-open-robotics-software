@@ -1,4 +1,4 @@
-package us.ihmc.atlas;
+package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -45,7 +45,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public class AtlasInverseDynamicsCalculatorTestHelper
+public class DRCInverseDynamicsCalculatorTestHelper
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -74,7 +74,7 @@ public class AtlasInverseDynamicsCalculatorTestHelper
 
    private final SideDependentList<ExternalForcePoint> feetExternalForcePoints;
 
-   public AtlasInverseDynamicsCalculatorTestHelper(SDFFullRobotModel fullRobotModel, SDFRobot robot, boolean visualize, double gravityZ)
+   public DRCInverseDynamicsCalculatorTestHelper(SDFFullRobotModel fullRobotModel, SDFRobot robot, boolean visualize, double gravityZ)
    {
       this.fullRobotModel = fullRobotModel;
       this.robot = robot;

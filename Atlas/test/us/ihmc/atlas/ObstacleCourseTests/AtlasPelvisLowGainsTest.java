@@ -3,13 +3,12 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasInverseDynamicsCalculatorTestHelper;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCInverseDynamicsCalculatorTestHelper;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCPelvisLowGainsTest;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -56,7 +55,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
    {
       private final boolean visualize = true;
       private final double gravityZ = 9.81;
-      private final AtlasInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
+      private final DRCInverseDynamicsCalculatorTestHelper atlasInverseDynamicsCalculatorTestHelper;
       private final SDFFullRobotModel controllersFullRobotModel;
       private final SimulationConstructionSet scs;
       private final SDFRobot robot, simulatedRobot;
@@ -76,7 +75,7 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
          robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
          robot.setGravity(gravityZ);
          
-         atlasInverseDynamicsCalculatorTestHelper = new AtlasInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);
+         atlasInverseDynamicsCalculatorTestHelper = new DRCInverseDynamicsCalculatorTestHelper(controllersFullRobotModel, robot, visualize, gravityZ);
          
 //         atlasInverseDynamicsCalculatorTestHelper =  AtlasInverseDynamicsCalculatorTestHelper.createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
          scs = atlasInverseDynamicsCalculatorTestHelper.getSimulationConstructionSet();
