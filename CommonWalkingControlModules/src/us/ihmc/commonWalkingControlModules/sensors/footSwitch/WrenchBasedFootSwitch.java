@@ -267,8 +267,10 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
+   private Wrench footWrenchInBodyFixedFrame = new Wrench();
+   
    private void readSensorData(Wrench footWrenchToPack)
-   {   
+   {
       forceSensorData.packWrench(footWrenchToPack);
 
       // First in measurement frame for all the frames...
@@ -279,16 +281,18 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
       footWrenchToPack.packAngularPart(footTorque);
       yoFootTorque.set(footTorque);
-
-      footForce.setToZero(footWrenchToPack.getExpressedInFrame());
-      footTorque.setToZero(footWrenchToPack.getExpressedInFrame());
       
-      footWrenchToPack.packLinearPart(footForce);
-      footWrenchToPack.packAngularPart(footTorque);
+      // magnitude of force part is independent of frame
+      footForceMagnitude.set(footForce.length());
       
       // Now change to frame after the parent joint (ankle or wrist for example):
-      footForce.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
-      footTorque.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
+      footWrenchInBodyFixedFrame.set(footWrenchToPack);
+      footWrenchInBodyFixedFrame.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
+
+      footForce.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
+      footWrenchInBodyFixedFrame.packLinearPart(footForce);
+      footTorque.setToZero(footWrenchInBodyFixedFrame.getExpressedInFrame());
+      footWrenchInBodyFixedFrame.packAngularPart(footTorque);
 
       footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
       yoFootForceInFoot.set(footForce);
@@ -302,11 +306,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootForceInWorld.set(footForce);
       yoFootTorqueInWorld.set(footTorque);
       
-      // magnitude of force part is independent of frame
-      footForceMagnitude.set(footForce.length());
-      
       updateSensorVisualizer();
-      
    }
    
    private void updateSensorVisualizer()
