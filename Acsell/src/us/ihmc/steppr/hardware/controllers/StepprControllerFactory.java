@@ -107,7 +107,7 @@ public class StepprControllerFactory
       /*
        * Pelvis Pose Correction
        */
-      PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer.getObjectCommunicator());
+      PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(dataProducer);
       dataProducer.attachListener(StampedPosePacket.class, externalPelvisPoseSubscriber);
 
       /*
