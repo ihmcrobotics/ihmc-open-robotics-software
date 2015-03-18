@@ -7,12 +7,12 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.utilities.Tuple;
+import us.ihmc.utilities.Triplet;
 
 public class MultiThreadedRealTimeRobotController
 {
    private final MultiThreadedRobotControlElement sensorReader;
-   private final ArrayList<Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();
+   private final ArrayList<Triplet<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();
    private final MonotonicTime triggerTime = new MonotonicTime();   
    private final MonotonicTime monotonicTime = new MonotonicTime();
       
@@ -23,7 +23,7 @@ public class MultiThreadedRealTimeRobotController
    
    public void addController(MultiThreadedRobotControlElement robotController, PriorityParameters priorityParameters, Processor processor)
    {
-      robotControllers.add(new Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor>(robotController, priorityParameters, processor));
+      robotControllers.add(new Triplet<MultiThreadedRobotControlElement, PriorityParameters, Processor>(robotController, priorityParameters, processor));
    }
    
    public void read()
@@ -42,7 +42,7 @@ public class MultiThreadedRealTimeRobotController
    {
       for(int i = 0; i < robotControllers.size(); i++)
       {
-         Tuple<MultiThreadedRobotControlElement, PriorityParameters, Processor> controllerAndPriority = robotControllers.get(i);
+         Triplet<MultiThreadedRobotControlElement, PriorityParameters, Processor> controllerAndPriority = robotControllers.get(i);
          MultiThreadedRobotControlElement controller = controllerAndPriority.first();
          PriorityParameters priority = controllerAndPriority.second();
          Processor processor = controllerAndPriority.third();
