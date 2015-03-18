@@ -36,7 +36,7 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       jointController.setProportionalGain(5000.0);
       jointController.setIntegralGain(1000.0*50.0);
       jointController.setMaxIntegralError(0.2);
-      jointController.setDerivativeGain(200.0);
+      jointController.setDerivativeGain(500.0);
       jointController.setMaximumOutputLimit( 400.0 );
    }
 
