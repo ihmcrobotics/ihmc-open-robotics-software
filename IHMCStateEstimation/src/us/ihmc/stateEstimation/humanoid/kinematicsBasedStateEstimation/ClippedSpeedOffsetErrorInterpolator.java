@@ -21,6 +21,8 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final BooleanYoVariable isRotationCorrectionEnabled;
+
    private final YoVariableRegistry registry;
 
    private final BooleanYoVariable hasBeenCalled;
@@ -68,7 +70,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFramePose yoInterpolatedOffset;
 
    public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, DoubleYoVariable alphaFilterBreakFrequency,
-         double dt)
+         double dt, boolean correctRotation)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -78,6 +80,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       this.dt.set(dt);
 
       this.referenceFrame = referenceFrame;
+
+      isRotationCorrectionEnabled = new BooleanYoVariable("isRotationCorrectionEnabled", registry);
+      isRotationCorrectionEnabled.set(correctRotation);
 
       hasBeenCalled = new BooleanYoVariable("hasbeenCalled", registry);
       hasBeenCalled.set(false);
@@ -123,14 +128,22 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       this.startOffsetErrorPose.setPoseIncludingFrame(startOffsetError);
       this.goalOffsetErrorPose.setPoseIncludingFrame(goalOffsetError);
+      if (!isRotationCorrectionEnabled.getBooleanValue())
+      {
+         this.startOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
+         this.goalOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
+      }
 
       //scs feedback only
       yoStartOffsetErrorPose.set(startOffsetError);
       yoGoalOffsetErrorPose.set(goalOffsetError);
       ///////////
-      
+
       startOffsetError.getPose(startTranslation, startRotation);
       goalOffsetError.getPose(goalTranslation, goalRotation);
+
+      startRotation.set(0.0, 0.0, 0.0, 1.0);
+      goalRotation.set(0.0, 0.0, 0.0, 1.0);
 
       alphaFilter_PositionValue.set(alphaFilterPosition);
       alphaFilter.set(0.0);
@@ -205,7 +218,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       interpolatedRotation.interpolate(startRotation, goalRotation, cLippedAlphaFilterValue.getDoubleValue());
 
       offsetPoseToPack.setPose(interpolatedTranslation, interpolatedRotation);
-      
+
       //scs feedback only
       yoInterpolatedOffset.set(offsetPoseToPack);
    }
