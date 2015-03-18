@@ -22,7 +22,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
 {
    @EstimatedDuration(duration = 0.5)
    @Test(timeout = 30000)
-   public void testAtlasInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
+   public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {
       Random random = new Random(1776L);
 
@@ -40,7 +40,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      DRCInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      DRCInverseDynamicsCalculatorTestHelper testHelper = createInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
       int numberOfTicks = 1000;
@@ -94,7 +94,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
 
    @EstimatedDuration(duration = 0.5)
    @Test(timeout = 30000)
-   public void testAtlasInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
+   public void testInverseDynamicsStartingWithRandomAccelerationsInInverseDynamics() throws UnreasonableAccelerationException
    {
       Random random = new Random(1984L);
 
@@ -112,7 +112,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      DRCInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      DRCInverseDynamicsCalculatorTestHelper testHelper = createInverseDynamicsCalculatorTestHelper(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
 
@@ -172,7 +172,7 @@ public abstract class DRCInverseDynamicsCalculatorTest implements MultiRobotTest
       }
    }
       
-   public DRCInverseDynamicsCalculatorTestHelper createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(boolean visualize, double gravityZ)
+   public DRCInverseDynamicsCalculatorTestHelper createInverseDynamicsCalculatorTestHelper(boolean visualize, double gravityZ)
    {
       DRCRobotModel drcRobotModel = getRobotModel();
       SDFFullRobotModel fullRobotModel = drcRobotModel.createFullRobotModel();
