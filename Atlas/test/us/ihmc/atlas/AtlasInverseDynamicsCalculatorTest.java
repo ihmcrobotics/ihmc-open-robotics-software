@@ -9,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCInverseDynamicsCalculatorTestHelper;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
@@ -39,7 +40,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      DRCInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
       int numberOfTicks = 1000;
@@ -111,7 +112,7 @@ public class AtlasInverseDynamicsCalculatorTest
       boolean makeAssertions = true;
 
       double gravityZ = 9.81;
-      AtlasInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
+      DRCInverseDynamicsCalculatorTestHelper testHelper = createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(visualize, gravityZ);
       testHelper.startSimulationOnAThread();
 
 
@@ -171,7 +172,7 @@ public class AtlasInverseDynamicsCalculatorTest
       }
    }
    
-   public static AtlasInverseDynamicsCalculatorTestHelper createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(boolean visualize, double gravityZ)
+   public static DRCInverseDynamicsCalculatorTestHelper createAtlasInverseDynamicsCalculatorTestHelperUsingAtlasUnplugged(boolean visualize, double gravityZ)
    {
       boolean headless = false;
       AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasTarget.SIM, headless);
@@ -182,6 +183,6 @@ public class AtlasInverseDynamicsCalculatorTest
       SDFRobot robot = atlasRobotModel.createSdfRobot(createCollisionMeshes);
       robot.setGravity(gravityZ);
 
-      return new AtlasInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);
+      return new DRCInverseDynamicsCalculatorTestHelper(fullRobotModel, robot, visualize, gravityZ);
    }
 }
