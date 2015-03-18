@@ -12,6 +12,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -20,7 +21,6 @@ import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class JointPositionHighLevelController extends HighLevelBehavior
 {
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HashSet<OneDoFJoint> jointsBeenControlled = new HashSet<OneDoFJoint>();
@@ -28,15 +28,18 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
 
-   private final HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectoryGenerator; 
+   private final HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectoryGenerator;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
    private final DoubleYoVariable timeProvider;
 
    private double initialTrajectoryTime;
    private final DesiredJointsPositionProvider desiredJointsProvider;
    private boolean firstPacket = true;
-   
-   private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>(); 
+
+   private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
+
+   private SideDependentList<double[]> armJointAngles, legJointAngles;
+   private double[] waistJointAngles;
 
    public JointPositionHighLevelController(MomentumBasedController momentumBasedController, DesiredJointsPositionProvider desiredJointsProvider)
    {
@@ -55,14 +58,18 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
          String joinName = joint.getName();
 
-         if( joinName.contains("finger") ) continue;
-         if( joinName.contains("hokuyo") ) continue;
-         if( joinName.contains("neck") )   continue;
+         if (joinName.contains("finger"))
+            continue;
+         if (joinName.contains("hokuyo"))
+            continue;
+         if (joinName.contains("neck"))
+            continue;
 
          jointsBeenControlled.add(joint);
 
-         OneDoFJointQuinticTrajectoryGenerator generator = new OneDoFJointQuinticTrajectoryGenerator("jointControl_"+ joint.getName() , joint, trajectoryTimeProvider, registry);
-         trajectoryGenerator.put(joint,  generator );
+         OneDoFJointQuinticTrajectoryGenerator generator = new OneDoFJointQuinticTrajectoryGenerator("jointControl_" + joint.getName(), joint,
+                                                              trajectoryTimeProvider, registry);
+         trajectoryGenerator.put(joint, generator);
 
       }
    }
@@ -71,107 +78,137 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    {
       initialTrajectoryTime = timeProvider.getDoubleValue();
       System.out.println("initialTrajectoryTime " + initialTrajectoryTime);
-      trajectoryTimeProvider.set( packet.trajectoryTime );
-      
-      System.out.println(" packet.trajectoryTime " +  packet.trajectoryTime);
-      //  ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+      trajectoryTimeProvider.set(packet.getTrajectoryTime());
 
-      //  OneDoFJoint[] spineJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getChest()), OneDoFJoint.class);
+      System.out.println(" packet.trajectoryTime " + packet.getTrajectoryTime());
 
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.SHOULDER_YAW)   ).setFinalPosition(packet.leftArmJointAngle[0] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.SHOULDER_ROLL)  ).setFinalPosition( packet.leftArmJointAngle[1] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.ELBOW_PITCH)    ).setFinalPosition( packet.leftArmJointAngle[2] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.ELBOW_ROLL)     ).setFinalPosition( packet.leftArmJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.FIRST_WRIST_PITCH)    ).setFinalPosition( packet.leftArmJointAngle[4] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.LEFT, ArmJointName.WRIST_ROLL)     ).setFinalPosition( packet.leftArmJointAngle[5] );
+      // ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
 
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.SHOULDER_YAW) ).setFinalPosition(   packet.rightArmJointAngle[0] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL)  ).setFinalPosition( packet.rightArmJointAngle[1] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.ELBOW_PITCH)    ).setFinalPosition( packet.rightArmJointAngle[2] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.ELBOW_ROLL)     ).setFinalPosition( packet.rightArmJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH)    ).setFinalPosition( packet.rightArmJointAngle[4] );
-      trajectoryGenerator.get( fullRobotModel.getArmJoint( RobotSide.RIGHT, ArmJointName.WRIST_ROLL)     ).setFinalPosition( packet.rightArmJointAngle[5] );
+      // OneDoFJoint[] spineJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getChest()), OneDoFJoint.class);
+      if (armJointAngles == null)
+      {
+         armJointAngles = new SideDependentList<double[]>();
 
-      trajectoryGenerator.get( fullRobotModel.getSpineJoint( SpineJointName.SPINE_PITCH) ).setFinalPosition( packet.waistJointAngle[0] );
-      trajectoryGenerator.get( fullRobotModel.getSpineJoint( SpineJointName.SPINE_ROLL)  ).setFinalPosition( packet.waistJointAngle[1] );
-      trajectoryGenerator.get( fullRobotModel.getSpineJoint( SpineJointName.SPINE_YAW)   ).setFinalPosition( packet.waistJointAngle[2] );
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            double[] jointAngles = new double[packet.getNumberOfArmJoints(robotSide)];
+            armJointAngles.put(robotSide, jointAngles);
+         }
+      }
 
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.HIP_YAW)    ).setFinalPosition( packet.leftLegJointAngle[0] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.HIP_ROLL)   ).setFinalPosition( packet.leftLegJointAngle[1] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.HIP_PITCH)  ).setFinalPosition( packet.leftLegJointAngle[2] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.KNEE)       ).setFinalPosition( packet.leftLegJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.ANKLE_PITCH)).setFinalPosition( packet.leftLegJointAngle[4] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.LEFT, LegJointName.ANKLE_ROLL) ).setFinalPosition( packet.leftLegJointAngle[5] );
+      if (this.legJointAngles == null)
+      {
+         legJointAngles = new SideDependentList<double[]>();
 
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.HIP_YAW)    ).setFinalPosition( packet.rightLegJointAngle[0] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.HIP_ROLL)   ).setFinalPosition( packet.rightLegJointAngle[1] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.HIP_PITCH)  ).setFinalPosition( packet.rightLegJointAngle[2] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.KNEE)       ).setFinalPosition( packet.rightLegJointAngle[3] );             
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.ANKLE_PITCH)).setFinalPosition( packet.rightLegJointAngle[4] );
-      trajectoryGenerator.get( fullRobotModel.getLegJoint( RobotSide.RIGHT, LegJointName.ANKLE_ROLL) ).setFinalPosition( packet.rightLegJointAngle[5] );
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            double[] jointAngles = new double[packet.getNumberOfLegJoints(robotSide)];
+            legJointAngles.put(robotSide, jointAngles);
+         }
+      }
 
+      if (waistJointAngles == null)
+         waistJointAngles = new double[packet.getNumberOfWaistJoints()];
 
-      if(firstPacket)
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setFinalPositionArmsAndLegs(robotSide, packet);
+      }
+
+      packet.packWaistJointAngle(waistJointAngles);
+
+      // Note: the number of waist joint angles is hardcoded
+      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setFinalPosition(waistJointAngles[0]);
+      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setFinalPosition(waistJointAngles[1]);
+      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setFinalPosition(waistJointAngles[2]);
+
+      if (firstPacket)
       {
          firstPacket = false;
-         for (OneDoFJoint joint: jointsBeenControlled)
+
+         for (OneDoFJoint joint : jointsBeenControlled)
          {
-            trajectoryGenerator.get(joint).initialize( );
-            previousPosition.put( joint, joint.getQ() );
+            trajectoryGenerator.get(joint).initialize();
+            previousPosition.put(joint, joint.getQ());
          }
       }
-      else{
-         for (OneDoFJoint joint: jointsBeenControlled)
+      else
+      {
+         for (OneDoFJoint joint : jointsBeenControlled)
          {
-            trajectoryGenerator.get(joint).initialize( previousPosition.get( joint ), 0.0 );
+            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
          }
       }
+   }
+
+   private void setFinalPositionArmsAndLegs(RobotSide robotSide, JointAnglesPacket packet)
+   {
+      packet.packArmJointAngle(robotSide, armJointAngles.get(robotSide));
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setFinalPosition(armJointAngles.get(robotSide)[0]);
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[1]);
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[2]);
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[3]);
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[4]);
+      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[5]);
+
+
+      packet.packLegJointAngle(robotSide, legJointAngles.get(robotSide));
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setFinalPosition(legJointAngles.get(robotSide)[0]);
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[1]);
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[2]);
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setFinalPosition(legJointAngles.get(robotSide)[3]);
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[4]);
+      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[5]);
    }
 
 
    @Override
    public void doAction()
    {
-
-      if(desiredJointsProvider != null && desiredJointsProvider.checkForNewPacket() )
+      if ((desiredJointsProvider != null) && desiredJointsProvider.checkForNewPacket())
       {
-         initializeFromPacket( desiredJointsProvider.getNewPacket() );
+         initializeFromPacket(desiredJointsProvider.getNewPacket());
       }
 
       double time = timeProvider.getDoubleValue() - initialTrajectoryTime;
-      // System.out.println(" time " + time); 
 
-      for (OneDoFJoint joint: jointsBeenControlled)
-      {   
+      // System.out.println(" time " + time);
+
+      for (OneDoFJoint joint : jointsBeenControlled)
+      {
          OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
 
-         if( generator.isDone() == false)
+         if (generator.isDone() == false)
          {
             generator.compute(time);
-            //   System.out.println("compute " + time + " / " +  trajectoryTimeProvider.getValue() );
+
+            // System.out.println("compute " + time + " / " +  trajectoryTimeProvider.getValue() );
          }
+
          joint.setUnderPositionControl(true);
-         joint.setqDesired( generator.getValue() );
-         joint.setQdDesired(  generator.getVelocity() );
-         
-         previousPosition.put(joint,  generator.getValue());
-         
-      } 
+         joint.setqDesired(generator.getValue());
+         joint.setQdDesired(generator.getVelocity());
+
+         previousPosition.put(joint, generator.getValue());
+
+      }
    }
 
    @Override
    public void doTransitionIntoAction()
-   {      
-      for (OneDoFJoint joint: jointsBeenControlled)
+   {
+      for (OneDoFJoint joint : jointsBeenControlled)
       {
-         trajectoryGenerator.get(joint).setFinalPosition(joint.getQ() );
-         trajectoryGenerator.get(joint).initialize(joint.getQ(), joint.getQd() );
-      } 
+         trajectoryGenerator.get(joint).setFinalPosition(joint.getQ());
+         trajectoryGenerator.get(joint).initialize(joint.getQ(), joint.getQd());
+      }
+      
+      trajectoryTimeProvider.set(0.1);
    }
 
    @Override
    public void doTransitionOutOfAction()
-   {      
+   {
    }
 
 
