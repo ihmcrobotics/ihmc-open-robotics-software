@@ -1,4 +1,4 @@
-package us.ihmc.atlas.drcsimGazebo;
+package us.ihmc.darpaRoboticsChallenge.robotController;
 
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
