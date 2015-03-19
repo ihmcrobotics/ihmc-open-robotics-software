@@ -296,13 +296,24 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
       forceNormal.scaleAdd(-groundBz.getDoubleValue() * zPrime, surfaceNormalTemp, forceNormal);
       
       double magnitudeOfForceNormal = forceNormal.dot(surfaceNormalTemp);
-      if (magnitudeOfForceNormal < 0.0) 
+      if (magnitudeOfForceNormal < 0.0)
       {
-    	  forceParallel.set(0.0, 0.0, 0.0);
-          forceNormal.set(0.0, 0.0, 0.0);
-          groundContactPoint.setNotInContact();
+         // If both the ground is pulling the point in rather than pushing it out, 
+         // and the point is higher than the touchdown point, then set not in contact so that
+         // the touchdown point can be reset next tick if still below the ground...
+         if (zPrime < 0.0)
+         {
+            forceParallel.set(0.0, 0.0, 0.0);
+            forceNormal.set(0.0, 0.0, 0.0);
+            groundContactPoint.setNotInContact();
+         }
+         else
+         {
+//            forceParallel.set(0.0, 0.0, 0.0);
+            forceNormal.set(0.0, 0.0, 0.0);
+         }
       }
-      
+
       // Sum the total
       forceWorld.set(forceParallel);
       forceWorld.add(forceNormal);
@@ -329,10 +340,22 @@ public class LinearStickSlipGroundContactModel implements GroundContactModel
 
       if (zForce < 0.0)
       {
-    	  xForce = 0.0;
-    	  yForce = 0.0;
-          zForce = 0.0;
-          groundContactPoint.setNotInContact();
+         // If both the ground is pulling the point in rather than pushing it out, 
+         // and the point is higher than the touchdown point, then set not in contact so that
+         // the touchdown point can be reset next tick if still below the ground...
+         if (deltaPositionFromTouchdown.getZ() < 0.0)
+         {
+            xForce = 0.0;
+            yForce = 0.0;
+            zForce = 0.0;
+            groundContactPoint.setNotInContact();
+         }
+         else
+         {
+//            xForce = 0.0;
+//            yForce = 0.0;
+            zForce = 0.0;
+         }
       }
 
       groundContactPoint.setForce(xForce, yForce, zForce);
