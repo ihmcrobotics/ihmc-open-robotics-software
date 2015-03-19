@@ -162,13 +162,16 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
             "l_arm_elx", "r_arm_elx",
             "l_arm_wrx", "r_arm_wrx"  };
 
-     /* taskEndEffectorPosition.get(RIGHT).setMaximumError(0.3);
-      taskEndEffectorPosition.get(LEFT).setMaximumError(0.3);
+      taskEndEffectorPosition.get(RIGHT).setClampingValueForTaskSpaceError(0.2);
+      taskEndEffectorPosition.get(LEFT).setClampingValueForTaskSpaceError(0.2);
       
-      taskEndEffectorRotation.get(RIGHT).setMaximumError(0.5);
-      taskEndEffectorRotation.get(LEFT).setMaximumError(0.5);
+      taskEndEffectorRotation.get(RIGHT).setClampingValueForTaskSpaceError(0.4);
+      taskEndEffectorRotation.get(LEFT).setClampingValueForTaskSpaceError(0.4);
+      
+      taskEndEffectorRotation.get(RIGHT).setParentTask(taskEndEffectorPosition.get(RIGHT));
+      taskEndEffectorRotation.get(LEFT).setParentTask(taskEndEffectorPosition.get(LEFT));
 
-      taskJointsPose.setMaximumError(0.6);*/
+      taskJointsPose.setClampingValueForTaskSpaceError(0.6);
 
       this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
       this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_3P);
