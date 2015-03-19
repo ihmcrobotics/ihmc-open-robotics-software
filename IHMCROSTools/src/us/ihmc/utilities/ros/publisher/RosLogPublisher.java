@@ -13,7 +13,7 @@ public class RosLogPublisher extends RosTopicPublisher<rosgraph_msgs.Log>
       this.rosMainNode = rosMainNode;
    }
    
-   public void pulish(byte level, String message)
+   public void publish(byte level, String message)
    {
       rosgraph_msgs.Log logMessage = getMessage();
 
