@@ -9,13 +9,18 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class ValkyriePhysicalProperties extends DRCRobotPhysicalProperties
 {
-   public static final double footsizeReduction = 0.04;
+   public static final double scale = 1.0;
    
    public static final double ankleHeight = 0.09; // Should be 0.075 + 0.015 (sole thickness)
-   public static final double footLength = 0.25 - footsizeReduction;
-   public static final double footBack = 0.058 - footsizeReduction/2.0;
+   public static final double footLength = 0.254;
+   public static final double footBack = 0.058;
+   public static final double footWidth = 0.152;
    public static final double footForward = footLength - footBack;
-   public static final double footWidth = 0.15 - footsizeReduction;
+   
+   public static final double footBackForControl = footBack - 0.038;
+   public static final double footWidthForControl = footWidth - 0.042;
+   public static final double footLengthForControl = footLength - 0.04; 
+   public static final double footForwardForControl = footLengthForControl - footBackForControl;
    public static final double thighLength = 0.431;
    public static final double shinLength = 0.406;
    
