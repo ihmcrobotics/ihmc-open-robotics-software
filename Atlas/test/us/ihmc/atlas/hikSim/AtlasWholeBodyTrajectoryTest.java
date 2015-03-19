@@ -13,7 +13,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTest;
 import us.ihmc.wholeBodyController.WholeBodyTrajectoryTestHelper;
 
-@BambooPlan(planType = {BambooPlanType.Fast})
+@BambooPlan(planType = {BambooPlanType.InDevelopment})
 public class AtlasWholeBodyTrajectoryTest extends WholeBodyTrajectoryTest
 {
    @Override 
