@@ -30,7 +30,7 @@ public class RobotAllJointsDataCheckerTest
    {
       TwoLinkRobotForTesting twoLinkRobotForTesting = new TwoLinkRobotForTesting();
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(twoLinkRobotForTesting);
+      SimulationConstructionSet scs = new SimulationConstructionSet(twoLinkRobotForTesting, simulationTestingParameters);
       scs.setDT(0.00001, 100);
       scs.startOnAThread();
 
