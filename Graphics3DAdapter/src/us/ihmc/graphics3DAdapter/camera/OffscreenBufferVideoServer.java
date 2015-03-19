@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class OffscreenBufferVideoServer
@@ -35,7 +36,7 @@ public class OffscreenBufferVideoServer
       CameraUpdater cameraUpdater = new CameraUpdater();
       this.videoDataServer = videoDataServer;
       this.timestampProvider = timestampProvider;
-      System.out.println("STarting vidoe stream");
+      PrintTools.info(this, "Starting video stream");
       viewport.getCaptureDevice().streamTo(cameraUpdater, framesPerSecond);
 
    }
