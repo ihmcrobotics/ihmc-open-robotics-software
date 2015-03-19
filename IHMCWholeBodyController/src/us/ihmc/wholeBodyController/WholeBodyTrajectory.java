@@ -141,7 +141,7 @@ public class WholeBodyTrajectory
       }
 
       int numSegments = Math.max(segmentsRot, segmentsPos);
-      //numSegments = 2;
+      numSegments = 1;
 
 
       Vector64F thisWaypointAngles = new Vector64F(N);
