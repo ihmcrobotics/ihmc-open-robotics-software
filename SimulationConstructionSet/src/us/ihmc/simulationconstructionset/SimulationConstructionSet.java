@@ -2071,11 +2071,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          if ((!defaultLoaded) && (myGUI != null))
          {
-            myGUI.loadDefaultGUIConfigurationFile();
+            if (parameters.getShowWindows())
+            {
+               myGUI.loadDefaultGUIConfigurationFile();
 
-            // myGUI.loadRegistryConfiguration();
-            defaultLoaded = true;
-            myGUI.saveNormalGUIConfigurationFile();
+               // myGUI.loadRegistryConfiguration();
+               defaultLoaded = true;
+               myGUI.saveNormalGUIConfigurationFile();
+            }
          }
       }
 
