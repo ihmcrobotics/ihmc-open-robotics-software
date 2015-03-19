@@ -18,7 +18,7 @@ public class DepthDataFilter extends DepthDataStore
    private final RigidBodyTransform worldToCorrected = new RigidBodyTransform();
 
 
-   public DepthDataFilter(ReferenceFrame headFrame)
+   public DepthDataFilter()
    {
       super();
    }
