@@ -8,8 +8,6 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryDevelopmentPacket;
-import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 
 public class PacketRouter
 {
