@@ -57,7 +57,10 @@ public class SingleThreadedThreadDataSynchronizer implements ThreadDataSynchroni
       controllerRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
       
       this.fullRobotModelRewinder = new FullRobotModelRootJointRewinder(estimatorFullRobotModel, registry);
-      scs.attachSimulationRewoundListener(fullRobotModelRewinder);
+      if(scs != null)
+      {
+    	  scs.attachSimulationRewoundListener(fullRobotModelRewinder);
+      }
    }
 
    @Override
