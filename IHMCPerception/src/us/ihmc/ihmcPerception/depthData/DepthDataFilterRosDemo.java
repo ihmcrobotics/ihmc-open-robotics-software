@@ -19,8 +19,7 @@ public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
 
    public DepthDataFilterRosDemo()
    {
-      ReferenceFrame headFrame = ReferenceFrame.getWorldFrame();
-      this.depthDataFilter = new DepthDataFilter(headFrame);
+      this.depthDataFilter = new DepthDataFilter();
 
    }
 
