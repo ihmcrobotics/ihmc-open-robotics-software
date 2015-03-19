@@ -148,7 +148,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
    private void doControl(int index)
    {
       FramePose desiredPose = getNextDesiredReferenceFrame(index);
-      wholeBodyIKSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, desiredPose);
+      wholeBodyIKSolver.setGripperPalmTarget( RobotSide.RIGHT, desiredPose);
       try
       {
          success = wholeBodyIKSolver.compute(actualRobotModel, desiredFullRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);

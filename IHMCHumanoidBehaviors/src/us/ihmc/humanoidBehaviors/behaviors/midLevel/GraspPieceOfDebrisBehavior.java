@@ -208,7 +208,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, controlledDofs);
       wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds( numberOfReseeds );
-      wholeBodyIKSolver.setGripperAttachmentTarget(actualRobotModel, robotSide, endEffectorPose);
+      wholeBodyIKSolver.setGripperAttachmentTarget( robotSide, endEffectorPose);
       setPositionAndOrientationErrorTolerance(positionTolerance, orientationTolerance);
 
       try

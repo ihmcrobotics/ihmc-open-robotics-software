@@ -121,7 +121,7 @@ public class WholeBodyTrajectory
          }    
       }
 
-      int segmentsPos = 1;
+    /*  int segmentsPos = 1;
       int segmentsRot = 1;
 
       double maxDeltaPos = maxDistanceInTaskSpaceBetweenWaypoints;
@@ -139,10 +139,9 @@ public class WholeBodyTrajectory
             segmentsPos = (int) Math.max(segmentsPos, Math.round( distance / maxDeltaPos) );
          }
       }
+*/
 
-      int numSegments = Math.max(segmentsRot, segmentsPos);
-      numSegments = 1;
-
+      int numSegments = 1;
 
       Vector64F thisWaypointAngles = new Vector64F(N);
       HashMap<String,Double> thisWaypointAnglesByName = new HashMap<String,Double>();
@@ -194,7 +193,7 @@ public class WholeBodyTrajectory
 
                FramePose target =  new FramePose( worldFrame, interpolatedTransform );
 
-               wbSolver.setGripperPalmTarget( initialRobotState,  side, target );
+               wbSolver.setGripperPalmTarget( side, target );
 
                if( side == RobotSide.RIGHT )
                {

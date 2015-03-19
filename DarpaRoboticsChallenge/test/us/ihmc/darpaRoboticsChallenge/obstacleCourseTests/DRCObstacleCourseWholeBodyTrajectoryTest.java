@@ -367,7 +367,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       
       for(SideDependentList<FramePose> sideDependentList : list){
          for(RobotSide robotSide : RobotSide.values){
-            wbSolver.setGripperPalmTarget(drcSimulationTestHelper.getSDFFullRobotModel(), robotSide, sideDependentList.get(robotSide));
+            wbSolver.setGripperPalmTarget( robotSide, sideDependentList.get(robotSide));
          }
          try
          {

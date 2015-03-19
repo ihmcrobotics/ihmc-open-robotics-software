@@ -21,6 +21,7 @@ import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -98,13 +99,13 @@ abstract public class WholeBodyIkSolver
       static public enum LockLevel{
          USE_WHOLE_BODY,           // can move the entire body
          LOCK_PELVIS_ORIENTATION,  // pelvis can move but not rotate
-         CONTROL_MANUALLY_PELVIS_POSE,
+         CONTROL_MANUALLY,
          LOCK_LEGS,                // will lock just the leg to the position given bu actualRobotModel. Note that COM position is NOT controlled.
          LOCK_LEGS_AND_WAIST_X_Y,  // lock waist and legs but keep wait yaw free to move.
          LOCK_LEGS_AND_WAIST       // lock waist and legs
       }
 
-      private LockLevel lockLevel = LockLevel.USE_WHOLE_BODY;
+      private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
       private boolean suggestKneeAngle = true;
 
       // --------------------- Miscellaneous -------------------------------------
@@ -124,7 +125,11 @@ abstract public class WholeBodyIkSolver
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
 
-      protected int maxNumberOfAutomaticReseeds = 3;
+      protected int maxNumberOfAutomaticReseeds = 0;
+      
+      protected final SideDependentList<FramePose> handTarget = new SideDependentList<FramePose>();
+      protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
+      protected final FramePose pelvisTarget = new FramePose();
 
       //------- Abstract method that provide robot-specific information and configuration  -------------
 
@@ -139,7 +144,17 @@ abstract public class WholeBodyIkSolver
       abstract protected HashSet<String> configureCollisionAvoidance(String urdfFileName )  throws Exception;
       abstract protected void configureTasks();
 
-      abstract public ReferenceFrame  getRootFrame( SDFFullRobotModel model);
+      public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
+      {
+         if( feetTarget.get(getSideOfTheFootRoot()) != null && lockLevel == LockLevel.CONTROL_MANUALLY )
+         {
+            return new PoseReferenceFrame("rootFootFrame", feetTarget.get(getSideOfTheFootRoot()) );
+         }
+         else{
+            // FIXME this is robot specific
+            return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
+         }
+      }
 
       abstract public int[] getWaistJointId();
 
@@ -183,7 +198,7 @@ abstract public class WholeBodyIkSolver
       }
 
       /*
-       * Sometimes the solver gest stacked in a local minimum and fails.
+       * Sometimes the solver gets stacked in a local minimum and fails.
        * Setting the maximum number of reseed > 0 you can automatically try to find a solution.
        */
       public void setNumberOfMaximumAutomaticReseeds(int maxReseeds )
@@ -237,16 +252,6 @@ abstract public class WholeBodyIkSolver
          out.setRotation( quat );
          out.setTranslation( new Vector3d( body_pos.get(0), body_pos.get(1), body_pos.get(2) ) ); 
          return out;
-      }
-
-
-      public ReferenceFrame getBodyReferenceFrame(String bodyname)
-      {
-         RigidBodyTransform localTransform = getLocalBodyTransform( bodyname );
-         ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", 
-               getRootFrame(workingSdfModel), localTransform);
-         System.out.println( localTransform );
-         return bodyFrame;
       }
 
       public ReferenceFrame getBodyReferenceFrame(int bodyId)
@@ -343,6 +348,8 @@ abstract public class WholeBodyIkSolver
 
             taskEndEffectorPosition.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
             taskEndEffectorRotation.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
+            feetTarget.set(robotSide, null );
+            handTarget.set(robotSide, null );
 
             int [] indexes = new  int[ getNumberDoFperArm()];
             urdfModel.getParentJoints(currentHandId, getNumberDoFperArm() , indexes);
@@ -419,18 +426,9 @@ abstract public class WholeBodyIkSolver
          return listOfVisibleAndEnableColliders.contains(bodyName);
       }
       
-      public void setPelvisTarget(SDFFullRobotModel actualRobotModel, FramePose pelvisPose)
+      public void setPelvisTarget(FramePose pelvisPose)
       {
-         PoseReferenceFrame pelvisPoseReferenceFrame = new PoseReferenceFrame("pelvisPoseReferenceFrame", pelvisPose);
-         
-         RigidBodyTransform pelvisTransform;
-         pelvisTransform = pelvisPoseReferenceFrame.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
-
-         Quat4d quat = new Quat4d();
-         Vector3d pos = new Vector3d();
-         pelvisTransform.get(quat, pos);
-
-         taskPelvisPose.setTarget( quat, pos); 
+         pelvisTarget.setPose( pelvisPose );
       }
 
       private void controlPelvis(SDFFullRobotModel actualSdfModel)
@@ -493,52 +491,73 @@ abstract public class WholeBodyIkSolver
        * We call "GripperAttachment" the location where the end effector would be if no gripper is present.
        * Its position corresponds with SDFFullRobotModel.getHandControlFrame
        */
-      public void setGripperAttachmentTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
+      public void setGripperAttachmentTarget(RobotSide endEffectorSide, FramePose endEffectorPose)
       {
-         PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-
+         handTarget.set(endEffectorSide, endEffectorPose);
+         
          taskEndEffectorPosition.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
          taskEndEffectorRotation.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
-
-         setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
       }
 
       /*
        * We call "GripperPalm" the location where grasping shall be made.
        * Its position corresponds with the blue cylinder of the ModifiafleCylinderGrabber.
        */
-      public void setGripperPalmTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, FramePose endEffectorPose)
+      public void setGripperPalmTarget(RobotSide endEffectorSide, FramePose endEffectorPose)
       {
-         PoseReferenceFrame endEffectorPoseReferenceFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", endEffectorPose);
-
+         handTarget.set(endEffectorSide, endEffectorPose);
+         
          taskEndEffectorPosition.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
          taskEndEffectorRotation.get(endEffectorSide).setBodyToControl( getGripperPalmLinkName(endEffectorSide));
-
-         setEndEffectorTarget(actualRobotModel, endEffectorSide, endEffectorPoseReferenceFrame);
       }
 
-      private void setEndEffectorTarget(SDFFullRobotModel actualRobotModel, RobotSide endEffectorSide, ReferenceFrame endEffectorPose)
+      private void adjustAllTargets(SDFFullRobotModel actualRobotModel)
       {
-         movePelvisToHaveOverlappingFeet( actualRobotModel, workingSdfModel );
-
-         // HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(endEffectorSide);
-
-         RigidBodyTransform ee_transform;
-         ee_transform = endEffectorPose.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
-
-         keepArmQuiet.get(endEffectorSide).setValue( false );
-
          Quat4d quat = new Quat4d();
          Vector3d pos = new Vector3d();
+         RigidBodyTransform ee_transform;
+         ReferenceFrame targetFrame;
+         
+         if( feetTarget.get(RobotSide.LEFT) == null || lockLevel != LockLevel.CONTROL_MANUALLY )
+         {
+            targetFrame = actualRobotModel.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint() ;
+         }
+         else {
+            RobotSide nonRootSide = getSideOfTheFootRoot().getOppositeSide();
+            targetFrame = new PoseReferenceFrame("footReferenceFrame", feetTarget.get( nonRootSide ));
+         }
+         ee_transform = targetFrame.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
          ee_transform.get(quat, pos);
-
-         taskEndEffectorPosition.get(endEffectorSide).setTarget( quat, pos); 
-         taskEndEffectorRotation.get(endEffectorSide).setTarget( quat, pos);
+         taskLegPose.setTarget( quat, pos ); 
+         
+         if( pelvisTarget != null)
+         {  
+            targetFrame = new PoseReferenceFrame("pelvisReferenceFrame", pelvisTarget );
+            ee_transform = targetFrame.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
+            ee_transform.get(quat, pos);
+            taskPelvisPose.setTarget( quat, pos ); 
+         }
+         
+         for (RobotSide side: RobotSide.values)
+         {
+            if( handTarget.get(side) != null)
+            {
+               targetFrame = new PoseReferenceFrame("endEffectorPoseReferenceFrame", handTarget.get(side));
+               ee_transform = targetFrame.getTransformToDesiredFrame( getRootFrame( actualRobotModel ));
+      
+               keepArmQuiet.get(side).setValue( false );
+   
+               ee_transform.get(quat, pos);
+      
+               taskEndEffectorPosition.get(side).setTarget( quat, pos ); 
+               taskEndEffectorRotation.get(side).setTarget( quat, pos );
+            }
+         }
       }
 
       private void enforceControlledDoF( ComputeOption opt )
       {
-         double rotationWeight = 0.5;
+         double rotationWeight = 0.4;
 
          for ( RobotSide side: RobotSide.values)
          {
@@ -578,17 +597,18 @@ abstract public class WholeBodyIkSolver
             case DOF_3P2R:
 
                taskEndEffectorPosition.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setEnabled(true);
-
-               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );
-               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  0.4, 0.4, 0.4) );
-
+               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );           
                taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
-               taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
 
+               //-------------
+               taskEndEffectorRotation.get(side).setEnabled(true);
+               taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
+               
                Vector64F target = taskEndEffectorRotation.get(side).getTarget();
-               Matrix3d rot = new Matrix3d();
-               rot.set( new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) ) );
+               Matrix3d rot = new Matrix3d();              
+               Quat4d targetQuaternion = new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) );
+ 
+               rot.set( targetQuaternion );
 
                taskEndEffectorRotation.get(side).disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21));  
 
@@ -667,7 +687,7 @@ abstract public class WholeBodyIkSolver
          {
          case USE_WHOLE_BODY: break;   
          
-         case CONTROL_MANUALLY_PELVIS_POSE:        
+         case CONTROL_MANUALLY:        
          case LOCK_PELVIS_ORIENTATION:
             enablePelvisRotation = false;
             break;
@@ -689,7 +709,7 @@ abstract public class WholeBodyIkSolver
          }
          
          taskPelvisPose.setEnabled( enableLeg && !enablePelvisRotation );
-         taskComPosition.setEnabled( enableLeg && lockLevel != LockLevel.CONTROL_MANUALLY_PELVIS_POSE  );
+         taskComPosition.setEnabled( enableLeg && lockLevel != LockLevel.CONTROL_MANUALLY  );
          taskLegPose.setEnabled( enableLeg );
 
 
@@ -819,7 +839,9 @@ abstract public class WholeBodyIkSolver
             // 
             break;
          }
-
+         
+         //
+         adjustAllTargets( actualSdfModel );
          enforceControlledDoF( opt );
          
          //-------------------------------------------
@@ -905,8 +927,10 @@ abstract public class WholeBodyIkSolver
          referenceModel.updateFrames();
          followerModel.updateFrames();
 
-         ReferenceFrame referenceSoleFrame = referenceModel.getSoleFrame( getSideOfTheFootRoot() );
-         ReferenceFrame followerSoleFrame  = followerModel.getSoleFrame( getSideOfTheFootRoot() );
+         ReferenceFrame referenceSoleFrame =  getRootFrame( referenceModel ); 
+            //referenceModel.getSoleFrame( getSideOfTheFootRoot() );
+         ReferenceFrame followerSoleFrame  =  followerModel.getOneDoFJointByName( "r_leg_akx" ).getFrameAfterJoint();
+               //followerModel.getSoleFrame( getSideOfTheFootRoot() );
 
          RigidBodyTransform soleWorldToFollow = new RigidBodyTransform();
          RigidBodyTransform soleToPelvis      = new RigidBodyTransform();
@@ -931,11 +955,12 @@ abstract public class WholeBodyIkSolver
          Vector64F q_out = new Vector64F(numOfJoints);
 
          try{
+           
             adjustDesiredCOM(actualSdfModel);
             controlPelvis( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
-            adjustOtherFoot(actualSdfModel);
+          //  adjustOtherFoot(actualSdfModel);
             checkIfArmShallStayQuiet(actualSdfModel);
 
             q_out.set(cachedAnglesQ);
@@ -1002,7 +1027,7 @@ abstract public class WholeBodyIkSolver
          return workingJointsInUrdfOrder[index].getQ();
       }
 
-      private void adjustOtherFoot(SDFFullRobotModel actualSdfModel )
+     /* private void adjustOtherFoot(SDFFullRobotModel actualSdfModel )
       {
          RigidBodyTransform foot_other_transform = new RigidBodyTransform();
          // note before and after... it is not a typo.
@@ -1015,15 +1040,19 @@ abstract public class WholeBodyIkSolver
 
          foot_other_transform.get(quat, pos);
          taskLegPose.setTarget(quat, pos);
-      }
+      }*/
 
+      public ReferenceFrames getWorkingReferenceFrames()
+      {
+         return workingFrames;
+      }
 
       public ReferenceFrame getDesiredAfterJointFrame(String jointName, ReferenceFrame parentFrame)
       {
          workingFrames.updateFrames();
 
          ReferenceFrame workingJointFrame = workingSdfModel.getOneDoFJointByName(jointName).getFrameAfterJoint();
-         ReferenceFrame workingRootFrame  = getRootFrame();
+         ReferenceFrame workingRootFrame  = getRootFrame( workingSdfModel );
 
          RigidBodyTransform rootToJoint  = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
          RigidBodyTransform parentToRoot = workingRootFrame.getTransformToDesiredFrame( parentFrame );
@@ -1055,7 +1084,7 @@ abstract public class WholeBodyIkSolver
          workingFrames.updateFrames();
 
          RigidBodyTransform rootToBody   = getLocalBodyTransform(name);
-         RigidBodyTransform parentToRoot =  getRootFrame().getTransformToDesiredFrame(parentFrame);
+         RigidBodyTransform parentToRoot =  getRootFrame( workingSdfModel ).getTransformToDesiredFrame(parentFrame);
 
          RigidBodyTransform parentToBody = new RigidBodyTransform();
          parentToBody.multiply(parentToRoot, rootToBody);
@@ -1083,6 +1112,16 @@ abstract public class WholeBodyIkSolver
       public LockLevel getLockLevel()
       {
          return  this.lockLevel;
+      }
+      
+      public void setFeetTarget(RobotSide side, FramePose footPose)
+      {
+         feetTarget.set(side, footPose);  
+      }
+      
+      public void setFootTarget(RobotSide side, FramePose footPose)
+      {
+         feetTarget.set(side, footPose);  
       }
 
 
