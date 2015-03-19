@@ -67,11 +67,11 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
       trajectoryTime.set(trajectoryDuration);
       if (setPalmTarget)
       {
-         wholeBodyIKSolver.setGripperPalmTarget(actualFullRobotModel, robotSide, endEffectorPose);
+         wholeBodyIKSolver.setGripperPalmTarget( robotSide, endEffectorPose);
       }
       else
       {
-         wholeBodyIKSolver.setGripperAttachmentTarget(actualFullRobotModel, robotSide, endEffectorPose);
+         wholeBodyIKSolver.setGripperAttachmentTarget( robotSide, endEffectorPose);
 
       }
 

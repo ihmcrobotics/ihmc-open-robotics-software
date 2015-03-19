@@ -63,13 +63,13 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       return new int[]{ back_bkz, back_bky, back_bkx };
    }
 
-   @Override 
+  /* @Override 
    public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
    {
       // important: this is AfterJoint, not beforeJoint, because the direction on the URDF model is reversed when
       // compared with the SDF model.
       return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
-   }
+   }*/
 
    static private String modelLocationPathString = null;
 
@@ -157,8 +157,10 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       int back_bky = jointNamesToIndex.get("back_bky");
       int back_bkx = jointNamesToIndex.get("back_bkx");
 
-      int larm_elx = jointNamesToIndex.get("l_arm_elx");
-      int rarm_elx = jointNamesToIndex.get("r_arm_elx");
+      String[] jointsToMinimize = new String[]{
+          //  "l_arm_shx", "r_arm_shx",
+            "l_arm_elx", "r_arm_elx",
+            "l_arm_wrx", "r_arm_wrx"  };
 
      /* taskEndEffectorPosition.get(RIGHT).setMaximumError(0.3);
       taskEndEffectorPosition.get(LEFT).setMaximumError(0.3);
@@ -262,12 +264,15 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       weights_jointpose.set(rleg_hpz, 0.2);
       weights_jointpose.set(lleg_hpz, 0.2);
 
-      //elbows
-    /*  weights_jointpose.set(larm_elx, 0.1);
-      weights_jointpose.set(rarm_elx, 0.1);
-      preferedJointPose.set(larm_elx, 1.0);
-      preferedJointPose.set(rarm_elx, -1.0);
-*/
+      // try to minimize the amount of motion of these joints (wrist pitches)
+      for(String jointName: jointsToMinimize)
+      {
+         int jointId = jointNamesToIndex.get(jointName);
+         weights_jointpose.set(jointId, 0.05);
+         coupledJointWeights.set(jointId, jointId, 1);
+      }
+      
+      //-------------------------------------------------
       RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
       for ( int index = 0; index< weights_jointpose.getNumElements(); index++ )
       {

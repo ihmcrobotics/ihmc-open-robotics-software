@@ -368,9 +368,12 @@ public abstract class WholeBodyIkSolverTest
 
       scs.startOnAThread();
 
-      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayList(getLeftHandToWorldArray(),
-                                                                 getRightHandToWorldArray());
-      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, handTargetArray, false, USE_RANDOM_START_LOCATIONS);
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = wholeBodyTrajectoryTestHelper.createManualFramePosePairArrayList(
+            getLeftHandToWorldArray(),
+            getRightHandToWorldArray());
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(
+            ControlledDoF.DOF_3P2R, ControlledDoF.DOF_3P2R, 
+            handTargetArray, false, USE_RANDOM_START_LOCATIONS);
 
       scs.cropBuffer();
       scs.gotoInPointNow();

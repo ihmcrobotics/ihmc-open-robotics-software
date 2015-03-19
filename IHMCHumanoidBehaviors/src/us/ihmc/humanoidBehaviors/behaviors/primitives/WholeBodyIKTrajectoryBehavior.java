@@ -81,14 +81,14 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, controlledDoFLeft);
       if (palmTargetLeft != null)
       {
-         wholeBodyIKSolver.setGripperPalmTarget(actualFullRobotModel, RobotSide.LEFT, palmTargetLeft);
+         wholeBodyIKSolver.setGripperPalmTarget( RobotSide.LEFT, palmTargetLeft);
          hasInputBeenSet.set(true);
       }
       
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, controlledDoFRight);
       if (palmTargetRight != null)
       {
-         wholeBodyIKSolver.setGripperPalmTarget(actualFullRobotModel, RobotSide.RIGHT, palmTargetRight);
+         wholeBodyIKSolver.setGripperPalmTarget( RobotSide.RIGHT, palmTargetRight);
          hasInputBeenSet.set(true);
       }
    }

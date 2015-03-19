@@ -140,7 +140,7 @@ public abstract class WholeBodyTrajectoryTest
 
 
          // wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.LEFT,  targetL );
-         wbSolver.setGripperPalmTarget(actualRobotModel, RobotSide.RIGHT, targetR);
+         wbSolver.setGripperPalmTarget( RobotSide.RIGHT, targetR);
 
          ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
 
@@ -260,7 +260,7 @@ public abstract class WholeBodyTrajectoryTest
 
          visualizePoint(0.04, YoAppearance.Green(), poseFrameTarget);
 
-         wbSolver.setGripperPalmTarget(actualRobotModel, robotSide, poseFrameTarget);
+         wbSolver.setGripperPalmTarget( robotSide, poseFrameTarget);
 
          ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
 
@@ -354,13 +354,13 @@ public abstract class WholeBodyTrajectoryTest
 
       // FramePose targetL = new FramePose(soleFrame, new Point3d( 0.5, 0.4, 0.8 ), new Quat4d() );
 
-      // For now, use a set of hard corded points. It would be better to have random points to chos from
+      // For now, use a set of hard corded points. It would be better to have random points to choose from
       double sideMultiplier = 1.0;
       robotSide.negateIfLeftSide(sideMultiplier);
 
       targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 1.4));
       targetList.add(new Point3d(0.4, -0.6 * sideMultiplier, 0.8));
-      targetList.add(new Point3d(0.5, 0.6 * sideMultiplier, 1.0));
+      targetList.add(new Point3d(0.5,  0.6 * sideMultiplier, 1.0));
       targetList.add(new Point3d(0.5, -0.0 * sideMultiplier, 1.0));
       targetList.add(new Point3d(0.5, -0.4 * sideMultiplier, 1.4));
       targetList.add(new Point3d(0.5, -0.2 * sideMultiplier, 0.6));
@@ -376,7 +376,7 @@ public abstract class WholeBodyTrajectoryTest
 
          visualizePoint(0.04, YoAppearance.Green(), poseFrameTarget);
 
-         wbSolver.setGripperPalmTarget(actualRobotModel, robotSide, poseFrameTarget);
+         wbSolver.setGripperPalmTarget(robotSide, poseFrameTarget);
 
          ComputeResult ret = wbSolver.compute(actualRobotModel, desiredRobotModel, ComputeOption.USE_ACTUAL_MODEL_JOINTS);
 
