@@ -43,7 +43,7 @@ public class ValkyrieSliderBoard
       ON_BOARD_POSITION, TORQUE_PD_CONTROL, WALKING, TUNING, GRAVITY_COMPENSATION
    }
 
-   private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint;
+   private final EnumYoVariable<ValkyrieSliderBoardSelectableJoints> selectedJoint, controllerSelectedJoint;
 
    private final LinkedHashMap<String, IntegerYoVariable> storedTurboIndex = new LinkedHashMap<>();
 
@@ -54,6 +54,8 @@ public class ValkyrieSliderBoard
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
+      
+      controllerSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable("ValkyrieSliderBoardController", "selectedJoint");
 
       remoteTurboIndex = (IntegerYoVariable) registry.getVariable("ValkyrieSliderBoardController", "turboIndex");
 
@@ -335,6 +337,7 @@ public class ValkyrieSliderBoard
                remoteTurboIndex.set(0);
                System.out.println("loading configuration " + selectedJoint.getEnumValue());
                sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
+               controllerSelectedJoint.set(selectedJoint.getEnumValue());
             }
 
             if (isTunableLinearActuatorJoint(selectedJoint.getEnumValue().toString()))
@@ -343,6 +346,7 @@ public class ValkyrieSliderBoard
                remoteTurboIndex.set(storedIndex);
                System.out.println("loading configuration " + selectedJoint.getEnumValue() + " " + storedIndex);
                sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString() + storedIndex);
+               controllerSelectedJoint.set(selectedJoint.getEnumValue());
             }
          }
       });
