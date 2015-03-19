@@ -10,6 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class SimulationConstructionSetProcessDataCallTest
 {   
+   private static final boolean DEBUG = false;
    private YoVariableRegistry registry;
 
 	@EstimatedDuration
@@ -47,15 +48,17 @@ public class SimulationConstructionSetProcessDataCallTest
       
       //Exact data from Data Processing Class
       DoubleYoVariable counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
-      
-      //Print out the data (for DEBUG)
-      System.out.println("===testForwardCount===");
-      for (int i = 0; i < maxValue-startValue; i++)
+
+      if (DEBUG)
       {
-         scs.setIndex(i);
-         System.out.println(dataSet.getDoubleValue() + "\t" + counterVariable.getDoubleValue());
-      }     
-      
+         System.out.println("===testForwardCount===");
+         for (int i = 0; i < maxValue-startValue; i++)
+         {
+            scs.setIndex(i);
+            System.out.println(dataSet.getDoubleValue() + "\t" + counterVariable.getDoubleValue());
+         }     
+      }
+
       //Test
       double testNum1, testNum2;
       for (int i = 0; i < maxValue-startValue; i++)
@@ -103,15 +106,18 @@ public class SimulationConstructionSetProcessDataCallTest
       
       //Exact data from Data Processing Class
       DoubleYoVariable counterVariable = ((CounterProcessingFunction) counterProcessingFunction).getCountVariable();
-      
-      //Print out the data (for DEBUG)
-      System.out.println("===testBackwardCount===");
-      for (int i = 0; i < maxValue-startValue; i++)
+
+      if (DEBUG)
       {
-         scs.setIndex(i);
-         System.out.println(dataSet.getDoubleValue() + "\t" + counterVariable.getDoubleValue());
+         System.out.println("===testBackwardCount===");
+
+         for (int i = 0; i < maxValue-startValue; i++)
+         {
+            scs.setIndex(i);
+            System.out.println(dataSet.getDoubleValue() + "\t" + counterVariable.getDoubleValue());
+         }
       }
-      
+
       //Test
       double testNum1, testNum2;
       for (int i = 0; i < maxValue-startValue; i++)
@@ -156,18 +162,20 @@ public class SimulationConstructionSetProcessDataCallTest
       //Apply the Data Processing Class
       DataProcessingFunction copierProcessingFunction = new CopierProcessingFunction(dataSet, registry);
       scs.applyDataProcessingFunction(copierProcessingFunction);
-      
+
       //Exact data from Data Processing Class
       DoubleYoVariable copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
-      
-      //Print out the data (for DEBUG)
-      System.out.println("===testForwardCopy===");
-      for (int i = 0; i < maxValue-startValue; i++)
+
+      if (DEBUG)
       {
-         scs.setIndex(i);
-         System.out.println(dataSet.getDoubleValue() + "\t" + copierVariable.getDoubleValue());
+         System.out.println("===testForwardCopy===");
+         for (int i = 0; i < maxValue-startValue; i++)
+         {
+            scs.setIndex(i);
+            System.out.println(dataSet.getDoubleValue() + "\t" + copierVariable.getDoubleValue());
+         }
       }
-      
+
       //Test
       double testNum1, testNum2;
       for (int i = 0; i < maxValue-startValue; i++)
@@ -216,14 +224,17 @@ public class SimulationConstructionSetProcessDataCallTest
       //Exact data from Data Processing Class
       DoubleYoVariable copierVariable = ((CopierProcessingFunction) copierProcessingFunction).getCopyVariable();
       
-      //Print out the data (for DEBUG)
-      System.out.println("===testBackwardCopy===");
-      for (int i = 0; i < maxValue-startValue; i++)
+      if (DEBUG)
       {
-         scs.setIndex(i);
-         System.out.println(dataSet.getDoubleValue() + "\t" + copierVariable.getDoubleValue());
+         System.out.println("===testBackwardCopy===");
+
+         for (int i = 0; i < maxValue-startValue; i++)
+         {
+            scs.setIndex(i);
+            System.out.println(dataSet.getDoubleValue() + "\t" + copierVariable.getDoubleValue());
+         }
       }
-      
+
       //Test     
       double testNum1, testNum2;
       for (int i = 0; i < maxValue-startValue; i++)

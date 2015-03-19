@@ -22,9 +22,7 @@ public class YoVariableValueDataCheckerTest
 {
    private double EPSILON = 1e-10;
 
-   
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    @After
    public void destroySimulationAndRecycleMemory()
@@ -33,8 +31,9 @@ public class YoVariableValueDataCheckerTest
       {
          //ThreadTools.sleepForever();
       }
+      
+      simulationTestingParameters = null;
    }
-
 
    @EstimatedDuration(duration = 2.0)
    @Test(timeout = 300000)
@@ -207,7 +206,8 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
       scs.hideViewport();
       scs.startOnAThread();
@@ -308,7 +308,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
 
@@ -334,7 +334,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
 
@@ -374,7 +374,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
 
@@ -416,7 +416,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
 
@@ -438,7 +438,7 @@ public class YoVariableValueDataCheckerTest
 
       robot.addYoVariableRegistry(registry);
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, simulationTestingParameters);
 
       ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
 
