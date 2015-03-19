@@ -58,6 +58,12 @@ public class StateFileSimulationComparer implements SimulationComparer
    public String toString()
    {
       StringBuffer stringBuffer = new StringBuffer();
+      
+      if (variableDifferences == null)
+      {
+         return "No comparison done - sim probably crashed";
+      }
+      
       for (VariableDifference variableDifference : variableDifferences)
       {
          if (variableDifference == null)
