@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -71,11 +72,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
    
+   private final GlobalDataProducer globalDataProducer;
+   
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
 		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
+      this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
       
@@ -156,38 +160,62 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    @Override
    public void read(long currentClockTime)
    {
-      actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
-      startClockTime.set(currentClockTime);
-      sensorReader.read();
-      
-      threadDataSynchronizer.receiveControllerDataForEstimator();
-      estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+      try
+      {
+         actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
+         startClockTime.set(currentClockTime);
+         sensorReader.read();
+         
+         threadDataSynchronizer.receiveControllerDataForEstimator();
+         estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
+      }
+      catch(Throwable e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_READ, e.getMessage());
+         throw new RuntimeException(e);
+      }
    }
 
    @Override
    public void run()
    {
-      if(firstTick.getBooleanValue())
+      try
       {
-         estimatorController.initialize();
-         firstTick.set(false);
+         if (firstTick.getBooleanValue())
+         {
+            estimatorController.initialize();
+            firstTick.set(false);
+         }
+
+         estimatorTimer.startMeasurement();
+         estimatorController.doControl();
+         estimatorTimer.stopMeasurement();
       }
-      
-      estimatorTimer.startMeasurement();
-      estimatorController.doControl();
-      estimatorTimer.stopMeasurement();
+      catch (Throwable e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_RUN, e.getMessage());
+         throw new RuntimeException(e);
+      }
    }
 
    @Override
    public void write(long timestamp)
    {
-      long startTimestamp = estimatorTime.getLongValue();
-      threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
-      if(robotVisualizer != null)
+      try
       {
-         robotVisualizer.update(startTimestamp);
+         long startTimestamp = estimatorTime.getLongValue();
+         threadDataSynchronizer.publishEstimatorState(startTimestamp, estimatorTick.getLongValue(), startClockTime.getLongValue());
+         if (robotVisualizer != null)
+         {
+            robotVisualizer.update(startTimestamp);
+         }
+         estimatorTick.increment();
       }
-      estimatorTick.increment();
+      catch (Throwable e)
+      {
+         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_WRITE, e.getMessage());
+         throw new RuntimeException(e);
+      }
    }
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
