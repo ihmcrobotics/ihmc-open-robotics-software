@@ -125,7 +125,7 @@ abstract public class WholeBodyIkSolver
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
 
-      protected int maxNumberOfAutomaticReseeds = 0;
+      protected int maxNumberOfAutomaticReseeds = 3;
       
       protected final SideDependentList<FramePose> handTarget = new SideDependentList<FramePose>();
       protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
@@ -478,9 +478,9 @@ abstract public class WholeBodyIkSolver
             zR = 1;
          }
 
-         double preferedKneeAngle = 2.6 - Math.min(zL , zR);
+         double preferedKneeAngle = 2.2 - Math.min(zL , zR);
 
-         if( preferedKneeAngle < 0.4) preferedKneeAngle = 0.4;
+         if( preferedKneeAngle < 0.6) preferedKneeAngle = 0.6;
 
          preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
          preferedJointPose.set(jointNamesToIndex.get("r_leg_kny"), preferedKneeAngle);
