@@ -115,12 +115,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          setFinalPositionArmsAndLegs(robotSide, packet);
       }
 
-      packet.packWaistJointAngle(waistJointAngles);
-
-      // Note: the number of waist joint angles is hardcoded
-      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setFinalPosition(waistJointAngles[0]);
-      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setFinalPosition(waistJointAngles[1]);
-      trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setFinalPosition(waistJointAngles[2]);
+      setFinalPositionSpineJoints(packet);
+      
+     
 
       if (firstPacket)
       {
@@ -141,24 +138,52 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       }
    }
 
+   private void setFinalPositionSpineJoints(JointAnglesPacket packet)
+   {
+      packet.packWaistJointAngle(waistJointAngles);
+
+      SpineJointName[] spineJointNames = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
+      for(int i=0; i<spineJointNames.length; i++)
+      {
+         trajectoryGenerator.get(fullRobotModel.getSpineJoint(spineJointNames[i])).setFinalPosition(waistJointAngles[i]);
+      }
+      
+//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setFinalPosition(waistJointAngles[0]);
+//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setFinalPosition(waistJointAngles[1]);
+//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setFinalPosition(waistJointAngles[2]);
+   }
+
    private void setFinalPositionArmsAndLegs(RobotSide robotSide, JointAnglesPacket packet)
    {
       packet.packArmJointAngle(robotSide, armJointAngles.get(robotSide));
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setFinalPosition(armJointAngles.get(robotSide)[0]);
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[1]);
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[2]);
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[3]);
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[4]);
-      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[5]);
+      
+      ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+      for(int i=0; i<armJointNames.length; i++)
+      {
+         trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, armJointNames[i])).setFinalPosition(armJointAngles.get(robotSide)[i]);
+      }
+      
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setFinalPosition(armJointAngles.get(robotSide)[0]);
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[1]);
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[2]);
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[3]);
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[4]);
+//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[5]);
 
 
       packet.packLegJointAngle(robotSide, legJointAngles.get(robotSide));
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setFinalPosition(legJointAngles.get(robotSide)[0]);
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[1]);
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[2]);
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setFinalPosition(legJointAngles.get(robotSide)[3]);
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[4]);
-      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[5]);
+      LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
+      for(int i=0; i<legJointNames.length; i++)
+      {
+         trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, legJointNames[i])).setFinalPosition(legJointAngles.get(robotSide)[i]);
+      }
+      
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setFinalPosition(legJointAngles.get(robotSide)[0]);
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[1]);
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[2]);
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setFinalPosition(legJointAngles.get(robotSide)[3]);
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[4]);
+//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[5]);
    }
 
 
