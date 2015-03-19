@@ -17,7 +17,7 @@ public class PointCloudWorldPacketGeneratorTest
    @Test(timeout = 10000)
    public void testGeneratePointCloudWorldPacket() throws InterruptedException
    {
-      DepthDataFilter depthDataFilter = new DepthDataFilter(ReferenceFrame.getWorldFrame());
+      DepthDataFilter depthDataFilter = new DepthDataFilter();
       PointCloudWorldPacketGenerator generator = new PointCloudWorldPacketGenerator(depthDataFilter);
 
       Point3d sensorOrigin = new Point3d(0, 0, 1.0);
