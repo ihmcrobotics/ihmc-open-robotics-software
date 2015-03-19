@@ -702,31 +702,31 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getFootWidth()
    {
-      return ValkyriePhysicalProperties.footWidth;
+      return ValkyriePhysicalProperties.footWidthForControl;
    }
 
    @Override
    public double getToeWidth()
    {
-      return ValkyriePhysicalProperties.footWidth;
+      return ValkyriePhysicalProperties.footWidthForControl;
    }
 
    @Override
    public double getFootLength()
    {
-      return ValkyriePhysicalProperties.footBack + ValkyriePhysicalProperties.footForward;
+      return ValkyriePhysicalProperties.footLengthForControl;
    }
 
    @Override
    public double getActualFootWidth()
    {
-      return getFootWidth();
+      return ValkyriePhysicalProperties.footWidth;
    }
 
    @Override
    public double getActualFootLength()
    {
-      return getFootLength();
+      return ValkyriePhysicalProperties.footLength;
    }
 
    @Override
