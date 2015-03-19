@@ -19,6 +19,7 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 
 public class AtlasROSAPISimulator
 {
@@ -26,7 +27,7 @@ public class AtlasROSAPISimulator
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    private final boolean startUI = false;
    
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace) throws IOException
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
    {
       PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
 
@@ -38,6 +39,12 @@ public class AtlasROSAPISimulator
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 //      networkProcessorParameters.setUseUiModule(startUI);
 //      networkProcessorParameters.setUseRosModule(true);
+      if(runAutomaticDiagnosticRoutine)
+      {
+         networkProcessorParameters.setUseBehaviorModule(true);
+         networkProcessorParameters.setUseBehaviorVisualizer(true);
+         networkProcessorParameters.setRunAutomaticDiagnostic(true);
+      }
       
       simulationStarter.startSimulation(networkProcessorParameters, true);
 
@@ -63,8 +70,12 @@ public class AtlasROSAPISimulator
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(defaultRobotModel);
       
+      Switch requestAutomaticDiagnostic = new Switch("requestAutomaticDiagnostic").setLongFlag("requestAutomaticDiagnostic").setShortFlag(JSAP.NO_SHORTFLAG);
+      requestAutomaticDiagnostic.setHelp("enable automatic diagnostic routine");
+      
       jsap.registerParameter(model);
       jsap.registerParameter(rosNameSpace);
+      jsap.registerParameter(requestAutomaticDiagnostic);
       JSAPResult config = jsap.parse(args);
 
       DRCRobotModel robotModel;
@@ -80,6 +91,6 @@ public class AtlasROSAPISimulator
          return;
       }
 
-      new AtlasROSAPISimulator(robotModel, config.getString("namespace"));
+      new AtlasROSAPISimulator(robotModel, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()));
    }
 }

@@ -8,19 +8,21 @@ import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 public class DRCNetworkModuleParameters
 {
    private boolean useController;
-   private boolean useSensorModule;      
-   private boolean useSimulatedSensors;  
-   private boolean useUiModule;          
+   private boolean useSensorModule;
+   private boolean useSimulatedSensors;
+   private boolean useUiModule;
    private boolean useBehaviorModule;
    private boolean useBehaviorVisualizer;
-   private boolean useHandModule;        
-   private boolean usePerceptionModule;  
-   private boolean useRosModule;     
-   
+   private boolean useHandModule;
+   private boolean usePerceptionModule;
+   private boolean useRosModule;
+
+   private boolean runAutomaticDiagnostic = false;
+
    private PacketCommunicator controllerCommunicator;
    private PacketCommunicator simulatedSensorCommunicator;
    private URI rosUri;
-   
+
    public boolean useSensorModule()
    {
       return useSensorModule;
@@ -55,7 +57,7 @@ public class DRCNetworkModuleParameters
    {
       return useSimulatedSensors;
    }
-   
+
    public boolean useController()
    {
       return useController;
@@ -70,7 +72,7 @@ public class DRCNetworkModuleParameters
    {
       return simulatedSensorCommunicator;
    }
-   
+
    public PacketCommunicator getControllerCommunicator()
    {
       return controllerCommunicator;
@@ -84,7 +86,8 @@ public class DRCNetworkModuleParameters
    public void setUseSensorModule(boolean b)
    {
       useSensorModule = b;
-      if (b) useController = true;
+      if (b)
+         useController = true;
    }
 
    public void setUseUiModule(boolean b)
@@ -95,7 +98,8 @@ public class DRCNetworkModuleParameters
    public void setUseBehaviorModule(boolean b)
    {
       useBehaviorModule = b;
-      if (b) useController = true;
+      if (b)
+         useController = true;
    }
 
    public void setUseBehaviorVisualizer(boolean useBehaviorVisualizer)
@@ -111,13 +115,14 @@ public class DRCNetworkModuleParameters
    public void setUsePerceptionModule(boolean b)
    {
       usePerceptionModule = b;
-      if (b) useController = true;
+      if (b)
+         useController = true;
    }
 
    public void setUseRosModule(boolean b)
    {
       useRosModule = b;
-      if(useRosModule && rosUri ==null)
+      if (useRosModule && rosUri == null)
          try
          {
             rosUri = new URI("http://localhost:11311");
@@ -133,12 +138,26 @@ public class DRCNetworkModuleParameters
       rosUri = rosURI;
    }
 
+   public boolean isRunAutomaticDiagnostic()
+   {
+      return runAutomaticDiagnostic;
+   }
+
+   public void setRunAutomaticDiagnostic(boolean runAutomaticDiagnostic)
+   {
+      this.runAutomaticDiagnostic = runAutomaticDiagnostic;
+      if (runAutomaticDiagnostic)
+      {
+         setUseBehaviorModule(true);
+      }
+   }
+
    public void setControllerCommunicator(PacketCommunicator controllerCommunicator)
    {
       this.controllerCommunicator = controllerCommunicator;
       useController = true;
    }
-   
+
    public void setSimulatedSensorCommunicator(PacketCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
