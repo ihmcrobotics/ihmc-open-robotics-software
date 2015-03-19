@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -29,6 +30,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
@@ -84,6 +86,15 @@ public class DiagnosticBehavior extends BehaviorInterface
    private static final boolean DEBUG = false;
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
+
+   /** FIXME Should have a packet from the controller to let know when it is ready to execute commands. */
+   private final ConcurrentListeningQueue<CapturabilityBasedStatus> inputListeningQueue = new ConcurrentListeningQueue<CapturabilityBasedStatus>();
+   private final BooleanYoVariable diagnosticBehaviorEnabled;
+   private final BooleanYoVariable hasControllerWakenUp;
+   private final BooleanYoVariable automaticDiagnosticRoutineRequested;
+   private final BooleanYoVariable automaticDiagnosticRoutineHasStarted;
+   private final DoubleYoVariable timeWhenControllerWokeUp;
+   private final DoubleYoVariable timeToWaitBeforeEnable;
 
    private final SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<>();
    private final SideDependentList<HandPoseListBehavior> handPoseListBehaviors = new SideDependentList<>();
@@ -201,7 +212,14 @@ public class DiagnosticBehavior extends BehaviorInterface
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;
       this.walkingControllerParameters = walkingControllerParameters;
-      
+
+      diagnosticBehaviorEnabled = new BooleanYoVariable("diagnosticBehaviorEnabled", registry);
+      hasControllerWakenUp = new BooleanYoVariable("diagnostBehaviorHasControllerWakenUp", registry);
+      automaticDiagnosticRoutineRequested = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineRequested", registry);
+      automaticDiagnosticRoutineHasStarted = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
+      timeWhenControllerWokeUp = new DoubleYoVariable("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
+      timeToWaitBeforeEnable = new DoubleYoVariable("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
+
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -387,6 +405,26 @@ public class DiagnosticBehavior extends BehaviorInterface
          YoFrameOrientation currentHandOrientation = new YoFrameOrientation(sidePrefix + "CurrentHand", lowerArmsFrames.get(robotSide), registry);
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
+
+      this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
+   }
+
+   public void setupForAutomaticDiagnostic()
+   {
+      automaticDiagnosticRoutineRequested.set(true);
+      timeToWaitBeforeEnable.set(15.0); // To make sure that the transition from strand prep to walking is done.
+      System.out.println("\n");
+      System.out.println("///////////////////////////////////////////////////////////");
+      System.out.println("//       Initializing automatic diagnostic routine       //");
+      System.out.println("//        Waiting for walking controller to start        //");
+      System.out.println("///////////////////////////////////////////////////////////");
+      System.out.println("");
+      
+   }
+
+   private void automaticDiagnosticRoutine()
+   {
+      sequenceSimpleWarmup();
    }
 
    private void sequenceSimpleWarmup()
@@ -1898,6 +1936,13 @@ public class DiagnosticBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      diagnosticBehaviorEnabled.set(isControllerReady());
+
+      handleAutomaticDiagnosticRoutine();
+      
+      if (!diagnosticBehaviorEnabled.getBooleanValue())
+         return;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          tempFrameOrientation.setToZero(upperArmsFrames.get(robotSide));
@@ -1914,6 +1959,26 @@ public class DiagnosticBehavior extends BehaviorInterface
       handleRequestedDiagnostic();
 
       pipeLine.doControl();
+   }
+
+   private boolean isControllerReady()
+   {
+      if (!hasControllerWakenUp.getBooleanValue())
+      {
+         boolean justReceivedAPacketFromController = inputListeningQueue.getNewestPacket() != null;
+         if (justReceivedAPacketFromController)
+         {
+            timeWhenControllerWokeUp.set(yoTime.getDoubleValue());
+            hasControllerWakenUp.set(true);
+         }
+
+         return false;
+      }
+      else
+      {
+         boolean isControllerReady = yoTime.getDoubleValue() - timeWhenControllerWokeUp.getDoubleValue() > timeToWaitBeforeEnable.getDoubleValue();
+         return isControllerReady;
+      }
    }
 
    private void handleRequestedDiagnostic()
@@ -2149,6 +2214,42 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
+   private boolean willStartMessageSent = false;
+
+   private void handleAutomaticDiagnosticRoutine()
+   {
+      if(!automaticDiagnosticRoutineRequested.getBooleanValue())
+         return;
+      if(hasControllerWakenUp.getBooleanValue() && !willStartMessageSent)
+      {
+         System.out.println("\n");
+         System.out.println("///////////////////////////////////////////////////////////");
+         System.out.println("// Automatic diagnostic routine will start in 15 seconds //");
+         System.out.println("///////////////////////////////////////////////////////////");
+         willStartMessageSent = true;
+      }
+      if(!diagnosticBehaviorEnabled.getBooleanValue())
+         return;
+      if(!automaticDiagnosticRoutineHasStarted.getBooleanValue())
+      {
+         automaticDiagnosticRoutine();
+         automaticDiagnosticRoutineHasStarted.set(true);
+         System.out.println("\n");
+         System.out.println("///////////////////////////////////////////////////////////");
+         System.out.println("//         Starting automatic diagnostic routine         //");
+         System.out.println("///////////////////////////////////////////////////////////");
+      }
+      if(automaticDiagnosticRoutineHasStarted.getBooleanValue() && pipeLine.isDone())
+      {
+         System.out.println("\n");
+         System.out.println("///////////////////////////////////////////////////////////");
+         System.out.println("//         Automatic diagnostic routine complete         //");
+         System.out.println("///////////////////////////////////////////////////////////");
+         automaticDiagnosticRoutineRequested.set(false);
+         diagnosticBehaviorEnabled.set(false);
+      }  
+   }
+   
    @Override
    protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
    {

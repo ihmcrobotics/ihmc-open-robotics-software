@@ -63,6 +63,12 @@ public class IHMCHumanoidBehaviorManager
    public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
          DRCRobotSensorInformation sensorInfo)
    {
+      this(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, false);
+   }
+
+   private IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
+         DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic)
+   {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
 
       if (startYoVariableServer)
@@ -111,8 +117,16 @@ public class IHMCHumanoidBehaviorManager
          }
       }
 
-      createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
-            capturePointUpdatable, wholeBodyControllerParameters, walkingControllerParameters);
+      if (runAutomaticDiagnostic)
+      {
+         createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
+               walkingControllerParameters);
+      }
+      else
+      {
+         createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
+               capturePointUpdatable, wholeBodyControllerParameters, walkingControllerParameters);
+      }
 
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
@@ -184,8 +198,30 @@ public class IHMCHumanoidBehaviorManager
       }
    }
 
+   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
+         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
+         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters)
+    {
+      BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
+      EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
+      YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
+
+      DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
+            outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
+      diagnosticBehavior.setupForAutomaticDiagnostic();
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
+      dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
+    }
+
    public PacketCommunicator getCommunicator()
    {
       return behaviorPacketCommunicator;
+   }
+
+   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
+         DRCRobotSensorInformation sensorInfo)
+   {
+      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, true);
+      return ihmcHumanoidBehaviorManager;
    }
 }

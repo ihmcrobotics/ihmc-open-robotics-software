@@ -84,6 +84,11 @@ public class BehaviorDisptacher implements Runnable
       parentRegistry.addChild(registry);
    }
 
+   public void requestBehavior(HumanoidBehaviorType behaviorEnum)
+   {
+      requestedBehavior.set(behaviorEnum);
+   }
+
    public void addHumanoidBehaviors(List<HumanoidBehaviorType> humanoidBehaviorTypes, List<BehaviorInterface> newBehaviors)
    {
       if (humanoidBehaviorTypes.size() != newBehaviors.size())
