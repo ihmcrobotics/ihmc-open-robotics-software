@@ -30,7 +30,7 @@ public class SimulatedRobotiqHandJointAngleProducer
          middleJoints.put(robotSide, new ArrayList<OneDegreeOfFreedomJoint>());
          thumbJoints.put(robotSide, new ArrayList<OneDegreeOfFreedomJoint>());
          
-         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, dataProducer.getObjectCommunicator()));
+         jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, dataProducer));
 
          for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
          {

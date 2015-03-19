@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -16,6 +17,8 @@ public class HandJointAngleCommunicator
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
    private final PacketCommunicator packetCommunicator;
+   private final GlobalDataProducer dataProducer;
+
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
@@ -23,8 +26,19 @@ public class HandJointAngleCommunicator
 
    public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator)
    {
+      this(side, packetCommunicator, null);
+   }
+
+   public HandJointAngleCommunicator(RobotSide side, GlobalDataProducer dataProducer)
+   {
+      this(side, null, dataProducer);
+   }
+
+   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, GlobalDataProducer dataProducer)
+   {
       this.side = side;
       this.packetCommunicator = packetCommunicator;
+      this.dataProducer = dataProducer;
       packetCopier = new ConcurrentCopier<HandJointAnglePacket>(HandJointAngleCommunicator.builder);
       startWriterThread();
    }
@@ -37,12 +51,16 @@ public class HandJointAngleCommunicator
          @Override
          public void run()
          {
-            if (packetCommunicator != null)
+            HandJointAnglePacket copyForReading = packetCopier.getCopyForReading();
+            if (copyForReading != null)
             {
-               HandJointAnglePacket copyForReading = packetCopier.getCopyForReading();
-               if(copyForReading != null)
+               if (packetCommunicator != null)
                {
-                  packetCommunicator.send(copyForReading);  
+                  packetCommunicator.send(copyForReading);
+               }
+               else
+               {
+                  dataProducer.send(copyForReading);
                }
             }
          }
@@ -61,9 +79,9 @@ public class HandJointAngleCommunicator
 
    public void updateHandAngles(HandSensorData sensorDataFromHand)
    {
-	   fingers = sensorDataFromHand.getFingerJointAngles();
-	   
-	   connected.set(true);
+      fingers = sensorDataFromHand.getFingerJointAngles();
+
+      connected.set(true);
    }
 
    public void write()

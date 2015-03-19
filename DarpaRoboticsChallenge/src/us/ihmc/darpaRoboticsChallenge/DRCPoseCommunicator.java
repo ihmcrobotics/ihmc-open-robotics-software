@@ -5,8 +5,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
@@ -29,7 +29,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final PacketCommunicator networkProcessorCommunicator;
+   private final GlobalDataProducer dataProducer;
    private final JointConfigurationGatherer jointConfigurationGathererAndProducer;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private final SideDependentList<String> wristForceSensorNames;
@@ -40,9 +40,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
-         PacketCommunicator networkProcessorCommunicator, SensorOutputMapReadOnly sensorOutputMapReadOnly, DRCRobotSensorInformation sensorInformation)
+         GlobalDataProducer dataProducer, SensorOutputMapReadOnly sensorOutputMapReadOnly, DRCRobotSensorInformation sensorInformation)
    {
-      this.networkProcessorCommunicator = networkProcessorCommunicator;
+      this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
 
@@ -89,7 +89,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
                RobotConfigurationData robotConfigData;
                while ((robotConfigData = robotConfigurationDataRingBuffer.read()) != null)
                {
-                  networkProcessorCommunicator.send(robotConfigData);
+                  dataProducer.send(robotConfigData);
                }
                robotConfigurationDataRingBuffer.flush();
             }
