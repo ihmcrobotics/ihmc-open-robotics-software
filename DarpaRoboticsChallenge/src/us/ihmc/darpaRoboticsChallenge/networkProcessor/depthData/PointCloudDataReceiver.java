@@ -47,7 +47,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.depthDataFilter = new RobotDepthDataFilter(handType, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
+      this.depthDataFilter = new RobotDepthDataFilter(handType, modelFactory, robotConfigurationDataBuffer, jointMap.getContactPointParameters().getFootContactPoints());
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
       
       setupListeners(packetCommunicator);
@@ -141,8 +141,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       readWriteLock.writeLock().lock();
       {
          setLidarState(LidarState.DISABLE);
-         depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
-         depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
+         //depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
+         //depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
       }
       readWriteLock.writeLock().unlock();
    }
