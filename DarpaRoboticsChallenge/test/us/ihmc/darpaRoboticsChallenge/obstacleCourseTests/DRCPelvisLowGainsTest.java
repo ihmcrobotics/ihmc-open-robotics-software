@@ -114,8 +114,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       simulationConstructionSet.setSimulateDoneCriterion(checkPelvisOrientationError);
 
-      DoubleYoVariable kpPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("kpPelvisOrientation");
-      DoubleYoVariable zetaPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable("zetaPelvisOrientation");
+      DoubleYoVariable kpPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable(getKpPelvisOrientationName());
+      DoubleYoVariable zetaPelvisOrientation = (DoubleYoVariable) simulationConstructionSet.getVariable(getZetaPelvisOrientationName());
 
       // kp = 20.0, zeta = 0.7 causes problems when running multithreaded. kp = 1.0, zeta = 0.7 causes problems when running single threaded.
       kpPelvisOrientation.set(1.0);
@@ -135,6 +135,9 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
+
+   public abstract String getZetaPelvisOrientationName();
+   public abstract String getKpPelvisOrientationName();
 
    private void setupCameraForElvisPelvis()
    {

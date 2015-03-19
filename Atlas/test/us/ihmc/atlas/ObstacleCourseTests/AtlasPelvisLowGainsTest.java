@@ -42,6 +42,20 @@ public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest
           "MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController",
           "pelvisOrientationErrorMagnitude");
    }
+   
+   
+   @Override
+   public String getKpPelvisOrientationName()
+   {
+      return "kpPelvisOrientation";
+   }
+
+   @Override
+   public String getZetaPelvisOrientationName()
+   {
+      return "zetaPelvisOrientation";
+   }
+
 
    @Override
    public InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(SDFFullRobotModel controllersFullRobotModel, SDFRobot robot)
