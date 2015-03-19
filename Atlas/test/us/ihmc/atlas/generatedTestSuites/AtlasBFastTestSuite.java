@@ -10,8 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.AtlasPushRecoveryTest.class,
    us.ihmc.atlas.AtlasScriptingTest.class,
    us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWholeBodyIKTrajectoryBehaviorTest.class
+   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class
 })
 
 public class AtlasBFastTestSuite

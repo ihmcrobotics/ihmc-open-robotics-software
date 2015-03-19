@@ -5,7 +5,10 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCWholeBodyIKTrajectoryBehaviorTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
+@BambooPlan(planType = {BambooPlanType.InDevelopment})
 public class AtlasWholeBodyIKTrajectoryBehaviorTest extends DRCWholeBodyIKTrajectoryBehaviorTest
 {
    private final AtlasRobotModel robotModel;

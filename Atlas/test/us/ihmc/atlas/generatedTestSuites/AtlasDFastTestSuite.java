@@ -8,7 +8,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
    us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
