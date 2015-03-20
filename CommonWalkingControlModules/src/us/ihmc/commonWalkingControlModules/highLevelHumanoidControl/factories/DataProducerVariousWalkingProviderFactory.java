@@ -86,7 +86,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHandstepProvider handstepProvider = new DesiredHandstepProvider(fullRobotModel);
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
-                                                    walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame());
+                                                    walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), objectCommunicator);
       PacketConsumer<StopArmMotionPacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
       
