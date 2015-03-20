@@ -4,7 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -31,8 +33,11 @@ public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, 
    private double trajectoryTime = Double.NaN;
    private final double defaultTrajectoryTime;
 
-   public DesiredFootPoseProvider(double defaultTrajectoryTime)
+   private final GlobalDataProducer globalDataProducer;
+
+   public DesiredFootPoseProvider(double defaultTrajectoryTime, GlobalDataProducer globalDataProducer)
    {
+      this.globalDataProducer = globalDataProducer;
       this.defaultTrajectoryTime = defaultTrajectoryTime;
    }
 
@@ -72,6 +77,16 @@ public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, 
    @Override
    public void receivedPacket(FootPosePacket object)
    {
+      if (globalDataProducer != null)
+      {
+         String errorMessage = PacketValidityChecker.validateFootPosePacket(object);
+         if (errorMessage != null)
+         {
+            globalDataProducer.notifyInvalidPacketReceived(FootPosePacket.class, errorMessage);
+            return;
+         }
+      }
+      
       RobotSide robotSide = object.getRobotSide();
       footPoseSide.set(robotSide == RobotSide.LEFT ? 0 : 1);
       trajectoryTime = object.getTrajectoryTime();
