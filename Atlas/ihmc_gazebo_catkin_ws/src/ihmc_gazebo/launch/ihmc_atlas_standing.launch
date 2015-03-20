@@ -17,13 +17,13 @@
   </include>
 
   <!-- Robot Description -->
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v4.urdf.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v5.urdf.xacro'" />
   <param name="robot_initial_pose/x"     value="0.10" type="double"/>
   <param name="robot_initial_pose/y"     value="-0.45" type="double"/>
   <param name="robot_initial_pose/z"     value="0.92" type="double"/>
   <param name="robot_initial_pose/roll"  value="0.0" type="double"/>
   <param name="robot_initial_pose/pitch" value="-0.0" type="double"/>
-  <param name="robot_initial_pose/yaw"   value="-0.0" type="double"/>  
+  <param name="robot_initial_pose/yaw"   value="0.0" type="double"/>  
     
-  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v4_bringup.launch"/>
+  <include file="$(find drcsim_gazebo)/launch/atlas_v5_bringup.launch"/>
 </launch>

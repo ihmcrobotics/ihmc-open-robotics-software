@@ -123,10 +123,10 @@ public:
         // Nasty initial angles hacks. Works great though. Note alphabetical order of joints!
 
         double initialAngles[] = { -0.0, 0.0, 0.0, 0.0, //back_bkx back_bky back_bkz hokuyo_joint
-                                   0.498, 2.0,   0.1, -1.1,   -0.004, 0.0,  // l_arm_elx l_arm_ely l_arm_shx l_arm_shy l_arm_wrx l_arm_wry
+                                   0.498, 2.0,   0.1, -1.1,   -0.004, 0.0, 0.0,  // l_arm_elx l_arm_ely l_arm_shx l_arm_shy l_arm_wrx l_arm_wry, l_arm_wry2
                                    -0.0, -0.28, 0.0, -0.2, 0.0, 0.5,  // l_leg_akx l_leg_aky l_leg_hpx l_leg_hpy l_leg_hpz l_leg_kny
                                    0, //neck_ry
-                                   -0.498, 2.0,   -0.1, 1.1,   0.004, 0.0, //r_arm_elx r_arm_ely r_arm_shx r_arm_shy r_arm_wrx r_arm_wry
+                                   -0.498, 2.0,   -0.1, 1.1,   0.004, 0.0,  0.0, //r_arm_elx r_arm_ely r_arm_shx r_arm_shy r_arm_wrx r_arm_wry, l_arm_wry2
                                    0.0, -0.28, -0.0, -0.2, 0.0, 0.5 }; // r_leg_akx r_leg_aky r_leg_hpx r_leg_hpy r_leg_hpz r_leg_kny
 
         /* to stand
@@ -140,17 +140,17 @@ public:
         if (startupParameter.find( "car_front") != std::string::npos)
         {
             initialAngles[1] = 0.0; // back pitch
-            initialAngles[13] = initialAngles[26] = -1.3; // hip y
-            initialAngles[15] = initialAngles[28] = 1.4;  // knee
-            initialAngles[11] = initialAngles[24] = -0.2; // ankle y
+            initialAngles[14] = initialAngles[28] = -1.3; // hip y
+            initialAngles[16] = initialAngles[30] = 1.4;  // knee
+            initialAngles[12] = initialAngles[26] = -0.2; // ankle y
         }
         else if (startupParameter.find( "car_lateral") != std::string::npos)
         {
             initialAngles[1] = 0.0; // back pitch
-            initialAngles[13] = initialAngles[26] = -1.7; // hip y
+            initialAngles[14] = initialAngles[28] = -1.7; // hip y
          //   initialAngles[13] += 0.2;
-            initialAngles[15] = initialAngles[28] = 1.5;  // knee
-            initialAngles[11] = initialAngles[24] = -0.0; // ankle y
+            initialAngles[16] = initialAngles[30] = 1.5;  // knee
+            initialAngles[12] = initialAngles[26] = -0.0; // ankle y
         }
         else if( startupParameter.find( "standing" ) != std::string::npos )
         {
@@ -158,14 +158,12 @@ public:
             initialAngles[7]  = initialAngles[20] = -0.0; // shoulder X
 
             initialAngles[6]  = - 1.0; // shoulder Y
-            initialAngles[19] = - initialAngles[6];
+            initialAngles[20] = - initialAngles[6];
 
-            initialAngles[13] = initialAngles[26] = -0.35; // hip y
-            initialAngles[15] = initialAngles[28] = 0.7;  // knee
-            initialAngles[11] = initialAngles[24] = -0.35; // ankle y
+            initialAngles[14] = initialAngles[28] = -0.35; // hip y
+            initialAngles[16] = initialAngles[30] = 0.7;  // knee
+            initialAngles[12] = initialAngles[26] = -0.35; // ankle y
         }
-
-
 
 
         for (unsigned int i = 0; i < joints.size(); i++) {
@@ -210,7 +208,7 @@ public:
                         if(joints.at(i)->GetName() != "hokuyo_joint")
                         {
                          //   joints.at(i)->SetEffortLimit(0, -1);
-                           // joints.at(i)->SetDamping(0, 0.1);
+                         // joints.at(i)->SetDamping(0, 0.1);
                         }
                     }
 
@@ -314,11 +312,13 @@ public:
         tcpDataServer.send(data);
     }
 
-    void readControlMessage(char* buffer, std::size_t bytes_transffered) 
+     void readControlMessage(char* buffer, std::size_t bytes_transffered)
     {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
             if (acceptAnyPacketSize || bytes_transffered == 24 + joints.size() * 8) {
+
+            	std::cout << "joints size = " << joints.size() << std::endl;
 
             	int64_t* longBuffer = ((int64_t*) (buffer));
                 simulationCyclesPerControlCycle = longBuffer[0];

@@ -18,7 +18,7 @@
   </include>
 
   <!-- Robot Description -->
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v4.urdf.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v5.urdf.xacro'" />
   <param name="robot_initial_pose/x"     value="0.05" type="double"/>
   <param name="robot_initial_pose/y"     value="-0.4" type="double"/>
   <param name="robot_initial_pose/z"     value="1.12" type="double"/>
@@ -26,5 +26,5 @@
   <param name="robot_initial_pose/pitch" value="-0.1" type="double"/>
   <param name="robot_initial_pose/yaw"   value="-1.5" type="double"/>  
     
-  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v4_bringup.launch"/>
+  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v5_bringup.launch"/>
 </launch>

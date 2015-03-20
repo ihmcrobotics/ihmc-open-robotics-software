@@ -1,7 +1,7 @@
 <launch>
   <!-- Use sim time -->
   <param name="/use_sim_time" type="bool" value="true"/>
-  <param name="atlas_version" type="int" value="4"/>
+  <param name="atlas_version" type="int" value="5"/>
 
   <!-- joint states to tf  
   <node pkg="robot_state_publisher" type="state_publisher" name="atlas_robot_state_publisher">
@@ -24,7 +24,7 @@
   </node>
 
   <!-- Arms 
-  <rosparam command="load" file="$(find drcsim_gazebo)/config/whole_body_trajectory_controller_v4.yaml" />-->
+  <rosparam command="load" file="$(find drcsim_gazebo)/config/whole_body_trajectory_controller_v5.yaml" />-->
 
   <!-- Controllers that come up started
   <node name="atlas_controller_spawner"
