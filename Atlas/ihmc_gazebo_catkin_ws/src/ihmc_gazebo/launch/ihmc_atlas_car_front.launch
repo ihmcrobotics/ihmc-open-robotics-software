@@ -25,5 +25,5 @@
   <param name="robot_initial_pose/pitch" value="-0.1" type="double"/>
   <param name="robot_initial_pose/yaw"   value="-0.0" type="double"/>  
     
-  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v4_bringup.launch"/>
+  <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v5_bringup.launch"/>
 </launch>
