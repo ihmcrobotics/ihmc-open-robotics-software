@@ -185,8 +185,21 @@ public class PacketRouter
    {
       PacketCommunicator communicator = communicators.remove(id);
       PacketConsumer<Packet> consumer = consumers.remove(id);
+      RouteReceieveType receiveType = communicatorRouteTypes.remove(id);
       
-      communicator.detachGlobalSendListener(consumer);
+      
+      
+      if(communicator != null)
+      {
+         if(receiveType == RouteReceieveType.ON_RECEIVE)
+         {
+            communicator.detachGlobalReceiveListener(consumer);
+         }
+         else
+         {
+            communicator.detachGlobalSendListener(consumer);
+         }
+      }
       
       redirects.remove(id);
 
