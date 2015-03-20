@@ -19,7 +19,7 @@ public class SingleThreadedRobotController extends AbstractThreadedRobotControll
    {
       controllers.add(new SingleThreadedRobotControllerExecutor(controller, executionsPerControlTick, skipFirstControlCycle, registry));
       
-      if(controller.getDynamicGraphicObjectsListRegistry() != null)
+      if(scs != null && controller.getDynamicGraphicObjectsListRegistry() != null)
       {
          scs.addYoGraphicsListRegistry(controller.getDynamicGraphicObjectsListRegistry(), true);
       }
