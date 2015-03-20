@@ -2,21 +2,18 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
-import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
+import us.ihmc.commonWalkingControlModules.packetConsumers.PacketValidityChecker;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
-import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 /**
  * User: Matt
@@ -27,16 +24,27 @@ public class FootstepPathConsumer implements PacketConsumer<FootstepDataList>
    private boolean DEBUG = false;
    private FootstepPathCoordinator footstepPathCoordinator;
    private final SideDependentList<? extends ContactablePlaneBody> bipedFeet;
+   private final GlobalDataProducer globalDataProducer;
 
    public FootstepPathConsumer(SideDependentList<? extends ContactablePlaneBody> bipedFeet, FootstepPathCoordinator footstepPathCoordinator,
-                               HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters)
+                               HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters, GlobalDataProducer globalDataProducer)
    {
+      this.globalDataProducer = globalDataProducer;
       this.footstepPathCoordinator = footstepPathCoordinator;
       this.bipedFeet = bipedFeet;
    }
 
    public void receivedPacket(FootstepDataList footstepList)
    {
+      if (globalDataProducer != null)
+      {
+         String errorMessage = PacketValidityChecker.validateFootstepDataList(footstepList);
+         if (errorMessage != null)
+         {
+            globalDataProducer.notifyInvalidPacketReceived(FootstepDataList.class, errorMessage);
+            return;
+         }
+      }
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
       for (int i = 0; i < footstepList.size(); i++)
