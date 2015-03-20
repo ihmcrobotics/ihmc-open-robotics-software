@@ -155,7 +155,7 @@ public:
         else if( startupParameter.find( "standing" ) != std::string::npos )
         {
             initialAngles[1] = 0.0; // back pitch
-            initialAngles[7]  = initialAngles[20] = -0.0; // shoulder X
+            initialAngles[7]  = initialAngles[21] = -0.0; // shoulder X
 
             initialAngles[6]  = - 1.0; // shoulder Y
             initialAngles[20] = - initialAngles[6];
