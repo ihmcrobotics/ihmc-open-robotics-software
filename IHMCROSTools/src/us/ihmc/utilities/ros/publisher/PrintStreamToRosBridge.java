@@ -9,7 +9,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 
 public class PrintStreamToRosBridge extends PrintStream
 {
-   private static final int TIME_PERIOD = 1000;
+   private static final int TIME_PERIOD = 1;
    private static final TimeUnit TIME_UNIT = TimeUnit.MILLISECONDS;
    
    private TimerBasedOutputStream tbos = (TimerBasedOutputStream) out;
@@ -48,30 +48,8 @@ public class PrintStreamToRosBridge extends PrintStream
             if(tbos.hasNewOutput())
             {
                publisher.publish((byte) 8, tbos.getString());
-//               System.out.println(tbos.getString());
             }
          }
       }
    }
-   
-//   public static void main(String[] args)
-//   {
-//      PrintStreamToRosBridge bridge = new PrintStreamToRosBridge();
-//      System.setErr(bridge);
-//      bridge.start();
-//      
-//      while(true)
-//      {
-//         try
-//         {
-//            throw new Exception("Test");
-//         }
-//         catch(Exception e)
-//         {
-//            e.printStackTrace();
-//         }
-//         System.out.println("LAP");
-//         ThreadTools.sleep(1000);
-//      }
-//   }
 }
