@@ -93,7 +93,7 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.4256076719967674</x>
+          <x>1.39</x>
           <y>-0.15122578389972408</y>
           <z>0.3759002687558197</z>
         </location>
@@ -275,8 +275,8 @@
       <us.ihmc.communication.packets.walking.FootstepData><!-- 20 -->
         <robotSide>LEFT</robotSide>
         <location>
-          <x>4.59</x>
-          <y>0.32715285370602036</y>
+          <x>4.58</x>
+          <y>.31</y>
           <z>.22</z>
         </location>
         <orientation>
@@ -317,7 +317,7 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>5.02</x>
+          <x>4.99</x>
           <y>0.290715285370602036</y>
           <z>.32</z>
         </location>
@@ -331,7 +331,7 @@
       <us.ihmc.communication.packets.walking.FootstepData>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>5.36095253345937147</x>
+          <x>5.34</x>
           <y>0.142715285370602036</y>
           <z>0.38786483941191614</z>
         </location>
