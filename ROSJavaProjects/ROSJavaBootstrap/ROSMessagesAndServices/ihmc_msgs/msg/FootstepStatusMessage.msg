@@ -8,14 +8,14 @@ uint8 status
 
 # footstepIndex starts at 0 and monotonically increases with each completed footstep in a given
 # FootstepDataListMessage.
-int32 footstepIndex
+int32 footstep_index
 
-int32 robotSide
+int32 robot_side
 
-geometry_msgs/Vector3 actualFootPositionInWorld
+geometry_msgs/Vector3 actual_foot_position_in_world
 
-geometry_msgs/Quaternion actualFootOrientationInWorld
+geometry_msgs/Quaternion actual_foot_orientation_in_world
 
-bool isDoneWalking
+bool is_done_walking
 
 

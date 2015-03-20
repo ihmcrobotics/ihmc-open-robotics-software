@@ -5,7 +5,7 @@
 #Options for robotSide
 # uint8 L = 0
 # uint8 R = 1
-uint8 robotSide
+uint8 robot_side
 
 geometry_msgs/Vector3 location
 
@@ -13,7 +13,7 @@ geometry_msgs/Quaternion orientation
 
 # predictedContactPoints gives the vertices of the expected contact polygon between the foot and
 # the world. A value of null will use the default controller contact points
-Point2dMessage[] predictedContactPoints
+Point2dMessage[] predicted_contact_points
 
 # This contains information on what the swing trajectory should be for each step
 # DEFAULT gives the standard IHMC parabolic footstep trajectory
@@ -26,9 +26,9 @@ Point2dMessage[] predictedContactPoints
 # uint8 BASIC = 1
 # uint8 PUSH_RECOVERY = 2
 # uint8 OBSTACLE_CLEARANCE = 3
-uint8 trajectoryType
+uint8 trajectory_type
 
 # Contains information on how high the robot should step
-float64 swingHeight
+float64 swing_height
 
 

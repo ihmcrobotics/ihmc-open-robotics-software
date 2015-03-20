@@ -94,7 +94,9 @@ public class ROSMessageGenerator
                }
 
                outBuffer += printType(field);
-               outBuffer += " " + field.getName() + System.lineSeparator() + System.lineSeparator();
+
+               String formattedFieldName = camelCaseToLowerCaseWithUnderscores(field.getName());
+               outBuffer += " " + formattedFieldName + System.lineSeparator() + System.lineSeparator();
             }
 
             fileStream.println(outBuffer);
@@ -106,6 +108,17 @@ public class ROSMessageGenerator
       }
 
       return messageName;
+   }
+   
+   private String camelCaseToLowerCaseWithUnderscores(String in)
+   {
+      String regex = "([a-z])([A-Z]+)";
+      String replacement = "$1_$2";
+      
+      String inWithUnderscores = in.replaceAll(regex, replacement);
+      String ret = inWithUnderscores.toLowerCase();
+      
+      return ret;
    }
 
    private boolean isDestinationField(Field field)
