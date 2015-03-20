@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -21,9 +23,11 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    private final ReferenceFrame lookAtFrame = ReferenceFrame.getWorldFrame();
    private final FramePoint pointToTrack = new FramePoint(lookAtFrame);
    private final FrameOrientation headOrientation;
+   private final GlobalDataProducer globalDataProducer;
 
-   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame)
+   public DesiredHeadOrientationProvider(ReferenceFrame headOrientationFrame, GlobalDataProducer globalDataProducer)
    {
+      this.globalDataProducer = globalDataProducer;
       headOrientationPacketConsumer = new HeadOrientationPacketConsumer();
       lookAtPacketConsumer = new LookAtPacketConsumer();
       this.headOrientationFrame = headOrientationFrame;
@@ -52,6 +56,15 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
    {
       public void receivedPacket(HeadOrientationPacket packet)
       {
+         if (globalDataProducer != null)
+         {
+            String errorMessage = PacketValidityChecker.validateHeadOrientationPacket(packet);
+            if (errorMessage != null)
+            {
+               globalDataProducer.notifyInvalidPacketReceived(HeadOrientationPacket.class, errorMessage);
+               return;
+            }
+         }
          headOrientationPacket.set(packet);
       }
    }
