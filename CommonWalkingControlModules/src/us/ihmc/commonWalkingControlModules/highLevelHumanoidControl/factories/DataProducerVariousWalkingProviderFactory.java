@@ -108,7 +108,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredHeadOrientationProvider headOrientationProvider = new DesiredHeadOrientationProvider(fullRobotModel.getChest().getBodyFixedFrame());
       DesiredComHeightProvider desiredComHeightProvider = new DesiredComHeightProvider(objectCommunicator);
       DesiredPelvisPoseProvider pelvisPoseProvider = new DesiredPelvisPoseProvider();
-      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(ReferenceFrame.getWorldFrame(), walkingControllerParameters.getTrajectoryTimeHeadOrientation());
+      DesiredChestOrientationProvider chestOrientationProvider = new DesiredChestOrientationProvider(ReferenceFrame.getWorldFrame(), walkingControllerParameters.getTrajectoryTimeHeadOrientation(), objectCommunicator);
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), objectCommunicator);
    
       DesiredJointsPositionProvider desiredJointsPositionProvider = new DesiredJointsPositionProvider();

@@ -6,8 +6,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
@@ -27,9 +29,12 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
 
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredChestOrientationWithWaypoints = new AtomicReference<>(null);
 
-   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime)
+   private final GlobalDataProducer globalDataProducer;
+
+   public DesiredChestOrientationProvider(ReferenceFrame chestOrientationFrame, double defaultTrajectoryTime, GlobalDataProducer globalDataProducer)
    {
       this.chestOrientationFrame = chestOrientationFrame;
+      this.globalDataProducer = globalDataProducer;
       trajectoryTime.set(defaultTrajectoryTime);
 
       wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
@@ -98,6 +103,16 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
    {
       if (object == null)
          return;
+      
+      if (globalDataProducer != null)
+      {
+         String errorMessage = PacketValidityChecker.validateChestOrientationPacket(object);
+         if (errorMessage != null)
+         {
+            globalDataProducer.notifyInvalidPacketReceived(ChestOrientationPacket.class, errorMessage);
+            return;
+         }
+      }
 
       trajectoryTime.set(object.getTrajectoryTime());
 
