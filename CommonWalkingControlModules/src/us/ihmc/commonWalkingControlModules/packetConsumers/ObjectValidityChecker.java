@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isInfinite;
+
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Tuple2d;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Tuple4d;
 
@@ -9,33 +13,60 @@ public abstract class ObjectValidityChecker
 
    public enum ObjectErrorType
    {
-      NULL, CONTAINS_NaN, CONTAINS_INFINITY, INVALID_TIME_VALUE;
+      NULL, CONTAINS_NaN, CONTAINS_INFINITY, INVALID_TIME_VALUE, WRONG_ARRAY_SIZE;
+
+      private int expectedArraySize, actualArraySize;
+
+      public void setExpectedArraySize(int expectedArraySize)
+      {
+         this.expectedArraySize = expectedArraySize;
+      }
+
+      public void setActualArraySize(int actualArraySize)
+      {
+         this.actualArraySize = actualArraySize;
+      }
 
       public String getMessage()
       {
          switch (this)
          {
-            case CONTAINS_INFINITY:
-               return "contains infinite value";
-            case CONTAINS_NaN:
-               return "contains NaN value";
-            case INVALID_TIME_VALUE:
-               return "is invalid time value";
-            case NULL:
-               return "is null";
-            default:
-               throw new RuntimeException("Enum value not handled: " + this );
+         case CONTAINS_INFINITY:
+            return "contains infinite value";
+         case CONTAINS_NaN:
+            return "contains NaN value";
+         case INVALID_TIME_VALUE:
+            return "is invalid time value";
+         case NULL:
+            return "is null";
+         case WRONG_ARRAY_SIZE:
+            return "has a different size than expected. Expected size: " + expectedArraySize + ", actual size: " + actualArraySize;
+         default:
+            throw new RuntimeException("Enum value not handled: " + this);
          }
       }
+   }
+
+   // TODO Add javadoc to say return null = "good"
+   public static ObjectErrorType validateTuple2d(Tuple2d tuple2dToCheck)
+   {
+      if (tuple2dToCheck == null)
+         return ObjectErrorType.NULL;
+      if (isNaN(tuple2dToCheck.getX()) || isNaN(tuple2dToCheck.getY()))
+         return ObjectErrorType.CONTAINS_NaN;
+      if (isInfinite(tuple2dToCheck.getX()) || isInfinite(tuple2dToCheck.getY()))
+         return ObjectErrorType.CONTAINS_INFINITY;
+
+      return null;
    }
 
    public static ObjectErrorType validateTuple3d(Tuple3d tuple3dToCheck)
    {
       if (tuple3dToCheck == null)
          return ObjectErrorType.NULL;
-      if (Double.isNaN(tuple3dToCheck.getX()) || Double.isNaN(tuple3dToCheck.getY()) || Double.isNaN(tuple3dToCheck.getZ()))
+      if (isNaN(tuple3dToCheck.getX()) || isNaN(tuple3dToCheck.getY()) || isNaN(tuple3dToCheck.getZ()))
          return ObjectErrorType.CONTAINS_NaN;
-      if (Double.isInfinite(tuple3dToCheck.getX()) || Double.isInfinite(tuple3dToCheck.getY()) || Double.isInfinite(tuple3dToCheck.getZ()))
+      if (isInfinite(tuple3dToCheck.getX()) || isInfinite(tuple3dToCheck.getY()) || isInfinite(tuple3dToCheck.getZ()))
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
@@ -45,10 +76,9 @@ public abstract class ObjectValidityChecker
    {
       if (tuple4dToCheck == null)
          return ObjectErrorType.NULL;
-      if (Double.isNaN(tuple4dToCheck.getX()) || Double.isNaN(tuple4dToCheck.getY()) || Double.isNaN(tuple4dToCheck.getZ()) || Double.isNaN(tuple4dToCheck.w))
+      if (isNaN(tuple4dToCheck.getX()) || isNaN(tuple4dToCheck.getY()) || isNaN(tuple4dToCheck.getZ()) || isNaN(tuple4dToCheck.getW()))
          return ObjectErrorType.CONTAINS_NaN;
-      if (Double.isInfinite(tuple4dToCheck.getX()) || Double.isInfinite(tuple4dToCheck.getY()) || Double.isInfinite(tuple4dToCheck.getZ())
-            || Double.isInfinite(tuple4dToCheck.w))
+      if (isInfinite(tuple4dToCheck.getX()) || isInfinite(tuple4dToCheck.getY()) || isInfinite(tuple4dToCheck.getZ()) || isInfinite(tuple4dToCheck.getW()))
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
@@ -58,11 +88,10 @@ public abstract class ObjectValidityChecker
    {
       if (axisAngleToCheck == null)
          return ObjectErrorType.NULL;
-      if (Double.isNaN(axisAngleToCheck.getX()) || Double.isNaN(axisAngleToCheck.getY()) || Double.isNaN(axisAngleToCheck.getZ())
-            || Double.isNaN(axisAngleToCheck.angle))
+      if (isNaN(axisAngleToCheck.getX()) || isNaN(axisAngleToCheck.getY()) || isNaN(axisAngleToCheck.getZ()) || isNaN(axisAngleToCheck.getAngle()))
          return ObjectErrorType.CONTAINS_NaN;
-      if (Double.isInfinite(axisAngleToCheck.getX()) || Double.isInfinite(axisAngleToCheck.getY()) || Double.isInfinite(axisAngleToCheck.getZ())
-            || Double.isInfinite(axisAngleToCheck.angle))
+      if (isInfinite(axisAngleToCheck.getX()) || isInfinite(axisAngleToCheck.getY()) || isInfinite(axisAngleToCheck.getZ())
+            || isInfinite(axisAngleToCheck.getAngle()))
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
@@ -70,9 +99,9 @@ public abstract class ObjectValidityChecker
 
    public static ObjectErrorType validateDouble(double doubleToCheck)
    {
-      if (Double.isNaN(doubleToCheck))
+      if (isNaN(doubleToCheck))
          return ObjectErrorType.CONTAINS_NaN;
-      if (Double.isInfinite(doubleToCheck))
+      if (isInfinite(doubleToCheck))
          return ObjectErrorType.CONTAINS_INFINITY;
 
       return null;
@@ -80,9 +109,9 @@ public abstract class ObjectValidityChecker
 
    public static ObjectErrorType validateTrajectoryTime(double trajectoryTimeToCheck)
    {
-      if (Double.isNaN(trajectoryTimeToCheck))
+      if (isNaN(trajectoryTimeToCheck))
          return ObjectErrorType.CONTAINS_NaN;
-      if (Double.isInfinite(trajectoryTimeToCheck))
+      if (isInfinite(trajectoryTimeToCheck))
          return ObjectErrorType.CONTAINS_INFINITY;
       if (trajectoryTimeToCheck < 0.0)
          return ObjectErrorType.INVALID_TIME_VALUE;
@@ -90,4 +119,30 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   public static ObjectErrorType validateArrayOfDouble(double[] doubleArrayToCheck, int expectedSize)
+   {
+      if (doubleArrayToCheck.length != expectedSize)
+      {
+         ObjectErrorType wrongArraySize = ObjectErrorType.WRONG_ARRAY_SIZE;
+         wrongArraySize.setActualArraySize(doubleArrayToCheck.length);
+         wrongArraySize.setExpectedArraySize(expectedSize);
+         return wrongArraySize;
+      }
+      for (int arrayIndex = 0; arrayIndex < doubleArrayToCheck.length; arrayIndex++)
+      {
+         ObjectErrorType validateDouble = validateDouble(doubleArrayToCheck[arrayIndex]);
+         if (validateDouble != null)
+            return validateDouble;
+      }
+
+      return null;
+   }
+
+   public static ObjectErrorType validateEnum(Enum<?> enumToCheck)
+   {
+      if (enumToCheck == null)
+         return ObjectErrorType.NULL;
+
+      return null;
+   }
 }
