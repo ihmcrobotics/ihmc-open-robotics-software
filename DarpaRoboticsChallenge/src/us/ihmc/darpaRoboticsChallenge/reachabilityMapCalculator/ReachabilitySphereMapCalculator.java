@@ -41,10 +41,10 @@ public class ReachabilitySphereMapCalculator
    private final SimulationConstructionSet scs;
    private final OneDoFJoint[] robotArmJoints;
    private final OneDoFJoint lastJoint;
-   private final int gridSizeInNumberOfVoxels = 1;
+   private final int gridSizeInNumberOfVoxels = 50;
    private final double voxelSize = 0.05;
-   private final int numberOfRays = 1;
-   private final int numberOfRotationsAroundRay = 1;
+   private final int numberOfRays = 100;
+   private final int numberOfRotationsAroundRay = 20;
    private final FramePoint voxelLocation = new FramePoint();
    private final FramePoint modifiableVoxelLocation = new FramePoint();
    private final RigidBodyTransform desiredEndEffectorPose = new RigidBodyTransform();
@@ -67,7 +67,7 @@ public class ReachabilitySphereMapCalculator
       linearInverseKinematicsCalculator = createNumericalInverseKinematicsCalculator(jacobian, maxIterations, false);
 
       ReferenceFrame frameBeforeRootJoint = robotArmJoints[0].getFrameBeforeJoint();
-      RigidBodyTransform gridTransformToParent = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(gridSizeInNumberOfVoxels * voxelSize / 3.0 + 0.3, 0.0, 0.0));
+      RigidBodyTransform gridTransformToParent = new RigidBodyTransform(new AxisAngle4d(), new Vector3d(gridSizeInNumberOfVoxels * voxelSize / 3.0, 0.0, 0.0));
       ReferenceFrame gridFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("gridFrame", frameBeforeRootJoint, gridTransformToParent);
       Graphics3DObject gridFrameViz = new Graphics3DObject();
       gridFrameViz.transform(gridFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame()));
