@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
-import static java.lang.Double.isNaN;
 import static java.lang.Double.isInfinite;
+import static java.lang.Double.isNaN;
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Tuple2d;
@@ -47,7 +47,11 @@ public abstract class ObjectValidityChecker
       }
    }
 
-   // TODO Add javadoc to say return null = "good"
+   /**
+    * Checks the validity of a {@link Tuple2d}
+    * @param tuple2dToCheck
+    * @return null if the tuple2d is valid, or the error message.
+    */
    public static ObjectErrorType validateTuple2d(Tuple2d tuple2dToCheck)
    {
       if (tuple2dToCheck == null)
@@ -60,6 +64,11 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link Tuple3d}
+    * @param tuple3dToCheck
+    * @return null if the tuple3d is valid, or the error message.
+    */
    public static ObjectErrorType validateTuple3d(Tuple3d tuple3dToCheck)
    {
       if (tuple3dToCheck == null)
@@ -72,6 +81,11 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link Tuple4d}
+    * @param tuple4dToCheck
+    * @return null if the tuple4d is valid, or the error message.
+    */
    public static ObjectErrorType validateTuple4d(Tuple4d tuple4dToCheck)
    {
       if (tuple4dToCheck == null)
@@ -84,6 +98,11 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link AxisAngle4d}
+    * @param axisAngleToCheck
+    * @return null if the axisAngle4d is valid, or the error message.
+    */
    public static ObjectErrorType validateAxisAngle4d(AxisAngle4d axisAngleToCheck)
    {
       if (axisAngleToCheck == null)
@@ -97,6 +116,11 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link double}
+    * @param doubleToCheck
+    * @return null if the double is valid, or the error message.
+    */
    public static ObjectErrorType validateDouble(double doubleToCheck)
    {
       if (isNaN(doubleToCheck))
@@ -107,6 +131,11 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a trajectoryTime
+    * @param trajectoryTimeToCheck
+    * @return null if the trajectoryTime is valid, or the error message.
+    */
    public static ObjectErrorType validateTrajectoryTime(double trajectoryTimeToCheck)
    {
       if (isNaN(trajectoryTimeToCheck))
@@ -119,6 +148,12 @@ public abstract class ObjectValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of an array of double
+    * @param doubleArrayToCheck
+    * @param expectedSize
+    * @return null if the array is of the expected size and if each element of the array is valid, or return the error message.
+    */
    public static ObjectErrorType validateArrayOfDouble(double[] doubleArrayToCheck, int expectedSize)
    {
       if (doubleArrayToCheck.length != expectedSize)
@@ -137,7 +172,12 @@ public abstract class ObjectValidityChecker
 
       return null;
    }
-
+   
+   /**
+    * Checks the validity of an enum
+    * @param enumToCheck
+    * @return null if the enum is valid, or the error message.
+    */
    public static ObjectErrorType validateEnum(Enum<?> enumToCheck)
    {
       if (enumToCheck == null)

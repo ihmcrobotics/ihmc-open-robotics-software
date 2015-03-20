@@ -40,6 +40,12 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link HandPosePacket}.
+    * @param packetToCheck
+    * @param numberOfArmJoints
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateHandPosePacket(HandPosePacket packetToCheck, int numberOfArmJoints)
    {
       if (packetToCheck == null)
@@ -101,7 +107,12 @@ public abstract class PacketValidityChecker
 
       return null;
    }
-
+   
+   /**
+    * Checks the validity of a {@link FootPosePacket}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateFootPosePacket(FootPosePacket packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getPosition());
@@ -135,6 +146,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link FootstepData}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateFootstepData(FootstepData packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
@@ -191,6 +207,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link FootstepDataList}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateFootstepDataList(FootstepDataList packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.swingTime);
@@ -225,6 +246,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link FootstepStatus}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateFootstepStatus(FootstepStatus packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getActualFootPositionInWorld());
@@ -257,6 +283,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link ChestOrientationPacket}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateChestOrientationPacket(ChestOrientationPacket packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
@@ -276,6 +307,11 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   /**
+    * Checks the validity of a {@link HeadOrientationPacket}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
    public static String validateHeadOrientationPacket(HeadOrientationPacket packetToCheck)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getQuaternion());
@@ -294,5 +330,4 @@ public abstract class PacketValidityChecker
 
       return null;
    }
-
 }
