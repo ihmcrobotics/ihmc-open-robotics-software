@@ -19,7 +19,7 @@ public class AtlasAutomaticDiagnosticDemo
       networkProcessorParameters = new DRCNetworkModuleParameters();
       networkProcessorParameters.setUseBehaviorModule(true);
       networkProcessorParameters.setUseBehaviorVisualizer(true);
-      networkProcessorParameters.setRunAutomaticDiagnostic(true);
+      networkProcessorParameters.setRunAutomaticDiagnostic(true, 15);
 
       boolean automaticallyStartSimulation = true;
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);

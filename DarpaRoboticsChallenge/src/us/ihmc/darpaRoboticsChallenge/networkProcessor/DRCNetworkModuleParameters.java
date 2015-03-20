@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 
 public class DRCNetworkModuleParameters
@@ -22,10 +23,18 @@ public class DRCNetworkModuleParameters
    private PacketCommunicator controllerCommunicator;
    private PacketCommunicator simulatedSensorCommunicator;
    private URI rosUri;
+   private KryoLocalPacketCommunicator GFEPacketCommunicator;
+
+   private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
 
    public boolean useSensorModule()
    {
       return useSensorModule;
+   }
+
+   public boolean useGFECommunicator()
+   {
+      return getGFEPacketCommunicator() != null;
    }
 
    public boolean usePerceptionModule()
@@ -143,13 +152,19 @@ public class DRCNetworkModuleParameters
       return runAutomaticDiagnostic;
    }
 
-   public void setRunAutomaticDiagnostic(boolean runAutomaticDiagnostic)
+   public void setRunAutomaticDiagnostic(boolean runAutomaticDiagnostic, double timeToWaitBeforeStartingDiagnostics)
    {
       this.runAutomaticDiagnostic = runAutomaticDiagnostic;
+      this.timeToWaitBeforeStartingDiagnostics = timeToWaitBeforeStartingDiagnostics;
       if (runAutomaticDiagnostic)
       {
          setUseBehaviorModule(true);
       }
+   }
+
+   public double getTimeToWaitBeforeStartingDiagnostics()
+   {
+      return timeToWaitBeforeStartingDiagnostics;
    }
 
    public void setControllerCommunicator(PacketCommunicator controllerCommunicator)
@@ -174,5 +189,15 @@ public class DRCNetworkModuleParameters
             + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
             + "\n controllerCommunicator=" + controllerCommunicator + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
             + "]";
+   }
+
+   public void setGFEPacketCommunicator(KryoLocalPacketCommunicator GFEPacketCommunicator)
+   {
+      this.GFEPacketCommunicator = GFEPacketCommunicator;
+   }
+
+   public KryoLocalPacketCommunicator getGFEPacketCommunicator()
+   {
+      return GFEPacketCommunicator;
    }
 }

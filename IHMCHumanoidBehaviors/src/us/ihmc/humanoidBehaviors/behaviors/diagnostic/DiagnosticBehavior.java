@@ -409,10 +409,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       this.attachControllerListeningQueue(inputListeningQueue, CapturabilityBasedStatus.class);
    }
 
-   public void setupForAutomaticDiagnostic()
+   public void setupForAutomaticDiagnostic(double timeToWait)
    {
       automaticDiagnosticRoutineRequested.set(true);
-      timeToWaitBeforeEnable.set(15.0); // To make sure that the transition from strand prep to walking is done.
+      timeToWaitBeforeEnable.set(timeToWait); // To make sure that the transition from strand prep to walking is done.
       System.out.println("\n");
       System.out.println("///////////////////////////////////////////////////////////");
       System.out.println("//       Initializing automatic diagnostic routine       //");
@@ -2224,7 +2224,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       {
          System.out.println("\n");
          System.out.println("///////////////////////////////////////////////////////////");
-         System.out.println("// Automatic diagnostic routine will start in 15 seconds //");
+         System.out.println("// Automatic diagnostic routine will start in " + timeToWaitBeforeEnable.getDoubleValue() + " seconds //");
          System.out.println("///////////////////////////////////////////////////////////");
          willStartMessageSent = true;
       }
