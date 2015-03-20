@@ -7,13 +7,13 @@
 #Options for robotSide
 # uint8 L = 0
 # uint8 R = 1
-uint8 robotSide
+uint8 robot_side
 
 geometry_msgs/Vector3 position
 
 geometry_msgs/Quaternion orientation
 
 # trajectoryTime specifies how fast or how slow to move to the desired pose
-float64 trajectoryTime
+float64 trajectory_time
 
 
