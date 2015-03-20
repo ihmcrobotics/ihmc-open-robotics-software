@@ -58,6 +58,17 @@ public class DRCNetworkProcessor
          }
       }
 
+      if(params.useGFECommunicator())
+      {
+         PacketCommunicator gfeCommunicator = params.getGFEPacketCommunicator();
+         communicators.add(gfeCommunicator);
+
+         if(DEBUG)
+         {
+            PrintTools.debug(this, "useGFECommunicator " + gfeCommunicator.getName() + " " + gfeCommunicator.getId());
+         }
+      }
+
       if (params.useUiModule())
       {
          PacketCommunicator uiModuleCommunicator = createUiModule(robotModel, params);
@@ -104,7 +115,7 @@ public class DRCNetworkProcessor
 
       if (params.useBehaviorModule())
       {
-         PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel, params.useBehaviorVisualizer(), params.isRunAutomaticDiagnostic());
+         PacketCommunicator behaviorModuleCommunicator = createBehaviorModule(robotModel, params);
          communicators.add(behaviorModuleCommunicator);
 
          if (DEBUG)
@@ -131,19 +142,19 @@ public class DRCNetworkProcessor
       return communicators;
    }
 
-   private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel, boolean startYoVariableServer, boolean runAutomaticDiagnostic)
+   private PacketCommunicator createBehaviorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       IHMCHumanoidBehaviorManager behaviorManager;
 
-      if (runAutomaticDiagnostic)
+      if (params.isRunAutomaticDiagnostic())
       {
-         behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, startYoVariableServer, sensorInformation);
+         behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
       }
       else
       {
-         behaviorManager = new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, startYoVariableServer, sensorInformation);
+         behaviorManager = new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation);
       }
 
       return behaviorManager.getCommunicator();

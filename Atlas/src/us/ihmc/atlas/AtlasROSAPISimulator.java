@@ -39,11 +39,16 @@ public class AtlasROSAPISimulator
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 //      networkProcessorParameters.setUseUiModule(startUI);
 //      networkProcessorParameters.setUseRosModule(true);
+      KryoLocalPacketCommunicator gfe_communicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+            PacketDestination.GFE.ordinal(), "GFE_Communicator");
+      networkProcessorParameters.setGFEPacketCommunicator(gfe_communicator);
+      networkProcessorParameters.setControllerCommunicator(controllerCommunicator);
+
       if(runAutomaticDiagnosticRoutine)
       {
          networkProcessorParameters.setUseBehaviorModule(true);
          networkProcessorParameters.setUseBehaviorVisualizer(true);
-         networkProcessorParameters.setRunAutomaticDiagnostic(true);
+         networkProcessorParameters.setRunAutomaticDiagnostic(true, 5);
       }
       
       simulationStarter.startSimulation(networkProcessorParameters, true);
@@ -52,7 +57,8 @@ public class AtlasROSAPISimulator
 
       PacketCommunicator sensorCommunicator = simulationStarter.createSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
+
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();

@@ -58,7 +58,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
         networkModuleParams.setUseBehaviorModule(true);
-        networkModuleParams.setRunAutomaticDiagnostic(true);
+        networkModuleParams.setRunAutomaticDiagnostic(true, 15.0);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)

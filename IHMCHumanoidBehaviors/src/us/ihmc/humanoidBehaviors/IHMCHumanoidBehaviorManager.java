@@ -52,6 +52,8 @@ public class IHMCHumanoidBehaviorManager
 {
    public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
 
+   private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
+
    private final KryoLocalPacketCommunicator behaviorPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
          PacketDestination.BEHAVIOR_MODULE.ordinal(), "Behavior_Module");
 
@@ -64,6 +66,11 @@ public class IHMCHumanoidBehaviorManager
          DRCRobotSensorInformation sensorInfo)
    {
       this(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, false);
+   }
+
+   public static void setAutomaticDiagnosticTimeToWait(double timeToWait)
+   {
+      runAutomaticDiagnosticTimeToWait = timeToWait;
    }
 
    private IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
@@ -117,10 +124,10 @@ public class IHMCHumanoidBehaviorManager
          }
       }
 
-      if (runAutomaticDiagnostic)
+      if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
-               walkingControllerParameters);
+               walkingControllerParameters, runAutomaticDiagnosticTimeToWait);
       }
       else
       {
@@ -200,7 +207,7 @@ public class IHMCHumanoidBehaviorManager
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters)
+         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters, double timeToWait)
     {
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
@@ -208,7 +215,7 @@ public class IHMCHumanoidBehaviorManager
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
             outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
-      diagnosticBehavior.setupForAutomaticDiagnostic();
+      diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
     }
@@ -219,8 +226,9 @@ public class IHMCHumanoidBehaviorManager
    }
 
    public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo)
+         DRCRobotSensorInformation sensorInfo, double timeToWait)
    {
+      IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
       IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, true);
       return ihmcHumanoidBehaviorManager;
    }
