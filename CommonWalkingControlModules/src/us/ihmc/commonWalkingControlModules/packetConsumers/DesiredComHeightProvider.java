@@ -7,8 +7,10 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
@@ -26,9 +28,12 @@ public class DesiredComHeightProvider
    private final AtomicReference<WaypointPositionTrajectoryData> multipointTrajectory = new  AtomicReference<WaypointPositionTrajectoryData>(null);
 
    private final double defaultTrajectoryTime = 0.5; //Hackish default time for height trajectory. We need to just ensure that this is always set in the packet instead and then get rid of this.
+   private final GlobalDataProducer globalDataProducer;
    
-   public DesiredComHeightProvider()
+   public DesiredComHeightProvider(GlobalDataProducer globalDataProducer)
    {
+      this.globalDataProducer = globalDataProducer;
+      
       comHeightPacketConsumer = new PacketConsumer<ComHeightPacket>()
       {
          @Override public void receivedPacket(ComHeightPacket packet) {  receivedPacketImplementation(packet);  }
@@ -52,6 +57,16 @@ public class DesiredComHeightProvider
 
    public void receivedPacketImplementation(ComHeightPacket packet)
    {
+      if (globalDataProducer != null)
+      {
+         String errorMessage = PacketValidityChecker.validateCoMHeightPacket(packet);
+         if (errorMessage != null)
+         {
+            globalDataProducer.notifyInvalidPacketReceived(ComHeightPacket.class, errorMessage);
+            return;
+         }
+      }
+      
       newDataAvailable.set(true);
       comHeightOffset.set(packet.getHeightOffset());
       double packetTime = packet.getTrajectoryTime();
