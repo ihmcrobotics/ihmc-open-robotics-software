@@ -24,25 +24,24 @@ import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.robotController.DRCSimGazeboThreadedRobotController;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
+import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -127,8 +126,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 			   if(j % 5000 == 0)
 			   {
 				   Packet randomPacket = createRandomPacket(IHMCRosApiMessageMap.INPUT_PACKET_LIST[i], random);
-				packetCommunicator.send(randomPacket);
 				   System.out.println(randomPacket);
+				   packetCommunicator.send(randomPacket);
 			   }
 //			   if(j % 60 == 0)
 			   {
@@ -167,7 +166,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   RobotVisualizer robotVisualizer = null;
 	   ThreadDataSynchronizerInterface threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(null, robotModel, registry);
 	   
-	   DRCSimGazeboThreadedRobotController robotController = new DRCSimGazeboThreadedRobotController();
+	   DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
+	   SingleThreadedRobotController robotController = new SingleThreadedRobotController("testSingleThreadedRobotController", yoTime, null );
 	   int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
 	   int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 	   
