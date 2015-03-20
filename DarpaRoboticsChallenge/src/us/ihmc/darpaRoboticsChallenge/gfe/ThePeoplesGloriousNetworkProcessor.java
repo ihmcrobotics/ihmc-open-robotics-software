@@ -120,9 +120,9 @@ public class ThePeoplesGloriousNetworkProcessor
          rosMainNode.attachPublisher(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);
       }
 
-//      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
-//      printStreamBridge.start();
-//      System.setErr(printStreamBridge);
+      PrintStreamToRosBridge printStreamBridge = new PrintStreamToRosBridge(rosMainNode, namespace);
+      printStreamBridge.start();
+      System.setErr(printStreamBridge);
    }
 
    private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher)
