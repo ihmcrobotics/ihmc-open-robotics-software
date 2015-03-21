@@ -5,9 +5,10 @@ package us.ihmc.ihmcPerception;
  */
 public class RosLocalizationConstants
 {
-   static final String OVERLAP_UPDATE_TOPIC = "/localization_overlap";
-   static final String STATUS_UPDATE_TOPIC = "/localization_status";
-   static final String POSE_UPDATE_TOPIC = "/icp_correction";
+   public static final String OVERLAP_UPDATE_TOPIC = "/localization_overlap";
+   public static final String STATUS_UPDATE_TOPIC = "/localization_status";
+   public static final String POSE_UPDATE_TOPIC = "/icp_correction";
+   public static final double DEFAULT_OVERLAP = 1.0;
 
    private RosLocalizationConstants(){}
 }

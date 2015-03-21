@@ -12,7 +12,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
  */
 public class RosLocalizationStatusSubscriber
 {
-   private double overlap = 1.0;
+   private double overlap = RosLocalizationConstants.DEFAULT_OVERLAP;
 
    public RosLocalizationStatusSubscriber(final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
