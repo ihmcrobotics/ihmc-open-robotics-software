@@ -45,9 +45,7 @@ public class STLLoader implements AssetLoader
 
    public Object load(AssetInfo assetInfo) throws IOException
    {
-      InputStream stream = assetInfo.openStream();
-      
-      STLReader reader = STLReaderFactory.create(stream);
+      STLReader reader = STLReaderFactory.create(assetInfo);
       List<Triangle> triangles = reader.getTriangles();            
       
       Mesh mesh = new Mesh();

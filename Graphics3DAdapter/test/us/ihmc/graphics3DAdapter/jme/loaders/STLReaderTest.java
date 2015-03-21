@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import com.jme3.asset.AssetInfo;
 import org.junit.Test;
 
 import us.ihmc.loaders.jme.ASCIISTLReader;
