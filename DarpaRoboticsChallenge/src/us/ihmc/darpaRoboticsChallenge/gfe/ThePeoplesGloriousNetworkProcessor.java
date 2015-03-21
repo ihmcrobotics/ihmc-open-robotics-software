@@ -20,7 +20,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
-import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
+import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ThreadTools;
@@ -74,7 +74,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace);
-//      setupRosLocalization();
+      setupRosLocalization();
 
       rosMainNode.execute();
 
@@ -156,6 +156,6 @@ public class ThePeoplesGloriousNetworkProcessor
 
    private void setupRosLocalization()
    {
-      new IHMCETHRosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
+      new RosLocalizationPoseCorrectionSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
    }
 }
