@@ -141,7 +141,7 @@ public class PacketRouter
             packet.setDestination(destination);
          }
       }
-      return destination;
+      return packet.getDestination();
    }
    
    /**
