@@ -57,6 +57,7 @@ public class WholeBodyTrajectory
          final SDFFullRobotModel finalRoboState
          ) throws Exception
    {
+      wbSolver.setVerbosityLevel(1);
       int N = wbSolver.getNumberOfJoints();
 
       worldToFoot = initialRobotState.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
@@ -71,6 +72,8 @@ public class WholeBodyTrajectory
             initialRobotState.getElevator(), currentRobotModel.getElevator() );
 
       copier.copy();
+      currentRobotModel.updateFrames();
+      
 
       int oldMaxReseed = wbSolver.maxNumberOfAutomaticReseeds;
       wbSolver.maxNumberOfAutomaticReseeds = 0;
@@ -103,7 +106,7 @@ public class WholeBodyTrajectory
 
          if( previousOption.get(side) != ControlledDoF.DOF_NONE)
          {
-            wbSolver.setNumberOfControlledDoF(side, ControlledDoF.DOF_3P3R ); 
+            wbSolver.setNumberOfControlledDoF(side, ControlledDoF.DOF_3P2R ); 
          }
       }
 
@@ -188,15 +191,12 @@ public class WholeBodyTrajectory
                double alpha = ((double)s)/(numSegments);
                interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
 
+               if(  wbSolver.getNumberOfControlledDoF(side) != ControlledDoF.DOF_NONE )
+                     System.out.println(">>>>>>>>>>> step:  " + s + "\n" +interpolatedTransform );
+               
                FramePose target =  new FramePose( worldFrame, interpolatedTransform );
 
                wbSolver.setGripperPalmTarget( side, target );
-
-               if( side == RobotSide.RIGHT )
-               {
-                  RigidBodyTransform targetTrans = new RigidBodyTransform();
-                  target.getRigidBodyTransform( targetTrans );
-               }
             }
 
             if( s < numSegments )
@@ -221,8 +221,8 @@ public class WholeBodyTrajectory
                   wb_trajectory.addWaypoint(thisWaypointAngles.data);
                }
                else{
-                  /*  System.out.println("OOOOPS");
-                 for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
+                  System.out.println("OOOOPS");
+                   /*  for ( Map.Entry<String, Integer> entry: nameToIndex.entrySet() )
                   {
                      String jointName = entry.getKey();
                      int index = entry.getValue();
