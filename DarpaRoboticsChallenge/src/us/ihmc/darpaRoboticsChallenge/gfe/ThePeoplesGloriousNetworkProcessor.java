@@ -13,6 +13,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -145,7 +146,7 @@ public class ThePeoplesGloriousNetworkProcessor
       {
          Message message = messageFactory.newFromType(e.getKey());
          IHMCMsgToPacketSubscriber<Message> subscriber = IHMCMsgToPacketSubscriber.createIHMCMsgToPacketSubscriber(message,
-               controllerCommunicationBridge);
+               controllerCommunicationBridge, PacketDestination.CONTROLLER.ordinal());
          subscribers.add(subscriber);
          rosMainNode.attachSubscriber(namespace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), subscriber);
       }
