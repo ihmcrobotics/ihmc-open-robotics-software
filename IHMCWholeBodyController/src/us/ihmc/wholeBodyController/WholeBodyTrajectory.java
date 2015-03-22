@@ -57,7 +57,6 @@ public class WholeBodyTrajectory
          final SDFFullRobotModel finalRoboState
          ) throws Exception
    {
-      wbSolver.setVerbosityLevel(1);
       int N = wbSolver.getNumberOfJoints();
 
       worldToFoot = initialRobotState.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
@@ -191,9 +190,6 @@ public class WholeBodyTrajectory
                double alpha = ((double)s)/(numSegments);
                interpolatedTransform.interpolate(initialTransform.get(side), finalTransform.get(side), alpha);
 
-               if(  wbSolver.getNumberOfControlledDoF(side) != ControlledDoF.DOF_NONE )
-                     System.out.println(">>>>>>>>>>> step:  " + s + "\n" +interpolatedTransform );
-               
                FramePose target =  new FramePose( worldFrame, interpolatedTransform );
 
                wbSolver.setGripperPalmTarget( side, target );
