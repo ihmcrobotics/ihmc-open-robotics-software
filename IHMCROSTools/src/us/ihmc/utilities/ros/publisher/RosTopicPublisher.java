@@ -75,6 +75,10 @@ public abstract class RosTopicPublisher<T extends Message>
       }
    }
 
+   public boolean isConnected()
+   {
+      return publisher != null;
+   }
 
    public void connected()
    {

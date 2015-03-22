@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
@@ -13,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -25,49 +27,54 @@ public class AtlasROSAPISimulator
 {
    private static String defaultPrefix = "/ihmc_msgs/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
-   private final boolean startUI = false;
-   
+   private final boolean startUI = true;
+   private boolean redirectUiPacketsToRos = true;
+   private KryoLocalPacketCommunicator gfe_communicator;
+
    public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
    {
-      PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "AtlasROSAPISimulatorLocalCommunicator");
-
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
       simulationStarter.setRunMultiThreaded(true);
-      
-      simulationStarter.setControllerPacketCommunicator(controllerCommunicator);
-      
-      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-//      networkProcessorParameters.setUseUiModule(startUI);
-//      networkProcessorParameters.setUseRosModule(true);
-      KryoLocalPacketCommunicator gfe_communicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.GFE.ordinal(), "GFE_Communicator");
-      networkProcessorParameters.setGFEPacketCommunicator(gfe_communicator);
-      networkProcessorParameters.setControllerCommunicator(controllerCommunicator);
 
-      if(runAutomaticDiagnosticRoutine)
+      DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+      
+      URI rosUri = NetworkParameters.getROSURI();
+      networkProcessorParameters.setRosUri(rosUri);
+
+      gfe_communicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.GFE.ordinal(), "GFE_Communicator");
+      networkProcessorParameters.setGFEPacketCommunicator(gfe_communicator);
+
+      if (runAutomaticDiagnosticRoutine)
       {
          networkProcessorParameters.setUseBehaviorModule(true);
          networkProcessorParameters.setUseBehaviorVisualizer(true);
          networkProcessorParameters.setRunAutomaticDiagnostic(true, 5);
       }
-      
-      simulationStarter.startSimulation(networkProcessorParameters, true);
-
-      URI rosUri = NetworkParameters.getROSURI();
-
-      PacketCommunicator sensorCommunicator = simulationStarter.createSimulatedSensorsPacketCommunicator();
-      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
 
       if (startUI)
+      {
+         networkProcessorParameters.setUseUiModule(true);
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
+      }
+
+      simulationStarter.startSimulation(networkProcessorParameters, true);
+
+      if (redirectUiPacketsToRos)
+      {
+         PacketRouter packetRouter = simulationStarter.getPacketRouter();
+         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator, packetRouter);
+      }
+      
+      PacketCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
+      SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
+
    }
-   
+
    public static void main(String[] args) throws JSAPException, IOException
    {
       JSAP jsap = new JSAP();
-      
+
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
       rosNameSpace.setDefault(defaultPrefix);
@@ -75,10 +82,10 @@ public class AtlasROSAPISimulator
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(defaultRobotModel);
-      
+
       Switch requestAutomaticDiagnostic = new Switch("requestAutomaticDiagnostic").setLongFlag("requestAutomaticDiagnostic").setShortFlag(JSAP.NO_SHORTFLAG);
       requestAutomaticDiagnostic.setHelp("enable automatic diagnostic routine");
-      
+
       jsap.registerParameter(model);
       jsap.registerParameter(rosNameSpace);
       jsap.registerParameter(requestAutomaticDiagnostic);
