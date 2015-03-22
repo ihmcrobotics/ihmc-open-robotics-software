@@ -68,7 +68,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       {    	      	
     	 OneDoFJoint joint = joints.get(i);
     	 
-    	 System.out.println(i + " " + joint.getName() + " " + joint.getqDesired());
+    	// System.out.println(i + " " + joint.getName() + " " + joint.getqDesired());
     	 
     	 if(joint.isUnderPositionControl())
     	 {
@@ -80,7 +80,6 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
     	 }    	 
       }
       
-      System.out.println();
       
       jointCommand.flip();
 

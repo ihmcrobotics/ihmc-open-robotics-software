@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -21,7 +20,6 @@ import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
-import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -125,7 +123,7 @@ abstract public class WholeBodyIkSolver
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
 
-      protected int maxNumberOfAutomaticReseeds = 2;
+      protected int maxNumberOfAutomaticReseeds = 0;
       
       protected final SideDependentList<FramePose> handTarget = new SideDependentList<FramePose>();
       protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
@@ -207,7 +205,7 @@ abstract public class WholeBodyIkSolver
          maxNumberOfAutomaticReseeds = maxReseeds;
       }
 
-      public ReferenceFrame getRootFrame(){
+      public ReferenceFrame getRootFrameOfWorkingModel(){
          return getRootFrame(workingSdfModel);
       }
 
@@ -555,7 +553,7 @@ abstract public class WholeBodyIkSolver
          }
       }
 
-      private void enforceControlledDoF( ComputeOption opt )
+      private void enforceControlledDoF( ComputeOption opt ) throws Exception
       {
          double rotationWeight = 0.4;
 
@@ -572,45 +570,38 @@ abstract public class WholeBodyIkSolver
 
             case DOF_3P:
                taskEndEffectorPosition.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setEnabled(false);
-
-               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1, 0.01, 0.01, 0.01) );
-               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,    0, 0, 0) );
-
-               taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
-               taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   0, 0, 0) );
+               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,   0.01,  0.01, 0.01) );
+               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,   0,     0,    0) );
+               
+               taskEndEffectorRotation.get(side).setEnabled(false);      
+               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,   0, 0, 0) );          
+               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,   0, 0, 0) );
                break;
 
 
             case DOF_3P3R:
                taskEndEffectorPosition.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setEnabled(true);
-
                taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );
-               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  0.4, 0.4, 0.4) );
-
-               taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
-               taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
-
+               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
+               
+               taskEndEffectorRotation.get(side).setEnabled(true);
+               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
+               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
                break;   
 
             case DOF_3P2R:
 
                taskEndEffectorPosition.get(side).setEnabled(true);
                taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );           
-               taskEndEffectorPosition.get(side).setWeightError( new Vector64F(6, 1, 1, 1,   0, 0, 0) );
+               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
 
                //-------------
                taskEndEffectorRotation.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setWeightError( new Vector64F(6, 0, 0, 0,   1, 1, 1) );
+               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
+               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
                
-               Vector64F target = taskEndEffectorRotation.get(side).getTarget();
-               Matrix3d rot = new Matrix3d();              
-               Quat4d targetQuaternion = new Quat4d( target.get(3),  target.get(4), target.get(5), target.get(6) );
- 
-               rot.set( targetQuaternion );
-
-               taskEndEffectorRotation.get(side).disableAxisInTaskSpace(rotationWeight, new Vector3d(rot.m01, rot.m11, rot.m21));  
+               Vector3d axisToDisable = new Vector3d(0, 1, 0);
+               taskEndEffectorRotation.get(side).disableAxisInTaskSpace(rotationWeight, axisToDisable );  
 
                break;
             }
@@ -960,7 +951,6 @@ abstract public class WholeBodyIkSolver
             controlPelvis( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
-          //  adjustOtherFoot(actualSdfModel);
             checkIfArmShallStayQuiet(actualSdfModel);
 
             q_out.set(cachedAnglesQ);
@@ -1101,7 +1091,6 @@ abstract public class WholeBodyIkSolver
       public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
       {
          controlledDoF.set(side, dof );
-         enforceControlledDoF( null );
       }
 
 
