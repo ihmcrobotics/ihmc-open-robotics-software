@@ -239,7 +239,7 @@ public class ReachabilitySphereMapCalculator
       }
 
       if (reachabilityMapFileWriter != null)
-         reachabilityMapFileWriter.close();
+         reachabilityMapFileWriter.exportAndClose();
       System.out.println("Done!");
    }
 
