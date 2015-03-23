@@ -585,7 +585,7 @@ abstract public class WholeBodyIkSolver
                taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
                
                taskEndEffectorRotation.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
+               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  0.5,  0.5,  0.5) );
                taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
                break;   
 
