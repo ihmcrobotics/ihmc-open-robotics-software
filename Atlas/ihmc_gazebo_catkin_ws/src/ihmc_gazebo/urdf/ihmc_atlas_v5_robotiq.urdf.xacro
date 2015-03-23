@@ -1,0 +1,16 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="atlas" >
+
+  <xacro:include filename="$(find ihmc_gazebo)/urdf/atlas_v5.urdf" />
+  <xacro:include filename="$(find robotiq_hand_description)/urdf/robotiq_hand.urdf.xacro" />
+
+  <xacro:robotiq_hand prefix="l_" parent="l_hand" reflect="-1">
+    <origin rpy="3.14159 3.14159 3.14159" xyz="-0.00125 0.17 0.01"/>
+  </xacro:robotiq_hand>
+  <xacro:robotiq_hand prefix="r_" parent="r_hand" reflect="1">
+    <origin rpy="3.14159 0 0" xyz="-0.00125 -0.17 0.01"/>
+  </xacro:robotiq_hand>
+
+  <xacro:include filename="$(find atlas_description)/urdf/atlas.gazebo" />
+  <xacro:include filename="$(find atlas_description)/urdf/atlas.transmission" />
+  <xacro:include filename="$(find multisense_sl_description)/urdf/multisense_sl.urdf" />
+</robot>
