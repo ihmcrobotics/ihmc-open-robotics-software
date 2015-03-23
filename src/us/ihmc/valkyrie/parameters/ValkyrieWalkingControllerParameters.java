@@ -64,6 +64,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getTimeToGetPreparedForLocomotion()
+   {
+      return 0.0;
+   }
+
+   @Override
    public boolean doToeOffIfPossible()
    {
       return !runningOnRealRobot;
@@ -118,6 +124,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getHeelTouchdownAngle()
    {
       return Math.toRadians(-20.0);
+   }
+
+   @Override
+   public boolean allowShrinkingSingleSupportFootPolygon()
+   {
+      return false;
    }
 
    @Override
