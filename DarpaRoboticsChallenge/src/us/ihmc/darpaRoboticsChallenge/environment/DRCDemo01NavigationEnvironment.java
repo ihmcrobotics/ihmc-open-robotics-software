@@ -7,6 +7,8 @@ import java.util.Random;
 import javax.vecmath.Point2d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
+import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
