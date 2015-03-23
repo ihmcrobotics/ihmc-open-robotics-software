@@ -46,18 +46,7 @@ public abstract class DRCSimulationTools
       List<Modules> modulesToStart = new ArrayList<Modules>();
       DRCStartingLocation startingLocation = null;
 
-      if (simulationStarter.getEnvironment() instanceof DRCDemo01NavigationEnvironment)
-      {
-         startingLocation = showSelectorWithStartingLocation(modulesToStart, DRCObstacleCourseStartingLocation.values());
-      }
-      else if(simulationStarter.getEnvironment() instanceof DRCSCEnvironment)
-      {
-          startingLocation = showSelectorWithStartingLocation(modulesToStart, DRCSCStartingLocations.values());
-      }
-      else
-      {
-         startingLocation = showSelectorWithStartingLocation(modulesToStart, possibleStartingLocations);
-      }
+      startingLocation = showSelectorWithStartingLocation(modulesToStart, possibleStartingLocations);
 
       if (startingLocation != null)
          simulationStarter.setStartingLocation(startingLocation);

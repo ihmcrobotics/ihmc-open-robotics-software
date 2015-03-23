@@ -33,6 +33,8 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
    private int numberOfStairs = 3;
 
    private double landingRun = 0.61;
+   private double landingWidth = 4;
+
    private double stairSupportThickness = 0.0508;
    private double stairSupportWidth = 0.132;
 
@@ -103,9 +105,10 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
 
    }
 
-   public void setLandingPlatformParameters(double landingDepth, double railHeight, int numberOfCrossBars)
+   public void setLandingPlatformParameters(double landingDepth,double landingWidth, double railHeight, int numberOfCrossBars)
    {
       this.landingRun = landingDepth;
+      this.landingWidth = landingWidth;
       this.topRailingHeight = railHeight;
       this.numberOfTopRailingCrossBars = numberOfCrossBars;
    }
@@ -188,10 +191,11 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       }
 
       centerPointLocal[0] += stepRun - stepTread / 2 + landingRun / 2;
+      centerPointLocal[1] = offsetSide- stepWidth;
       double topLandingCenter = centerPointLocal[0];
       stairTopHeight += stepRise;
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
-      setUpFloatingStair(combinedTerrainObject, centerPoint, stepWidth, landingRun, stepThickness, stairTopHeight, courseAngle, app);
+      setUpFloatingStair(combinedTerrainObject, centerPoint, landingWidth, landingRun, 0.0762, stairTopHeight, courseAngle, app);
 
       // side supports
       double sinStairSlope = Math.sin(stairSlope);
@@ -217,10 +221,10 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       centerPointLocal[0] = topLandingCenter - distanceFromSupportGroundCornerToLeadingGroundStepEdge / 2;
       zCenter = stairTopHeight - stairSupportWidth / 2;
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
-//      setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
-//            courseAngle, app);
+      setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
+            courseAngle, app);
 
-      centerPointLocal[1] = offsetSide+-(stepWidth / 2 + stairSupportThickness / 2);
+      centerPointLocal[1] = offsetSide+(stepWidth / 2 + stairSupportThickness / 2);
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
       setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
             courseAngle, app);
@@ -232,24 +236,24 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       {
          centerPointLocal[1] = offsetSide+ySign * (stepWidth / 2 + railingDiameter / 2);
 
-         for (int xSign = -1; xSign <= 2; xSign += 2)
-         {
-            // vertical supports for railing on top landing
-            centerPointLocal[0] = topLandingCenter + xSign * (landingRun / 2 - railingDiameter / 2);
-            centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
-            setUpSlopedCylinder(combinedTerrainObject, centerPoint[0], centerPoint[1], stairTopHeight + topRailingHeight / 2, topRailingHeight,
-                  railingDiameter / 2, Math.PI / 2, 0, app);
-         }
+//         for (int xSign = -1; xSign <= 2; xSign += 2)
+//         {
+//            // vertical supports for railing on top landing
+//            centerPointLocal[0] = topLandingCenter + xSign * (landingRun / 2 - railingDiameter / 2);
+//            centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
+//            setUpSlopedCylinder(combinedTerrainObject, centerPoint[0], centerPoint[1], stairTopHeight + topRailingHeight / 2, topRailingHeight,
+//                  railingDiameter / 2, Math.PI / 2, 0, app);
+//         }
 
          // horizontal railing on top landing
          centerPointLocal[0] = topLandingCenter;
          centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
 
-         for (int n = 0; n < numberOfTopRailingCrossBars; n++)
-         {
-            setUpSlopedCylinder(combinedTerrainObject, centerPoint[0], centerPoint[1], stairTopHeight + topRailingHeight / (numberOfTopRailingCrossBars)
-                  * (n + 1), landingRun, railingDiameter / 2, 0, courseAngle, app);
-         }
+//         for (int n = 0; n < numberOfTopRailingCrossBars; n++)
+//         {
+//            setUpSlopedCylinder(combinedTerrainObject, centerPoint[0], centerPoint[1], stairTopHeight + topRailingHeight / (numberOfTopRailingCrossBars)
+//                  * (n + 1), landingRun, railingDiameter / 2, 0, courseAngle, app);
+//         }
 
          // stairs railing supports
          for (int n = 0; n < nunberOfStairRailSupports; n++)
