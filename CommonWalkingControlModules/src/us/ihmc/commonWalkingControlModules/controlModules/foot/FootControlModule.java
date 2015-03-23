@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterfac
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -21,6 +22,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -360,6 +362,20 @@ public class FootControlModule
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
       swingState.setFootstep(footstep, false);
+   }
+
+   public boolean isLegDoingToeOffAndAtLimit()
+   {
+      if (getCurrentConstraintType() != ConstraintType.TOES)
+         return false;
+      RobotSide robotSide = footControlHelper.getRobotSide();
+      OneDoFJoint kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+      OneDoFJoint anklePitchJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+      double straightKneeThresholdInToeOFf = 0.42;
+      boolean isKneeAlmostStraight = kneeJoint.getQ() < straightKneeThresholdInToeOFf;
+      boolean isAnkleAtLowerLimit = anklePitchJoint.getQ() > anklePitchJoint.getJointLimitUpper() - 0.05;
+
+      return isKneeAlmostStraight && isAnkleAtLowerLimit;
    }
 
    public void setFootPose(FramePose footPose, double trajectoryTime)
