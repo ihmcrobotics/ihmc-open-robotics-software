@@ -76,6 +76,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getTimeToGetPreparedForLocomotion()
+   {
+      return 0.0; // 0.3 seems to be a good starting point
+   }
+
+   @Override
    public boolean doToeOffIfPossible()
    {
       return true;
@@ -130,6 +136,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getHeelTouchdownAngle()
    {
       return Math.toRadians(-20.0);
+   }
+
+   @Override
+   public boolean allowShrinkingSingleSupportFootPolygon()
+   {
+      return false;
    }
 
    public boolean isNeckPositionControlled()

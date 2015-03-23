@@ -192,6 +192,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
 
+   private final BooleanYoVariable preparingForLocomotion = new BooleanYoVariable("preparingForLocomotion", registry);
+   private final DoubleYoVariable timeToGetPreparedForLocomotion = new DoubleYoVariable("timeToGetPreparedForLocomotion", registry);
+   private final DoubleYoVariable preparingForLocomotionStartTime = new DoubleYoVariable("preparingForLocomotionStartTime", registry);
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
    private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
 
@@ -210,6 +213,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       setupManagers(variousWalkingManagers);
+
+      timeToGetPreparedForLocomotion.set(walkingControllerParameters.getTimeToGetPreparedForLocomotion());
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(true);
@@ -677,6 +682,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         preparingForLocomotion.set(false);
+         preparingForLocomotionStartTime.set(Double.NaN);
+
          pelvisICPBasedTranslationManager.enable();
 
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
@@ -708,11 +716,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                instantaneousCapturePointPlanner.reInitializeSingleSupport(transferToAndNextFootstepsData, yoTime.getDoubleValue());
                finalDesiredICPInWorld.set(instantaneousCapturePointPlanner.getFinalDesiredICP());
             }
+
+            feetManager.enableAnkleLimitAvoidanceInSupportState(transferToSide, false);
+            feetManager.enableAnkleLimitAvoidanceInSupportState(transferToSide.getOppositeSide(), true);
          }
          else
          {
             failureDetectionControlModule.setNextFootstep(null);
             momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
+            feetManager.enableAnkleLimitAvoidanceInSupportState(false);
 
             // Do something smart here when going to DoubleSupport state.
             //            instantaneousCapturePointPlanner.initializeForStoppingInDoubleSupport(yoTime.getDoubleValue());
@@ -753,6 +765,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionOutOfAction()
       {
+         preparingForLocomotion.set(false);
          pelvisICPBasedTranslationManager.disable();
          footstepListHasBeenUpdated.set(false);
          desiredECMPinSupportPolygon.set(false);
@@ -774,12 +787,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             System.out.println("WalkingHighLevelHumanoidController: leavingDoubleSupportState");
 
          desiredICPVelocity.set(0.0, 0.0);
-
-         if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
-            manipulationControlModule.prepareForLocomotion();
-
-         if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
-            pelvisOrientationManager.prepareForLocomotion();
 
          footExplorationControlModule.reset();
       }
@@ -978,6 +985,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pelvisICPBasedTranslationManager.enable();
          }
 
+         feetManager.enableAnkleLimitAvoidanceInSupportState(false);
+
          if (DEBUG)
             System.out.println("WalkingHighLevelHumanoidController: enteringSingleSupportState");
 
@@ -1095,7 +1104,30 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean doubleSupportTimeHasPassed = stateMachine.timeInCurrentState() > transferTimeCalculationProvider.getValue();
          boolean transferringToThisRobotSide = transferToSide == upcomingSupportLeg.getEnumValue();
 
-         return transferringToThisRobotSide && doubleSupportTimeHasPassed;
+         boolean shouldStartWalking = transferringToThisRobotSide && doubleSupportTimeHasPassed;
+         boolean isPreparedToWalk = false;
+
+         if (shouldStartWalking)
+         {
+            if (preparingForLocomotionStartTime.isNaN())
+            {
+               preparingForLocomotion.set(true);
+               preparingForLocomotionStartTime.set(yoTime.getDoubleValue());
+
+               if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
+                  manipulationControlModule.prepareForLocomotion();
+
+               if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
+                  pelvisOrientationManager.prepareForLocomotion();
+
+               RobotSide upcomingSwingSide = upcomingSupportLeg.getEnumValue().getOppositeSide();
+               feetManager.enableAnkleLimitAvoidanceInSupportState(upcomingSwingSide, true);
+            }
+
+            isPreparedToWalk = yoTime.getDoubleValue() - preparingForLocomotionStartTime.getDoubleValue() > timeToGetPreparedForLocomotion.getDoubleValue();
+         }
+
+         return shouldStartWalking && isPreparedToWalk;
       }
    }
 
