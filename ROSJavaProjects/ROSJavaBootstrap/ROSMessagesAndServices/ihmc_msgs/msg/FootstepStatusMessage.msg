@@ -1,7 +1,7 @@
 ## FootstepStatusMessage
 # This message gives the status of the current footstep from the controller.
 
-#Options for status
+# Options for status
 # uint8 STARTED = 0
 # uint8 COMPLETED = 1
 uint8 status
