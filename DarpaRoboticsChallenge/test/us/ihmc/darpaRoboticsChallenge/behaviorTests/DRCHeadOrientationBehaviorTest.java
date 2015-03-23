@@ -196,7 +196,7 @@ public abstract class DRCHeadOrientationBehaviorTest implements MultiRobotTestIn
       }
 
       FramePose desiredHeadPose = new FramePose();
-      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headOrientationPacket.quaternion);
+      desiredHeadPose.setPose(initialHeadPose.getFramePointCopy().getPoint(), headOrientationPacket.orientation);
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
       assertTrue(headOrientBehavior.isDone());
    }

@@ -314,7 +314,7 @@ public abstract class PacketValidityChecker
     */
    public static String validateHeadOrientationPacket(HeadOrientationPacket packetToCheck)
    {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getQuaternion());
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
       if (packetFieldErrorType != null)
       {
          String errorMessage = "quaternion field " + packetFieldErrorType.getMessage();

@@ -90,7 +90,7 @@ public class DesiredHeadOrientationProvider implements HeadOrientationProvider
       HeadOrientationPacket packet = headOrientationPacket.getAndSet(null);
       if (packet != null)
       {
-         headOrientation.set(packet.getQuaternion());
+         headOrientation.set(packet.getOrientation());
          return true;
       }
       else
