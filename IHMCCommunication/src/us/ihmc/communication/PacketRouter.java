@@ -132,7 +132,7 @@ public class PacketRouter
    
    private int getPacketDestination(PacketCommunicator source, Packet packet)
    {
-      int destination = packet.getDestination();
+      int destination = packet.getDestination(); 
       if (redirects.containsKey(destination))
       {
          destination = getRedirectDestination(destination);
@@ -218,6 +218,10 @@ public class PacketRouter
 
    public void setPacketRedirects(int redirectFrom, int redirectTo)
    {
+      if(redirects.containsValue(redirectFrom))
+      {
+         throw new IllegalArgumentException(redirectTo + " is currently redirecting and can't be chained");
+      }
       redirects.put(redirectFrom, redirectTo);
    }
 
