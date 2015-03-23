@@ -37,25 +37,55 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
    private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   //DRILL PARAMETERS
-
-   //**************
-
-   public DRCSCEnvironment()
+   public DRCSCEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
-      addFullCourse3dModel();
-      
-      createDoor();
-      createValve();
-      createDrill();
+
+      addFullCourse3dModel(valve);
+
+      if (door)
+         createDoor();
+      if (valve)
+         createValve();
+      if (drill)
+         createDrill();
+      if (stairs)
+         createStairs();
    }
 
-   private void addFullCourse3dModel()
+   private void addFullCourse3dModel(boolean doingValve)
    {
       combinedTerrainObject.getLinkGraphics().identity();
-      combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBed.obj");
+      if (doingValve)
+         combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBedWallCut.obj");
+      else
+         combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBed.obj");
+   }
+
+   private void createStairs()
+   {
+      DRCStairsEnvironment environment = new DRCStairsEnvironment();
+      environment.setStairsParameters(4, 1.016, 0.2286, 0.2921);
+      environment.setRailingParameters(0.05, 0.3, 0.05, 0.8128, 2, false);
+      environment.setLandingPlatformParameters(1.27, 1.143, 2);
+      environment.setCourseAngle(-90);
+      environment.setCourseStartDistance(14.2794);
+      environment.setCourseOffsetSide(1);
+
+      environment.generateTerrains();
+      ArrayList<TerrainObject3D> stairs = ((CombinedTerrainObject3D) environment.getTerrainObject3D()).getTerrainObjects();
+      for (TerrainObject3D object : stairs)
+      {
+         if (object instanceof CombinedTerrainObject3D)
+         {
+            if (!((CombinedTerrainObject3D) object).getName().contains("ground"))
+            {
+               combinedTerrainObject.addTerrainObject(object);
+            }
+         }
+      }
+
    }
 
    private void createDrill()
@@ -87,10 +117,9 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
       drillRobot.setGroundContactModel(groundContactModel);
 
       contactableRobots.add(drillRobot);
-      
-      combinedTerrainObject.addBox(-0.777, -6.916,-0.947, -6.746 , 1.061,1.08);
 
-      
+      combinedTerrainObject.addBox(-0.777, -6.916, -0.947, -6.746, 1.061, 1.08);
+
    }
 
    private void createDoor()

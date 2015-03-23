@@ -22,6 +22,8 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
 
    private double courseAngle = 0.0;
    private double courseStartDistance = 0.5;
+   private double offsetSide = 0.0;
+
 
    private double stepTread = 0.2794;
    private double stepWidth = 1.06;
@@ -51,6 +53,20 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
 
+   }
+   
+   public void setCourseStartDistance(double courseStartDistance)
+   {
+      this.courseStartDistance = courseStartDistance;
+   }
+   
+   public void setCourseOffsetSide(double offsetSide)
+   {
+      this.offsetSide = offsetSide;
+   }
+   public void setCourseAngle(double courseAngle)
+   {
+      this.courseAngle = courseAngle;
    }
 
    public void generateTerrains()
@@ -157,10 +173,10 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
-      AppearanceDefinition app = YoAppearance.BlackMetalMaterial();
+      AppearanceDefinition app = YoAppearance.Silver();
 
       // steps
-      double[] centerPointLocal = { courseStartDistance + stepTread / 2, 0 };
+      double[] centerPointLocal = { courseStartDistance + stepTread / 2, offsetSide };
       double[] centerPoint;
       double stairTopHeight = 0;
       for (int i = 0; i < numberOfStairs - 1; i++)
@@ -187,12 +203,12 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       centerPointLocal[0] = courseStartDistance + supportLength / 2 * cosStairSlope + stairSupportWidth / 2 * sinStairSlope
             - distanceFromSupportGroundCornerToLeadingGroundStepEdge;
       double zCenter = supportLength / 2 * sinStairSlope - stairSupportWidth / 2 * cosStairSlope;
-      centerPointLocal[1] = stepWidth / 2 + stairSupportThickness / 2;
+      centerPointLocal[1] = offsetSide+(stepWidth / 2 + stairSupportThickness / 2);
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
       setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, supportLength, stairSupportThickness, stairSupportWidth, stairSlope,
             courseAngle, app);
 
-      centerPointLocal[1] = -centerPointLocal[1];
+      centerPointLocal[1] = offsetSide+-(stepWidth / 2 + stairSupportThickness / 2);
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
       setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, supportLength, stairSupportThickness, stairSupportWidth, stairSlope,
             courseAngle, app);
@@ -201,10 +217,10 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
       centerPointLocal[0] = topLandingCenter - distanceFromSupportGroundCornerToLeadingGroundStepEdge / 2;
       zCenter = stairTopHeight - stairSupportWidth / 2;
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
-      setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
-            courseAngle, app);
+//      setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
+//            courseAngle, app);
 
-      centerPointLocal[1] = -centerPointLocal[1];
+      centerPointLocal[1] = offsetSide+-(stepWidth / 2 + stairSupportThickness / 2);
       centerPoint = rotateAroundOrigin(centerPointLocal, courseAngle);
       setUpSlopedBox(combinedTerrainObject, centerPoint[0], centerPoint[1], zCenter, topSupportLength, stairSupportThickness, stairSupportWidth, 0,
             courseAngle, app);
@@ -214,7 +230,7 @@ public class DRCStairsEnvironment implements CommonAvatarEnvironmentInterface
 
       for (int ySign = -1; ySign <= 1; ySign += 2)
       {
-         centerPointLocal[1] = ySign * (stepWidth / 2 + railingDiameter / 2);
+         centerPointLocal[1] = offsetSide+ySign * (stepWidth / 2 + railingDiameter / 2);
 
          for (int xSign = -1; xSign <= 2; xSign += 2)
          {
