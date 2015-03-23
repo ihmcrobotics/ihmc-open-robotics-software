@@ -169,8 +169,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       taskEndEffectorRotation.get(LEFT).setClampingValueForTaskSpaceError(0.4);
       
       // WARNINGS:  this could cause the failure of the unit tests
-    //  taskEndEffectorRotation.get(RIGHT).setParentTask(taskEndEffectorPosition.get(RIGHT));
-   //   taskEndEffectorRotation.get(LEFT).setParentTask(taskEndEffectorPosition.get(LEFT));
+      taskEndEffectorRotation.get(RIGHT).setParentTask(taskEndEffectorPosition.get(RIGHT));
+      taskEndEffectorRotation.get(LEFT).setParentTask(taskEndEffectorPosition.get(LEFT));
 
       taskJointsPose.setClampingValueForTaskSpaceError(0.6);
 
