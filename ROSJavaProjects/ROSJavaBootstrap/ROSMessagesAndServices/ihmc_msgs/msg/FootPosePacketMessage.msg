@@ -4,7 +4,7 @@
 # as the controller will use a straight-line trajectory when moving the foot from its
 # current to desired location/orientation
 
-#Options for robotSide
+# Options for robotSide
 # uint8 L = 0
 # uint8 R = 1
 uint8 robot_side

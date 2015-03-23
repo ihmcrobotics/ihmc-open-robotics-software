@@ -5,17 +5,17 @@
 # of the wrist. The position/orientation may be specified in world frame, chest
 # frame, or desired joint angles.
 
-#Options for robotSide
+# Options for robotSide
 # uint8 L = 0
 # uint8 R = 1
 uint8 robot_side
 
-#Options for dataType
+# Options for dataType
 # uint8 HAND_POSE = 0
 # uint8 JOINT_ANGLES = 1
 uint8 data_type
 
-#Options for referenceFrame
+# Options for referenceFrame
 # uint8 CHEST = 0
 # uint8 WORLD = 1
 uint8 reference_frame

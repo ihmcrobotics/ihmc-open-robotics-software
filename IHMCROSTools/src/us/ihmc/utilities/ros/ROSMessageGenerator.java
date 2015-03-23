@@ -16,6 +16,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
+import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.DocumentedPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
@@ -88,7 +89,7 @@ public class ROSMessageGenerator
             Field[] fields = clazz.getFields();
             for (Field field : fields)
             {
-               if(isConstant(field) || isDestinationField(field))
+               if(isConstant(field) || isIgnoredField(field))
                {
                   continue;
                }
@@ -121,9 +122,9 @@ public class ROSMessageGenerator
       return ret;
    }
 
-   private boolean isDestinationField(Field field)
+   private boolean isIgnoredField(Field field)
    {
-      return field.getDeclaringClass().equals(Packet.class);
+      return field.isAnnotationPresent(IgnoreField.class);
    }
 
    private boolean isConstant(Field field)
@@ -176,7 +177,7 @@ public class ROSMessageGenerator
       else if (clazz.isEnum())
       {
          Object[] enumList = clazz.getEnumConstants();
-         buffer += "#Options for " + varName + System.lineSeparator();
+         buffer += "# Options for " + varName + System.lineSeparator();
 
          for (int i = 0; i < enumList.length; i++)
          {
