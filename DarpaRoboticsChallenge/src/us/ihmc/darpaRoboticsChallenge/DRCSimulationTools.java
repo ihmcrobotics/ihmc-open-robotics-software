@@ -21,15 +21,22 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCSCEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.utilities.FormattingTools;
 
 public abstract class DRCSimulationTools
 {
-   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel)
+//   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel)
+//   {
+//      return new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
+//   }
+   
+   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
-      return new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
+      return new DRCSimulationStarter(robotModel, environment);
    }
 
    @SuppressWarnings({ "hiding", "unchecked" })
@@ -42,6 +49,10 @@ public abstract class DRCSimulationTools
       if (simulationStarter.getEnvironment() instanceof DRCDemo01NavigationEnvironment)
       {
          startingLocation = showSelectorWithStartingLocation(modulesToStart, DRCObstacleCourseStartingLocation.values());
+      }
+      else if(simulationStarter.getEnvironment() instanceof DRCSCEnvironment)
+      {
+          startingLocation = showSelectorWithStartingLocation(modulesToStart, DRCSCStartingLocations.values());
       }
       else
       {
