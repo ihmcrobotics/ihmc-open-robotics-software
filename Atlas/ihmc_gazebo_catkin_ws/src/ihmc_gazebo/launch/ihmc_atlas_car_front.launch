@@ -17,7 +17,7 @@
   </include>
 
   <!-- Robot Description -->
-  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v4.urdf.xacro'" />
+  <param name="robot_description" command="$(find xacro)/xacro.py '$(find ihmc_gazebo)/urdf/ihmc_atlas_v5.urdf.xacro'" />
   <param name="robot_initial_pose/x"     value="0.10" type="double"/>
   <param name="robot_initial_pose/y"     value="-0.45" type="double"/>
   <param name="robot_initial_pose/z"     value="1.08" type="double"/>
