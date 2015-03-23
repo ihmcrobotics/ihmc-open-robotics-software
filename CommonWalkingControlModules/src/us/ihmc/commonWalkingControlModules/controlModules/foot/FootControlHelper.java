@@ -3,13 +3,18 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.lists.FrameTuple2dArrayList;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -28,7 +33,7 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class FootControlHelper
 {
@@ -73,6 +78,18 @@ public class FootControlHelper
    private final DoubleYoVariable ankleRollAndHipYawAlignmentFactor;
    private final DoubleYoVariable ankleRollAndHipYawAlignmentTreshold;
    private final FrameMatrix3D angularSelectionMatrix = new FrameMatrix3D();
+
+   // For hold position and fully constrained states.
+   private final FrameTuple2dArrayList<FramePoint2d> originalContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
+   private final FrameConvexPolygon2d originalSupportFootPolygon = new FrameConvexPolygon2d();
+   private final BooleanYoVariable allowSupportFootShrink;
+   private final BooleanYoVariable isSupportFootShrinkEnabled;
+   private final DoubleYoVariable contactPointMaxX;
+   private final DoubleYoVariable alphaForFootShrink;
+   private final AlphaFilteredYoVariable footShrinkPercent;
+   private final DoubleYoVariable maxFootShrinkInPercent;
+   private final DoubleYoVariable thresholdInPercentForAnkleLimitWatcher;
+   private final BooleanYoVariable isAnkleFlexionLimitReached;
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
          YoVariableRegistry registry)
@@ -128,6 +145,21 @@ public class FootControlHelper
       CommonOps.setIdentity(selectionMatrix);
       rootBody = twistCalculator.getRootBody();
       taskspaceConstraintData.set(rootBody, contactableFoot.getRigidBody());
+
+      String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+      isSupportFootShrinkEnabled = new BooleanYoVariable("is" + robotSide.getCamelCaseNameForMiddleOfExpression() + "SupportFootShrinkEnabled", registry);
+      allowSupportFootShrink = new BooleanYoVariable("AllowSupport" + robotSide.getCamelCaseNameForMiddleOfExpression() + "FootShrink", registry);
+      allowSupportFootShrink.set(walkingControllerParameters.allowShrinkingSingleSupportFootPolygon());
+      contactPointMaxX = new DoubleYoVariable(contactableFoot.getName() + "ContactPointMaxX", registry);
+      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
+      alphaForFootShrink = new DoubleYoVariable(sidePrefix + "AlphaForFootShrink", registry);
+      alphaForFootShrink.set(0.95);
+      footShrinkPercent = new AlphaFilteredYoVariable(sidePrefix + "FootShrinkPercent", registry, alphaForFootShrink);
+      maxFootShrinkInPercent = new DoubleYoVariable(sidePrefix + "MaxFootShrinkInPercent", registry);
+      maxFootShrinkInPercent.set(1.0);
+      thresholdInPercentForAnkleLimitWatcher = new DoubleYoVariable(sidePrefix + "ThresholdInPercentForAnkleLimitWatcher", registry);
+      thresholdInPercentForAnkleLimitWatcher.set(0.1);
+      isAnkleFlexionLimitReached = new BooleanYoVariable(sidePrefix + "IsAnkleLimitReached", registry);
    }
 
    public void update()
@@ -377,5 +409,93 @@ public class FootControlHelper
    {
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
+   }
+
+   public void enableAnkleLimitAvoidanceInSupportState(boolean enable)
+   {
+      if (!allowSupportFootShrink.getBooleanValue())
+         enable = false;
+
+      isSupportFootShrinkEnabled.set(enable);
+
+      if (!enable)
+         footShrinkPercent.set(0.0);
+   }
+
+   public void initializeParametersForSupportFootShrink(boolean resetCurrentFootShrink)
+   {
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+
+      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
+      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+      {
+         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
+         FramePoint2d originalContactPointPosition = originalContactPointPositions.get(i);
+         yoContactPoint.getPosition2d(originalContactPointPosition);
+
+         if (originalContactPointPosition.getX() > contactPointMaxX.getDoubleValue())
+            contactPointMaxX.set(originalContactPointPosition.getX());
+      }
+
+      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions);
+
+      if (resetCurrentFootShrink)
+      {
+         footShrinkPercent.set(0.0);
+      }
+   }
+
+   public void restoreSupportFootContactPoints()
+   {
+      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
+
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+      {
+         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
+         yoContactPoint.setPosition2d(originalContactPointPositions.get(i));
+      }
+   }
+
+   private void checkAnkleFlexionLimit()
+   {
+      OneDoFJoint oneDoFJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
+      double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();
+      double thresholdAmount = range * thresholdInPercentForAnkleLimitWatcher.getDoubleValue();
+      double flexionLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
+
+      isAnkleFlexionLimitReached.set(oneDoFJoint.getQ() < flexionLimit);
+   }
+
+   private final FramePoint2d tempFramePoint = new FramePoint2d();
+
+   public void shrinkSupportFootContactPointsToToesIfNecessary()
+   {
+      if (!allowSupportFootShrink.getBooleanValue() || !isSupportFootShrinkEnabled.getBooleanValue())
+         return;
+
+      checkAnkleFlexionLimit();
+
+      if (isAnkleFlexionLimitReached.getBooleanValue())
+         footShrinkPercent.update(1.0);
+      else
+         footShrinkPercent.update(0.0);
+
+      footShrinkPercent.set(MathTools.clipToMinMax(footShrinkPercent.getDoubleValue(), 0.0, maxFootShrinkInPercent.getDoubleValue()));
+
+      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+
+      double alpha = footShrinkPercent.getDoubleValue();
+
+      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+      {
+         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
+         double originalContactPointX = originalContactPointPositions.get(i).getX();
+         yoContactPoint.getPosition2d(tempFramePoint);
+         tempFramePoint.setX(alpha * contactPointMaxX.getDoubleValue() + (1.0 - alpha) * originalContactPointX);
+
+         originalSupportFootPolygon.orthogonalProjection(tempFramePoint);
+         yoContactPoint.setPosition2d(tempFramePoint);
+      }
    }
 }

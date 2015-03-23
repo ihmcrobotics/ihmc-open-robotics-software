@@ -38,6 +38,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double pelvisToAnkleThresholdForWalking();
 
+   public abstract double getTimeToGetPreparedForLocomotion();
+
    public abstract boolean doToeOffIfPossible();
 
    public abstract boolean checkECMPLocationToTriggerToeOff();
@@ -55,6 +57,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract boolean doHeelTouchdownIfPossible();
 
    public abstract double getHeelTouchdownAngle();
+
+   public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
    public abstract double getCaptureKpParallelToMotion();
 
