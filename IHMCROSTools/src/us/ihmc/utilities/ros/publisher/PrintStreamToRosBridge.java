@@ -21,7 +21,8 @@ public class PrintStreamToRosBridge extends PrintStream
       super(new TimerBasedOutputStream(TIME_PERIOD, TIME_UNIT), true);
       
       publisher = new RosLogPublisher(rosMainNode, true);
-      rosMainNode.attachPublisher(rosNamespace + "/ihmc_err", publisher);
+      rosMainNode.attachPublisher("/rosout", publisher);
+      
    }
    
    public PrintStreamToRosBridge()
