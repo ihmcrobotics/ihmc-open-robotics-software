@@ -48,11 +48,11 @@ public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
    @Override
    public void receivedPacket(Packet packet)
    {
-      if (!PACKETS_TO_REDIRECT_TO_ROS.containsKey(packet.getClass()))
-      {
-         packet.setDestination(PacketDestination.CONTROLLER.ordinal());
-         packetCommunicator.send(packet);
-      }
+//      if (!PACKETS_TO_REDIRECT_TO_ROS.containsKey(packet.getClass()))
+//      {
+//         packet.setDestination(PacketDestination.CONTROLLER.ordinal());
+//         packetCommunicator.send(packet);
+//      }
    }
 
    private void setupMsgTopics(PacketCommunicator packetCommunicator)
