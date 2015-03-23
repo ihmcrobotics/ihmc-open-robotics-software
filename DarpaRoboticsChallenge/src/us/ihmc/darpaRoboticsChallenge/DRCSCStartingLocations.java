@@ -29,7 +29,7 @@ public enum DRCSCStartingLocations implements DRCStartingLocation
       addMapping(DRCSCStartingLocations.WALKING_START, new OffsetAndYawRobotInitialSetup(0,-8.5, 0,Math.toRadians(-90.0)));
       addMapping(DRCSCStartingLocations.WALKING_END, new OffsetAndYawRobotInitialSetup(0.35,-13.5, 0,Math.toRadians(-90.0)));
       addMapping(DRCSCStartingLocations.STAIRS_START, new OffsetAndYawRobotInitialSetup(0.85,-13.5, 0,Math.toRadians(-90.0)));
-      addMapping(DRCSCStartingLocations.STAIRS_END, new OffsetAndYawRobotInitialSetup(0.85,-15.5, 3,Math.toRadians(-90.0)));
+      addMapping(DRCSCStartingLocations.STAIRS_END, new OffsetAndYawRobotInitialSetup(0.85,-16, 0.9144,Math.toRadians(-90.0)));
    };
 
    private static void addMapping(DRCSCStartingLocations drcDemo01StartingLocation, OffsetAndYawRobotInitialSetup robotInitialSetup)
