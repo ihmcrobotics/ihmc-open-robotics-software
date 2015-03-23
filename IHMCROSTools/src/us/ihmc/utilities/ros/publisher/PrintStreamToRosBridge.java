@@ -3,9 +3,9 @@ package us.ihmc.utilities.ros.publisher;
 import java.io.PrintStream;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.TimerBasedOutputStream;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTopicEchoer;
 
 public class PrintStreamToRosBridge extends PrintStream
 {
@@ -14,6 +14,7 @@ public class PrintStreamToRosBridge extends PrintStream
    
    private TimerBasedOutputStream tbos = (TimerBasedOutputStream) out;
    private RosLogPublisher publisher;
+   private RosTopicEchoer<rosgraph_msgs.Log> echoPublisher;
    private Thread currentThread = null;
    
    public PrintStreamToRosBridge(RosMainNode rosMainNode, String rosNamespace)
@@ -21,8 +22,9 @@ public class PrintStreamToRosBridge extends PrintStream
       super(new TimerBasedOutputStream(TIME_PERIOD, TIME_UNIT), true);
       
       publisher = new RosLogPublisher(rosMainNode, true);
-      rosMainNode.attachPublisher("/rosout", publisher);
+      rosMainNode.attachPublisher(rosNamespace + "/ihmc_err", publisher);
       
+      echoPublisher = new RosTopicEchoer<>(rosMainNode, rosgraph_msgs.Log._TYPE, rosNamespace + "/ihmc_err", "/rosout");
    }
    
    public PrintStreamToRosBridge()
