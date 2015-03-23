@@ -83,4 +83,15 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       return startingLocation;
    }
    
+   public static String optionsToString()
+   {
+      String ret = "[ ";
+      for (DRCObstacleCourseStartingLocation location : DRCObstacleCourseStartingLocation.values())
+      {
+         ret = ret + location.toString() + ", ";
+      }
+      ret = ret + "]";
+      return ret;
+   }
+   
 }

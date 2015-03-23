@@ -9,8 +9,10 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
@@ -27,11 +29,12 @@ public class AtlasROSAPISimulator
 {
    private static String defaultPrefix = "/ihmc_msgs/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
+   private static String defaultStartingLocation = "DEFAULT";
    private final boolean startUI = true;
    private boolean redirectUiPacketsToRos = true;
    private KryoLocalPacketCommunicator gfe_communicator;
 
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
    {
       DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel);
       simulationStarter.setRunMultiThreaded(true);
@@ -57,6 +60,8 @@ public class AtlasROSAPISimulator
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
       }
 
+      simulationStarter.setStartingLocation(startingLocation);
+      simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.startSimulation(networkProcessorParameters, true);
 
       if (redirectUiPacketsToRos)
@@ -82,17 +87,21 @@ public class AtlasROSAPISimulator
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(defaultRobotModel);
+      
+      FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      location.setHelp("Starting locations: " + DRCObstacleCourseStartingLocation.optionsToString());
+      location.setDefault(defaultStartingLocation);
 
       Switch requestAutomaticDiagnostic = new Switch("requestAutomaticDiagnostic").setLongFlag("requestAutomaticDiagnostic").setShortFlag(JSAP.NO_SHORTFLAG);
       requestAutomaticDiagnostic.setHelp("enable automatic diagnostic routine");
 
       jsap.registerParameter(model);
+      jsap.registerParameter(location);
       jsap.registerParameter(rosNameSpace);
       jsap.registerParameter(requestAutomaticDiagnostic);
       JSAPResult config = jsap.parse(args);
 
       DRCRobotModel robotModel;
-
       try
       {
          robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
@@ -103,7 +112,19 @@ public class AtlasROSAPISimulator
          System.out.println(jsap.getHelp());
          return;
       }
+      
+      DRCStartingLocation startingLocation;
+      try
+      {
+         startingLocation = DRCObstacleCourseStartingLocation.valueOf(config.getString("startingLocation"));
+      }
+      catch (IllegalArgumentException e)
+      {
+         System.err.println("Incorrect starting location " + config.getString("startingLocation"));
+         System.out.println(jsap.getHelp());
+         return;
+      }
 
-      new AtlasROSAPISimulator(robotModel, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()));
+      new AtlasROSAPISimulator(robotModel, startingLocation, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()));
    }
 }
