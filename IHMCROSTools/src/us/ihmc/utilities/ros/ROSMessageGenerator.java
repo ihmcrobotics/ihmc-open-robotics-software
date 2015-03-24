@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -192,9 +191,8 @@ public class ROSMessageGenerator
             buffer += " = " + i;
             if (DocumentedEnum.class.isAssignableFrom(clazz))
             {
-               DocumentedEnum<?> documentedEnum = (DocumentedEnum<?>) Enum.valueOf(clazz, enumList[i].toString());
-               Method method = clazz.getMethod("getDocumentation", clazz);
-               String documentation = (String) method.invoke(documentedEnum, enumList[i]);
+               DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, enumList[i].toString());
+               String documentation = documentedEnum.getDocumentation(enumList[i]);
                buffer += " - " + documentation;
             }
             else
