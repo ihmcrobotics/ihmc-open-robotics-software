@@ -62,13 +62,14 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
     	  }
       }
             
-      jointCommand.putLong(jointsUnderPositionControl);
+//      System.out.println("# of joints = " + joints.size());
+//      jointCommand.putLong(jointsUnderPositionControl);
 
       for (int i = 0; i < joints.size(); i++)
       {    	      	
     	 OneDoFJoint joint = joints.get(i);
     	 
-    	// System.out.println(i + " " + joint.getName() + " " + joint.getqDesired());
+//    	 System.out.println(i + " " + joint.getName() + " " + joint.getTau());
     	 
     	 if(joint.isUnderPositionControl())
     	 {
@@ -80,6 +81,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
     	 }    	 
       }
       
+//      System.out.println();
       
       jointCommand.flip();
 

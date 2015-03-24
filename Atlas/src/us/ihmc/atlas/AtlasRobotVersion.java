@@ -15,7 +15,8 @@ public enum AtlasRobotVersion
    ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
-   GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS;
+   GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS,
+   GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
 
    private static String[] resourceDirectories;
    private final SideDependentList<Transform> offsetHandFromAttachmentPlate = new SideDependentList<Transform>();
@@ -25,6 +26,7 @@ public enum AtlasRobotVersion
       switch (this)
       {
          case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+         case GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return DRCHandType.ROBOTIQ;
 
          case ATLAS_UNPLUGGED_V5_NO_HANDS:
@@ -40,6 +42,7 @@ public enum AtlasRobotVersion
       switch (this)
       {
          case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+         case GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return 0.16;
          default:
             return 0.0;
@@ -59,6 +62,7 @@ public enum AtlasRobotVersion
          case ATLAS_UNPLUGGED_V5_NO_HANDS:
             return "models/GFE/atlas_unplugged_v5.sdf";
          case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
+         case GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
             return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
          case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS:
             return "models/GFE/atlas_unplugged_v5.sdf";
