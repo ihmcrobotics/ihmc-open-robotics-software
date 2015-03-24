@@ -17,7 +17,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.communication.packets.DocumentedPacket;
+import us.ihmc.communication.packets.IHMCRosApidPacket;
 import us.ihmc.utilities.DocumentedEnum;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
@@ -52,8 +52,8 @@ public class ROSMessageGenerator
          return "";
       }
       
-      if(!DocumentedPacket.class.isAssignableFrom(clazz))
-         System.err.println(clazz.getSimpleName() + " does not extend DocumentedPacket");
+      if(!IHMCRosApidPacket.class.isAssignableFrom(clazz))
+         System.err.println(clazz.getSimpleName() + " does not extend IHMCRosApiPacket");
 
       File file = new File(messageFolder);
       if (!file.exists())
