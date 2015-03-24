@@ -35,14 +35,14 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
+public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final List<Robot> contactableRobots = new ArrayList<Robot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DRCSCEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
+   public DRCFinalsEnvironment(boolean door, boolean drill, boolean valve, boolean wakling, boolean stairs)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
