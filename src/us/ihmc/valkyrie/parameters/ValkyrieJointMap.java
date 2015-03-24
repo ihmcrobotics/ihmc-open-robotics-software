@@ -41,6 +41,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -273,6 +275,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
+   }
+
+   @Override public List<Pair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   {
+      return null;
    }
 
    @Override
