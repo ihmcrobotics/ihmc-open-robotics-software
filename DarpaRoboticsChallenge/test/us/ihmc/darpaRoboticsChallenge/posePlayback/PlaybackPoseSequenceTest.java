@@ -20,7 +20,7 @@ public abstract class PlaybackPoseSequenceTest implements MultiRobotTestInterfac
 {
 
 	@EstimatedDuration(duration = 0.1)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testReadAndWriteWithRandomSequence()
    {
       DRCRobotModel robotModel = getRobotModel();

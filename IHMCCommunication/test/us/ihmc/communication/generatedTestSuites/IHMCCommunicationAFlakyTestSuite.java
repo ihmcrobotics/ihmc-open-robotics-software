@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
+   us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,
    us.ihmc.communication.packetCommunicator.KryoPacketCommunicatorTest.class,
    us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class
 })
