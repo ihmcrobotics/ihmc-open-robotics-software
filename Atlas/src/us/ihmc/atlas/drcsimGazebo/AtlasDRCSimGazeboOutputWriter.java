@@ -113,7 +113,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       });
 
-      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 24);
+      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 16);
       jointCommand.order(ByteOrder.nativeOrder());
 
       try
