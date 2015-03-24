@@ -36,11 +36,6 @@ applicationDistribution.from(startScripts.outputDir) {
     into "bin"
 }
 
-applicationDistribution.from(file("GFEDefaultNetworkParameters.ini")) {
-    rename "GFEDefaultNetworkParameters.ini", "IHMCNetworkParameters.ini"
-	into "bin"
-}
-
 task gfeDevCompile(dependsOn:distTar) << {
     if(!project.hasProperty("catkinWorkspaceLocation"))
     {
