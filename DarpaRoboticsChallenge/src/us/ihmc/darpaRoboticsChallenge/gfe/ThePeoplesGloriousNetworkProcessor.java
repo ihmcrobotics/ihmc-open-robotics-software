@@ -11,7 +11,10 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -72,10 +75,11 @@ public class ThePeoplesGloriousNetworkProcessor
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
-
+      
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace);
       setupRosLocalization();
+      setupErrorTopics();
 
       rosMainNode.execute();
 
@@ -158,5 +162,28 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupRosLocalization()
    {
       new RosLocalizationPoseCorrectionSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
+   }
+   
+   private void setupErrorTopics()
+   {
+      controllerCommunicationBridge.attachListener(InvalidPacketNotificationPacket.class, new PacketConsumer<InvalidPacketNotificationPacket>()
+      {
+         @Override
+         public void receivedPacket(InvalidPacketNotificationPacket packet)
+         {
+            System.err.println("Controller recieved invalid packet of type " + packet.packetClass);
+            System.err.println("Message: " + packet.errorMessage);
+         }
+      });
+      
+      controllerCommunicationBridge.attachListener(ControllerCrashNotificationPacket.class, new PacketConsumer<ControllerCrashNotificationPacket>()
+      {
+         @Override
+         public void receivedPacket(ControllerCrashNotificationPacket packet)
+         {
+            System.err.println("Controller crashed at " + packet.location);
+            System.err.println("StackTrace: " + packet.stacktrace);
+         }
+      });
    }
 }
