@@ -5,7 +5,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '0.2.2-alpha'
+version = '0.3.0-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -81,7 +81,7 @@ task pushBuild(type:Exec, dependsOn:distTar) {
     doLast {
         def userName = "${bitbucket_user}"
         def password = "${bitbucket_password}"
-        def repoUrl = "/ihmcrobotics/ihmc_msgs/downloads"
+        def repoUrl = "/ihmcrobotics/ihmc_ros/downloads"
         def targetFile = "build/distributions/${applicationName}-${version}.tar"
     
         commandLine 'build_utilities/upload-to-bitbucket.sh', userName, password, repoUrl, targetFile
