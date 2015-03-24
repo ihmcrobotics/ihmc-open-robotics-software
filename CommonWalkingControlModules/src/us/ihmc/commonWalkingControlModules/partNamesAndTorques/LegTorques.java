@@ -113,7 +113,7 @@ public class LegTorques implements LegTorquesInterface
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
-      builder.append("RobotSide: " + robotSide + "\n");
+      builder.append("RobotSide: " + robotSide.getSideNameFirstLetter() + "\n");
 
       for (int i = 0; i < legJointNames.length - 1; i++)
       {

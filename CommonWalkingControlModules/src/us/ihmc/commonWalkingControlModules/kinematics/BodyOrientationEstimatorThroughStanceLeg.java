@@ -23,11 +23,11 @@ public class BodyOrientationEstimatorThroughStanceLeg implements SensorProcessor
 
    public BodyOrientationEstimatorThroughStanceLeg(RobotSide robotSide, CommonHumanoidReferenceFrames referenceFrames)
    {
-      this.name = robotSide + getClass().getSimpleName();
+      this.name = robotSide.getSideNameFirstLetter() + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);
       this.robotSide = robotSide;
       this.referenceFrames = referenceFrames;
-      this.orientation =  new YoFrameOrientation(robotSide + "bodyOrientationThroughStanceLeg", "", worldFrame, registry);
+      this.orientation =  new YoFrameOrientation(robotSide.getSideNameFirstLetter() + "bodyOrientationThroughStanceLeg", "", worldFrame, registry);
    }
 
    public void packBodyOrientation(FrameOrientation bodyOrientationToPack)

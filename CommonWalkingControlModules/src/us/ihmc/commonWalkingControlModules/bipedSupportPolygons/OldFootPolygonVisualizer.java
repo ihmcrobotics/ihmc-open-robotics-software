@@ -29,13 +29,13 @@ public class OldFootPolygonVisualizer implements Updatable
       {       
         for (RobotSide robotSide : RobotSide.values)
         {
-           YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
+           YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide.getSideNameFirstLetter() + "foot", "", ReferenceFrame.getWorldFrame(), 30, registry);
            yoFootPolygons.put(robotSide, yoFootPolygon);
            Color color = colors.get(robotSide);
            
-           YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(robotSide + " Foot", yoFootPolygon,
+           YoArtifactPolygon dynamicGraphicYoPolygonArtifact = new YoArtifactPolygon(robotSide.getSideNameFirstLetter() + " Foot", yoFootPolygon,
                  color, false);
-           yoGraphicsListRegistry.registerArtifact(robotSide + " Foot", dynamicGraphicYoPolygonArtifact);
+           yoGraphicsListRegistry.registerArtifact(robotSide.getSideNameFirstLetter() + " Foot", dynamicGraphicYoPolygonArtifact);
         }
       }
 
