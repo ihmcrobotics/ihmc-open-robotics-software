@@ -94,8 +94,8 @@ public class OnToesState extends AbstractFootControlState
    {
       super(ConstraintType.TOES, footControlHelper, registry);
 
-      rootToFootJacobianId = createRootToFootJacobian();
       kneeJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE);
+      rootToFootJacobianId = createRootToFootJacobian();
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       String namePrefix = contactableFoot.getName();
