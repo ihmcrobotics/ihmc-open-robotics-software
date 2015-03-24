@@ -50,7 +50,7 @@ public class ResizableBipedFoot implements BipedFootInterface
                              double maxHeelPointsForward, double narrowWidthOnToesPercentage, YoVariableRegistry yoVariableRegistry,
                              YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      registry = new YoVariableRegistry(robotSide + "BipedFoot");
+      registry = new YoVariableRegistry(robotSide.getSideNameFirstLetter() + "BipedFoot");
       this.narrowWidthOnToesPercentage = narrowWidthOnToesPercentage;
 
       // Checks constants:
@@ -125,8 +125,8 @@ public class ResizableBipedFoot implements BipedFootInterface
       this.maxHeelPointsForward = maxHeelPointsForward;
       this.maxToePointsBack = maxToePointsBack;
 
-      this.footPolygonInUseEnum = EnumYoVariable.create(robotSide + "FootPolygonInUse", FootPolygonEnum.class, registry);
-      this.shift = new DoubleYoVariable(robotSide + "Shift", registry);
+      this.footPolygonInUseEnum = EnumYoVariable.create(robotSide.getSideNameFirstLetter() + "FootPolygonInUse", FootPolygonEnum.class, registry);
+      this.shift = new DoubleYoVariable(robotSide.getSideNameFirstLetter() + "Shift", registry);
 
       if (robotSide == RobotSide.LEFT)
       {
