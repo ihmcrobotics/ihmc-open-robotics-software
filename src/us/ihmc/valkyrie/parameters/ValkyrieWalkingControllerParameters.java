@@ -357,7 +357,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       if (!runningOnRealRobot)
          return 1.4;
 
-      return 1.4;
+      return 1.5;
    }
 
    @Override
@@ -366,7 +366,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       if (!runningOnRealRobot)
          return 1.4;
 
-      return 1.4;
+      return 1.5;
    }
 
    @Override
@@ -714,19 +714,19 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getFootWidth()
    {
-      return ValkyriePhysicalProperties.footWidthForControl;
+      return ValkyriePhysicalProperties.footWidth;
    }
 
    @Override
    public double getToeWidth()
    {
-      return ValkyriePhysicalProperties.footWidthForControl;
+      return ValkyriePhysicalProperties.footWidth;
    }
 
    @Override
    public double getFootLength()
    {
-      return ValkyriePhysicalProperties.footLengthForControl;
+      return ValkyriePhysicalProperties.footLength;
    }
 
    @Override
