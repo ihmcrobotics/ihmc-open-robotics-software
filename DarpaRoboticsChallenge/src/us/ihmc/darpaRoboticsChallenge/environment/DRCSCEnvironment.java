@@ -205,6 +205,7 @@ public class DRCSCEnvironment implements CommonAvatarEnvironmentInterface
             contactController.addContactable((Contactable) r);
 
       }
+      if( contactableRobots.size()>0)
       contactableRobots.get(0).setController(contactController);
    }
 
