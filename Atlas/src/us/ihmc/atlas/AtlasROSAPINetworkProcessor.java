@@ -20,7 +20,7 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasROSAPINetworkProcessor
 {
-   private static String defaultRosNameSpace = "/ihmc_msgs/atlas";
+   private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
