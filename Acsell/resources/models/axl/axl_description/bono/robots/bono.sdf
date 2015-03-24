@@ -3,8 +3,9 @@
   <pose>0 0 0.94 0 0 0</pose>
     <link name='pelvis'>
       <pose>0 0 0 0 0 0</pose>
+<!-- No Hip X Springs -->
       <inertial>
-		<pose>-0.05039 -0.00002 0.11723 0 0 0</pose>
+		    <pose>-0.05039 -0.00002 0.11723 0 0 0</pose>
         <mass>12.547</mass>
         <inertia>
           <ixx>0.15688</ixx>
@@ -15,6 +16,21 @@
           <izz>0.16107</izz>
         </inertia>
       </inertial>
+
+<!-- Includes Hip X Springs
+      <inertial>
+        <pose>-0.05257 -0.00002 0.11366 0 0 0</pose>
+        <mass>12.866</mass>
+        <inertia>
+          <ixx> 0.16409</ixx>
+          <ixy>-0.00002</ixy>
+          <ixz> 0.02319</ixz>
+          <iyy> 0.11943</iyy>
+          <iyz>-0.00005</iyz>
+          <izz> 0.16461</izz>
+        </inertia>
+      </inertial>
+ -->
       <collision name='pelvis_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -189,9 +205,10 @@
     </joint>
     <link name='utorso'>
       <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
-<!-- With dummy mass 18.94268 original added 2.2kg to adjust to weighed value
+<!-- Inertial pose with mass shifted by 0.03 in Y -->
+<!-- With dummy mass  original sdf said 18.9 added 2.2kg to accomodate full robot mass -->
        <inertial>
-        <pose>-0.0195224 0.000144025 0.313439 0 -0 0</pose>
+        <pose>-0.0195224 0.030144025 0.313439 0 -0 0</pose>
         <mass>21.14268</mass>
         <inertia>
           <ixx>0.272494</ixx>
@@ -202,8 +219,7 @@
           <izz>0.190387</izz>
         </inertia>
       </inertial>
--->
-<!-- without dummy mass 7.00027 original added 2.2kg to adjust to weighed value -->
+<!-- without dummy mass original sdf said 7.00027 added 2.2kg to accomodate full robot mass
       <inertial>
         <pose>-0.02033 0.00039 0.35741 0 -0 0</pose>
         <mass>9.20327</mass> 
@@ -216,7 +232,7 @@
           <izz>0.12898</izz>
         </inertia>
       </inertial>
-
+-->
       <collision name='utorso_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
