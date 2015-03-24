@@ -55,7 +55,8 @@ task gfeDevCompile(dependsOn:distTar) << {
     String buildName = applicationName.toString() + "-" + version;
     java.nio.file.Path messagesLocation = Paths.get(project(':ROSJavaBootstrap').projectDir.absolutePath, "ROSMessagesAndServices", "ihmc_msgs", "msg")
     java.nio.file.Path catkinWorkspaceLocationPath = Paths.get("$catkinWorkspaceLocation")
-    java.nio.file.Path ihmcMsgsLocation = catkinWorkspaceLocationPath.resolve("src").resolve("ihmc_ros").resolve("ihmc_sim")
+    java.nio.file.Path ihmcMsgsLocation = catkinWorkspaceLocationPath.resolve("src").resolve("ihmc_ros").resolve("ihmc_msgs")
+    java.nio.file.Path ihmcSimLocation = catkinWorkspaceLocationPath.resolve("src").resolve("ihmc_ros").resolve("ihmc_sim")
     java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
 
     if(!Files.exists(ihmcMsgsLocation))
@@ -73,7 +74,7 @@ task gfeDevCompile(dependsOn:distTar) << {
     copy {
         println "Expanding the distribution archive in to ihmc_msgs/scripts"
         from tarTree(archiveLocation.toAbsolutePath().toString())
-        into ihmcMsgsLocation.resolve("bin").toAbsolutePath().toString()
+        into ihmcSimLocation.resolve("bin").toAbsolutePath().toString()
     }
 }
 
