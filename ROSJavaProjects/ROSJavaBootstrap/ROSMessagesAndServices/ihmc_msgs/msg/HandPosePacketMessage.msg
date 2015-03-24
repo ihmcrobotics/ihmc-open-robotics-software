@@ -6,8 +6,8 @@
 # frame, or desired joint angles.
 
 # Options for robotSide
-# uint8 L = 0
-# uint8 R = 1
+# LEFT = 0 - refers to the LEFT side of a robot
+# RIGHT = 1 - refers to the RIGHT side of a robot
 uint8 robot_side
 
 # toHomePosition can be used to move the arm end effectors back to their starting
