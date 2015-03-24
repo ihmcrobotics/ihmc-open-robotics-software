@@ -275,7 +275,7 @@ public abstract class PacketValidityChecker
       }
 
       if (packetToCheck.getFootstepIndex() < 0)
-         return "footstepIndex field should be positive";
+         return "footstepIndex field should be non-negative";
 
       return null;
    }
