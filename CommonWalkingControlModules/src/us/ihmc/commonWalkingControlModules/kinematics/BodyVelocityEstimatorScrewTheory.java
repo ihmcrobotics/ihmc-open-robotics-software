@@ -32,7 +32,7 @@ public class BodyVelocityEstimatorScrewTheory implements BodyVelocityEstimator
    public BodyVelocityEstimatorScrewTheory(RigidBody foot, ReferenceFrame footZUpFrame, InverseDynamicsJoint imuJoint, RobotSide robotSide,
            LegToTrustForVelocityReadOnly legToTrustForVelocity, double defaultCovariance)
    {
-      this.name = robotSide + getClass().getSimpleName();
+      this.name = robotSide.getSideNameFirstLetter() + getClass().getSimpleName();
       this.registry = new YoVariableRegistry(name);
       this.legToTrustForVelocity = legToTrustForVelocity;
       this.robotSide = robotSide;
