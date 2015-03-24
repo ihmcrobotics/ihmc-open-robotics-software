@@ -31,8 +31,8 @@ public class AtlasROSAPISimulator
    private static String defaultPrefix = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    private static String defaultStartingLocation = "DEFAULT";
-   private final boolean startUI = true;
-   private boolean redirectUiPacketsToRos = true;
+   private final boolean startUI = false;
+   private boolean redirectUiPacketsToRos = false;
    private KryoLocalPacketCommunicator gfe_communicator;
 
    public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException

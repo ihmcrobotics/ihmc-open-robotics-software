@@ -1,6 +1,15 @@
 import java.nio.file.Files
 import java.nio.file.Paths
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
+    }
+}
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
@@ -36,6 +45,30 @@ applicationDistribution.from(startScripts.outputDir) {
     into "bin"
 }
 
+import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
+
+task awsDeploy(type: S3Sync, dependsOn: distTar) {
+    description = "Push current API release to AWS S3"
+    configFile "aws.properties"
+
+    from "${buildDir}/distributions"
+    into "ihmc/api_releases"
+
+    doFirst{
+        if(!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey"))
+        {
+            throw new TaskExecutionException(tasks.awsDeploy, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
+        }
+
+        accessKey awsAccessKey
+        secretKey awsSecretKey
+
+        def verManifestFile = new File("${buildDir}/distributions/version")
+
+        verManifestFile.text = version
+    }
+}
+
 task gfeDevCompile(dependsOn:distTar) << {
     if(!project.hasProperty("catkinWorkspaceLocation"))
     {
@@ -69,17 +102,6 @@ task gfeDevCompile(dependsOn:distTar) << {
     copy {
         println "Expanding the distribution archive in to ihmc_msgs/scripts"
         from tarTree(archiveLocation.toAbsolutePath().toString())
-        into ihmcSimLocation.resolve("bin").toAbsolutePath().toString()
-    }
-}
-
-task pushBuild(type:Exec, dependsOn:distTar) {
-    doLast {
-        def userName = "${bitbucket_user}"
-        def password = "${bitbucket_password}"
-        def repoUrl = "/ihmcrobotics/ihmc_ros/downloads"
-        def targetFile = "build/distributions/${applicationName}-${version}.tar"
-    
-        commandLine 'build_utilities/upload-to-bitbucket.sh', userName, password, repoUrl, targetFile
+        into ihmcSimLocation.toAbsolutePath().toString()
     }
 }
