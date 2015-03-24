@@ -277,9 +277,6 @@ public abstract class PacketValidityChecker
       if (packetToCheck.getFootstepIndex() < 0)
          return "footstepIndex field should be positive";
 
-      if (packetToCheck.robotSide < -1 || packetToCheck.robotSide > 1)
-         return "robotSide field should be equal to -1, 0 or 1";
-
       return null;
    }
 
