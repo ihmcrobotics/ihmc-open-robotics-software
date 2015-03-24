@@ -71,7 +71,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          if (!isSeeking && !scs.isSimulating())
          {
-            robot.seek(newValue);
+            robot.seek(newValue-1); //Do -1 so that we'll get to sliderValue after doing the seek.
 
             try
             {
@@ -218,7 +218,9 @@ public class YoVariableLogVisualizerGUI extends JPanel
          @Override
          public void stateChanged(ChangeEvent e)
          {
-            final String val = String.valueOf(slider.getValue());
+            int sliderValue = slider.getValue();
+            
+            final String val = String.valueOf(sliderValue);
             SwingUtilities.invokeLater(new Runnable()
             {
 
@@ -228,7 +230,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
                   currentTime.setText(val);
                }
             });
-            seek(slider.getValue());
+            seek(sliderValue);
 
          }
       });
