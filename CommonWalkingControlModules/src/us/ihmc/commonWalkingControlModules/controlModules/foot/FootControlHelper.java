@@ -21,12 +21,7 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.GeometricJacobian;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
-import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -114,7 +109,8 @@ public class FootControlHelper
 
       FullRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
       RigidBody pelvis = fullRobotModel.getPelvis();
-      jacobianId = momentumBasedController.getOrCreateGeometricJacobian(pelvis, foot, foot.getBodyFixedFrame());
+      RevoluteJoint[] legJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(pelvis, foot), RevoluteJoint.class);
+      jacobianId = momentumBasedController.getOrCreateGeometricJacobian(legJoints, foot.getBodyFixedFrame());
       jacobian = momentumBasedController.getJacobian(jacobianId);
 
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);

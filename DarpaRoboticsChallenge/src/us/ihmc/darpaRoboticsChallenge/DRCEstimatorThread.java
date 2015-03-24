@@ -47,6 +47,8 @@ import us.ihmc.yoUtilities.time.ExecutionTimer;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {
+   private static final boolean USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR = false;
+
    private final YoVariableRegistry estimatorRegistry = new YoVariableRegistry("DRCEstimatorThread");
    private final RobotVisualizer robotVisualizer;
    private final SDFFullRobotModel estimatorFullRobotModel;
@@ -82,13 +84,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
-      
-      sensorReaderFactory.build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
-            forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
+
+      sensorReaderFactory
+            .build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
+                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
-      
+
       estimatorController = new ModularRobotController("EstimatorController");
-      
+
       centerOfPressureDataHolderFromController = threadDataSynchronizer.getEstimatorCenterOfPressureDataHolder();
       robotMotionStatusFromController = threadDataSynchronizer.getEstimatorRobotMotionStatusHolder();
 
@@ -108,13 +111,16 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints());
       estimatorController.addRobotController(robotJointLimitWatcher);
 
-      for(ForceSensorDefinition forceSensorDefinition:forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      if (USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR)
       {
-        ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(
-              forceSensorDefinition.getSensorName(), 
-              forceSensorDataHolderForEstimator.get(forceSensorDefinition), 
-              forceSensorDefinition.getRigidBody());
-        estimatorController.addRobotController(footSensorToJointTorqueProjector);
+         for(ForceSensorDefinition forceSensorDefinition:forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+         {
+            ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(
+                  forceSensorDefinition.getSensorName(),
+                  forceSensorDataHolderForEstimator.get(forceSensorDefinition),
+                  forceSensorDefinition.getRigidBody());
+            estimatorController.addRobotController(footSensorToJointTorqueProjector);
+         }
       }
             
       
@@ -193,7 +199,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       }
       catch (Throwable e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_RUN, e.getMessage());
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_RUN, e.getMessage());
+         }
          throw new RuntimeException(e);
       }
    }
