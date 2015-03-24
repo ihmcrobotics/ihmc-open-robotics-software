@@ -1,13 +1,16 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.Random;
 
 import org.apache.poi.ss.formula.functions.T;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.ros.RosCore;
 import org.ros.internal.message.Message;
 
 import us.ihmc.SdfLoader.SDFRobot;
@@ -19,6 +22,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DataProducerVariousWalkingProviderFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
+import us.ihmc.communication.PacketRouter;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.LocalPacketCommunicator;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.Packet;
@@ -26,7 +32,10 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -87,11 +96,80 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       }
    }
    
+   @Test
+   public void testFuzzyPacketsUsingRos()
+   {
+      RosCore rosCore = RosCore.newPrivate();
+      rosCore.start();
+      URI rosUri = rosCore.getUri();
+      System.out.println(rosUri);
+      ThreadTools.sleep(2000);
+      
+      DRCRobotModel robotModel = getRobotModel();
+      Random random = new Random();
+      
+      LocalPacketCommunicator controllerCommunicator = new LocalPacketCommunicator(PacketDestination.CONTROLLER.ordinal(),"controller");
+      KryoLocalPacketCommunicator gfe_communicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.GFE.ordinal(), "GFE_Communicator");
+      
+      PacketRouter packetRouter = new PacketRouter();
+      packetRouter.attachPacketCommunicator(gfe_communicator);
+      packetRouter.attachPacketCommunicator(controllerCommunicator);
+      
+      SDFRobot sdfRobot = robotModel.createSdfRobot(false);
+      DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
+      DRCSimulationOutputWriter outputWriter = new DRCSimulationOutputWriter(sdfRobot);
+      GlobalDataProducer globalDataProducer = new GlobalDataProducer(controllerCommunicator);
+      
+      AbstractThreadedRobotController robotController = createController(robotModel, globalDataProducer, outputWriter, sdfRobot);
+      sdfRobot.setController(robotController);
+      
+      OneDegreeOfFreedomJoint[] joints = sdfRobot.getOneDoFJoints();
+      
+      robotController.doControl();
+      controllerCommunicator.send(new HighLevelStatePacket(HighLevelState.WALKING));
+      
+      new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator, packetRouter);
+      
+      try
+      {
+         SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
+         String nameSpace = "/ihmc_ros/atlas";
+         new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, null, ppsOffsetProvider, robotModel, nameSpace);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      
+      for(int i = 0; i < 100; i++)
+      {
+         robotController.doControl();
+      }
+      
+      Class[] gfePacketList = IHMCRosApiMessageMap.PACKET_LIST;
+      
+      int randomModulus = random.nextInt(250) + 1;
+      for(int i = 0; i < 1000000; i++)
+      {
+         robotController.doControl();
+         if(i % randomModulus == 0)
+         {
+            randomModulus = random.nextInt(250) + 1;
+            int randomIndex = random.nextInt(gfePacketList.length);
+            Class randomClazz = gfePacketList[randomIndex];
+            
+            Packet randomPacket = createRandomPacket(randomClazz, random);
+            System.out.println(randomPacket.getClass() + " " + randomPacket);
+            gfe_communicator.receivedPacket(randomPacket);
+         }
+      }
+   }
 
    private DRCSimulationFactory drcSimulation;
    
    @Test
-   public void testFuzzyPackets()
+   public void testFuzzyPacketsWithoutRos()
    {
 	   DRCRobotModel robotModel = getRobotModel();
 	   Random random = new Random();
@@ -123,7 +201,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 		   for(int j = 0; j < 100000; j++)
 		   {
 			   robotController.doControl();
-			   if(j % 5000 == 0)
+			   if(j % 300 == 0)
 			   {
 				   Packet randomPacket = createRandomPacket(IHMCRosApiMessageMap.INPUT_PACKET_LIST[i], random);
 				   System.out.println(randomPacket);
