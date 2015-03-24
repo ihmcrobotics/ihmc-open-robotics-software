@@ -11,7 +11,7 @@ import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 
 public class RosLocalizationPoseCorrectionSubscriber
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
 
