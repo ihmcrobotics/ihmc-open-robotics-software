@@ -1,12 +1,17 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.SdfLoader.SDFJointNameMap;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+
+import java.util.List;
 
 public interface DRCRobotJointMap extends SDFJointNameMap
 {
@@ -29,4 +34,6 @@ public interface DRCRobotJointMap extends SDFJointNameMap
    public abstract String[] getPositionControlledJointsForSimulation();
 
    public abstract DRCRobotContactPointParameters getContactPointParameters();
+
+   public List<Pair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
 }

@@ -14,6 +14,9 @@ import us.ihmc.utilities.humanoidRobot.partNames.RobotSpecificJointNames;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
+import us.ihmc.yoUtilities.controllers.YoPIDGains;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public interface SDFJointNameMap extends RobotSpecificJointNames
 {

@@ -394,7 +394,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
       catch (Exception e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_RUN, e.getMessage());
+         if(globalDataProducer != null)
+            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_RUN, e.getMessage());
          throw new RuntimeException(e);
       }
    }

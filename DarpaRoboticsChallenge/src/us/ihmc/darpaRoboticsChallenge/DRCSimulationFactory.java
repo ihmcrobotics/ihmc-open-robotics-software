@@ -17,6 +17,7 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCSimulatedIMUPublisher;
 import us.ihmc.darpaRoboticsChallenge.controllers.JointLowLevelPositionControlSimulator;
 import us.ihmc.darpaRoboticsChallenge.controllers.PIDLidarTorqueController;
+import us.ihmc.darpaRoboticsChallenge.controllers.PassiveJointController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -39,6 +40,7 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -52,6 +54,8 @@ import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
+import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCSimulationFactory
@@ -270,6 +274,19 @@ public class DRCSimulationFactory
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
             JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
+         }
+      }
+
+      List<Pair<String, YoPDGains>> passiveJointNameWithGains = jointMap.getPassiveJointNameWithGains(simulatedRobot.getRobotsYoVariableRegistry());
+      if (passiveJointNameWithGains != null)
+      {
+         for (int i = 0; i < passiveJointNameWithGains.size(); i++)
+         {
+            String jointName = passiveJointNameWithGains.get(i).first();
+            OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
+            YoPDGains gains = passiveJointNameWithGains.get(i).second();
+            PassiveJointController passiveJointController = new PassiveJointController(simulatedJoint, gains);
+            simulatedRobot.setController(passiveJointController);
          }
       }
 
