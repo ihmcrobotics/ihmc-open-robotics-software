@@ -34,6 +34,11 @@ public class ROSMessageGenerator
 
    public static void main(String... args)
    {
+      generate();
+   }
+   
+   public static void generate()
+   {
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
       for (Class clazz : IHMCRosApiMessageMap.PACKET_LIST)
       {
