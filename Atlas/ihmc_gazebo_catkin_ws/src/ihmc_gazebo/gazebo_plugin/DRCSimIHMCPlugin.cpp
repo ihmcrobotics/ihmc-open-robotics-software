@@ -124,10 +124,17 @@ public:
 
         double initialAngles[] = { -0.0, 0.0, 0.0, 0.0, //back_bkx back_bky back_bkz hokuyo_joint
                                    0.498, 2.0,   0.1, -1.1,   -0.004, 0.0, 0.0,  // l_arm_elx l_arm_ely l_arm_shx l_arm_shy l_arm_wrx l_arm_wry, l_arm_wry2
+								   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // l_finger_1_joint_1, l_finger_1_joint_2, l_finger_1_joint_3, l_finger_2_joint_1, l_finger_2_joint_2, l_finger_2_joint_3
+								   0.0, 0.0, 0.0, // l_finger_middle_joint_1, l_finger_middle_joint_2, l_finger_middle_joint_3
                                    -0.0, -0.28, 0.0, -0.2, 0.0, 0.5,  // l_leg_akx l_leg_aky l_leg_hpx l_leg_hpy l_leg_hpz l_leg_kny
+								   0.0, 0.0, 0.0, // l_palm_finger_1_joint, l_palm_finger_2_joint, l_palm_finger_middle_joint
                                    0, //neck_ry
                                    -0.498, 2.0,   -0.1, 1.1,   0.004, 0.0,  0.0, //r_arm_elx r_arm_ely r_arm_shx r_arm_shy r_arm_wrx r_arm_wry, l_arm_wry2
-                                   0.0, -0.28, -0.0, -0.2, 0.0, 0.5 }; // r_leg_akx r_leg_aky r_leg_hpx r_leg_hpy r_leg_hpz r_leg_kny
+								   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // r_finger_1_joint_1, r_finger_1_joint_2, r_finger_1_joint_3, r_finger_2_joint_1, r_finger_2_joint_2, r_finger_2_joint_3
+								   0.0, 0.0, 0.0, // r_finger_middle_joint_1, r_finger_middle_joint_2, r_finger_middle_joint_3
+                                   0.0, -0.28, -0.0, -0.2, 0.0, 0.5, // r_leg_akx r_leg_aky r_leg_hpx r_leg_hpy r_leg_hpz r_leg_kny
+								   0.0, 0.0, 0.0 };  // r_palm_finger_1_joint, r_palm_finger_2_joint, r_palm_finger_middle_joint
+
 
         /* to stand
         double anklePitchAngle = -0.5; //0.346
@@ -140,29 +147,29 @@ public:
         if (startupParameter.find( "car_front") != std::string::npos)
         {
             initialAngles[1] = 0.0; // back pitch
-            initialAngles[14] = initialAngles[28] = -1.3; // hip y
-            initialAngles[16] = initialAngles[30] = 1.4;  // knee
-            initialAngles[12] = initialAngles[26] = -0.2; // ankle y
+            initialAngles[23] = initialAngles[49] = -1.3; // hip y
+            initialAngles[25] = initialAngles[51] = 1.4;  // knee
+            initialAngles[21] = initialAngles[47] = -0.2; // ankle y
         }
         else if (startupParameter.find( "car_lateral") != std::string::npos)
         {
             initialAngles[1] = 0.0; // back pitch
-            initialAngles[14] = initialAngles[28] = -1.7; // hip y
+            initialAngles[23] = initialAngles[49] = -1.7; // hip y
          //   initialAngles[13] += 0.2;
-            initialAngles[16] = initialAngles[30] = 1.5;  // knee
-            initialAngles[12] = initialAngles[26] = -0.0; // ankle y
+            initialAngles[25] = initialAngles[51] = 1.5;  // knee
+            initialAngles[21] = initialAngles[47] = -0.0; // ankle y
         }
         else if( startupParameter.find( "standing" ) != std::string::npos )
         {
             initialAngles[1] = 0.1; // back pitch
-            initialAngles[7]  = initialAngles[21] = -0.0; // shoulder X
+            initialAngles[7]  = initialAngles[33] = -0.0; // shoulder X
 
             initialAngles[6]  = - 1.0; // shoulder Y
-            initialAngles[20] = - initialAngles[6];
+            initialAngles[32] = - initialAngles[6];
 
-            initialAngles[14] = initialAngles[28] = -0.35; // hip y
-            initialAngles[16] = initialAngles[30] = 0.7;  // knee
-            initialAngles[12] = initialAngles[26] = -0.35; // ankle y
+            initialAngles[23] = initialAngles[49] = -0.35; // hip y
+            initialAngles[25] = initialAngles[51] = 0.7;  // knee
+            initialAngles[21] = initialAngles[47] = -0.35; // ankle y
         }
 
 
@@ -323,26 +330,26 @@ public:
             	int64_t* longBuffer = ((int64_t*) (buffer));
                 simulationCyclesPerControlCycle = longBuffer[0];
                 lastReceivedTimestamp = longBuffer[1];
-                int64_t positionControlData = longBuffer[2]; // if the i_th entry of this value in binary is 1, joint i position controlled
+           //     int64_t positionControlData = longBuffer[2]; // if the i_th entry of this value in binary is 1, joint i position controlled
 
-                for (unsigned int i = 0; i < joints.size(); i++) {
-                	jointsUnderPositionControl[i] = positionControlData % 2 == 1;
-                	positionControlData /= 2;
-                }
+//                for (unsigned int i = 0; i < joints.size(); i++) {
+//                	jointsUnderPositionControl[i] = positionControlData % 2 == 1;
+//                	positionControlData /= 2;
+//                }
 
                 // Pointer arithmetic is evil
                 // ^ this is a fact
-                double* jointData = (double*) (buffer + 24);
+                double* jointData = (double*) (buffer + 16);
                 for (unsigned int i = 0; i < joints.size(); i++) {
-                    if(jointsUnderPositionControl[i]) {
+//                    if(jointsUnderPositionControl[i]) {
                     	desiredPositions[i] = jointData[i];
                    // 	std::cout << "SENT: "<<desiredPositions[i] << std::endl;
-                    } else {
-                    	desiredTorques[i] = jointData[i];
-                    }
+//                    } else {
+//                    	desiredTorques[i] = jointData[i];
+//                    }
                 }
 
-                std::cout << "" << std::endl;
+//                std::cout << "" << std::endl;
 
                 receivedControlMessage = true;
                 condition.notify_all();

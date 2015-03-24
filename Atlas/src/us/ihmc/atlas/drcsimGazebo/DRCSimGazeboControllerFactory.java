@@ -48,7 +48,7 @@ public class DRCSimGazeboControllerFactory
 
    public DRCSimGazeboControllerFactory()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.GAZEBO, false);
       /*
        * Create registries
        */
