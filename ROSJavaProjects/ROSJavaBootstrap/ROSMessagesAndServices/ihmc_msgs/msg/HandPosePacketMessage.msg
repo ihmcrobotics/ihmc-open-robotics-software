@@ -10,23 +10,9 @@
 # uint8 R = 1
 uint8 robot_side
 
-# Options for dataType
-# uint8 HAND_POSE = 0
-# uint8 JOINT_ANGLES = 1
-uint8 data_type
-
-# Options for referenceFrame
-# uint8 CHEST = 0
-# uint8 WORLD = 1
-uint8 reference_frame
-
 # toHomePosition can be used to move the arm end effectors back to their starting
 # position, defined as down and beside the robot with slightly bent elbows
 bool to_home_position
-
-geometry_msgs/Vector3 position
-
-geometry_msgs/Quaternion orientation
 
 # trajectoryTime specifies how fast or how slow to move to the desired pose
 float64 trajectory_time
