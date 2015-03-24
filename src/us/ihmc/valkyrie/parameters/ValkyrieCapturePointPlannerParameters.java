@@ -98,7 +98,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
 	public double getCapturePointInFromFootCenterDistance()
 	{
-		return 0.006;
+      return runningOnRealRobot ? 0.026 : 0.006;
 	}
    
    @Override
