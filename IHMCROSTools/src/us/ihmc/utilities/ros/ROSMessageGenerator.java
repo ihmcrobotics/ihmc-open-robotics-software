@@ -32,12 +32,12 @@ public class ROSMessageGenerator
       this.overwriteSubMessages = overwriteSubMessages;
    }
 
-   public static void main(String... args)
+   public static void main(String... args) throws Exception
    {
       generate();
    }
    
-   public static void generate()
+   public static void generate() throws Exception
    {
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
       for (Class clazz : IHMCRosApiMessageMap.PACKET_LIST)
@@ -46,7 +46,7 @@ public class ROSMessageGenerator
       }
    }
 
-   public String createNewRosMessage(Class clazz, boolean overwrite)
+   public String createNewRosMessage(Class clazz, boolean overwrite) throws Exception
    {
       if (clazz == null)
       {
@@ -140,7 +140,7 @@ public class ROSMessageGenerator
       return Modifier.isFinal(modifier) && Modifier.isPublic(modifier) && Modifier.isStatic(modifier);
    }
 
-   private String printType(Field field)
+   private String printType(Field field) throws Exception
    {
 	   String buffer = "";
 	   FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
@@ -168,7 +168,7 @@ public class ROSMessageGenerator
    }
 
    @SuppressWarnings("unchecked")
-   private String printType(Class clazz, String varName)
+   private String printType(Class clazz, String varName) throws Exception
    {
       String buffer = "";
       if (clazz == null)
@@ -192,17 +192,10 @@ public class ROSMessageGenerator
             buffer += " = " + i;
             if (DocumentedEnum.class.isAssignableFrom(clazz))
             {
-               try
-               {
-                  DocumentedEnum<?> documentedEnum = (DocumentedEnum<?>) Enum.valueOf(clazz, enumList[i].toString());
-                  Method method = clazz.getMethod("getDocumentation", clazz);
-                  String documentation = (String) method.invoke(documentedEnum, enumList[i]);
-                  buffer += " - " + documentation;
-               }
-               catch (Exception e)
-               {
-                  e.printStackTrace();
-               }
+               DocumentedEnum<?> documentedEnum = (DocumentedEnum<?>) Enum.valueOf(clazz, enumList[i].toString());
+               Method method = clazz.getMethod("getDocumentation", clazz);
+               String documentation = (String) method.invoke(documentedEnum, enumList[i]);
+               buffer += " - " + documentation;
             }
             else
             {
