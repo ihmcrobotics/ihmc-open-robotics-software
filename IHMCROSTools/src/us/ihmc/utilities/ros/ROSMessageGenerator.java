@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -18,6 +19,7 @@ import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 import us.ihmc.communication.packets.DocumentedPacket;
+import us.ihmc.utilities.DocumentedEnum;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 
 public class ROSMessageGenerator
@@ -160,6 +162,7 @@ public class ROSMessageGenerator
       return buffer;
    }
 
+   @SuppressWarnings("unchecked")
    private String printType(Class clazz, String varName)
    {
       String buffer = "";
@@ -180,9 +183,27 @@ public class ROSMessageGenerator
 
          for (int i = 0; i < enumList.length; i++)
          {
-            buffer += "# uint8";
-            buffer += " " + enumList[i];
-            buffer += " = " + i + System.lineSeparator();
+            buffer += "# " + enumList[i];
+            buffer += " = " + i;
+            if (DocumentedEnum.class.isAssignableFrom(clazz))
+            {
+               try
+               {
+                  DocumentedEnum<?> documentedEnum = (DocumentedEnum<?>) Enum.valueOf(clazz, enumList[i].toString());
+                  Method method = clazz.getMethod("getDocumentation", clazz);
+                  String documentation = (String) method.invoke(documentedEnum, enumList[i]);
+                  buffer += " - " + documentation;
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+            else
+            {
+               System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum!");
+            }
+            buffer += System.lineSeparator();
          }
 
          buffer += "uint8";
