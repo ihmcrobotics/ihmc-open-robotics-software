@@ -23,7 +23,7 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
 {
    private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
-   private static final String ROS_NAMESPACE = "/ihmc_msgs/atlas";
+   private static final String ROS_NAMESPACE = "/ihmc_ros/atlas";
    
    private final RosMainNode rosMainNode;
    private final NodeConfiguration nodeConfiguration;
