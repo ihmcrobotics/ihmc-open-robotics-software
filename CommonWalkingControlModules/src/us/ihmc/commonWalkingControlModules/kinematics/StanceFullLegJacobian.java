@@ -60,8 +60,8 @@ public class StanceFullLegJacobian
       legJacobian = new GeometricJacobian(pelvis, foot, jacobianFrame);
 
       // Build vtpJacobian
-      vtpXFrame = new VTPXFrame(robotSide + "Vtpx", footFrame, footHeight);
-      vtpYFrame = new VTPYFrame(robotSide + "Vtpy", vtpXFrame);
+      vtpXFrame = new VTPXFrame(robotSide.getSideNameFirstLetter() + "Vtpx", footFrame, footHeight);
+      vtpYFrame = new VTPYFrame(robotSide.getSideNameFirstLetter() + "Vtpy", vtpXFrame);
       RigidBody vtpJacobianBase = new RigidBody("vtpJacobianBase", footFrame);
       FrameVector x = new FrameVector(vtpYFrame, 1.0, 0.0, 0.0);
       FrameVector y = new FrameVector(vtpXFrame, 0.0, 1.0, 0.0);

@@ -29,7 +29,7 @@ public class SwingFullLegJacobian
     */
    public SwingFullLegJacobian(RobotSide robotSide, FullRobotModel fullRobotModel, YoVariableRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(robotSide + getClass().getSimpleName());
+      registry = new YoVariableRegistry(robotSide.getSideNameFirstLetter() + getClass().getSimpleName());
       this.robotSide = robotSide;
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
