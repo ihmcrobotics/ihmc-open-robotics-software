@@ -6,34 +6,64 @@ public class StepprLeftHipXSpringProperties implements HystereticSpringPropertie
 
 	}
 	
+//	@Override
+//	public double getLoadingSpringConstant() {
+//		return 270;
+//	}
+//	
+//	@Override
+//	public double getLinearSpringConstant() {
+//		return 280;
+//	}
+//	
+//	@Override
+//	public double getUnloadingSpringConstant() {
+//		return 200; //290
+//	}
+	
 	@Override
 	public double getLoadingSpringConstant() {
-		return 270;
+		return 370;
 	}
 	
 	@Override
 	public double getLinearSpringConstant() {
-		return 355;
+		return 385;
 	}
 	
 	@Override
 	public double getUnloadingSpringConstant() {
-		return 350;
+		return 370;
 	}
-
+	
+//	@Override
+//	public double getLoadingRestLength() {
+//		return 0.03;
+//	}
+//	
+//	@Override
+//	public double getLinearSpringRestLength() {
+//		return -0.03;
+//	}
+//	
+//	@Override
+//	public double getUnloadingRestLength() {
+//		return -0.05;
+//	}
+	
 	@Override
 	public double getLoadingRestLength() {
-		return 0.03;
+		return -0.00;//0.03; //Both spacers 0.03, larger spacer 0.00, small spacer -0.05
 	}
 	
 	@Override
 	public double getLinearSpringRestLength() {
-		return -0.03;
+		return 0.015;
 	}
 	
 	@Override
 	public double getUnloadingRestLength() {
-		return -0.05;
+		return -0.03;//0.00 //Loading -0.03
 	}
 	
 	@Override
