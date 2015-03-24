@@ -30,6 +30,58 @@
           </script>
         </material>
       </visual>
+
+            <collision name="grip_pole_driver_side_collision">
+        <pose>0.7 0.75 1.5 0 0 0</pose>
+        <geometry> 
+          <cylinder> 
+            <radius>0.02</radius>
+            <length>1.07</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      
+      <visual name="grip_pole_driver_side_visual">
+        <pose>0.7 0.75 1.5 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.02</radius>
+            <length>1.07</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/DarkGrey</name>
+          </script>
+        </material>
+      </visual>
+      
+            <collision name="grip_pole_passenger_side_collision">
+        <pose>0.7 -0.75 1.5 0 0 0</pose>
+        <geometry> 
+          <cylinder> 
+            <radius>0.02</radius>
+            <length>1.07</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      
+      <visual name="grip_pole_passenger_side_visual">
+        <pose>0.7 -0.75 1.5 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.02</radius>
+            <length>1.07</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/DarkGrey</name>
+          </script>
+        </material>
+      </visual>
       
     
       <collision name="chassis">
