@@ -10,7 +10,10 @@ uint8 status
 # FootstepDataListMessage.
 int32 footstep_index
 
-int32 robot_side
+# Options for robotSide
+# uint8 L = 0
+# uint8 R = 1
+uint8 robot_side
 
 geometry_msgs/Vector3 actual_foot_position_in_world
 
