@@ -21,6 +21,7 @@ public class StepprLinearTransmissionJointState implements StepprJointState
    private final DoubleYoVariable qd;
    private final DoubleYoVariable tau_strain;
    private final DoubleYoVariable tau_current;
+   private final DoubleYoVariable tau_error;
 
    public StepprLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, StepprActuatorState actuator, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
    {
@@ -34,6 +35,7 @@ public class StepprLinearTransmissionJointState implements StepprJointState
       this.qd = new DoubleYoVariable(name + "_qd", registry);
       this.tau_current = new DoubleYoVariable(name + "_tauPredictedCurrent", registry);
       this.tau_strain = new DoubleYoVariable(name + "_tauMeasuredStrain", registry);
+      this.tau_error = new DoubleYoVariable(name + "_tauCurrentStrainError", registry);
       
       parentRegistry.addChild(registry);
    }
@@ -73,7 +75,10 @@ public class StepprLinearTransmissionJointState implements StepprJointState
       }
       tau_current.set(actuator.getMotorTorque() * ratio);
       if(strainSensor!=null)
+      {
          tau_strain.set(strainSensor.getCalibratedValue());
+         tau_error.set(tau_strain.getDoubleValue()-tau_current.getDoubleValue());
+      }
    }
 
    @Override
