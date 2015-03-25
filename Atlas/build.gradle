@@ -47,7 +47,7 @@ applicationDistribution.from(startScripts.outputDir) {
 
 import com.monochromeroad.gradle.plugin.aws.s3.S3Sync
 
-task awsDeploy(type: S3Sync, dependsOn: distTar) {
+task awsDeploySim(type: S3Sync, dependsOn: distTar) {
     description = "Push current API release to AWS S3"
     configFile "aws.properties"
 
