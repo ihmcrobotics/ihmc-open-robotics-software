@@ -72,7 +72,7 @@ public abstract class DRCOptimizationMomentumControlModuleTest implements MultiR
 {
 
 	@EstimatedDuration(duration = 0.6)
-	@Test(timeout = 11824)
+	@Test(timeout = 30000)
    public void testAllJointAccelerationsZero() throws IOException, JAXBException
    {
       Random random = new Random(1252515L);
