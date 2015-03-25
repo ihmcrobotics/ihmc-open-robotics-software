@@ -138,7 +138,7 @@ public class PointVelocityMeasurementModelElementTest
       FramePoint pointInTwistBaseFrame = new FramePoint(measurementPointInBodyFrame);
       pointInTwistBaseFrame.changeFrame(twist.getBaseFrame());
       FrameVector velocityOfMeasurementPointInWorldFrame = new FrameVector(twist.getBaseFrame());
-      twist.packVelocityOfPointFixedInBodyFrame(velocityOfMeasurementPointInWorldFrame, pointInTwistBaseFrame);
+      twist.packLinearVelocityOfPointFixedInBodyFrame(velocityOfMeasurementPointInWorldFrame, pointInTwistBaseFrame);
       velocityOfMeasurementPointInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
       
       PointVelocityDataObject pointVelocityDataObject = new PointVelocityDataObject();

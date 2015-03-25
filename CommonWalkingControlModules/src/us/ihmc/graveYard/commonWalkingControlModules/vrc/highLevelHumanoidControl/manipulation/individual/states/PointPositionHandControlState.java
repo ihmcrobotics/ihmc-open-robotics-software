@@ -103,7 +103,7 @@ public class PointPositionHandControlState extends State<HandControlState>
    {
       twistCalculator.packRelativeTwist(currentTwist, base, endEffector);
       currentTwist.changeFrame(base.getBodyFixedFrame());
-      currentTwist.packVelocityOfPointFixedInBodyFrame(currentVelocity, point);
+      currentTwist.packLinearVelocityOfPointFixedInBodyFrame(currentVelocity, point);
    }
 
    @Override
