@@ -10,11 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -30,11 +35,13 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
    private final int estimatorTicksPerControlTick;
    private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    private ByteBuffer jointCommand;
+   
+   // Since the finger joint controller doesn't set the OneDoFJoints used in this writer, this acts as an object communicator for finger joint angles
+   private HashMap<String, OneDegreeOfFreedomJoint> fingerJointMap = null;
 
    public AtlasDRCSimGazeboOutputWriter(AtlasRobotModel robotModel)
    {
       estimatorTicksPerControlTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
-
    }
 
    @Override
@@ -50,39 +57,17 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 
       jointCommand.putLong(estimatorTicksPerControlTick);
       jointCommand.putLong(timestamp);
-      
-      // if the i_th value of the binary rep of this is 1, it's position controlled
-      long jointsUnderPositionControl = 0;
-      
-      for(int i = 0; i < joints.size(); i++)
-      {
-    	  if(joints.get(i).isUnderPositionControl())
-    	  {
-        	  jointsUnderPositionControl += 1 << i;    		  
-    	  }
-      }
-            
-//      System.out.println("# of joints = " + joints.size());
-//      jointCommand.putLong(jointsUnderPositionControl);
 
       for (int i = 0; i < joints.size(); i++)
-      {    	      	
-    	 OneDoFJoint joint = joints.get(i);
-    	 
-//    	 System.out.println(i + " " + joint.getName() + " " + joint.getTau());
-    	 
-    	 if(joint.isUnderPositionControl())
-    	 {
-    		 jointCommand.putDouble(joint.getqDesired());
-    	 }
-    	 else
-    	 {
-             jointCommand.putDouble(joint.getTau());    		 
-    	 }    	 
+      {
+         OneDoFJoint joint = joints.get(i);
+         
+         if(fingerJointMap == null || !fingerJointMap.containsKey(joint.getName()))
+            jointCommand.putDouble(joint.getqDesired());
+         else
+            jointCommand.putDouble(fingerJointMap.get(joint.getName()).getqDesired());
       }
-      
-//      System.out.println();
-      
+
       jointCommand.flip();
 
       try
@@ -96,7 +81,19 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       {
          e.printStackTrace();
       }
-
+   }
+   
+   public void setFingerJointsProvider(SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints)
+   {      
+      fingerJointMap = new HashMap<String, OneDegreeOfFreedomJoint>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {
+         for(OneDegreeOfFreedomJoint joint : allFingerJoints.get(robotSide))
+         {
+            fingerJointMap.put(joint.getName(), joint);
+         }
+      }
    }
 
    @Override
@@ -128,7 +125,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          System.out.println("[DRCSim] Connecting to " + address);
          channel.connect(address);
          System.out.println("[DRCSim] Connected");
-         
+
          sendInitialState();
       }
       catch (IOException e)
@@ -142,12 +139,12 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       jointCommand.clear();
       jointCommand.putLong(estimatorTicksPerControlTick * 3);
       jointCommand.putLong(0);
-      for(int i = 0; i < joints.size(); i++)
+      for (int i = 0; i < joints.size(); i++)
       {
          jointCommand.putDouble(0.0);
       }
       jointCommand.flip();
-      
+
       while (jointCommand.hasRemaining())
       {
          channel.write(jointCommand);

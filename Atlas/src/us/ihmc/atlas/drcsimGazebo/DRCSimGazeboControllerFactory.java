@@ -2,7 +2,9 @@ package us.ihmc.atlas.drcsimGazebo;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
@@ -34,7 +36,10 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameter
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.robotController.DRCSimGazeboThreadedRobotController;
 import us.ihmc.robotDataCommunication.YoVariableServer;
+import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 
@@ -45,7 +50,8 @@ public class DRCSimGazeboControllerFactory
    private final AtlasSensorInformation sensorInformation;
 
    private static final double gravity = -9.81;
-
+   private static final boolean useRobotiqHands = true;
+   
    public DRCSimGazeboControllerFactory()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.GAZEBO, false);
@@ -100,13 +106,23 @@ public class DRCSimGazeboControllerFactory
       /*
        * Setup threads
        */
-
       DRCSimGazeboThreadedRobotController robotController = new DRCSimGazeboThreadedRobotController();
       int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
       int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
+      
+      if(useRobotiqHands)
+      {
+         boolean createCollisionMeshes = false;
+         SDFRobot sdfRobot = robotModel.createSdfRobot(createCollisionMeshes);
+         SimulatedRobotiqHandsController simulatedHandsController = (SimulatedRobotiqHandsController) robotModel.createSimulatedHandController(sdfRobot, threadDataSynchronizer, dataProducer);
+         robotController.addController(simulatedHandsController, controllerTicksPerSimulationTick, true);
+         
+         SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = simulatedHandsController.getAllFingerJoints();
+         outputWriter.setFingerJointsProvider(allFingerJoints);
+      }
 
       try
       {
