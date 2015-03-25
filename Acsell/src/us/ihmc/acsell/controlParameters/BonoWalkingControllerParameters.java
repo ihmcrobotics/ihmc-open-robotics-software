@@ -135,8 +135,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595;
-   private double nominalHeightAboveGround = 0.670;
-   private final double maximumHeightAboveGround = 0.735;
+   private double nominalHeightAboveGround = 0.670+0.020+0.010;//+0.020;
+   private final double maximumHeightAboveGround = 0.79;//Pelvis height fully upright//0.735;
    private final double additionalOffsetHeightBono = 0.15;
 
    @Override
@@ -250,7 +250,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMinStepWidth()
    {
-      return 0.35;
+      return 0.375;//0.35;
    }
 
    @Override
@@ -610,7 +610,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getDefaultTransferTime()
    {
       if (runningOnRealRobot)
-         return 0.15;//0.3;////1.0; //.5;
+         return 0.25;//0.15;//0.3;////1.0; //.5;
       return 0.25; // 1.5; //
    }
 
@@ -789,8 +789,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
-      return 0.035;
-
+      return 0.025;
    }
 
    @Override
