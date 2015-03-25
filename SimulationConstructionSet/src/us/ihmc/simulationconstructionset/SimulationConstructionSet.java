@@ -89,6 +89,7 @@ import us.ihmc.utilities.GraphicsUpdatable;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
@@ -3214,7 +3215,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void writeSpreadsheetFormattedData(String varGroupName, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
-      System.out.println("Writing Data File " + chosenFile.getName()); // filename);
+      PrintTools.info(this, "Writing Data File " + chosenFile.getName());
 
       // ArrayList vars = myGUI.getVarsFromGroup(varGroup);
       ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
@@ -3257,7 +3258,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void writeData(ArrayList<YoVariable<?>> vars, boolean binary, boolean compress, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
-      System.out.println("Writing Data File " + chosenFile.getName()); // filename);
+      PrintTools.info(this, "Writing Data File " + chosenFile.getName());
 
       dataWriter.writeData(robots[0].getName(), mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars, binary, compress, robots[0]);
    }
@@ -3266,7 +3267,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void writeMatlabData(String varGroup, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
-      System.out.println("Writing Data File " + chosenFile.getName()); // filename);
+      PrintTools.info(this, "Writing Data File " + chosenFile.getName());
 
       ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroup, varGroupList);
       dataWriter.writeMatlabBinaryData( mySimulation.getDT() * mySimulation.getRecordFreq(), myDataBuffer, vars);      
@@ -3398,7 +3399,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void writeSpreadsheetFormattedState(String varGroupName, File chosenFile)
    {
       DataFileWriter dataWriter = new DataFileWriter(chosenFile);
-      System.out.println("Writing Data File " + chosenFile.getName()); // filename);
+      PrintTools.info(this, "Writing Data File " + chosenFile.getName());
 
       ArrayList<YoVariable<?>> vars = myDataBuffer.getVarsFromGroup(varGroupName, varGroupList);
 
