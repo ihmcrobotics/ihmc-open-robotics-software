@@ -17,7 +17,7 @@ import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
 public class StepprStandPrep implements StepprController
 {
-   private enum StandPrepState
+   public static enum StandPrepState
    {
       WAIT, INITIALIZE, EXECUTE
    }
@@ -169,6 +169,11 @@ public class StepprStandPrep implements StepprController
          break;
       }
 
+   }
+   
+   public StandPrepState getStandPrepState()
+   {
+	   return standPrepState.getEnumValue();
    }
 
    @Override
