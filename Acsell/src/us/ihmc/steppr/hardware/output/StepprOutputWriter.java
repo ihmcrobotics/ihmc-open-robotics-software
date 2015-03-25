@@ -3,6 +3,12 @@ package us.ihmc.steppr.hardware.output;
 import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.acsell.springs.HystereticSpringCalculator;
+import us.ihmc.acsell.springs.HystereticSpringProperties;
+import us.ihmc.acsell.springs.LinearSpringCalculator;
+import us.ihmc.acsell.springs.SpringCalculator;
+import us.ihmc.acsell.springs.StepprLeftHipXSpringProperties;
+import us.ihmc.acsell.springs.StepprRightHipXSpringProperties;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -22,7 +28,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter
 {
-   boolean USE_SPRING = false;
+   boolean USE_SPRING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputWriter");
 
@@ -41,13 +47,21 @@ public class StepprOutputWriter implements DRCOutputWriter
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
    private final UDPStepprOutputWriter outputWriter;
-   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpringCorrection = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoTauHipXTotal = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> yoAngleHipXSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoReflectedMotorInertia = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauInertiaViz = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
+   
+   private final HystereticSpringProperties leftHipXSpringProperties = new StepprLeftHipXSpringProperties();
+   private final HystereticSpringProperties rightHipXSpringProperties = new StepprRightHipXSpringProperties();
+   private final SpringCalculator leftHipXSpringCalculator;
+   private final SpringCalculator rightHipXSpringCalculator;
+   
 
    enum JointControlMode
    {
@@ -77,9 +91,18 @@ public class StepprOutputWriter implements DRCOutputWriter
          desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));         
       }
 
-      yoTauSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
-      yoTauSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      yoTauSpringCorrection.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
+      
+      yoTauHipXTotal.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
+      yoTauHipXTotal.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_tauSpringTotalDesired", registry));
 
+      yoAngleHipXSpring.put(StepprJoint.RIGHT_HIP_X, new DoubleYoVariable(StepprJoint.RIGHT_HIP_X.getSdfName() + "_q_Spring", registry));
+      yoAngleHipXSpring.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_q_Spring", registry));
+      
+      leftHipXSpringCalculator = new HystereticSpringCalculator(leftHipXSpringProperties,StepprJoint.LEFT_HIP_X.getSdfName(),registry);
+      rightHipXSpringCalculator = new HystereticSpringCalculator(rightHipXSpringProperties,StepprJoint.RIGHT_HIP_X.getSdfName(),registry);
+      
       initializeJointControlMode(robotModel.getWalkingControllerParameters().getJointsToIgnoreInController());
       initializeMotorDamping();
       initializeFeedForwardTorqueFromDesiredAcceleration();
@@ -195,17 +218,22 @@ public class StepprOutputWriter implements DRCOutputWriter
             if(USE_SPRING)
             {
                double tauSpring = 0;
-               if (yoTauSpring.get(joint) != null)
+               if (yoTauSpringCorrection.get(joint) != null)
                {
                   tauSpring = calcSpringTorque(joint, rawSensorData.getQ_raw());
-                  yoTauSpring.get(joint).set(tauSpring);
+                  yoTauSpringCorrection.get(joint).set(tauSpring);
                } 
-               jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData); 
+               jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
             }
             else
             {
                jointCommand.setTauDesired(tau, wholeBodyControlJoint.getQddDesired(), rawSensorData); 
             }
+            if (joint==StepprJoint.LEFT_HIP_X || joint==StepprJoint.RIGHT_HIP_X)
+            {
+            	yoTauHipXTotal.get(joint).set(tau);
+            }
+            
             jointCommand.setDamping(kd);
 
          }
@@ -251,17 +279,25 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    private double calcSpringTorque(StepprJoint joint, double q)
    {
-      final double springConstant = 300.0;//350; //400.0;
-      final double springEngageJointAngle = 0.0;//0.085; //0.05;
-      switch (joint)
-      {
+	  if (standPrep.getStandPrepState() != StepprStandPrep.StandPrepState.EXECUTE)
+		 return 0.0;
+     switch (joint)
+     {
       case LEFT_HIP_X:
-         return springConstant * Math.max(-springEngageJointAngle - q, 0.0);
-      case RIGHT_HIP_X:
-         return -springConstant * Math.max(q - springEngageJointAngle, 0.0);
-      default:
-         return 0;
+      {
+    	  yoAngleHipXSpring.get(joint).set(q);
+    	  leftHipXSpringCalculator.update(q);
+    	  return leftHipXSpringCalculator.getSpringForce();
       }
+      case RIGHT_HIP_X:
+      {
+    	  yoAngleHipXSpring.get(joint).set(q);
+    	  rightHipXSpringCalculator.update(q);
+    	  return rightHipXSpringCalculator.getSpringForce();
+      }
+      default:
+         return 0.0;
+     }
    }
 
    @Override
