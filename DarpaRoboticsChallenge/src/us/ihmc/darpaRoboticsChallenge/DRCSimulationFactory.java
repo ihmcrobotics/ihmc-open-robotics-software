@@ -42,7 +42,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCControllerThread;
@@ -55,7 +55,6 @@ import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchroniz
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
-import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCSimulationFactory
@@ -251,7 +250,7 @@ public class DRCSimulationFactory
 
       if (scsInitialSetup.getInitializeEstimatorToActual())
       {
-         System.err.println(this.getClass().getSimpleName() + ": Warning! Initializing Estimator to Actual!");
+         PrintTools.warn(this, "Initializing Estimator to Actual!", true);
          initializeEstimatorToActual(drcEstimatorThread, robotInitialSetup, simulatedRobot, jointMap);
       }
 

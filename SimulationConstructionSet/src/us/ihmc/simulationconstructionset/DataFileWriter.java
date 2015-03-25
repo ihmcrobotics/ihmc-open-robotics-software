@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 import com.jmatio.io.MatFileIncrementalWriter;
@@ -392,7 +393,7 @@ public class DataFileWriter
                   if(!mlRoot.getName().equals(rootName)) 
                   {
                           writer.write(mlRoot);
-                          System.err.println("write "+ mlRoot.getName());
+                          PrintTools.info(this, "MLStructure '"+ mlRoot.getName() + "' written", true);
                           mlRoot = new MLStructure(rootName, new int[]{1,1});
                   }
                }
@@ -426,7 +427,7 @@ public class DataFileWriter
          if (mlRoot != null)
          {
             writer.write(mlRoot);
-            System.err.println("write " + mlRoot.getName());
+            PrintTools.info(this, "MLStructure '"+ mlRoot.getName() + "' written", true);
          }
          writer.close();
       }

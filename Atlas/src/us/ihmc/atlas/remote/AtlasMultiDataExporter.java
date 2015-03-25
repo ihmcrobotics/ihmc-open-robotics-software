@@ -44,6 +44,7 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.utilities.SwingUtils;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -536,7 +537,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       private void writeSpreadsheetFormattedData(File chosenFile, String timeVariable)
       {
-         System.out.println("Writing Data File " + chosenFile.getName());
+         PrintTools.info(this, "Writing Data File " + chosenFile.getName());
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 
