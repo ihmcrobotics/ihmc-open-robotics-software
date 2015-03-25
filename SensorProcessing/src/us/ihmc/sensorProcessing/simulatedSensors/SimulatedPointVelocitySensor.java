@@ -50,7 +50,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
       
       tempPointToMeasureVelocityOf.setIncludingFrame(pointToMeasureVelocityOf);
       tempPointToMeasureVelocityOf.changeFrame(twist.getBaseFrame());
-      twist.packVelocityOfPointFixedInBodyFrame(pointVelocityFrameVector, tempPointToMeasureVelocityOf);
+      twist.packLinearVelocityOfPointFixedInBodyFrame(pointVelocityFrameVector, tempPointToMeasureVelocityOf);
       
       pointVelocityFrameVector.changeFrame(worldFrame);
       pointVelocityFrameVector.get(pointVelocity);

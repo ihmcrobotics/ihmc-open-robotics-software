@@ -203,7 +203,7 @@ public class RigidBodySpatialAccelerationControlModule
    
    public void packEndeffectorVelocity(FrameVector vectorToPack)
    {
-      vectorToPack.setIncludingFrame(currentTwist.getBodyOriginLinearVelocityInBaseFrame());
+      currentTwist.packBodyOriginLinearPartInBaseFrame(vectorToPack);
    }
    
    public void packEndeffectorPosition(FramePoint pointToPack)

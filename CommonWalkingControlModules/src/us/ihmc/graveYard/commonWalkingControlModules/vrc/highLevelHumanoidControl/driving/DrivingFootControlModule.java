@@ -334,7 +334,7 @@ public class DrivingFootControlModule
       currentTwist.changeFrame(elevator.getBodyFixedFrame());
       toePointInBase.setIncludingFrame(toePoint);
       toePointInBase.changeFrame(elevator.getBodyFixedFrame());
-      currentTwist.packVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
+      currentTwist.packLinearVelocityOfPointFixedInBodyFrame(currentVelocity, toePointInBase);
    }
 
    private static FramePoint getCenterToePoint(ContactablePlaneBody foot)

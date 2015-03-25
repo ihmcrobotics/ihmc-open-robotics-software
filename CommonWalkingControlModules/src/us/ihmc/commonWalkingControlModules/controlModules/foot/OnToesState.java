@@ -249,7 +249,7 @@ public class OnToesState extends AbstractFootControlState
 
          contactPointPosition.changeFrame(footTwist.getBaseFrame());
          footTwist.changeFrame(footTwist.getBaseFrame());
-         footTwist.packVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
+         footTwist.packLinearVelocityOfPointFixedInBodyFrame(contactPointLinearVelocity, contactPointPosition);
          contactPointPosition.changeFrame(rootBody.getBodyFixedFrame());
 
          proportionalPart.changeFrame(rootBody.getBodyFixedFrame());
