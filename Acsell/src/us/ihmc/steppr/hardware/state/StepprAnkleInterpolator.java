@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 {
-	   private static final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = true;
+	   private static final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = true;//If false use joint
 	   private static final boolean COMPUTE_JACOBIAN_FROM_JOINT_ANGLES = true;
 	   private static final boolean COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES = true;
 	   
@@ -126,7 +126,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 	   measuredJointVelocities.set(1,leftActuator.getJointVelocity());
 	   
 	   q_rightActuator = rightActuator.getMotorPosition();
-	   q_leftActuator = rightActuator.getMotorPosition();
+	   q_leftActuator = leftActuator.getMotorPosition();
 	   measuredMotorVelocities.set(0,rightActuator.getMotorVelocity());
 	   measuredMotorVelocities.set(1,leftActuator.getMotorVelocity());
 	   measuredMotorTorque.set(0,rightActuator.getMotorTorque());
@@ -134,7 +134,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 	   
 	   if (COMPUTE_JACOBIAN_FROM_JOINT_ANGLES || !USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES)
 	   {		   
-		   updateAnkleStateFromJointAngles(rightActuator,leftActuator);
+		   updateAnkleStateFromJointAngles();
 		   
 	       if(!USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES)
 	       {
@@ -144,7 +144,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 	   }
 	   if (COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES || USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES)
 	   {
-		   updateAnkleStateFromMotorAngles(rightActuator,leftActuator);
+		   updateAnkleStateFromMotorAngles();
 		   
 		   if(USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES)
 		   {
@@ -229,7 +229,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 	   }
    }
       
-   private void updateAnkleStateFromJointAngles(StepprActuatorState rightActuator, StepprActuatorState leftActuator)
+   private void updateAnkleStateFromJointAngles()
    {	   
 	   q_rightActuator_calc = computeRightMotorAngle(q_AnkleX, q_AnkleY);
 	   q_leftActuator_calc = computeLeftMotorAngle(q_AnkleX, q_AnkleY);
@@ -238,7 +238,7 @@ public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 	   computeMotorVelocities();
    }
       
-   private void updateAnkleStateFromMotorAngles(StepprActuatorState rightActuator, StepprActuatorState leftActuator)
+   private void updateAnkleStateFromMotorAngles()
    {	   
 	   q_AnkleX_calc = scaledDownCubicApprox(px, q_rightActuator, q_leftActuator);
 	   q_AnkleY_calc = scaledDownCubicApprox(py, q_rightActuator, q_leftActuator);
