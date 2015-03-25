@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
 
@@ -68,10 +69,13 @@ public class DesiredComHeightProvider
       }
       
       newDataAvailable.set(true);
-      comHeightOffset.set(packet.getHeightOffset());
+      
+      double heightOffset = packet.getHeightOffset();
+      heightOffset = MathTools.clipToMinMax(heightOffset, ComHeightPacket.MIN_COM_HEIGHT, ComHeightPacket.MAX_COM_HEIGHT);
+      comHeightOffset.set(heightOffset);
       double packetTime = packet.getTrajectoryTime();
       
-      if ((packetTime < 1e-7) || (Double.isNaN(packetTime)))
+      if ((packetTime < 1e-7) || (Double.isNaN(packetTime) || packetTime > 1000))
       {
          packetTime = defaultTrajectoryTime;
       }

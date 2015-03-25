@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.math.trajectories.WaypointOrientationTrajectoryData;
@@ -114,7 +115,9 @@ public class DesiredChestOrientationProvider implements PacketConsumer<ChestOrie
          }
       }
 
-      trajectoryTime.set(object.getTrajectoryTime());
+      double desiredTrajectoryTime = object.getTrajectoryTime();
+      desiredTrajectoryTime = MathTools.clipToMinMax(desiredTrajectoryTime, 0.0001, 30.0);
+      trajectoryTime.set(desiredTrajectoryTime);
 
       // If go to home orientation requested, ignore the other commands.
       if (object.isToHomeOrientation())
