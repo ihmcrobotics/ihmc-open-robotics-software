@@ -52,7 +52,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame rootJointFrame;
-   private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<ReferenceFrame>();
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> copFrames = new SideDependentList<ReferenceFrame>();
 
    private final YoFramePoint rootJointPosition = new YoFramePoint("estimatedRootJointPositionWithKinematics", worldFrame, registry);
@@ -117,8 +117,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame footFrame = bipedFeet.get(robotSide).getSoleFrame();
-         footFrames.put(robotSide, footFrame);
+         ReferenceFrame soleFrame = bipedFeet.get(robotSide).getSoleFrame();
+         soleFrames.put(robotSide, soleFrame);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
@@ -131,10 +131,10 @@ public class PelvisKinematicsBasedLinearStateCalculator
          FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d(bipedFeet.get(robotSide).getContactPoints2d());
          footPolygons.put(robotSide, footPolygon);
 
-         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2d(footFrame), new FramePoint2d(footFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
+         FrameLineSegment2d tempLineSegment = new FrameLineSegment2d(new FramePoint2d(soleFrame), new FramePoint2d(soleFrame, 1.0, 1.0)); // TODO need to give distinct points that's not convenient
          footCenterCoPLineSegments.put(robotSide, tempLineSegment);
 
-         YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(sidePrefix + "CoPRawInFootFrame", footFrames.get(robotSide), registry);
+         YoFramePoint2d copRawInFootFrame = new YoFramePoint2d(sidePrefix + "CoPRawInFootFrame", soleFrames.get(robotSide), registry);
          copsRawInFootFrame.put(robotSide, copRawInFootFrame);
 
          final AlphaFilteredYoFramePoint2d copFilteredInFootFrame = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d(sidePrefix + "CoPFilteredInFootFrame", "", registry, alphaCoPFilter, copRawInFootFrame);
@@ -144,7 +144,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          YoFramePoint copPositionInWorld = new YoFramePoint(sidePrefix + "CoPPositionsInWorld", worldFrame, registry);
          copPositionsInWorld.put(robotSide, copPositionInWorld);
 
-         ReferenceFrame copFrame = new ReferenceFrame("copFrame", footFrame)
+         ReferenceFrame copFrame = new ReferenceFrame("copFrame", soleFrame)
          {
             private static final long serialVersionUID = -1926704435608610401L;
             private final Vector3d copOffset = new Vector3d();
@@ -280,7 +280,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private void updateCoPPosition(RobotSide trustedSide)
    {
       AlphaFilteredYoFramePoint2d copFilteredInFootFrame = copsFilteredInFootFrame.get(trustedSide);
-      ReferenceFrame footFrame = footFrames.get(trustedSide);
+      ReferenceFrame footFrame = soleFrames.get(trustedSide);
 
       if (useControllerDesiredCoP.getBooleanValue())
          centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, trustedSide);
@@ -361,7 +361,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       for(RobotSide robotSide : RobotSide.values)
       {
          tempFramePoint.setToZero(rootJointFrame);
-         tempFramePoint.changeFrame(footFrames.get(robotSide));
+         tempFramePoint.changeFrame(soleFrames.get(robotSide));
 
          tempFrameVector.setIncludingFrame(tempFramePoint);
          tempFrameVector.changeFrame(worldFrame);
@@ -392,8 +392,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotSide);
 
          twistCalculator.packTwistOfBody(footTwistInWorld , bipedFeet.get(robotSide).getRigidBody());
-         footTwistInWorld.changeBodyFrameNoRelativeTwist(footFrames.get(robotSide));
-         footTwistInWorld.changeFrame(footFrames.get(robotSide));
+         footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(robotSide));
+         footTwistInWorld.changeFrame(soleFrames.get(robotSide));
 
          if (COMPUTE_FOOT_LINEAR_VELOCITY_AT_COP)
          {
