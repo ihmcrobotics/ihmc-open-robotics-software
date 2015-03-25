@@ -12,7 +12,7 @@ public class AtlasAutomaticDiagnosticDemo
    {
       DRCRobotModel robotModel = AtlasRobotModelFactory.createDefaultRobotModel();
 
-      DRCSimulationStarter simulationStarter = DRCSimulationTools.createObstacleCourseSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
       simulationStarter.setRunMultiThreaded(true);
       //      simulationStarter.registerHighLevelController(new CarIngressEgressControllerFactory(robotModel.getMultiContactControllerParameters(), true));
 
