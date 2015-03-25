@@ -350,4 +350,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       }
    }
 
+   public SideDependentList<List<OneDegreeOfFreedomJoint>> getAllFingerJoints()
+   {
+      return allFingerJoints;
+   }
 }
