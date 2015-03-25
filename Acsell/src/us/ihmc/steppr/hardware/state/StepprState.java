@@ -111,12 +111,12 @@ public class StepprState
 
       // Create ankles
       StepprAnkleJointState leftAnkle = new StepprAnkleJointState(RobotSide.LEFT, actuatorStates.get(StepprActuator.LEFT_ANKLE_RIGHT),
-            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), registry);
+            actuatorStates.get(StepprActuator.LEFT_ANKLE_LEFT), getCalibratedJointStrainGauge(StepprJoint.LEFT_ANKLE_Y.getStrainGaugeInformation()), getCalibratedJointStrainGauge(StepprJoint.LEFT_ANKLE_X.getStrainGaugeInformation()), registry);
       jointStates.put(StepprJoint.LEFT_ANKLE_Y, leftAnkle.ankleY());
       jointStates.put(StepprJoint.LEFT_ANKLE_X, leftAnkle.ankleX());
 
       StepprAnkleJointState rightAnkle = new StepprAnkleJointState(RobotSide.RIGHT, actuatorStates.get(StepprActuator.RIGHT_ANKLE_RIGHT),
-            actuatorStates.get(StepprActuator.RIGHT_ANKLE_LEFT), registry);
+            actuatorStates.get(StepprActuator.RIGHT_ANKLE_LEFT), getCalibratedJointStrainGauge(StepprJoint.RIGHT_ANKLE_Y.getStrainGaugeInformation()), getCalibratedJointStrainGauge(StepprJoint.RIGHT_ANKLE_X.getStrainGaugeInformation()), registry);
       jointStates.put(StepprJoint.RIGHT_ANKLE_Y, rightAnkle.ankleY());
       jointStates.put(StepprJoint.RIGHT_ANKLE_X, rightAnkle.ankleX());
 
@@ -178,6 +178,7 @@ public class StepprState
          tarePressureSensors();
          leftFootStrainGauge.tare();
          rightFootStrainGauge.tare();
+         //jointStates.get(StepprJoint.LEFT_ANKLE_X).tare();
          tareSensors.set(false);
       }
 
