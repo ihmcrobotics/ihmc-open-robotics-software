@@ -27,15 +27,6 @@ import us.ihmc.utilities.FormattingTools;
 
 public abstract class DRCSimulationTools
 {
-//   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel)
-//   {
-//      return new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
-//   }
-   
-   public static DRCSimulationStarter createObstacleCourseSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
-   {
-      return new DRCSimulationStarter(robotModel, environment);
-   }
 
    @SuppressWarnings({ "hiding", "unchecked" })
    public static <T extends DRCStartingLocation, Enum> void startSimulationWithGraphicSelector(DRCSimulationStarter simulationStarter,
