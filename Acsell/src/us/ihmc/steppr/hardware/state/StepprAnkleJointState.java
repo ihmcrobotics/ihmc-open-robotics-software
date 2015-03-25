@@ -1,5 +1,6 @@
 package us.ihmc.steppr.hardware.state;
 
+import us.ihmc.steppr.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -15,6 +16,9 @@ public class StepprAnkleJointState
 
    private final StepprActuatorState rightActuator;
    private final StepprActuatorState leftActuator;
+   
+   private final StrainSensor strainSensorRight;
+   private final StrainSensor strainSensorLeft;
 
    private final YoVariableRegistry registry;
 
@@ -34,13 +38,22 @@ public class StepprAnkleJointState
    private final DoubleYoVariable q_leftActuator_calc;
    private final DoubleYoVariable qd_rightActuator_calc;
    private final DoubleYoVariable qd_leftActuator_calc;
+   private final DoubleYoVariable tau_rightActuator;
+   private final DoubleYoVariable tau_leftActuator;
+   
+
+   private final DoubleYoVariable tau_strain_Left;
+   private final DoubleYoVariable tau_strain_Right;
 
    private final double motorAngle[] = new double[2];
 
-   public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, YoVariableRegistry parentRegistry)
+   public StepprAnkleJointState(RobotSide robotSide, StepprActuatorState rightActuator, StepprActuatorState leftActuator, StrainSensor strainSensorRight, StrainSensor strainSensorLeft, YoVariableRegistry parentRegistry)
    {
       this.leftActuator = leftActuator;
       this.rightActuator = rightActuator;
+      
+      this.strainSensorRight = strainSensorRight;
+      this.strainSensorLeft = strainSensorLeft;
 
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Ankle";
       this.registry = new YoVariableRegistry(name);
@@ -60,7 +73,12 @@ public class StepprAnkleJointState
       this.q_leftActuator_calc = new DoubleYoVariable(name + "_q_m_leftActuator_calc", registry);
       this.q_rightActuator_calc = new DoubleYoVariable(name + "_q_m_rightActuator_calc", registry);
       this.qd_leftActuator_calc = new DoubleYoVariable(name + "_qd_m_leftActuator_calc", registry);
-      this.qd_rightActuator_calc = new DoubleYoVariable(name + "_qd_m_crightActuator_calc", registry);
+      this.qd_rightActuator_calc = new DoubleYoVariable(name + "_qd_m_rightActuator_calc", registry);
+      this.tau_leftActuator = new DoubleYoVariable(name + "_tau_leftActuator", registry);
+      this.tau_rightActuator = new DoubleYoVariable(name + "_tau_rightActuator", registry);
+      
+      this.tau_strain_Left = new DoubleYoVariable(name + "LeftActuator_tauMeasuredStrain", registry);
+      this.tau_strain_Right = new DoubleYoVariable(name + "RightActuator_tauMeasuredStrain", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -94,7 +112,12 @@ public class StepprAnkleJointState
 	       
 	   this.tau_x.set(interpolator.getComputedTauAnkleX());
 	   this.tau_y.set(interpolator.getComputedTauAnkleY());
-     
+	   
+	   tau_rightActuator.set(rightActuator.getMotorTorque());
+	   tau_leftActuator.set(leftActuator.getMotorTorque());
+	   
+	   if(strainSensorRight!=null) tau_strain_Right.set(strainSensorRight.getCalibratedValue());
+       if(strainSensorLeft!=null) tau_strain_Left.set(strainSensorLeft.getCalibratedValue());
    }
 
    
@@ -205,6 +228,12 @@ public class StepprAnkleJointState
       public void updateOffsets()
       {
          // Offset is already updated by ankle Y.
+      }
+      
+      public void tareStrainGauges()
+      {
+   	  	if(strainSensorRight!=null) strainSensorRight.tare();
+      	if(strainSensorLeft!=null) strainSensorLeft.tare();
       }
 
    }
