@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -15,7 +16,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
@@ -24,7 +24,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.filters.BacklashCompensatingVelocityYoFrameVector;
@@ -42,11 +41,13 @@ public class PelvisKinematicsBasedLinearStateCalculator
 {
    private static final boolean VISUALIZE = true;
 
+   private static final boolean COMPUTE_FOOT_LINEAR_VELOCITY_AT_COP = false;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final TwistCalculator twistCalculator;
 
-   private final RigidBody rootBody;
+   private final SixDoFJoint rootJoint;
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -92,7 +93,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final FramePoint tempFramePoint = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
    private final FramePoint tempPosition = new FramePoint();
-   private final FramePoint2d tempCoP = new FramePoint2d();
+   private final FramePoint2d tempCoP2d = new FramePoint2d();
+   private final FramePoint tempCoP = new FramePoint();
    private final FrameVector tempCoPOffset = new FrameVector();
    private final RobotSide[] singleElementRobotSideArray = new RobotSide[1];
 
@@ -103,9 +105,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
          SideDependentList<FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
-      this.rootBody = inverseDynamicsStructure.getRootJoint().getSuccessor();
+      this.rootJoint = inverseDynamicsStructure.getRootJoint();
       this.bipedFeet = bipedFeet;
-      this.rootJointFrame = inverseDynamicsStructure.getRootJoint().getFrameAfterJoint();
+      this.rootJointFrame = rootJoint.getFrameAfterJoint();
       this.twistCalculator = inverseDynamicsStructure.getTwistCalculator();
       this.footSwitches = footSwitches;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
@@ -281,24 +283,24 @@ public class PelvisKinematicsBasedLinearStateCalculator
       ReferenceFrame footFrame = footFrames.get(trustedSide);
 
       if (useControllerDesiredCoP.getBooleanValue())
-         centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP, trustedSide);
+         centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, trustedSide);
       else
-         footSwitches.get(trustedSide).computeAndPackCoP(tempCoP);
+         footSwitches.get(trustedSide).computeAndPackCoP(tempCoP2d);
       
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         if (tempCoP.containsNaN())
+         if (tempCoP2d.containsNaN())
          {
-            tempCoP.setToZero();
+            tempCoP2d.setToZero();
          }
          else
          {
             FrameConvexPolygon2d footPolygon = footPolygons.get(trustedSide);
-            boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP);
+            boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP2d);
             if (!isCoPInsideFoot)
             {
                FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedSide);
-               footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP.getX(), tempCoP.getY());
+               footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
                // TODO Garbage
                FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
 
@@ -308,19 +310,19 @@ public class PelvisKinematicsBasedLinearStateCalculator
                if (intersectionPoints.length == 0)
                {
                   System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
-                  tempCoP.setToZero(footFrame);
+                  tempCoP2d.setToZero(footFrame);
                }
                else
-                  tempCoP.set(intersectionPoints[0]);
+                  tempCoP2d.set(intersectionPoints[0]);
             }
          }
       }
       else
       {
-         tempCoP.setToZero();
+         tempCoP2d.setToZero();
       }
 
-      copsRawInFootFrame.get(trustedSide).set(tempCoP);
+      copsRawInFootFrame.get(trustedSide).set(tempCoP2d);
 
       tempCoPOffset.setIncludingFrame(footFrame, copFilteredInFootFrame.getX(), copFilteredInFootFrame.getY(), 0.0);
       copFilteredInFootFrame.update();
@@ -374,7 +376,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    
    private void updateKinematicsNewTwist()
    {      
-      SixDoFJoint rootJoint = (SixDoFJoint) (rootBody.getParentJoint());
       rootJoint.packJointTwist(tempRootBodyTwist);
       
       rootJointLinearVelocityNewTwist.getFrameTupleIncludingFrame(tempFrameVector);
@@ -388,13 +389,27 @@ public class PelvisKinematicsBasedLinearStateCalculator
       for(RobotSide robotSide : RobotSide.values)
       {
          Twist footTwistInWorld = footTwistsInWorld.get(robotSide);
+         YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotSide);
+
          twistCalculator.packTwistOfBody(footTwistInWorld , bipedFeet.get(robotSide).getRigidBody());
          footTwistInWorld.changeBodyFrameNoRelativeTwist(footFrames.get(robotSide));
          footTwistInWorld.changeFrame(footFrames.get(robotSide));
-         footTwistInWorld.packLinearPart(tempFrameVector);
+
+         if (COMPUTE_FOOT_LINEAR_VELOCITY_AT_COP)
+         {
+            this.copsFilteredInFootFrame.get(robotSide).getFrameTuple2dIncludingFrame(tempCoP2d);
+            tempCoP.setXYIncludingFrame(tempCoP2d);
+            footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
+            tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
+            footTwistInWorld.packLinearVelocityOfPointFixedInBodyFrame(tempFrameVector, tempCoP);
+         }
+         else
+         {
+            footTwistInWorld.packLinearPart(tempFrameVector);
+         }
+
          tempFrameVector.changeFrame(worldFrame);
-         
-         footVelocitiesInWorld.get(robotSide).set(tempFrameVector);
+         footVelocityInWorld.set(tempFrameVector);
       }
    }
 
