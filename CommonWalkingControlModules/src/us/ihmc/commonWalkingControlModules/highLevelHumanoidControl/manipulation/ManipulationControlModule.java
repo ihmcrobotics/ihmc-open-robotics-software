@@ -36,7 +36,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class ManipulationControlModule
 {
    public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
-   private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 1.0;
+   private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
