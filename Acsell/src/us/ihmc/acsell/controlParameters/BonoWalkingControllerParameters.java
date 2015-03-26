@@ -135,9 +135,10 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595;
-   private double nominalHeightAboveGround = 0.670+0.020+0.010;//+0.020;
-   private final double maximumHeightAboveGround = 0.79;//Pelvis height fully upright//0.735;
-   private final double additionalOffsetHeightBono = 0.15;
+   private double nominalHeightAboveGround = 0.670+0.020;//+0.010;//+0.020;
+   private final double maximumHeightAboveGround = 0.79;//Hip height fully upright//0.735;
+   //private final double additionalOffsetHeightBono = 0.15;
+   private final double additionalOffsetHeightBono = 0.16; //Spring Ankle
 
    @Override
    public double minimumHeightAboveAnkle()
