@@ -3,6 +3,7 @@ package us.ihmc.acsell.controlParameters;
 import us.ihmc.acsell.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -309,45 +310,28 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getCaptureKpParallelToMotion()
+   public ICPControlGains getICPControlGains()
    {
-      return 1.5;
-   }
+      ICPControlGains gains = new ICPControlGains();
 
-   @Override
-   public double getCaptureKpOrthogonalToMotion()
-   {
-      return 1.5;
-   }
+      double kp = 1.5;
+      double ki = 4.0;
+      double kiBleedOff = 0.9;
+      boolean useRawCMP = false;
+      double cmpFilterBreakFrequencyInHertz = 16.0;
+      double cmpRateLimit = 6.0;
+      double cmpAccelerationLimit = 200.0;
 
-   @Override
-   public double getCaptureKi()
-   {
-      return 4.0;
-   }
+      gains.setKpParallelToMotion(kp);
+      gains.setKpOrthogonalToMotion(kp);
+      gains.setKi(ki);
+      gains.setKiBleedOff(kiBleedOff);
+      gains.setUseRawCMP(useRawCMP);
+      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
+      gains.setCMPRateLimit(cmpRateLimit);
+      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
 
-   @Override
-   public double getCaptureKiBleedoff()
-   {
-      return 0.9;
-   }
-
-   @Override
-   public double getCaptureFilterBreakFrequencyInHz()
-   {
-      return 16.0; //Double.POSITIVE_INFINITY;
-   }
-
-   @Override
-   public double getCMPRateLimit()
-   {
-      return 6.0;
-   }
-
-   @Override
-   public double getCMPAccelerationLimit()
-   {
-      return 200.0;
+      return gains;
    }
 
    @Override
