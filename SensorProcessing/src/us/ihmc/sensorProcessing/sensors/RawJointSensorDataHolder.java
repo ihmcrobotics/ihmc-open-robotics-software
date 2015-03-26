@@ -6,6 +6,7 @@ public class RawJointSensorDataHolder
    
    private boolean useOutputEncoderQ = false;
    private boolean useOutputEncoderQd = false;
+   private boolean isEnabled = false;
    
    private double q_raw;
    private double q_out_raw;
@@ -16,6 +17,7 @@ public class RawJointSensorDataHolder
    private double psi_pos_raw;
    private double motorCurrent;
    private double commandedMotorCurrent;
+   private double temperature;
    
    private double[] motorAngles = new double[2]; // Increase if we get more motors/joint
 
@@ -35,7 +37,8 @@ public class RawJointSensorDataHolder
       {
          throw new RuntimeException("Source name does not equal name");
       }
-      
+
+      setIsEnabled(source.getIsEnabled());
       setQ_raw(source.getQ_raw());
       setQ_out_raw(source.getQ_out_raw());
       setQd_out_raw(source.getQd_out_raw());
@@ -47,6 +50,7 @@ public class RawJointSensorDataHolder
       setUsesOutputEncoderQd(source.isUseOutputEncoderQd());
       setMotorCurrent(source.getMotorCurrent());
       setCommandedMotorCurrent(source.getCommandedMotorCurrent());
+      setTemperature(source.getTemperature());
       
       for (int i = 0; i < motorAngles.length; i++)
       {
@@ -65,7 +69,11 @@ public class RawJointSensorDataHolder
       return useOutputEncoderQd;
    }
 
-   
+   public boolean getIsEnabled()
+   {
+      return isEnabled;
+   }
+
    public void setUsesOutputEncoderQ(boolean useOutputEncoder)
    {
       this.useOutputEncoderQ = useOutputEncoder;
@@ -77,6 +85,10 @@ public class RawJointSensorDataHolder
       this.useOutputEncoderQd = useOutputEncoder;
    }
 
+   public void setIsEnabled(boolean isEnabled)
+   {
+      this.isEnabled = isEnabled;
+   }
 
    public double getQ_raw()
    {
@@ -154,8 +166,17 @@ public class RawJointSensorDataHolder
    {
       return qd_out_raw;
    }
-   
-   
+
+   public double getTemperature()
+   {
+      return temperature;
+   }
+
+   public void setTemperature(double temperature)
+   {
+      this.temperature = temperature;
+   }
+
    public void setQd_out_raw(double qd_out_raw)
    {
       this.qd_out_raw = qd_out_raw;
