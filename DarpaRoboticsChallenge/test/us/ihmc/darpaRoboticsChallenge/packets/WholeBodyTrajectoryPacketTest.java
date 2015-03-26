@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.packets;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
-import us.ihmc.communication.util.NetworkConfigParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -36,6 +36,9 @@ public abstract class WholeBodyTrajectoryPacketTest
    // allowed deviations on the simulated robot from the trajectory for position and velocity:
    private final static double epsilonQ = 0.05;
    private final static double epsilonQd = 0.1;
+   
+   private final long seed = 126497;
+   Random random = new Random(seed);
 
    static
    {
@@ -43,7 +46,6 @@ public abstract class WholeBodyTrajectoryPacketTest
    }
    
    public abstract DRCRobotModel getRobotModel();
-   public abstract String getSimpleRobotName();
    
    @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90000)
@@ -54,11 +56,13 @@ public abstract class WholeBodyTrajectoryPacketTest
       
       WholeBodyTrajectoryPacket packet = createEmptyPacket(waypoints, armJoints);
       
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         packet.allocateArmTrajectory(robotSide);
+      }
+      
       double[] leftArmHome = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, RobotSide.LEFT);
       double[] rightArmHome = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, RobotSide.RIGHT);
-      
-      packet.leftArmJointAngle = new double[armJoints][waypoints];
-      packet.rightArmJointAngle = new double[armJoints][waypoints];
       
       for (int jointIdx = 0; jointIdx < armJoints; jointIdx++)
       {
@@ -75,10 +79,26 @@ public abstract class WholeBodyTrajectoryPacketTest
       executePacket(packet);
    }
    
+//   @EstimatedDuration(duration = 30.0)
+//   @Test(timeout = 90000)
+//   public void testChestPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
+//   {
+//      int waypoints = 2;
+//      WholeBodyTrajectoryPacket packet = createEmptyPacket(waypoints, 0);
+//      
+//      packet.allocatePelvisTrajectory();
+//      
+//      packet.pelvisWorldPosition[0] = new Point3d(0.0, 0.0, 0.3);
+//      packet.pelvisWorldPosition[1] = new Point3d(0.0, 0.0, 0.8);
+//      
+//      packet.timeAtWaypoint[0] = 2.0;
+//      packet.timeAtWaypoint[1] = 4.0;
+//      
+//      executePacket(packet);
+//   }
+   
    private void executePacket(WholeBodyTrajectoryPacket packet) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWholeBodyTrajectoryPacketTest", null, DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.simulateAndBlock(1.0);
       drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
       
       int waypoints = packet.numWaypoints; 
@@ -172,13 +192,11 @@ public abstract class WholeBodyTrajectoryPacketTest
    @Before
    public void setUp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      if (NetworkConfigParameters.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage();
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWholeBodyTrajectoryPacketTest", null, DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.simulateAndBlock(1.0);
    }
 
    @After
@@ -191,7 +209,6 @@ public abstract class WholeBodyTrajectoryPacketTest
          ThreadTools.sleepForever();
       }
 
-      // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)
       {
          drcSimulationTestHelper.destroySimulation();
