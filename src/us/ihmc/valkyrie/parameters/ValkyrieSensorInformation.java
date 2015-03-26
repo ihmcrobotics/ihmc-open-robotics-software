@@ -35,8 +35,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
    
-   public static final double tekscanContactRegionThreshold = .00000044;
-   public static final double tekscanContactThreshold = .00000044;
+   public static final double tekscanContactRegionThreshold = 0.00000044;
+   public static final double tekscanContactThreshold = 0.00000044;
 
    private static final SideDependentList<SpatialForceVector> footForceSensorTareOffsets;
    static
