@@ -11,10 +11,11 @@ import us.ihmc.acsell.springs.StepprLeftAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprLeftHipXSpringProperties;
 import us.ihmc.acsell.springs.StepprRightAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprRightHipXSpringProperties;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 //import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
@@ -30,7 +31,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-public class StepprOutputWriter implements DRCOutputWriter//, ControllerStateChangedListener
+public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
    boolean USE_LEFT_HIP_X_SPRING = false;
    boolean USE_LEFT_ANKLE_SPRING = true;
