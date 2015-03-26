@@ -180,6 +180,9 @@ public class OnToesState extends AbstractFootControlState
       return jacobianId;
    }
 
+   private final FrameVector axisOfRotation = new FrameVector();
+   private final FrameVector2d axisOfRotation2d = new FrameVector2d();
+
    @Override
    public void doSpecificAction()
    {
@@ -216,8 +219,8 @@ public class OnToesState extends AbstractFootControlState
             desiredLinearAcceleration, desiredAngularAcceleration, rootBody);
       accelerationControlModule.packAcceleration(footAcceleration);
 
-      FrameVector2d axisOfRotation2d = edgeToRotateAbout.getVectorCopy();
-      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
+      edgeToRotateAbout.getFrameVector(axisOfRotation2d);
+      axisOfRotation.setXYIncludingFrame(axisOfRotation2d);
       axisOfRotation.normalize();
       axisOfRotation.changeFrame(footAcceleration.getExpressedInFrame());
 
