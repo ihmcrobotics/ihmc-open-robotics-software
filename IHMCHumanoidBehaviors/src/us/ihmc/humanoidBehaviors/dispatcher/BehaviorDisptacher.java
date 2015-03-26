@@ -40,7 +40,6 @@ public class BehaviorDisptacher implements Runnable
 
    private final DoubleYoVariable yoTime;
    private final YoVariableServer yoVaribleServer;
-   private final DoubleYoVariable startTime = new DoubleYoVariable("startTime", registry);
    private final BehaviorStateMachine<HumanoidBehaviorType> stateMachine;
 
    private final EnumYoVariable<HumanoidBehaviorType> requestedBehavior = new EnumYoVariable<>("requestedBehavior", registry, HumanoidBehaviorType.class, true);
@@ -79,7 +78,6 @@ public class BehaviorDisptacher implements Runnable
       stateMachine.setCurrentState(HumanoidBehaviorType.STOP);
 
       requestedBehavior.set(null);
-      startTime.set(Double.NaN);
 
       parentRegistry.addChild(registry);
    }
@@ -173,12 +171,7 @@ public class BehaviorDisptacher implements Runnable
          return;
 
       double currentTimeInSeconds = TimeTools.nanoSecondstoSeconds(simTimestamp);
-      if (startTime.isNaN())
-      {
-         startTime.set(currentTimeInSeconds);
-      }
-
-      yoTime.set(currentTimeInSeconds - startTime.getDoubleValue());
+      yoTime.set(currentTimeInSeconds);
    }
 
    private void updateRequestedBehavior()
