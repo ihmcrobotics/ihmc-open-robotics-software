@@ -236,11 +236,11 @@ file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
 # ... for the build tree
 get_property(CONF_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 get_target_property(POINTMATCHER_LIB pointmatcher LOCATION)
-configure_file(libpointmatcherConfig.cmake.in
-  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
+#configure_file(libpointmatcherConfig.cmake.in
+#  "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" @ONLY)
 
 # Change variables for the install tree
-set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ${CONF_INCLUDE_DIRS} )
+set(CONF_INCLUDE_DIRS ${INSTALL_INCLUDE_DIR} ) #${CONF_INCLUDE_DIRS} )
 # gather all the includes but remove ones in the source tree
 # because we added an include for the local yaml-cpp-pm we should also remove it
 list(REMOVE_ITEM CONF_INCLUDE_DIRS ${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/contrib/yaml-cpp-pm/include)
@@ -261,7 +261,7 @@ install(FILES
 	 "${PROJECT_BINARY_DIR}/libpointmatcherConfigVersion.cmake"
 		   DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-install (FILES "${PROJECT_BINARY_DIR}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
+install (FILES "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/libpointmatcherConfig.cmake" DESTINATION "share/${PROJECT_NAME}/cmake/")
 
 # For Windows
 if( MSVC ) # VS2012 does not support tuples correctly yet
