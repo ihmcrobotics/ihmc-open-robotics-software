@@ -52,7 +52,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final CurrentConfigurationProvider initialConfigurationProvider;
    private final VectorProvider initialVelocityProvider;
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
-   private final DoubleProvider swingTimeProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new TrajectoryParameters());
 
 
@@ -67,8 +66,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
                      VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
-
-      this.swingTimeProvider = swingTimeProvider;
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
 
