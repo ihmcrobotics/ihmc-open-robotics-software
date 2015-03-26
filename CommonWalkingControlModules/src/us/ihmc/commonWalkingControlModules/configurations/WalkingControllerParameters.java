@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -60,19 +61,21 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
-   public abstract double getCaptureKpParallelToMotion();
+   public abstract ICPControlGains getICPControlGains();
 
-   public abstract double getCaptureKpOrthogonalToMotion();
-
-   public abstract double getCaptureKi();
-
-   public abstract double getCaptureKiBleedoff();
-
-   public abstract double getCaptureFilterBreakFrequencyInHz();
-
-   public abstract double getCMPRateLimit();
-
-   public abstract double getCMPAccelerationLimit();
+//   public abstract double getCaptureKpParallelToMotion();
+//
+//   public abstract double getCaptureKpOrthogonalToMotion();
+//
+//   public abstract double getCaptureKi();
+//
+//   public abstract double getCaptureKiBleedoff();
+//
+//   public abstract double getCaptureFilterBreakFrequencyInHz();
+//
+//   public abstract double getCMPRateLimit();
+//
+//   public abstract double getCMPAccelerationLimit();
 
    public abstract YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry);
 

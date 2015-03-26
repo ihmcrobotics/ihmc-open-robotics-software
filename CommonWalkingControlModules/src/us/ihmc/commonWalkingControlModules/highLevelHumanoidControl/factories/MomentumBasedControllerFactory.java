@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPBasedLinearMomentumRateOfChangeControlModule;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -202,13 +203,9 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
+      ICPControlGains icpControlGains = walkingControllerParameters.getICPControlGains();
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
-            referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, registry, yoGraphicsListRegistry);
-
-      iCPBasedLinearMomentumRateOfChangeControlModule.setGains(walkingControllerParameters.getCaptureKpParallelToMotion(),
-            walkingControllerParameters.getCaptureKpOrthogonalToMotion(), walkingControllerParameters.getCaptureKi(),
-            walkingControllerParameters.getCaptureKiBleedoff(), walkingControllerParameters.getCaptureFilterBreakFrequencyInHz(),
-            walkingControllerParameters.getCMPRateLimit(), walkingControllerParameters.getCMPAccelerationLimit());
+            referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, iCPBasedLinearMomentumRateOfChangeControlModule,

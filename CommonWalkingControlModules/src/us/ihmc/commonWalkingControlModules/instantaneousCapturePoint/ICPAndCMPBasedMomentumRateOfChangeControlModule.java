@@ -76,8 +76,8 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
    private final FrameOrientation desiredPelvisOrientation = new FrameOrientation();
 
    public ICPAndCMPBasedMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         TwistCalculator twistCalculator, double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains,
+         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
       this.pelvisFrame = referenceFrames.getPelvisFrame();
@@ -86,7 +86,7 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       this.gravityZ = gravityZ;
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry, yoGraphicsListRegistry);
       groundReactionMomentControlModule = new GroundReactionMomentControlModule(pelvisFrame, registry);
       groundReactionMomentControlModule.setGains(10.0, 100.0); // kPelvisYaw was 0.0 for M3 movie TODO: move to setGains method
 
@@ -170,13 +170,10 @@ public class ICPAndCMPBasedMomentumRateOfChangeControlModule
       return ret;
    }
 
-   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle, double captureKpParallelToMotion, double captureKpOrthogonalToMotion,
-         double captureKi, double captureKiBleedoff, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
+   public void setGains(double kAngularMomentumXY, double kPelvisAxisAngle)
    {
       this.kAngularMomentumXY.set(kAngularMomentumXY);
       this.kPelvisAxisAngle.set(kPelvisAxisAngle);
-      icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz,
-            rateLimitCMP, accelerationLimitCMP);
    }
 
    private FrameVector2d determineDesiredDeltaCMP(FrameOrientation desiredPelvisOrientation, Momentum momentum)
