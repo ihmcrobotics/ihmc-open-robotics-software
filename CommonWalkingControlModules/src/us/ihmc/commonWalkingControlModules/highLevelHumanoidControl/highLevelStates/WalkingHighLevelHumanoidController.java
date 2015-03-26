@@ -389,7 +389,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          @Override
          public void stateChanged(State<WalkingState> oldState, State<WalkingState> newState, double time)
          {
-            momentumBasedController.reportControllerStateChangeToListeners();
+            momentumBasedController.reportControllerStateChangeToListeners(oldState.getStateEnum(), newState.getStateEnum());
          }
       });
    }
