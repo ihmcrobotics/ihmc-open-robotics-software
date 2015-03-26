@@ -12,7 +12,7 @@ public class TestMultiThreadedSimulation
 
       DoublePendulumController controller = new DoublePendulumController(doublePendulum);
       
-      MultiThreadedRobotController multiThreadedRobotController = new MultiThreadedRobotController("threadedController", doublePendulum.getYoTime(), scs);
+      MultiThreadedRobotController multiThreadedRobotController = new MultiThreadedRobotController("threadedController", doublePendulum, scs);
       multiThreadedRobotController.addController(controller, 10, false);
       multiThreadedRobotController.initialize();
       

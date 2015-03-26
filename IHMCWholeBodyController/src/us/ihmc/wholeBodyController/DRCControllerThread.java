@@ -33,6 +33,8 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -107,6 +109,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final BooleanYoVariable runController = new BooleanYoVariable("runController", registry);
 
    private final GlobalDataProducer globalDataProducer;
+   
+   private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
+   private final ReferenceFrame rootFrame;
 
    public DRCControllerThread(WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation,
          MomentumBasedControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, DRCOutputWriter outputWriter,
@@ -118,7 +123,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
       this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(estimatorDT);
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
-      controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
       this.outputProcessor = robotModel.getOutputProcessor(controllerFullRobotModel);
       this.globalDataProducer = dataProducer;
 
@@ -366,7 +372,10 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
       catch (Exception e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
+         }
          throw new RuntimeException(e);
 
       }
@@ -415,6 +424,9 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             {
                robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
             }
+            
+            rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
+            yoGraphicsListRegistry.setControllerTransformToWorld(rootToWorldTransform);
          }
 
       }

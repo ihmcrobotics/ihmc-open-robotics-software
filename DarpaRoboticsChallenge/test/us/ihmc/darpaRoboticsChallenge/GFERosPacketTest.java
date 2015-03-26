@@ -38,6 +38,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPac
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
@@ -50,7 +51,6 @@ import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -244,8 +244,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   RobotVisualizer robotVisualizer = null;
 	   ThreadDataSynchronizerInterface threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(null, robotModel, registry);
 	   
-	   DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
-	   SingleThreadedRobotController robotController = new SingleThreadedRobotController("testSingleThreadedRobotController", yoTime, null );
+	   Robot robot = new Robot("Robot");
+	   SingleThreadedRobotController robotController = new SingleThreadedRobotController("testSingleThreadedRobotController", robot, null );
 	   int estimatorTicksPerSimulationTick = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getEstimatorDT());
 	   int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 	   

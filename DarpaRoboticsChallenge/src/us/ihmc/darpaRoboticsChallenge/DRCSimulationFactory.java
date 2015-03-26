@@ -223,12 +223,12 @@ public class DRCSimulationFactory
 
       if (scsInitialSetup.getRunMultiThreaded())
       {
-         multiThreadedRobotController = new MultiThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);
+         multiThreadedRobotController = new MultiThreadedRobotController("DRCSimulation", simulatedRobot, scs);
       }
       else
       {
          PrintTools.warn(this, "Running simulation in single threaded mode", true);
-         multiThreadedRobotController = new SingleThreadedRobotController("DRCSimulation", simulatedRobot.getYoTime(), scs);
+         multiThreadedRobotController = new SingleThreadedRobotController("DRCSimulation", simulatedRobot, scs);
       }
       int estimatorTicksPerSimulationTick = (int) Math.round(drcRobotModel.getEstimatorDT() / drcRobotModel.getSimulateDT());
       int controllerTicksPerSimulationTick = (int) Math.round(drcRobotModel.getControllerDT() / drcRobotModel.getSimulateDT());
@@ -291,12 +291,7 @@ public class DRCSimulationFactory
 
       simulatedRobot.setController(simulatedDRCRobotTimeProvider);
    }
-
-   private static void setupJointDamping(SDFRobot simulatedRobot, DRCRobotModel robotModel)
-   {
-      robotModel.setJointDamping(simulatedRobot);
-   }
-
+   
    private static void initializeEstimatorToActual(DRCEstimatorThread drcStateEstimator, DRCRobotInitialSetup<SDFRobot> robotInitialSetup,
          SDFRobot simulatedRobot, DRCRobotJointMap jointMap)
    {

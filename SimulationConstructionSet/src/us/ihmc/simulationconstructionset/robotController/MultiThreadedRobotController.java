@@ -1,17 +1,17 @@
 package us.ihmc.simulationconstructionset.robotController;
 
 import us.ihmc.simulationconstructionset.PlayCycleListener;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class MultiThreadedRobotController extends AbstractThreadedRobotController implements RewoundListener, PlayCycleListener
 {
    private final SimulationConstructionSet scs;
 
-   public MultiThreadedRobotController(String name, DoubleYoVariable yoTime, SimulationConstructionSet scs)
+   public MultiThreadedRobotController(String name, Robot simulatedRobot, SimulationConstructionSet scs)
    {
-      super(name, yoTime);
+      super(name, simulatedRobot);
       this.scs = scs;
       scs.attachSimulationRewoundListener(this);
       scs.attachPlayCycleListener(this);
@@ -19,7 +19,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
 
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
-      controllers.add(new MultiThreadedRobotControllerExecutor(controller, executionsPerControlTick, skipFirstControlCycle, registry));
+      controllers.add(new MultiThreadedRobotControllerExecutor(simulatedRobot, controller, executionsPerControlTick, skipFirstControlCycle, registry));
       if(controller.getDynamicGraphicObjectsListRegistry() != null)
       {
          scs.addYoGraphicsListRegistry(controller.getDynamicGraphicObjectsListRegistry(), false);

@@ -17,7 +17,7 @@ public class DRCSimGazeboThreadedRobotController extends AbstractThreadedRobotCo
    @Override
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
-      controllers.add(new MultiThreadedRobotControllerExecutor(controller, executionsPerControlTick, skipFirstControlCycle, registry));
+      controllers.add(new MultiThreadedRobotControllerExecutor(null, controller, executionsPerControlTick, skipFirstControlCycle, registry));
    }
 
    @Override

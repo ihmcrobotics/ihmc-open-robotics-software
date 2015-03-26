@@ -5,8 +5,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class MultiThreadedRobotControllerExecutor implements RobotControllerExecutor
@@ -20,13 +22,16 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
 
    private final MirroredYoVariableRegistry registry;
    private final boolean skipFirstControlCycle;
+   
+   private final Robot simulatedRobot;
 
-   public MultiThreadedRobotControllerExecutor(MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
+   public MultiThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
    {
       this.ticksPerSimulationTick = ticksPerSimulationTick;
       this.skipFirstControlCycle = skipFirstControlCycle;
       this.robotControlElement = robotControlElement;
       this.controlExecutor = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(robotControlElement.getName()));
+      this.simulatedRobot = simulatedRobot;
 
       YoVariableRegistry elementRegistry = robotControlElement.getYoVariableRegistry();
       if(elementRegistry!=null)
@@ -120,6 +125,12 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
       {
     	  if(registry!=null)
                  registry.updateChangedValues();
+         if (simulatedRobot != null)
+         {
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
+            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+         }
          robotControlElement.getDynamicGraphicObjectsListRegistry().update();
       }
    }
