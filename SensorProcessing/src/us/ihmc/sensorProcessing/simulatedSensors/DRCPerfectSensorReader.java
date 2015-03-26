@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -15,6 +16,7 @@ public class DRCPerfectSensorReader implements SensorReader
    private final YoVariableRegistry registry = new YoVariableRegistry("DRCPerfectSensorReader");
    private RawSensorReader rawSensorReader;
    private SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   private SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
@@ -34,10 +36,21 @@ public class DRCPerfectSensorReader implements SensorReader
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
    }
 
+   public void setSensorRawOutputMapReadOnly(SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly)
+   {
+      this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
+   }
+
    @Override
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
    {
       return sensorOutputMapReadOnly;
+   }
+
+   @Override
+   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   {
+      return sensorRawOutputMapReadOnly;
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)

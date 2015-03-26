@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
@@ -23,7 +24,7 @@ import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly
+public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
    private final String name;
    private final SDFRobot robot;
@@ -205,6 +206,36 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    @Override
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
+   {
+      return new ArrayList<>();
+   }
+
+   @Override
+   public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQ();
+   }
+
+   @Override
+   public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQd();
+   }
+
+   @Override
+   public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getQdd();
+   }
+
+   @Override
+   public double getJointTauRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.getTau();
+   }
+
+   @Override
+   public List<? extends IMUSensorReadOnly> getIMURawOutputs()
    {
       return new ArrayList<>();
    }
