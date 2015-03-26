@@ -9,9 +9,11 @@ import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
 import us.ihmc.acsell.springs.StepprLeftHipXSpringProperties;
 import us.ihmc.acsell.springs.StepprRightHipXSpringProperties;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.command.StepprCommand;
@@ -26,7 +28,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-public class StepprOutputWriter implements DRCOutputWriter
+public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
    boolean USE_SPRING = true;
 
@@ -70,6 +72,8 @@ public class StepprOutputWriter implements DRCOutputWriter
 
    private final EnumMap<StepprJoint, EnumYoVariable<JointControlMode>> jointControlMode = new EnumMap<StepprJoint, EnumYoVariable<JointControlMode>>(
          StepprJoint.class);
+
+   private WalkingState currentWalkingState;
 
    public StepprOutputWriter(DRCRobotModel robotModel)
    {
@@ -310,13 +314,21 @@ public class StepprOutputWriter implements DRCOutputWriter
    @Override
    public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForController)
    {
-
    }
 
    @Override
    public YoVariableRegistry getControllerYoVariableRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
+   {
+      if(newState instanceof WalkingState)
+      {
+         currentWalkingState = (WalkingState)newState;
+      }
    }
 
 }
