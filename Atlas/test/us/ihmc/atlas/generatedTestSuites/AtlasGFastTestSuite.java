@@ -11,6 +11,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseStandingYawedTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class,
+   us.ihmc.atlas.packets.wholebody.AtlasWholeBodyTrajectoryPacketTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
    us.ihmc.atlas.roughTerrainWalking.AtlasFootstepSnapperTest.class,
    us.ihmc.atlas.roughTerrainWalking.AtlasSwingTrajectoryTest.class,
