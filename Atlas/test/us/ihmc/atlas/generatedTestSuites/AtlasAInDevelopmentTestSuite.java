@@ -8,11 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.AtlasGFERosPacketTest.class,
-   us.ihmc.atlas.AtlasMultiContactTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasBehaviorDispatcherTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasDrillPickUpBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasFootstepListBehaviorTest.class
+   us.ihmc.atlas.AtlasMultiContactTest.class
 })
 
 public class AtlasAInDevelopmentTestSuite
