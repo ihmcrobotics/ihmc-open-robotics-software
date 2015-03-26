@@ -8,7 +8,11 @@ import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -182,27 +186,33 @@ public class ROSMessageGenerator
       }
       else if (clazz.isEnum())
       {
-         Object[] enumList = clazz.getEnumConstants();
-         buffer += "# Options for " + varName + System.lineSeparator();
-
-         for (int i = 0; i < enumList.length; i++)
+         if (DocumentedEnum.class.isAssignableFrom(clazz))
          {
-            buffer += "# " + enumList[i];
-            buffer += " = " + i;
-            if (DocumentedEnum.class.isAssignableFrom(clazz))
+            DocumentedEnum[] enumList = (DocumentedEnum[]) clazz.getEnumConstants();
+            if(enumList.length > 0)
             {
-               DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, enumList[i].toString());
-               String documentation = documentedEnum.getDocumentation(enumList[i]);
-               buffer += " - " + documentation;
+               List<Object> documentedValues = Arrays.asList(enumList[0].getDocumentedValues());
+               
+               buffer += "# Options for " + varName + System.lineSeparator();
+               
+               for (int i = 0; i < documentedValues.size(); i++)
+               {
+                  buffer += "# " + documentedValues.get(i);
+                  buffer += " = " + i;
+                  DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, documentedValues.get(i).toString());
+                  String documentation = documentedEnum.getDocumentation(documentedValues.get(i));
+                  buffer += " - " + documentation;
+                  buffer += System.lineSeparator();
+               }
+               
+               buffer += "uint8";
             }
-            else
-            {
-               System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum!");
-            }
-            buffer += System.lineSeparator();
+         }
+         else
+         {
+            System.err.println(clazz.getSimpleName() + " is not a DocumentedEnum! Fix and rerun!");
          }
 
-         buffer += "uint8";
       }
       else if (clazz.equals(byte.class) || clazz.equals(Byte.class))
       {
