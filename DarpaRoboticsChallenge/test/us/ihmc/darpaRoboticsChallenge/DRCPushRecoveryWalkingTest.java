@@ -26,6 +26,7 @@ import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -293,7 +294,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       double duration = 0.05;
       // This doesn't work for 0.5 or higher. We need to do more development to get this working better. So for now, just stick with 0.4.
       double percentInTransferState = 0.4; //0.9 * Math.random();
-      System.out.println("percentInTransferState = " + percentInTransferState);
+      PrintTools.info(this, "percentInTransferState = " + percentInTransferState);
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
