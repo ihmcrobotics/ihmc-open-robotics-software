@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProduce
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -541,7 +542,12 @@ public class HandControlModule
 
       for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
       {
-         quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).setFinalPosition(desiredJointPositions.get(oneDoFJoint));
+         double desiredPositions = desiredJointPositions.get(oneDoFJoint);
+         
+         //make sure that we do not set the desired position outside the joint limit
+         desiredPositions = MathTools.clipToMinMax(desiredPositions, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         
+         quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).setFinalPosition(desiredPositions);
       }
 
       jointSpaceHandControlState.setTrajectories(quinticPolynomialTrajectoryGenerators);
@@ -564,12 +570,23 @@ public class HandControlModule
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
+      //Note that for way points, this will be really really slow because 
+      //it will be TWO seconds between each way point
       time = Math.max(2.0, time);
       trajectoryTimeProvider.set(time);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         waypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[i]).setDesiredPositions(desiredJointPositions.get(oneDoFJoints[i]));
+         //check if the desired is in the limits
+         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         double[] desiredPositions  = desiredJointPositions.get(oneDoFJoint);
+         
+         for(int j=0; j<desiredPositions.length; j++)
+         {
+            desiredPositions[j] = MathTools.clipToMinMax(desiredPositions[j], oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         }
+         
+         waypointsPolynomialTrajectoryGenerators.get(oneDoFJoint).setDesiredPositions(desiredPositions);
       }
 
       jointSpaceHandControlState.setTrajectories(waypointsPolynomialTrajectoryGenerators);
@@ -622,7 +639,8 @@ public class HandControlModule
          jointCurrentPositionMap.put(oneDoFJoint, oneDoFJoint.getQ());
       }
 
-      moveUsingQuinticSplines(jointCurrentPositionMap, 0.0, false);
+      double epsilon = 1e-2;
+      moveUsingQuinticSplines(jointCurrentPositionMap, epsilon, false);
    }
 
    public boolean isControllingPoseInWorld()
