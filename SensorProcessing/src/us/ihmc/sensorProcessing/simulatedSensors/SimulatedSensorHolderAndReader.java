@@ -5,6 +5,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
@@ -87,6 +88,12 @@ public class SimulatedSensorHolderAndReader implements SensorReader
    }
 
    public SensorOutputMapReadOnly getSensorOutputMapReadOnly()
+   {
+      return sensorProcessing;
+   }
+
+   @Override
+   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
    }

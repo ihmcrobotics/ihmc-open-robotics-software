@@ -31,7 +31,7 @@ import us.ihmc.yoUtilities.math.filters.RevisedBacklashCompensatingVelocityYoVar
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
-public class SensorProcessing implements SensorOutputMapReadOnly
+public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutputMapReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -68,6 +68,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointAccelerations = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointTaus = new LinkedHashMap<>();
 
+   private final ArrayList<IMUSensor> inputIMUs = new ArrayList<IMUSensor>();
    private final ArrayList<IMUSensor> outputIMUs = new ArrayList<IMUSensor>();
 
    private final List<OneDoFJoint> jointSensorDefinitions;
@@ -135,6 +136,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          intermediateLinearAccelerations.put(imuDefinition, rawLinearAcceleration);
          processedLinearAccelerations.put(imuDefinition, new ArrayList<ProcessingYoVariable>());
          
+         inputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
          outputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
       }
 
@@ -156,7 +158,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
-         
+
          updateProcessors(processedJointPositions.get(oneDoFJoint));
          updateProcessors(processedJointVelocities.get(oneDoFJoint));
          updateProcessors(processedJointAccelerations.get(oneDoFJoint));
@@ -166,6 +168,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       for (int i = 0; i < imuSensorDefinitions.size(); i++)
       {
          IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+
+         IMUSensor inputIMU = inputIMUs.get(i);
+         inputOrientations.get(imuDefinition).get(tempOrientation);
+         inputAngularVelocities.get(imuDefinition).get(tempAngularVelocity);
+         inputLinearAccelerations.get(imuDefinition).get(tempLinearAcceleration);
+         inputIMU.setOrientationMeasurement(tempOrientation);
+         inputIMU.setAngularVelocityMeasurement(tempAngularVelocity);
+         inputIMU.setLinearAccelerationMeasurement(tempLinearAcceleration);
+
          updateProcessors(processedOrientations.get(imuDefinition));
          updateProcessors(processedAngularVelocities.get(imuDefinition));
          updateProcessors(processedLinearAccelerations.get(imuDefinition));
@@ -718,5 +729,35 @@ public class SensorProcessing implements SensorOutputMapReadOnly
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return inputJointPositions.get(oneDoFJoint).getDoubleValue();
+   }
+
+   @Override
+   public double getJointVelocityRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return inputJointVelocities.get(oneDoFJoint).getDoubleValue();
+   }
+
+   @Override
+   public double getJointAccelerationRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return inputJointAccelerations.get(oneDoFJoint).getDoubleValue();
+   }
+
+   @Override
+   public double getJointTauRawOutput(OneDoFJoint oneDoFJoint)
+   {
+      return inputJointTaus.get(oneDoFJoint).getDoubleValue();
+   }
+
+   @Override
+   public List<? extends IMUSensorReadOnly> getIMURawOutputs()
+   {
+      return inputIMUs;
    }
 }

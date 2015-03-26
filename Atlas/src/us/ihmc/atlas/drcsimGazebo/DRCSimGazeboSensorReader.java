@@ -19,6 +19,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -175,4 +176,9 @@ public class DRCSimGazeboSensorReader implements SensorReader
       return sensorProcessing;
    }
 
+   @Override
+   public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
+   {
+      return sensorProcessing;
+   }
 }
