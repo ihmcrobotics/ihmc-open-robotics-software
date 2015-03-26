@@ -32,6 +32,8 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
@@ -76,6 +78,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    
    private final GlobalDataProducer globalDataProducer;
    
+   private final RigidBodyTransform rootToWorldTransform = new RigidBodyTransform();
+   private final ReferenceFrame rootFrame;
+   
    public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, DRCRobotContactPointParameters contactPointParameters, StateEstimatorParameters stateEstimatorParameters,
 		   SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer dataProducer, RobotVisualizer robotVisualizer, double gravity)
    {
@@ -83,6 +88,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.robotVisualizer = robotVisualizer;
       this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
+      rootFrame = estimatorFullRobotModel.getRootJoint().getFrameAfterJoint();
+      
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
 
       sensorReaderFactory
@@ -219,10 +226,16 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             robotVisualizer.update(startTimestamp);
          }
          estimatorTick.increment();
+         
+         rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
+         yoGraphicsListRegistry.setControllerTransformToWorld(rootToWorldTransform);
       }
       catch (Throwable e)
       {
-         globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_WRITE, e.getMessage());
+         if(globalDataProducer != null)
+         {
+            globalDataProducer.notifyControllerCrash(CrashLocation.ESTIMATOR_WRITE, e.getMessage());
+         }
          throw new RuntimeException(e);
       }
    }

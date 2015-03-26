@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.robotController;
 
 import java.util.ArrayList;
 
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -14,16 +15,17 @@ public abstract class AbstractThreadedRobotController implements RobotController
 
    protected final ArrayList<RobotControllerExecutor> controllers = new ArrayList<RobotControllerExecutor>();
    protected final DoubleYoVariable yoTime;
+   protected final Robot simulatedRobot;
 
    protected final LongYoVariable currentControlTick;
 
-   public AbstractThreadedRobotController(String name, DoubleYoVariable yoTime)
+   public AbstractThreadedRobotController(String name, Robot simulatedRobot)
    {
       this.name = name;
       this.registry = new YoVariableRegistry(name);
       this.currentControlTick = new LongYoVariable("currentControlTick", registry);
-      this.yoTime = yoTime;
-
+      this.yoTime = simulatedRobot.getYoTime();
+      this.simulatedRobot = simulatedRobot;
    }
    
    public AbstractThreadedRobotController(String name)
@@ -32,6 +34,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
       this.registry = new YoVariableRegistry(name);
       this.currentControlTick = new LongYoVariable("currentControlTick", registry);
       this.yoTime = new DoubleYoVariable("time", registry);
+      this.simulatedRobot = null;
    }
 
    public abstract void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle);

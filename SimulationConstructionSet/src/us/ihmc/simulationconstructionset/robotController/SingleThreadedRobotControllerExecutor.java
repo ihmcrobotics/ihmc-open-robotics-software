@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.robotController;
 
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
@@ -7,13 +9,15 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
    private final long ticksPerSimulationTick;
    private final MultiThreadedRobotControlElement robotControlElement;
    private final boolean skipFirstControlCycle;
-
-   SingleThreadedRobotControllerExecutor(MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
+   private final Robot simulatedRobot;
+   
+   SingleThreadedRobotControllerExecutor(Robot simulatedRobot, MultiThreadedRobotControlElement robotControlElement, int ticksPerSimulationTick, boolean skipFirstControlCycle, YoVariableRegistry parentRegistry)
    {
       this.ticksPerSimulationTick = ticksPerSimulationTick;
       this.robotControlElement = robotControlElement;
       this.skipFirstControlCycle = skipFirstControlCycle;
-
+      this.simulatedRobot = simulatedRobot;
+      
       parentRegistry.addChild(robotControlElement.getYoVariableRegistry());
    }
 
@@ -22,6 +26,12 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
       if (tick % ticksPerSimulationTick == 0 && !(tick == 0 && skipFirstControlCycle))
       {
          robotControlElement.write(System.nanoTime());
+         if (simulatedRobot != null)
+         {
+            RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
+            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+         }
       }
    }
 
