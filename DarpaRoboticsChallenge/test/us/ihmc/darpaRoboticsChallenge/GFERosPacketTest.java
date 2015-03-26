@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.poi.ss.formula.functions.T;
 import org.junit.After;
@@ -45,6 +46,7 @@ import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotCont
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCSimulationOutputWriter;
@@ -150,10 +152,25 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       Class[] gfePacketList = IHMCRosApiMessageMap.PACKET_LIST;
       
       int randomModulus = random.nextInt(250) + 1;
-      for(int i = 0; i < 1000000; i++)
+      
+      int iteration = 0;
+      final AtomicBoolean timeNotElapsed = new AtomicBoolean(true);
+      Runnable timer = new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            ThreadTools.sleep(TimeTools.secondsToMilliSeconds(180));
+            timeNotElapsed.set(false);
+         }
+      };
+      Thread t1 = new Thread(timer);
+      t1.start();
+      
+      while(timeNotElapsed .get() && iteration < 1000000)
       {
          robotController.doControl();
-         if(i % randomModulus == 0)
+         if(iteration % randomModulus == 0)
          {
             randomModulus = random.nextInt(250) + 1;
             int randomIndex = random.nextInt(gfePacketList.length);
@@ -163,6 +180,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
             System.out.println(randomPacket.getClass() + " " + randomPacket);
             gfe_communicator.receivedPacket(randomPacket);
          }
+         iteration++;
       }
    }
 
