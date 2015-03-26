@@ -522,6 +522,11 @@ public class HandControlModule
 
    public void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time)
    {
+      moveUsingQuinticSplines(desiredJointPositions, time, true);
+   }
+
+   private void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time, boolean checkTrajectoryTime)
+   {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          if (!desiredJointPositions.containsKey(oneDoFJoints[i]))
@@ -531,7 +536,7 @@ public class HandControlModule
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
-      if (time < 2.0) time = 2.0;
+      if (time < 2.0 && checkTrajectoryTime) time = 2.0;
       trajectoryTimeProvider.set(time);
 
       for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
@@ -618,7 +623,7 @@ public class HandControlModule
       }
 
       double epsilon = 1e-2;
-      moveUsingQuinticSplines(jointCurrentPositionMap, epsilon);
+      moveUsingQuinticSplines(jointCurrentPositionMap, epsilon, false);
    }
 
    public boolean isControllingPoseInWorld()
