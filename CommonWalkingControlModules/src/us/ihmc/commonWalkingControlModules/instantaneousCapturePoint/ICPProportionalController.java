@@ -28,25 +28,17 @@ public class ICPProportionalController
    private final FrameVector2d tempControl = new FrameVector2d(worldFrame);
    private final YoFrameVector2d icpError = new YoFrameVector2d("icpError", "", worldFrame, registry);
    private final YoFrameVector2d icpErrorIntegrated = new YoFrameVector2d("icpErrorIntegrated", "", worldFrame, registry);
-   
+
    private final YoFrameVector2d feedbackPart = new YoFrameVector2d("feedbackPart", "", worldFrame, registry);
    
-
    private final DoubleYoVariable alphaICPVelocityFeedForward = new DoubleYoVariable("alphaICPVelocityFeedForward", registry);
 
-   private final DoubleYoVariable alphaCMP = new DoubleYoVariable("alphaCMP", registry);
-   private final DoubleYoVariable rateLimitCMP = new DoubleYoVariable("rateLimitCMP", registry);
-   private final DoubleYoVariable accelerationLimitCMP = new DoubleYoVariable("accelerationLimitCMP", registry);
-
    private final YoFrameVector2d desiredCMPToICP = new YoFrameVector2d("desiredCMPToICP", "", worldFrame, registry);
+
    private final YoFrameVector2d rawCMPOutput = new YoFrameVector2d("rawCMPOutput", "", worldFrame, registry);
-   private final AlphaFilteredYoFrameVector2d filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "",
-                                                                    registry, alphaCMP, rawCMPOutput);
-   
+   private final AlphaFilteredYoFrameVector2d filteredCMPOutput;
    private final AccelerationLimitedYoFrameVector2d rateLimitedCMPOutput;
 
-   private final DoubleYoVariable maxDistanceBetweenICPAndCMP = new DoubleYoVariable("maxDistanceBetweenICPAndCMP", registry);
-   
    private final YoFramePoint icpPosition;
    private final DoubleYoVariable alphaICPVelocity;
    private final FilteredVelocityYoFrameVector icpVelocity;
@@ -67,13 +59,14 @@ public class ICPProportionalController
 
    private final SmartCMPProjectorTwo smartCMPProjector;
 
-   public ICPProportionalController(double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final boolean useRawCMP;
+
+   public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
 
       this.controlDT = controlDT;
-      
-      rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);      
+
       icpVelocityDirectionFrame = new Vector2dZUpFrame("icpVelocityDirectionFrame", worldFrame);
       
       icpPosition = new YoFramePoint("icpPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -81,13 +74,52 @@ public class ICPProportionalController
       icpVelocity = FilteredVelocityYoFrameVector.createFilteredVelocityYoFrameVector("icpVelocity", "", alphaICPVelocity, controlDT, parentRegistry, icpPosition);
       parentRegistry.addChild(registry);
       
-      maxDistanceBetweenICPAndCMP.set(Double.POSITIVE_INFINITY);
+      captureKpParallelToMotion.set(gains.getKpParallelToMotion());
+      captureKpOrthogonalToMotion.set(gains.getKpOrthogonalToMotion());
+      captureKi.set(gains.getKi());
+      captureKiBleedoff.set(gains.getKiBleedOff());
+
+      useRawCMP = gains.useRawCMP();
+      if (useRawCMP)
+      {
+         filteredCMPOutput = null;
+         rateLimitedCMPOutput = null;
+      }
+      else
+      {
+         DoubleYoVariable alphaCMP = new DoubleYoVariable("alphaCMP", registry);
+         DoubleYoVariable rateLimitCMP = new DoubleYoVariable("rateLimitCMP", registry);
+         DoubleYoVariable accelerationLimitCMP = new DoubleYoVariable("accelerationLimitCMP", registry);
+
+         filteredCMPOutput = AlphaFilteredYoFrameVector2d.createAlphaFilteredYoFrameVector2d("filteredCMPOutput", "", registry, alphaCMP, rawCMPOutput);
+         rateLimitedCMPOutput = AccelerationLimitedYoFrameVector2d.createAccelerationLimitedYoFrameVector2d("rateLimitedCMPOutput", "", registry, rateLimitCMP, accelerationLimitCMP, controlDT, filteredCMPOutput);      
+
+         double filterBreakFrequencyHertz = gains.getCMPFilterBreakFrequencyInHertz();
+         alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
+         rateLimitCMP.set(gains.getCMPRateLimit());
+         accelerationLimitCMP.set(gains.getCMPAccelerationLimit());
+
+         rateLimitedCMPOutput.setGainsByPolePlacement(2.0 * Math.PI * filterBreakFrequencyHertz, 1.0);
+
+         double frequencyRatios = filterBreakFrequencyHertz / (accelerationLimitCMP.getDoubleValue() / rateLimitCMP.getDoubleValue());
+
+         if (frequencyRatios > 0.5)
+         {
+            System.err.println("Warning. Shouldn't have frequency ratios greater than 0.5 in ICPProportionalController!!");
+            System.err.println("frequencyRatios = " + frequencyRatios);
+         }
+
+      }
+   
    }
 
    public void reset()
    {
-      filteredCMPOutput.reset();
-      rateLimitedCMPOutput.reset();
+      if (!useRawCMP)
+      {
+         filteredCMPOutput.reset();
+         rateLimitedCMPOutput.reset();
+      }
       icpErrorIntegrated.set(0.0, 0.0);
    }
 
@@ -172,14 +204,6 @@ public class ICPProportionalController
 
       desiredCMPToICP.sub(capturePoint, desiredCMP);
 
-      double distanceDesiredCMPToICP = desiredCMPToICP.length();
-      if (distanceDesiredCMPToICP > maxDistanceBetweenICPAndCMP.getDoubleValue())
-      {
-         desiredCMPToICP.scale(maxDistanceBetweenICPAndCMP.getDoubleValue() / distanceDesiredCMPToICP);
-         desiredCMP.set(capturePoint);
-         desiredCMP.sub(desiredCMPToICP.getFrameVector2dCopy());
-      }
-      
       if (projectIntoSupportPolygon)
       {
          smartCMPProjector.projectCMPIntoSupportPolygonIfOutside(capturePoint, supportPolygon, finalDesiredCapturePoint, desiredCMP);
@@ -201,11 +225,14 @@ public class ICPProportionalController
       
       desiredCMP.changeFrame(rawCMPOutput.getReferenceFrame());
       rawCMPOutput.set(desiredCMP);
-      
-      filteredCMPOutput.update();
-      rateLimitedCMPOutput.update();
-      rateLimitedCMPOutput.getFrameTuple2d(desiredCMP);
-      
+
+      if (!useRawCMP)
+      {
+         filteredCMPOutput.update();
+         rateLimitedCMPOutput.update();
+         rateLimitedCMPOutput.getFrameTuple2d(desiredCMP);
+      }
+
       return desiredCMP;
    }
 
@@ -228,30 +255,7 @@ public class ICPProportionalController
          }
       }
    }
-
    
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double captureKiBleedoff, double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
-   {
-      this.captureKpParallelToMotion.set(captureKpParallelToMotion);
-      this.captureKpOrthogonalToMotion.set(captureKpOrthogonalToMotion);
-      this.captureKi.set(captureKi);
-      this.captureKiBleedoff.set(captureKiBleedoff);
-      
-      this.alphaCMP.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequencyHertz, controlDT));
-      this.rateLimitCMP.set(rateLimitCMP);
-      this.accelerationLimitCMP.set(accelerationLimitCMP);
-      
-      rateLimitedCMPOutput.setGainsByPolePlacement(2.0 * Math.PI * filterBreakFrequencyHertz, 1.0);
-      
-      double frequencyRatios = filterBreakFrequencyHertz/(accelerationLimitCMP/rateLimitCMP);
-      
-      if (frequencyRatios > 0.5)
-      {
-         System.err.println("Warning. Shouldn't have frequency ratios greater than 0.5 in ICPProportionalController!!");
-         System.err.println("frequencyRatios = " + frequencyRatios);
-      }
-   }
-
    private class Vector2dZUpFrame extends ReferenceFrame
    {
       private static final long serialVersionUID = -1810366869361449743L;

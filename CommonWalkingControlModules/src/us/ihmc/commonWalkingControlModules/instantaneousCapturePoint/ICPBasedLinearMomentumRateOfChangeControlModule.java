@@ -54,11 +54,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
    private final FramePoint2d finalDesiredCapturePoint = new FramePoint2d();
 
    public ICPBasedLinearMomentumRateOfChangeControlModule(CommonHumanoidReferenceFrames referenceFrames, BipedSupportPolygons bipedSupportPolygons,
-         double controlDT, double totalMass, double gravityZ, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         double controlDT, double totalMass, double gravityZ, ICPControlGains icpControlGains, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
-      icpProportionalController = new ICPProportionalController(controlDT, registry, yoGraphicsListRegistry);
+      icpProportionalController = new ICPProportionalController(icpControlGains, controlDT, registry, yoGraphicsListRegistry);
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
@@ -132,13 +133,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       groundReactionForce.changeFrame(centerOfMassFrame);
 
       return groundReactionForce;
-   }
-
-   public void setGains(double captureKpParallelToMotion, double captureKpOrthogonalToMotion, double captureKi, double captureKiBleedoff,
-         double filterBreakFrequencyHertz, double rateLimitCMP, double accelerationLimitCMP)
-   {
-      icpProportionalController.setGains(captureKpParallelToMotion, captureKpOrthogonalToMotion, captureKi, captureKiBleedoff, filterBreakFrequencyHertz,
-            rateLimitCMP, accelerationLimitCMP);
    }
 
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
