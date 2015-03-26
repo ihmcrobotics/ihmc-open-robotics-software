@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.bono.q_l_leg_uhz</Variables>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,9 +61,33 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footTorqueZ,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footForceX,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.WrenchVisualizer.DesiredExternalWrenchl_footForceY</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footHeightVelocityCorrectedFilteredForSingularityAvoidance,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footHeightVelocityCorrectedFilteredForSingularityAvoidance</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footAlphaSupportSingularityAvoidance,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footAlphaSupportSingularityAvoidance</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -78,7 +102,7 @@
 <Title>
 Tab
 </Title>
-<Entry Boxes>walk,desiredVelocityX</Entry Boxes>
+<Entry Boxes>walk,desiredVelocityX,desiredHeading</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -87,15 +111,8 @@ Tab
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>0.0, 0.0</WindowLocation>
-<WindowSize>804.0, 545.0</WindowSize>
-<GraphGroup>
-	<Cols>1</Cols>
-</GraphGroup>
-</Graph Array Window1>
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>

@@ -1,7 +1,7 @@
 <GraphGroup>
-	<Cols>3</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.powerDistribution.robotWork</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_q_d</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.timestamp</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kp</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_kd</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManualDesiredVelocityControlModule.desiredVelocityY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.RateBasedDesiredHeadingControlModule.desiredHeadingDot,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.DesiredFootstepCalculatorFootstepProviderWrapper.walk</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_positionerror</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,117 +61,9 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.StepprStandPrepSliderBoard.selectedJoint_damping</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManualDesiredVelocityControlModule.desiredVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.controlRatio</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.CommonHumanoidReferenceFramesVisualizer.pelvisRoll</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.kpPelvisOrientation</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityZ</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -218,6 +110,12 @@ ToeOff
 </Title>
 <Entry Boxes>l_footToeOffFinalAngle,r_footToeOffFinalAngle,kpXYAngularSwingFoot</Entry Boxes>
 </EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab6
+</Title>
+<Entry Boxes>chestCoMOffsetY</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -225,15 +123,123 @@ ToeOff
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>1</Graph Array Window Size>
+<Graph Array Window Size>11</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>0</ScreenID>
-<WindowLocation>3944.0, 0.0</WindowLocation>
-<WindowSize>1918.0, 1165.0</WindowSize>
+<ScreenID>2</ScreenID>
+<WindowLocation>2291.0, 1129.0</WindowLocation>
+<WindowSize>1466.0, 1047.0</WindowSize>
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce0</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_tauSpringCorrection,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_mhx.l_leg_mhxTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_mhx.l_leg_mhx_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_tauSpringCorrection,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_mhx.r_leg_mhxTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_tauSpringCorrection,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_mhx.l_leg_mhx_tauCurrentStrainError</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_tauSpringCorrection,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauCurrentStrainError</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorJointEncoderPosition,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhxFilteredSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorJointEncoderPosition,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhxFilteredSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_uay_tauSpringCorrection,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_tau_yPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_uay_tauSpringCorrection,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_tau_yPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_uay_q_Spring</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_uay_q_Spring</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -244,8 +250,15 @@ ToeOff
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>2</ScreenID>
+<WindowLocation>2046.0, 1130.0</WindowLocation>
+<WindowSize>1677.0, 1064.0</WindowSize>
+<GraphGroup>
+	<Cols>4</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce1</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_m_leftActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorEncoderPosition</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -257,7 +270,7 @@ ToeOff
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce2</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_m_leftActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorVelocityEstimate</Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -269,7 +282,7 @@ ToeOff
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce3</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_m_rightActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorMotorEncoderPosition</Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -281,7 +294,7 @@ ToeOff
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorFootForceMag</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_m_rightActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorMotorVelocityEstimate</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -292,8 +305,1019 @@ ToeOff
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_x,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_x</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_x,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_calc_x</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_y,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_calc_y</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.0</MaxScaling>
+			<MinScaling>-0.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_y,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_qd_calc_y</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>4.0</MaxScaling>
+			<MinScaling>-4.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_m_leftActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.0</MaxScaling>
+			<MinScaling>-3.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_m_leftActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorVelocityEstimate</Variables>
+		<GraphConfiguration>
+			<Name>config26</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>-10.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_m_rightActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorMotorEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.0</MaxScaling>
+			<MinScaling>-3.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_m_rightActuator_calc,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorMotorVelocityEstimate</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_x,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_x</Variables>
+		<GraphConfiguration>
+			<Name>config29</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_x,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_calc_x</Variables>
+		<GraphConfiguration>
+			<Name>config30</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>3.0</MaxScaling>
+			<MinScaling>-3.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_y,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_calc_y</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.0</MaxScaling>
+			<MinScaling>-0.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_y,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_qd_calc_y</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>4.0</MaxScaling>
+			<MinScaling>-4.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
-</Graph Array Window1>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>2</ScreenID>
+<WindowLocation>2377.0, 1158.0</WindowLocation>
+<WindowSize>1168.0, 997.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.SlowSensors.leftHipXActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config33</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.SlowSensors.rightHipXActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.SlowSensors.leftHipZActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.SlowSensors.rightHipZActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.SlowSensors.leftHipYActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.SlowSensors.rightHipYActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.SlowSensors.leftKneeActuatorQuadratureControlEffort,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>2</ScreenID>
+<WindowLocation>2499.0, 1205.0</WindowLocation>
+<WindowSize>1280.0, 950.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_mhx.l_leg_mhx_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_uhz.l_leg_uhzTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_uhz.l_leg_uhz_tauPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_uhz.r_leg_uhzTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_uhz.r_leg_uhz_tauPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config48</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_lhy.l_leg_lhyTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_lhy.l_leg_lhy_tauPredictedCurrent,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_lhy.l_leg_lhy_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_lhy.r_leg_lhyTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_lhy.r_leg_lhy_tauPredictedCurrent,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_lhy.r_leg_lhy_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config50</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_kny.l_leg_knyTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_kny.l_leg_kny_tauPredictedCurrent,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_kny.l_leg_kny_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config51</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_kny.r_leg_knyTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_kny.r_leg_kny_tauPredictedCurrent,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_kny.r_leg_kny_tauMeasuredStrain</Variables>
+		<GraphConfiguration>
+			<Name>config52</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_uay.l_leg_uayTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_tau_yPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config53</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>-10.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_uay.r_leg_uayTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_tau_yPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config54</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.l_leg_lax.l_leg_laxTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_tau_xPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config55</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.r_leg_lax.r_leg_laxTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_tau_xPredictedCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config56</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4><Graph Array Window5>
+<ScreenID>2</ScreenID>
+<WindowLocation>2482.0, 1200.0</WindowLocation>
+<WindowSize>1358.0, 938.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.nonCorrectedPelvis_roll,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisPoseHistoryCorrection.correctedPelvis_roll,root.remotemain.DRCControllerThread.DRCMomentumBasedController.CommonHumanoidReferenceFramesVisualizer.pelvisRoll</Variables>
+		<GraphConfiguration>
+			<Name>config57</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config58</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorJointEncoderPosition,bono.q_l_leg_mhx</Variables>
+		<GraphConfiguration>
+			<Name>config59</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.25</MaxScaling>
+			<MinScaling>-0.25</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorJointEncoderPosition,bono.q_r_leg_mhx</Variables>
+		<GraphConfiguration>
+			<Name>config60</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.25</MaxScaling>
+			<MinScaling>-0.25</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_y,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_uay_q_Spring</Variables>
+		<GraphConfiguration>
+			<Name>config61</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_y,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_uay_q_Spring</Variables>
+		<GraphConfiguration>
+			<Name>config62</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window5><Graph Array Window6>
+<ScreenID>2</ScreenID>
+<WindowLocation>2170.0, 1288.0</WindowLocation>
+<WindowSize>1535.0, 811.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce0,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce1,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce2,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce3,root.remotemain.DRCEstimatorThread.l_footStateEstimatorWrenchBasedFootSwitch.l_footStateEstimatorForceZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.l_leg_laxForceVectorZ</Variables>
+		<GraphConfiguration>
+			<Name>config63</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce0,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce1,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce2,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce3,root.remotemain.DRCEstimatorThread.r_footStateEstimatorWrenchBasedFootSwitch.r_footStateEstimatorForceZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.DiagnosticsWhenHangingController.r_leg_laxForceVectorZ</Variables>
+		<GraphConfiguration>
+			<Name>config64</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window6><Graph Array Window7>
+<ScreenID>2</ScreenID>
+<WindowLocation>2656.0, 1238.0</WindowLocation>
+<WindowSize>1168.0, 965.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.leftAnkleCommand.leftAnkleCommandLeftActuator.leftAnkleCommandLeftActuatorTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkleLeftActuator_tauMeasuredStrain,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_tau_leftActuator</Variables>
+		<GraphConfiguration>
+			<Name>config65</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>20.0</MaxScaling>
+			<MinScaling>-20.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.leftAnkleCommand.leftAnkleCommandRightActuator.leftAnkleCommandRightActuatorTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkleRightActuator_tauMeasuredStrain,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_tau_rightActuator</Variables>
+		<GraphConfiguration>
+			<Name>config66</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>20.0</MaxScaling>
+			<MinScaling>-20.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.rightAnkleCommand.rightAnkleCommandLeftActuator.rightAnkleCommandLeftActuatorTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkleLeftActuator_tauMeasuredStrain,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_tau_leftActuator</Variables>
+		<GraphConfiguration>
+			<Name>config67</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.rightAnkleCommand.rightAnkleCommandRightActuator.rightAnkleCommandRightActuatorTauDesired,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkleRightActuator_tauMeasuredStrain,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_tau_rightActuator</Variables>
+		<GraphConfiguration>
+			<Name>config68</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorStrainSensor1,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorStrainSensor1</Variables>
+		<GraphConfiguration>
+			<Name>config69</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorStrainSensor2,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorStrainSensor2</Variables>
+		<GraphConfiguration>
+			<Name>config70</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window7><Graph Array Window8>
+<ScreenID>2</ScreenID>
+<WindowLocation>2473.0, 1326.0</WindowLocation>
+<WindowSize>947.0, 803.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config71</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.leftHipZActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.rightHipZActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config74</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.leftHipYActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.rightHipYActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config76</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config77</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config78</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config79</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config80</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config81</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config82</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>10.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window8><Graph Array Window9>
+<ScreenID>0</ScreenID>
+<WindowLocation>784.0, 1229.0</WindowLocation>
+<WindowSize>1054.0, 888.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config83</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.3</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config84</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.leftHipZActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config85</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.rightHipZActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config86</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.leftHipYActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config87</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.rightHipYActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config88</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config89</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorJointEncoderPosition</Variables>
+		<GraphConfiguration>
+			<Name>config90</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_y</Variables>
+		<GraphConfiguration>
+			<Name>config91</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.0</MaxScaling>
+			<MinScaling>-0.5</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_y</Variables>
+		<GraphConfiguration>
+			<Name>config92</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkle.leftAnkle_q_x</Variables>
+		<GraphConfiguration>
+			<Name>config93</Name>
+			<ScalingMethod>2</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>0.2</MaxScaling>
+			<MinScaling>-0.2</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkle.rightAnkle_q_x</Variables>
+		<GraphConfiguration>
+			<Name>config94</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window9><Graph Array Window10>
+<ScreenID>2</ScreenID>
+<WindowLocation>2715.0, 1463.0</WindowLocation>
+<WindowSize>988.0, 605.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.leftFootSwingTwoWaypointPositionTrajectoryGenerator.leftFootSwingWaypointBagOfBallsBalls.leftFootSwingWaypointBagOfBalls2Z,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.rightFootSwingTwoWaypointPositionTrajectoryGenerator.rightFootSwingWaypointBagOfBallsBalls.rightFootSwingWaypointBagOfBalls2Z</Variables>
+		<GraphConfiguration>
+			<Name>config95</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.leftFootSwingTwoWaypointPositionTrajectoryGenerator.leftFootSwingWaypointBagOfBallsBalls.leftFootSwingWaypointBagOfBalls0Z,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.rightFootSwingTwoWaypointPositionTrajectoryGenerator.rightFootSwingWaypointBagOfBallsBalls.rightFootSwingWaypointBagOfBalls0Z</Variables>
+		<GraphConfiguration>
+			<Name>config96</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window10><Graph Array Window11>
+<ScreenID>2</ScreenID>
+<WindowLocation>2948.0, 1402.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.leftFootPositionInWorldZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footSwingDesiredPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config97</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.rightFootPositionInWorldZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footSwingDesiredPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionZ</Variables>
+		<GraphConfiguration>
+			<Name>config98</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.positionError_comHeight</Variables>
+		<GraphConfiguration>
+			<Name>config99</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window11>
 
 <Extra Panels>
 <Main Viewport>
