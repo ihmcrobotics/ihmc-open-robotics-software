@@ -1,0 +1,6 @@
+
+
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/multisense/left/image_color  --no-service-check
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/blackfly/right/image_mono camera:=/blackfly/right
+./cameracalibrator.py --size 3x4 --square 0.03 image:=/blackfly/left/image_mono camera:=/blackfly/left
+
