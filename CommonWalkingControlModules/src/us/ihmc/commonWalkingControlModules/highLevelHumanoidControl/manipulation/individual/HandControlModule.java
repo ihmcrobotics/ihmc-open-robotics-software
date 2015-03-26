@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProduce
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -410,6 +411,11 @@ public class HandControlModule
       
       desiredRotationAngleProvider.set(desiredRotationAngle);
       
+      //Limit arm joint motor speed based on Boston Dynamics Limit
+      //of 700 rad/s input to the transmission.
+      //For now, just set move time to at least 2 seconds
+      if (time < 2.0) time = 2.0;
+      
       trajectoryTimeProvider.set(time);
       circularPoseTrajectoryGenerator.initialize();
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator);
@@ -522,6 +528,10 @@ public class HandControlModule
             throw new RuntimeException("not all joint positions specified");
       }
 
+      //Limit arm joint motor speed based on Boston Dynamics Limit
+      //of 700 rad/s input to the transmission.
+      //For now, just set move time to at least 2 seconds
+      if (time < 2.0) time = 2.0;
       trajectoryTimeProvider.set(time);
 
       for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
@@ -546,6 +556,10 @@ public class HandControlModule
             throw new RuntimeException("not all joint positions specified");
       }
 
+      //Limit arm joint motor speed based on Boston Dynamics Limit
+      //of 700 rad/s input to the transmission.
+      //For now, just set move time to at least 2 seconds
+      if (time < 2.0) time = 2.0;
       trajectoryTimeProvider.set(time);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
