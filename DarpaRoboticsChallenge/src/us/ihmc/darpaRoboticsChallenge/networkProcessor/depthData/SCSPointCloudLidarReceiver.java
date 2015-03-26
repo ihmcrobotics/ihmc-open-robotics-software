@@ -37,7 +37,7 @@ public class SCSPointCloudLidarReceiver implements PacketConsumer<SimulatedLidar
    @Override
    public void receivedPacket(SimulatedLidarScanPacket packet)
    {
-      LidarScan scan = packet.createFullLidarScan();
+      LidarScan scan = new LidarScan(packet.getLidarScanParameters(), packet.getRanges(), packet.getSensorId());
       // Set the world transforms to nothing, so points are in lidar scan frame
       scan.setWorldTransforms(identityTransform, identityTransform);
       ArrayList<Point3d> points = scan.getAllPoints();
