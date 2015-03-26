@@ -1,0 +1,28 @@
+<launch>
+   <!-- Determine this using rosrun pointgrey_camera_driver list_cameras.
+       If not specified, defaults to first camera found. -->
+  <arg name="camera_serial" default="0" />
+  <arg name="calibrated" default="0" />
+  <arg name="side"/>
+
+  <group ns="$(arg side)">
+    <node pkg="nodelet" type="nodelet" name="$(arg side)_camera_nodelet"
+          args="standalone pointgrey_camera_driver/PointGreyCameraNodelet" >
+      <param name="frame_id" value="$(arg side)_blackfly" />
+      <param name="serial" value="$(arg camera_serial)" />
+
+      <!-- When unspecified, the driver will use the default framerate as given by the
+           camera itself. Use this parameter to override that value for cameras capable of
+           other framerates. -->
+      <param name="frame_rate" value="5" /> 
+      
+      <!-- Use the camera_calibration package to create this file -->
+      <param name="camera_info_url" if="$(arg calibrated)"
+             value="file://$(env HOME)/.ros/camera_info/$(arg camera_serial).yaml" />
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="$(arg side)_image_proc_debayer"
+          args="standalone image_proc/debayer">
+    </node>
+  </group>
+</launch>
