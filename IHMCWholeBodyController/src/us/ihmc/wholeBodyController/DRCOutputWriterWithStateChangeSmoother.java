@@ -82,11 +82,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    {
       ControllerStateChangedListener controllerStateChangedListener = new ControllerStateChangedListener()
       {
-         
          @Override
-         public void controllerStateHasChanged(double time)
+         public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
          {
-            hasHighLevelControllerStateChanged.set(true);
+            hasHighLevelControllerStateChanged.set(true);            
          }
       };
 

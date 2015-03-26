@@ -1376,11 +1376,11 @@ public class MomentumBasedController
       }
    }
 
-   public void reportControllerStateChangeToListeners()
+   public void reportControllerStateChangeToListeners(Enum<?> oldState, Enum<?> newState)
    {
       for (int i = 0; i < controllerStateChangedListeners.size(); i++)
       {
-         controllerStateChangedListeners.get(i).controllerStateHasChanged(yoTime.getDoubleValue());
+         controllerStateChangedListeners.get(i).controllerStateHasChanged(oldState, newState);
       }
    }
 
