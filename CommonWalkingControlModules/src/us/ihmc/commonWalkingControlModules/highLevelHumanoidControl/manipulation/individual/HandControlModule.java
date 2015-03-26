@@ -622,8 +622,7 @@ public class HandControlModule
          jointCurrentPositionMap.put(oneDoFJoint, oneDoFJoint.getQ());
       }
 
-      double epsilon = 1e-2;
-      moveUsingQuinticSplines(jointCurrentPositionMap, epsilon, false);
+      moveUsingQuinticSplines(jointCurrentPositionMap, 0.0, false);
    }
 
    public boolean isControllingPoseInWorld()
