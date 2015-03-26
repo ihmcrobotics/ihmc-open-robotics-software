@@ -72,7 +72,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
    private final HashMap<String, FrameVector> lidarAxis = new HashMap<String, FrameVector>();
-   private final ArrayList<OneDoFJoint> lidarJoints = new ArrayList<>();
+   private final HashMap<String, OneDoFJoint> lidarJoints = new HashMap<>();
 
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> attachmentPlateFrames = new SideDependentList<>();
@@ -199,7 +199,7 @@ public class SDFFullRobotModel implements FullRobotModel
                   lidarBaseFrames.put(sensor.getName(), lidarFrame);
                   lidarBaseToSensorTransform.put(sensor.getName(), linkToSensorInZUp);
                   lidarAxis.put(sensor.getName(), ((RevoluteJoint) joint).getJointAxis());
-                  lidarJoints.add((OneDoFJoint) joint);
+                  lidarJoints.put(sensor.getName(), (OneDoFJoint) joint);
                }
                else
                {
@@ -476,9 +476,9 @@ public class SDFFullRobotModel implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public void getLidarJoints(ArrayList<OneDoFJoint> lidarJointsToPack)
+   public InverseDynamicsJoint getLidarJoint(String lidarName)
    {
-      lidarJointsToPack.addAll(lidarJoints);
+      return lidarJoints.get(lidarName);
    }
 
    /** {@inheritDoc} */

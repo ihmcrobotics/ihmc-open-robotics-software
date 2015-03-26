@@ -15,7 +15,6 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
-import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
@@ -24,7 +23,9 @@ import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -55,9 +56,19 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    }  
    
+   public RigidBodyTransform getLidarToSensorTransform(String lidarName)
+   {
+      return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
+   }
+   
    public ReferenceFrame getLidarFrame(String lidarName)
    {
       return fullRobotModel.getLidarBaseFrame(lidarName);
+   }
+   
+   public InverseDynamicsJoint getLidarJoint(String lidarName)
+   {
+      return fullRobotModel.getLidarJoint(lidarName);
    }
 
    @Override
@@ -73,6 +84,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                readWriteLock.writeLock().lock();
                
                long prevTimestamp = -1;
+               
+               RigidBodyTransform scanFrameToWorld = new RigidBodyTransform();
                for (int i = 0; i < data.points.size(); i++)
                {
                   long nextTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamps[i]);
@@ -88,7 +101,10 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   Point3d pointInWorld; 
                   if(!data.scanFrame.isWorldFrame())
                   {
-                     throw new RuntimeException("TODO: Implement me");
+                     data.scanFrame.getTransformToDesiredFrame(scanFrameToWorld, ReferenceFrame.getWorldFrame());
+                     
+                     pointInWorld = data.points.get(i);
+                     scanFrameToWorld.transform(pointInWorld);
                   }
                   else
                   {
