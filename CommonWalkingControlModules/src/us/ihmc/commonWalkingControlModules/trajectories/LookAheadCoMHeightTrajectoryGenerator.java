@@ -686,6 +686,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
    {
+      projectionSegment.orthogonalProjection(queryPoint);
+      double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
+
+      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
+
       if (desiredComHeightProvider != null)
       {
          if (desiredComHeightProvider.isNewComHeightInformationAvailable())
@@ -699,25 +704,17 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
          {
             WaypointPositionTrajectoryData pelvisTrajectory = desiredComHeightProvider.getComHeightMultipointWorldPosition();
 
-            double midAnkleZ = 0.0;
-            ankleZUpFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslation(anklePosition);
-            midAnkleZ += anklePosition.getZ() * 0.5;
-            ankleZUpFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation(anklePosition);
-            midAnkleZ += anklePosition.getZ() * 0.5;
-
             int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
-            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - nominalHeightAboveGround.getDoubleValue() - midAnkleZ;
             // TODO (Sylvain) Check if that's the right way to do it
-            //            double lastHeight = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
+            double heightOffset = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
 
             // it is not really the last time, since we have the "settling"
-            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex - 1];
+            double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex];
 
-            offsetHeightAboveGround.set(lastHeight);
+            offsetHeightAboveGround.set(heightOffset);
             offsetHeightAboveGroundTrajectoryTimeProvider.set(totalTime);
             offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
             offsetHeightAboveGroundTrajectory.initialize();
-            //  System.out.format("offsetHeightAboveGround B:(%.3f)  %.3f  %.3f\n", offsetHeightAboveGround.getDoubleValue(), totalTime, lastHeight );
          }
       }
       offsetHeightAboveGroundTrajectory.compute(yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue());
@@ -725,10 +722,6 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       offsetHeightAboveGroundPrevValue.set(offsetHeightAboveGroundTrajectory.getValue());
 
-      projectionSegment.orthogonalProjection(queryPoint);
-      double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
-
-      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
       double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
