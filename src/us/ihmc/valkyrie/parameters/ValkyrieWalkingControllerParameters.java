@@ -295,7 +295,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMinStepWidth()
    {
-      return 0.15;
+      return runningOnRealRobot ? 0.165 : 0.15;
    }
 
    @Override
