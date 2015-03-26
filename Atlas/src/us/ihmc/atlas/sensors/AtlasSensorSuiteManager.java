@@ -15,7 +15,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSCheatingPointCloudLidarReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLidarReceiver;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
@@ -66,7 +66,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new SCSCheatingPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
+         new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
          pointCloudDataReceiver.start();
       }
 
