@@ -156,7 +156,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       
       double deadZone = 0.02;
       double desiredVelocityX_Bias = 0.0;
-      double desiredVelocityY_Bias = 0.0;//0.055;
+      double desiredVelocityY_Bias = 0.0;
       double desiredHeadingDot_Bias = 0.0;
       final double minVelocityX = -0.10;
       
@@ -167,7 +167,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
       desiredVelocityX.set(desiredVelocityX_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
-    		  -0.40+desiredVelocityX_Bias, 0.40+desiredVelocityX_Bias, deadZone, true));
+    		  -0.25+desiredVelocityX_Bias, 0.25+desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -186,7 +186,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
-    		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone, true));
+    		  -0.1+desiredHeadingDot_Bias, 0.1+desiredHeadingDot_Bias, deadZone/2.0, true));
       
       joystickUpdater.listComponents();
       

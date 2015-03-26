@@ -208,8 +208,8 @@ public class StepprState
          }
          
          //calculate toe Z force based on ankle
-         final double distHeelFromAnkle = 0.035;
-         final double distToeFromAnkle = 0.16;        
+         final double distHeelFromAnkle = 0.035+2.0*0.0254-0.001;
+         final double distToeFromAnkle = 0.16+0.001;       
          double leftAnkleYTau = jointStates.get(StepprJoint.LEFT_ANKLE_Y).getTau();
          double leftToeForce = leftHeelForce*distHeelFromAnkle + leftAnkleYTau / distToeFromAnkle;         
          double rightAnkleYTau = jointStates.get(StepprJoint.RIGHT_ANKLE_Y).getTau();

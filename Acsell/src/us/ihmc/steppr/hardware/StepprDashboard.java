@@ -170,7 +170,7 @@ public class StepprDashboard extends JPanel implements PlaybackListener
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 600.0)
+            if((leftFootForce.getDoubleValue() + rightFootForce.getDoubleValue()) > 400.0)
             {	
             	switchToWalk.setEnabled(true);
             	switchToWalk.setBackground(Color.GREEN);
