@@ -29,7 +29,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
          forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle"};
    }
    
-   private static final SideDependentList<String> tekscanSensorNames = new SideDependentList<String>("LeftLegTekscan", "RightLegTekscan");
+   private static final SideDependentList<String> tekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
    private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
 
