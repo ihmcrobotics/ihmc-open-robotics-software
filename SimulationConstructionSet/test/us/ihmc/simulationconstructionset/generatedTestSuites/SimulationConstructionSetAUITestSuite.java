@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.simulationconstructionset.gui.YoEntryBoxTest.class,
    us.ihmc.simulationconstructionset.LinkGraphicsTest.class,
-   us.ihmc.simulationconstructionset.SimulatedLIDARSensorTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetFestTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetMemoryReclamationTest.class,
    us.ihmc.simulationconstructionset.SimulationConstructionSetRootRegistryTest.class,
