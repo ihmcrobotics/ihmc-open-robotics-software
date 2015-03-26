@@ -414,7 +414,7 @@ public class HandControlModule
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
-      if (time < 2.0) time = 2.0;
+      time = Math.max(2.0, time);
       
       trajectoryTimeProvider.set(time);
       circularPoseTrajectoryGenerator.initialize();
@@ -536,7 +536,8 @@ public class HandControlModule
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
-      if (time < 2.0 && checkTrajectoryTime) time = 2.0;
+      if (checkTrajectoryTime)
+         time = Math.max(2.0, time);
       trajectoryTimeProvider.set(time);
 
       for (OneDoFJoint oneDoFJoint : desiredJointPositions.keySet())
@@ -564,7 +565,7 @@ public class HandControlModule
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
-      if (time < 2.0) time = 2.0;
+      time = Math.max(2.0, time);
       trajectoryTimeProvider.set(time);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
