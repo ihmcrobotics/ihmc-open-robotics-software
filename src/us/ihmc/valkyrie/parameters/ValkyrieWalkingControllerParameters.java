@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.parameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
@@ -352,63 +353,28 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public double getCaptureKpParallelToMotion()
+   public ICPControlGains getICPControlGains()
    {
-      if (!runningOnRealRobot)
-         return 1.4;
+      ICPControlGains gains = new ICPControlGains();
 
-      return 1.5;
-   }
+      double kp = runningOnRealRobot ? 1.5 : 1.4;
+      double ki = runningOnRealRobot ? 4.0 : 0.0;
+      double kiBleedOff = 0.9;
+      boolean useRawCMP = false;
+      double cmpFilterBreakFrequencyInHertz = 16.0;
+      double cmpRateLimit = runningOnRealRobot ? 6.0 : 60.0;
+      double cmpAccelerationLimit = runningOnRealRobot ? 200.0 : 2000.0;
 
-   @Override
-   public double getCaptureKpOrthogonalToMotion()
-   {
-      if (!runningOnRealRobot)
-         return 1.4;
+      gains.setKpParallelToMotion(kp);
+      gains.setKpOrthogonalToMotion(kp);
+      gains.setKi(ki);
+      gains.setKiBleedOff(kiBleedOff);
+      gains.setUseRawCMP(useRawCMP);
+      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
+      gains.setCMPRateLimit(cmpRateLimit);
+      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
 
-      return 1.5;
-   }
-
-   @Override
-   public double getCaptureKi()
-   {
-      if (!runningOnRealRobot)
-         return 4.0;
-
-      return 0.0;
-   }
-
-   @Override
-   public double getCaptureKiBleedoff()
-   {
-      return 0.9;
-   }
-
-   @Override
-   public double getCaptureFilterBreakFrequencyInHz()
-   {
-      if (!runningOnRealRobot)
-         return 16.0;
-
-      return 16.0;    // 20.0;//16.0;
-   }
-
-   @Override
-   public double getCMPRateLimit()
-   {
-      if (!runningOnRealRobot)
-         return 60.0;
-
-      return 6.0;    // 12.0;//60.0; //6.0;
-   }
-
-   @Override
-   public double getCMPAccelerationLimit()
-   {
-      if (!runningOnRealRobot)
-         return 2000.0;
-
-      return 200.0;    // 400.0;//2000.0; //200.0;
+      return gains;
    }
 
    @Override
