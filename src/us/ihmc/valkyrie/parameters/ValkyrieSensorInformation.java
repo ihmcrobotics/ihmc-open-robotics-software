@@ -35,17 +35,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
    
-   public static final double tekscanContactRegionThreshold = 0.00000044;
-   public static final double tekscanContactThreshold = 0.00000044;
-
-   private static final SideDependentList<SpatialForceVector> footForceSensorTareOffsets;
-   static
-   {
-      SpatialForceVector leftFootForceSensorTareOffset_20141012_135433 = new SpatialForceVector(null, new double[] { 6.72, -23.23,  3.28,  183.80,  306.97,  1065.85});
-      SpatialForceVector rightFootForceSensorTareOffset_20141012_135433 = new SpatialForceVector(null, new double[] {-1.59, -3.04, -10.12,  82.64, -4.46, -122.53});
-
-      footForceSensorTareOffsets = new SideDependentList<SpatialForceVector>(leftFootForceSensorTareOffset_20141012_135433, rightFootForceSensorTareOffset_20141012_135433);
-   }
+   public static final double defaultTekscanContactRegionThreshold = 0.00000044;
+   public static final double defaultTekscanContactThreshold = 0.00000044;
+   public static final double defaultTekscanAlpha = 0.0;
+   public static final double defaultTekscanBeta = 0.0;
+   public static final int defaultTekscanCTRL1 = 0;
 
    public static final SideDependentList<RigidBodyTransform> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
@@ -169,17 +163,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public static double getTekscanContactRegionThreshold()
    {
-	   return tekscanContactRegionThreshold;
+	   return defaultTekscanContactRegionThreshold;
    }
    
    public static double getTekscanContactThreshold()
    {
-	   return tekscanContactThreshold;
-   }
-
-   public static SpatialForceVector getFootForceSensorTareOffset(RobotSide robotSide)
-   {
-      return footForceSensorTareOffsets.get(robotSide);
+	   return defaultTekscanContactThreshold;
    }
    
    public RigidBodyTransform getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
