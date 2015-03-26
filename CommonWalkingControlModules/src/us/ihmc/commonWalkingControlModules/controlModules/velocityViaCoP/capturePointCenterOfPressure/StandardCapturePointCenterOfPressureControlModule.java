@@ -270,7 +270,8 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
                centerOfPressureDesired.setY(intersectionToUse.getY());
 
                // Move in a little along the line:
-               FrameVector2d frameVector2d = desiredCaptureToDesiredCop.getVectorCopy();
+               FrameVector2d frameVector2d = new FrameVector2d();
+               desiredCaptureToDesiredCop.getFrameVector(frameVector2d);
                frameVector2d.normalize();
                frameVector2d.scale(-0.002); // Move toward desired capture by 2 mm to prevent some jerky behavior with VTPs..
 
@@ -363,7 +364,8 @@ public class StandardCapturePointCenterOfPressureControlModule implements Captur
          FramePoint2d shiftedPoint = new FramePoint2d(captureProjectedOntoGuideLine);
          shiftedPoint.add(projectedToCurrent);
 
-         FrameVector2d frameVector2d = guideLine.getVectorCopy();
+         FrameVector2d frameVector2d = new FrameVector2d();
+         guideLine.getFrameVector(frameVector2d);
          FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, frameVector2d);
 
          //       FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, guideLine.getNormalizedFrameVector());

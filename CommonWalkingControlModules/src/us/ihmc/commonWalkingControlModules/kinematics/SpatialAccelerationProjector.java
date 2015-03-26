@@ -23,13 +23,16 @@ public class SpatialAccelerationProjector
       projectionFactor = new DoubleYoVariable(namePrefix + "ProjectionFactor", registry);
    }
 
+   private final FrameVector axisOfRotation = new FrameVector();
+   private final FrameVector2d axisOfRotation2d = new FrameVector2d();
+
    public void projectAcceleration(SpatialAccelerationVector accelerationToProject, FrameLineSegment2d closestEdge)
    {
       if (closestEdge == null)
          throw new RuntimeException("closestEdge == null");
 
-      FrameVector2d axisOfRotation2d = closestEdge.getVectorCopy();
-      FrameVector axisOfRotation = new FrameVector(axisOfRotation2d.getReferenceFrame(), axisOfRotation2d.getX(), axisOfRotation2d.getY(), 0.0);
+      closestEdge.getFrameVector(axisOfRotation2d);
+      axisOfRotation.setXYIncludingFrame(axisOfRotation2d);
       FramePoint offset = closestEdge.getFirstEndPointCopy().toFramePoint();
 
       ReferenceFrame baseFrame = accelerationToProject.getBaseFrame();

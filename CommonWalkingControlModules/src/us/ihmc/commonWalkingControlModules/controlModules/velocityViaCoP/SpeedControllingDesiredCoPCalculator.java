@@ -131,7 +131,8 @@ public class SpeedControllingDesiredCoPCalculator implements DesiredCapturePoint
       FramePoint2d shiftedPoint = new FramePoint2d(captureProjectedOntoGuideLine);
       shiftedPoint.add(projectedToCurrent);
 
-      FrameVector2d frameVector2d = guideLine.getVectorCopy();
+      FrameVector2d frameVector2d = new FrameVector2d();
+      guideLine.getFrameVector(frameVector2d);
       FrameLine2d shiftedParallelLine = new FrameLine2d(shiftedPoint, frameVector2d);
       FrameLine2d shiftedParallelLineInWorld = new FrameLine2d(shiftedParallelLine);
       shiftedParallelLineInWorld.changeFrame(world);
