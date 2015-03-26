@@ -63,8 +63,6 @@ public class DRCLidar
 
    public static class DRCLidarCallback implements GPULidarListener
    {
-//      private final Executor pool = Executors.newSingleThreadExecutor();
-
       private final PacketCommunicator objectCommunicator;
       private final LidarScanParameters lidarScanParameters;
       private final int lidarSensorId;
@@ -79,19 +77,10 @@ public class DRCLidar
       @Override
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
-         RigidBodyTransform transform = new RigidBodyTransform(lidarTransform);
-         final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters, TimeTools.secondsToNanoSeconds(time)), transform, transform,
-                                        Arrays.copyOf(scan, scan.length));
+         final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters,
+               TimeTools.secondsToNanoSeconds(time)), Arrays.copyOf(scan, scan.length));
 
          objectCommunicator.send(lidarScan);
-//         pool.execute(new Runnable()
-//         {
-//            @Override
-//            public void run()
-//            {
-//               objectCommunicator.send(lidarScan);
-//            }
-//         });
       }
    }
 
