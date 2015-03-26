@@ -11,6 +11,7 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -137,7 +138,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          }
       }
    }
-
+   
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)
    {
       packet.packWaistJointAngle(waistJointAngles);
@@ -145,7 +146,13 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       SpineJointName[] spineJointNames = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
       for(int i=0; i<spineJointNames.length; i++)
       {
-         trajectoryGenerator.get(fullRobotModel.getSpineJoint(spineJointNames[i])).setFinalPosition(waistJointAngles[i]);
+         OneDoFJoint oneDoFJoint = fullRobotModel.getSpineJoint(spineJointNames[i]);
+         double desiredPostion = waistJointAngles[i];
+         
+         //make sure that we do not command an arm joint outside the joint limits
+         desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         
+         trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
       }
       
 //    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setFinalPosition(waistJointAngles[0]);
@@ -160,7 +167,14 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
       for(int i=0; i<armJointNames.length; i++)
       {
-         trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, armJointNames[i])).setFinalPosition(armJointAngles.get(robotSide)[i]);
+         OneDoFJoint oneDoFJoint = fullRobotModel.getArmJoint(robotSide, armJointNames[i]);
+         double desiredPostion = armJointAngles.get(robotSide)[i];
+         
+         //make sure that we do not command an arm joint outside the joint limits
+         desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         
+         
+         trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
       }
       
 //      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setFinalPosition(armJointAngles.get(robotSide)[0]);
@@ -175,7 +189,13 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for(int i=0; i<legJointNames.length; i++)
       {
-         trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, legJointNames[i])).setFinalPosition(legJointAngles.get(robotSide)[i]);
+         OneDoFJoint oneDoFJoint = fullRobotModel.getLegJoint(robotSide, legJointNames[i]);
+         double desiredPostion = legJointAngles.get(robotSide)[i];
+         
+         //make sure that we do not command an arm joint outside the joint limits
+         desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         
+         trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
       }
       
 //      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setFinalPosition(legJointAngles.get(robotSide)[0]);
