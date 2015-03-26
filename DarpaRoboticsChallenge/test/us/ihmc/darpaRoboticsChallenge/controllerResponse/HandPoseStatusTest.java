@@ -90,7 +90,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.2, -0.3, 0.5, 0.2, 0.3);
       Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
 
-      HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 0.4);
+      HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 2.0);
       handPosePacket.setDestination(PacketDestination.CONTROLLER);
       return handPosePacket;
    }
@@ -101,7 +101,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.3, 0.7, 0.5, 0.3, 1.3);
       Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
 
-      HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 0.4);
+      HandPosePacket handPosePacket = new HandPosePacket(robotSide, Frame.CHEST, position, orientation, 2.0);
       handPosePacket.setDestination(PacketDestination.CONTROLLER);
       return handPosePacket;
    }
@@ -181,7 +181,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
          }
       });
 
-      testHelper.simulateAndBlockAndCatchExceptions(1.1);
+      testHelper.simulateAndBlockAndCatchExceptions(2.1);
       hasSimulationBeenInitialized = true;
       
       Vector3d startTranslation = new Vector3d();
@@ -194,7 +194,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       outgoingHandPosePacket.position.x = desiredTranslation.getX();
       outgoingHandPosePacket.position.y = desiredTranslation.getY();
       outgoingHandPosePacket.position.z = desiredTranslation.getZ();
-      int trajectoryTime = 3;
+      double trajectoryTime = 3.0;
       outgoingHandPosePacket.trajectoryTime = trajectoryTime;
       outgoingHandPosePacket.robotSide = RobotSide.LEFT;
       mockUiCommunicator.send(outgoingHandPosePacket);
@@ -322,7 +322,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       final HandPosePacket outgoingHandPosePacket_1 = createRandomHandPosePacketWithRobotSide(RobotSide.LEFT);
       final HandPosePacket outgoingHandPosePacket_2 = createRandomHandPosePacketWithRobotSide(RobotSide.RIGHT);
 
-      testHelper.simulateAndBlockAndCatchExceptions(1.1);
+      testHelper.simulateAndBlockAndCatchExceptions(2.1);
       hasSimulationBeenInitialized = true;
 
       Runnable myRunnable = new Runnable()
@@ -338,7 +338,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       Thread handposeThread = new Thread(myRunnable);
       handposeThread.start();
-      testHelper.simulateAndBlockAndCatchExceptions(1.0);
+      testHelper.simulateAndBlockAndCatchExceptions(3.0);
       assertTrue((leftStatusStartedCounter == 1) && (rightStatusStartedCounter == 1) && (leftStatusCompletedCounter == 1) && (rightStatusCompletedCounter == 1));
       BambooTools.reportTestFinishedMessage();
    }
