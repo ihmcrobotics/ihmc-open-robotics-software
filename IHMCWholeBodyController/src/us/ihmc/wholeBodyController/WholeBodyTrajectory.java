@@ -277,22 +277,22 @@ public class WholeBodyTrajectory
 
          //-----  check if this is part of the arms ---------
 
-         int J = 0 ;
+         int jointIdx = 0 ;
          for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.LEFT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
-            packet.leftArmJointAngle[J][w]    = jointsWaypoint.position[index];
-            packet.leftArmJointVelocity[J][w] = jointsWaypoint.velocity[index];
-            J++;
+            packet.leftArmTrajectory.trajectoryPoints[w].positions[jointIdx] = jointsWaypoint.position[index];
+            packet.leftArmTrajectory.trajectoryPoints[w].velocities[jointIdx] = jointsWaypoint.velocity[index];
+            jointIdx++;
          }
 
-         J = 0 ;
+         jointIdx = 0 ;
          for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.RIGHT) )
          {   
             int index = jointNameToTrajectoryIndex.get( armJoint.getName() );
-            packet.rightArmJointAngle[J][w]    = jointsWaypoint.position[index];
-            packet.rightArmJointVelocity[J][w] = jointsWaypoint.velocity[index];
-            J++;
+            packet.rightArmTrajectory.trajectoryPoints[w].positions[jointIdx] = jointsWaypoint.position[index];
+            packet.rightArmTrajectory.trajectoryPoints[w].velocities[jointIdx] = jointsWaypoint.velocity[index];
+            jointIdx++;
          }
 
          ///---------- calculation in task space ------------
@@ -357,9 +357,7 @@ public class WholeBodyTrajectory
       Quat4d chestOrientation = new Quat4d();
       chestToWorld.get(chestOrientation, chestPosition);
       
-      boolean rightArmVelocityContent = false;
       boolean rightArmPositionContent = false;
-      boolean leftArmVelocityContent = false;
       boolean leftArmPositionContent = false;
       
       boolean pelvisLinearVelocityContent = false;
@@ -375,13 +373,9 @@ public class WholeBodyTrajectory
          int J = 0;
          for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.RIGHT))
          {   
-            if (!MathTools.epsilonEquals(packet.rightArmJointAngle[J][n], armJoint.getQ(), epsilon))
+            if (!MathTools.epsilonEquals(packet.rightArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
             {
                rightArmPositionContent = true;
-            }
-            if (!MathTools.epsilonEquals(packet.rightArmJointVelocity[J][n], 0.0, epsilon))
-            {
-               rightArmVelocityContent = true;
             }
             J++;
          }
@@ -389,13 +383,9 @@ public class WholeBodyTrajectory
          J = 0;
          for(OneDoFJoint armJoint: fullRobotModel.armJointIDsList.get(RobotSide.LEFT))
          {   
-            if (!MathTools.epsilonEquals(packet.leftArmJointAngle[J][n], armJoint.getQ(), epsilon))
+            if (!MathTools.epsilonEquals(packet.leftArmTrajectory.trajectoryPoints[n].positions[J], armJoint.getQ(), epsilon))
             {
                leftArmPositionContent = true;
-            }
-            if (!MathTools.epsilonEquals(packet.leftArmJointVelocity[J][n], 0.0, epsilon))
-            {
-               leftArmVelocityContent = true;
             }
             J++;
          }
@@ -430,22 +420,12 @@ public class WholeBodyTrajectory
       if (!rightArmPositionContent)
       {
 //         System.out.println("no right arm position content");
-         packet.rightArmJointAngle = null;
-      }
-      if (!rightArmVelocityContent)
-      {
-//         System.out.println("no right arm velocity content");
-         packet.rightArmJointVelocity = null;
+         packet.rightArmTrajectory = null;
       }
       if (!leftArmPositionContent)
       {
 //         System.out.println("no left arm position content");
-         packet.leftArmJointAngle = null;
-      }
-      if (!leftArmVelocityContent)
-      {
-//         System.out.println("no left arm velocity content");
-         packet.leftArmJointVelocity = null;
+         packet.leftArmTrajectory = null;
       }
       if (!pelvisLinearVelocityContent)
       {

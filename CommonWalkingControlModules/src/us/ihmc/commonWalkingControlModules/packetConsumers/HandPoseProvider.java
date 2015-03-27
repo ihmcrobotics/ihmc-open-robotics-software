@@ -48,16 +48,6 @@ public interface HandPoseProvider
 
    public abstract void getPauseCommand(RobotSide robotSide);
 
-   public abstract boolean checkForNewWholeBodyPoseList(RobotSide robotSide);
-
-   public abstract double[] getDesiredWholeBodyTrajectoryTimeArray();
-   
-   public abstract double[][] getDesiredWholeBodyTrajectoryPositionArray(RobotSide robotSide);
-   
-   public abstract double[][] getDesiredWholeBodyTrajectoryVelocityArray(RobotSide robotSide);
-   
-   public abstract void setWholeBodyTrajectoryPacketAtomicReferenceToNull(RobotSide robotSide);
-
    public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
 
    public abstract ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide);

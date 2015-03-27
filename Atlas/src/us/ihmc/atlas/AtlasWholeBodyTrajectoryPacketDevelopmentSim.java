@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -40,7 +41,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    //   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
    private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
-   private final boolean USE_INGRESS_ONLY = true;
+   private final boolean USE_INGRESS_ONLY = false;
    private final YoVariableRegistry registry;
    private final YoFramePoint framePoint;
    private final YoFrameOrientation frameOrientation;
@@ -118,7 +119,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
 //      	   return trajectoryAnglesToReturn;
 //         }
 
-   private double[][] generateArmTrajectory(RobotSide robotSide, int numOfWaypoints)
+   private ArmJointTrajectoryPacket generateArmTrajectory(RobotSide robotSide, int numOfWaypoints)
    {
       // Put the arm down
       //waypoints isnt used in this function
@@ -130,8 +131,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 });
       double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 });
 
-  
-      double[][] armFlyingSequence = new double[numberOfArmJoints][numOfWaypoints];
+      ArmJointTrajectoryPacket armFlyingSequence = new ArmJointTrajectoryPacket(robotSide, numOfWaypoints, numberOfArmJoints);
 
       for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
       {
@@ -162,7 +162,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
                throw new RuntimeException("Should not get there!");
             }
 
-            armFlyingSequence[jointIndex][poseIndex] = desiredJointAngle;
+            armFlyingSequence.trajectoryPoints[poseIndex].positions[jointIndex] = desiredJointAngle;
          }
       }
       return armFlyingSequence;
@@ -217,11 +217,9 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
             packet.pelvisWorldOrientation[w] = new Quat4d(); 
          }
          
-         packet.allocateArmTrajectory(RobotSide.LEFT);
-         packet.allocateArmTrajectory(RobotSide.RIGHT);
-         
-         packet.leftArmJointAngle  = generateArmTrajectory(RobotSide.LEFT, waypoints);
-         packet.rightArmJointAngle = generateArmTrajectory(RobotSide.RIGHT, waypoints);
+         packet.allocateArmTrajectories();
+         packet.leftArmTrajectory = generateArmTrajectory(RobotSide.LEFT, waypoints);
+         packet.rightArmTrajectory = generateArmTrajectory(RobotSide.RIGHT, waypoints);
          
       }
       catch (Exception e)
