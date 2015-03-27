@@ -28,7 +28,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    protected final YoSE3PIDGains gains;
 
-   private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
    private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
 
