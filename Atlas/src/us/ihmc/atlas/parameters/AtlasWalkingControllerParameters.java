@@ -364,6 +364,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double ki = realRobot ? 2.0 : 4.0;
       double kiBleedOff = 0.9;
       boolean useRawCMP = true;
+      boolean useHackToReduceFeedForward = false;
 //      double cmpFilterBreakFrequencyInHertz = 16.0;
 //      double cmpRateLimit = 60.0;
 //      double cmpAccelerationLimit = 2000.0;
@@ -373,9 +374,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
       gains.setUseRawCMP(useRawCMP);
-//      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
+      //      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
 //      gains.setCMPRateLimit(cmpRateLimit);
 //      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
+      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }

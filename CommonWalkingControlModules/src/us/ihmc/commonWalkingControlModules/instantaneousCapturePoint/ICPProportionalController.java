@@ -11,6 +11,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.AccelerationLimitedYoFrameVector2d;
@@ -61,6 +62,8 @@ public class ICPProportionalController
 
    private final boolean useRawCMP;
 
+   private final BooleanYoVariable useHackToReduceFeedForward = new BooleanYoVariable("icpControlUseHackToReduceFeedForward", registry);
+
    public ICPProportionalController(ICPControlGains gains, double controlDT, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       smartCMPProjector = new SmartCMPProjectorTwo(parentRegistry, yoGraphicsListRegistry);
@@ -80,6 +83,8 @@ public class ICPProportionalController
       captureKiBleedoff.set(gains.getKiBleedOff());
 
       useRawCMP = gains.useRawCMP();
+      useHackToReduceFeedForward.set(gains.useHackToReduceFeedForward());
+
       if (useRawCMP)
       {
          filteredCMPOutput = null;
@@ -140,7 +145,8 @@ public class ICPProportionalController
       icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
       icpVelocity.update();
       alphaICPVelocityFeedForward.set(1.0);
-      correctICPFeedForward(capturePoint, desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointVelocity);
+      if (useHackToReduceFeedForward.getBooleanValue())
+         correctICPFeedForward(capturePoint, desiredCapturePoint, finalDesiredCapturePoint, desiredCapturePointVelocity);
       // feed forward part
       tempControl.setIncludingFrame(desiredCapturePointVelocity);
       tempControl.scale(alphaICPVelocityFeedForward.getDoubleValue() / omega0);
