@@ -70,10 +70,8 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
    private void addFullCourse3dModel(boolean doingValve)
    {
       combinedTerrainObject.getLinkGraphics().identity();
-      if (doingValve)
-         combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBedWallCut.obj");
-      else
-         combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBed.obj");
+
+      combinedTerrainObject.getLinkGraphics().addModelFile("models/SCTestBed.obj");
    }
 
    private void createStairs()
@@ -148,10 +146,10 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
 
       String valveRobotName = "ValveRobot";
       ValveType valveType = ValveType.SMALL_VALVE;
-      double x = -1.043;
-      double y = -5.937;
-      double z = 1.168;
-      double yaw_degrees = 135;
+      double x = -0.758;
+      double y = -8.515;
+      double z = 1.067;
+      double yaw_degrees = -135;
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
       Point3d position = new Point3d(x, y, z);
@@ -205,8 +203,8 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
             contactController.addContactable((Contactable) r);
 
       }
-      if( contactableRobots.size()>0)
-      contactableRobots.get(0).setController(contactController);
+      if (contactableRobots.size() > 0)
+         contactableRobots.get(0).setController(contactController);
    }
 
    @Override
@@ -312,8 +310,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
    }
 
-   private void setUpSlopedCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
-         double yawDegrees)
+   private void setUpSlopedCinderBlock(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       if (numberFlatSupports < 0)
          return;
@@ -334,8 +331,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(newBox);
    }
 
-   private void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports,
-         double yawDegrees)
+   private void setUpCinderBlockSquare(CombinedTerrainObject3D combinedTerrainObject, double xCenter, double yCenter, int numberFlatSupports, double yawDegrees)
    {
       double xOffset = 0, yOffset = cinderBlockWidth / 2.0;
       double[] xyRotated1 = rotateAroundOrigin(new double[] { xOffset, yOffset }, yawDegrees);
@@ -383,8 +379,7 @@ public class DRCFinalsEnvironment implements CommonAvatarEnvironmentInterface
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps,
             cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps), app);
       combinedTerrainObject.addTerrainObject(newBox);
-     
-           
+
    }
 
 }
