@@ -165,7 +165,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
                   throw new RuntimeException("Unkown frame");
                }
 
-               FramePose pose = new FramePose(packetReferenceFrames.get(robotSide), object.getPosition(), object.getOrientation());
+               FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
+               pose.changeFrame(packetReferenceFrames.get(robotSide));
                desiredHandPoses.put(robotSide, pose);
             }
 
