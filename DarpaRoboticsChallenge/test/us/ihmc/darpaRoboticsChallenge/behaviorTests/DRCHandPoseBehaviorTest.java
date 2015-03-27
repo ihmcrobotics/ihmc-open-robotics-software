@@ -202,6 +202,82 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testMoveHandToHome() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      PrintTools.debug(this, "Initializing Sim");
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Joint Space");
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 2.0;
+      double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredJointSpaceHandPose);
+
+      FramePose initialHandPose = getCurrentHandPose(robotSide);
+      PrintTools.debug(this, "Starting Joint Space Hand Pose Behavior");
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      PrintTools.debug(this, "Joint Space Hand Pose Behavior Should Be Done");
+      
+      assertTrue(handPoseBehavior.isDone());
+
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(PacketControllerTools.createGoToHomeHandPosePacket(robotSide, trajectoryTime));
+
+      PrintTools.debug(this, "Moving arm back to home pose");
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      PrintTools.debug(this, "Arm should be back to home pose");
+      assertTrue(success);
+
+      assertTrue(handPoseBehavior.isDone());
+      assertCurrentHandPoseIsWithinThresholds(robotSide, initialHandPose);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testTwoSequentialHandPoses() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      PrintTools.debug(this, "Initializing Sim");
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      PrintTools.debug(this, "Setting Hand Pose Behavior Input in Joint Space");
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 2.0;
+      double[] desiredJointSpaceHandPose = createRandomArmPose(robotSide);
+      final HandPoseBehavior handPoseBehavior = createNewHandPoseBehavior(robotSide, trajectoryTime, desiredJointSpaceHandPose);
+
+      FramePose initialHandPose = getCurrentHandPose(robotSide);
+      PrintTools.debug(this, "Starting Joint Space Hand Pose Behavior");
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      PrintTools.debug(this, "Joint Space Hand Pose Behavior Should Be Done");
+
+      assertTrue(handPoseBehavior.isDone());
+
+      RigidBodyTransform handPoseTargetTransform = new RigidBodyTransform();
+      initialHandPose.getPose(handPoseTargetTransform);
+      handPoseBehavior.initialize();
+      handPoseBehavior.setInput(Frame.WORLD, handPoseTargetTransform, robotSide, trajectoryTime);
+
+      PrintTools.debug(this, "Moving arm back to home pose");
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      PrintTools.debug(this, "Arm should be back to home pose");
+      assertTrue(success);
+
+      assertTrue(handPoseBehavior.isDone());
+      assertCurrentHandPoseIsWithinThresholds(robotSide, initialHandPose);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
 
    @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
