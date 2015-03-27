@@ -9,7 +9,9 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
    us.ihmc.atlas.AtlasInverseDynamicsCalculatorTest.class,
-   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class
+   us.ihmc.atlas.AtlasPushRecoveryTest.class,
+   us.ihmc.atlas.AtlasScriptingTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class
 })
 
 public class AtlasAFastTestSuite

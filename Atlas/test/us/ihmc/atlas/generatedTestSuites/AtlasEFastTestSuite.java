@@ -7,9 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCoursePlatformTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampFootstepSnapperTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class
 })
 
 public class AtlasEFastTestSuite
