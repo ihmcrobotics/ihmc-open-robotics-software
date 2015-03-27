@@ -571,7 +571,7 @@ public class HandControlModule
       int waypoints = trajectoryPacket.trajectoryPoints.length;
       if (waypoints == 0)
       {
-         System.out.println("recieved empty packet");
+         System.out.println(this.getClass().getSimpleName() + ": recieved empty ArmJointTrajectoryPacket packet");
          return;
       }
       
@@ -581,14 +581,14 @@ public class HandControlModule
          int armJoints = trajectoryPacket.trajectoryPoints[i].positions.length;
          if (armJoints != oneDoFJoints.length)
          {
-            System.out.println("in waypoint " + i + ":");
+            System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket waypoint " + i + ":");
             System.out.println("package contains " + armJoints + " joints - expected was " + oneDoFJoints.length);
             return;
          }
          if (trajectoryPacket.trajectoryPoints[i].time <= prevTime)
          {
-            System.out.println("in waypoint " + i + ":");
-            System.out.println("time value is not increasing - should be bigger then " + prevTime);
+            System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket waypoint " + i + ":");
+            System.out.println("time value invalid - should be bigger then " + prevTime);
             return;
          }
          prevTime = trajectoryPacket.trajectoryPoints[i].time;
@@ -645,26 +645,6 @@ public class HandControlModule
       }
 
       jointSpaceHandControlState.setTrajectories(waypointsPolynomialTrajectoryGenerators);
-      requestedState.set(jointSpaceHandControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
-      
-//      if (handPoseStatusProducer != null)
-//         handPoseStatusProducer.sendStartedStatus(robotSide);
-   }
-
-   public void moveJointspaceWithWaypoints(RobotSide robotSide, double[] timeArray, double[][] positionArray, double[][] velocityArray)
-   {
-      if (positionArray.length != oneDoFJoints.length)
-      {
-         throw new RuntimeException("not all joint positions specified");
-      }
-
-      for (int i = 0; i < oneDoFJoints.length; i++)
-      {
-         wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[i]).setWaypoints(timeArray, positionArray[i], velocityArray[i]);
-      }
-
-      jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
       requestedState.set(jointSpaceHandControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       
