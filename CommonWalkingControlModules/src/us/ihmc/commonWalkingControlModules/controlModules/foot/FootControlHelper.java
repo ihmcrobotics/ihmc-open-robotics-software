@@ -132,7 +132,7 @@ public class FootControlHelper
       ankleRollAndHipYawAlignmentTreshold.set(0.9);
 
       minJacobianDeterminantForSingularityEscape = new DoubleYoVariable("minJacobianDeterminantForSingularityEscape", registry);
-      minJacobianDeterminantForSingularityEscape.set(0.035);
+      minJacobianDeterminantForSingularityEscape.set(0.025);
       
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
             walkingControllerParameters, momentumBasedController, registry);
