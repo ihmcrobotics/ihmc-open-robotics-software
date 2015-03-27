@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket.TrajectoryPoint;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
@@ -325,6 +327,102 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
+      return null;
+   }
+   
+   /**
+    * Checks the validity of a {@link ArmJointTrajectoryPacket}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateArmJointTrajectoryPacket(ArmJointTrajectoryPacket packetToCheck)
+   {
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.robotSide);
+      if (packetFieldErrorType != null)
+      {
+         String errorMessage = "robotSide field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+      
+      int waypoints = packetToCheck.trajectoryPoints.length;
+      if (waypoints == 0)
+      {
+         String errorMessage = "ArmJointTrajectoryPacket does not contain any points";
+         return errorMessage;
+      }
+      
+      double prevTime = 0.0;
+      int joints = packetToCheck.trajectoryPoints[0].positions.length;
+      
+      for (int i = 0; i < waypoints; i++)
+      {
+         TrajectoryPoint trajectoryPoint = packetToCheck.trajectoryPoints[i];
+         String errorMessage = validateTrajectoryPointPacket(trajectoryPoint);
+         if (errorMessage != null)
+         {
+            return "ArmJointTrajectoryPacket: waypoint " + i + " - " + errorMessage;
+         }
+         
+         if (trajectoryPoint.time <= prevTime)
+         {
+            return "ArmJointTrajectoryPacket: waypoint " + i + " has invalid time - needs to be bigger then " + prevTime;
+         }
+         prevTime = trajectoryPoint.time;
+         
+         if (trajectoryPoint.positions.length != joints || trajectoryPoint.velocities.length != joints)
+         {
+            return "ArmJointTrajectoryPacket contains waypoints with inconsistent number of joints";
+         }
+      }
+
+      return null;
+   }
+   
+   private final static double MAX_ACCEPTED_JOINT_VELOCITY = 100.0;
+   /**
+    * Checks the validity of a {@link TrajectoryPoint}.
+    * @param packetToCheck
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateTrajectoryPointPacket(TrajectoryPoint packetToCheck)
+   {
+      ObjectErrorType errorTime = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.time);
+      if (errorTime != null)
+      {
+         return errorTime.getMessage();
+      }
+      
+      int joints = packetToCheck.positions.length;
+      if (packetToCheck.velocities.length != joints)
+      {
+         return "inconstistent size of position and velocity arrays";
+      }
+      
+      ObjectErrorType errorPos = ObjectValidityChecker.validateArrayOfDouble(packetToCheck.positions, joints);
+      if (errorPos != null)
+      {
+         return "positions array " + errorPos.getMessage();
+      }
+      
+      ObjectErrorType errorVel = ObjectValidityChecker.validateArrayOfDouble(packetToCheck.velocities, joints);
+      if (errorVel != null)
+      {
+         return "velocities array " + errorVel.getMessage();
+      }
+      
+      for (int i = 0; i < joints; i++)
+      {
+         if (Math.abs(packetToCheck.positions[i]) > Math.PI)
+         {
+            return "joint angle values between -pi and pi expected for joint #" + i + " was " + packetToCheck.positions[i];
+         }
+         if (Math.abs(packetToCheck.velocities[i]) > MAX_ACCEPTED_JOINT_VELOCITY)
+         {
+            return "joint amgular velocity unreasonably high for joint #" + i + " was " + packetToCheck.velocities[i]
+                  + " expecting less then " + MAX_ACCEPTED_JOINT_VELOCITY;
+         }
+      }
+      
       return null;
    }
 }

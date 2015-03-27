@@ -283,9 +283,11 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    @Override
    public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
    {
+      ArmJointTrajectoryPacket packet = null;
+      
       if (armJointTrajectoryPackets.get(robotSide).get() != null)
       {
-         return armJointTrajectoryPackets.get(robotSide).getAndSet(null);
+         packet = armJointTrajectoryPackets.get(robotSide).getAndSet(null);
       }
       
       if (wholeBodyTrajectoryHandPoseListPackets.get() != null)
@@ -293,16 +295,27 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          if (robotSide.equals(RobotSide.LEFT))
          {
             WholeBodyTrajectoryPacket wholeBodyPacket = wholeBodyTrajectoryHandPoseListPackets.get();
-            return wholeBodyPacket.leftArmTrajectory;
+            packet = wholeBodyPacket.leftArmTrajectory;
          }
          else if (robotSide.equals(RobotSide.RIGHT))
          {
             WholeBodyTrajectoryPacket wholeBodyPacket = wholeBodyTrajectoryHandPoseListPackets.getAndSet(null);
-            return wholeBodyPacket.rightArmTrajectory;
+            packet = wholeBodyPacket.rightArmTrajectory;
          }
       }
       
-      return null;
+      if (globalDataProducer != null && packet != null)
+      {
+         String errorMessage = PacketValidityChecker.validateArmJointTrajectoryPacket(packet);
+         if (errorMessage != null)
+         {
+            globalDataProducer.notifyInvalidPacketReceived(HandPosePacket.class, errorMessage);
+            System.out.println(errorMessage);
+            return null;
+         }
+      }
+      
+      return packet;
    }
    
    @Override

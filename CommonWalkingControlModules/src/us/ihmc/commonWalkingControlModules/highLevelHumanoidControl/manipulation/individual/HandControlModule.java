@@ -568,32 +568,15 @@ public class HandControlModule
    
    public void moveUsingCubicTrajectory(ArmJointTrajectoryPacket trajectoryPacket)
    {
-      int waypoints = trajectoryPacket.trajectoryPoints.length;
-      if (waypoints == 0)
+      int armJoints = trajectoryPacket.trajectoryPoints[0].positions.length;
+      if (armJoints != oneDoFJoints.length)
       {
-         System.out.println(this.getClass().getSimpleName() + ": recieved empty ArmJointTrajectoryPacket packet");
+         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket package contains "
+               + armJoints + " joints - expected was " + oneDoFJoints.length);
          return;
       }
       
-      double prevTime = 0.0;
-      for (int i = 0; i < waypoints; i++)
-      {
-         int armJoints = trajectoryPacket.trajectoryPoints[i].positions.length;
-         if (armJoints != oneDoFJoints.length)
-         {
-            System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket waypoint " + i + ":");
-            System.out.println("package contains " + armJoints + " joints - expected was " + oneDoFJoints.length);
-            return;
-         }
-         if (trajectoryPacket.trajectoryPoints[i].time <= prevTime)
-         {
-            System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket waypoint " + i + ":");
-            System.out.println("time value invalid - should be bigger then " + prevTime);
-            return;
-         }
-         prevTime = trajectoryPacket.trajectoryPoints[i].time;
-      }
-      
+      int waypoints = trajectoryPacket.trajectoryPoints.length;
       for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
       {
          MultipleWaypointsOneDoFJointTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[jointIdx]);
