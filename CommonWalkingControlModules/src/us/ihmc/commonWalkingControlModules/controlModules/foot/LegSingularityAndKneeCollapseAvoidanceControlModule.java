@@ -42,7 +42,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private static final boolean USE_MECHANICAL_LIMIT_AVOIDANCE_SWING = true; // Limit the swing foot motion according to the knee flexion limit.
    public static final boolean USE_SINGULARITY_AVOIDANCE_SUPPORT = true; // Progressively limit the CoM height as the support leg(s) are getting more straight
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION = true; // Lower the CoM if a footstep is unreachable
-   private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION = false; // When false, the module will correct only the velocity and acceleration of the CoM height.
+   private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION = true; // When false, the module will correct only the velocity and acceleration of the CoM height.
    private static final boolean USE_COLLAPSE_AVOIDANCE = false; // Try to avoid the knee from collapsing by limiting how low the CoM can be
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
