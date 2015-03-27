@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.lists.FrameTupleArrayList;
-import us.ihmc.utilities.lists.RecyclingArrayList;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -75,7 +74,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    private final ArrayList<YoFramePoint> constantCentroidalMomentumPivots = new ArrayList<YoFramePoint>();
    private final ArrayList<YoFramePoint> capturePointCornerPoints = new ArrayList<YoFramePoint>();
    private final FrameTupleArrayList<FramePoint> footstepList = FrameTupleArrayList.createFramePointArrayList();
-   private final ArrayList<FramePoint> tmpArrayListOfFramePoints = new ArrayList<>();
+   private final FrameTupleArrayList<FramePoint> tmpArrayListOfFramePoints = FrameTupleArrayList.createFramePointArrayList();
 
    private final VelocityConstrainedPositionTrajectoryGenerator doubleSupportCapturePointTrajectory;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
@@ -162,7 +161,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
    }
 
    public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity, double initialTime,
-         ArrayList<FramePoint> footstepList)
+         FrameTupleArrayList<FramePoint> footstepList)
    {
       this.footstepList.copyFromListAndTrimSize(footstepList);
 
@@ -201,7 +200,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
             singleSupportInitialDesiredCapturePointVelocity, doubleSupportTimeToUse);
    }
 
-   public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
+   public void initializeSingleSupport(double initialTime, FrameTupleArrayList<FramePoint> footstepList)
    {
       this.footstepList.copyFromListAndTrimSize(footstepList);
 
@@ -233,7 +232,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
             constantCentroidalMomentumPivots.get(1), singleSupportInitialDesiredCapturePointVelocity);
    }
 
-   protected void computeConstantCMPs(RecyclingArrayList<FramePoint> footstepList)
+   protected void computeConstantCMPs(FrameTupleArrayList<FramePoint> footstepList)
    {
       comeToStop.set(footstepList.size() <= footstepsToStop.getIntegerValue());
 
@@ -424,7 +423,72 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       wasPushedInDoubleSupport.set(false);
    }
 
+   public void updatePlanForDoubleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
+   {
+      this.footstepList.copyFromListAndTrimSize(footstepList);
+
+      initialTime.set(time);
+      wasPushedInDoubleSupport.set(true);
+      isDoubleSupport.set(false);
+      atAStop.set(false);
+      comeToStop.set(true);
+
+      computeConstantCMPs(this.footstepList);
+      double stepDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
+      computeCapturePointCornerPoints(stepDuration);
+
+      capturePointCornerPoints.get(1).getFrameTuple2dIncludingFrame(tmp2dFramePoint1);
+      tmp2dFramePoint2.setByProjectionOntoXYPlaneIncludingFrame(footstepList.get(0));
+
+      frameLine2d.set(tmp2dFramePoint1, tmp2dFramePoint2);
+
+      CapturePointTools.computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(actualCapturePointPosition, frameLine2d, tmp2dFramePoint3);
+
+      capturePointCornerPoints.get(0).setXY(tmp2dFramePoint3);
+
+      CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0), capturePointCornerPoints.get(1),
+            capturePointCornerPoints.get(0), omega0.getDoubleValue(), stepDuration);
+
+      desiredCapturePointPosition.set(capturePointCornerPoints.get(0));
+      singleSupportInitialDesiredCapturePointPosition.set(desiredCapturePointPosition);
+
+      wasPushedInDoubleSupport.set(false);
+   }
+
    public void updatePlanForSingleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
+   {
+      this.footstepList.copyFromListAndTrimSize(footstepList);
+
+      computeTimeInCurrentState(time);
+      double timeRemaining = singleSupportDuration.getDoubleValue() - timeInCurrentState.getDoubleValue();
+      wasPushedInSingleSupport.set(true);
+
+      computeConstantCMPs(this.footstepList);
+      computeCapturePointCornerPoints(doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue());
+
+      tmp2dFramePoint1.setIncludingFrame(capturePointCornerPoints.get(1).getReferenceFrame(), capturePointCornerPoints.get(1).getX(), capturePointCornerPoints
+            .get(1).getY());
+
+      tmp2dFramePoint2.setIncludingFrame(footstepList.get(0).getReferenceFrame(), footstepList.get(0).getX(), footstepList.get(0).getY());
+
+      frameLine2d.set(tmp2dFramePoint1, tmp2dFramePoint2);
+
+      CapturePointTools.computeCapturePointOnTrajectoryAndClosestToActualCapturePoint(actualCapturePointPosition, frameLine2d, tmp2dFramePoint3);
+
+      capturePointCornerPoints.get(0).set(tmp2dFramePoint3.getX(), tmp2dFramePoint3.getY(), 0);
+      desiredCapturePointPosition.set(tmp2dFramePoint3.getX(), tmp2dFramePoint3.getY(), 0.0);
+
+      CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0), capturePointCornerPoints.get(1),
+            capturePointCornerPoints.get(0), omega0.getDoubleValue(), timeRemaining + doubleSupportDuration.getDoubleValue());
+
+      singleSupportInitialDesiredCapturePointPosition.set(desiredCapturePointPosition);
+
+      initialTime.set(time);
+
+      wasPushedInSingleSupport.set(false);
+   }
+
+   public void updatePlanForSingleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
    {
       this.footstepList.copyFromListAndTrimSize(footstepList);
 
@@ -469,7 +533,52 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       }
    }
 
+   public void cancelPlan(double time, FrameTupleArrayList<FramePoint> footstepList)
+   {
+      if (isDoubleSupport.getBooleanValue())
+      {
+         cancelPlanNow(time, footstepList);
+      }
+      else
+      {
+         cancelPlan.set(true);
+      }
+   }
+
    private void cancelPlanNow(double time, ArrayList<FramePoint> footstepList)
+   {
+      this.footstepList.copyFromListAndTrimSize(footstepList);
+
+      capturePointCornerPoints.get(0).set(desiredCapturePointPosition);
+
+      singleSupportInitialDesiredCapturePointPosition.set(footstepList.get(0));
+      singleSupportInitialDesiredCapturePointPosition.add(footstepList.get(1));
+      singleSupportInitialDesiredCapturePointPosition.scale(0.5);
+
+      singleSupportInitialDesiredCapturePointVelocity.set(0.0, 0.0, 0.0);
+
+      for (int i = 1; i < constantCentroidalMomentumPivots.size(); i++)
+      {
+         constantCentroidalMomentumPivots.get(i).set(singleSupportInitialDesiredCapturePointPosition);
+      }
+
+      for (int i = 1; i < capturePointCornerPoints.size(); i++)
+      {
+         capturePointCornerPoints.get(i).set(singleSupportInitialDesiredCapturePointPosition);
+      }
+
+      initializeDoubleSupportCapturePointTrajectory(desiredCapturePointPosition, desiredCapturePointVelocity, singleSupportInitialDesiredCapturePointPosition,
+            singleSupportInitialDesiredCapturePointVelocity, doubleSupportDuration);
+
+      CapturePointTools.computeConstantCMPFromInitialAndFinalCapturePointLocations(constantCentroidalMomentumPivots.get(0),
+            singleSupportInitialDesiredCapturePointPosition, desiredCapturePointPosition, omega0.getDoubleValue(), doubleSupportDuration.getDoubleValue());
+
+      initialTime.set(time);
+
+      cancelPlan.set(false);
+   }
+
+   private void cancelPlanNow(double time, FrameTupleArrayList<FramePoint> footstepList)
    {
       this.footstepList.copyFromListAndTrimSize(footstepList);
 
@@ -549,6 +658,11 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       return constantCentroidalMomentumPivots;
    }
 
+   public void setInitialDoubleSupportTime(double time)
+   {
+      doubleSupportInitialTransferDuration.set(time);
+   }
+
    public void setDoubleSupportTime(double time)
    {
       doubleSupportDuration.set(time);
@@ -598,12 +712,7 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       desiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
       desiredCapturePointVelocity.getFrameTupleIncludingFrame(tmpFrameVector1);
 
-      tmpArrayListOfFramePoints.clear();
-
-      for (int i = 0; i < 2; i++)
-      {
-         tmpArrayListOfFramePoints.add(footstepList.get(i));
-      }
+      tmpArrayListOfFramePoints.copyFromListAndTrimSize(footstepList);
 
       initializeDoubleSupport(tmpFramePoint1, tmpFrameVector1, time, tmpArrayListOfFramePoints);
    }
