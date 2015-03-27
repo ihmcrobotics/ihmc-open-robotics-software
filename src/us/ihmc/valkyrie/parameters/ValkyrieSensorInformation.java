@@ -34,12 +34,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
-   
-   public static final double defaultTekscanContactRegionThreshold = 0.00000044;
-   public static final double defaultTekscanContactThreshold = 0.00000044;
-   public static final double defaultTekscanAlpha = 0.0;
-   public static final double defaultTekscanBeta = 0.0;
-   public static final int defaultTekscanCTRL1 = 0;
 
    public static final SideDependentList<RigidBodyTransform> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
@@ -159,16 +153,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public String getPrimaryBodyImu()
    {
       return leftPelvisIMUSensor;
-   }
-   
-   public static double getTekscanContactRegionThreshold()
-   {
-	   return defaultTekscanContactRegionThreshold;
-   }
-   
-   public static double getTekscanContactThreshold()
-   {
-	   return defaultTekscanContactThreshold;
    }
    
    public RigidBodyTransform getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
