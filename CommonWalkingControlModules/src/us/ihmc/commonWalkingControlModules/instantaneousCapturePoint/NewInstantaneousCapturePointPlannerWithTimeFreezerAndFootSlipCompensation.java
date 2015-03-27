@@ -18,10 +18,9 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 
 public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation extends NewInstantaneousCapturePointPlannerWithSmoother
 {
-   private static final boolean USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK = true;
-   
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final EnumYoVariable<RobotSide> currentTransferToSide;
+   private final BooleanYoVariable doICPVelocityReductionInEndOfTranfer;
    private final BooleanYoVariable doTimeFreezing;
    private final BooleanYoVariable doFootSlipCompensation;
    private final BooleanYoVariable isTimeBeingFrozen;
@@ -60,6 +59,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.percentToScaleBackOnVelocity = new DoubleYoVariable("icpPlannerPercentToScaleBackOnVelocity", registry);
       this.alphaDeltaFootPosition = new DoubleYoVariable("icpPlannerAlphaDeltaFootPosition", registry);
       this.changeInTransferToFootPositionMagnitude = new DoubleYoVariable("icpPlannerChangeInTransferToFootPositionMagnitude", registry);
+      this.doICPVelocityReductionInEndOfTranfer = new BooleanYoVariable("icpDoICPVelocityReductionInEndOfTranfer", registry);
       this.doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
       this.doFootSlipCompensation = new BooleanYoVariable("icpPlannerDoFootSlipCompensation", registry);
       this.isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
@@ -81,6 +81,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       this.normalizedCapturePointVelocityVector.setToZero();
       this.vectorFromActualToDesiredCapturePoint.setToZero();
       this.distanceToFreezeLine.set(0.0);
+      this.doICPVelocityReductionInEndOfTranfer.set(capturePointPlannerParameters.useTerribleHackToReduceICPVelocityAtTheEndOfTransfer());
       this.doTimeFreezing.set(capturePointPlannerParameters.getDoTimeFreezing());
       this.doFootSlipCompensation.set(capturePointPlannerParameters.getDoFootSlipCompensation());
 
@@ -192,7 +193,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       percentToScaleDownAtEnd = MathTools.clipToMinMax(percentToScaleDownAtEnd, 0.0, 1.0);
       percentToScaleBackOnVelocity.set(percentToScaleBackOnVelocity.getDoubleValue() * percentToScaleDownAtEnd);
 
-      if (USE_SLOW_DOWN_ICP_VELOCITY_AT_END_OF_TRANSFER_HACK)
+      if (doICPVelocityReductionInEndOfTranfer.getBooleanValue())
       {
          tmpCapturePointVelocity.scale(percentToScaleBackOnVelocity.getDoubleValue());         
       }

@@ -167,6 +167,12 @@ public class NewInstantaneousCapturePointPlannerTest
 		{
 			return 0.03;
 		}
+
+	   @Override
+	   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
+	   {
+	      return true;
+	   }
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
