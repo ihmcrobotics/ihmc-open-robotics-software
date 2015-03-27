@@ -25,7 +25,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCEstimatorThread;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.realtime.PriorityParameters;
@@ -70,7 +70,7 @@ public class StepprControllerFactory
       /*
        * Create network servers/clients
        */
-      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "StepprControllerCommunicator" );
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
