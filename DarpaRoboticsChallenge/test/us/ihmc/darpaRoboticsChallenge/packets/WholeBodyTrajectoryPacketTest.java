@@ -70,10 +70,10 @@ public abstract class WholeBodyTrajectoryPacketTest
          packet.rightArmTrajectory.trajectoryPoints[1].positions[jointIdx] = rightArmHome[jointIdx];
       }
       
-      packet.leftArmTrajectory.trajectoryPoints[0].time = 2.0;
-      packet.rightArmTrajectory.trajectoryPoints[0].time = 2.0;
-      packet.leftArmTrajectory.trajectoryPoints[1].time = 4.0;
-      packet.rightArmTrajectory.trajectoryPoints[1].time = 4.0;
+      packet.leftArmTrajectory.trajectoryPoints[0].time = 3.0;
+      packet.rightArmTrajectory.trajectoryPoints[0].time = 3.0;
+      packet.leftArmTrajectory.trajectoryPoints[1].time = 6.0;
+      packet.rightArmTrajectory.trajectoryPoints[1].time = 6.0;
       
       executePacket(packet);
    }
