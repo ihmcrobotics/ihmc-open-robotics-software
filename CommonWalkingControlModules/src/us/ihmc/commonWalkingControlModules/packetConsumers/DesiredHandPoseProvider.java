@@ -10,6 +10,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
@@ -33,7 +34,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<AtomicReference<HandRotateAboutAxisPacket>> handRotateAboutAxisPackets = new SideDependentList<AtomicReference<HandRotateAboutAxisPacket>>();
    private final AtomicReference<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListPackets = new AtomicReference<WholeBodyTrajectoryPacket>();
    private final SideDependentList<AtomicReference<StopArmMotionPacket>> pausePackets = new SideDependentList<AtomicReference<StopArmMotionPacket>>();
-
+   private final SideDependentList<AtomicReference<ArmJointTrajectoryPacket>> armJointTrajectoryPackets = new SideDependentList<AtomicReference<ArmJointTrajectoryPacket>>();
+   
    private final SideDependentList<FramePose> homePositions = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
    private final SideDependentList<FramePose[]> desiredHandPosesList = new SideDependentList<FramePose[]>();
@@ -56,6 +58,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final PacketConsumer<HandPoseListPacket> handPoseListConsumer;
    private final PacketConsumer<HandRotateAboutAxisPacket> handRotateAboutAxisConsumer;
    private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryHandPoseListConsumer;
+   private final PacketConsumer<ArmJointTrajectoryPacket> armJointTrajectoryPacketConsumer;
    private final GlobalDataProducer globalDataProducer;
 
    public DesiredHandPoseProvider(FullRobotModel fullRobotModel, SideDependentList<RigidBodyTransform> desiredHandPosesWithRespectToChestFrame,
@@ -73,6 +76,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          pausePackets.put(robotSide, new AtomicReference<StopArmMotionPacket>());
          handPoseListPackets.put(robotSide, new AtomicReference<HandPoseListPacket>());
          handRotateAboutAxisPackets.put(robotSide, new AtomicReference<HandRotateAboutAxisPacket>());
+         armJointTrajectoryPackets.put(robotSide, new AtomicReference<ArmJointTrajectoryPacket>());
 
          homePositions.put(robotSide, new FramePose(chestFrame, desiredHandPosesWithRespectToChestFrame.get(robotSide)));
          desiredHandPoses.put(robotSide, homePositions.get(robotSide));
@@ -116,6 +120,15 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
             wholeBodyTrajectoryHandPoseListPackets.set(packet);
+         }
+      };
+      
+      armJointTrajectoryPacketConsumer = new PacketConsumer<ArmJointTrajectoryPacket>()
+      {
+         @Override
+         public void receivedPacket(ArmJointTrajectoryPacket object)
+         {
+            armJointTrajectoryPackets.get(object.robotSide).set(object);
          }
       };
    }
@@ -260,7 +273,19 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       return handRotateAboutAxisPackets.get(robotSide).get() != null;
    }
-
+   
+   @Override
+   public boolean checkForNewArmJointTrajectory(RobotSide robotSide)
+   {
+      return armJointTrajectoryPackets.get(robotSide).get() != null;
+   }
+   
+   @Override
+   public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
+   {
+      return armJointTrajectoryPackets.get(robotSide).getAndSet(null);
+   }
+   
    @Override
    public void getPauseCommand(RobotSide robotSide)
    {
@@ -396,6 +421,11 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    public PacketConsumer<HandRotateAboutAxisPacket> getHandRotateAboutAxisConsumer()
    {
       return handRotateAboutAxisConsumer;
+   }
+   
+   public PacketConsumer<ArmJointTrajectoryPacket> getArmJointTrajectoryConsumer()
+   {
+      return armJointTrajectoryPacketConsumer;
    }
 
    @Override

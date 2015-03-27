@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBody;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -203,6 +204,11 @@ public class ManipulationControlModule
       else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
       {
          handControlModules.get(robotSide).moveInCircle(handPoseProvider.getRotationAxisOriginInWorld(robotSide), handPoseProvider.getRotationAxisInWorld(robotSide), handPoseProvider.getRotationAngleRightHandRule(robotSide), handPoseProvider.getTrajectoryTime());
+      }
+      else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
+      {
+         ArmJointTrajectoryPacket armJointTrajectoryPacket = handPoseProvider.getArmJointTrajectoryPacket(robotSide);
+         handControlModules.get(robotSide).moveUsingCubicTrajectory(armJointTrajectoryPacket);
       }
       else if (handPoseProvider.checkForNewWholeBodyPoseList(robotSide))
       {

@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -57,5 +58,7 @@ public interface HandPoseProvider
    
    public abstract void setWholeBodyTrajectoryPacketAtomicReferenceToNull(RobotSide robotSide);
 
-   
+   public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
+
+   public abstract ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide);
 }

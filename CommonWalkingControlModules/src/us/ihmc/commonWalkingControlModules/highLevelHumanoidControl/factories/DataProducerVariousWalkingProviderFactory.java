@@ -34,6 +34,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalc
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -146,6 +147,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HandRotateAboutAxisPacket.class, handPoseProvider.getHandRotateAboutAxisConsumer());
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, handPoseProvider.getWholeBodyTrajectoryPacketConsumer());
+      objectCommunicator.attachListener(ArmJointTrajectoryPacket.class, handPoseProvider.getArmJointTrajectoryConsumer());
 
       objectCommunicator.attachListener(FootStatePacket.class, footLoadBearingProvider);
       objectCommunicator.attachListener(ThighStatePacket.class, thighLoadBearingProvider);

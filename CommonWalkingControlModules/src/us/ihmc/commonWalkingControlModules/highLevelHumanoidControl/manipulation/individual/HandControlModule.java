@@ -18,8 +18,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -561,6 +561,53 @@ public class HandControlModule
       
       if (handPoseStatusProducer != null)
          handPoseStatusProducer.sendStartedStatus(robotSide);
+   }
+   
+   public void moveUsingCubicTrajectory(ArmJointTrajectoryPacket trajectoryPacket)
+   {
+      int waypoints = trajectoryPacket.trajectoryPoints.length;
+      if (waypoints == 0)
+      {
+         System.out.println("recieved empty packet");
+         return;
+      }
+      
+      double prevTime = 0.0;
+      for (int i = 0; i < waypoints; i++)
+      {
+         int armJoints = trajectoryPacket.trajectoryPoints[i].positions.length;
+         if (armJoints != oneDoFJoints.length)
+         {
+            System.out.println("in waypoint " + i + ":");
+            System.out.println("package contains " + armJoints + " joints - expected was " + oneDoFJoints.length);
+            return;
+         }
+         if (trajectoryPacket.trajectoryPoints[i].time <= prevTime)
+         {
+            System.out.println("in waypoint " + i + ":");
+            System.out.println("time value is not increasing - should be bigger then " + prevTime);
+            return;
+         }
+         prevTime = trajectoryPacket.trajectoryPoints[i].time;
+      }
+      
+      for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
+      {
+         MultipleWaypointsOneDoFJointTrajectoryGenerator trajectoryGenerator = wholeBodyWaypointsPolynomialTrajectoryGenerators.get(oneDoFJoints[jointIdx]);
+         trajectoryGenerator.clear();
+         for (int i = 0; i < waypoints; i++)
+         {
+            double position = trajectoryPacket.trajectoryPoints[i].positions[jointIdx];
+            double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIdx];
+            double time = trajectoryPacket.trajectoryPoints[i].time;
+
+            trajectoryGenerator.appendWaypoint(time, position, velocity);
+         }
+      }
+
+      jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
+      requestedState.set(jointSpaceHandControlState.getStateEnum());
+      stateMachine.checkTransitionConditions();
    }
 
    @Deprecated
