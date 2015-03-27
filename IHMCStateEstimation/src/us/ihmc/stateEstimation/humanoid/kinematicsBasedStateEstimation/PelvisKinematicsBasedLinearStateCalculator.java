@@ -41,8 +41,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
 {
    private static final boolean VISUALIZE = true;
 
-   private static final boolean COMPUTE_FOOT_LINEAR_VELOCITY_AT_COP = false;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final TwistCalculator twistCalculator;
@@ -391,22 +389,15 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(robotSide);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(robotSide);
 
-         twistCalculator.packTwistOfBody(footTwistInWorld , bipedFeet.get(robotSide).getRigidBody());
+         twistCalculator.packTwistOfBody(footTwistInWorld, bipedFeet.get(robotSide).getRigidBody());
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(robotSide));
          footTwistInWorld.changeFrame(soleFrames.get(robotSide));
 
-         if (COMPUTE_FOOT_LINEAR_VELOCITY_AT_COP)
-         {
-            this.copsFilteredInFootFrame.get(robotSide).getFrameTuple2dIncludingFrame(tempCoP2d);
-            tempCoP.setXYIncludingFrame(tempCoP2d);
-            footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
-            tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
-            footTwistInWorld.packLinearVelocityOfPointFixedInBodyFrame(tempFrameVector, tempCoP);
-         }
-         else
-         {
-            footTwistInWorld.packLinearPart(tempFrameVector);
-         }
+         this.copsFilteredInFootFrame.get(robotSide).getFrameTuple2dIncludingFrame(tempCoP2d);
+         tempCoP.setXYIncludingFrame(tempCoP2d);
+         footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
+         tempCoP.changeFrame(footTwistInWorld.getExpressedInFrame());
+         footTwistInWorld.packLinearVelocityOfPointFixedInBodyFrame(tempFrameVector, tempCoP);
 
          tempFrameVector.changeFrame(worldFrame);
          footVelocityInWorld.set(tempFrameVector);
