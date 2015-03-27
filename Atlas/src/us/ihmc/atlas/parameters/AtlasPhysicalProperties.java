@@ -15,7 +15,7 @@ public class AtlasPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double footWidthForControl = scale * 0.11; //0.12; // 0.08;   //0.124887;
    public static final double toeWidthForControl = scale * 0.085; //0.095; // 0.07;   //0.05;   //
    public static final double footLengthForControl = scale * 0.22; //0.255;
-   public static final double footBackForControl = scale * 0.09; // 0.06;   //0.082;    // 0.07;
+   public static final double footBackForControl = scale * 0.085; // 0.09; // 0.06;   //0.082;    // 0.07;
    
    public static final double actualFootWidth = scale * 0.138;
    public static final double actualFootLength = scale * 0.26;
