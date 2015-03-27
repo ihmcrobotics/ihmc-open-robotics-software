@@ -1,7 +1,6 @@
 package us.ihmc.atlas;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
