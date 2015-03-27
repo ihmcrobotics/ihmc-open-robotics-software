@@ -6,6 +6,7 @@ import javax.vecmath.Quat4d;
 
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasWholeBodyIK;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.DRCObstacleCourseWholeBodyTrajectoryTest;
@@ -47,7 +48,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
       return ret;
    }
 
-   private double[][] generateArmTrajectory(RobotSide robotSide, int numOfWaypoints)
+   private ArmJointTrajectoryPacket generateArmTrajectory(RobotSide robotSide, int numOfWaypoints)
    {
       // Put the arm down
       //waypoints isnt used in this function
@@ -58,8 +59,9 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
       double[] armUp2 = ensureJointAnglesSize(new double[] { 0.0, -1.5 * halfPi, -halfPi / 2.0, 0.0 });
       double[] armIntermediateOnWayDown = ensureJointAnglesSize(new double[] { 0.0, -halfPi, -halfPi / 2.0, -halfPi / 2.0 });
       double[] armDown1 = ensureJointAnglesSize(new double[] { 0.0, -0.4, -halfPi / 2.0, 0.0 });
-      double[][] armFlyingSequence = new double[numberOfArmJoints][numOfWaypoints];
 
+      ArmJointTrajectoryPacket armFlyingSequence = new ArmJointTrajectoryPacket(robotSide, numOfWaypoints, numberOfArmJoints);
+      
       for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
       {
          for (int poseIndex = 0; poseIndex < numOfWaypoints; poseIndex++)
@@ -89,7 +91,7 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
                throw new RuntimeException("Should not get there!");
             }
 
-            armFlyingSequence[jointIndex][poseIndex] = desiredJointAngle;
+            armFlyingSequence.trajectoryPoints[poseIndex].positions[jointIndex] = desiredJointAngle;
          }
       }
       return armFlyingSequence;
@@ -117,11 +119,10 @@ public class AtlasObstacleCourseWholeBodyTrajectoryTest extends DRCObstacleCours
             packet.pelvisWorldOrientation[w] = new Quat4d();
          }
 
-         packet.allocateArmTrajectory(RobotSide.LEFT);
-         packet.allocateArmTrajectory(RobotSide.RIGHT);
+         packet.allocateArmTrajectories();
 
-         packet.leftArmJointAngle = generateArmTrajectory(RobotSide.LEFT, waypoints);
-         packet.rightArmJointAngle = generateArmTrajectory(RobotSide.RIGHT, waypoints);
+         packet.leftArmTrajectory = generateArmTrajectory(RobotSide.LEFT, waypoints);
+         packet.rightArmTrajectory = generateArmTrajectory(RobotSide.RIGHT, waypoints);
 
       }
       catch (Exception e)

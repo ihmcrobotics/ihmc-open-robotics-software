@@ -208,22 +208,10 @@ public class ManipulationControlModule
       else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
       {
          ArmJointTrajectoryPacket armJointTrajectoryPacket = handPoseProvider.getArmJointTrajectoryPacket(robotSide);
-         handControlModules.get(robotSide).moveUsingCubicTrajectory(armJointTrajectoryPacket);
-      }
-      else if (handPoseProvider.checkForNewWholeBodyPoseList(robotSide))
-      {
-         double[] timeArray = handPoseProvider.getDesiredWholeBodyTrajectoryTimeArray();
-         double[][] jointPositionArray = handPoseProvider.getDesiredWholeBodyTrajectoryPositionArray(robotSide);
-         double[][] jointVelocityArray = handPoseProvider.getDesiredWholeBodyTrajectoryVelocityArray(robotSide);
-         if (jointPositionArray != null)
+         if (armJointTrajectoryPacket != null)
          {
-            if (jointVelocityArray == null)
-            {
-               jointVelocityArray = new double[jointPositionArray.length][timeArray.length];
-            }
-            handControlModules.get(robotSide).moveJointspaceWithWaypoints(robotSide, timeArray, jointPositionArray, jointVelocityArray);
+            handControlModules.get(robotSide).moveUsingCubicTrajectory(armJointTrajectoryPacket);
          }
-         handPoseProvider.setWholeBodyTrajectoryPacketAtomicReferenceToNull(robotSide);
       }
    }
 

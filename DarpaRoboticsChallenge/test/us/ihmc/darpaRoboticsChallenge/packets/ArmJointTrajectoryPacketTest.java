@@ -111,9 +111,9 @@ public abstract class ArmJointTrajectoryPacketTest
          {
             OneDegreeOfFreedomJoint joint = sdfRobot.getOneDegreeOfFreedomJoint(armJoints.get(jointIdx).getName());
             
-            System.out.println(armJoints.get(jointIdx).getName() + " performance at waypoint " + i + ":");
-            System.out.println("expected position: " + packet.trajectoryPoints[i].positions[jointIdx] + " actual was: " + joint.getQ().getDoubleValue());
-            System.out.println("expected velocity: " + packet.trajectoryPoints[i].velocities[jointIdx] + " actual was: " + joint.getQD().getDoubleValue());
+//            System.out.println(armJoints.get(jointIdx).getName() + " performance at waypoint " + i + ":");
+//            System.out.println("expected position: " + packet.trajectoryPoints[i].positions[jointIdx] + " actual was: " + joint.getQ().getDoubleValue());
+//            System.out.println("expected velocity: " + packet.trajectoryPoints[i].velocities[jointIdx] + " actual was: " + joint.getQD().getDoubleValue());
             
             assertEquals(packet.trajectoryPoints[i].positions[jointIdx], joint.getQ().getDoubleValue(), epsilonQ);
             assertEquals(packet.trajectoryPoints[i].velocities[jointIdx], joint.getQD().getDoubleValue(), epsilonQd);

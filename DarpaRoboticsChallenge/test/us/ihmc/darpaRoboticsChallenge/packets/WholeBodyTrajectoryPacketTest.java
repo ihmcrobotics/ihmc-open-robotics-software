@@ -55,26 +55,25 @@ public abstract class WholeBodyTrajectoryPacketTest
       int armJoints = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, RobotSide.LEFT).length;
       
       WholeBodyTrajectoryPacket packet = createEmptyPacket(waypoints, armJoints);
-      
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         packet.allocateArmTrajectory(robotSide);
-      }
+      packet.allocateArmTrajectories();
       
       double[] leftArmHome = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, RobotSide.LEFT);
       double[] rightArmHome = getRobotModel().getDefaultArmConfigurations().getArmDefaultConfigurationJointAngles(ArmConfigurations.HOME, RobotSide.RIGHT);
       
+      // this test assumes the same number of waypoints for both arms.
       for (int jointIdx = 0; jointIdx < armJoints; jointIdx++)
       {
-         packet.leftArmJointAngle[jointIdx][0] = 0.0;
-         packet.rightArmJointAngle[jointIdx][0] = 0.0;
+         packet.leftArmTrajectory.trajectoryPoints[0].positions[jointIdx] = 0.0;
+         packet.rightArmTrajectory.trajectoryPoints[0].positions[jointIdx] = 0.0;
          
-         packet.leftArmJointAngle[jointIdx][1] = leftArmHome[jointIdx];
-         packet.rightArmJointAngle[jointIdx][1] = rightArmHome[jointIdx];
+         packet.leftArmTrajectory.trajectoryPoints[1].positions[jointIdx] = leftArmHome[jointIdx];
+         packet.rightArmTrajectory.trajectoryPoints[1].positions[jointIdx] = rightArmHome[jointIdx];
       }
       
-      packet.timeAtWaypoint[0] = 2.0;
-      packet.timeAtWaypoint[1] = 4.0;
+      packet.leftArmTrajectory.trajectoryPoints[0].time = 2.0;
+      packet.rightArmTrajectory.trajectoryPoints[0].time = 2.0;
+      packet.leftArmTrajectory.trajectoryPoints[1].time = 4.0;
+      packet.rightArmTrajectory.trajectoryPoints[1].time = 4.0;
       
       executePacket(packet);
    }
@@ -107,14 +106,14 @@ public abstract class WholeBodyTrajectoryPacketTest
          System.out.println("Starting execution of waypoint " + (i+1) + "/" + waypoints + "...");
          
          double startWaypointTime;
-         double endWaypointTime = packet.timeAtWaypoint[i];
+         double endWaypointTime = packet.leftArmTrajectory.trajectoryPoints[i].time;
          if (i == 0)
          {
             startWaypointTime = 0.0;
          }
          else
          {
-            startWaypointTime = packet.timeAtWaypoint[i-1];
+            startWaypointTime = packet.leftArmTrajectory.trajectoryPoints[i-1].time;
          }
          
          drcSimulationTestHelper.simulateAndBlock(endWaypointTime - startWaypointTime);
@@ -127,17 +126,17 @@ public abstract class WholeBodyTrajectoryPacketTest
          for (RobotSide robotSide : RobotSide.values)
          {
             ArrayList<OneDoFJoint> armJoints = fullRobotModel.armJointIDsList.get(robotSide);
-            double[][] desiredQ;
-            double[][] desiredQd;
+            double[] desiredQ;
+            double[] desiredQd;
             if (robotSide == RobotSide.LEFT)
             {
-               desiredQ = packet.leftArmJointAngle;
-               desiredQd = packet.leftArmJointVelocity;
+               desiredQ = packet.leftArmTrajectory.trajectoryPoints[i].positions;
+               desiredQd = packet.leftArmTrajectory.trajectoryPoints[i].velocities;
             }
             else
             {
-               desiredQ = packet.rightArmJointAngle;
-               desiredQd = packet.rightArmJointVelocity;
+               desiredQ = packet.rightArmTrajectory.trajectoryPoints[i].positions;
+               desiredQd = packet.rightArmTrajectory.trajectoryPoints[i].velocities;
             }
             
             for (int jointIdx = 0; jointIdx < armJoints.size(); jointIdx++)
@@ -146,13 +145,13 @@ public abstract class WholeBodyTrajectoryPacketTest
                // if the desired position is null the waypoint is set to the actual position internally
                if (desiredQ != null)
                {
-                  assertEquals(joint.getQ().getDoubleValue(), desiredQ[jointIdx][i], epsilonQ);
+                  assertEquals(joint.getQ().getDoubleValue(), desiredQ[jointIdx], epsilonQ);
                }
                
                // if the desired velocity is null the waypoint is set to velocity zero internally
                if (desiredQd != null)
                {
-                  assertEquals(joint.getQD().getDoubleValue(), desiredQd[jointIdx][i], epsilonQd);
+                  assertEquals(joint.getQD().getDoubleValue(), desiredQd[jointIdx], epsilonQd);
                }
                else
                {
@@ -181,10 +180,8 @@ public abstract class WholeBodyTrajectoryPacketTest
       ret.pelvisWorldOrientation = null;
       ret.chestWorldOrientation = null;
       ret.chestAngularVelocity = null;
-      ret.leftArmJointAngle = null;
-      ret.rightArmJointAngle = null;
-      ret.leftArmJointVelocity = null;
-      ret.rightArmJointVelocity = null;
+      ret.leftArmTrajectory = null;
+      ret.rightArmTrajectory = null;
       
       return ret;
    }
