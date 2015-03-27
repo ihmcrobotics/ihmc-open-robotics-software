@@ -78,7 +78,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getTimeToGetPreparedForLocomotion()
    {
-      return 0.0; // 0.3 seems to be a good starting point
+      return 0.3; // 0.3 seems to be a good starting point
    }
 
    @Override
@@ -141,7 +141,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean allowShrinkingSingleSupportFootPolygon()
    {
-      return false;
+      return true;
    }
 
    public boolean isNeckPositionControlled()
@@ -361,7 +361,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
       double kp = 1.5;
-      double ki = realRobot ? 4.0 : 0.0;
+      double ki = realRobot ? 2.0 : 4.0;
       double kiBleedOff = 0.9;
       boolean useRawCMP = true;
 //      double cmpFilterBreakFrequencyInHertz = 16.0;
@@ -492,8 +492,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
-      double kpXY = 80.0;
-      double kpZ = 80.0;
+      double kpXY = 40.0; //80.0;
+      double kpZ = 40.0; //80.0;
       double zetaXY = realRobot ? 0.5 : 0.8;
       double zetaZ = realRobot ? 0.5 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
@@ -815,9 +815,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
+      momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12);    // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 
@@ -842,7 +842,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMaxICPErrorBeforeSingleSupport()
    {
-      return 0.025; //0.035;
+      return 0.035;
    }
 
    @Override
