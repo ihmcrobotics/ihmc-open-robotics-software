@@ -160,6 +160,7 @@ public class RosMainNode implements NodeMain
          final RosTopicPublisher rosTopicPublisher = entry.getValue();
          Publisher<? extends Message> publisher = connectedNode.newPublisher(entry.getKey(), rosTopicPublisher.getMessageType());
          rosTopicPublisher.registered(publisher);
+         rosTopicPublisher.setConnectedNode(connectedNode);
          rosTopicPublisher.connected();
       }
       
