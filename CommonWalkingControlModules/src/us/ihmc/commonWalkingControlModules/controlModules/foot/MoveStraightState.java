@@ -69,6 +69,14 @@ public class MoveStraightState extends AbstractUnconstrainedState
    }
 
    @Override
+   public void doTransitionIntoAction()
+   {
+      super.doTransitionIntoAction();
+      if (getPreviousState() == this)
+         legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
+   };
+
+   @Override
    protected void computeAndPackTrajectory()
    {
       positionTrajectoryGenerator.compute(getTimeInCurrentState());
