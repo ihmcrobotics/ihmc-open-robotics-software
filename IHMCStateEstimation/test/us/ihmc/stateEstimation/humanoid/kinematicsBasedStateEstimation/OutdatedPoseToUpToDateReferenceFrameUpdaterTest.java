@@ -31,13 +31,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       PoseReferenceFrame upToDateReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", upToDatePoseInPresent);
       int numberOfUpToDateTransforms = 20;
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
-            numberOfUpToDateTransforms , upToDateReferenceFrameInPresent);
-      
+            numberOfUpToDateTransforms, upToDateReferenceFrameInPresent);
+
       Random random = new Random(42L);
       long timeStamp;
       RigidBodyTransform transform;
-      
-      for(int i = 0; i < 100; i++)
+
+      for (int i = 0; i < 100; i++)
       {
          timeStamp = random.nextLong();
          transform = generateRandomUpToDateTransforms(random);
@@ -45,7 +45,34 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          assertTrue(timeStamp == outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferNewestTimestamp());
       }
    }
-   
+
+   @EstimatedDuration(duration = 0.2)
+   @Test(timeout = 3000)
+   public void testGetUpToDateTimeStampedBufferOldestTimeStamp()
+   {
+      FramePose upToDatePoseInPresent = new FramePose(worldFrame);
+      PoseReferenceFrame upToDateReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", upToDatePoseInPresent);
+      int numberOfUpToDateTransforms = 20;
+      OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
+            numberOfUpToDateTransforms, upToDateReferenceFrameInPresent);
+
+      Random random = new Random(42L);
+      long timeStamp = 100;
+      long firstTimeStamp = timeStamp;
+      RigidBodyTransform transform;
+
+      for (int i = 0; i < 100; i++)
+      {
+         transform = generateRandomUpToDateTransforms(random);
+         outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(transform, timeStamp);
+         if (i < 20)
+            assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferOldestTimestamp() == firstTimeStamp);
+         else
+            assertTrue((timeStamp - (numberOfUpToDateTransforms - 1)) == outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferOldestTimestamp());
+         timeStamp++;
+      }
+   }
+
    @EstimatedDuration(duration = 0.2)
    @Test(timeout = 3000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
@@ -128,8 +155,6 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          testedPose.getOrientation(testedOrientation);
          testedPose.getPosition(testedTranslation);
 
-         System.out.println(outdatedTimeStampsIndex);
-
          if (timeStamp < (int) (firstTimeStamp * 1.2 + numberOfTicksOfDelay))
          {
             assertTrue(testedOrientation.epsilonEquals(new Quat4d(0.0, 0.0, 0.0, 1.0), 1e-8));
@@ -171,5 +196,5 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       upToDateTransform.setRotation(RandomTools.generateRandomQuaternion(random));
       return upToDateTransform;
    }
-   
+
 }
