@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.packetConsumers;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
-import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket.TrajectoryPoint;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
@@ -356,7 +356,7 @@ public abstract class PacketValidityChecker
       
       for (int i = 0; i < waypoints; i++)
       {
-         TrajectoryPoint trajectoryPoint = packetToCheck.trajectoryPoints[i];
+         JointTrajectoryPoint trajectoryPoint = packetToCheck.trajectoryPoints[i];
          String errorMessage = validateTrajectoryPointPacket(trajectoryPoint);
          if (errorMessage != null)
          {
@@ -384,7 +384,7 @@ public abstract class PacketValidityChecker
     * @param packetToCheck
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateTrajectoryPointPacket(TrajectoryPoint packetToCheck)
+   public static String validateTrajectoryPointPacket(JointTrajectoryPoint packetToCheck)
    {
       ObjectErrorType errorTime = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.time);
       if (errorTime != null)

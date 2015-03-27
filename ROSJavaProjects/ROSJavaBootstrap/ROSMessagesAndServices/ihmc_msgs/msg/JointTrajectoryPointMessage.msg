@@ -1,4 +1,4 @@
-## TrajectoryPointMessage
+## JointTrajectoryPointMessage
 # Sub-Packet for a point in an arm joint trajectory. It works similar to the
 # trajectory_msgs/JointTrajectoryPoint message.
 
