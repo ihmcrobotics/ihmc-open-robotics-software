@@ -1235,7 +1235,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       footPose.setOrientation(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
       submitChestHomeCommand(true);
-      submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(25.0));
+      submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(robotSide.negateIfRightSide(25.0)));
 
       pipeLine.submitSingleTaskStage(new NullTask());
 
