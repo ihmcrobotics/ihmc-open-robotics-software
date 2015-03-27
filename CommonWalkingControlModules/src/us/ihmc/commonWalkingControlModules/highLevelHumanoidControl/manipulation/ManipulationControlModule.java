@@ -191,14 +191,18 @@ public class ManipulationControlModule
       {
          if (handPoseProvider.checkHandPoseListPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            handControlModules.get(robotSide).moveTaskSpaceWithWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
-                  handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide), handSwingClearance.getDoubleValue());
+             handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
+                     handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide));
          }
          else
          {
             handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide),
                   handPoseProvider.getTrajectoryTime());
          }
+      }
+      else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
+      {
+         handControlModules.get(robotSide).moveInCircle(handPoseProvider.getRotationAxisOriginInWorld(robotSide), handPoseProvider.getRotationAxisInWorld(robotSide), handPoseProvider.getRotationAngleRightHandRule(robotSide), handPoseProvider.getTrajectoryTime());
       }
       else if (handPoseProvider.checkForNewWholeBodyPoseList(robotSide))
       {
