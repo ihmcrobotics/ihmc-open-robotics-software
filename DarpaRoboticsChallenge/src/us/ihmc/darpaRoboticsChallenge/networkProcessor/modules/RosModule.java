@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
@@ -50,7 +50,7 @@ public class RosModule
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotJointStatePublisher(robotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,robotModel.getSimpleRobotName().toLowerCase(),tfPublisher);
+      new RosRobotStatePublisher(robotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,robotModel.getSimpleRobotName().toLowerCase(),tfPublisher);
 
       if(sensorInformation.setupROSLocationService())
       {

@@ -20,7 +20,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotJointStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotStatePublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
@@ -104,7 +104,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotJointStatePublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
+      new RosRobotStatePublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
 
       if(scsSensorCommunicationBridge != null)
       {
