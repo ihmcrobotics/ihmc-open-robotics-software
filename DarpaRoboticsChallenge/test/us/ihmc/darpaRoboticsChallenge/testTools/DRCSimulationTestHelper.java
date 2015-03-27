@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
@@ -243,6 +244,12 @@ public class DRCSimulationTestHelper
    public void sendWholeBodyTrajectoryPacketToListeners(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket){
       if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
          ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendWholeBodyTrajectory(wholeBodyTrajectoryPacket);
+   }
+   
+   public void sendArmJointTrajectoryPacketToListeners(ArmJointTrajectoryPacket armJointTrajectoryPacket)
+   {
+      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
+         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendArmJointTrajectory(armJointTrajectoryPacket);
    }
 
    public SDFRobot getRobot()

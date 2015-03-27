@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -256,6 +257,20 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    {
       // TODO Auto-generated method stub
       return 0;
+   }
+
+   @Override
+   public boolean checkForNewArmJointTrajectory(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
+   @Override
+   public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 
 }
