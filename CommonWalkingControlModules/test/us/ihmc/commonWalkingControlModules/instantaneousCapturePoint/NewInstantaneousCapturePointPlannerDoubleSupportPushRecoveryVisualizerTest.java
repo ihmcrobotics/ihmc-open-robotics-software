@@ -19,6 +19,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -267,7 +268,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
       double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-      ArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
+      FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
             stepLength, halfStepWidth);
 
       FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -354,28 +355,26 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
    }
 
-   private ArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
+   private FrameTupleArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
          int numberOfStepsInStepList, double stepLength, double halfStepWidth)
    {
-      ArrayList<FramePoint> footLocations = new ArrayList<FramePoint>();
+      FrameTupleArrayList<FramePoint> footLocations = FrameTupleArrayList.createFramePointArrayList();
 
       double height = 0.5;
 
       if (startSquaredUp)
       {
-         FramePoint firstStepLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint firstStepLocation = footLocations.add();
          firstStepLocation.set(0, stepSide.negateIfRightSide(halfStepWidth), height);
-         footLocations.add(firstStepLocation);
 
          stepSide = stepSide.getOppositeSide();
       }
 
       for (int i = 0; i < numberOfStepsInStepList; i++)
       {
-         FramePoint stepLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+         FramePoint stepLocation = footLocations.add();
          stepLocation.set(i * stepLength, stepSide.negateIfRightSide(halfStepWidth), height);
 
-         footLocations.add(stepLocation);
          stepSide = stepSide.getOppositeSide();
       }
 
@@ -456,7 +455,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
    private void simulateForwardAndCheckSingleSupport(FramePoint icpPositionToPack, FrameVector icpVelocityToPack,
          FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
          NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double singleSupportDuration,
-         double omega0, FramePoint initialICPPosition, ArrayList<FramePoint> footstepList, boolean testPushInDoubleSupport)
+         double omega0, FramePoint initialICPPosition, FrameTupleArrayList<FramePoint> footstepList, boolean testPushInDoubleSupport)
    {
       double time = initialTime + deltaT;
       
@@ -501,7 +500,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       initialTime = time;
    }
 
-   private void simulateForwardAndCheckDoubleSupport(ArrayList<FramePoint> footstepList, FramePoint icpPositionToPack,
+   private void simulateForwardAndCheckDoubleSupport(FrameTupleArrayList<FramePoint> footstepList, FramePoint icpPositionToPack,
          FrameVector icpVelocityToPack, FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
          NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double doubleSupportDuration,
          double deltaT, double omega0, FramePoint initialICPPosition, boolean testPushInDoubleSupport)
@@ -553,7 +552,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       scs.tickAndUpdate();
    }
 
-   private void updateFootstepsFromPush(ArrayList<FramePoint> footstepList)
+   private void updateFootstepsFromPush(FrameTupleArrayList<FramePoint> footstepList)
    {
       double tmpx = random.nextDouble() * 0.1;
       double tmpy = random.nextDouble() * 0.05;
@@ -575,7 +574,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
    }
 
-   public void plotFootPolygon(ArrayList<FramePoint> footstepList, ArrayList<ArrayList<YoFrameLineSegment2d>> listOfFootLineSegments)
+   public void plotFootPolygon(FrameTupleArrayList<FramePoint> footstepList, ArrayList<ArrayList<YoFrameLineSegment2d>> listOfFootLineSegments)
    {
       FramePoint2d toeLeft = new FramePoint2d(ReferenceFrame.getWorldFrame());
       FramePoint2d toeRight = new FramePoint2d(ReferenceFrame.getWorldFrame());
@@ -600,7 +599,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
    }
    
-   private void updatePointsVis(ArrayList<FramePoint> footLocations)
+   private void updatePointsVis(FrameTupleArrayList<FramePoint> footLocations)
    {
       for(int i = 0; i < Math.min(footstepYoFramePoints.size(),footLocations.size()); i++)
       {

@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -244,7 +245,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-		ArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
+		FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
 				stepLength, halfStepWidth);
 
 		FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -327,7 +328,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-		ArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
+		FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
 				stepLength, halfStepWidth);
 
 		FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -416,7 +417,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 
 		double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-		ArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
+		FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
 				stepLength, halfStepWidth);
 
 		FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -548,28 +549,26 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		}
 	}
 
-	private ArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
+	private FrameTupleArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
 			int numberOfStepsInStepList, double stepLength, double halfStepWidth)
 	{
-		ArrayList<FramePoint> footLocations = new ArrayList<FramePoint>();
+	   FrameTupleArrayList<FramePoint> footLocations = FrameTupleArrayList.createFramePointArrayList();
 
 		double height = 0.5;
 
 		if (startSquaredUp)
 		{
-			FramePoint firstStepLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+			FramePoint firstStepLocation = footLocations.add();
 			firstStepLocation.set(0, stepSide.negateIfRightSide(halfStepWidth), height);
-			footLocations.add(firstStepLocation);
 
 			stepSide = stepSide.getOppositeSide();
 		}
 
 		for (int i = 0; i < numberOfStepsInStepList; i++)
 		{
-			FramePoint stepLocation = new FramePoint(ReferenceFrame.getWorldFrame());
+			FramePoint stepLocation = footLocations.add();
 			stepLocation.set(i * stepLength, stepSide.negateIfRightSide(halfStepWidth), height);
 
-			footLocations.add(stepLocation);
 			stepSide = stepSide.getOppositeSide();
 		}
 
@@ -646,7 +645,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	private void simulateForwardAndCheckSingleSupport(FramePoint icpPositionToPack, FrameVector icpVelocityToPack,
 			FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack, NewInstantaneousCapturePointPlannerWithSmoother icpPlanner,
 			double singleSupportDuration, double initialTime, double omega0, FramePoint initialICPPosition,
-			ArrayList<FramePoint> footstepList, boolean cancelPlan)
+			FrameTupleArrayList<FramePoint> footstepList, boolean cancelPlan)
 	{
 		for (double time = initialTime + deltaT; time <= initialTime + singleSupportDuration; time = time + deltaT)
 		{
@@ -683,7 +682,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 		}
 	}
 
-	private void simulateForwardAndCheckDoubleSupport(ArrayList<FramePoint> footstepList, FramePoint icpPositionToPack,
+	private void simulateForwardAndCheckDoubleSupport(FrameTupleArrayList<FramePoint> footstepList, FramePoint icpPositionToPack,
 			FrameVector icpVelocityToPack, FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
 			NewInstantaneousCapturePointPlannerWithSmoother icpPlanner, double doubleSupportDuration, double initialTime, double deltaT,
 			double omega0, FramePoint initialICPPosition, boolean cancelPlan)

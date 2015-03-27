@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -113,7 +112,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    }
 
    public void initializeDoubleSupport(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity, double initialTime,
-         ArrayList<FramePoint> footstepList, RobotSide transferToSide, FramePoint transferToFootLocation)
+         FrameTupleArrayList<FramePoint> footstepList, RobotSide transferToSide, FramePoint transferToFootLocation)
    {
       changeInTransferToFootPosition.reset();
       timeDelay.set(0.0);
@@ -124,7 +123,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    }
 
    @Override
-   public void initializeSingleSupport(double initialTime, ArrayList<FramePoint> footstepList)
+   public void initializeSingleSupport(double initialTime, FrameTupleArrayList<FramePoint> footstepList)
    {
       changeInTransferToFootPosition.reset();
       timeDelay.set(0.0);
@@ -215,18 +214,18 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
             desiredCapturePointVelocity));
    }
-   
+
    @Override
-   public void updatePlanForSingleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
+   public void updatePlanForSingleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
    {
-	   timeDelay.set(0.0);
-	   changeInTransferToFootPosition.reset();
-	   previousTime.set(time);
-	   super.updatePlanForSingleSupportPush(footstepList, actualCapturePointPosition, time);
+      timeDelay.set(0.0);
+      changeInTransferToFootPosition.reset();
+      previousTime.set(time);
+      super.updatePlanForSingleSupportPush(footstepList, actualCapturePointPosition, time);
    }
-   
+
    @Override
-   public void updatePlanForDoubleSupportPush(ArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition,
+   public void updatePlanForDoubleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition,
          double time)
    {
       timeDelay.set(0.0);
@@ -234,9 +233,9 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       previousTime.set(time);
       super.updatePlanForDoubleSupportPush(footstepList, actualCapturePointPosition, time);
    }
-   
+
    @Override
-   public void cancelPlan(double time, ArrayList<FramePoint> footstepList)
+   public void cancelPlan(double time, FrameTupleArrayList<FramePoint> footstepList)
    {
 	   if(isDoubleSupport.getBooleanValue())
 	   {
@@ -256,6 +255,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       return time - timeDelay.getDoubleValue();
    }
    
+   @Override
    public void reset(double time)
    {
 	   changeInTransferToFootPosition.reset();

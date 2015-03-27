@@ -164,6 +164,9 @@ public class MomentumBasedControllerFactory
       if (variousWalkingProviders == null)
          throw new RuntimeException("Couldn't create various walking providers!");
 
+      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
+            registry, yoGraphicsListRegistry, false);
+
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup different things for walking ///////////////////////////////////////////////////////
       double doubleSupportPercentageIn = 0.3; // NOTE: used to be 0.35, jojo
@@ -179,7 +182,7 @@ public class MomentumBasedControllerFactory
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
       CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry,
-            yoGraphicsListRegistry, controlDT, referenceFrames);
+            yoGraphicsListRegistry, controlDT, referenceFrames, bipedSupportPolygons);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
@@ -197,17 +200,15 @@ public class MomentumBasedControllerFactory
             armControllerParameters, registry, swingTimeCalculationProvider);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
-      BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(referenceFrames.getAnkleZUpReferenceFrames(), referenceFrames.getMidFeetZUpFrame(),
-            registry, yoGraphicsListRegistry, false);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPBasedLinearMomentumRateOfChangeControlModule ////////////////////////////////
       ICPControlGains icpControlGains = walkingControllerParameters.getICPControlGains();
       ICPBasedLinearMomentumRateOfChangeControlModule iCPBasedLinearMomentumRateOfChangeControlModule = new ICPBasedLinearMomentumRateOfChangeControlModule(
             referenceFrames, bipedSupportPolygons, controlDT, totalMass, gravityZ, icpControlGains, registry, yoGraphicsListRegistry);
 
       CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = variousWalkingProviders.getCapturabilityBasedStatusProducer();
+
+      /////////////////////////////////////////////////////////////////////////////////////////////
+      // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
       icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, iCPBasedLinearMomentumRateOfChangeControlModule,
             bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
 
