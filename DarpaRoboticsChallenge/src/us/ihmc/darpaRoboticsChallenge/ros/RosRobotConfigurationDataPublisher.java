@@ -18,9 +18,10 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.publisher.RosImuPublisher;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
+import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-public class RosRobotStatePublisher implements PacketConsumer<RobotConfigurationData>, Runnable
+public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
    public static final String WORLD_FRAME = "world";
 
@@ -28,6 +29,7 @@ public class RosRobotStatePublisher implements PacketConsumer<RobotConfiguration
 
    private final RosJointStatePublisher jointStatePublisher;
    private final RosImuPublisher pelvisImuPublisher;
+   private final RosStringPublisher robotMotionStatusPublisher;
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -37,13 +39,14 @@ public class RosRobotStatePublisher implements PacketConsumer<RobotConfiguration
 
    private final int jointNameHash;
 
-   public RosRobotStatePublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator fieldComputer, final RosMainNode rosMainNode,
+   public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator fieldComputer, final RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.rosMainNode = rosMainNode;
       this.jointStatePublisher = new RosJointStatePublisher(false);
       this.pelvisImuPublisher = new RosImuPublisher(false);
+      this.robotMotionStatusPublisher = new RosStringPublisher(false);
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.tfPublisher = tfPublisher;
 
@@ -57,6 +60,7 @@ public class RosRobotStatePublisher implements PacketConsumer<RobotConfiguration
 
       rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(RobotConfigurationData.class), jointStatePublisher);
       rosMainNode.attachPublisher(rosNameSpace +  "/pelvisImu", pelvisImuPublisher);
+      rosMainNode.attachPublisher(rosNameSpace + "/robotMotionStatus", robotMotionStatusPublisher);
       fieldComputer.attachListener(RobotConfigurationData.class, this);
       
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
@@ -99,6 +103,9 @@ public class RosRobotStatePublisher implements PacketConsumer<RobotConfiguration
                      robotConfigurationData.getRawImuLinearAcceleration(), 
                      robotConfigurationData.getRawImuOrientation(),
                      robotConfigurationData.getRawImuAngularVelocity());
+               
+               robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
+               
 
                RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getOrientation(), robotConfigurationData.getTranslation());
                tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, "pelvis");
