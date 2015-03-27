@@ -5,6 +5,9 @@ import static us.ihmc.yoUtilities.stateMachines.StateMachineTools.addRequestedSt
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
@@ -39,6 +42,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.yoUtilities.math.trajectories.CirclePositionAndOrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.FinalApproachPoseTrajectoryGenerator;
@@ -214,12 +218,14 @@ public class HandControlModule
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
             yoGraphicsListRegistry);
-      circularPoseTrajectoryGenerator = new CirclePositionAndOrientationTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, currentHandOrientation, currentHandPosition, registry, desiredRotationAngleProvider);
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
       initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize,
             yoGraphicsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
+      circularPoseTrajectoryGenerator = new CirclePositionAndOrientationTrajectoryGenerator(name + "Circular", trajectoryTimeProvider, currentHandOrientation,
+              currentHandPosition, registry, desiredRotationAngleProvider, yoGraphicsListRegistry);
+      
       boolean doVelocityAtWaypoints = false;
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", 15, worldFrame, currentHandPosition,
             registry);
@@ -356,10 +362,11 @@ public class HandControlModule
    private final FrameVector tempVelocity = new FrameVector();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameOrientation tempOrientation = new FrameOrientation();
+   private final FrameOrientation tempOrientationOld = new FrameOrientation();
+   private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
-   public void moveTaskSpaceWithWayPoints(FramePose[] desiredPoses, double totalTrajectoryTime, ReferenceFrame trajectoryFrame, double swingClearance)
+   public void moveInStraightLinesViaWayPoints(FramePose[] desiredPoses, double totalTrajectoryTime, ReferenceFrame trajectoryFrame)
    {
-      
       waypointOrientationTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
       waypointPositionTrajectoryGenerator.clear();
       waypointOrientationTrajectoryGenerator.clear();
@@ -380,13 +387,21 @@ public class HandControlModule
          {
             tempVelocity.sub(tempPosition, tempPositionOld);
             tempVelocity.scale(1.0 / trajectoryTimeOfEachPose);
+            
+            orientationInterpolationCalculator.computeAngularVelocity(tempAngularVelocity, tempOrientationOld, tempOrientation, 1.0 / trajectoryTimeOfEachPose);
+         }
+         else
+         {
+            tempVelocity.scale(0.0);
+            tempAngularVelocity.scale(0.0);
          }
          tempPositionOld.set(tempPosition);
+         tempOrientationOld.set(tempOrientation);
 
          elapsedTimeSinceTrajectoryStart += trajectoryTimeOfEachPose;
 
          waypointPositionTrajectoryGenerator.appendWayPoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempVelocity);
-         waypointOrientationTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempOrientation);
+         waypointOrientationTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempOrientation, tempAngularVelocity);
       }
 
       waypointPositionTrajectoryGenerator.initialize();
@@ -395,29 +410,19 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
-   public void moveInCircle(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, double time)
    {
-      PrintTools.debug(this, "Moving hand in circle");
-      currentHandPosition.get(tempPosition);
-      currentHandOrientation.get(tempOrientation);
-      
-      FramePose currentHandPose = new FramePose();
-      currentHandPose.changeFrame(tempPosition.getReferenceFrame());
-      currentHandPose.setPosition(tempPosition);
-      currentHandPose.setOrientation(tempOrientation);
-      currentHandPose.changeFrame(worldFrame);
-      
-      double desiredRotationAngle = finalDesiredPose.getOrientationDistance(currentHandPose);
-      
-      desiredRotationAngleProvider.set(desiredRotationAngle);
-      
       //Limit arm joint motor speed based on Boston Dynamics Limit
       //of 700 rad/s input to the transmission.
       //For now, just set move time to at least 2 seconds
-      time = Math.max(2.0, time);
+      if (time < 2.0) time = 2.0;
       
+      desiredRotationAngleProvider.set(rotationAngle);
       trajectoryTimeProvider.set(time);
-      circularPoseTrajectoryGenerator.initialize();
+     
+      circularPoseTrajectoryGenerator.setRotationAxis(rotationAxisOriginInWorld, rotationAxisInWorld);
+      circularPoseTrajectoryGenerator.setInitialPose(new FramePose(fullRobotModel.getHandControlFrame(robotSide)));
+      
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator);
    }
    
