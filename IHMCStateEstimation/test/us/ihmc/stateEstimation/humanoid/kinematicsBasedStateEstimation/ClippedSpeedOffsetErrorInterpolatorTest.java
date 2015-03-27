@@ -16,6 +16,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -23,9 +25,9 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
+@BambooPlan(planType={BambooPlanType.Fast})
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
-
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
 
    SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
