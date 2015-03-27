@@ -712,7 +712,8 @@ public class NewInstantaneousCapturePointPlannerWithSmoother
       desiredCapturePointPosition.getFrameTupleIncludingFrame(tmpFramePoint1);
       desiredCapturePointVelocity.getFrameTupleIncludingFrame(tmpFrameVector1);
 
-      tmpArrayListOfFramePoints.copyFromListAndTrimSize(footstepList);
+      tmpArrayListOfFramePoints.setOrCreate(0, footstepList.get(0));
+      tmpArrayListOfFramePoints.setOrCreate(1, footstepList.get(1));
 
       initializeDoubleSupport(tmpFramePoint1, tmpFrameVector1, time, tmpArrayListOfFramePoints);
    }
