@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -72,6 +73,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final LongYoVariable actualEstimatorDT = new LongYoVariable("actualEstimatorDT", estimatorRegistry);
    
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+   private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
    private final DRCPoseCommunicator poseCommunicator;
@@ -103,6 +105,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       robotMotionStatusFromController = threadDataSynchronizer.getEstimatorRobotMotionStatusHolder();
 
       sensorOutputMapReadOnly = sensorReader.getSensorOutputMapReadOnly();
+      sensorRawOutputMapReadOnly = sensorReader.getSensorRawOutputMapReadOnly();
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
@@ -136,7 +139,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel, forceSensorDataHolderForEstimator);
          
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer,
-               dataProducer, sensorOutputMapReadOnly, sensorInformation);
+               dataProducer, sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation);
          estimatorController.setRawOutputWriter(poseCommunicator);
       }
       else
