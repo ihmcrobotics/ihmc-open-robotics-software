@@ -47,4 +47,20 @@ public class FootstepTools
 
       return footstep;
    }
+
+   public static Footstep generateFootstepFromFootstepDataSole(FootstepData footstepData, ContactablePlaneBody contactableBody)
+   {
+      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+      PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
+      List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
+      if ((contactPoints != null) && (contactPoints.size() == 0))
+         throw new RuntimeException(
+               "Cannot have an empty list of contact points in FootstepData. Should be null to use the default controller contact points.");
+      Footstep footstep = new Footstep(contactableBody.getRigidBody(), footstepData.getRobotSide(), contactableBody.getSoleFrame(), footstepPoseFrame, true,
+            contactPoints);
+      footstep.trajectoryType = footstepData.getTrajectoryType();
+      footstep.swingHeight = footstepData.swingHeight;
+      footstep.setSolePose(footstepPose);
+      return footstep;
+   }
 }
