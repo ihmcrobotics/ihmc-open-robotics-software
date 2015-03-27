@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -19,6 +21,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
+@BambooPlan(planType={BambooPlanType.Fast})
 public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
