@@ -9,7 +9,7 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketClient;
 import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 
@@ -27,7 +27,7 @@ public class AtlasROSAPINetworkProcessor
    {
       String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       
-      KryoPacketClientEndPointCommunicator controllerCommunicator = new KryoPacketClientEndPointCommunicator(kryoIP, NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+      KryoPacketClientEndPointCommunicator controllerCommunicator = new KryoPacketClientEndPointCommunicator(kryoIP, NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
             new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),"AtlasROSAPINetworkProcessor");
       
       URI rosUri = NetworkParameters.getROSURI();

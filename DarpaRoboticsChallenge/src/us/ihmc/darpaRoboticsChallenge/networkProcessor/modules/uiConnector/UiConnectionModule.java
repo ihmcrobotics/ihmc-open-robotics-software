@@ -14,7 +14,7 @@ import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 
 public class UiConnectionModule implements PacketConsumer<RobotConfigurationData>
 {
@@ -26,7 +26,7 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    private final Class[] packetsAllowedToGotoUserInterface = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE;
    private final HashMap<Class, Long> packetsAllowedToGotoUserInterfaceWithIntervals = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS;
    
-   private final int NP_TO_UI_TCP_PORT = NetworkConfigParameters.NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT;
+   private final int NP_TO_UI_TCP_PORT = NetworkPorts.NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT;
    private final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
    private final KryoPacketServer uiKryoPacketServer = new KryoPacketServer(NP_TO_UI_TCP_PORT, NETCLASSLIST, PacketDestination.UI.ordinal(),"UIServerCommunicator"); //connection to the UI
    private final KryoLocalPacketCommunicator uiModuleCommunicator = new KryoLocalPacketCommunicator(NETCLASSLIST, PacketDestination.UI.ordinal(),"UIModuleCommunicator"); // connect to network processor

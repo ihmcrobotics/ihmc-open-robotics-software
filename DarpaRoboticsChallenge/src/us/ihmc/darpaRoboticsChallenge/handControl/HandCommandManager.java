@@ -7,7 +7,7 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -28,7 +28,7 @@ public abstract class HandCommandManager
 	      spawner.spawn(clazz, new String[]{"-r", robotSide.getLowerCaseName()});
 		
 		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
-		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkConfigParameters.LEFT_HAND_PORT : NetworkConfigParameters.RIGHT_HAND_PORT,
+		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT,
 		                                                              new IHMCCommunicationKryoNetClassList(),
 		                                                              robotSide.equals(RobotSide.LEFT) ? PacketDestination.LEFT_HAND_MANAGER.ordinal() : PacketDestination.RIGHT_HAND_MANAGER.ordinal(),
 		                                                              robotSide.getCamelCaseNameForStartOfExpression() + "HandCommandManagerClient");
