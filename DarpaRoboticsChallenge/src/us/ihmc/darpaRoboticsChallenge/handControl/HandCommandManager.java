@@ -28,7 +28,7 @@ public abstract class HandCommandManager
 	      spawner.spawn(clazz, new String[]{"-r", robotSide.getLowerCaseName()});
 		
 		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
-		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT,
+		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT.getPort() : NetworkPorts.RIGHT_HAND_PORT.getPort(),
 		                                                              new IHMCCommunicationKryoNetClassList(),
 		                                                              robotSide.equals(RobotSide.LEFT) ? PacketDestination.LEFT_HAND_MANAGER.ordinal() : PacketDestination.RIGHT_HAND_MANAGER.ordinal(),
 		                                                              robotSide.getCamelCaseNameForStartOfExpression() + "HandCommandManagerClient");
