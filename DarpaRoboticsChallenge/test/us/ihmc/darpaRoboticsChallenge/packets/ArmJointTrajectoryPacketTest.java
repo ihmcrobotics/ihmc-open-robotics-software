@@ -38,7 +38,7 @@ public abstract class ArmJointTrajectoryPacketTest
    private final static double epsilonQd = 0.1;
    
    private final long seed = 126497;
-   Random random = new Random(seed);
+   private final Random random = new Random(seed);
 
    static
    {
@@ -76,6 +76,19 @@ public abstract class ArmJointTrajectoryPacketTest
       packet.trajectoryPoints[2].positions[3] = -1.0;
       
       executePacket(packet);
+   }
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 150000)
+   public void testRandomPackets() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      for (int i = 0; i < 100; i++)
+      {
+//         System.out.println("sending silly packet #" + i);
+         ArmJointTrajectoryPacket packet = new ArmJointTrajectoryPacket(random);
+         drcSimulationTestHelper.sendArmJointTrajectoryPacketToListeners(packet);
+         drcSimulationTestHelper.simulateAndBlock(0.1);
+      }
    }
 
    private void executePacket(ArmJointTrajectoryPacket packet) throws SimulationExceededMaximumTimeException, ControllerFailureException
