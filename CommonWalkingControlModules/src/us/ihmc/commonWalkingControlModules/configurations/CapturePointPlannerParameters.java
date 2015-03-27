@@ -39,4 +39,6 @@ public interface CapturePointPlannerParameters
 	public abstract double getCapturePointInFromFootCenterDistance();
 	
 	public abstract double getCapturePointForwardFromFootCenterDistance();
+
+	public abstract boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer();
 }

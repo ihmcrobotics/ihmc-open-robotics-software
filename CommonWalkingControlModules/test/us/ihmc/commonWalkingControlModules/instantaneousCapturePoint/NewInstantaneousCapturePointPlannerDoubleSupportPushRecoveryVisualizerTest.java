@@ -179,6 +179,12 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       {
          return 0.03;
       }
+
+      @Override
+      public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
+      {
+         return true;
+      }
    };
 
    private final double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();

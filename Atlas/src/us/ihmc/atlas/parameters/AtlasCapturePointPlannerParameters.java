@@ -112,4 +112,10 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 	{
 		return 0.03;
 	}
+
+   @Override
+   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
+   {
+      return false;
+   }
 }
