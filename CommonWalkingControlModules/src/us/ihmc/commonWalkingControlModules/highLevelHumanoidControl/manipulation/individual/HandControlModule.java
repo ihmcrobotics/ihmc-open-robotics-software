@@ -586,7 +586,42 @@ public class HandControlModule
             double position = trajectoryPacket.trajectoryPoints[i].positions[jointIdx];
             double velocity = trajectoryPacket.trajectoryPoints[i].velocities[jointIdx];
             double time = trajectoryPacket.trajectoryPoints[i].time;
-
+            
+            // Safety for the new arms Boston Dynamic limit
+            // ----------------------------------------------------
+            // 1. limit the positions to be within joint limits
+            position = MathTools.clipToMinMax(position, oneDoFJoints[jointIdx].getJointLimitLower(), oneDoFJoints[jointIdx].getJointLimitUpper());
+            if (position != trajectoryPacket.trajectoryPoints[i].positions[jointIdx])
+            {
+               System.out.println(this.getClass().getSimpleName() + " limited the angle because of new arms safety");
+            }
+            // 2. limit the velocities at the waypoints to a maximum of 7rad/s
+            velocity = MathTools.clipToMinMax(velocity, -7.0, 7.0);
+            if (velocity != trajectoryPacket.trajectoryPoints[i].velocities[jointIdx])
+            {
+               System.out.println(this.getClass().getSimpleName() + " limited the joint velocity because of new arms safety");
+            }
+            // 3. make sure there are at least two seconds in between all waypoints
+            if (i == 0)
+            {
+               double deltaTime = trajectoryPacket.trajectoryPoints[i].time;
+               if (deltaTime < 2.0)
+               {
+                  time = 2.0;
+                  System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety");
+               }
+            }
+            else
+            {
+               double deltaTime = trajectoryPacket.trajectoryPoints[i].time - trajectoryPacket.trajectoryPoints[i-1].time;
+               if (deltaTime < 2.0)
+               {
+                  time = trajectoryPacket.trajectoryPoints[i-1].time + 2.0;
+                  System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety");
+               }
+            }
+            // ----------------------------------------------------
+            
             trajectoryGenerator.appendWaypoint(time, position, velocity);
          }
       }
