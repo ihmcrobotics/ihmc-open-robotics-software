@@ -66,7 +66,7 @@ public class DRCSimGazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(),
             new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboSimControllerCommunicator" );
 //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
@@ -140,7 +140,7 @@ public class DRCSimGazeboControllerFactory
       
       if(USE_GUI)
       {
-    	 KryoPacketClientEndPointCommunicator packetCommunicator = new KryoPacketClientEndPointCommunicator("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT, new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboControllerPluginClientEndpoint");
+    	 KryoPacketClientEndPointCommunicator packetCommunicator = new KryoPacketClientEndPointCommunicator("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(), new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboControllerPluginClientEndpoint");
          DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
          URI rosURI = NetworkParameters.getROSURI();
          networkModuleParameters.setRosUri(rosURI);

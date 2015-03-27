@@ -111,7 +111,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         else
         {
            String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-           int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
+           int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort();
            KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList, communicatorId, "Atlas_Controller_Endpoint");
            networkModuleParams.setControllerCommunicator(realRobotControllerConnection);
         }

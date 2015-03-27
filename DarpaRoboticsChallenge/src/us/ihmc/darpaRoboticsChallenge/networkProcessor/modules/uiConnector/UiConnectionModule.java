@@ -26,7 +26,7 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    private final Class[] packetsAllowedToGotoUserInterface = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE;
    private final HashMap<Class, Long> packetsAllowedToGotoUserInterfaceWithIntervals = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS;
    
-   private final int NP_TO_UI_TCP_PORT = NetworkPorts.NETWORK_PROCESSOR_TO_UI_RAW_PROTOCOL_TCP_PORT;
+   private final int NP_TO_UI_TCP_PORT = NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT.getPort();
    private final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
    private final KryoPacketServer uiKryoPacketServer = new KryoPacketServer(NP_TO_UI_TCP_PORT, NETCLASSLIST, PacketDestination.UI.ordinal(),"UIServerCommunicator"); //connection to the UI
    private final KryoLocalPacketCommunicator uiModuleCommunicator = new KryoLocalPacketCommunicator(NETCLASSLIST, PacketDestination.UI.ordinal(),"UIModuleCommunicator"); // connect to network processor

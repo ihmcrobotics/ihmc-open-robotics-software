@@ -41,7 +41,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       try
       {
-         commandServer = new ReconnectingTCPServer(NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+         commandServer = new ReconnectingTCPServer(NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT.getPort());
       }
       catch (IOException e)
       {
@@ -119,7 +119,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
             ServerSocket server = null;
             try
             {
-               server = new ServerSocket(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               server = new ServerSocket(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT.getPort());
                commandServer.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
                Socket socket = server.accept();
                socket.setTcpNoDelay(true);

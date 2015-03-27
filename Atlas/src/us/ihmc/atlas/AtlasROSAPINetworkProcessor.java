@@ -27,7 +27,7 @@ public class AtlasROSAPINetworkProcessor
    {
       String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       
-      KryoPacketClientEndPointCommunicator controllerCommunicator = new KryoPacketClientEndPointCommunicator(kryoIP, NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+      KryoPacketClientEndPointCommunicator controllerCommunicator = new KryoPacketClientEndPointCommunicator(kryoIP, NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(),
             new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),"AtlasROSAPINetworkProcessor");
       
       URI rosUri = NetworkParameters.getROSURI();
