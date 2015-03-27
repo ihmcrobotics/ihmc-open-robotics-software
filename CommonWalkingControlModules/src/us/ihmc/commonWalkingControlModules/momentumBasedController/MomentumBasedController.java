@@ -86,7 +86,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class MomentumBasedController
 {
    public static final boolean DO_NECK_PD_CONTROL = true;
-   private static final boolean DO_PASSIVE_KNEE_CONTROL = false;
+   private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
    private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
 
    public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
