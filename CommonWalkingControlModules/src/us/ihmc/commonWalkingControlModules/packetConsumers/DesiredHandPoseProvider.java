@@ -165,10 +165,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
                   throw new RuntimeException("Unkown frame");
                }
 
-               FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), object.getPosition(), object.getOrientation());
-               pose.changeFrame(packetReferenceFrames.get(robotSide));
+               FramePose pose = new FramePose(packetReferenceFrames.get(robotSide), object.getPosition(), object.getOrientation());
                desiredHandPoses.put(robotSide, pose);
-
             }
 
             Map<OneDoFJoint, Double> finalDesiredJointAngleMap = finalDesiredJointAngleMaps.get(robotSide);
