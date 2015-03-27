@@ -9,6 +9,6 @@
 uint8 robot_side
 
 # List of points in the trajectory
-TrajectoryPointMessage[] trajectory_points
+JointTrajectoryPointMessage[] trajectory_points
 
 
