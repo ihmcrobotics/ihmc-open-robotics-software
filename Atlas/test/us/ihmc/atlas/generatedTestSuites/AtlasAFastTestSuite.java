@@ -8,7 +8,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.AtlasBumpyAndShallowRampsWalkingTest.class,
-   us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.AtlasInverseDynamicsCalculatorTest.class,
    us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class
 })

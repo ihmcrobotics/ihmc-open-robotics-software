@@ -7,6 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.atlas.AtlasFlatGroundRewindabilityTest.class,
    us.ihmc.atlas.behaviorTests.AtlasChestOrientationBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
