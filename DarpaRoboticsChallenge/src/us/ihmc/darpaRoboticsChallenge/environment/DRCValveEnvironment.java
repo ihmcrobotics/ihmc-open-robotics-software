@@ -55,7 +55,7 @@ public class DRCValveEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
-      createValve("ValveRobot", ValveType.BIG_VALVE, valveX, valveY, valveZ, valveYaw_degrees, forceVectorScale);
+      createValve("ValveRobot", ValveType.SMALL_VALVE, valveX, valveY, valveZ, valveYaw_degrees, forceVectorScale);
 
    }
 
