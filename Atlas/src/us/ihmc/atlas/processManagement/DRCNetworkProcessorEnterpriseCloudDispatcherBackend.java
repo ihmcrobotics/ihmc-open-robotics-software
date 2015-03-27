@@ -10,7 +10,7 @@ import us.ihmc.atlas.AtlasNetworkProcessor;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.net.tcpServer.DisconnectedException;
 import us.ihmc.communication.net.tcpServer.ReconnectingTCPServer;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -41,7 +41,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
    {
       try
       {
-         commandServer = new ReconnectingTCPServer(NetworkConfigParameters.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+         commandServer = new ReconnectingTCPServer(NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
       }
       catch (IOException e)
       {
@@ -119,7 +119,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
             ServerSocket server = null;
             try
             {
-               server = new ServerSocket(NetworkConfigParameters.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               server = new ServerSocket(NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
                commandServer.write(new byte[] {UnsignedByteTools.fromInt(0x22)});
                Socket socket = server.accept();
                socket.setTcpNoDelay(true);

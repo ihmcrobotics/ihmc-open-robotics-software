@@ -1,6 +1,6 @@
 package us.ihmc.communication.util;
 
-public class NetworkConfigParameters
+public class NetworkPorts
 {
    public static final boolean USE_BEHAVIORS_MODULE = false;
 

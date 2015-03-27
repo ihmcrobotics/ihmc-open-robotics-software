@@ -1,7 +1,7 @@
 package us.ihmc.atlas;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.visualization.GainControllerSliderBoard;
 import us.ihmc.darpaRoboticsChallenge.visualization.WalkControllerSliderBoard;
@@ -20,7 +20,7 @@ import com.martiansoftware.jsap.Switch;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
-   public static final int defaultPort = NetworkConfigParameters.DEFAULT_YOVARIABLE_SERVER_PORT;
+   public static final int defaultPort = NetworkPorts.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = true;
    private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER; 
    
