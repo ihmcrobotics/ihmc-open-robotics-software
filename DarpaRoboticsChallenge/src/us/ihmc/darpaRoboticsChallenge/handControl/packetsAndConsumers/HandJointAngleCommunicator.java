@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.Builder;
@@ -16,7 +16,7 @@ public class HandJointAngleCommunicator
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 500;
 
-   private final PacketCommunicator packetCommunicator;
+   private final PacketCommunicatorMock packetCommunicator;
    private final GlobalDataProducer dataProducer;
 
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
@@ -24,7 +24,7 @@ public class HandJointAngleCommunicator
    private final AtomicBoolean connected = new AtomicBoolean();
    private final RobotSide side;
 
-   public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator)
+   public HandJointAngleCommunicator(RobotSide side, PacketCommunicatorMock packetCommunicator)
    {
       this(side, packetCommunicator, null);
    }
@@ -34,7 +34,7 @@ public class HandJointAngleCommunicator
       this(side, null, dataProducer);
    }
 
-   private HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator, GlobalDataProducer dataProducer)
+   private HandJointAngleCommunicator(RobotSide side, PacketCommunicatorMock packetCommunicator, GlobalDataProducer dataProducer)
    {
       this.side = side;
       this.packetCommunicator = packetCommunicator;
