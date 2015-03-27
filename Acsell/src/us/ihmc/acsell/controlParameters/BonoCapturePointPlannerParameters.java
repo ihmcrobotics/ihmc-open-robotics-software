@@ -113,4 +113,10 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
 	{
 		return 0.015;//0.00;//0.02-.025/2;
 	}
+
+   @Override
+   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
+   {
+      return true;
+   }
 }
