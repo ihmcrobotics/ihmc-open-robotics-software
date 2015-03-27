@@ -130,7 +130,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupNetProcSocket()
    {
-      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+      netProcClient = new ReconnectingTCPClient(netProcMachineIpAddress, NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT.getPort());
       netProcClient.attachStateListener(new NetStateListener()
       {
          public void connected()
@@ -152,7 +152,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupControllerSocket()
    {
-      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT);
+      controllerClient = new ReconnectingTCPClient(controllerMachineIpAddress, NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT.getPort());
       controllerClient.attachStateListener(new NetStateListener()
       {
          public void connected()
@@ -751,7 +751,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             Socket clientSocket = null;
             try
             {
-               clientSocket = new Socket(controllerMachineIpAddress, NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               clientSocket = new Socket(controllerMachineIpAddress, NetworkPorts.CONTROLLER_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT.getPort());
                clientSocket.setTcpNoDelay(true);
 
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
@@ -800,7 +800,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
             Socket clientSocket = null;
             try
             {
-               clientSocket = new Socket(netProcMachineIpAddress, NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_TCP_PORT + 5);
+               clientSocket = new Socket(netProcMachineIpAddress, NetworkPorts.NETWORK_PROCESSOR_CLOUD_DISPATCHER_BACKEND_CONSOLE_TCP_PORT.getPort());
                clientSocket.setTcpNoDelay(true);
 
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());

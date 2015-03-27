@@ -20,7 +20,6 @@ import com.martiansoftware.jsap.Switch;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
-   public static final int defaultPort = NetworkPorts.DEFAULT_YOVARIABLE_SERVER_PORT;
    private final boolean showOverheadView = true;
    private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER; 
    

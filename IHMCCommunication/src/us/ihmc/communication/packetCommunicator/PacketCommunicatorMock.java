@@ -15,6 +15,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.net.local.InterprocessObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.util.NetworkPorts;
 
 public class PacketCommunicatorMock
 {
@@ -26,25 +27,25 @@ public class PacketCommunicatorMock
 
    private final List<Class<?>> registeredClasses;
    
-   public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, int port, NetClassList netClassList)
+   public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
    {
-      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port, netClassList, BUFFER_SIZE, BUFFER_SIZE);
+      KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(true);
       return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
    }
 
-   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, NetClassList netClassList)
+   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
    {
       return createTCPPacketCommunicatorServer(port, BUFFER_SIZE, BUFFER_SIZE, netClassList);
    }
-   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(int port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
+   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectServer(port, netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
+      return new PacketCommunicatorMock(new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
    }
 
-   public static PacketCommunicatorMock createInterprocessPacketCommunicator(int port, NetClassList netClassList)
+   public static PacketCommunicatorMock createInterprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port, netClassList), netClassList.getPacketClassList());
+      return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port.getPort(), netClassList), netClassList.getPacketClassList());
    }
    
    public static PacketCommunicatorMock createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
