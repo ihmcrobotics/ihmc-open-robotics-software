@@ -3,10 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -18,7 +17,7 @@ public abstract class HandCommandManager
 	   
 	protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 	
-	protected KryoPacketClientEndPointCommunicator packetCommunicator;
+	protected PacketCommunicatorMock packetCommunicator;
 	
 	public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
 	{
@@ -27,12 +26,8 @@ public abstract class HandCommandManager
 	   if(DEBUG)
 	      spawner.spawn(clazz, new String[]{"-r", robotSide.getLowerCaseName()});
 		
-		packetCommunicator = new KryoPacketClientEndPointCommunicator(SERVER_ADDRESS,
-		                                                              robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT.getPort() : NetworkPorts.RIGHT_HAND_PORT.getPort(),
-		                                                              new IHMCCommunicationKryoNetClassList(),
-		                                                              robotSide.equals(RobotSide.LEFT) ? PacketDestination.LEFT_HAND_MANAGER.ordinal() : PacketDestination.RIGHT_HAND_MANAGER.ordinal(),
-		                                                              robotSide.getCamelCaseNameForStartOfExpression() + "HandCommandManagerClient");
-		packetCommunicator.setReconnectAutomatically(true);
+	   NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
+	   packetCommunicator = PacketCommunicatorMock.createTCPPacketCommunicatorClient(SERVER_ADDRESS, port, new IHMCCommunicationKryoNetClassList());
 		
 		try
 		{
@@ -44,7 +39,7 @@ public abstract class HandCommandManager
 		}
 	}
 	
-	public void sendHandCommand(Packet packet)
+	public void sendHandCommand(Packet<?> packet)
 	{
 	   packetCommunicator.send(packet);
 	}
