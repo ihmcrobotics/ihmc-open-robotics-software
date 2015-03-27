@@ -8,6 +8,7 @@ public class ICPControlGains
    private double kiBleedOff = 1.0;
 
    private boolean useRawCMP = false;
+   private boolean useHackToReduceFeedForward = true;
 
    private double cmpFilterBreakFrequencyInHertz = Double.POSITIVE_INFINITY;
    private double cmpRateLimit = Double.POSITIVE_INFINITY;
@@ -95,5 +96,15 @@ public class ICPControlGains
    public void setCMPAccelerationLimit(double cmpAccelerationLimit)
    {
       this.cmpAccelerationLimit = cmpAccelerationLimit;
+   }
+
+   public boolean useHackToReduceFeedForward()
+   {
+      return useHackToReduceFeedForward;
+   }
+
+   public void setUseHackToReduceFeedForward(boolean useHackToReduceFeedForward)
+   {
+      this.useHackToReduceFeedForward = useHackToReduceFeedForward;
    }
 }
