@@ -23,7 +23,7 @@ public class HoldPositionState extends AbstractFootControlState
 {
    private static final boolean CONTROL_WRT_PELVIS = false;
 
-   private static final double EPSILON = 0.001;
+   private static final double EPSILON = 0.010;
 
    private final FrameVector holdPositionNormalContactVector = new FrameVector();
    private final FrameVector fullyConstrainedNormalContactVector;
@@ -59,6 +59,8 @@ public class HoldPositionState extends AbstractFootControlState
       String namePrefix = footControlHelper.getContactableFoot().getName();
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
       doSmartHoldPosition = new BooleanYoVariable(namePrefix + "DoSmartHoldPosition", registry);
+
+      doSmartHoldPosition.set(true);
    }
 
    @Override
