@@ -70,7 +70,7 @@ public class StepprControllerFactory
       /*
        * Create network servers/clients
        */
-      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT,
+      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(),
             new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "StepprControllerCommunicator" );
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());

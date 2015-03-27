@@ -26,7 +26,7 @@ public class StepprNetworkProcessor
       String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
             
 //            model.getNetworkParameters().getRobotControlComputerIP();
-      int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
+      int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort();
       int communicatorId = PacketDestination.CONTROLLER.ordinal();
 
       KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList,
