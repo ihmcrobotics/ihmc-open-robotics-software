@@ -78,7 +78,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getTimeToGetPreparedForLocomotion()
    {
-      return 0.3; // 0.3 seems to be a good starting point
+      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      return realRobot ? 0.3 : 0.0; // 0.3 seems to be a good starting point
    }
 
    @Override
@@ -141,7 +142,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean allowShrinkingSingleSupportFootPolygon()
    {
-      return true;
+      return target == AtlasTarget.REAL_ROBOT;
    }
 
    public boolean isNeckPositionControlled()
