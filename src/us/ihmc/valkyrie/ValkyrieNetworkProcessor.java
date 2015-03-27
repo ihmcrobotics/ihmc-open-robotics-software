@@ -8,7 +8,7 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
 import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkConfigParameters;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
@@ -24,7 +24,7 @@ public class ValkyrieNetworkProcessor
    {
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-      int tcpPort = NetworkConfigParameters.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
+      int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT;
       int communicatorId = PacketDestination.CONTROLLER.ordinal();
       
       KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList,
