@@ -142,9 +142,6 @@ public class ClippedSpeedOffsetErrorInterpolator
       startOffsetError.getPose(startTranslation, startRotation);
       goalOffsetError.getPose(goalTranslation, goalRotation);
 
-      startRotation.set(0.0, 0.0, 0.0, 1.0);
-      goalRotation.set(0.0, 0.0, 0.0, 1.0);
-
       alphaFilter_PositionValue.set(alphaFilterPosition);
       alphaFilter.set(0.0);
       previousClippedAlphaFilterValue.set(0.0);
