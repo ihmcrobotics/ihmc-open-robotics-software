@@ -10,12 +10,12 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotStatePublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
-import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
+import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -50,7 +50,7 @@ public class RosModule
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotStatePublisher(robotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,robotModel.getSimpleRobotName().toLowerCase(),tfPublisher);
+      new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,robotModel.getSimpleRobotName().toLowerCase(),tfPublisher);
 
       if(sensorInformation.setupROSLocationService())
       {
