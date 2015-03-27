@@ -83,7 +83,7 @@ public class FootControlHelper
    private final DoubleYoVariable alphaForFootShrink;
    private final AlphaFilteredYoVariable footShrinkPercent;
    private final DoubleYoVariable maxFootShrinkInPercent;
-   private final DoubleYoVariable thresholdInPercentForAnkleLimitWatcher;
+   private final DoubleYoVariable thresholdForAnkleLimitWatcher;
    private final BooleanYoVariable isAnkleFlexionLimitReached;
 
    public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, MomentumBasedController momentumBasedController,
@@ -153,8 +153,8 @@ public class FootControlHelper
       footShrinkPercent = new AlphaFilteredYoVariable(sidePrefix + "FootShrinkPercent", registry, alphaForFootShrink);
       maxFootShrinkInPercent = new DoubleYoVariable(sidePrefix + "MaxFootShrinkInPercent", registry);
       maxFootShrinkInPercent.set(1.0);
-      thresholdInPercentForAnkleLimitWatcher = new DoubleYoVariable(sidePrefix + "ThresholdInPercentForAnkleLimitWatcher", registry);
-      thresholdInPercentForAnkleLimitWatcher.set(0.1);
+      thresholdForAnkleLimitWatcher = new DoubleYoVariable(sidePrefix + "ThresholdInPercentForAnkleLimitWatcher", registry);
+      thresholdForAnkleLimitWatcher.set(0.08);
       isAnkleFlexionLimitReached = new BooleanYoVariable(sidePrefix + "IsAnkleLimitReached", registry);
    }
 
@@ -456,9 +456,7 @@ public class FootControlHelper
    private void checkAnkleFlexionLimit()
    {
       OneDoFJoint oneDoFJoint = momentumBasedController.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH);
-      double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();
-      double thresholdAmount = range * thresholdInPercentForAnkleLimitWatcher.getDoubleValue();
-      double flexionLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
+      double flexionLimit = oneDoFJoint.getJointLimitLower() + thresholdForAnkleLimitWatcher.getDoubleValue();
 
       isAnkleFlexionLimitReached.set(oneDoFJoint.getQ() < flexionLimit);
    }
