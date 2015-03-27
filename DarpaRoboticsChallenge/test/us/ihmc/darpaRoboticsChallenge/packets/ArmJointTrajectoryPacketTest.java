@@ -66,9 +66,9 @@ public abstract class ArmJointTrajectoryPacketTest
       }
       
       packet.trajectoryPoints[0].time = 3.0;
-      packet.trajectoryPoints[1].time = 4.0;
-      packet.trajectoryPoints[2].time = 5.0;
-      packet.trajectoryPoints[3].time = 8.0;
+      packet.trajectoryPoints[1].time = 5.0;
+      packet.trajectoryPoints[2].time = 7.0;
+      packet.trajectoryPoints[3].time = 10.0;
       
       packet.trajectoryPoints[1].positions[3] = -0.5;
       packet.trajectoryPoints[1].velocities[3] = -0.5;
