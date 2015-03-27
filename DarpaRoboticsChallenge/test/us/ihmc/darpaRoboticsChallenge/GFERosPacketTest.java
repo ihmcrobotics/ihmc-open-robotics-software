@@ -46,6 +46,7 @@ import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotCont
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.wholeBodyController.DRCControllerThread;
@@ -98,7 +99,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       }
    }
    
-   @Test
+   @EstimatedDuration(duration = 5.0)
+   @Test(timeout = 30000)
    public void testFuzzyPacketsUsingRos()
    {
       RosCore rosCore = RosCore.newPrivate();
@@ -186,7 +188,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 
    private DRCSimulationFactory drcSimulation;
    
-   @Test
+   @EstimatedDuration(duration = 1.0)
+   @Test(timeout = 30000)
    public void testFuzzyPacketsWithoutRos()
    {
 	   DRCRobotModel robotModel = getRobotModel();
