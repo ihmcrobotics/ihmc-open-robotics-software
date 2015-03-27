@@ -36,7 +36,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 {
    public static final boolean INITIALIZE_HEIGHT_WITH_FOOT = true;
 
-   public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = false;
+   public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
