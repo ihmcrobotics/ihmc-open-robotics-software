@@ -130,6 +130,9 @@ public class HoldPositionState extends AbstractFootControlState
       if (!doSmartHoldPosition.getBooleanValue())
          return;
 
+      if (cop.containsNaN())
+         return;
+
       boolean isCoPOnEdge = !footPolygon.isPointInside(cop, -EPSILON);
       
       if (!isCoPOnEdge)
