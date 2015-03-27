@@ -30,7 +30,10 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
          {
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
-            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+            if (robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
+            {
+               robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+            }
          }
       }
    }
