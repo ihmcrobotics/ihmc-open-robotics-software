@@ -231,10 +231,23 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly)
    {
+      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, forVizOnly);
+   }
+
+   public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
          DoubleYoVariable stiffness = stiffnesses.get(oneDoFJoint);
          DoubleYoVariable intermediateJointPosition = outputJointPositions.get(oneDoFJoint);
          DoubleYoVariable intermediateJointTau = outputJointTaus.get(oneDoFJoint);
@@ -604,11 +617,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
     */
    public Map<OneDoFJoint, DoubleYoVariable> createStiffness(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness)
    {
+      return createStiffnessWithJointsToIgnore(nameSuffix, defaultStiffness, jointSpecificStiffness);
+   }
+
+   public Map<OneDoFJoint, DoubleYoVariable> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness, Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
       LinkedHashMap<OneDoFJoint, DoubleYoVariable> stiffesses = new LinkedHashMap<>();
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
          OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
          String jointName = oneDoFJoint.getName();
+         
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
          DoubleYoVariable stiffness = new DoubleYoVariable(jointName + nameSuffix, registry);
 
          if (jointSpecificStiffness != null && jointSpecificStiffness.containsKey(jointName))
