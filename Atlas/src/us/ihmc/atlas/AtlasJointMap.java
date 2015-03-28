@@ -1,24 +1,6 @@
 package us.ihmc.atlas;
 
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.back_bkz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.forcedSideDependentJointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.jointNames;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_elx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_ely;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_shz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wrx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_arm_wry2;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_akx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_aky;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpx;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpy;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_hpz;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.l_leg_kny;
-import static us.ihmc.atlas.ros.AtlasOrderedJointMap.neck_ry;
+import static us.ihmc.atlas.ros.AtlasOrderedJointMap.*;
 import static us.ihmc.utilities.humanoidRobot.partNames.ArmJointName.*;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.ANKLE_PITCH;
 import static us.ihmc.utilities.humanoidRobot.partNames.LegJointName.ANKLE_ROLL;
@@ -164,7 +146,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
-         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
+         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(WRIST_ROLL));
       }
    }
 
