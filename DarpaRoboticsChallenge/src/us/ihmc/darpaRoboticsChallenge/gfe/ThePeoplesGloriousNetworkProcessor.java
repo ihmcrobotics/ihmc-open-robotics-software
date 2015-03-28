@@ -89,6 +89,8 @@ public class ThePeoplesGloriousNetworkProcessor
       }
 
       controllerCommunicationBridge.connect();
+      
+      System.out.println("IHMC ROS API node successfully connected to controller.");
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
