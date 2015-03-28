@@ -24,7 +24,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
-import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 
 public class RosCameraReceiver extends CameraDataReceiver
 {
@@ -48,7 +48,7 @@ public class RosCameraReceiver extends CameraDataReceiver
          setCameraFrame(getHeadFrame());
       }
 
-      RosImageSubscriber imageSubscriberSubscriber = new RosImageSubscriber()
+      RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
       {
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
