@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
-<stringAttribute key="bad_container_name" value="/At"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/Atlas/src/us/ihmc/atlas/AtlasOperatorUserInterface.java"/>
 </listAttribute>
@@ -18,7 +17,7 @@
 </listAttribute>
 <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.atlas.AtlasOperatorUserInterface"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-m ATLAS_UNPLUGGED_V4_NO_HANDS --realRobot"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-m ATLAS_UNPLUGGED_V4_DUAL_ROBOTIQ --realRobot"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Atlas"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DnetworkParameterFile=ShaperIHMCNetworkParameters.ini"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-DnetworkParameterFile=DiagnosticIHMCNetworkParameters.ini"/>
 </launchConfiguration>
