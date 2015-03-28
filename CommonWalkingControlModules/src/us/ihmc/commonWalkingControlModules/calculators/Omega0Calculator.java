@@ -21,10 +21,14 @@ public class Omega0Calculator implements Omega0CalculatorInterface
    private final FramePoint pseudoCoP = new FramePoint();
    private final SpatialForceVector totalGroundReactionWrench = new SpatialForceVector();
 
-   public Omega0Calculator(ReferenceFrame centerOfMassFrame, double totalMass)
+   private double omega0;
+
+   public Omega0Calculator(ReferenceFrame centerOfMassFrame, double totalMass, double initialOmega0)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.totalMass = totalMass;
+
+      omega0 = initialOmega0;
 
       for (RobotSide robotSide : RobotSide.values) // Max of 2 CoPs assumed here
          cops.put(robotSide, new FramePoint());
@@ -66,7 +70,7 @@ public class Omega0Calculator implements Omega0CalculatorInterface
             cops.get(robotSide).changeFrame(copToCoPFrame.getParent());
          }
 
-         copToCoPFrame.setOriginAndPositionToPointAt(cops.get(0), cops.get(1));
+         copToCoPFrame.setOriginAndPositionToPointAt(cops.get(RobotSide.LEFT), cops.get(RobotSide.RIGHT));
          copToCoPFrame.update();
          pseudoCoP2d.setToZero(copToCoPFrame);
          centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(pseudoCoP2d, totalGroundReactionWrench, copToCoPFrame);
@@ -75,9 +79,9 @@ public class Omega0Calculator implements Omega0CalculatorInterface
          deltaZ = -pseudoCoP.getZ();
       }
 
-      double omega0 = Math.sqrt(fz / (totalMass * deltaZ));
-      if (Double.isNaN(omega0))
-         throw new RuntimeException("omega0 is NaN");
+      double newOmega0 = Math.sqrt(fz / (totalMass * deltaZ));
+      if (!Double.isNaN(newOmega0))
+         omega0 = newOmega0;
       return omega0;
    }
 

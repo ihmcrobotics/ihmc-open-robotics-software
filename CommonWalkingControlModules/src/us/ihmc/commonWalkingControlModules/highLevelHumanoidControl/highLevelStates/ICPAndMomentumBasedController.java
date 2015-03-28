@@ -109,7 +109,7 @@ public class ICPAndMomentumBasedController
       }
       else
       {
-         this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass);
+         this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass, 3.4);
       }
 
       this.contactableFeet = momentumBasedController.getContactableFeet();
