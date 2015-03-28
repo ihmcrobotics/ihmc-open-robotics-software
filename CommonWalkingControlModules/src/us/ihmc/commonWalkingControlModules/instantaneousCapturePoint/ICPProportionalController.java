@@ -131,6 +131,7 @@ public class ICPProportionalController
    private final FrameVector2d desICPToFinalDesICPVector = new FrameVector2d();
    private final FrameLineSegment2d desiredICPToFinalDesiredICPSegment = new FrameLineSegment2d();
    private final FramePoint2d icpProjected = new FramePoint2d();
+   private final FramePoint2d desiredCMP = new FramePoint2d();
       
    public FramePoint2d doProportionalControl(FramePoint2d capturePoint, FramePoint2d desiredCapturePoint, FramePoint2d finalDesiredCapturePoint, FrameVector2d desiredCapturePointVelocity,
            double omega0, boolean projectIntoSupportPolygon, FrameConvexPolygon2d supportPolygon)
@@ -140,7 +141,7 @@ public class ICPProportionalController
       finalDesiredCapturePoint.changeFrame(worldFrame);
       desiredCapturePointVelocity.changeFrame(worldFrame);
       
-      FramePoint2d desiredCMP = new FramePoint2d(capturePoint);
+      desiredCMP.setIncludingFrame(capturePoint);
 
       icpPosition.set(capturePoint.getX(), capturePoint.getY(), 0.0);
       icpVelocity.update();
