@@ -204,10 +204,7 @@ public class HandControlModule
       
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
-         //TODO: Having a hard code limit of the max number of way points is risky
-         //If someone creates a trajectory with more than the 15 points it will throw a new RunTimeExcetion
-         //This should be fixed to do something smarter
-         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, 15, registry);
+         MultipleWaypointsOneDoFJointTrajectoryGenerator multiWaypointTrajectoryGenerator = new MultipleWaypointsOneDoFJointTrajectoryGenerator(oneDoFJoint.getName(), oneDoFJoint, registry);
          wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
@@ -230,7 +227,7 @@ public class HandControlModule
               currentHandPosition, registry, desiredRotationAngleProvider, yoGraphicsListRegistry);
       
       boolean doVelocityAtWaypoints = false;
-      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", 15, worldFrame, currentHandPosition,
+      waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", worldFrame, currentHandPosition,
             registry);
       waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, doVelocityAtWaypoints, true,
             worldFrame, registry);
