@@ -229,7 +229,7 @@ public class FootstepPathCoordinator implements FootstepProvider
          }
          else
          {
-            footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue());
+            footstepStatus = new FootstepStatus(status, currentFootstepIndex.getIntegerValue(), actualFootPositionInWorld, actualFootOrientationInWorld);
          }
 
          footstepStatusDataProducer.queueDataToSend(footstepStatus);
