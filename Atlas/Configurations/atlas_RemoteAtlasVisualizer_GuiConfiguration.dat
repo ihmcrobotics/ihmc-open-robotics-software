@@ -1,81 +1,9 @@
 <GraphGroup>
-	<Cols>2</Cols>
-	<Graph>
-		<Variables>atlas.q_back_bkz,atlas.q_l_leg_hpz,atlas.q_r_leg_hpz</Variables>
-		<GraphConfiguration>
-			<Name>config1</Name>
-			<ScalingMethod>0</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
+	<Cols>3</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
 		<GraphConfiguration>
-			<Name>config2</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_InputOffset</Variables>
-		<GraphConfiguration>
-			<Name>config3</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitl_leg_hpz_Status,root.remotemain.DRCEstimatorThread.EstimatorController.JointLimits.limitr_leg_hpz_Status</Variables>
-		<GraphConfiguration>
-			<Name>config4</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>atlas.q_neck_ry,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q_bef,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q_befcomp,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_angleOffsetPreTransmission</Variables>
-		<GraphConfiguration>
-			<Name>config5</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_neck_ry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_neck_ry.ll_out_neck_ry_q_d</Variables>
-		<GraphConfiguration>
-			<Name>config6</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_neck_ry.ll_in_neck_ry_q,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_neck_ry.ll_out_neck_ry_q_d</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
+			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -87,7 +15,7 @@
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.actualControlDT</Variables>
 		<GraphConfiguration>
-			<Name>config8</Name>
+			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -99,7 +27,7 @@
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.atlasCommunicationDelay</Variables>
 		<GraphConfiguration>
-			<Name>config9</Name>
+			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -111,7 +39,7 @@
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.totalDelay</Variables>
 		<GraphConfiguration>
-			<Name>config10</Name>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -123,79 +51,79 @@
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.bdi_calibrate_state</Variables>
 		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.motor_temperature,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.motor_driver_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_supply_pressure,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.desiredPumpPSI</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.pump_inlet_pressure,root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.AtlasControlThread.air_sump_pressure</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointInPelvisReferenceFramePoseX</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_a_k_q_p,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_k_q_p</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.AtlasAutomatedStandPrep.StandPrepStateMachine</Variables>
+		<GraphConfiguration>
 			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpxqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpxqdd_d</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_knyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_knyqdd_d</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpyqdd_d</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.l_leg_hpzqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.r_leg_hpzqdd_d</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkzqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkyqdd_d,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.back_bkxqdd_d</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_l_leg_hpx.ll_in_l_leg_hpx_f</Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -210,7 +138,7 @@
 <Title>
 Walking
 </Title>
-<Entry Boxes>requestedBehavior,ll_in_back_bkx_angleOffsetPreTransmission,maxICPErrorBeforeSingleSupport,swingTime,transferTime,chestCoMOffsetY,captureKpParallel,captureKpOrthogonal,l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,icpPlannerInitialTransferDuration,slopTimeForSmoothedJointTorques,icpInFromCenter,captureKi,captureKiBleedoff,chestCoMOffsetX</Entry Boxes>
+<Entry Boxes>requestedBehavior,ll_in_back_bkx_angleOffsetPreTransmission,maxICPErrorBeforeSingleSupport,swingTime,transferTime,captureKpParallel,captureKpOrthogonal,l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,icpPlannerInitialTransferDuration,slopTimeForSmoothedJointTorques,icpInFromCenter,captureKi,captureKiBleedoff,maximumAccelerationArmJointspace,alphaDesiredVelocityLegs,alphaDesiredVelocityArms,JOINT_BACK_BKXKVelActuatorValve,doAccelerationIntegration_back_bkx,jointBacklashSlopTime,slopTimeRootJointLinearVelocityBacklashKinematics,armJointBacklashSlopTime,linearMomentumXYWeight,linearMomentumZWeight</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -223,12 +151,6 @@ hpzForce
 BackOscillation
 </Title>
 <Entry Boxes>kpPelvisOrientation,zetaPelvisOrientation,kpZAngularChestOrientation,zetaZAngularChestOrientation,ll_out_l_arm_shx_a_k_qd_p,ll_out_r_arm_shx_a_k_qd_p</Entry Boxes>
-</EntryBoxTab>
-<EntryBoxTab>
-<Title>
-Tab3
-</Title>
-<Entry Boxes>ll_in_neck_ry_angleOffsetPreTransmission,q_d_neck_ry,ll_out_neck_ry_q_d,ll_out_neck_ry_q_offset,ll_in_neck_ry_jointAngleScalar,ll_out_r_arm_ely_a_k_qd_p,ll_out_r_arm_ely_k_qd_p,JOINT_L_LEG_HPZKVelActuatorValve,JOINT_R_LEG_HPZKVelActuatorValve,ll_out_l_arm_ely_k_qd_p,ll_out_l_arm_ely_a_k_qd_p,bdi_calibrate_state,requestedBehavior</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -258,7 +180,79 @@ Stiffness
 <Title>
 Tab8
 </Title>
-<Entry Boxes>jointVelocityAlphaFilter,armJointVelocityAlphaFilter,jointBacklashSlopTime,armJointBacklashSlopTime</Entry Boxes>
+<Entry Boxes>jointVelocityAlphaFilter,armJointVelocityAlphaFilter,jointBacklashSlopTime,armJointBacklashSlopTime,desiredPumpPSI,ll_in_neck_ry_InputOffset,ll_in_back_bkx_InputOffset</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+ChestCoMOffsets
+</Title>
+<Entry Boxes>chestCoMOffsetX,chestCoMOffsetY,chestCoMOffsetZ,zetaPelvisOrientation,kdXYAngularChestOrientation,kdZAngularChestOrientation,zetaLinearSwingFoot,zetaXYAngularSwingFoot,zetaZAngularSwingFoot,bdi_calibrate_state,icpPlannerInitialTransferDuration</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Car
+</Title>
+<Entry Boxes>requestedHighLevelState,highLevelState,doIHMCControlRatio,requestReInitializeInWalking,desiredPumpPSI,doVelocityControlLocally</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Rumble
+</Title>
+<Entry Boxes>l_footTouchdownVelocityZ,r_footTouchdownVelocityZ,ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,slopTimeForSmoothedJointTorques,desiredPumpPSI,timeToGetPreparedForLocomotion,highLevelState,requestedHighLevelState,icpPlannerDoubleSupportSplitFractior,additionalSwingTimeForICP</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab13
+</Title>
+<Entry Boxes>ll_out_r_leg_hpz_a_k_f_p,ll_out_r_leg_hpx_a_k_f_p,ll_out_r_leg_hpy_a_k_f_p,ll_out_r_leg_kny_a_k_f_p,ll_out_r_leg_aky_k_f_p,ll_out_r_leg_akx_k_f_p,ll_out_r_leg_hpx_a_k_qd_p,ll_out_r_leg_hpx_a_ff_f_d,JOINT_R_LEG_HPXKVelActuatorValve,doVelocityControlLocally,ll_out_l_leg_hpx_a_ff_qd,ll_out_r_leg_hpx_a_ff_qd,desiredPumpPSI</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Tab14
+</Title>
+<Entry Boxes>ll_out_l_leg_aky_ff_qd,ll_out_r_leg_aky_ff_qd,JOINT_L_LEG_AKY_local_ff_qd,JOINT_R_LEG_AKY_local_ff_qd,doVelocityControlLocally,bdi_calibrate_state,doIHMCControlRatio</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+ChestTuning
+</Title>
+<Entry Boxes>kpPelvisOrientation,zetaPelvisOrientation,kpXYAngularChestOrientation,kpZAngularChestOrientation,kdXYAngularChestOrientation,kdZAngularChestOrientation,kpArmJointspace,wRho,wRhoSmoother,wRhoPenalizer,jointVelocityAlphaFilter,alphaIMUAgainstKinematicsForVelocity,alphaCoPFilter</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+AnkleForce
+</Title>
+<Entry Boxes>JOINT_L_LEG_AKY_local_ff_qd,JOINT_L_LEG_AKX_local_ff_qd,JOINT_R_LEG_AKY_local_ff_qd,JOINT_R_LEG_AKX_local_ff_qd,chestCoMOffsetY,ll_out_l_leg_akx_k_f_p,ll_out_r_leg_akx_k_f_p,ll_out_l_leg_aky_k_f_p,ll_out_r_leg_aky_k_f_p,icpInFromCenter</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Calibration
+</Title>
+<Entry Boxes>requestedBehavior,bdi_calibrate_state</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Filters
+</Title>
+<Entry Boxes>angularVelocityAlphaFilter,jointVelocityAlphaFilter,armJointVelocityAlphaFilter</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+MotorEnables
+</Title>
+<Entry Boxes>ll_out_elec_motor_l_arm_wry_enable_elec_motor,ll_out_elec_motor_l_arm_wrx_enable_elec_motor,ll_out_elec_motor_l_arm_wry2_enable_elec_motor,ll_out_elec_motor_r_arm_wry_enable_elec_motor,ll_out_elec_motor_r_arm_wrx_enable_elec_motor,ll_out_elec_motor_r_arm_wry2_enable_elec_motor,ll_out_l_arm_wry_a_k_q_p,ll_out_l_arm_wrx_a_k_q_p,ll_out_l_arm_wry2_a_k_q_p,ll_out_r_arm_wry_a_k_q_p,ll_out_r_arm_wrx_a_k_q_p,ll_out_r_arm_wry2_a_k_q_p</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+wristY
+</Title>
+<Entry Boxes>ll_out_l_arm_wry_q_d,ll_out_l_arm_wry_a_k_q_p,ll_out_l_arm_wry_a_k_qd_p,ll_out_elec_motor_l_arm_wry_enable_elec_motor,ll_out_l_arm_wry_a_ff_const,ll_out_elec_motor_l_arm_wry2_enable_elec_motor,ll_out_l_arm_wry2_q_d,ll_out_l_arm_wry2_a_k_q_p,ll_out_l_arm_wry2_a_k_qd_p,ll_out_l_arm_wry2_a_ff_const</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+wristX
+</Title>
+<Entry Boxes>ll_out_l_arm_wrx_a_k_q_p,ll_out_l_arm_wrx_a_k_qd_p,ll_out_l_arm_wrx_a_ff_const,ll_out_l_arm_wrx_q_d,ll_out_elec_motor_l_arm_wrx_enable_elec_motor,requestCalibrateLeftWristSensor</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -267,8 +261,571 @@ Tab8
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>0</Graph Array Window Size>
-
+<Graph Array Window Size>5</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>3</ScreenID>
+<WindowLocation>3840.0, 0.0</WindowLocation>
+<WindowSize>1280.0, 800.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoP2dX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.leftCoPRawInFootFrameX</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.rightSoleCoP2dX,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.rightCoPRawInFootFrameX</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.leftSoleCoP2dY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.leftCoPRawInFootFrameY</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.PlaneContactWrenchProcessor.rightSoleCoP2dY,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.PelvisKinematicsBasedLinearStateCalculator.rightCoPRawInFootFrameY</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>2</ScreenID>
+<WindowLocation>-2.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1087.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry.ll_in_elec_motor_l_arm_wry_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_l_arm_wry.ll_out_elec_motor_l_arm_wry_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry.ll_in_elec_motor_r_arm_wry_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_r_arm_wry.ll_out_elec_motor_r_arm_wry_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wrx.ll_in_elec_motor_l_arm_wrx_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_l_arm_wrx.ll_out_elec_motor_l_arm_wrx_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wrx.ll_in_elec_motor_r_arm_wrx_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_r_arm_wrx.ll_out_elec_motor_r_arm_wrx_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry2.ll_in_elec_motor_l_arm_wry2_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_l_arm_wry2.ll_out_elec_motor_l_arm_wry2_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry2.ll_in_elec_motor_r_arm_wry2_enabled,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_elec_motor_r_arm_wry2.ll_out_elec_motor_r_arm_wry2_enable_elec_motor</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry.ll_in_elec_motor_l_arm_wry_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry.ll_in_elec_motor_r_arm_wry_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry.ll_in_elec_motor_l_arm_wry_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry.ll_in_elec_motor_r_arm_wry_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wrx.ll_in_elec_motor_l_arm_wrx_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config26</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wrx.ll_in_elec_motor_r_arm_wrx_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wrx.ll_in_elec_motor_l_arm_wrx_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wrx.ll_in_elec_motor_r_arm_wrx_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config29</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry2.ll_in_elec_motor_l_arm_wry2_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry2.ll_in_elec_motor_r_arm_wry2_temperature</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry2.ll_in_elec_motor_l_arm_wry2_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_r_arm_wry2.ll_in_elec_motor_r_arm_wry2_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config33</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>5758.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_l_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_r_arm_wry</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_l_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wrx.ll_out_l_arm_wrx_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_r_arm_wrx</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_l_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry2.ll_out_l_arm_wry2_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.q_d_r_arm_wry2</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>0</ScreenID>
+<WindowLocation>2368.0, 89.0</WindowLocation>
+<WindowSize>1280.0, 776.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wry.ll_out_r_arm_wry_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wrx.ll_out_l_arm_wrx_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wrx.ll_out_r_arm_wrx_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry2.ll_out_l_arm_wry2_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_r_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_r_arm_wry2.ll_out_r_arm_wry2_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_r_leg_hpx.ll_in_r_leg_hpx_psi_pos</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_a_k_q_p</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_a_k_qd_p</Variables>
+		<GraphConfiguration>
+			<Name>config48</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4><Graph Array Window5>
+<ScreenID>0</ScreenID>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1172.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry.ll_out_l_arm_wry_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config50</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry.ll_in_elec_motor_l_arm_wry_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config51</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wrx,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wrx.ll_out_l_arm_wrx_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config52</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wrx.ll_in_elec_motor_l_arm_wrx_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config53</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>atlas.q_l_arm_wry2,root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.ll_out_l_arm_wry2.ll_out_l_arm_wry2_q_d</Variables>
+		<GraphConfiguration>
+			<Name>config54</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.AtlasSensorReader.AtlasDispatcherThread.ll_in_elec_motor_l_arm_wry2.ll_in_elec_motor_l_arm_wry2_drive_current</Variables>
+		<GraphConfiguration>
+			<Name>config55</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window5>
 
 <Extra Panels>
 <Main Viewport>
@@ -277,9 +834,9 @@ Plotter,Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>-0.06624444053316048</Camera X>
+ <Camera Y>-2.249702960321969</Camera Y>
+ <Camera Z>0.9714734240608061</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -303,8 +860,8 @@ Plotter,Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>0.5000571736307847</Fix X>
+<Fix Y>1.1300354300966777</Fix Y>
+<Fix Z>0.6250523688855771</Fix Z>
 </Fix Position>
 </Canvas 1>
