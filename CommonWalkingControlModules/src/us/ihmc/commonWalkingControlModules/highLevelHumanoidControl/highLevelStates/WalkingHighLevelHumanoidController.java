@@ -613,9 +613,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             capturePointPlannerAdapter.clear(null);
             if (footPoseProvider != null && footPoseProvider.checkForNewPose() != null)
             {
-               // FIXME Hack to have the ICP desired centered on the upcoming support foot.
-               // The next line should use transferToSide.getOppositeSide()
-               capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(transferToSide));
+               capturePointPlannerAdapter.setSingleSupportTime(Double.POSITIVE_INFINITY);
+               capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(transferToSide.getOppositeSide()));
                capturePointPlannerAdapter.setTransferToSide(transferToSide);
             }
             else
