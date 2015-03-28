@@ -4,6 +4,15 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: 'x'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
     
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-calibration', version: '0.19-internal'
+	compile group: 'us.ihmc.thirdparty', name: 'boofcv-recognition', version: '0.19-internal'
+	compile group: 'us.ihmc.thirdparty', name: 'boofcv-feature', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-geo', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-io', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-ip', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-visualize', version: '0.19-internal'
+    compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
+    
     //ejml core, complex, and equation
     ['core','complex','equation'].each{
     	String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'
