@@ -8,9 +8,15 @@ import java.awt.image.BufferedImage;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import javax.swing.JFrame;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import org.ros.RosCore;
 
+import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
 import us.ihmc.utilities.ros.subscriber.RosCameraInfoSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
 import boofcv.abst.calib.ConfigChessboard;
@@ -25,50 +31,60 @@ import boofcv.struct.image.ImageFloat32;
 
 public class RosFiducialDetector extends RosImageSubscriber
 {
+   final boolean VISUALIZE = true;
    private RosCameraInfoSubscriber cameraInfoSubscriber;
+   private RosTf2Publisher tfPublisher = new RosTf2Publisher(false);
 
    ImageFloat32 gray = new ImageFloat32(640, 480);
-   ImagePanel gui = new ImagePanel(640, 480);
-   IntrinsicParameters param = new IntrinsicParameters();
+   ImagePanel imagePanel = null;
+   JFrame frame = null;
+   IntrinsicParameters intrinsicParameters = null;
 
    FiducialDetector<ImageFloat32> detector = FactoryFiducial.
    //       squareBinaryRobust(new ConfigFiducialBinary(0.1), 6, ImageFloat32.class);
-         calibChessboard(new ConfigChessboard(5, 6), 0.01, ImageFloat32.class);
+         calibChessboard(new ConfigChessboard(7, 9), 0.01, ImageFloat32.class);
 
    //       calibSquareGrid(new ConfigSquareGrid(5,7), 0.03, ImageFloat32.class);
 
    public RosFiducialDetector(RosMainNode rosMainNode, String imageTopic, String cameraInfoTopic)
    {
       cameraInfoSubscriber = new RosCameraInfoSubscriber(rosMainNode, cameraInfoTopic);
+      rosMainNode.attachPublisher("/tf", tfPublisher);
       rosMainNode.attachSubscriber(imageTopic, this);
-      ShowImages.showWindow(gui, "Fiducials");
+      if(VISUALIZE)
+      {
+         imagePanel= new ImagePanel(100, 100);
+         frame=ShowImages.showWindow(imagePanel, "Fiducials");
+      }
    }
 
    private void determineIntrinsicParameters(int width, int height)
    {
       try
       {
-         param = cameraInfoSubscriber.getIntrinsicParametersBlocking();
-         throw new InterruptedException();
+         intrinsicParameters = cameraInfoSubscriber.getIntrinsicParametersBlocking();
       }
       catch (InterruptedException e)
       {
          System.out.println("Use default intrinsic parameters");
-         param.width = width;
-         param.height = height;
-         param.cx = width / 2;
-         param.cy = height / 2;
-         param.fx = param.cx / Math.tan(UtilAngle.degreeToRadian(30)); // assume 60 degree FOV
-         param.fy = param.cx / Math.tan(UtilAngle.degreeToRadian(30));
-         param.flipY = false;
+         intrinsicParameters = new IntrinsicParameters();
+         intrinsicParameters.width = width;
+         intrinsicParameters.height = height;
+         intrinsicParameters.cx = width / 2;
+         intrinsicParameters.cy = height / 2;
+         intrinsicParameters.fx = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30)); // assume 60 degree FOV
+         intrinsicParameters.fy = intrinsicParameters.cx / Math.tan(UtilAngle.degreeToRadian(30));
+         intrinsicParameters.flipY = false;
       }
-      detector.setIntrinsic(param);
+      detector.setIntrinsic(intrinsicParameters);
    }
 
    @Override
    protected void imageReceived(long timeStamp, BufferedImage image)
    {
-      determineIntrinsicParameters(image.getWidth(), image.getHeight());
+      if(intrinsicParameters==null)
+         determineIntrinsicParameters(image.getWidth(), image.getHeight());
+      gray.reshape(image.getWidth(), image.getHeight());
       ConvertBufferedImage.convertFrom(image, gray);
 
       try
@@ -81,11 +97,21 @@ public class RosFiducialDetector extends RosImageSubscriber
          {
             detector.getFiducialToWorld(i, targetToSensor);
 
-            VisualizeFiducial.drawCube(targetToSensor, param, 0.1, g2);
+            VisualizeFiducial.drawCube(targetToSensor, intrinsicParameters, 0.1, g2);
          }
+         
+         Matrix3d rotation = new Matrix3d(targetToSensor.getRotation().getData());
+         Vector3d translation = new Vector3d(targetToSensor.getTranslation().getX(),targetToSensor.getTranslation().getY(),targetToSensor.getTranslation().getZ());
+         Transform3d transform = new Transform3d(rotation, translation);
+         tfPublisher.publish(transform, timeStamp, "fiducialTarget", "camera");
 
-         gui.setBufferedImageSafe(image);
-         gui.repaint();
+         if(VISUALIZE)
+         {
+            int heightOffset=frame.getHeight()-frame.getContentPane().getHeight();
+            int widthOffset=frame.getWidth() - frame.getContentPane().getWidth();
+            frame.setSize(image.getWidth()+widthOffset,image.getHeight()+heightOffset);
+            imagePanel.setBufferedImageSafe(image);
+         }
       }
       catch (Exception e)
       {
@@ -99,8 +125,8 @@ public class RosFiducialDetector extends RosImageSubscriber
    public static void main(String[] arg) throws URISyntaxException
    {
       //install ros libuvc_camera driver first to try on usbwebcams
-      String cameraPrefix = "camera";
-      String imageTopic = cameraPrefix + "/image_raw";
+      String cameraPrefix = "/multisense/left";
+      String imageTopic = cameraPrefix + "/image_color";
       String cameraInfoTopic = cameraPrefix + "/camera_info";
 
       final boolean RUN_JAVA_ROSCORE = false;
