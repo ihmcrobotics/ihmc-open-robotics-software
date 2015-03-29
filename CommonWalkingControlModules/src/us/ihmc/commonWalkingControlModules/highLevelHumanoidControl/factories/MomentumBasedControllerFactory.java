@@ -209,7 +209,8 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the ICPAndMomentumBasedController //////////////////////////////////////////////////
-      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, iCPBasedLinearMomentumRateOfChangeControlModule,
+      double omega0 = walkingControllerParameters.getOmega0();
+      icpAndMomentumBasedController = new ICPAndMomentumBasedController(momentumBasedController, omega0, iCPBasedLinearMomentumRateOfChangeControlModule,
             bipedSupportPolygons, capturabilityBasedStatusProducer, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
