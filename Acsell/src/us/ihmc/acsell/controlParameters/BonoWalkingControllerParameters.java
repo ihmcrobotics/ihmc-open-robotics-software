@@ -37,6 +37,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getOmega0()
+   {
+      // TODO probably need to be tuned.
+      return 3.4;
+   }
+
+   @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
