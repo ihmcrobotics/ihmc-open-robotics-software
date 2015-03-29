@@ -59,6 +59,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double getOmega0()
+   {
+      // TODO probably need to be tuned.
+      return runningOnRealRobot ? 3.4 : 3.3; // 3.3 seems more appropriate.
+   }
+
+  @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
