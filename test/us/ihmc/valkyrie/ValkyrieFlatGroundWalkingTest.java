@@ -11,7 +11,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
+//This test is slow but very important, let's keep it in the FAST build please. (Sylvain)
+@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoB})
 public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
 
