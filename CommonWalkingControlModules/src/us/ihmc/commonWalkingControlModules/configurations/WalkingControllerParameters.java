@@ -17,6 +17,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
 
+   public abstract double getOmega0();
+
    public abstract double getAnkleHeight();
 
    public abstract double getLegLength();

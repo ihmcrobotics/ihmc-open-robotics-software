@@ -83,7 +83,7 @@ public class ICPAndMomentumBasedController
 
    private final MomentumRateOfChangeData momentumRateOfChangeData;
 
-   public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController,
+   public ICPAndMomentumBasedController(MomentumBasedController momentumBasedController, double omega0,
          ICPBasedLinearMomentumRateOfChangeControlModule icpBasedLinearMomentumRateOfChangeControlModule, BipedSupportPolygons bipedSupportPolygons,
          CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, YoVariableRegistry parentRegistry)
    {
@@ -104,12 +104,11 @@ public class ICPAndMomentumBasedController
       
       if (USE_CONSTANT_OMEGA0)
       {
-         double constantOmega0 = 3.4;
-         this.omega0Calculator = new ConstantOmega0Calculator(constantOmega0, registry);
+         this.omega0Calculator = new ConstantOmega0Calculator(omega0, registry);
       }
       else
       {
-         this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass, 3.4);
+         this.omega0Calculator = new Omega0Calculator(centerOfMassFrame, totalMass, omega0);
       }
 
       this.contactableFeet = momentumBasedController.getContactableFeet();

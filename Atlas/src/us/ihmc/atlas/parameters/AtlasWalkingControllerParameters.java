@@ -76,6 +76,14 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getOmega0()
+   {
+      // TODO probably need to be tuned.
+      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      return realRobot ? 3.4 : 3.0; // 3.0 seems more appropriate.
+   }
+
+   @Override
    public double getTimeToGetPreparedForLocomotion()
    {
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
