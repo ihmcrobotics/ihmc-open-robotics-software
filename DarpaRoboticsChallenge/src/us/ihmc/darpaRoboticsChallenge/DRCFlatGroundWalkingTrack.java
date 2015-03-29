@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 
 
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -83,6 +84,11 @@ public class DRCFlatGroundWalkingTrack
       drcSimulation.start();
    }
 
+   public void attachControllerFailureListener(ControllerFailureListener listener)
+   {
+      drcSimulation.getControllerFactory().attachControllerFailureListener(listener);
+   }
+
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return drcSimulation.getSimulationConstructionSet();
@@ -100,7 +106,5 @@ public class DRCFlatGroundWalkingTrack
          drcSimulation.dispose();
       }
       GlobalTimer.clearTimers();
-      
-      
    }
 }
