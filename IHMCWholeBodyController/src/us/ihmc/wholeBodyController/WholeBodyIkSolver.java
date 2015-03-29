@@ -123,7 +123,7 @@ abstract public class WholeBodyIkSolver
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
 
-      protected int maxNumberOfAutomaticReseeds = 0;
+      protected int maxNumberOfAutomaticReseeds = 3;
       
       protected final SideDependentList<FramePose> handTarget = new SideDependentList<FramePose>();
       protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
