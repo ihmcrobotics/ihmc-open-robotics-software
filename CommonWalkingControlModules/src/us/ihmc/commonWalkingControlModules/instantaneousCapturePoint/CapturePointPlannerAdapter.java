@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point2d;
@@ -168,6 +167,9 @@ public class CapturePointPlannerAdapter
 
       setSupportFootLocation(transferFromSide, transferFromFootLocation);
       setSupportFootLocation(transferToSide, transferToFootLocation);
+
+      transferToFootLocation = new FramePoint(referenceFrames.getSoleFrame(transferToSide));
+      transferToFootLocation.changeFrame(worldFrame);
 
       newCapturePointPlanner.initializeDoubleSupport(currentDesiredICP, currentDesiredICPVelocity, initialTime, footstepLocations, transferToSide, transferToFootLocation);
    }
