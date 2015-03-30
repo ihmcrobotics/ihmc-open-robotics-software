@@ -135,8 +135,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
 
    // puts the state data into the ring buffer for the output thread
-   Vector3d linearAccelerationToPack = new Vector3d();
-   Vector3d angularVelocityToPack = new Vector3d();
+   Vector3d rawImuLinearAccelerationToPack = new Vector3d();
+   Vector3d rawImuAngularVelocityToPack = new Vector3d();
    Matrix3d orientationToPack = new Matrix3d();
    Quat4d orientationQuat= new Quat4d();
 
@@ -155,11 +155,11 @@ public class DRCPoseCommunicator implements RawOutputWriter
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
       
       IMUSensorReadOnly rawImu =  sensorRawOutputMapReadOnly.getIMURawOutputs().get(0);
-      rawImu.getLinearAccelerationMeasurement(linearAccelerationToPack);
+      rawImu.getLinearAccelerationMeasurement(rawImuLinearAccelerationToPack);
       rawImu.getOrientationMeasurement(orientationToPack);
       RotationFunctions.setQuaternionBasedOnMatrix3d(orientationQuat, orientationToPack);
-      rawImu.getAngularVelocityMeasurement(angularVelocityToPack);
-      state.setRawImuData(linearAccelerationToPack, orientationQuat, angularVelocityToPack);
+      rawImu.getAngularVelocityMeasurement(rawImuAngularVelocityToPack);
+      state.setRawImuData(rawImuLinearAccelerationToPack, orientationQuat, rawImuAngularVelocityToPack);
       
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
       
