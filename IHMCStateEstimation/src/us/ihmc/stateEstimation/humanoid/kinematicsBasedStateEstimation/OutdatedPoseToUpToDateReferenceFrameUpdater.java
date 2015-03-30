@@ -21,13 +21,17 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final TimeStampedTransformBuffer upToDateTimeStampedTransformBuffer;
    private final ReferenceFrame upToDateReferenceFrameInPresent;
+   private final ReferenceFrame upToDateReferenceFrameInPresent_Translation;
+   private final ReferenceFrame upToDateReferenceFrameInPresent_Rotation;
 
    private final TimeStampedTransform3D upToDateTimeStampedTransformInPast;
    private final FramePose upToDatePoseInPast;
    private final PoseReferenceFrame upToDateReferenceFrameInPast;
-
+   
    private final FramePose outdatedPose;
    private final RigidBodyTransform outdatedTransform_upToDateReferenceFrameInPast = new RigidBodyTransform();
+   
+   
 
    /**
     * Constructor
@@ -38,6 +42,35 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    {
       this.upToDateReferenceFrameInPresent = upToDateReferenceFrameInPresent;
 
+      upToDateReferenceFrameInPresent_Translation = new ReferenceFrame("upToDateReferenceFrameInPresent_Translation", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+//            OutdatedPoseToUpToDateReferenceFrameUpdater.this.upToDateReferenceFrameInPresent.getTransformToParent(transformToParent);
+            OutdatedPoseToUpToDateReferenceFrameUpdater.this.upToDateReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
+            transformToParent.setRotationToIdentity();
+         }
+      };
+      
+      upToDateReferenceFrameInPresent_Rotation = new ReferenceFrame("upToDateReferenceFrameInPresent_Rotation", upToDateReferenceFrameInPresent_Translation)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+//            OutdatedPoseToUpToDateReferenceFrameUpdater.this.upToDateReferenceFrameInPresent.getTransformToParent(transformToParent);
+            OutdatedPoseToUpToDateReferenceFrameUpdater.this.upToDateReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
+            transformToParent.zeroTranslation();
+         }
+
+         @Override
+         public void update()
+         {
+            super.update();
+            upToDateReferenceFrameInPresent_Translation.update();
+         }
+      };
+      
       upToDateTimeStampedTransformBuffer = new TimeStampedTransformBuffer(upToDateBufferSize);
 
       upToDateTimeStampedTransformInPast = new TimeStampedTransform3D();
@@ -63,9 +96,12 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       outdatedPose.changeFrame(upToDateReferenceFrameInPast);
       outdatedPose.getRigidBodyTransform(outdatedTransform_upToDateReferenceFrameInPast);
 
-      outdatedPoseToBeUpdatedToPack.setPoseIncludingFrame(upToDateReferenceFrameInPresent, outdatedTransform_upToDateReferenceFrameInPast);
+      upToDateReferenceFrameInPresent_Rotation.update();
+      outdatedPoseToBeUpdatedToPack.setPoseIncludingFrame(upToDateReferenceFrameInPresent_Rotation, outdatedTransform_upToDateReferenceFrameInPast);
+      outdatedPoseToBeUpdatedToPack.changeFrame(upToDateReferenceFrameInPresent);
    }
 
+   
    /**
     * Puts the upToDateTransform in the buffer with the corresponding timeStamp
     * @param upToDateTransform 
