@@ -400,7 +400,7 @@ public class HandControlModule
 
          elapsedTimeSinceTrajectoryStart += trajectoryTimeOfEachPose;
 
-         waypointPositionTrajectoryGenerator.appendWayPoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempVelocity);
+         waypointPositionTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempPosition, tempVelocity);
          waypointOrientationTrajectoryGenerator.appendWaypoint(elapsedTimeSinceTrajectoryStart, tempOrientation, tempAngularVelocity);
       }
 
@@ -605,7 +605,11 @@ public class HandControlModule
                if (deltaTime < 2.0)
                {
                   time = 2.0;
-                  System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety");
+                  if (jointIdx == 0)
+                  {
+                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety "
+                           + "(this only affects the arms)");
+                  }
                }
             }
             else
@@ -614,7 +618,11 @@ public class HandControlModule
                if (deltaTime < 2.0)
                {
                   time = trajectoryPacket.trajectoryPoints[i-1].time + 2.0;
-                  System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety");
+                  if (jointIdx == 0)
+                  {
+                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety "
+                           + "(this only affects the arms)");
+                  }
                }
             }
             // ----------------------------------------------------

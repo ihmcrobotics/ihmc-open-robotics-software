@@ -285,6 +285,7 @@ public class WholeBodyTrajectory
             packet.leftArmTrajectory.trajectoryPoints[w].velocities[jointIdx] = jointsWaypoint.velocity[index];
             jointIdx++;
          }
+         packet.leftArmTrajectory.trajectoryPoints[w].time = packet.timeAtWaypoint[w];
 
          jointIdx = 0 ;
          for(OneDoFJoint armJoint: currentRobotModel.armJointIDsList.get( RobotSide.RIGHT) )
@@ -294,6 +295,7 @@ public class WholeBodyTrajectory
             packet.rightArmTrajectory.trajectoryPoints[w].velocities[jointIdx] = jointsWaypoint.velocity[index];
             jointIdx++;
          }
+         packet.rightArmTrajectory.trajectoryPoints[w].time = packet.timeAtWaypoint[w];
 
          ///---------- calculation in task space ------------
 

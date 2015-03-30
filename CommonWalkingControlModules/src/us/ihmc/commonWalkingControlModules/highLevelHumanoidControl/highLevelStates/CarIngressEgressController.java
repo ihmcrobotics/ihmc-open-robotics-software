@@ -315,11 +315,11 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             pelvisPositionTrajectoryGenerator.get(desiredPelvisWaypointPosition);
             desiredPelvisWaypointLinearVelocity.setToZero(worldFrame);
             pelvisPositionTrajectoryGenerator.clear();
-            pelvisPositionTrajectoryGenerator.appendWayPoint(0.0, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
+            pelvisPositionTrajectoryGenerator.appendWaypoint(0.0, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
             desiredPelvisWaypointPosition.setIncludingFrame(pelvisPoseProvider.getDesiredPelvisPosition(worldFrame));
             desiredPelvisWaypointPosition.changeFrame(worldFrame);
             double dt = pelvisPoseProvider.getTrajectoryTime();
-            pelvisPositionTrajectoryGenerator.appendWayPoint(dt, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
+            pelvisPositionTrajectoryGenerator.appendWaypoint(dt, desiredPelvisWaypointPosition, desiredPelvisWaypointLinearVelocity);
             pelvisTrajectoryStartTime.set(yoTime.getDoubleValue());
 
             pelvisPositionTrajectoryGenerator.initialize();
