@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
@@ -73,27 +74,33 @@ public class RobotiqHandCommandManager extends HandCommandManager
    
    public static void main(String[] args)
    {
-      final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(RobotSide.LEFT);
       JFrame frame = new JFrame();
+      FlowLayout layout = new FlowLayout();
+      frame.setLayout(layout);
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      
-      final JComboBox<FingerState> stateToSend = new JComboBox<FingerState>(FingerState.values());
-      stateToSend.setSelectedItem(FingerState.CALIBRATE);
-      
-      final JButton button = new JButton("Send");
-      button.addActionListener(new ActionListener()
+
+      for(final RobotSide side:RobotSide.values)
       {
-         @Override
-         public void actionPerformed(ActionEvent e)
+         final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(side);
+         
+         final JComboBox<FingerState> stateToSend = new JComboBox<FingerState>(FingerState.values());
+         stateToSend.setSelectedItem(FingerState.CALIBRATE);
+         
+         final JButton button = new JButton("Send");
+         button.addActionListener(new ActionListener()
          {
-            commandManager.getCommunicator().send(new FingerStatePacket(RobotSide.LEFT,
-                  (FingerState)(stateToSend.getSelectedItem())));
-         }
-      });
-      frame.setLayout(new FlowLayout());
-      
-      frame.getContentPane().add(stateToSend);
-      frame.getContentPane().add(button);
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+               commandManager.getCommunicator().send(new FingerStatePacket(side,
+                     (FingerState)(stateToSend.getSelectedItem())));
+            }
+         });
+         frame.getContentPane().add(new JLabel(side.name()));
+         frame.getContentPane().add(stateToSend);
+         frame.getContentPane().add(button);
+      }
+
       frame.pack();
       frame.setVisible(true);
    }
