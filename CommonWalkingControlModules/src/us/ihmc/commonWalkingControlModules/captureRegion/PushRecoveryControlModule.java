@@ -40,7 +40,7 @@ public class PushRecoveryControlModule
    private static final boolean USE_PUSH_RECOVERY_ICP_PLANNER = false;
    private static final boolean ENABLE_PROJECTION_INSIDE_PUSH_RECOVERY_ICP_PLANNER = true;
 
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SCALE = 0.75;
+   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE = 0.02;
    private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
@@ -219,7 +219,7 @@ public class PushRecoveryControlModule
                // get current robot status
                reducedSupportPolygon.changeFrame(midFeetZUp);
                reducedSupportPolygon.setAndUpdate(supportPolygonInMidFeetZUp);
-               reducedSupportPolygon.scale(DOUBLESUPPORT_SUPPORT_POLYGON_SCALE);
+               reducedSupportPolygon.shrink(DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE);
 
                capturePoint2d.changeFrame(midFeetZUp);
 
