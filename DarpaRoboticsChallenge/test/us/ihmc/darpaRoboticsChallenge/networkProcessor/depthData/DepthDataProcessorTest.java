@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.vecmath.Point3d;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.net.PacketConsumer;
@@ -43,8 +42,6 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before: ");
    }
-
-   @Ignore
 
 	@EstimatedDuration
 	@Test(timeout=300000) 
