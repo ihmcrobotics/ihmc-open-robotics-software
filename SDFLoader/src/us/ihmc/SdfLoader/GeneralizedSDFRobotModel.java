@@ -143,6 +143,6 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    public void addForceSensor(String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
-      joints.get(sensorName).addForceSensor(sdfForceSensor);
+      joints.get(parentJointName).addForceSensor(sdfForceSensor);
    }
 }
