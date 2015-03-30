@@ -573,6 +573,7 @@ public class HandControlModule
          return;
       }
       
+      boolean success = true;
       int waypoints = trajectoryPacket.trajectoryPoints.length;
       for (int jointIdx = 0; jointIdx < oneDoFJoints.length; jointIdx++)
       {
@@ -627,13 +628,16 @@ public class HandControlModule
             }
             // ----------------------------------------------------
             
-            trajectoryGenerator.appendWaypoint(time, position, velocity);
+            success &= trajectoryGenerator.appendWaypoint(time, position, velocity);
          }
       }
-
-      jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
-      requestedState.set(jointSpaceHandControlState.getStateEnum());
-      stateMachine.checkTransitionConditions();
+      
+      if (success)
+      {
+         jointSpaceHandControlState.setTrajectories(wholeBodyWaypointsPolynomialTrajectoryGenerators);
+         requestedState.set(jointSpaceHandControlState.getStateEnum());
+         stateMachine.checkTransitionConditions();
+      }
    }
 
    @Deprecated
