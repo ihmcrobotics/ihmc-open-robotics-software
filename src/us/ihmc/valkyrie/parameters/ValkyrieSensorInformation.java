@@ -35,7 +35,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
 
-   public static final SideDependentList<RigidBodyTransform> transformFromMeasurementToAnkleZUpFrames = new SideDependentList<>();
+   public static final SideDependentList<RigidBodyTransform> transformFromSixAxisMeasurementToAnkleZUpFrames = new SideDependentList<>();
    static
    {     
       RigidBodyTransform translateForwardAndDownOnFoot = new RigidBodyTransform();
@@ -56,8 +56,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       leftTransform.multiply(rotateZ60Degrees);
       leftTransform.multiply(rotXByPi);
 
-      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
-      transformFromMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
+      transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
+      transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
    }
 
    /**
@@ -157,7 +157,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public RigidBodyTransform getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
    {
-      return transformFromMeasurementToAnkleZUpFrames.get(robotSide);
+      return transformFromSixAxisMeasurementToAnkleZUpFrames.get(robotSide);
    }
 
    @Override
