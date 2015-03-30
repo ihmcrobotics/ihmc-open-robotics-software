@@ -1,6 +1,6 @@
 <launch>
 	<node name="mapper_humanoid" type="mapper_humanoid" pkg="ethzasl_icp_mapper_humanoid" output="screen">
-	    <remap from="/icp_correction" to="/ihmc_ros/localization/pelvis_pose_correction"
+	    <remap from="/icp_correction" to="/ihmc_ros/localization/pelvis_pose_correction" />
 		<remap from="cloud_in" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud" />
 		<param name="subscribe_scan" value="false" />
 		<param name="icpConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/icp.yaml" />
