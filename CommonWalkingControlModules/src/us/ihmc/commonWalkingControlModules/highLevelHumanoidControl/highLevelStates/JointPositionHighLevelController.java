@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -41,6 +42,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
    private SideDependentList<double[]> armJointAngles, legJointAngles;
    private double[] waistJointAngles;
+   private double neckJointAngle;
 
    public JointPositionHighLevelController(MomentumBasedController momentumBasedController, DesiredJointsPositionProvider desiredJointsProvider)
    {
@@ -60,8 +62,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          String joinName = joint.getName();
 
          if (joinName.contains("finger"))
-            continue;
-         if (joinName.contains("hokuyo"))
             continue;
          if (joinName.contains("neck"))
             continue;
@@ -117,7 +117,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       }
 
       setFinalPositionSpineJoints(packet);
-      
+      setFinalPositionNeckJoint(packet);
      
 
       if (firstPacket)
@@ -159,6 +159,16 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 //    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setFinalPosition(waistJointAngles[1]);
 //    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setFinalPosition(waistJointAngles[2]);
    }
+   
+   private void setFinalPositionNeckJoint(JointAnglesPacket packet)
+   {
+      neckJointAngle = packet.getNeckJointAngle();
+      
+      OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(NeckJointName.LOWER_NECK_PITCH);
+      double desiredNeckJointAngle = MathTools.clipToMinMax(neckJointAngle, neckJoint.getJointLimitLower(), neckJoint.getJointLimitUpper());
+      
+      trajectoryGenerator.get(neckJoint).setFinalPosition(desiredNeckJointAngle);
+   }
 
    private void setFinalPositionArmsAndLegs(RobotSide robotSide, JointAnglesPacket packet)
    {
@@ -177,14 +187,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
       }
       
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setFinalPosition(armJointAngles.get(robotSide)[0]);
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[1]);
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[2]);
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[3]);
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH)).setFinalPosition(armJointAngles.get(robotSide)[4]);
-//      trajectoryGenerator.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL)).setFinalPosition(armJointAngles.get(robotSide)[5]);
-
-
       packet.packLegJointAngle(robotSide, legJointAngles.get(robotSide));
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for(int i=0; i<legJointNames.length; i++)
@@ -196,16 +198,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          
          trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
-      }
-      
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setFinalPosition(legJointAngles.get(robotSide)[0]);
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[1]);
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[2]);
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE)).setFinalPosition(legJointAngles.get(robotSide)[3]);
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setFinalPosition(legJointAngles.get(robotSide)[4]);
-//      trajectoryGenerator.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setFinalPosition(legJointAngles.get(robotSide)[5]);
+      }      
    }
-
 
    @Override
    public void doAction()
