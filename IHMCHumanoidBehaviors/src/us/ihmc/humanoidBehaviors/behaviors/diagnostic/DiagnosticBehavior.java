@@ -256,7 +256,7 @@ public class DiagnosticBehavior extends BehaviorInterface
 
          }
       });
-      minMaxIcpAngularOffset = new DoubleYoVariable(getName() + "MinMaxIcpRandomOffset", registry);
+      minMaxIcpAngularOffset = new DoubleYoVariable(getName() + "MinMaxIcpAngularOffset", registry);
       minMaxIcpAngularOffset.set(0.0);
       minMaxIcpTranslationOffset = new DoubleYoVariable(getName() + "MinMaxIcpTranslationOffset", registry);
       minMaxIcpTranslationOffset.set(0.06);
