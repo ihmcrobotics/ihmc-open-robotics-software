@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProduce
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -600,29 +601,48 @@ public class HandControlModule
                System.out.println(this.getClass().getSimpleName() + " limited the joint velocity because of new arms safety");
             }
             // 3. make sure there are at least two seconds in between all waypoints
+            double MAX_JOINT_VEL = 1.0;
+            double maxDisplacement = 0.0;
+            for (int j = 0; j < oneDoFJoints.length; j++)
+            {
+               double displacement;
+               if (i == 0)
+               {
+                  ArmJointName jointName = fullRobotModel.getRobotSpecificJointNames().getArmJointNames()[j];
+                  double current = fullRobotModel.getArmJoint(robotSide, jointName).getQ();
+                  displacement = current - trajectoryPacket.trajectoryPoints[i].positions[j];
+               }
+               else
+               {
+                  displacement = trajectoryPacket.trajectoryPoints[i].positions[j] - trajectoryPacket.trajectoryPoints[i-1].positions[j];
+               }
+               maxDisplacement = Math.max(maxDisplacement, Math.abs(displacement));
+            }
+            double minDeltaTime = maxDisplacement / MAX_JOINT_VEL;
+            
             if (i == 0)
             {
                double deltaTime = trajectoryPacket.trajectoryPoints[i].time;
-               if (deltaTime < 2.0)
+               if (deltaTime < minDeltaTime)
                {
-                  time = 2.0;
+                  time = minDeltaTime;
                   if (jointIdx == 0)
                   {
-                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety "
-                           + "(this only affects the arms)");
+                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds"
+                           + "for new arm safety (this only affects the arms)");
                   }
                }
             }
             else
             {
                double deltaTime = trajectoryPacket.trajectoryPoints[i].time - trajectoryPacket.trajectoryPoints[i-1].time;
-               if (deltaTime < 2.0)
+               if (deltaTime < minDeltaTime)
                {
-                  time = trajectoryPacket.trajectoryPoints[i-1].time + 2.0;
+                  time = trajectoryPacket.trajectoryPoints[i-1].time + minDeltaTime;
                   if (jointIdx == 0)
                   {
-                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to 2 seconds for new arm safety "
-                           + "(this only affects the arms)");
+                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds"
+                           + "for new arm safety (this only affects the arms)");
                   }
                }
             }
