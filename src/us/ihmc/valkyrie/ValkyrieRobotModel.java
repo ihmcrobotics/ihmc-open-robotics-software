@@ -119,6 +119,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
+      
+      for(String parentJointName : ValkyrieSensorInformation.copSensors.keySet())
+      {
+         for(String copSensorName : ValkyrieSensorInformation.copSensors.get(parentJointName).keySet())
+         {
+            loader.addForceSensor(jointMap, copSensorName,parentJointName,ValkyrieSensorInformation.copSensors.get(parentJointName).get(copSensorName));
+         }
+      }
 
       capturePointPlannerParameters = new ValkyrieCapturePointPlannerParameters(runningOnRealRobot);
       armControllerParameters = new ValkyrieArmControllerParameters(runningOnRealRobot);

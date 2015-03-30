@@ -2,6 +2,7 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.vecmath.Vector3d;
 
@@ -29,9 +30,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
          forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle"};
    }
    
-   private static final SideDependentList<String> tekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
+   private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
+   private static final SideDependentList<String> tekscanSensorNames = new SideDependentList<String>("LeftTekscanFootSensor", "RightTekscanFootSensor");
    private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
+   private static final LinkedHashMap<String, LinkedHashMap<String, RigidBodyTransform>> forceSensors = new LinkedHashMap<>();
+   public static final LinkedHashMap<String, LinkedHashMap<String, RigidBodyTransform>> copSensors = new LinkedHashMap<>();
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
 
@@ -39,7 +43,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    static
    {     
       RigidBodyTransform translateForwardAndDownOnFoot = new RigidBodyTransform();
-      translateForwardAndDownOnFoot.setTranslation(new Vector3d(0.02150, 0.0, -0.058547));  //from Will's CAD measurement
+      translateForwardAndDownOnFoot.setTranslation(0.02150, 0.0, -0.058547);  //from Will's CAD measurement
       
       RigidBodyTransform rotYBy7dot5 = new RigidBodyTransform();
       rotYBy7dot5.rotY(-Math.PI/24.0);
@@ -58,6 +62,25 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
+   }
+   
+   public static final SideDependentList<RigidBodyTransform> transformFromTekscanMeasurementToAnkleZUpFrames = new SideDependentList<>();
+   static
+   {
+      //Fortunately the Tekscan measurement frame is a z-up frame and is aligned with the foot, so only translation required.
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.setTranslation(-0.0289334,0,0.075159108);
+      
+      transformFromTekscanMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, transform);
+      transformFromTekscanMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(transform));
+   }
+   
+   static
+   {
+      copSensors.put("LeftAnkle", new LinkedHashMap<String, RigidBodyTransform>());
+      copSensors.get("LeftAnkle").put("LeftFootTekscan", transformFromTekscanMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
+      copSensors.put("RightAnkle", new LinkedHashMap<String, RigidBodyTransform>());
+      copSensors.get("RightAnkle").put("LeftFootTekscan", transformFromTekscanMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
    }
 
    /**
