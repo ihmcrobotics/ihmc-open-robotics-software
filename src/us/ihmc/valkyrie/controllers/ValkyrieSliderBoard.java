@@ -126,8 +126,8 @@ public class ValkyrieSliderBoard
          return;
 
       desiredVelocityX.set(desiredVelocityX_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.4
-            + desiredVelocityX_Bias, 0.4 + desiredVelocityX_Bias, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.25
+            + desiredVelocityX_Bias, 0.25 + desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
