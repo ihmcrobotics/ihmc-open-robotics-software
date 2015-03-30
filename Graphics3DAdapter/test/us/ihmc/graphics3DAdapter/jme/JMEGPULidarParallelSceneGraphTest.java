@@ -71,7 +71,7 @@ public class JMEGPULidarParallelSceneGraphTest
       world.getGraphics3DAdapter().getRenderer().setGroundVisible(true);
 
       final Graphics3DNode lidarNode = new Graphics3DNode("lidar", Graphics3DNodeType.ROOTJOINT, new Graphics3DObject());
-      lidarNode.getGraphics3DObject().addModelFile("Models/hokuyo.dae", YoAppearance.Black());
+      lidarNode.getGraphics3DObject().addModelFile("models/hokuyo.dae", YoAppearance.Black());
       lidarNode.translate(0.5, Axis.Z);
 
       world.addChild(lidarNode);

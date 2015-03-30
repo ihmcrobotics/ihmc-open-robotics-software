@@ -82,7 +82,7 @@ public class JMEGPULidarTestEnviroment implements Graphics3DFrameListener
       ((JMEGraphics3DAdapter) world.getGraphics3DAdapter()).getRenderer().getZUpNode().attachChild(jmeSphereNode);
 
       lidarNode = new Graphics3DNode("lidar", new Graphics3DObject());
-      lidarNode.getGraphics3DObject().addModelFile("Models/hokuyo.dae", YoAppearance.Black());
+      lidarNode.getGraphics3DObject().addModelFile("models/hokuyo.dae", YoAppearance.Black());
 
       gpuLidarVisualization = new Graphics3DLidarScan(world, "gpuLidar", params.getScansPerSweep(), params.getMinRange(), params.getMaxRange(),
               params.getShowScanRays(), params.getShowGpuPoints(), YoAppearance.Red());
