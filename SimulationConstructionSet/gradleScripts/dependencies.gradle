@@ -14,7 +14,7 @@ dependencies {
 	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
 	compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
-	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.6'
+	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.7'
 	compile group: 'org.jfree', name: 'jfreechart', version: '1.0.17'
 	compile group: 'org.jfree', name: 'jcommon', version: '1.0.17'
 	compile group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.7'
