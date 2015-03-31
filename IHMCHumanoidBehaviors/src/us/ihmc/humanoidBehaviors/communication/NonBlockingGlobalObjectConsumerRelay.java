@@ -2,20 +2,20 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ThreadTools;
 
-public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
+public class NonBlockingGlobalObjectConsumerRelay implements GlobalPacketConsumer
 {
    private static final boolean DEBUG = false;
 
-   private final ConcurrentLinkedQueue<Packet> queuedData = new ConcurrentLinkedQueue<Packet>(); 
-   private final PacketCommunicator communicatorToForwardFrom;
-   private final PacketCommunicator communicatorToForwardTo;
+   private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>(); 
+   private final PacketCommunicatorMock communicatorToForwardFrom;
+   private final PacketCommunicatorMock communicatorToForwardTo;
    
-   public NonBlockingGlobalObjectConsumerRelay(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo)
+   public NonBlockingGlobalObjectConsumerRelay(PacketCommunicatorMock communicatorToForwardFrom, PacketCommunicatorMock communicatorToForwardTo)
    {
       this.communicatorToForwardFrom = communicatorToForwardFrom;
       this.communicatorToForwardTo = communicatorToForwardTo;
@@ -24,18 +24,18 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
    
    public void enableForwarding()
    {
-      communicatorToForwardFrom.attacthGlobalSendListener(this);
+      communicatorToForwardFrom.attachGlobalListener(this);
       System.out.println("enabled forwarder from " + communicatorToForwardFrom.getClass().getSimpleName());
    }
    
    public void disableForwarding()
    {
-      communicatorToForwardFrom.detachGlobalSendListener(this);
+      communicatorToForwardFrom.detachGlobalListener(this);
       System.out.println("disabled forwarder" + communicatorToForwardFrom.getClass().getSimpleName());
    }
 
    @Override
-   public void receivedPacket(Packet packet)
+   public void receivedPacket(Packet<?> packet)
    {
       queuedData.add(packet);
    }
@@ -50,7 +50,7 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
          {
             while (isRunning)
             {
-               Packet dataObject;
+               Packet<?> dataObject;
                while((dataObject = queuedData.poll()) != null)
                {
                   if (DEBUG)
@@ -58,7 +58,7 @@ public class NonBlockingGlobalObjectConsumerRelay implements PacketConsumer
                      if(!dataObject.getClass().getSimpleName().equals("RobotConfigurationData") && !dataObject.getClass().getSimpleName().equals("RobotPoseData"))
                         System.out.println(dataObject.getClass().getSimpleName());
                   }
-                  communicatorToForwardTo.receivedPacket(dataObject);
+                  communicatorToForwardTo.send(dataObject);
                }
                
                ThreadTools.sleep(100);
