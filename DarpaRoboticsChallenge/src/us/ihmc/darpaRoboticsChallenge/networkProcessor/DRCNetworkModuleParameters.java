@@ -184,6 +184,10 @@ public class DRCNetworkModuleParameters
    public void setUseLocalControllerCommunicator(boolean useLocalControllerCommunicator)
    {
       this.useLocalControllerCommunicator = useLocalControllerCommunicator;
+      if(useLocalControllerCommunicator)
+      {
+         this.useController = true;
+      }
    }
 
    public boolean useGFECommunicator()
