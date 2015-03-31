@@ -453,14 +453,14 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
 
       if (success)
       {
          footstepDataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+         drcSimulationTestHelper.send(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       }

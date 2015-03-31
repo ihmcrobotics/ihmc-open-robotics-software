@@ -36,9 +36,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.humanoidRobot.footstep.FootSpoof;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.footstep.footsepGenerator.PathTypeStepParameters;
@@ -209,7 +207,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       double trajectoryTime = 0.5;
       ChestOrientationPacket packet = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
-      drcSimulationTestHelper.sendChestOrientationPacketToListeners(packet);
+      drcSimulationTestHelper.send(packet);
       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
@@ -286,7 +284,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
       controllerChestDesiredFrameOrientation.changeFrame(pelvisZUpFrame);
 
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(desiredFootstepList.size() * (swingTime + transferTime) + 5.0);
       assertTrue(success);
@@ -663,7 +661,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForRotatedStepInTheAir(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
@@ -693,7 +691,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       FootstepDataList footstepDataList = createFootstepsForWalkingUpToRampShortSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -729,8 +727,8 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataList footstepDataList = createFootstepsForWalkingOnFlatLongSteps(scriptedFootstepGenerator);
 
       // FootstepDataList footstepDataList = createFootstepsForTwoLongFlatSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
-      drcSimulationTestHelper.sendComHeightPacketToListeners(new ComHeightPacket(0.08, 1.0));
+      drcSimulationTestHelper.send(footstepDataList);
+      drcSimulationTestHelper.send(new ComHeightPacket(0.08, 1.0));
 
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(15.0);
@@ -768,7 +766,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       final DoubleYoVariable pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet);
       

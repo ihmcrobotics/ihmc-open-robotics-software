@@ -98,7 +98,7 @@ public abstract class WholeBodyTrajectoryPacketTest
    
    private void executePacket(WholeBodyTrajectoryPacket packet) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
+      drcSimulationTestHelper.send(packet);
       
       int waypoints = packet.numWaypoints; 
       for (int i = 0; i < waypoints; i++)

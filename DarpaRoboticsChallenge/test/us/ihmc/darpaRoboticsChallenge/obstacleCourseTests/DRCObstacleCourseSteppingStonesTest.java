@@ -76,7 +76,7 @@ public abstract class DRCObstacleCourseSteppingStonesTest implements MultiRobotT
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForWalkingOverEasySteppingStones(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(13.0);
 

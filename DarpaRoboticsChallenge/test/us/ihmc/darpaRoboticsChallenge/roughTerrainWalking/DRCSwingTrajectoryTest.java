@@ -161,7 +161,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
          FootstepDataList footstepDataList = createBasicFootstepFromDefaultForSwingHeightTest(currentHeight);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+         drcSimulationTestHelper.send(footstepDataList);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
          maxHeights[i] = testController.getMaxFootHeight();
          assertTrue(success);
@@ -203,7 +203,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataList footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
       assertTrue(success);
 
@@ -233,7 +233,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataList footstepDataList = createFootstepsForSwingHeightTest(currentHeight);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
       assertTrue(success);
 

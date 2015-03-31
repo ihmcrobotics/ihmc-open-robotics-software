@@ -86,14 +86,14 @@ public abstract class ArmJointTrajectoryPacketTest
       {
 //         System.out.println("sending silly packet #" + i);
          ArmJointTrajectoryPacket packet = new ArmJointTrajectoryPacket(random);
-         drcSimulationTestHelper.sendArmJointTrajectoryPacketToListeners(packet);
+         drcSimulationTestHelper.send(packet);
          drcSimulationTestHelper.simulateAndBlock(0.1);
       }
    }
 
    private void executePacket(ArmJointTrajectoryPacket packet) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      drcSimulationTestHelper.sendArmJointTrajectoryPacketToListeners(packet);
+      drcSimulationTestHelper.send(packet);
       
       int waypoints = packet.trajectoryPoints.length;
       

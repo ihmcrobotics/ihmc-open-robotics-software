@@ -94,7 +94,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       FootstepDataList footstepDataList = createFootstepsForWalkingDownRampMediumSteps(scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(18.0);
 
@@ -182,7 +182,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
-      drcSimulationTestHelper.sendComHeightPacketToListeners(comHeightPacket);
+      drcSimulationTestHelper.send(comHeightPacket);
 
       setupCameraForWalkingOverRamp(simulationConstructionSet);
       ThreadTools.sleep(1000);
@@ -196,7 +196,7 @@ public abstract class DRCObstacleCourseRampsTest implements MultiRobotTestInterf
          footstepDataList = footstepDataListCorruptor.corruptDataList(footstepDataList);
       }
 
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
 
