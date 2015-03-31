@@ -25,6 +25,7 @@ import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWallAtDistanceEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -85,13 +86,6 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
 
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
       
-      DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
-//      PacketCommunicatorMock packetCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
-      PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, new IHMCCommunicationKryoNetClassList());
-      
-//      KryoPacketClient packetCommunicator = new KryoPacketClient("localhost", NetworkPorts.UI_MODULE.getPort(), new IHMCCommunicationKryoNetClassList(), PacketDestination.SENSOR_MANAGER.ordinal(), PacketDestination.UI.ordinal(), "PointCloudDataReceiverTest");
-      
       DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
       drcNetworkModuleParameters.setUseNetworkProcessor(true);
       drcNetworkModuleParameters.setUseBehaviorModule(false);
@@ -104,28 +98,29 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       drcNetworkModuleParameters.setUseSensorModule(true);
       drcNetworkModuleParameters.setUseUiModule(true);
       
-      testHelper = new DRCSimulationTestHelper(new DRCWallAtDistanceEnvironment(WALL_DISTANCE), this.getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel(), drcNetworkModuleParameters);
+      DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCWallAtDistanceEnvironment(WALL_DISTANCE);
+      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel(), drcNetworkModuleParameters);
       testHelper.setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
-      packetCommunicator.attachListener(PointCloudWorldPacket.class, new PointCloudWorldConsumer());
-
-      DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
-      lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
-
-      testHelper.simulateAndBlockAndCatchExceptions(1.1);
+      testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for sim to initialize
       
       try
       {
+         PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, new IHMCCommunicationKryoNetClassList());
+         packetCommunicator.attachListener(PointCloudWorldPacket.class, new PointCloudWorldConsumer());
          packetCommunicator.connect();
+         
+         testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for KryoObjectClient to connect
+         
+         DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
+         lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
+         packetCommunicator.send(lidarEnablePacket);
       }
       catch (IOException e)
       {
          e.printStackTrace();
       }
-      
-      testHelper.simulateAndBlockAndCatchExceptions(1.1);
-      
-      packetCommunicator.send(lidarEnablePacket);
       
       boolean success = testHelper.simulateAndBlockAndCatchExceptions(7.0);
 
@@ -157,7 +152,6 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       public void receivedPacket(PointCloudWorldPacket pointCloud)
       {
          numberOfLidarScansConsumed++;
-         // jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
          jmeLidarScanVisualizer.addPointCloud(Arrays.asList(pointCloud.getDecayingWorldScan()));
 
          try
