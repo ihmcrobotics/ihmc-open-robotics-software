@@ -3,12 +3,9 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 
 import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.communication.packets.sensing.PointCloudPacket;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DepthDataFilter extends DepthDataStore
@@ -87,22 +84,6 @@ public class DepthDataFilter extends DepthDataStore
       double dist = sensorOrigin.distance(point);
 
       return (dist > parameters.minRange) && (dist < parameters.maxRange);
-   }
-
-   @Deprecated
-   public PointCloudPacket filterPolarLidarScan(LidarScan lidarScan)
-   {
-      ArrayList<Point3d> points = new ArrayList<>();
-      for (int i = 0; i < lidarScan.size(); i++)
-      {
-         addLidarScan(lidarScan, i, points);
-      }
-      Point3d origin = new Point3d();
-      Vector3d worldVector = new Vector3d();
-      lidarScan.getAverageTransform().get(worldVector);
-      origin.set(worldVector);
-      return new PointCloudPacket(origin, points.toArray(new Point3d[points.size()]), lidarScan.params.timestamp);
-
    }
    
    @Deprecated
