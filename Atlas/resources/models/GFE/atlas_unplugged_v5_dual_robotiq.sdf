@@ -3141,16 +3141,16 @@
         <pose>0.00128479 -0.141218 -0.00810888 0 -0 0</pose>
         <mass>1.8839</mass>
         <inertia>
-          <ixx>0.00657383</ixx>
-          <ixy>1.72513e-05</ixy>
-          <ixz>0.00143662</ixz>
+          <ixx>0.00836233</ixx>
+          <ixy>-1.16647e-05</ixy>
+          <ixz>0.00167662</ixz>
           <iyy>0.013426</iyy>
-          <iyz>-0.000478557</iyz>
-          <izz>0.00871418</izz>
+          <iyz>-0.000449641</iyz>
+          <izz>0.00692568</izz>
         </inertia>
       </inertial>
       <collision name='r_hand_collision'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -1.0472 -4.23518e-22</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -0.523599 -1.22259e-22</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3170,7 +3170,7 @@
         </surface>
       </collision>
       <visual name='r_hand_visual'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -1.0472 -4.23518e-22</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -0.523599 -1.22259e-22</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3213,7 +3213,7 @@
       </physics>
     </joint>
     <link name='r_finger_1_link_0'>
-      <pose>0.138317 -1.13055 0.359426 1.0472 0.000693312 -1.57119</pose>
+      <pose>0.108486 -1.13055 0.362903 0.523599 0.000404525 -1.57148</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3249,7 +3249,7 @@
       <child>r_finger_1_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.5 -0.000796327 0.866025</xyz>
+        <xyz>0.866025 -0.000796327 0.5</xyz>
         <limit>
           <lower>-0.16</lower>
           <upper>0.25</upper>
@@ -3264,7 +3264,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_1'>
-      <pose>0.138309 -1.15055 0.359412 1.0472 0.000693312 -1.57119</pose>
+      <pose>0.108472 -1.15055 0.362895 0.523599 0.000404525 -1.57148</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3300,7 +3300,7 @@
       <child>r_finger_1_link_1</child>
       <parent>r_finger_1_link_0</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3315,7 +3315,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_2'>
-      <pose>0.124289 -1.20053 0.335129 0.983537 0.445504 -1.8501</pose>
+      <pose>0.0841891 -1.20053 0.348875 0.46429 0.251432 -2.03185</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3351,7 +3351,7 @@
       <child>r_finger_1_link_2</child>
       <parent>r_finger_1_link_1</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3366,7 +3366,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_3'>
-      <pose>0.114587 -1.23436 0.318323 0.983537 0.445504 -1.8501</pose>
+      <pose>0.0673838 -1.23436 0.339172 0.46429 0.251432 -2.03185</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3402,7 +3402,7 @@
       <child>r_finger_1_link_3</child>
       <parent>r_finger_1_link_2</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3417,7 +3417,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_0'>
-      <pose>0.0759631 -1.13055 0.395426 1.0472 0.000693312 -1.57119</pose>
+      <pose>0.0724858 -1.13055 0.425257 0.523599 0.000404525 -1.57148</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3453,7 +3453,7 @@
       <child>r_finger_2_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.5 -0.000796327 0.866025</xyz>
+        <xyz>0.866025 -0.000796327 0.5</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3468,7 +3468,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_1'>
-      <pose>0.0759552 -1.15055 0.395412 1.0472 0.000693312 -1.57119</pose>
+      <pose>0.0724721 -1.15055 0.425249 0.523599 0.000404525 -1.57148</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3504,7 +3504,7 @@
       <child>r_finger_2_link_1</child>
       <parent>r_finger_2_link_0</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3519,7 +3519,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_2'>
-      <pose>0.0619357 -1.20053 0.371129 0.983537 0.445504 -1.8501</pose>
+      <pose>0.0481891 -1.20053 0.411229 0.46429 0.251432 -2.03185</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3555,7 +3555,7 @@
       <child>r_finger_2_link_2</child>
       <parent>r_finger_2_link_1</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3570,7 +3570,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_3'>
-      <pose>0.0522332 -1.23436 0.354323 0.983537 0.445504 -1.8501</pose>
+      <pose>0.0313838 -1.23436 0.401526 0.46429 0.251432 -2.03185</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3606,7 +3606,7 @@
       <child>r_finger_2_link_3</child>
       <parent>r_finger_2_link_2</parent>
       <axis>
-        <xyz>-0.866025 -7.34582e-06 0.5</xyz>
+        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3621,7 +3621,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_0'>
-      <pose>0.15264 -1.13055 0.456234 -2.0944 -0.00068964 -1.5704</pose>
+      <pose>0.169294 -1.13055 0.43958 -2.61799 -0.000398164 -1.57011</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3657,7 +3657,7 @@
       <child>r_finger_middle_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.866025 -5.89793e-10 -0.5</xyz>
+        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3672,7 +3672,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_1'>
-      <pose>0.152648 -1.15055 0.456248 -2.0944 -0.00068964 -1.5704</pose>
+      <pose>0.169308 -1.15055 0.439588 -2.61799 -0.000398164 -1.57011</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3708,7 +3708,7 @@
       <child>r_finger_middle_link_1</child>
       <parent>r_finger_middle_link_0</parent>
       <axis>
-        <xyz>0.866025 -5.89793e-10 -0.5</xyz>
+        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3723,7 +3723,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_2'>
-      <pose>0.166668 -1.20053 0.480531 -2.15805 -0.4455 -1.29148</pose>
+      <pose>0.193591 -1.20053 0.453608 -2.6773 -0.251426 -1.10974</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3759,7 +3759,7 @@
       <child>r_finger_middle_link_2</child>
       <parent>r_finger_middle_link_1</parent>
       <axis>
-        <xyz>0.866025 -5.89793e-10 -0.5</xyz>
+        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3774,7 +3774,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_3'>
-      <pose>0.176371 -1.23436 0.497337 -2.15805 -0.4455 -1.29148</pose>
+      <pose>0.210397 -1.23436 0.463311 -2.6773 -0.251426 -1.10974</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3810,7 +3810,7 @@
       <child>r_finger_middle_link_3</child>
       <parent>r_finger_middle_link_2</parent>
       <axis>
-        <xyz>0.866025 -5.89793e-10 -0.5</xyz>
+        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
