@@ -1,85 +1,70 @@
 package us.ihmc.communication;
 
-import gnu.trove.iterator.TIntIntIterator;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketServer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
+import java.util.EnumMap;
+import java.util.HashMap;
 
-public class PacketRouter
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
+import us.ihmc.communication.packets.Packet;
+
+public class PacketRouter<T extends Enum<T>> 
 {
    private boolean DEBUG = false;
+   private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
-   private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
+   private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE;//set to Integer.MIN_VALUE to debug all destinations
+   private Class<?>[] packetTypesToDebug =null;//set to null to debug all packets
    
    private final int BROADCAST = 0;
-   private enum RouteReceieveType {ON_SEND, ON_RECEIVE};
-   private final TIntObjectHashMap<RouteReceieveType> communicatorRouteTypes = new TIntObjectHashMap<RouteReceieveType>();
-   private final TIntObjectHashMap<PacketCommunicator> communicators = new TIntObjectHashMap<PacketCommunicator>();
-   private final TIntObjectHashMap<PacketConsumer<Packet>> consumers = new TIntObjectHashMap<PacketConsumer<Packet>>();
-   private final TIntIntHashMap redirects = new TIntIntHashMap();
+
+   private final EnumMap<T, PacketCommunicatorMock> communicators;
+   private final HashMap<PacketCommunicatorMock, T> communicatorDestinations;
+
+   private final EnumMap<T, GlobalPacketConsumer> consumers;
+   private final EnumMap<T, T> redirects;
    
-   public PacketRouter()
+   public PacketRouter(Class<T> destinationType)
    {
+      destinationConstants = destinationType.getEnumConstants();
+      communicators = new EnumMap<>(destinationType);
+      consumers = new EnumMap<>(destinationType);
+      communicatorDestinations = new HashMap<>();
+      redirects = new EnumMap<>(destinationType);
+      
       if(DEBUG)
       {
          System.out.println("Creating Packet Router");
       }
    }
 
-   public void attachPacketCommunicator(final PacketCommunicator packetCommunicator)
+   public void attachPacketCommunicator(T destination, final PacketCommunicatorMock packetCommunicator)
    {
-      checkCommunicatorId(packetCommunicator);
-      RouteReceieveType routeType = getCommunicatorRouteType(packetCommunicator);
-      int id = packetCommunicator.getId();
+      checkCommunicatorId(destination);
+            
+      GlobalPacketConsumer packetRoutingAction = new PacketRoutingAction(packetCommunicator);
+      packetCommunicator.attachGlobalListener(packetRoutingAction);
       
-      PacketConsumer<Packet> packetRoutingAction = new packetRoutingAction(packetCommunicator);
       
-      if(routeType == RouteReceieveType.ON_RECEIVE)
-      {
-         packetCommunicator.attacthGlobalReceiveListener(packetRoutingAction);
-      } 
-      else 
-      {
-         packetCommunicator.attacthGlobalSendListener(packetRoutingAction);
-      }
-      
-      consumers.put(id, packetRoutingAction);
-      communicators.put(id, packetCommunicator);
-      communicatorRouteTypes.put(id, routeType);
+      consumers.put(destination, packetRoutingAction);
+      communicators.put(destination, packetCommunicator);
+      communicatorDestinations.put(packetCommunicator, destination);
       
       if(DEBUG)
       {
-         System.out.println(getClass().getSimpleName() + " Attached " + packetCommunicator.getName() + ":" + packetCommunicator.getId() + " to the network processor");
+         System.out.println(getClass().getSimpleName() + " Attached " + destination + " to the network processor");
       }
-   }
-
-   private RouteReceieveType getCommunicatorRouteType(final PacketCommunicator packetCommunicator)
-   {
-      RouteReceieveType routeType = RouteReceieveType.ON_SEND;
-      if(packetCommunicator.getClass() == KryoPacketClientEndPointCommunicator.class || packetCommunicator.getClass() == KryoPacketServer.class)
-      {
-         routeType = RouteReceieveType.ON_RECEIVE;
-      }
-      return routeType;
    }
    
-   private void checkCommunicatorId(final PacketCommunicator packetCommunicator)
+   private void checkCommunicatorId(final T destination)
    {
-      int communicatorId = packetCommunicator.getId();
       
-      if(communicatorId == BROADCAST)
+      if(isBroadcast(destination))
       {
          throw new IllegalArgumentException("packetCommunicator cannot have an id of zero, it's reserved for broadcast!!");
       }
-      if(communicators.containsKey(communicatorId))
+      if(communicators.containsKey(destination))
       {
-         throw new IllegalArgumentException("Tried to register " + packetCommunicator.getName() + " with id of " + communicatorId + " but " + communicators.get(communicatorId).getName() + " already registered with that id!");
+         throw new IllegalArgumentException("Tried to register " + destination + " but already registerd communicator with that id!");
       }
    }
    
@@ -92,77 +77,84 @@ public class PacketRouter
     * @param source the source communicator that sent the packet
     * @param packet
     */
-   private void processPacketRouting(PacketCommunicator source, Packet packet)
+   private void processPacketRouting(PacketCommunicatorMock source, Packet<?> packet)
    {
-      if(shouldPrintDebugStatement(source.getId(), packet.getDestination(), packet.getClass()))
+      if(shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-         System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + PacketDestination.fromOrdinal(packet.getDestination()) + " from " + source.getName());
+         System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + packet.getDestination() + " from " + communicatorDestinations.get(source));
       }
       
-      int destination = getPacketDestination(source, packet);
+      T destination = getPacketDestination(source, packet);
       
-      PacketCommunicator destinationCommunicator = communicators.get(destination);
-      if (destinationCommunicator != null && destinationCommunicator.isConnected())
+      PacketCommunicatorMock destinationCommunicator = communicators.get(destination);
+      if(isBroadcast(destination))
       {
-         if(shouldPrintDebugStatement(source.getId(), destination, packet.getClass()))
+         broadcastPacket(source, packet);
+      }
+      else if (destinationCommunicator != null && destinationCommunicator.isConnected())
+      {
+         if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
          {
-            System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + source.getName() + " to " + destinationCommunicator.getName());
+            System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
          }
          
          forwardPacket(packet, destinationCommunicator);
       }
       
-      if(destination == BROADCAST)
-      {
-         broadcastPacket(source, packet);
-      }
    }
 
-   private void forwardPacket(Packet packet, PacketCommunicator destinationCommunicator)
+   private boolean isBroadcast(T destination)
    {
-      //send and recv swapped on forward
-      if(communicatorRouteTypes.get(destinationCommunicator.getId()) == RouteReceieveType.ON_SEND)
-      {
-         destinationCommunicator.receivedPacket(packet);
-      } 
-      else 
-      {
-         destinationCommunicator.send(packet);
-      }
+      return destination.ordinal() == BROADCAST;
+   }
+
+   private void forwardPacket(Packet<?> packet, PacketCommunicatorMock destinationCommunicator)
+   {
+      destinationCommunicator.send(packet);
    }
    
-   private int getPacketDestination(PacketCommunicator source, Packet packet)
+   private T getPacketDestination(PacketCommunicatorMock source, Packet<?> packet)
    {
-      int destination = packet.getDestination(); 
+      if(packet.getDestination() < 0 || packet.getDestination() >= destinationConstants.length)
+      {
+         System.err.println("Invalid destination: " + packet.getDestination() + " sending to Broadcast");
+         return destinationConstants[0];
+      }
+      
+      T destination = destinationConstants[packet.getDestination()]; 
       if (redirects.containsKey(destination))
       {
          destination = getRedirectDestination(destination);
-         if(destination != source.getId())
+         if(destination != communicatorDestinations.get(source))
          {
-            packet.setDestination(destination);
+            packet.setDestination(destination.ordinal());
          }
       }
-      return packet.getDestination();
+      return destination;
    }
    
    /**
     * sends the packet to every communicator once, except the sender or any
     * communicators with redirects
    **/
-   private void broadcastPacket(PacketCommunicator source, Packet packet)
+   private void broadcastPacket(PacketCommunicatorMock source, Packet<?> packet)
    {
-      int[] ids = communicators.keys();
-      for(int i = 0; i < ids.length; i++)
+      for(T destination : destinationConstants)
       {
-         int destinationId = ids[i];
-         if(destinationId != source.getId() && !redirects.containsKey(destinationId))
+         if(isBroadcast(destination) || !communicators.containsKey(destination))
          {
-            PacketCommunicator destinationCommunicator = communicators.get(destinationId);
+            continue;
+         }
+         
+         PacketCommunicatorMock destinationCommunicator = communicators.get(destination);
+         if(source != destinationCommunicator && !redirects.containsKey(destination))
+         {
+            
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
-               if(shouldPrintDebugStatement(source.getId(), destinationCommunicator.getId(), packet.getClass()))
+               if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
                {
-                  System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + source.getName() + " to " + destinationCommunicator.getName());
+                  System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
                }
                forwardPacket(packet, destinationCommunicator);
             }
@@ -173,7 +165,7 @@ public class PacketRouter
    /**
     * possible infinite recursion for funs.
     */
-   private int getRedirectDestination(int destination)
+   private T getRedirectDestination(T destination)
    {
       if (redirects.containsKey(destination))
       {
@@ -182,42 +174,28 @@ public class PacketRouter
       return destination;
    }
 
-   public void detatchObjectCommunicator(int id)
+   public void detatchObjectCommunicator(T id)
    {
-      PacketCommunicator communicator = communicators.remove(id);
-      PacketConsumer<Packet> consumer = consumers.remove(id);
-      RouteReceieveType receiveType = communicatorRouteTypes.remove(id);
-      
-      
+      PacketCommunicatorMock communicator = communicators.remove(id);
+      GlobalPacketConsumer consumer = consumers.remove(id);
       
       if(communicator != null)
       {
-         if(receiveType == RouteReceieveType.ON_RECEIVE)
-         {
-            communicator.detachGlobalReceiveListener(consumer);
-         }
-         else
-         {
-            communicator.detachGlobalSendListener(consumer);
-         }
+         communicator.detachGlobalListener(consumer);
       }
       
       redirects.remove(id);
 
-      if (redirects.containsValue(id))
+      for(T destination : destinationConstants)
       {
-         for (TIntIntIterator iterator = redirects.iterator(); iterator.hasNext();)
+         if(redirects.get(destination) == id)
          {
-            iterator.advance();
-            if (iterator.value() == id)
-            {
-               iterator.remove();
-            }
+            redirects.remove(destination);
          }
       }
    }
 
-   public void setPacketRedirects(int redirectFrom, int redirectTo)
+   public void setPacketRedirects(T redirectFrom, T redirectTo)
    {
       if(redirects.containsValue(redirectFrom))
       {
@@ -231,14 +209,14 @@ public class PacketRouter
       redirects.remove(redirectFrom);
    }
    
-   private boolean shouldPrintDebugStatement(int sourceCommunicatorId, int destinationCommunicatorId, Class packetType)
+   private boolean shouldPrintDebugStatement(PacketCommunicatorMock source, int destinationCommunicatorId, Class<?> packetType)
    {
       if(!DEBUG)
       {
          return false;
       }
       
-      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != sourceCommunicatorId)
+      if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(source).ordinal())
       {
          return false;
       }
@@ -289,16 +267,16 @@ public class PacketRouter
    }
 
    
-   private class packetRoutingAction implements PacketConsumer<Packet>
+   private class PacketRoutingAction implements GlobalPacketConsumer
    {
-      PacketCommunicator communicator;
-      public packetRoutingAction(PacketCommunicator packetCommunicator)
+      private final PacketCommunicatorMock communicator;
+      private PacketRoutingAction(PacketCommunicatorMock packetCommunicator)
       {
          this.communicator = packetCommunicator;
       }
       
       @Override
-      public void receivedPacket(Packet packet)
+      public void receivedPacket(Packet<?> packet)
       {
          processPacketRouting(communicator, packet);
       }

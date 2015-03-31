@@ -9,10 +9,7 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.FilteredPacketSendingForwarder;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketServer;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 
@@ -23,21 +20,21 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    private final FilteredPacketSendingForwarder packetForwarderFromUiModuleToUserInterface;
    private final FilteredPacketSendingForwarder packetForwarderFromUserInterfaceToUiModule;
    
-   private final Class[] packetsAllowedToGotoUserInterface = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE;
-   private final HashMap<Class, Long> packetsAllowedToGotoUserInterfaceWithIntervals = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS;
+   private final Class<?>[] packetsAllowedToGotoUserInterface = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE;
+   private final HashMap<Class<?>, Long> packetsAllowedToGotoUserInterfaceWithIntervals = PacketsForwardedToTheUi.PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS;
    
-   private final int NP_TO_UI_TCP_PORT = NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT.getPort();
    private final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
-   private final KryoPacketServer uiKryoPacketServer = new KryoPacketServer(NP_TO_UI_TCP_PORT, NETCLASSLIST, PacketDestination.UI.ordinal(),"UIServerCommunicator"); //connection to the UI
-   private final KryoLocalPacketCommunicator uiModuleCommunicator = new KryoLocalPacketCommunicator(NETCLASSLIST, PacketDestination.UI.ordinal(),"UIModuleCommunicator"); // connect to network processor
+   
+   private final PacketCommunicatorMock uiPacketServer = PacketCommunicatorMock.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, NETCLASSLIST);
+   private final PacketCommunicatorMock uiModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NETCLASSLIST);
    
    public UiConnectionModule()
    {
       //Forward all packets from the User Interface to the network processor
-      packetForwarderFromUserInterfaceToUiModule = new FilteredPacketSendingForwarder(uiKryoPacketServer, uiModuleCommunicator, timestampProvider);
+      packetForwarderFromUserInterfaceToUiModule = new FilteredPacketSendingForwarder(uiPacketServer, uiModuleCommunicator, timestampProvider);
       
       //Selective send packets to the User Interface
-      packetForwarderFromUiModuleToUserInterface = new FilteredPacketSendingForwarder(uiModuleCommunicator, uiKryoPacketServer, timestampProvider);
+      packetForwarderFromUiModuleToUserInterface = new FilteredPacketSendingForwarder(uiModuleCommunicator, uiPacketServer, timestampProvider);
       uiModuleCommunicator.attachListener(RobotConfigurationData.class, this);
       
       setPacketForwardingFilters();
@@ -50,22 +47,19 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
       
       packetForwarderFromUiModuleToUserInterface.enableInclusiveForwarding(packetsAllowedToGotoUserInterface);
       
-      for (Entry<Class, Long> entry : packetsAllowedToGotoUserInterfaceWithIntervals.entrySet())
+      for (Entry<Class<?>, Long> entry : packetsAllowedToGotoUserInterfaceWithIntervals.entrySet())
       {
          packetForwarderFromUiModuleToUserInterface.enableInclusiveForwardingWithMinimumRobotTimeIntervals(entry.getKey(), entry.getValue());
       }
    }
    
-   public KryoPacketCommunicator getPacketCommunicator()
-   {
-      return uiModuleCommunicator;
-   }
    
    public void connect()
    {
       try
       {
-         uiKryoPacketServer.connect();
+         uiPacketServer.connect();
+         uiModuleCommunicator.connect();
       }
       catch (IOException e)
       {
@@ -75,12 +69,13 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    
    public boolean isConnected()
    {
-      return uiKryoPacketServer.isConnected();
+      return uiPacketServer.isConnected();
    }
    
    public void close()
    {
-      uiKryoPacketServer.close();
+      uiPacketServer.close();
+      uiModuleCommunicator.close();
    }
 
    @Override

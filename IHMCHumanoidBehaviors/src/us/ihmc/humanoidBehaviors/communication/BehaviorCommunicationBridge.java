@@ -1,8 +1,7 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -10,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeInterface, IncomingCommunicationBridgeInterface
 {
-   private final PacketCommunicator behaviorPacketCommunicator;
+   private final PacketCommunicatorMock behaviorPacketCommunicator;
    
    
    
@@ -42,7 +41,7 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
 //      packetPassthrough = new BooleanYoVariable("Behavior_packetPassthrough", registry);
 //   }
 
-   public BehaviorCommunicationBridge(KryoPacketCommunicator behaviorPacketCommunicator, YoVariableRegistry parentRegistry)
+   public BehaviorCommunicationBridge(PacketCommunicatorMock behaviorPacketCommunicator, YoVariableRegistry parentRegistry)
    {
       this.behaviorPacketCommunicator = behaviorPacketCommunicator; 
       this.registry = new YoVariableRegistry("BehaviorCommunicationBridge");
@@ -64,15 +63,15 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
    }
 
    @Override
-   public void attachGlobalListener(PacketConsumer listener)
+   public void attachGlobalListener(GlobalPacketConsumer listener)
    {
-      behaviorPacketCommunicator.attacthGlobalReceiveListener(listener);
+      behaviorPacketCommunicator.attachGlobalListener(listener);
    }
 
    @Override
-   public void detachGlobalListener(PacketConsumer listener)
+   public void detachGlobalListener(GlobalPacketConsumer listener)
    {
-      behaviorPacketCommunicator.detachGlobalReceiveListener(listener);
+      behaviorPacketCommunicator.detachGlobalListener(listener);
    }
 
    public boolean isPacketPassthroughActive()

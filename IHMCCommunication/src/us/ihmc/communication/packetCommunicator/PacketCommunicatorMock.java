@@ -12,7 +12,7 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.net.local.InterprocessObjectCommunicator;
+import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
@@ -27,11 +27,13 @@ public class PacketCommunicatorMock
 
    private final List<Class<?>> registeredClasses;
    
+   private final String description;
+   
    public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
    {
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(true);
-      return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
+      return new PacketCommunicatorMock("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList.getPacketClassList());
    }
 
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
@@ -40,21 +42,22 @@ public class PacketCommunicatorMock
    }
    public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
+      return new PacketCommunicatorMock("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
    }
 
-   public static PacketCommunicatorMock createInterprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
+   public static PacketCommunicatorMock createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(new InterprocessObjectCommunicator(port.getPort(), netClassList), netClassList.getPacketClassList());
+      return new PacketCommunicatorMock("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList.getPacketClassList());
    }
    
    public static PacketCommunicatorMock createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock(objectCommunicator, netClassList.getPacketClassList());
+      return new PacketCommunicatorMock("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList.getPacketClassList());
    }
 
-   private PacketCommunicatorMock(NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
+   private PacketCommunicatorMock(String description, NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
    {
+      this.description = description;
       this.communicator = communicator;
       this.registeredClasses = registeredClasses;
    }
@@ -103,7 +106,7 @@ public class PacketCommunicatorMock
 
    public void detachGlobalListener(GlobalPacketConsumer listener)
    {
-      GlobalPacketObjectConsumer consumer = new GlobalPacketObjectConsumer(listener);
+      GlobalObjectConsumer consumer = globalConsumers.get(listener);
       if(consumer != null)
       {
          communicator.detachGlobalListener(consumer);
@@ -174,6 +177,12 @@ public class PacketCommunicatorMock
    public List<Class<?>> getRegisteredClasses()
    {
       return registeredClasses;
+   }
+   
+   @Override
+   public String toString()
+   {
+      return description;
    }
 
 }

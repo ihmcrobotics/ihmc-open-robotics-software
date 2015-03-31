@@ -21,9 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketServer;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -66,8 +64,8 @@ public class DRCSimGazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      KryoPacketServer drcNetworkProcessorServer = new KryoPacketServer(NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(),
-            new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboSimControllerCommunicator" );
+      PacketCommunicatorMock drcNetworkProcessorServer = PacketCommunicatorMock.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+
 //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
 
@@ -140,13 +138,12 @@ public class DRCSimGazeboControllerFactory
       
       if(USE_GUI)
       {
-    	 KryoPacketClientEndPointCommunicator packetCommunicator = new KryoPacketClientEndPointCommunicator("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(), new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboControllerPluginClientEndpoint");
          DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
          URI rosURI = NetworkParameters.getROSURI();
          networkModuleParameters.setRosUri(rosURI);
          networkModuleParameters.setUseUiModule(true);
          networkModuleParameters.setUseRosModule(true);
-         networkModuleParameters.setControllerCommunicator(packetCommunicator);
+         networkModuleParameters.setUseLocalControllerCommunicator(false);
          new DRCNetworkProcessor(robotModel, networkModuleParameters);
       }
       try

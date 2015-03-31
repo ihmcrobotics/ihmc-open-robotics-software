@@ -10,10 +10,12 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKIngressEgressControllerSimulation;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.utilities.RandomTools;
@@ -37,7 +39,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
    private final SDFFullRobotModel actualRobotModel;
-   private final PacketCommunicator fieldObjectCommunicator;
+   private final PacketCommunicatorMock fieldObjectCommunicator;
    //   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
    private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
@@ -74,7 +76,10 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       hikIngEgCtrlSim.getSimulationConstructionSet().addYoGraphic(yoGraphicsShapeDesired);
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.actualRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
-      this.fieldObjectCommunicator = hikIngEgCtrlSim.getControllerPacketCommunicator();
+      
+      this.fieldObjectCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      this.fieldObjectCommunicator.connect();
+      
       this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
       wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);

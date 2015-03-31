@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.ControllerGlobalObjectConsumer;
@@ -69,12 +70,12 @@ public abstract class BehaviorInterface implements RobotController
       percentCompleted = new DoubleYoVariable("percentCompleted", registry);
    }
 
-   public void sendPacketToController(Packet obj)
+   public void sendPacketToController(Packet<?> obj)
    {
       outgoingCommunicationBridge.sendPacketToController(obj);
    }
 
-   public void sendPacketToNetworkProcessor(Packet obj)
+   public void sendPacketToNetworkProcessor(Packet<?> obj)
    {
       outgoingCommunicationBridge.sendPacketToNetworkProcessor(obj);
    }
@@ -233,12 +234,12 @@ public abstract class BehaviorInterface implements RobotController
    }
    
    
-   public PacketConsumer getNetworkProcessorGlobalObjectConsumer()
+   public GlobalPacketConsumer getNetworkProcessorGlobalObjectConsumer()
    {
       return networkProcessorObjectConsumer;
    }
    
-   public PacketConsumer getControllerGlobalPacketConsumer()
+   public GlobalPacketConsumer getControllerGlobalPacketConsumer()
    {
       return controllerObjectConsumer;
    }

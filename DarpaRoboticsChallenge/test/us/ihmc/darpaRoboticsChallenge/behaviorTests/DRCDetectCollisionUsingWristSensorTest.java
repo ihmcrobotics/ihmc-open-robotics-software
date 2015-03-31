@@ -119,8 +119,8 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
 
       DRCWallWorldEnvironment testEnvironment = new DRCWallWorldEnvironment(-0.5, 2.5);
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       updateForceSensorController = setupUpdateForceSensorController(drcBehaviorTestHelper.getRobotDataReceiver(),
             drcBehaviorTestHelper.getWristForceSensorUpdatable(robotSideToTest));

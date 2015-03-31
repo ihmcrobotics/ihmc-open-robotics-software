@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.testTools;
 
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,9 +10,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
@@ -22,6 +21,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -60,8 +60,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
  */
 public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 {
-   private final boolean DEBUG = false;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTimeRobot;
    private final DoubleYoVariable yoTimeBehaviorDispatcher;
@@ -70,10 +68,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final DRCRobotModel drcRobotModel;
    private final SDFFullRobotModel fullRobotModel;
 
-   private final PacketRouter networkProcessor;
-   private final KryoPacketCommunicator mockUIPacketCommunicator;//send packets as if it was sent from the UI
-   private final KryoPacketCommunicator controllerCommunicator;
-   private final KryoLocalPacketCommunicator behaviorCommunicator;
+   private final PacketRouter<PacketDestination> networkProcessor;
+   private final PacketCommunicatorMock mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
+   private final PacketCommunicatorMock behaviorCommunicatorServer;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
    private final ReferenceFrames referenceFrames;
@@ -84,27 +81,21 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
    private final BehaviorDisptacher behaviorDispatcher;
 
+   
+   private final PacketCommunicatorMock behaviorCommunicatorClient;
+   private final PacketCommunicatorMock mockUIPacketCommunicatorClient;
+
    public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation,
-         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel, KryoPacketCommunicator networkObjectCommunicator,
-         KryoPacketCommunicator controllerCommunicator)
+         SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel,
-            controllerCommunicator);
+      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
    }
 
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
-         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
-         KryoPacketCommunicator networkObjectCommunicator, KryoPacketCommunicator controllerCommunicator)
-   {
-      this(commonAvatarEnvironmentInterface, networkObjectCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel,
-            controllerCommunicator);
-   }
-
-   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, KryoPacketCommunicator networkObjectCommunicator,
+   public DRCBehaviorTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface,
          String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-         DRCRobotModel robotModel, KryoPacketCommunicator controllerCommunicator)
+         DRCRobotModel robotModel)
    {
-      super(commonAvatarEnvironmentInterface, controllerCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, false, robotModel);
+      super(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
 
       yoTimeRobot = getRobot().getYoTime();
       yoTimeBehaviorDispatcher = new DoubleYoVariable("yoTimeBehaviorDispatcher", registry);
@@ -114,31 +105,34 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
 
       
-      if(networkObjectCommunicator == null)
+      this.mockUIPacketCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      mockUIPacketCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      
+      behaviorCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+
+      try
       {
-         this.mockUIPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.UI.ordinal(),
-               "mockUiCommunicator");
+         behaviorCommunicatorClient.connect();
+         behaviorCommunicatorServer.connect();
+         mockUIPacketCommunicatorServer.connect();
+         mockUIPacketCommunicatorClient.connect();
       }
-      else 
+      catch (IOException e)
       {
-         this.mockUIPacketCommunicator = networkObjectCommunicator;
+         throw new RuntimeException(e);
       }
       
-      this.controllerCommunicator = controllerCommunicator;
+      networkProcessor = new PacketRouter<>(PacketDestination.class);
+      networkProcessor.attachPacketCommunicator(PacketDestination.UI, mockUIPacketCommunicatorClient);
+      networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicator);
+      networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
-      behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.BEHAVIOR_MODULE.ordinal(),
-            "behvaiorCommunicator");
-
-      networkProcessor = new PacketRouter();
-      networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
-      networkProcessor.attachPacketCommunicator(controllerCommunicator);
-      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
-
-      behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, registry);
+      behaviorCommunicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, registry);
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      networkObjectCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      mockUIPacketCommunicatorServer.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -148,7 +142,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       updatables.add(wristForceSensorUpdatables.get(RobotSide.LEFT));
       updatables.add(wristForceSensorUpdatables.get(RobotSide.RIGHT));
 
-      behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, behaviorCommunicator, robotDataReceiver, yoGraphicsListRegistry);
+      behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, behaviorCommunicatorServer, robotDataReceiver, yoGraphicsListRegistry);
 
       referenceFrames = robotDataReceiver.getReferenceFrames();
    }
@@ -215,7 +209,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       dispatcherThread.start();
 
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
-      mockUIPacketCommunicator.send(requestTestBehaviorPacket);
+      mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
 
       boolean success = simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
@@ -227,10 +221,10 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorDispatcher.addHumanoidBehavior(testBehaviorType, behaviorToTest);
       
       HumanoidBehaviorTypePacket requestTestBehaviorPacket = new HumanoidBehaviorTypePacket(testBehaviorType);
-      mockUIPacketCommunicator.send(requestTestBehaviorPacket);
+      mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
+   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicatorMock behaviorCommunicator,
          RobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();
@@ -285,16 +279,25 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
          behaviorDispatcher.closeAndDispose();
       }
 
-      if (mockUIPacketCommunicator != null)
+      if (mockUIPacketCommunicatorServer != null)
       {
-         mockUIPacketCommunicator.close();
-         mockUIPacketCommunicator.closeAndDispose();
+         mockUIPacketCommunicatorServer.close();
       }
-
-      if (behaviorCommunicator != null)
+      
+      if (mockUIPacketCommunicatorClient != null)
       {
-         behaviorCommunicator.close();
-         behaviorCommunicator.closeAndDispose();
+         mockUIPacketCommunicatorClient.close();
+      }
+      
+
+      if (behaviorCommunicatorClient != null)
+      {
+         behaviorCommunicatorClient.close();
+      }
+      
+      if (behaviorCommunicatorServer != null)
+      {
+         behaviorCommunicatorServer.close();
       }
 
       if (behaviorCommunicationBridge != null)
@@ -305,7 +308,6 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       if (controllerCommunicator != null)
       {
          controllerCommunicator.close();
-         controllerCommunicator.closeAndDispose();
       }
 
       super.destroySimulation();
@@ -556,8 +558,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       }
    }
 
-   public void sendPacketAsIfItWasFromUI(Packet packet)
+   public void sendPacketAsIfItWasFromUI(Packet<?> packet)
    {
-      mockUIPacketCommunicator.send(packet);
+      mockUIPacketCommunicatorServer.send(packet);
    }
 }

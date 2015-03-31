@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -17,8 +18,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
@@ -79,6 +79,16 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
       }
+      
+      if(behaviorCommunicatorClient != null)
+      {
+         behaviorCommunicatorClient.close();
+      }
+      
+      if(behaviorCommunicatorServer != null)
+      {
+         behaviorCommunicatorServer.close();
+      }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -92,8 +102,6 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private final double EXTRA_SIM_TIME_FOR_SETTLING = 1.0;
 
    private final DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
-   private final PacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-         "DRCHandPoseBehaviorTestControllerCommunicator");
 
    private DoubleYoVariable yoTime;
 
@@ -105,6 +113,10 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
 
+   private PacketCommunicatorMock behaviorCommunicatorServer;
+
+   private PacketCommunicatorMock behaviorCommunicatorClient;
+
    @Before
    public void setUp()
    {
@@ -115,8 +127,19 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, controllerCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, false, getRobotModel());
+      behaviorCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      try
+      {
+         behaviorCommunicatorClient.connect();
+         behaviorCommunicatorServer.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testEnvironment, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       Robot robotToTest = drcSimulationTestHelper.getRobot();
       yoTime = robotToTest.getYoTime();
@@ -127,20 +150,16 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
       forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);
 
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      drcSimulationTestHelper.attachListener(RobotConfigurationData.class, robotDataReceiver);
 
-      PacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), 10,
-            "DRCComHeightBehaviorTestJunkyCommunicator");
       
-      KryoLocalPacketCommunicator behaviorCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.BEHAVIOR_MODULE.ordinal(), "behvaiorCommunicator");
       
-      PacketRouter networkProcessor = new PacketRouter();
-      networkProcessor.attachPacketCommunicator(networkObjectCommunicator);
-      networkProcessor.attachPacketCommunicator(controllerCommunicator);
-      networkProcessor.attachPacketCommunicator(behaviorCommunicator);
+      
+      PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
+      networkProcessor.attachPacketCommunicator(PacketDestination.CONTROLLER, drcSimulationTestHelper.getControllerCommunicator());
+      networkProcessor.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorCommunicatorClient);
 
-      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicator, robotToTest.getRobotsYoVariableRegistry());
+      communicationBridge = new BehaviorCommunicationBridge(behaviorCommunicatorServer, robotToTest.getRobotsYoVariableRegistry());
    }
 
    @Ignore

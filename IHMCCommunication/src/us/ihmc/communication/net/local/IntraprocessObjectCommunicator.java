@@ -12,7 +12,7 @@ import us.ihmc.communication.net.ObjectConsumer;
 
 import com.esotericsoftware.kryo.Kryo;
 
-public class InterprocessObjectCommunicator implements NetworkedObjectCommunicator
+public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicator
 {
    private final Kryo kryo = new Kryo();
    private final LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>> listeners = new LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>>();
@@ -27,7 +27,7 @@ public class InterprocessObjectCommunicator implements NetworkedObjectCommunicat
     * @param port
     * @param classList for copying objects
     */
-   public InterprocessObjectCommunicator(int port, NetClassList classList)
+   public IntraprocessObjectCommunicator(int port, NetClassList classList)
    {
       this.port = port;
 
@@ -52,7 +52,7 @@ public class InterprocessObjectCommunicator implements NetworkedObjectCommunicat
    @Override
    public int send(Object object)
    {
-      return InterprocessCommunicationNetwork.sendObject(this, port, object);
+      return IntraprocessCommunicationNetwork.sendObject(this, port, object);
    }
    
    @SuppressWarnings("unchecked")
@@ -125,19 +125,19 @@ public class InterprocessObjectCommunicator implements NetworkedObjectCommunicat
    @Override
    public boolean isConnected()
    {
-      return InterprocessCommunicationNetwork.isConnected(this, port);
+      return IntraprocessCommunicationNetwork.isConnected(this, port);
    }
 
    @Override
    public void close()
    {
-      InterprocessCommunicationNetwork.disconnect(this, port);
+      IntraprocessCommunicationNetwork.disconnect(this, port);
    }
 
    @Override
    public void connect() throws IOException
    {
-      InterprocessCommunicationNetwork.connect(this, port);
+      IntraprocessCommunicationNetwork.connect(this, port);
    }
 
    /* package-private */void connected()

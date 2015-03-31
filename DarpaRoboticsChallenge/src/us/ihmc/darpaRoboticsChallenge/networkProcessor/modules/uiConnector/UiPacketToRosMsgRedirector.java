@@ -9,9 +9,8 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketServer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -20,7 +19,7 @@ import us.ihmc.utilities.ros.msgToPacket.IHMCRosApiMessageMap;
 import us.ihmc.utilities.ros.publisher.IHMCPacketToMsgPublisher;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
-public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
+public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 {
    private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
    private static final String ROS_NAMESPACE = "/ihmc_ros/atlas";
@@ -29,24 +28,22 @@ public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
    private final NodeConfiguration nodeConfiguration;
    private final MessageFactory messageFactory;
    private final ArrayList<RosTopicPublisher<?>> publishers;
-   private final PacketServer packetCommunicator;
 
 
-   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator packetCommunicator, PacketRouter packetRouter)
+   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicatorMock gfe_communicator, PacketRouter<PacketDestination> packetRouter)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
-      this.packetCommunicator = packetCommunicator;
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
-      setupMsgTopics(packetCommunicator);
+      setupMsgTopics(gfe_communicator);
       rosMainNode.execute();
-      packetCommunicator.attachListener(Packet.class, this);
-      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER.ordinal(), packetCommunicator.getId());
+      gfe_communicator.attachGlobalListener(this);
+      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER, PacketDestination.GFE);
    }
 
    @Override
-   public void receivedPacket(Packet packet)
+   public void receivedPacket(Packet<?> packet)
    {
 //      if (!PACKETS_TO_REDIRECT_TO_ROS.containsKey(packet.getClass()))
 //      {
@@ -55,7 +52,7 @@ public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
 //      }
    }
 
-   private void setupMsgTopics(PacketCommunicator packetCommunicator)
+   private void setupMsgTopics(PacketCommunicatorMock gfe_communicator)
    {
       Map<String, Class> outputPacketList = PACKETS_TO_REDIRECT_TO_ROS;
 
@@ -63,7 +60,7 @@ public class UiPacketToRosMsgRedirector implements PacketConsumer<Packet>
       {
          Message message = messageFactory.newFromType(e.getKey());
 
-         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, packetCommunicator,
+         IHMCPacketToMsgPublisher<Message, Packet> publisher = IHMCPacketToMsgPublisher.createIHMCPacketToMsgPublisher(message, false, gfe_communicator,
                e.getValue());
          publishers.add(publisher);
          rosMainNode.attachPublisher(ROS_NAMESPACE + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(e.getValue()), publisher);

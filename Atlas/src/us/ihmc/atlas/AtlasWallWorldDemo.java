@@ -31,7 +31,7 @@ public class AtlasWallWorldDemo
       networkProcessorParameters.setUseBehaviorModule(true);
       networkProcessorParameters.setUsePerceptionModule(true);
       networkProcessorParameters.setUseSensorModule(true);
-      
+      networkProcessorParameters.setUseLocalControllerCommunicator(true);
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
 }

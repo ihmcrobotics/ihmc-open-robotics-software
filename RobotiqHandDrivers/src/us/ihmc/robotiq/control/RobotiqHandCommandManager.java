@@ -65,12 +65,6 @@ public class RobotiqHandCommandManager extends HandCommandManager
          }
       });
    }
-
-   @Override
-   public PacketCommunicator getCommunicator()
-   {
-      return handManagerPacketCommunicator;
-   }
    
    public static void main(String[] args)
    {
@@ -92,7 +86,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
             @Override
             public void actionPerformed(ActionEvent e)
             {
-               commandManager.getCommunicator().send(new FingerStatePacket(side,
+               commandManager.handManagerPacketCommunicator.send(new FingerStatePacket(side,
                      (FingerState)(stateToSend.getSelectedItem())));
             }
          });

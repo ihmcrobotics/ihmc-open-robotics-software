@@ -1,14 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
+import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
@@ -27,8 +28,11 @@ public class RosModule
 
    private static final String ROS_NAMESPACE = "networkProcessor/rosModule";
 
-   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
+//   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
+//         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
+   
+   private final PacketCommunicatorMock rosModulePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE,
+         new IHMCCommunicationKryoNetClassList());
    
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -64,6 +68,15 @@ public class RosModule
          publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, simulatedSensorCommunicator);
       }
 
+      try
+      {
+         rosModulePacketCommunicator.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      
       System.out.flush();
       rosMainNode.execute();
       printIfDebug("Finished creating ROS Module.");
@@ -112,11 +125,6 @@ public class RosModule
       {
          System.out.println("[DEBUG] " + str);
       }
-   }
-
-   public PacketCommunicator getCommunicator()
-   {
-      return rosModulePacketCommunicator;
    }
    
 }

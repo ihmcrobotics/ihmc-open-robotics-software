@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
@@ -43,16 +43,16 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private volatile boolean running = true;
 
    public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, DRCHandType handType, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
-         RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator)
+         RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicatorMock sensorSuitePacketCommunicator)
    {
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.depthDataFilter = new RobotDepthDataFilter(handType, modelFactory, robotConfigurationDataBuffer, jointMap.getContactPointParameters().getFootContactPoints());
-      this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(packetCommunicator, readWriteLock.readLock(), depthDataFilter);
+      this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(sensorSuitePacketCommunicator, readWriteLock.readLock(), depthDataFilter);
       
-      setupListeners(packetCommunicator);
-      packetCommunicator.attachStateListener(this);
+      setupListeners(sensorSuitePacketCommunicator);
+      sensorSuitePacketCommunicator.attachStateListener(this);
 
    }  
    
@@ -174,10 +174,10 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       sendData.set(lidarState != LidarState.DISABLE);
    }
 
-   private void setupListeners(PacketCommunicator packetCommunicator)
+   private void setupListeners(PacketCommunicatorMock sensorSuitePacketCommunicator)
    {
 
-      packetCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
+      sensorSuitePacketCommunicator.attachListener(DepthDataStateCommand.class, new PacketConsumer<DepthDataStateCommand>()
       {
          public void receivedPacket(DepthDataStateCommand object)
          {
@@ -185,7 +185,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          }
       });
 
-      packetCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
+      sensorSuitePacketCommunicator.attachListener(DepthDataClearCommand.class, new PacketConsumer<DepthDataClearCommand>()
       {
          public void receivedPacket(DepthDataClearCommand object)
          {
@@ -193,7 +193,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          }
       });
 
-      packetCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
+      sensorSuitePacketCommunicator.attachListener(DepthDataFilterParameters.class, new PacketConsumer<DepthDataFilterParameters>()
       {
          public void receivedPacket(DepthDataFilterParameters object)
          {

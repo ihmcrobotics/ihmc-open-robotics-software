@@ -26,22 +26,22 @@ public class InterprocessObjectCommunicatorTest
    public void testOpeningAndClosingALotOfPorts() throws IOException
    {
       TestNetClassList classList = new TestNetClassList();
-      ArrayList<InterprocessObjectCommunicator> communicators = new ArrayList<>();
+      ArrayList<IntraprocessObjectCommunicator> communicators = new ArrayList<>();
       for (int i = 0; i < 2560; i += 20)
       {
-         InterprocessObjectCommunicator communicator = new InterprocessObjectCommunicator(i, classList);
+         IntraprocessObjectCommunicator communicator = new IntraprocessObjectCommunicator(i, classList);
          communicator.connect();
          communicators.add(communicator);
       }
-      assertTrue("Hashmap is empty", InterprocessCommunicationNetwork.hasMap());
-      assertEquals("Open ports does not equal number of communicators", communicators.size(), InterprocessCommunicationNetwork.getOpenPorts());
+      assertTrue("Hashmap is empty", IntraprocessCommunicationNetwork.hasMap());
+      assertEquals("Open ports does not equal number of communicators", communicators.size(), IntraprocessCommunicationNetwork.getOpenPorts());
       for (int i = 0; i < communicators.size(); i++)
       {
          communicators.get(i).close();
       }
 
-      assertEquals("Open ports does not equal zero", 0, InterprocessCommunicationNetwork.getOpenPorts());
-      assertFalse("Hashmap is not cleaned up", InterprocessCommunicationNetwork.hasMap());
+      assertEquals("Open ports does not equal zero", 0, IntraprocessCommunicationNetwork.getOpenPorts());
+      assertFalse("Hashmap is not cleaned up", IntraprocessCommunicationNetwork.hasMap());
 
    }
 
@@ -49,10 +49,10 @@ public class InterprocessObjectCommunicatorTest
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {
-      InterprocessObjectCommunicator port128ClientA = new InterprocessObjectCommunicator(128, new TestNetClassList());
-      InterprocessObjectCommunicator port128ClientB = new InterprocessObjectCommunicator(128, new TestNetClassList());
-      InterprocessObjectCommunicator port128ClientDisconnected = new InterprocessObjectCommunicator(128, new TestNetClassList());
-      InterprocessObjectCommunicator port256Client = new InterprocessObjectCommunicator(256, new TestNetClassList());
+      IntraprocessObjectCommunicator port128ClientA = new IntraprocessObjectCommunicator(128, new TestNetClassList());
+      IntraprocessObjectCommunicator port128ClientB = new IntraprocessObjectCommunicator(128, new TestNetClassList());
+      IntraprocessObjectCommunicator port128ClientDisconnected = new IntraprocessObjectCommunicator(128, new TestNetClassList());
+      IntraprocessObjectCommunicator port256Client = new IntraprocessObjectCommunicator(256, new TestNetClassList());
 
       // Check for not getting packets back I sent
       port128ClientA.attachListener(MutableInt.class, new FailConsumer<MutableInt>());
@@ -94,15 +94,15 @@ public class InterprocessObjectCommunicatorTest
       port128ClientB.close();
       port256Client.close();
 
-      assertEquals("Open ports does not equal zero", 0, InterprocessCommunicationNetwork.getOpenPorts());
-      assertFalse("Hashmap is not cleaned up", InterprocessCommunicationNetwork.hasMap());
+      assertEquals("Open ports does not equal zero", 0, IntraprocessCommunicationNetwork.getOpenPorts());
+      assertFalse("Hashmap is not cleaned up", IntraprocessCommunicationNetwork.hasMap());
 
    }
 
    @After
    public void closeNetwork()
    {
-      InterprocessCommunicationNetwork.closeAllConnectionsForMyJUnitTests();
+      IntraprocessCommunicationNetwork.closeAllConnectionsForMyJUnitTests();
    }
 
    private final class FailConsumer<T extends Number> implements ObjectConsumer<T>

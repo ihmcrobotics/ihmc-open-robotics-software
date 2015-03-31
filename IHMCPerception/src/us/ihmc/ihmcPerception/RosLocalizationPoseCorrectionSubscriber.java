@@ -1,7 +1,8 @@
 package us.ihmc.ihmcPerception;
 
 import org.ros.node.NodeConfiguration;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
@@ -15,7 +16,7 @@ public class RosLocalizationPoseCorrectionSubscriber
 
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
 
-   public RosLocalizationPoseCorrectionSubscriber(final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
+   public RosLocalizationPoseCorrectionSubscriber(final RosMainNode rosMainNode, final PacketCommunicatorMock controllerCommunicationBridge,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
 
@@ -33,7 +34,7 @@ public class RosLocalizationPoseCorrectionSubscriber
 			   posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
 			   if (DEBUG) System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
 
-			   packetCommunicator.send(posePacket);
+			   controllerCommunicationBridge.send(posePacket);
 		   }
 	   };
 

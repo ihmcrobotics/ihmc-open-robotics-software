@@ -5,19 +5,22 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Quat4d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
@@ -30,13 +33,15 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.robotSide.RobotSide;
 
-public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterface
+public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
 {
-   private static final int MINIMUM_SCANS_TO_RECIEVE = 10; // GPU Benchmark
+   private static final int MINIMUM_SCANS_TO_RECIEVE = 60; // GPU Benchmark
    private static final float SCAN_TOLERANCE = 0.001f;
    private static final double WALL_DISTANCE = 1.0;
    private static final boolean ALLOW_PERCENTAGE_OUT_OF_RANGE = true;
@@ -74,7 +79,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @EstimatedDuration(duration = 30.0)
+   @EstimatedDuration
    @Test(timeout = 300000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
@@ -88,14 +93,31 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
 
       testHelper.attachListener(PointCloudWorldPacket.class, new PointCloudWorldConsumer());
 
+      testHelper.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
+      {
+         @Override
+         public void receivedPacket(HandPoseStatus object)
+         {
+            PrintTools.debug(DepthDataProcessorTest.this, "Hand pose status recieved!");
+         }
+      });
+
       DepthDataStateCommand lidarEnablePacket = new DepthDataStateCommand(LidarState.ENABLE);
       lidarEnablePacket.setDestination(PacketDestination.SENSOR_MANAGER);
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1);
+
+      Point3d position = RandomTools.generateRandomPoint(new Random(), 0.1, -0.3, 0.7, 0.5, 0.3, 1.3);
+      Quat4d orientation = RandomTools.generateRandomQuaternion(new Random(), Math.PI / 4);
+
+      HandPosePacket handPosePacket = new HandPosePacket(RobotSide.LEFT, Frame.CHEST, position, orientation, 2.0);
+      handPosePacket.setDestination(PacketDestination.CONTROLLER);
+
+      testHelper.send(handPosePacket);
       
       testHelper.send(lidarEnablePacket);
       
-      boolean success = testHelper.simulateAndBlockAndCatchExceptions(7.0);
+      boolean success = testHelper.simulateAndBlockAndCatchExceptions(5.0);
 
       assertTrue(success);
 
@@ -124,7 +146,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       @Override
       public void receivedPacket(PointCloudWorldPacket pointCloud)
       {
-         PrintTools.debug(PointCloudDataReceiverTest.this, "Point cloud world received.");
+         PrintTools.debug(DepthDataProcessorTest.this, "Point cloud world received.");
 
          numberOfLidarScansConsumed++;
          // jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());
