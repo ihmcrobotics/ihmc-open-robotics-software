@@ -100,19 +100,19 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
          HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(),
         		 											location, orientation, surfaceNormal,
         		 											handstep.getSwingTrajectoryTime());
-         drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
+         drcSimulationTestHelper.send(handstepPacket);
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       }
 
       FootstepDataList footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.LEFT, 0.5, 0.1, stepHeight, scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       //TODO: This only works if you step a little too high. Otherwise it catches its foot on the step
       double extraHeightToAvoidStubbing = 0.05;
       footstepDataList = createFootstepsForStepOntoPlatform(RobotSide.RIGHT, 0.5, -0.1, stepHeight + extraHeightToAvoidStubbing, scriptedFootstepGenerator);
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       

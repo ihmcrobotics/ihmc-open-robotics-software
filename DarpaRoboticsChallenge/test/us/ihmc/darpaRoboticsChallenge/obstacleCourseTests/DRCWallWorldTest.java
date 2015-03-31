@@ -105,24 +105,24 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
             HandstepPacket handstepPacket = new HandstepPacket(handstep.getRobotSide(),
             												   location, orientation, surfaceNormal,
             												   handstep.getSwingTrajectoryTime());
-            drcSimulationTestHelper.sendHandstepPacketToListeners(handstepPacket);
+            drcSimulationTestHelper.send(handstepPacket);
             success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
          }
 
          bodyY = bodyY + 0.15;
 
          FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+         drcSimulationTestHelper.send(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       }
       
       HandPosePacket releaseLeftHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.LEFT, 1.0);
-      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseLeftHandToHome);
+      drcSimulationTestHelper.send(releaseLeftHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       HandPosePacket releaseRightHandToHome = PacketControllerTools.createGoToHomeHandPosePacket(RobotSide.RIGHT, 1.0);
-      drcSimulationTestHelper.sendHandPosePacketToListeners(releaseRightHandToHome);
+      drcSimulationTestHelper.send(releaseRightHandToHome);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       for (int i=0; i<3; i++)
@@ -130,7 +130,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
          bodyY = bodyY + 0.3;
 
          FootstepDataList footstepDataList = createFootstepsForTwoSideSteps(bodyY, scriptedFootstepGenerator);
-         drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+         drcSimulationTestHelper.send(footstepDataList);
 
          success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
       }

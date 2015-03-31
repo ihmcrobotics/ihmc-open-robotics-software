@@ -234,7 +234,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       packet.timeAtWaypoint[1] = trajectoryTime*2/3;
       packet.timeAtWaypoint[2] = trajectoryTime;
       
-      drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
+      drcSimulationTestHelper.send(packet);
       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime );
       assertTrue(success);
@@ -311,7 +311,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
 
       controllerChestDesiredFrameOrientation.changeFrame(pelvisZUpFrame);
 
-      drcSimulationTestHelper.sendFootstepListToListeners(footstepDataList);
+      drcSimulationTestHelper.send(footstepDataList);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(desiredFootstepList.size() * (swingTime + transferTime) + 5.0);
       assertTrue(success);
@@ -391,7 +391,7 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
 
          WholeBodyTrajectoryPacket packet = wholeBodyTrajectoryGenerator.convertTrajectoryToPacket(trajND);
          
-         drcSimulationTestHelper.sendWholeBodyTrajectoryPacketToListeners(packet);
+         drcSimulationTestHelper.send(packet);
          
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + packet.timeAtWaypoint[packet.timeAtWaypoint.length] );
          

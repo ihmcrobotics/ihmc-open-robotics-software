@@ -177,8 +177,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.2));
 
-      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.RIGHT, 0.5, rightArmDefaultConfigurationJointAngles));
-      drcBehaviorTestHelper.sendHandPosePacketToListeners(new HandPosePacket(RobotSide.LEFT, 0.5, leftArmDefaultConfigurationJointAngles));
+      drcBehaviorTestHelper.send(new HandPosePacket(RobotSide.RIGHT, 0.5, rightArmDefaultConfigurationJointAngles));
+      drcBehaviorTestHelper.send(new HandPosePacket(RobotSide.LEFT, 0.5, leftArmDefaultConfigurationJointAngles));
       drcBehaviorTestHelper.updateRobotModel();
 
       assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0));

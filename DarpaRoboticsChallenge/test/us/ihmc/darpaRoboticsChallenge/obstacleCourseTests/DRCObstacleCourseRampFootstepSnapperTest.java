@@ -110,7 +110,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
-      drcSimulationTestHelper.sendComHeightPacketToListeners(comHeightPacket);
+      drcSimulationTestHelper.send(comHeightPacket);
 
       setupCameraForWalkingOverRamp(scs);
       ThreadTools.sleep(1000);
@@ -201,7 +201,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       }
 
       // Send footsteps to controller
-      drcSimulationTestHelper.sendFootstepListToListeners(snappedFootstepDataList);
+      drcSimulationTestHelper.send(snappedFootstepDataList);
 
       // Check for success
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);

@@ -202,46 +202,6 @@ public class DRCSimulationTestHelper
       }
    }
 
-   public void sendFootstepListToListeners(FootstepDataList footstepDataList)
-   {
-      controllerCommunicator.send(footstepDataList);
-   }
-
-   public void sendHandstepPacketToListeners(HandstepPacket handstepPacket)
-   {
-      controllerCommunicator.send(handstepPacket);
-   }
-
-   public void sendHandPosePacketToListeners(HandPosePacket handPosePacket)
-   {
-      controllerCommunicator.send(handPosePacket);
-   }
-
-   public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)
-   {
-      controllerCommunicator.send(blindWalkingPacket);
-   }
-
-   public void sendComHeightPacketToListeners(ComHeightPacket comHeightPacket)
-   {
-      controllerCommunicator.send(comHeightPacket);
-   }
-
-   public void sendChestOrientationPacketToListeners(ChestOrientationPacket chestOrientationPacket)
-   {
-      controllerCommunicator.send(chestOrientationPacket);
-   }
-
-   public void sendWholeBodyTrajectoryPacketToListeners(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket)
-   {
-      controllerCommunicator.send(wholeBodyTrajectoryPacket);
-   }
-
-   public void sendArmJointTrajectoryPacketToListeners(ArmJointTrajectoryPacket armJointTrajectoryPacket)
-   {
-      controllerCommunicator.send(armJointTrajectoryPacket);
-   }
-
    public SDFRobot getRobot()
    {
       return sdfRobot;
