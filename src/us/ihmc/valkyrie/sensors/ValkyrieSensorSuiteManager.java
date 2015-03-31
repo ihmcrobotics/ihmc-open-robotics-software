@@ -1,15 +1,16 @@
 package us.ihmc.valkyrie.sensors;
 
+import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
@@ -29,8 +30,10 @@ import us.ihmc.wholeBodyController.DRCHandType;
 
 public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.SENSOR_MANAGER.ordinal(), "VAL_SENSOR_MANAGER");
+   private final PacketCommunicatorMock sensorSuitePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
+         new IHMCCommunicationKryoNetClassList());
+
+   
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
@@ -84,9 +87,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       rosMainNode.execute();
    }
 
+
    @Override
-   public PacketCommunicator getProcessedSensorsCommunicator()
+   public void connect() throws IOException
    {
-      return sensorSuitePacketCommunicator;
+      sensorSuitePacketCommunicator.connect();
    }
 }
