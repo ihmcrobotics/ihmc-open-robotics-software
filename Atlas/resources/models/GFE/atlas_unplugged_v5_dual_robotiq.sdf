@@ -118,7 +118,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/pelvis.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/pelvis.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -176,7 +176,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/ltorso.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/ltorso.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -253,7 +253,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/mtorso.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/mtorso.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -466,7 +466,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/utorso.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/utorso.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -672,7 +672,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_clav.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_clav.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -806,7 +806,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_scap.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_scap.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -902,7 +902,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_uarm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_uarm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1075,7 +1075,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_larm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_larm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1191,7 +1191,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_farm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_farm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1328,7 +1328,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_hand.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_hand.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2439,7 +2439,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_clav.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_clav.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2573,7 +2573,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_scap.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_scap.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2669,7 +2669,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_uarm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_uarm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2842,7 +2842,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_larm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_larm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -2958,7 +2958,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_farm.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_farm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3095,7 +3095,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_hand.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_hand.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3141,16 +3141,16 @@
         <pose>0.00128479 -0.141218 -0.00810888 0 -0 0</pose>
         <mass>1.8839</mass>
         <inertia>
-          <ixx>0.00678243</ixx>
-          <ixy>1.25957e-05</ixy>
-          <ixz>0.00157554</ixz>
+          <ixx>0.00671342</ixx>
+          <ixy>1.40674e-05</ixy>
+          <ixz>0.00153414</ixz>
           <iyy>0.013426</iyy>
-          <iyz>-0.000475649</iyz>
-          <izz>0.00850558</izz>
+          <iyz>-0.000476617</iyz>
+          <izz>0.00857459</izz>
         </inertia>
       </inertial>
       <collision name='r_hand_collision'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -0.9777 0</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -1 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3170,7 +3170,7 @@
         </surface>
       </collision>
       <visual name='r_hand_visual'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -0.9777 0</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -1 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3213,7 +3213,7 @@
       </physics>
     </joint>
     <link name='r_finger_1_link_0'>
-      <pose>0.13431 -1.13055 0.358979 0.9777 0.000664431 -1.57124</pose>
+      <pose>0.135599 -1.13055 0.359092 1 0.000674055 -1.57122</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3249,7 +3249,7 @@
       <child>r_finger_1_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.558931 -0.000796327 0.829214</xyz>
+        <xyz>0.540302 -0.000796327 0.841471</xyz>
         <limit>
           <lower>-0.16</lower>
           <upper>0.25</upper>
@@ -3264,7 +3264,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_1'>
-      <pose>0.134302 -1.15055 0.358966 0.9777 0.000664431 -1.57124</pose>
+      <pose>0.135591 -1.15055 0.359079 1 0.000674055 -1.57122</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3300,7 +3300,7 @@
       <child>r_finger_1_link_1</child>
       <parent>r_finger_1_link_0</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3315,7 +3315,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_2'>
-      <pose>0.11863 -1.20053 0.335715 0.910192 0.425303 -1.88105</pose>
+      <pose>0.120441 -1.20053 0.335484 0.933576 0.432008 -1.87133</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3351,7 +3351,7 @@
       <child>r_finger_1_link_2</child>
       <parent>r_finger_1_link_1</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3366,7 +3366,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_3'>
-      <pose>0.107784 -1.23436 0.319623 0.910192 0.425303 -1.88105</pose>
+      <pose>0.109957 -1.23436 0.319155 0.933576 0.432008 -1.87133</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3402,7 +3402,7 @@
       <child>r_finger_1_link_3</child>
       <parent>r_finger_1_link_2</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3417,7 +3417,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_0'>
-      <pose>0.0746069 -1.13055 0.399222 0.9777 0.000664431 -1.57124</pose>
+      <pose>0.0750133 -1.13055 0.397994 1 0.000674055 -1.57122</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3453,7 +3453,7 @@
       <child>r_finger_2_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.558931 -0.000796327 0.829214</xyz>
+        <xyz>0.540302 -0.000796327 0.841471</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3468,7 +3468,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_1'>
-      <pose>0.0745981 -1.15055 0.399209 0.9777 0.000664431 -1.57124</pose>
+      <pose>0.0750048 -1.15055 0.39798 1 0.000674055 -1.57122</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3504,7 +3504,7 @@
       <child>r_finger_2_link_1</child>
       <parent>r_finger_2_link_0</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3519,7 +3519,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_2'>
-      <pose>0.0589261 -1.20053 0.375958 0.910192 0.425303 -1.88105</pose>
+      <pose>0.0598551 -1.20053 0.374386 0.933576 0.432008 -1.87133</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3555,7 +3555,7 @@
       <child>r_finger_2_link_2</child>
       <parent>r_finger_2_link_1</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3570,7 +3570,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_3'>
-      <pose>0.0480801 -1.23436 0.359867 0.910192 0.425303 -1.88105</pose>
+      <pose>0.0493706 -1.23436 0.358056 0.933576 0.432008 -1.87133</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3606,7 +3606,7 @@
       <child>r_finger_2_link_3</child>
       <parent>r_finger_2_link_2</parent>
       <axis>
-        <xyz>-0.829214 -7.34582e-06 0.558931</xyz>
+        <xyz>-0.841471 -7.34582e-06 0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3621,7 +3621,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_0'>
-      <pose>0.155321 -1.13055 0.454559 -2.16389 -0.000660326 -1.57035</pose>
+      <pose>0.154474 -1.13055 0.455117 -2.14159 -0.000670086 -1.57037</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3657,7 +3657,7 @@
       <child>r_finger_middle_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.829214 -5.89793e-10 -0.558931</xyz>
+        <xyz>0.841471 -5.89793e-10 -0.540302</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3672,7 +3672,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_1'>
-      <pose>0.15533 -1.15055 0.454572 -2.16389 -0.000660326 -1.57035</pose>
+      <pose>0.154482 -1.15055 0.45513 -2.14159 -0.000670086 -1.57037</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3708,7 +3708,7 @@
       <child>r_finger_middle_link_1</child>
       <parent>r_finger_middle_link_0</parent>
       <axis>
-        <xyz>0.829214 -5.89793e-10 -0.558931</xyz>
+        <xyz>0.841471 -5.89793e-10 -0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3723,7 +3723,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_2'>
-      <pose>0.171003 -1.20053 0.477823 -2.2314 -0.425299 -1.26054</pose>
+      <pose>0.169632 -1.20053 0.478725 -2.20802 -0.432004 -1.27026</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3759,7 +3759,7 @@
       <child>r_finger_middle_link_2</child>
       <parent>r_finger_middle_link_1</parent>
       <axis>
-        <xyz>0.829214 -5.89793e-10 -0.558931</xyz>
+        <xyz>0.841471 -5.89793e-10 -0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3774,7 +3774,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_3'>
-      <pose>0.181849 -1.23436 0.493915 -2.2314 -0.425299 -1.26054</pose>
+      <pose>0.180117 -1.23436 0.495054 -2.20802 -0.432004 -1.27026</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3810,7 +3810,7 @@
       <child>r_finger_middle_link_3</child>
       <parent>r_finger_middle_link_2</parent>
       <axis>
-        <xyz>0.829214 -5.89793e-10 -0.558931</xyz>
+        <xyz>0.841471 -5.89793e-10 -0.540302</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3883,7 +3883,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_uglut.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_uglut.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -3999,7 +3999,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_lglut.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_lglut.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4154,7 +4154,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_uleg.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_uleg.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4231,7 +4231,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_lleg.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_lleg.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4328,7 +4328,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_talus.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_talus.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4451,7 +4451,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_foot.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/l_foot.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4559,7 +4559,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_uglut.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_uglut.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4675,7 +4675,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_lglut.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_lglut.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4830,7 +4830,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_uleg.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_uleg.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -4907,7 +4907,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_lleg.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_lleg.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -5004,7 +5004,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_talus.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_talus.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -5127,7 +5127,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/r_foot.dae</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_foot.obj</uri>
           </mesh>
         </geometry>
       </visual>
