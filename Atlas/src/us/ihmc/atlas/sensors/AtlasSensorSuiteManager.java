@@ -69,7 +69,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (sensorInformation.getLidarParameters().length > 0)
       {
          new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
-         pointCloudDataReceiver.start();
       }
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
@@ -98,7 +97,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, pointCloudDataReceiver, robotConfigurationDataBuffer, rosMainNode,
             sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
             multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
-      pointCloudDataReceiver.start();
+      
 
 //      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator,
 //            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
@@ -121,6 +120,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    public void connect() throws IOException
    {
       sensorSuitePacketCommunicator.connect();
+      if (sensorInformation.getLidarParameters().length > 0)
+      {
+         pointCloudDataReceiver.start();
+      }
    }
 
 }

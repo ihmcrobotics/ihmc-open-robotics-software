@@ -80,6 +80,15 @@ public class PointCloudWorldPacketGenerator implements Runnable
    @Override
    public void run()
    {
-      packetCommunicator.send(getPointCloudWorldPacket());
+      try
+      {
+         PointCloudWorldPacket pointCloudWorldPacket = getPointCloudWorldPacket();
+         packetCommunicator.send(pointCloudWorldPacket);
+      }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+         throw new RuntimeException(e);
+      }
    }
 }
