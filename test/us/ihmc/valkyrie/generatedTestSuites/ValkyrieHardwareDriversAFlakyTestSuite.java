@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.valkyrie.networkProcessor.depthData.ValkyrieDepthDataProcessorTest.class
+   us.ihmc.valkyrie.networkProcessor.depthData.ValkyriePointCloudDataReceiverTest.class
 })
 
 public class ValkyrieHardwareDriversAFlakyTestSuite
