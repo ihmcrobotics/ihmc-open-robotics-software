@@ -597,7 +597,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          double sdfMinAngle = Double.parseDouble(sdfHorizontalScan.getMinAngle());
 
          // double sdfAngularResolution = Double.parseDouble(sdfHorizontalScan.getSillyAndProbablyNotUsefulResolution());
-         int sdfSamples = Integer.parseInt(sdfHorizontalScan.getSamples());
+         int sdfSamples = (Integer.parseInt(sdfHorizontalScan.getSamples()) / 3) * 3;
          double sdfRangeResolution = Double.parseDouble(sdfRay.getRange().getResolution());
 
          boolean sdfAlwaysOn = true;
