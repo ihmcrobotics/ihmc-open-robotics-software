@@ -292,7 +292,7 @@
       </physics>
     </joint>
     <link name='utorso'>
-      <pose>-0.0125 0 0.212 0 -0 0</pose>
+      <pose>-0.006795 0 0.212 0 -0 0</pose>
       <inertial>
         <pose>-0.0616866 0.00229456 0.316809 0 -0 0</pose>
         <mass>84.609</mass>

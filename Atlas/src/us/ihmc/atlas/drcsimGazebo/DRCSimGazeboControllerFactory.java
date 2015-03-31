@@ -48,11 +48,11 @@ public class DRCSimGazeboControllerFactory
    private final AtlasSensorInformation sensorInformation;
 
    private static final double gravity = -9.81;
-   private static final boolean useRobotiqHands = true;
+   private static final boolean useRobotiqHands = false;
    
    public DRCSimGazeboControllerFactory()
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, AtlasRobotModel.AtlasTarget.GAZEBO, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
       /*
        * Create registries
        */
@@ -171,7 +171,7 @@ public class DRCSimGazeboControllerFactory
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
             sensorInformation.getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
       
-      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
+//      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 
       if (USE_GUI)
       {
