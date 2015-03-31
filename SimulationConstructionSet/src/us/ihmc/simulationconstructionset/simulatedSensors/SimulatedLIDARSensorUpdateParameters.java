@@ -1,13 +1,13 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 
 public class SimulatedLIDARSensorUpdateParameters
 {
    private boolean alwaysOn;
    private int updatePEriod;
 
-   private PacketCommunicatorMock objectCommunicator;
+   private PacketCommunicator objectCommunicator;
 
    public boolean isAlwaysOn()
    {
@@ -29,12 +29,12 @@ public class SimulatedLIDARSensorUpdateParameters
       this.updatePEriod = updatePeriod;
    }
 
-   public void setObjectCommunicator(PacketCommunicatorMock objectCommunicator)
+   public void setObjectCommunicator(PacketCommunicator objectCommunicator)
    {
       this.objectCommunicator = objectCommunicator;
    }
    
-   public PacketCommunicatorMock getObjectCommunicator()
+   public PacketCommunicator getObjectCommunicator()
    {
       return objectCommunicator;
    }

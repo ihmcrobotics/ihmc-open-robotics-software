@@ -10,7 +10,7 @@ import multisense_ros.RawImuData;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket.MeasurementStatus;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -28,14 +28,14 @@ public class IMUBasedHeadPoseCalculatorFactory {
 	{
 	}
 	
-	static IMUBasedHeadPoseCalculator create(PacketCommunicatorMock packetCommunicator, DRCRobotSensorInformation sensorInformation)
+	static IMUBasedHeadPoseCalculator create(PacketCommunicator packetCommunicator, DRCRobotSensorInformation sensorInformation)
 	{
 		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(packetCommunicator, sensorInformation);
 		packetCommunicator.attachListener(RawIMUPacket.class, calculator); 
 		return calculator;
 	}
 
-	static IMUBasedHeadPoseCalculator create(PacketCommunicatorMock sensorSuitePacketCommunicator, DRCRobotSensorInformation sensorInformation, RosMainNode rosMainNode)
+	static IMUBasedHeadPoseCalculator create(PacketCommunicator sensorSuitePacketCommunicator, DRCRobotSensorInformation sensorInformation, RosMainNode rosMainNode)
 	{
 		
 		IMUBasedHeadPoseCalculator calculator = new IMUBasedHeadPoseCalculator(sensorSuitePacketCommunicator, sensorInformation);
@@ -104,14 +104,14 @@ class RunningStatistics
 class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements PacketConsumer<RawIMUPacket>
 {
 	
-	PacketCommunicatorMock packetCommunicator;
+	PacketCommunicator packetCommunicator;
 	HeadPosePacket headPosePacket=new HeadPosePacket();
 	DRCRobotSensorInformation sensorInformation;
 	ReferenceFrame headIMUFrameWhenLevel;
 	RunningStatistics stat = new RunningStatistics(100);
 	
 
-	public IMUBasedHeadPoseCalculator(PacketCommunicatorMock sensorSuitePacketCommunicator, DRCRobotSensorInformation sensorInformation) {
+	public IMUBasedHeadPoseCalculator(PacketCommunicator sensorSuitePacketCommunicator, DRCRobotSensorInformation sensorInformation) {
 		super(multisense_ros.RawImuData._TYPE);
 		this.packetCommunicator = sensorSuitePacketCommunicator;
 		this.sensorInformation = sensorInformation;

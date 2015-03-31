@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -28,7 +28,7 @@ public class MultiSenseSensorManager
    private final SDFFullRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final PacketCommunicatorMock packetCommunicator;
+   private final PacketCommunicator packetCommunicator;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
 
@@ -41,7 +41,7 @@ public class MultiSenseSensorManager
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
    public MultiSenseSensorManager(SDFFullRobotModelFactory sdfFullRobotModelFactory, PointCloudDataReceiver pointCloudDataReceiver, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         RosMainNode rosMainNode, PacketCommunicatorMock sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
+         RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;

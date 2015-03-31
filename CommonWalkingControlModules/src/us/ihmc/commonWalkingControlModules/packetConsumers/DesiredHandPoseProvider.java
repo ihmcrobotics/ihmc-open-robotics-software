@@ -128,6 +128,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          @Override
          public void receivedPacket(ArmJointTrajectoryPacket object)
          {
+            System.out.println("RECEIVED ARM JOINT PACKET " + object);
             armJointTrajectoryPackets.get(object.robotSide).set(object);
          }
       };

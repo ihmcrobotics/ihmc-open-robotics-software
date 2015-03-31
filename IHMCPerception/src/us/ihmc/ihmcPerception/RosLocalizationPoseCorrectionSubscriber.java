@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception;
 
 import org.ros.node.NodeConfiguration;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
@@ -16,7 +16,7 @@ public class RosLocalizationPoseCorrectionSubscriber
 
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
 
-   public RosLocalizationPoseCorrectionSubscriber(final RosMainNode rosMainNode, final PacketCommunicatorMock controllerCommunicationBridge,
+   public RosLocalizationPoseCorrectionSubscriber(final RosMainNode rosMainNode, final PacketCommunicator controllerCommunicationBridge,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
 

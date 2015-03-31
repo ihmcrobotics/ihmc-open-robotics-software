@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
@@ -48,7 +48,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
-   private final PacketCommunicatorMock controllerCommunicationBridge;
+   private final PacketCommunicator controllerCommunicationBridge;
    private final ObjectCommunicator scsSensorCommunicationBridge;
 
    private final ArrayList<AbstractRosTopicSubscriber<?>> subscribers;
@@ -58,7 +58,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
@@ -94,7 +94,7 @@ public class ThePeoplesGloriousNetworkProcessor
       System.out.println("IHMC ROS API node successfully connected to controller.");
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
          IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace);

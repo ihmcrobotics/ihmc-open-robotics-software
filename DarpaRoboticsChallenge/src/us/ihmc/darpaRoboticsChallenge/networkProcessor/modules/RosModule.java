@@ -6,7 +6,7 @@ import java.net.URI;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.util.NetworkPorts;
@@ -31,7 +31,7 @@ public class RosModule
 //   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
 //         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
    
-   private final PacketCommunicatorMock rosModulePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE,
+   private final PacketCommunicator rosModulePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE,
          new IHMCCommunicationKryoNetClassList());
    
    private final RosMainNode rosMainNode;

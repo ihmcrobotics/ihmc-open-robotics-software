@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.utilities.ThreadTools;
@@ -12,10 +12,10 @@ public class NonBlockingGlobalObjectConsumerRelay implements GlobalPacketConsume
    private static final boolean DEBUG = false;
 
    private final ConcurrentLinkedQueue<Packet<?>> queuedData = new ConcurrentLinkedQueue<Packet<?>>(); 
-   private final PacketCommunicatorMock communicatorToForwardFrom;
-   private final PacketCommunicatorMock communicatorToForwardTo;
+   private final PacketCommunicator communicatorToForwardFrom;
+   private final PacketCommunicator communicatorToForwardTo;
    
-   public NonBlockingGlobalObjectConsumerRelay(PacketCommunicatorMock communicatorToForwardFrom, PacketCommunicatorMock communicatorToForwardTo)
+   public NonBlockingGlobalObjectConsumerRelay(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo)
    {
       this.communicatorToForwardFrom = communicatorToForwardFrom;
       this.communicatorToForwardTo = communicatorToForwardTo;

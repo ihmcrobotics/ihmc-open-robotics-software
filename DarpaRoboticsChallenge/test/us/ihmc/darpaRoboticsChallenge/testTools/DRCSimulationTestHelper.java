@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
@@ -52,7 +52,7 @@ public class DRCSimulationTestHelper
    private final SimulationConstructionSet scs;
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
-   protected final PacketCommunicatorMock controllerCommunicator;
+   protected final PacketCommunicator controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
@@ -78,7 +78,7 @@ public class DRCSimulationTestHelper
    public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
          DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this.controllerCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
@@ -328,7 +328,7 @@ public class DRCSimulationTestHelper
       controllerCommunicator.attachListener(clazz, listener);
    }
 
-   public PacketCommunicatorMock getControllerCommunicator()
+   public PacketCommunicator getControllerCommunicator()
    {
       return controllerCommunicator;
    }

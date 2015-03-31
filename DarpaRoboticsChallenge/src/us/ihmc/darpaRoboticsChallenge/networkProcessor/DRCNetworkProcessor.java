@@ -6,7 +6,7 @@ import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -60,7 +60,7 @@ public class DRCNetworkProcessor
          for(RobotSide robotSide : RobotSide.values)
          {
             NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
-            PacketCommunicatorMock handModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
+            PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
             PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
             packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
             handModuleCommunicator.connect();
@@ -89,7 +89,7 @@ public class DRCNetworkProcessor
             new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation);
          }
          
-         PacketCommunicatorMock behaviorModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+         PacketCommunicator behaviorModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorModuleCommunicator);
          behaviorModuleCommunicator.connect();
 
@@ -105,7 +105,7 @@ public class DRCNetworkProcessor
       {
          new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
 
-         PacketCommunicatorMock rosModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE, new IHMCCommunicationKryoNetClassList());
+         PacketCommunicator rosModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.ROS_MODULE, rosModuleCommunicator);
          rosModuleCommunicator.connect();
          
@@ -129,7 +129,7 @@ public class DRCNetworkProcessor
          }
          sensorSuiteManager.connect();
          
-         PacketCommunicatorMock sensorSuiteManagerCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, new IHMCCommunicationKryoNetClassList());
+         PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
          
@@ -145,7 +145,7 @@ public class DRCNetworkProcessor
       {
          new UiConnectionModule();
          
-         PacketCommunicatorMock uiModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+         PacketCommunicator uiModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.UI, uiModuleCommunicator);
          uiModuleCommunicator.connect();
          String methodName = "setupUiModule ";
@@ -157,7 +157,7 @@ public class DRCNetworkProcessor
    {
       if(params.useGFECommunicator())
       {
-         PacketCommunicatorMock gfeCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+         PacketCommunicator gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfeCommunicator);
          gfeCommunicator.connect();
          String methodName = "setupGFEModule ";
@@ -169,16 +169,16 @@ public class DRCNetworkProcessor
    {
       if (params.useController())
       {
-         PacketCommunicatorMock controllerPacketCommunicator;
+         PacketCommunicator controllerPacketCommunicator;
          if(params.useLocalControllerCommunicator())
          {
             System.out.println("Connecting to controller using intra process communication");
-            controllerPacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+            controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
          }
          else 
          {
             System.out.println("Connecting to controller using TCP on " + NetworkParameters.getHost(NetworkParameterKeys.robotController));
-            controllerPacketCommunicator = PacketCommunicatorMock.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+            controllerPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
          }
          
          packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerPacketCommunicator);
@@ -189,7 +189,7 @@ public class DRCNetworkProcessor
       }
    }
 
-   protected void connect(PacketCommunicatorMock communicator)
+   protected void connect(PacketCommunicator communicator)
    {
       try
       {

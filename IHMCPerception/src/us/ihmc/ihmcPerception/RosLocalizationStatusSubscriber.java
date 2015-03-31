@@ -1,7 +1,7 @@
 package us.ihmc.ihmcPerception;
 
 import std_msgs.Float64;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -14,7 +14,7 @@ public class RosLocalizationStatusSubscriber
 {
    private double overlap = RosLocalizationConstants.DEFAULT_OVERLAP;
 
-   public RosLocalizationStatusSubscriber(final RosMainNode rosMainNode, final PacketCommunicatorMock packetCommunicator,
+   public RosLocalizationStatusSubscriber(final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE) {

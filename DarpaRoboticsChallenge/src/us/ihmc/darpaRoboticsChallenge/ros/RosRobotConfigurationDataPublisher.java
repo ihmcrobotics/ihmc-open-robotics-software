@@ -8,7 +8,7 @@ import org.ros.message.Time;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
@@ -39,7 +39,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private final int jointNameHash;
 
-   public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicatorMock rosModulePacketCommunicator, final RosMainNode rosMainNode,
+   public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator, final RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();

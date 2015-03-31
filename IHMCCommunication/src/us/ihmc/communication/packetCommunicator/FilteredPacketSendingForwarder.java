@@ -16,8 +16,8 @@ public class FilteredPacketSendingForwarder implements GlobalPacketConsumer
 {
    private static final boolean DEBUG = false;
    
-   private final PacketCommunicatorMock communicatorToForwardFrom;
-   private final PacketCommunicatorMock communicatorToForwardTo;
+   private final PacketCommunicator communicatorToForwardFrom;
+   private final PacketCommunicator communicatorToForwardTo;
    private final HashMap<Class, TimedElapsedChecker> inclusiveClassesWithElapsedTimeTriggers = new HashMap<Class, FilteredPacketSendingForwarder.TimedElapsedChecker>();
    private final HashSet<Class> classesToInclude = new HashSet<Class>();
    private final HashSet<Class> classesToExclude = new HashSet<Class>();
@@ -26,7 +26,7 @@ public class FilteredPacketSendingForwarder implements GlobalPacketConsumer
    private ForwarderMode mode;
 
    
-   public FilteredPacketSendingForwarder(PacketCommunicatorMock communicatorToForwardFrom, PacketCommunicatorMock communicatorToForwardTo, AtomicSettableTimestampProvider timestampProvider)
+   public FilteredPacketSendingForwarder(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo, AtomicSettableTimestampProvider timestampProvider)
    {
       this.communicatorToForwardFrom = communicatorToForwardFrom;
       this.communicatorToForwardTo = communicatorToForwardTo;

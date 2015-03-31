@@ -14,7 +14,7 @@ import transform_provider.TransformProvider;
 import transform_provider.TransformProviderRequest;
 import transform_provider.TransformProviderResponse;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -30,7 +30,7 @@ public class RosCameraReceiver extends CameraDataReceiver
 {
    
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
-         RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicatorMock packetCommunicator,
+         RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
          final PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final CameraLogger logger, URI sensorURI)
    {
       super(fullRobotModelFactory, cameraParameters.getPoseFrameForSdf(), robotConfigurationDataBuffer, packetCommunicator, ppsTimestampOffsetProvider);

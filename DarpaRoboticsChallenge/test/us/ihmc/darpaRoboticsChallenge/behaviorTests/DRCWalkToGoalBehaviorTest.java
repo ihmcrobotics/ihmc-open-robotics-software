@@ -18,7 +18,7 @@ import org.junit.Test;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
@@ -113,9 +113,9 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
    private SDFRobot robot;
    private FullRobotModel fullRobotModel;
 
-   private PacketCommunicatorMock behaviorCommunicatorServer;
+   private PacketCommunicator behaviorCommunicatorServer;
 
-   private PacketCommunicatorMock behaviorCommunicatorClient;
+   private PacketCommunicator behaviorCommunicatorClient;
 
    @Before
    public void setUp()
@@ -127,8 +127,8 @@ public abstract class DRCWalkToGoalBehaviorTest implements MultiRobotTestInterfa
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      behaviorCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
-      behaviorCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
       try
       {
          behaviorCommunicatorClient.connect();

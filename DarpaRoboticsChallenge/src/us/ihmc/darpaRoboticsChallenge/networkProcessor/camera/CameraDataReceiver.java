@@ -11,7 +11,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -42,7 +42,7 @@ public abstract class CameraDataReceiver extends Thread
    private volatile boolean running = true;
 
    public CameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         final PacketCommunicatorMock sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         final PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
@@ -143,9 +143,9 @@ public abstract class CameraDataReceiver extends Thread
 
    private class VideoPacketHandler implements CompressedVideoHandler
    {
-      private final PacketCommunicatorMock packetCommunicator;
+      private final PacketCommunicator packetCommunicator;
 
-      public VideoPacketHandler(PacketCommunicatorMock sensorSuitePacketCommunicator)
+      public VideoPacketHandler(PacketCommunicator sensorSuitePacketCommunicator)
       {
          this.packetCommunicator = sensorSuitePacketCommunicator;
       }

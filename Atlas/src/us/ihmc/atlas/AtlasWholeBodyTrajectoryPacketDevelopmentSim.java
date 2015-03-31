@@ -11,7 +11,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -39,7 +39,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
    private final WholeBodyIkSolver wholeBodyIKSolver;
    private final WholeBodyIKPacketCreator wholeBodyIKPacketCreator;
    private final SDFFullRobotModel actualRobotModel;
-   private final PacketCommunicatorMock fieldObjectCommunicator;
+   private final PacketCommunicator fieldObjectCommunicator;
    //   private final ArrayList<Packet> packetsToSend = new ArrayList<Packet>();
    private final ArrayList<FramePose> desiredPelvisFrameList = new ArrayList<FramePose>();
    private final WholeBodyIKIngressEgressControllerSimulation hikIngEgCtrlSim;
@@ -77,7 +77,7 @@ public class AtlasWholeBodyTrajectoryPacketDevelopmentSim
       hikIngEgCtrlSim.getDRCSimulation().start();
       this.actualRobotModel = hikIngEgCtrlSim.getDRCSimulation().getThreadDataSynchronizer().getEstimatorFullRobotModel();
       
-      this.fieldObjectCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      this.fieldObjectCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       this.fieldObjectCommunicator.connect();
       
       this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();

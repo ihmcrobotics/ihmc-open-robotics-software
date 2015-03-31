@@ -10,7 +10,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
@@ -69,8 +69,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final SDFFullRobotModel fullRobotModel;
 
    private final PacketRouter<PacketDestination> networkProcessor;
-   private final PacketCommunicatorMock mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
-   private final PacketCommunicatorMock behaviorCommunicatorServer;
+   private final PacketCommunicator mockUIPacketCommunicatorServer;//send packets as if it was sent from the UI
+   private final PacketCommunicator behaviorCommunicatorServer;
    private final BehaviorCommunicationBridge behaviorCommunicationBridge;
    private final RobotDataReceiver robotDataReceiver;
    private final ReferenceFrames referenceFrames;
@@ -82,8 +82,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private final BehaviorDisptacher behaviorDispatcher;
 
    
-   private final PacketCommunicatorMock behaviorCommunicatorClient;
-   private final PacketCommunicatorMock mockUIPacketCommunicatorClient;
+   private final PacketCommunicator behaviorCommunicatorClient;
+   private final PacketCommunicator mockUIPacketCommunicatorClient;
 
    public DRCBehaviorTestHelper(String name, String scriptFileName, DRCStartingLocation selectedLocation,
          SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
@@ -105,11 +105,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       yoTimeLastFullRobotModelUpdate = new DoubleYoVariable("yoTimeRobotModelUpdate", registry);
 
       
-      this.mockUIPacketCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
-      mockUIPacketCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      this.mockUIPacketCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+      mockUIPacketCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
       
-      behaviorCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
-      behaviorCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
       try
       {
@@ -224,7 +224,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       mockUIPacketCommunicatorServer.send(requestTestBehaviorPacket);
    }
 
-   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicatorMock behaviorCommunicator,
+   private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, PacketCommunicator behaviorCommunicator,
          RobotDataReceiver robotDataReceiver, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       HumanoidBehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new HumanoidBehaviorControlModeSubscriber();

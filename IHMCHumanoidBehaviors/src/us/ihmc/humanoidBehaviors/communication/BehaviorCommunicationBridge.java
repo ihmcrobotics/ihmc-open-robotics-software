@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 
 public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeInterface, IncomingCommunicationBridgeInterface
 {
-   private final PacketCommunicatorMock behaviorPacketCommunicator;
+   private final PacketCommunicator behaviorPacketCommunicator;
    
    
    
@@ -41,7 +41,7 @@ public class BehaviorCommunicationBridge implements OutgoingCommunicationBridgeI
 //      packetPassthrough = new BooleanYoVariable("Behavior_packetPassthrough", registry);
 //   }
 
-   public BehaviorCommunicationBridge(PacketCommunicatorMock behaviorPacketCommunicator, YoVariableRegistry parentRegistry)
+   public BehaviorCommunicationBridge(PacketCommunicator behaviorPacketCommunicator, YoVariableRegistry parentRegistry)
    {
       this.behaviorPacketCommunicator = behaviorPacketCommunicator; 
       this.registry = new YoVariableRegistry("BehaviorCommunicationBridge");

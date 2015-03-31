@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 import java.io.IOException;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -14,11 +14,11 @@ public abstract class HandCommandManager
    private final boolean DEBUG = true;
    private final String SERVER_ADDRESS = "localhost";
 
-   protected final PacketCommunicatorMock handManagerPacketCommunicator;
+   protected final PacketCommunicator handManagerPacketCommunicator;
 
    protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 
-   protected PacketCommunicatorMock packetCommunicator;
+   protected PacketCommunicator packetCommunicator;
 
    public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
    {
@@ -28,10 +28,10 @@ public abstract class HandCommandManager
          spawner.spawn(clazz, new String[] { "-r", robotSide.getLowerCaseName() });
 
       NetworkPorts managerPort = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
-      handManagerPacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
+      handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
 
       NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
-      packetCommunicator = PacketCommunicatorMock.createTCPPacketCommunicatorClient(SERVER_ADDRESS, port, new IHMCCommunicationKryoNetClassList());
+      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(SERVER_ADDRESS, port, new IHMCCommunicationKryoNetClassList());
 
       try
       {

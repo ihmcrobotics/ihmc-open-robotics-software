@@ -17,7 +17,7 @@ import javax.vecmath.Vector3d;
 import org.ddogleg.struct.FastQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
@@ -43,7 +43,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
 
    TestbedAutomaticAlignment testbedFinder;
 
-   PacketCommunicatorMock controllerStateHandler;
+   PacketCommunicator controllerStateHandler;
 
    boolean justCollectData;
 
@@ -54,7 +54,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
    int totalSaved = 0;
    Point3D_F64 testbedLocation = new Point3D_F64();
 
-   public NetworkProcessorTestbedAlignment(PacketCommunicatorMock controllerStateHandler)
+   public NetworkProcessorTestbedAlignment(PacketCommunicator controllerStateHandler)
    {
 
       this.controllerStateHandler = controllerStateHandler;
