@@ -5,8 +5,8 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
@@ -50,7 +50,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public void initializeSimulatedSensors(PacketCommunicator scsSensorsCommunicator)
+   public void initializeSimulatedSensors(ObjectCommunicator scsSensorsCommunicator)
    {
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
