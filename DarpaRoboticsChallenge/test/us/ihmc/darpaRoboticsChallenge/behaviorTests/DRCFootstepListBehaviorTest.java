@@ -15,12 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
-import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
@@ -100,20 +95,12 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
 
       DRCDemo01NavigationEnvironment testEnvironment = new DRCDemo01NavigationEnvironment();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
-
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null,
-            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel(), controllerCommunicator);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,
+            DRCObstacleCourseStartingLocation.DEFAULT, simulationTestingParameters, getRobotModel());
 
       fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
 
       robot = drcBehaviorTestHelper.getRobot();
-
-      robotDataReceiver = drcBehaviorTestHelper.getRobotDataReceiver();
-      controllerCommunicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
    }
 
    @EstimatedDuration(duration = 31.9)

@@ -12,9 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
@@ -111,13 +109,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    public void testStartedAndCompletedStatusAreSentAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
-      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
       
+    
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel());
       
 
       statusStartedCounter = 0;
@@ -125,7 +120,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      mockUiCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
+      testHelper.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
          public void receivedPacket(HandPoseStatus object)
@@ -143,11 +138,12 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       testHelper.simulateAndBlockAndCatchExceptions(1.1);
       hasSimulationBeenInitialized = true;
 
-      mockUiCommunicator.send(outgoingHandPosePacket);
+      testHelper.send(outgoingHandPosePacket);
       testHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       assertTrue((statusStartedCounter == 1) && (statusCompletedCounter == 1));
       BambooTools.reportTestFinishedMessage();
+      
    }
 
 	@EstimatedDuration(duration = 21.5)
@@ -155,20 +151,16 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    public void testPauseDuringSingleSendAndReceivedForOneHandPose() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
-      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
-      
+
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
 
       hasSimulationBeenInitialized = false;
 
-      mockUiCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
+      testHelper.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
          public void receivedPacket(HandPoseStatus status)
@@ -197,10 +189,10 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       double trajectoryTime = 3.0;
       outgoingHandPosePacket.trajectoryTime = trajectoryTime;
       outgoingHandPosePacket.robotSide = RobotSide.LEFT;
-      mockUiCommunicator.send(outgoingHandPosePacket);
+      testHelper.send(outgoingHandPosePacket);
       double timeToSimulateHandMotion = 1.0;
       testHelper.simulateAndBlockAndCatchExceptions(timeToSimulateHandMotion);
-      mockUiCommunicator.send(new StopArmMotionPacket(RobotSide.LEFT));
+      testHelper.send(new StopArmMotionPacket(RobotSide.LEFT));
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       Vector3d endTranslation = new Vector3d();
@@ -217,6 +209,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       assertTrue(Math.abs(endTranslation.getZ() - expectedTranslation.getZ()) < 0.1);
 
       BambooTools.reportTestFinishedMessage();
+      
    }
 
 	@EstimatedDuration(duration = 11.4)
@@ -224,20 +217,15 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    public void testWhenTwoHandPosesAreSentInARow() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      final KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
-      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
-      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
 
       statusStartedCounter = 0;
       statusCompletedCounter = 0;
 
       hasSimulationBeenInitialized = false;
 
-      mockUiCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
+      testHelper.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
          public void receivedPacket(HandPoseStatus object)
@@ -263,9 +251,9 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
          @Override
          public void run()
          {
-            mockUiCommunicator.send(outgoingHandPosePacket_1);
+            testHelper.send(outgoingHandPosePacket_1);
             ThreadTools.sleep(200);
-            mockUiCommunicator.send(outgoingHandPosePacket_2);
+            testHelper.send(outgoingHandPosePacket_2);
          }
       };
 
@@ -275,6 +263,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       assertTrue((statusStartedCounter == 2) && (statusCompletedCounter == 1));
 
       BambooTools.reportTestFinishedMessage();
+      
    }
 
 	@EstimatedDuration(duration = 11.7)
@@ -282,13 +271,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
    public void testEachArmReceiveOneHandPoseAtTheSameTime() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      final KryoLocalPacketCommunicator mockUiCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      KryoLocalPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),PacketDestination.NETWORK_PROCESSOR.ordinal(), "HandPoseStatusTest"); 
-      mockUiCommunicator.attacthGlobalSendListener(controllerCommunicator);
-      controllerCommunicator.attacthGlobalSendListener(mockUiCommunicator);
-      
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), controllerCommunicator, this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, false, getRobotModel());
+      testHelper = new DRCSimulationTestHelper(new FlatGroundEnvironment(), this.getClass().getSimpleName(), null, startingLocation , simulationTestingParameters, getRobotModel());
 
       leftStatusStartedCounter = 0;
       leftStatusCompletedCounter = 0;
@@ -297,7 +281,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
 
       hasSimulationBeenInitialized = false;
 
-      mockUiCommunicator.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
+      testHelper.attachListener(HandPoseStatus.class, new PacketConsumer<HandPoseStatus>()
       {
          @Override
          public void receivedPacket(HandPoseStatus object)
@@ -330,9 +314,9 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
          @Override
          public void run()
          {
-            mockUiCommunicator.send(outgoingHandPosePacket_1);
+            testHelper.send(outgoingHandPosePacket_1);
             ThreadTools.sleep(200);
-            mockUiCommunicator.send(outgoingHandPosePacket_2);
+            testHelper.send(outgoingHandPosePacket_2);
          }
       };
 
@@ -340,6 +324,8 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       handposeThread.start();
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
       assertTrue((leftStatusStartedCounter == 1) && (rightStatusStartedCounter == 1) && (leftStatusCompletedCounter == 1) && (rightStatusCompletedCounter == 1));
+
       BambooTools.reportTestFinishedMessage();
+      
    }
 }

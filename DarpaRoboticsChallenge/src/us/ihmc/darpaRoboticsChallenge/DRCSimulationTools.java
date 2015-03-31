@@ -20,8 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.utilities.FormattingTools;
 
@@ -56,6 +54,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.setUsePerceptionModule(true);
          networkProcessorParameters.setUseRosModule(modulesToStart.contains(Modules.ROS_MODULE));
+         networkProcessorParameters.setUseLocalControllerCommunicator(true);
       }
       else
       {

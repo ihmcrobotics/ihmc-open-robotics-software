@@ -36,7 +36,7 @@ public class PacketsForwardedToTheUi
    public static final long UI_WRIST_FEET_SENSORS_UPDATE_MILLIS = 500l;
    public static final long UI_MULTISENSE_IMU_CHECK_MILLIS=5000l;
    
-   public static Class[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
+   public static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
       FootstepStatus.class,                          
       ScriptBehaviorStatusPacket.class,
       PelvisPoseErrorPacket.class,                   
@@ -62,7 +62,7 @@ public class PacketsForwardedToTheUi
       InvalidPacketNotificationPacket.class
    };
    
-   public static final HashMap<Class, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class, Long>();
+   public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
    static {
 //      PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(RobotPoseData.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);
       PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS.put(CapturabilityBasedStatus.class, UI_JOINT_CONFIGURATION_UPDATE_MILLIS);

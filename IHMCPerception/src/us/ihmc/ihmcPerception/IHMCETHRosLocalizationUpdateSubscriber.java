@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception;
 import org.ros.node.NodeConfiguration;
 
 import std_msgs.Float64;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
@@ -20,7 +20,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber
 
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
    
-   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
+   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicatorMock rosModulePacketCommunicator,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
 	   
@@ -38,7 +38,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber
 			   posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
 			   if (DEBUG) System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
 			   
-			   packetCommunicator.send(posePacket);
+			   rosModulePacketCommunicator.send(posePacket);
 		   }
 	   };
 	   
@@ -49,7 +49,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber
          public void onNewMessage(std_msgs.Float64 message) {
             overlap = message.getData();
             LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,null);
-            packetCommunicator.send(localizationOverlapPacket);
+            rosModulePacketCommunicator.send(localizationOverlapPacket);
          }
       };
       rosMainNode.attachSubscriber(RosLocalizationConstants.OVERLAP_UPDATE_TOPIC, overlapSubscriber);
@@ -60,7 +60,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber
          public void onNewMessage(std_msgs.String message) {
             String status = message.getData();
             LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,status);
-            packetCommunicator.send(localizationOverlapPacket);
+            rosModulePacketCommunicator.send(localizationOverlapPacket);
          }
 
       };

@@ -1,18 +1,20 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.ihmcPerception.IHMCPerceptionManager;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -21,46 +23,31 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 
 public class DRCNetworkProcessor
 {
-   private final PacketRouter packetRouter;
+   private final PacketRouter<PacketDestination> packetRouter;
    private final boolean DEBUG = false;
 
    public DRCNetworkProcessor(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
    {
-      packetRouter = new PacketRouter();
-      ArrayList<PacketCommunicator> communicators = createRequestedModules(robotModel, params);
-
-      for (int i = 0; i < communicators.size(); i++)
+      packetRouter = new PacketRouter<>(PacketDestination.class);
+      
+      try
       {
-         PacketCommunicator packetCommunicator = communicators.get(i);
-         if (packetCommunicator != null)
-         {
-            packetRouter.attachPacketCommunicator(packetCommunicator);
-            connect(packetCommunicator);
-         }
-         else if (DEBUG)
-         {
-            PrintTools.debug(this, "Null Communicator!");
-         }
+         setupControllerCommunicator(params);
+         setupUiModule(robotModel, params);
+         setupSensorModule(robotModel, params);
+         setupBehaviorModule(robotModel, params);
+         setupHandModules(robotModel, params);
+         setupRosModule(robotModel, params);
+         setupGFEModule(params);
       }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      
    }
 
-   private ArrayList<PacketCommunicator> createRequestedModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
-   {
-      ArrayList<PacketCommunicator> communicators = new ArrayList<PacketCommunicator>();
-
-      setupControllerCommunicator(params, communicators);
-      setupUiModule(robotModel, params, communicators);
-      setupSensorModule(robotModel, params, communicators);
-      setupPerceptionModule(robotModel, params, communicators);
-      setupBehaviorModule(robotModel, params, communicators);
-      setupHandModules(robotModel, params, communicators);
-      setupRosModule(robotModel, params, communicators);
-      setupGFEModule(params, communicators);
-
-      return communicators;
-   }
-   
-   private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useHandModule())
       {
@@ -70,72 +57,64 @@ public class DRCNetworkProcessor
             return;
          }
          
-         SideDependentList<PacketCommunicator> handModuleCommunicator = new SideDependentList<PacketCommunicator>(handCommandModule.get(RobotSide.LEFT).getCommunicator(),
-               handCommandModule.get(RobotSide.RIGHT).getCommunicator());
-         
          for(RobotSide robotSide : RobotSide.values)
          {
-            communicators.add(handModuleCommunicator.get(robotSide));
+            NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
+            PacketCommunicatorMock handModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
+            PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
+            packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
+            handModuleCommunicator.connect();
             
             String methodName = "setupHandModules ";
-            printModuleConnectedDebugStatement(handModuleCommunicator.get(robotSide), methodName);
+            printModuleConnectedDebugStatement(destination, methodName);
          }
+         
+            
       }
    }
 
-   private void setupBehaviorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupBehaviorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useBehaviorModule())
       {
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-         IHMCHumanoidBehaviorManager behaviorManager;
 
          if (params.isRunAutomaticDiagnostic())
          {
-            behaviorManager = IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
+            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            behaviorManager = new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation);
+            new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation);
          }
+         
+         PacketCommunicatorMock behaviorModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.BEHAVIOR_MODULE, behaviorModuleCommunicator);
+         behaviorModuleCommunicator.connect();
 
-         PacketCommunicator behaviorModuleCommunicator = behaviorManager.getCommunicator();
-         communicators.add(behaviorModuleCommunicator);
 
          String methodName = "setupBehaviorModule ";
-         printModuleConnectedDebugStatement(behaviorModuleCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.BEHAVIOR_MODULE, methodName);
       }
    }
 
-   private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useRosModule())
       {
-         RosModule rosModule = new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
+         new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
 
-         PacketCommunicator rosModuleCommunicator = rosModule.getCommunicator();
-         communicators.add(rosModuleCommunicator);
-
+         PacketCommunicatorMock rosModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.ROS_MODULE, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.ROS_MODULE, rosModuleCommunicator);
+         rosModuleCommunicator.connect();
+         
          String methodName = "setupRosModule ";
-         printModuleConnectedDebugStatement(rosModuleCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.ROS_MODULE, methodName);
       }
    }
-
-   private void setupPerceptionModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
-   {
-      if (params.usePerceptionModule())
-      {
-         IHMCPerceptionManager perceptionModule = new IHMCPerceptionManager();
-         PacketCommunicator perceptionModuleCommunicator = perceptionModule.getPerceptionCommunicator();
-         communicators.add(perceptionModuleCommunicator);
-
-         String methodName = "setupPerceptionModule ";
-         printModuleConnectedDebugStatement(perceptionModuleCommunicator, methodName);
-      }
-   }
-
-   private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   
+   private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useSensorModule())
       {
@@ -148,54 +127,69 @@ public class DRCNetworkProcessor
          {
             sensorSuiteManager.initializePhysicalSensors(params.getRosUri());
          }
-
-         PacketCommunicator sensorModuleCommunicator = sensorSuiteManager.getProcessedSensorsCommunicator();
-         communicators.add(sensorModuleCommunicator);
-
+         sensorSuiteManager.connect();
+         
+         PacketCommunicatorMock sensorSuiteManagerCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
+         sensorSuiteManagerCommunicator.connect();
+         
+         
          String methodName = "setupSensorModule ";
-         printModuleConnectedDebugStatement(sensorModuleCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);
       }
    }
 
-   private void setupUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useUiModule())
       {
-         UiConnectionModule uiConnectionModule = new UiConnectionModule();
-
-         KryoPacketCommunicator uiModuleCommunicator = uiConnectionModule.getPacketCommunicator();
-         communicators.add(uiModuleCommunicator);
-
+         new UiConnectionModule();
+         
+         PacketCommunicatorMock uiModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.UI, uiModuleCommunicator);
+         uiModuleCommunicator.connect();
          String methodName = "setupUiModule ";
-         printModuleConnectedDebugStatement(uiModuleCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.UI, methodName);
       }
    }
 
-   private void setupGFEModule(DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupGFEModule(DRCNetworkModuleParameters params) throws IOException
    {
       if(params.useGFECommunicator())
       {
-         PacketCommunicator gfeCommunicator = params.getGFEPacketCommunicator();
-         communicators.add(gfeCommunicator);
-
+         PacketCommunicatorMock gfeCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfeCommunicator);
+         gfeCommunicator.connect();
          String methodName = "setupGFEModule ";
-         printModuleConnectedDebugStatement(gfeCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.GFE, methodName);
       }
    }
 
-   private void setupControllerCommunicator(DRCNetworkModuleParameters params, ArrayList<PacketCommunicator> communicators)
+   private void setupControllerCommunicator(DRCNetworkModuleParameters params) throws IOException
    {
       if (params.useController())
       {
-         PacketCommunicator simulatedControllerCommunicator = params.getControllerCommunicator();
-         communicators.add(simulatedControllerCommunicator);
+         PacketCommunicatorMock controllerPacketCommunicator;
+         if(params.useLocalControllerCommunicator())
+         {
+            System.out.println("Connecting to controller using intra process communication");
+            controllerPacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+         }
+         else 
+         {
+            System.out.println("Connecting to controller using TCP on " + NetworkParameters.getHost(NetworkParameterKeys.robotController));
+            controllerPacketCommunicator = PacketCommunicatorMock.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.robotController), NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+         }
+         
+         packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerPacketCommunicator);
+         controllerPacketCommunicator.connect();
 
          String methodName = "setupControllerCommunicator ";
-         printModuleConnectedDebugStatement(simulatedControllerCommunicator, methodName);
+         printModuleConnectedDebugStatement(PacketDestination.CONTROLLER, methodName);
       }
    }
 
-   protected void connect(PacketCommunicator communicator)
+   protected void connect(PacketCommunicatorMock communicator)
    {
       try
       {
@@ -206,26 +200,26 @@ public class DRCNetworkProcessor
          throw new RuntimeException(e);
       }
    }
+//
+//   public void addPacketCommunicatorToRouter(PacketDestination destination, PacketCommunicatorMock packetCommunicator)
+//   {
+//      packetRouter.attachPacketCommunicator(destination, packetCommunicator);
+//      connect(packetCommunicator);
+//      
+//      String methodName = "addPacketCommunicatorToRouter ";
+//      printModuleConnectedDebugStatement(destination, methodName);
+//   }
 
-   public void addPacketCommunicatorToRouter(PacketCommunicator packetCommunicator)
-   {
-      packetRouter.attachPacketCommunicator(packetCommunicator);
-      connect(packetCommunicator);
-      
-      String methodName = "addPacketCommunicatorToRouter ";
-      printModuleConnectedDebugStatement(packetCommunicator, methodName);
-   }
-
-   public PacketRouter getPacketRouter()
+   public PacketRouter<PacketDestination> getPacketRouter()
    {
       return packetRouter;
    }
    
-   private void printModuleConnectedDebugStatement(PacketCommunicator packetCommunicator, String methodName)
+   private void printModuleConnectedDebugStatement(PacketDestination destination, String methodName)
    {
       if (DEBUG)
       {
-         PrintTools.debug(this, methodName + packetCommunicator.getName() + " " + packetCommunicator.getId());
+         PrintTools.debug(this, methodName + ": " + destination);
       }
    }
 }

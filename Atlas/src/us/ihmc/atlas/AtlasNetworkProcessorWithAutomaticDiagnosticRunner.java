@@ -4,18 +4,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.DummyController;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -28,7 +20,6 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
-      Switch simulateController = new Switch("simulate-controller").setShortFlag('d').setLongFlag(JSAP.NO_LONGFLAG);
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
       
@@ -41,7 +32,6 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
       robotModel.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       jsap.registerParameter(robotModel);
 
-      jsap.registerParameter(simulateController);
       jsap.registerParameter(runningOnRealRobot);
       jsap.registerParameter(runningOnGazebo);
       jsap.registerParameter(leftHandHost);
@@ -53,8 +43,6 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
       {
         DRCRobotModel model;
         
-        int communicatorId = PacketDestination.CONTROLLER.ordinal();
-        IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
         networkModuleParams.setUseBehaviorModule(true);
@@ -98,23 +86,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         
         URI rosMasterURI = NetworkParameters.getROSURI();
         networkModuleParams.setRosUri(rosMasterURI);
-        
-        if (config.getBoolean(simulateController.getID()) && config.getBoolean(runningOnRealRobot.getID()))
-        {
-           System.err
-           .println("WARNING WARNING WARNING :: Simulating DRC Controller - WILL NOT WORK ON REAL ROBOT. Do not use -d argument when running on real robot.");
-           KryoLocalPacketCommunicator dummyControllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "Atlas_Dummy_Controller_Communicator");
-           
-           new DummyController(rosMasterURI, dummyControllerCommunicator, model);
-           networkModuleParams.setControllerCommunicator(dummyControllerCommunicator);
-        }
-        else
-        {
-           String controllerKryoServerIp = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-           int tcpPort = NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort();
-           KryoPacketCommunicator realRobotControllerConnection = new KryoPacketClientEndPointCommunicator(controllerKryoServerIp, tcpPort, netClassList, communicatorId, "Atlas_Controller_Endpoint");
-           networkModuleParams.setControllerCommunicator(realRobotControllerConnection);
-        }
+        networkModuleParams.setUseLocalControllerCommunicator(false);
         
         new DRCNetworkProcessor(model, networkModuleParams);
       }

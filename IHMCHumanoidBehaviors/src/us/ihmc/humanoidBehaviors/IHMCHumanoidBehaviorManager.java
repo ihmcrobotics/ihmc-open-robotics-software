@@ -1,13 +1,12 @@
 package us.ihmc.humanoidBehaviors;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorTypePacket;
@@ -15,10 +14,11 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -54,8 +54,7 @@ public class IHMCHumanoidBehaviorManager
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final KryoLocalPacketCommunicator behaviorPacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.BEHAVIOR_MODULE.ordinal(), "Behavior_Module");
+   private final PacketCommunicatorMock behaviorPacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
@@ -63,7 +62,7 @@ public class IHMCHumanoidBehaviorManager
    private YoVariableServer yoVariableServer = null;
 
    public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo)
+         DRCRobotSensorInformation sensorInfo) throws IOException
    {
       this(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, false);
    }
@@ -74,7 +73,7 @@ public class IHMCHumanoidBehaviorManager
    }
 
    private IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic)
+         DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic) throws IOException
    {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
 
@@ -138,6 +137,8 @@ public class IHMCHumanoidBehaviorManager
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
+      behaviorPacketCommunicator.connect();
+      
       if (startYoVariableServer)
       {
          yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
@@ -220,13 +221,9 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
     }
 
-   public PacketCommunicator getCommunicator()
-   {
-      return behaviorPacketCommunicator;
-   }
 
    public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo, double timeToWait)
+         DRCRobotSensorInformation sensorInfo, double timeToWait) throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
       IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, true);

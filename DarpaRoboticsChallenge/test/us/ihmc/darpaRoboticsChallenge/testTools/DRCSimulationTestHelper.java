@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.testTools;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,8 +14,11 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
@@ -23,6 +27,7 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
@@ -55,7 +60,7 @@ public class DRCSimulationTestHelper
    private final SimulationConstructionSet scs;
    private final SDFRobot sdfRobot;
    private final DRCSimulationFactory drcSimulationFactory;
-   private final PacketCommunicator controllerCommunicator;
+   protected final PacketCommunicatorMock controllerCommunicator;
    private final CommonAvatarEnvironmentInterface testEnvironment;
 
    private final SimulationTestingParameters simulationTestingParameters;
@@ -64,35 +69,39 @@ public class DRCSimulationTestHelper
    private BlockingSimulationRunner blockingSimulationRunner;
    private final WalkingControllerParameters walkingControlParameters;
 
-
    private final FullRobotModel fullRobotModel;
    private final ReferenceFrames referenceFrames;
    private final ScriptedFootstepGenerator scriptedFootstepGenerator;
    private final ScriptedHandstepGenerator scriptedHandstepGenerator;
 
    private final DRCNetworkModuleParameters networkProcessorParameters;
-  
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
+   private DRCSimulationStarter simulationStarter;
+
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation,
+         SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
-      this(new DRCDemo01NavigationEnvironment(), new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, false, robotModel);
+      this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, robotModel);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation,
-         SimulationTestingParameters simulationConstructionSetParameters, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, new ScriptedFootstepDataListObjectCommunicator("Team"), name, scriptFileName, selectedLocation, simulationConstructionSetParameters, false, robotModel);
-   }
-   
-         
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, PacketCommunicator packetCommunicator, String name, 
-         String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters , boolean startNetworkProcessor, DRCRobotModel robotModel)
-   {
-      this.controllerCommunicator = packetCommunicator;
+      this.controllerCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+            new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
 
       this.simulationTestingParameters = simulationTestingParameters;
+
+      try
+      {
+         controllerCommunicator.connect();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
 
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
@@ -101,7 +110,7 @@ public class DRCSimulationTestHelper
 
       DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
+      simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
 
@@ -109,20 +118,10 @@ public class DRCSimulationTestHelper
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
-      
-      if (startNetworkProcessor)
-      {
-         networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.setUseSensorModule(startNetworkProcessor);
-         networkProcessorParameters.setUsePerceptionModule(startNetworkProcessor);
-         networkProcessorParameters.setUseBehaviorVisualizer(false); // Needs to be false for bamboo.
-      }
-      else
-      {
-         networkProcessorParameters = null;
-         simulationStarter.setControllerPacketCommunicator(packetCommunicator);
-      }
-      
+
+      networkProcessorParameters = new DRCNetworkModuleParameters();
+      networkProcessorParameters.setUseNetworkProcessor(false);
+
       simulationStarter.startSimulation(networkProcessorParameters, false);
 
       scs = simulationStarter.getSimulationConstructionSet();
@@ -130,9 +129,6 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
-      
-      if (startNetworkProcessor)
-         simulationStarter.addPacketCommunicatorToNetworkProcessor(packetCommunicator);
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
@@ -153,28 +149,28 @@ public class DRCSimulationTestHelper
    {
       return scs;
    }
-   
+
    public DRCSimulationFactory getDRCSimulationFactory()
    {
       return drcSimulationFactory;
    }
-   
+
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
       controllerFactory.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
-   
+
    public SDFFullRobotModel getControllerFullRobotModel()
    {
       return drcSimulationFactory.getControllerFullRobotModel();
    }
-   
+
    public SDFFullRobotModel getSDFFullRobotModel()
    {
       return (SDFFullRobotModel) fullRobotModel;
    }
-   
+
    public CommonAvatarEnvironmentInterface getTestEnviroment()
    {
       return testEnvironment;
@@ -184,7 +180,7 @@ public class DRCSimulationTestHelper
    {
       return scriptedFootstepGenerator;
    }
-   
+
    public ScriptedHandstepGenerator createScriptedHandstepGenerator()
    {
       return scriptedHandstepGenerator;
@@ -208,51 +204,42 @@ public class DRCSimulationTestHelper
 
    public void sendFootstepListToListeners(FootstepDataList footstepDataList)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendFootstepListToListeners(footstepDataList);
+      controllerCommunicator.send(footstepDataList);
    }
-   
+
    public void sendHandstepPacketToListeners(HandstepPacket handstepPacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendHandstepPacketToListeners(handstepPacket);
+      controllerCommunicator.send(handstepPacket);
    }
-   
+
    public void sendHandPosePacketToListeners(HandPosePacket handPosePacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendHandPosePacketToListeners(handPosePacket);
-      if (controllerCommunicator instanceof KryoLocalPacketCommunicator)
-         controllerCommunicator.send(handPosePacket);
+      controllerCommunicator.send(handPosePacket);
    }
 
    public void sendBlindWalkingPacketToListeners(BlindWalkingPacket blindWalkingPacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendBlindWalkingPacketToListeners(blindWalkingPacket);
+      controllerCommunicator.send(blindWalkingPacket);
    }
 
    public void sendComHeightPacketToListeners(ComHeightPacket comHeightPacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendComHeightPacketToListeners(comHeightPacket);
+      controllerCommunicator.send(comHeightPacket);
    }
 
    public void sendChestOrientationPacketToListeners(ChestOrientationPacket chestOrientationPacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendChestOrientation(chestOrientationPacket);
+      controllerCommunicator.send(chestOrientationPacket);
    }
-   
-   public void sendWholeBodyTrajectoryPacketToListeners(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket){
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendWholeBodyTrajectory(wholeBodyTrajectoryPacket);
+
+   public void sendWholeBodyTrajectoryPacketToListeners(WholeBodyTrajectoryPacket wholeBodyTrajectoryPacket)
+   {
+      controllerCommunicator.send(wholeBodyTrajectoryPacket);
    }
-   
+
    public void sendArmJointTrajectoryPacketToListeners(ArmJointTrajectoryPacket armJointTrajectoryPacket)
    {
-      if (controllerCommunicator instanceof ScriptedFootstepDataListObjectCommunicator)
-         ((ScriptedFootstepDataListObjectCommunicator) controllerCommunicator).sendArmJointTrajectory(armJointTrajectoryPacket);
+      controllerCommunicator.send(armJointTrajectoryPacket);
    }
 
    public SDFRobot getRobot()
@@ -274,9 +261,7 @@ public class DRCSimulationTestHelper
          drcSimulationFactory.dispose();
       }
       GlobalTimer.clearTimers();
-      
-      
-      
+
       if (networkProcessorParameters != null)
       {
          PacketCommunicator simulatedSensorCommunicator = networkProcessorParameters.getSimulatedSensorCommunicator();
@@ -284,13 +269,14 @@ public class DRCSimulationTestHelper
          {
             simulatedSensorCommunicator.close();
          }
-         
-         PacketCommunicator controllerCommunicator = networkProcessorParameters.getControllerCommunicator();
-         if (controllerCommunicator != null)
-         {
-            controllerCommunicator.close();
-         }
+
       }
+      if (controllerCommunicator != null)
+      {
+         controllerCommunicator.close();
+      }
+
+      simulationStarter.close();
    }
 
    public boolean simulateAndBlockAndCatchExceptions(double simulationTime) throws SimulationExceededMaximumTimeException
@@ -344,7 +330,6 @@ public class DRCSimulationTestHelper
       scs.selectCamera("testCamera");
    }
 
-   
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3d boundingBox)
    {
       FloatingJoint rootJoint = getRobot().getRootJoint();
@@ -372,12 +357,27 @@ public class DRCSimulationTestHelper
       exceptions.add("controllerStartTime");
       exceptions.add("actualControlDT");
       exceptions.add("timePassed");
-      
-//    exceptions.add("gc_");
-//    exceptions.add("toolFrame");
-//    exceptions.add("ef_");
-//    exceptions.add("kp_");
+
+      //    exceptions.add("gc_");
+      //    exceptions.add("toolFrame");
+      //    exceptions.add("ef_");
+      //    exceptions.add("kp_");
 
       return exceptions;
+   }
+
+   public void send(Packet<?> packet)
+   {
+      controllerCommunicator.send(packet);
+   }
+
+   public <T extends Packet<?>> void attachListener(Class<T> clazz, PacketConsumer<T> listener)
+   {
+      controllerCommunicator.attachListener(clazz, listener);
+   }
+
+   public PacketCommunicatorMock getControllerCommunicator()
+   {
+      return controllerCommunicator;
    }
 }

@@ -12,6 +12,7 @@ import org.ros.node.NodeConfiguration;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
@@ -47,7 +48,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
-   private final PacketCommunicator controllerCommunicationBridge;
+   private final PacketCommunicatorMock controllerCommunicationBridge;
    private final PacketCommunicator scsSensorCommunicationBridge;
 
    private final ArrayList<AbstractRosTopicSubscriber<?>> subscribers;
@@ -57,12 +58,12 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, PacketCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock gfe_communicator, PacketCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
-      this.controllerCommunicationBridge = controllerCommunicationBridge;
+      this.controllerCommunicationBridge = gfe_communicator;
       this.scsSensorCommunicationBridge = scsSensorCommunicationBridge;
       this.ppsTimestampOffsetProvider = ppsOffsetProvider;
       this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -74,7 +75,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.fullRobotModel = robotModel.createFullRobotModel();
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
-      controllerCommunicationBridge.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace);
@@ -88,12 +89,12 @@ public class ThePeoplesGloriousNetworkProcessor
          ThreadTools.sleep(100);
       }
 
-      controllerCommunicationBridge.connect();
+      gfe_communicator.connect();
       
       System.out.println("IHMC ROS API node successfully connected to controller.");
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
          IOException
    {
       this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace);

@@ -6,9 +6,7 @@ import java.net.URI;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoPacketClient;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
@@ -27,8 +25,7 @@ public class AtlasROSAPINetworkProcessor
    {
       String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       
-      KryoPacketClientEndPointCommunicator controllerCommunicator = new KryoPacketClientEndPointCommunicator(kryoIP, NetworkPorts.NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT.getPort(),
-            new IHMCCommunicationKryoNetClassList(),PacketDestination.CONTROLLER.ordinal(),"AtlasROSAPINetworkProcessor");
+      PacketCommunicatorMock controllerCommunicator = PacketCommunicatorMock.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       
       URI rosUri = NetworkParameters.getROSURI();
       new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, robotModel, nameSpace);

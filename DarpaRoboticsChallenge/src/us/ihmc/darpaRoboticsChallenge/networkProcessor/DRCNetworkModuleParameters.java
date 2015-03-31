@@ -3,7 +3,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 
 public class DRCNetworkModuleParameters
@@ -17,24 +16,21 @@ public class DRCNetworkModuleParameters
    private boolean useHandModule;
    private boolean usePerceptionModule;
    private boolean useRosModule;
-
+   private boolean useGFECommunicator;
+   private boolean useNetworkProcessor = true;
+   
+   private boolean useLocalControllerCommunicator;
+   
    private boolean runAutomaticDiagnostic = false;
 
-   private PacketCommunicator controllerCommunicator;
    private PacketCommunicator simulatedSensorCommunicator;
    private URI rosUri;
-   private KryoLocalPacketCommunicator GFEPacketCommunicator;
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
 
    public boolean useSensorModule()
    {
       return useSensorModule;
-   }
-
-   public boolean useGFECommunicator()
-   {
-      return getGFEPacketCommunicator() != null;
    }
 
    public boolean usePerceptionModule()
@@ -80,11 +76,6 @@ public class DRCNetworkModuleParameters
    public PacketCommunicator getSimulatedSensorCommunicator()
    {
       return simulatedSensorCommunicator;
-   }
-
-   public PacketCommunicator getControllerCommunicator()
-   {
-      return controllerCommunicator;
    }
 
    public URI getRosUri()
@@ -167,12 +158,6 @@ public class DRCNetworkModuleParameters
       return timeToWaitBeforeStartingDiagnostics;
    }
 
-   public void setControllerCommunicator(PacketCommunicator controllerCommunicator)
-   {
-      this.controllerCommunicator = controllerCommunicator;
-      useController = true;
-   }
-
    public void setSimulatedSensorCommunicator(PacketCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
@@ -187,17 +172,37 @@ public class DRCNetworkModuleParameters
       return "DRCNetworkModuleParameters [useController=" + useController + "\n useSensorModule=" + useSensorModule + "\n useSimulatedSensors="
             + useSimulatedSensors + "\n useUiModule=" + useUiModule + "\n useBehaviorModule=" + useBehaviorModule + "\n useBehaviorVisualizer="
             + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
-            + "\n controllerCommunicator=" + controllerCommunicator + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
+            + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
             + "]";
    }
 
-   public void setGFEPacketCommunicator(KryoLocalPacketCommunicator GFEPacketCommunicator)
+   public boolean useLocalControllerCommunicator()
    {
-      this.GFEPacketCommunicator = GFEPacketCommunicator;
+      return useLocalControllerCommunicator;
    }
 
-   public KryoLocalPacketCommunicator getGFEPacketCommunicator()
+   public void setUseLocalControllerCommunicator(boolean useLocalControllerCommunicator)
    {
-      return GFEPacketCommunicator;
+      this.useLocalControllerCommunicator = useLocalControllerCommunicator;
+   }
+
+   public boolean useGFECommunicator()
+   {
+      return useGFECommunicator;
+   }
+
+   public void setUseGFECommunicator(boolean useGFECommunicator)
+   {
+      this.useGFECommunicator = useGFECommunicator;
+   }
+
+   public boolean useNetworkProcessor()
+   {
+      return useNetworkProcessor;
+   }
+
+   public void setUseNetworkProcessor(boolean useNetworkProcessor)
+   {
+      this.useNetworkProcessor = useNetworkProcessor;
    }
 }

@@ -9,7 +9,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -87,15 +86,13 @@ public abstract class DRCObstacleCourseDoNothingTest implements MultiRobotTestIn
 //      createMovie, false, robotModel
       
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCDemo01NavigationEnvironment();
-      PacketCommunicator packetCommunicator = null;
       String name = "DRCDoNothingTest";
       String scriptFileName = "";
       
 
-      boolean startNetworkProcessor = false;
       DRCRobotModel robotModel = getRobotModel();
       
-      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, packetCommunicator, name, scriptFileName, selectedLocation, simulationTestingParameters, startNetworkProcessor, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel);
 //      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCDoNothingTest", "", selectedLocation, checkNothingChanged, showGUI, createMovie,
 //            getRobotModel());
 

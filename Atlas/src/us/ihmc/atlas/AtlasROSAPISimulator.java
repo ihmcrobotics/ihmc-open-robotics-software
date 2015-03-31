@@ -6,12 +6,12 @@ import java.net.URI;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
-import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -33,7 +33,7 @@ public class AtlasROSAPISimulator
    private static String defaultStartingLocation = "DEFAULT";
    private final boolean startUI = false;
    private boolean redirectUiPacketsToRos = false;
-   private KryoLocalPacketCommunicator gfe_communicator;
+   private PacketCommunicatorMock gfe_communicator;
 
    public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
    {
@@ -45,9 +45,10 @@ public class AtlasROSAPISimulator
       URI rosUri = NetworkParameters.getROSURI();
       networkProcessorParameters.setRosUri(rosUri);
 
-      gfe_communicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.GFE.ordinal(), "GFE_Communicator");
-      networkProcessorParameters.setGFEPacketCommunicator(gfe_communicator);
+      gfe_communicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      gfe_communicator.connect();
 
+      networkProcessorParameters.setUseGFECommunicator(true);
       if (runAutomaticDiagnosticRoutine)
       {
          networkProcessorParameters.setUseBehaviorModule(true);
@@ -67,7 +68,7 @@ public class AtlasROSAPISimulator
 
       if (redirectUiPacketsToRos)
       {
-         PacketRouter packetRouter = simulationStarter.getPacketRouter();
+         PacketRouter<PacketDestination> packetRouter = simulationStarter.getPacketRouter();
          new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator, packetRouter);
       }
       

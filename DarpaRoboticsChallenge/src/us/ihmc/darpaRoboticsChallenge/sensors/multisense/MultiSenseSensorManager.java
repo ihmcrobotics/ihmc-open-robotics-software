@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.multisense;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
@@ -28,7 +28,7 @@ public class MultiSenseSensorManager
    private final SDFFullRobotModelFactory fullRobotModelFactory;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final RosMainNode rosMainNode;
-   private final PacketCommunicator packetCommunicator;
+   private final PacketCommunicatorMock packetCommunicator;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
 
@@ -41,7 +41,7 @@ public class MultiSenseSensorManager
    private MultiSenseParamaterSetter multiSenseParamaterSetter;
 
    public MultiSenseSensorManager(SDFFullRobotModelFactory sdfFullRobotModelFactory, PointCloudDataReceiver pointCloudDataReceiver, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         RosMainNode rosMainNode, PacketCommunicator packetCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
+         RosMainNode rosMainNode, PacketCommunicatorMock sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, URI sensorURI, DRCRobotCameraParameters cameraParamaters,
          DRCRobotLidarParameters lidarParamaters, DRCRobotPointCloudParameters stereoParamaters, boolean setROSParameters)
    {
       this.fullRobotModelFactory = sdfFullRobotModelFactory;
@@ -50,14 +50,14 @@ public class MultiSenseSensorManager
       this.lidarParamaters = lidarParamaters;
       this.cameraParamaters = cameraParamaters;
       this.rosMainNode = rosMainNode;
-      this.packetCommunicator = packetCommunicator;
+      this.packetCommunicator = sensorSuitePacketCommunicator;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorURI = sensorURI;
       registerCameraReceivers();
       registerLidarReceivers();
       if(setROSParameters)
       {
-         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, packetCommunicator);
+         multiSenseParamaterSetter = new MultiSenseParamaterSetter(rosMainNode, sensorSuitePacketCommunicator);
          setMultiseSenseParams(lidarParamaters.getLidarSpindleVelocity());
       }
       else

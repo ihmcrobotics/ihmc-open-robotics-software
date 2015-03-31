@@ -4,8 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
 /**
@@ -13,12 +12,12 @@ import us.ihmc.communication.packets.Packet;
  * If you send from the source it will filter the packet then call send on the destination
  * communicator.
  */
-public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
+public class FilteredPacketSendingForwarder implements GlobalPacketConsumer
 {
    private static final boolean DEBUG = false;
    
-   private final PacketCommunicator communicatorToForwardFrom;
-   private final PacketCommunicator communicatorToForwardTo;
+   private final PacketCommunicatorMock communicatorToForwardFrom;
+   private final PacketCommunicatorMock communicatorToForwardTo;
    private final HashMap<Class, TimedElapsedChecker> inclusiveClassesWithElapsedTimeTriggers = new HashMap<Class, FilteredPacketSendingForwarder.TimedElapsedChecker>();
    private final HashSet<Class> classesToInclude = new HashSet<Class>();
    private final HashSet<Class> classesToExclude = new HashSet<Class>();
@@ -27,11 +26,11 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
    private ForwarderMode mode;
 
    
-   public FilteredPacketSendingForwarder(PacketCommunicator communicatorToForwardFrom, PacketCommunicator communicatorToForwardTo, AtomicSettableTimestampProvider timestampProvider)
+   public FilteredPacketSendingForwarder(PacketCommunicatorMock communicatorToForwardFrom, PacketCommunicatorMock communicatorToForwardTo, AtomicSettableTimestampProvider timestampProvider)
    {
       this.communicatorToForwardFrom = communicatorToForwardFrom;
       this.communicatorToForwardTo = communicatorToForwardTo;
-      communicatorToForwardFrom.attacthGlobalReceiveListener(this);
+      communicatorToForwardFrom.attachGlobalListener(this);
       this.timestampProvider = timestampProvider;
    }
 
@@ -47,7 +46,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
          classesToExclude.add(clazzesToExclude[i]);
          if (DEBUG)
          {
-            System.out.println(getClass().getSimpleName() + ": excluding " + clazzesToExclude[i].getSimpleName() + " forwarding from " + communicatorToForwardFrom.getName() + " to " + communicatorToForwardTo.getName());
+            System.out.println(getClass().getSimpleName() + ": excluding " + clazzesToExclude[i].getSimpleName() + " forwarding from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
          }
       }
    }
@@ -64,7 +63,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
          classesToInclude.add(clazzesToInclude[i]);
          if (DEBUG)
          {
-            System.out.println(getClass().getSimpleName() + ": including " + clazzesToInclude[i].getSimpleName() + " forwarding from " + communicatorToForwardFrom.getName() + " to " + communicatorToForwardTo.getName());
+            System.out.println(getClass().getSimpleName() + ": including " + clazzesToInclude[i].getSimpleName() + " forwarding from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
          }
       }
    }
@@ -86,7 +85,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       inclusiveClassesWithElapsedTimeTriggers.put(clazz, new TimedElapsedChecker(minimumTimeBetweenForwardInNanos));
       if (DEBUG)
       {
-         System.out.println(getClass().getSimpleName() + ": including " + clazz.getSimpleName() + " " + minimumTimeBetweenForwardInNanos + " nanoseconds timelapsed forwarding from " + communicatorToForwardFrom.getName() + " to " + communicatorToForwardTo.getName());
+         System.out.println(getClass().getSimpleName() + ": including " + clazz.getSimpleName() + " " + minimumTimeBetweenForwardInNanos + " nanoseconds timelapsed forwarding from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
       }
    }
    
@@ -95,7 +94,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       mode = ForwarderMode.DISABLED;
       if (DEBUG)
       {
-         System.out.println(getClass().getSimpleName() + ": disabled forwarder" + communicatorToForwardFrom.getClass().getSimpleName());
+         System.out.println(getClass().getSimpleName() + ": disabled forwarder" + communicatorToForwardFrom);
       }
    }
 
@@ -121,7 +120,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       {
          if (DEBUG)
          {
-            System.out.println(getClass().getSimpleName() + ": forwarding " +packet.getClass() + " from " + communicatorToForwardFrom.getClass().getSimpleName() + " to " + communicatorToForwardTo.getClass().getSimpleName());
+            System.out.println(getClass().getSimpleName() + ": forwarding " +packet.getClass() + " from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
          }
          communicatorToForwardTo.send(packet);
          return;
@@ -133,7 +132,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
          {
             if (DEBUG)
             {
-               System.out.println(getClass().getSimpleName() + ": time lapsed forwarding " + packet.getClass() + " from " + communicatorToForwardFrom.getClass().getSimpleName() + " to " + communicatorToForwardTo.getClass().getSimpleName());
+               System.out.println(getClass().getSimpleName() + ": time lapsed forwarding " + packet.getClass() + " from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
             }
             communicatorToForwardTo.send(packet);
          }
@@ -142,7 +141,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       
       if (DEBUG)
       {
-         System.out.println(getClass().getSimpleName() + ": excluded on inclusive send " + packet.getClass() + " from " + communicatorToForwardFrom.getClass().getSimpleName() + " to " + communicatorToForwardTo.getClass().getSimpleName());
+         System.out.println(getClass().getSimpleName() + ": excluded on inclusive send " + packet.getClass() + " from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
       }
    }
 
@@ -152,7 +151,7 @@ public class FilteredPacketSendingForwarder implements PacketConsumer<Packet>
       {
          if (DEBUG)
          {
-            System.out.println(getClass().getSimpleName() + ": forwarding " +packet.getClass() + " from " + communicatorToForwardFrom.getClass().getSimpleName() + " to " + communicatorToForwardTo.getClass().getSimpleName());
+            System.out.println(getClass().getSimpleName() + ": forwarding " +packet.getClass() + " from " + communicatorToForwardFrom + " to " + communicatorToForwardTo);
          }
          communicatorToForwardTo.send(packet);
       }

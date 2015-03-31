@@ -3,7 +3,7 @@ package us.ihmc.communication.util;
 public enum NetworkPorts
 {
    // Network processor <-> Controller communication
-   NETWORK_PROCESSOR_TO_CONTROLLER_TCP_PORT(4895),
+   CONTROLLER_PORT(4895),
    
    // Network processor <-> UI Communication
    NETWORK_PROCESSOR_TO_UI_TCP_PORT(4898),
@@ -17,7 +17,26 @@ public enum NetworkPorts
    
    // Hands
    LEFT_HAND_PORT(5003),
-   RIGHT_HAND_PORT(5004)
+   RIGHT_HAND_PORT(5004),
+   
+   
+   // Test ports
+   TEST_PORT_A(21090),
+   TEST_PORT_B(21091),
+   TEST_PORT_C(21092),
+   TEST_PORT_D(21093),
+   TEST_PORT_E(21094),
+   TEST_PORT_F(21095), 
+   
+   // Network manager ports
+   BEHAVIOUR_MODULE_PORT(6001), 
+   UI_MODULE(6002), 
+   SENSOR_MANAGER(6003), 
+   LEFT_HAND_MANAGER_PORT(6004),
+   RIGHT_HAND_MANAGER_PORT(6005), 
+   ROS_MODULE(6006), 
+   GFE_COMMUNICATOR(6007),
+   
    ;
    
    private final int port;

@@ -97,11 +97,6 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
    private void setUpDrcTestHelper()
    {
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
-
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -116,8 +111,8 @@ public abstract class DRCGraspPieceOfDebrisBehaviorTest implements MultiRobotTes
 
       testEnvironment.createDebrisContactController();
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null, startingLocation,
-            simulationTestingParameters, getRobotModel(), controllerCommunicator);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null, startingLocation,
+            simulationTestingParameters, getRobotModel());
 
       yoTime = drcBehaviorTestHelper.getRobot().getYoTime();
 

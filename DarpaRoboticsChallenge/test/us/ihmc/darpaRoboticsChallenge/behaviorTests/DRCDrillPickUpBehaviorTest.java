@@ -9,10 +9,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.DrillPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
@@ -105,11 +101,6 @@ public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterf
       DRCDrillEnvironment testEnvironment = new DRCDrillEnvironment();
       drillRobot = testEnvironment.getDrillRobot();
 
-      KryoPacketCommunicator controllerCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-                                                         PacketDestination.CONTROLLER.ordinal(), "DRCControllerCommunicator");
-      KryoPacketCommunicator networkObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-                                                            PacketDestination.NETWORK_PROCESSOR.ordinal(), "MockNetworkProcessorCommunicator");
-
       DRCStartingLocation startingLocation = new DRCStartingLocation()
       {
          @Override
@@ -121,8 +112,8 @@ public abstract class DRCDrillPickUpBehaviorTest implements MultiRobotTestInterf
          }
       };
 
-      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, networkObjectCommunicator, getSimpleRobotName(), null, startingLocation,
-              simulationTestingParameters, getRobotModel(), controllerCommunicator);
+      drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null, startingLocation,
+              simulationTestingParameters, getRobotModel());
       drillPickUpBehavior = new DrillPickUpBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime(),
               drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getReferenceFrames(), getRobotModel());
       drillPickUpBehavior.setGrabSide(grabSide);

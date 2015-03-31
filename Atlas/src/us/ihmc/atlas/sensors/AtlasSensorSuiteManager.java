@@ -1,5 +1,6 @@
 package us.ihmc.atlas.sensors;
 
+import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
@@ -8,11 +9,11 @@ import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLidarReceiver;
@@ -30,8 +31,9 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
-         PacketDestination.SENSOR_MANAGER.ordinal(), "ATLAS_SENSOR_MANAGER");
+   private final PacketCommunicatorMock sensorSuitePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
+         new IHMCCommunicationKryoNetClassList());
+   
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
    private final PointCloudDataReceiver pointCloudDataReceiver;
@@ -76,7 +78,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       //         cameraReceiver.registerCameraListener(armCalibrationHelper);
       //      }
 
-      IMUBasedHeadPoseCalculatorFactory.create(scsSensorsCommunicator, sensorInformation);
+      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
    }
 
    @Override
@@ -116,9 +118,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    }
 
    @Override
-   public PacketCommunicator getProcessedSensorsCommunicator()
+   public void connect() throws IOException
    {
-      return sensorSuitePacketCommunicator;
+      sensorSuitePacketCommunicator.connect();
    }
 
 }

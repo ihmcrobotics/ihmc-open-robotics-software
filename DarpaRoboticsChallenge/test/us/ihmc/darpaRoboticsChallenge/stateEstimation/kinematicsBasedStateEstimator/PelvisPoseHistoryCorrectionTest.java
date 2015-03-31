@@ -16,9 +16,6 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
-import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -119,7 +116,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private final KryoLocalPacketCommunicator kryoLocalObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "PelvisPoseHistoryCorrectionTestLocalControllerCommunicator");
+//   private final KryoLocalPacketCommunicator kryoLocalObjectCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "PelvisPoseHistoryCorrectionTestLocalControllerCommunicator");
    private final Random random = new Random();
    private FlatGroundEnvironment flatGroundEnvironment;
    private YoVariableRegistry registry;
@@ -484,7 +481,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private boolean yawBigInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
       FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1, 1, 0.3), new Quat4d(), 0.6);
-      kryoLocalObjectCommunicator.send(packet);
+      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
@@ -498,7 +495,7 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
    private boolean localizeOutsideOfFootInSingleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
       FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3d(1.0, 1.0, 0.3), new Quat4d(), 0.6);
-      kryoLocalObjectCommunicator.send(packet);
+      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       long timeStamp = TimeTools.secondsToNanoSeconds(simulationConstructionSet.getTime());
       RigidBodyTransform outsideOfFootTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1.5, 1.0, 0.8, 0.0, 0.0, 0.0);
@@ -840,8 +837,8 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       {
          script = simpleFlatGroundScriptName;
       }
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, kryoLocalObjectCommunicator, "PelvisCorrectionTest", script,
-            startingLocation, simulationTestingParameters, false, getRobotModel());
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, "PelvisCorrectionTest", script,
+            startingLocation, simulationTestingParameters, getRobotModel());
       simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       robot = drcSimulationTestHelper.getRobot();
       registry = robot.getRobotsYoVariableRegistry();
