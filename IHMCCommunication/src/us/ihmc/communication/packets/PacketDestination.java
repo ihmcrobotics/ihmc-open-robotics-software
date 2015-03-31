@@ -18,4 +18,15 @@ public enum PacketDestination
    GFE;
 
    public static final PacketDestination[] values = values();
+   
+   public static final PacketDestination fromOrdinal(int ordinal)
+   {
+      for (PacketDestination packetDestination : values)
+      {
+         if (ordinal == packetDestination.ordinal())
+            return packetDestination;
+      }
+      
+      return null;
+   }
 }
