@@ -16,8 +16,8 @@ import javax.vecmath.Vector3d;
 
 import org.ddogleg.struct.FastQueue;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.sensing.TestbedClientPacket;
 import us.ihmc.communication.packets.sensing.TestbedServerPacket;
 import us.ihmc.sensorProcessing.pointClouds.testbed.TestbedAutomaticAlignment;
@@ -43,7 +43,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
 
    TestbedAutomaticAlignment testbedFinder;
 
-   AbstractNetworkProcessorNetworkingManager networkManager;
+   PacketCommunicatorMock controllerStateHandler;
 
    boolean justCollectData;
 
@@ -54,10 +54,10 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
    int totalSaved = 0;
    Point3D_F64 testbedLocation = new Point3D_F64();
 
-   public NetworkProcessorTestbedAlignment(AbstractNetworkProcessorNetworkingManager networkManager)
+   public NetworkProcessorTestbedAlignment(PacketCommunicatorMock controllerStateHandler)
    {
 
-      this.networkManager = networkManager;
+      this.controllerStateHandler = controllerStateHandler;
 
       try
       {
@@ -91,11 +91,11 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
             testbedFinder.reset();
             active = true;
             stopTime = System.currentTimeMillis() + integrationPeriod;
-            networkManager.getControllerStateHandler().sendPacket(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
+            controllerStateHandler.send(new TestbedServerPacket(TestbedServerPacket.START_COLLECTING));
          }
       } else {
          System.out.println("NetworkProcessorTestbedAlignment - model not loaded");
-         networkManager.getControllerStateHandler().sendPacket(new TestbedServerPacket(TestbedServerPacket.FAILED_NORESOURCE));
+         controllerStateHandler.send(new TestbedServerPacket(TestbedServerPacket.FAILED_NORESOURCE));
       }
    }
 
@@ -144,7 +144,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
                   savePointCloudScans(false);
                   processing = false;
                   active = false;
-                  networkManager.getControllerStateHandler().sendPacket(new TestbedServerPacket(TestbedServerPacket.DONE_COLLECTING_DATA));
+                  controllerStateHandler.send(new TestbedServerPacket(TestbedServerPacket.DONE_COLLECTING_DATA));
                } else {
                   processing = true;
                   active = false;
@@ -191,7 +191,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
          {
             if (processing)
             {
-               networkManager.getControllerStateHandler().sendPacket(new TestbedServerPacket(TestbedServerPacket.START_PROCESSING));
+               controllerStateHandler.send(new TestbedServerPacket(TestbedServerPacket.START_PROCESSING));
 
 
                TestbedServerPacket packet = new TestbedServerPacket();
@@ -226,7 +226,7 @@ public class NetworkProcessorTestbedAlignment implements Runnable, PacketConsume
                   System.out.println("Failed to find testbed");
                   packet.setResult(TestbedServerPacket.FAILED);
                }
-               networkManager.getControllerStateHandler().sendPacket(packet);
+               controllerStateHandler.send(packet);
                processing = false;
             }
          }

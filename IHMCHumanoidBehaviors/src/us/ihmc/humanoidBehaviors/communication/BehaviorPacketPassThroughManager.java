@@ -2,18 +2,18 @@ package us.ihmc.humanoidBehaviors.communication;
 
 import java.util.HashMap;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
-public class BehaviorPacketPassThroughManager implements PacketConsumer<Packet>
+public class BehaviorPacketPassThroughManager implements GlobalPacketConsumer
 {
 
-   private final PacketCommunicator toCommunicator;
+   private final PacketCommunicatorMock toCommunicator;
    private final HashMap<Class, Boolean> classPassthroughMap;
    private boolean passThroughActive;
 
-   public BehaviorPacketPassThroughManager(PacketCommunicator fromCommunicator, PacketCommunicator toCommunicator, Class[] packetsToPass)
+   public BehaviorPacketPassThroughManager(PacketCommunicatorMock fromCommunicator, PacketCommunicatorMock toCommunicator, Class[] packetsToPass)
    {
       this.toCommunicator = toCommunicator;
 
@@ -25,7 +25,7 @@ public class BehaviorPacketPassThroughManager implements PacketConsumer<Packet>
       }
 
       passThroughActive = true;
-      fromCommunicator.attacthGlobalSendListener(this);
+      fromCommunicator.attachGlobalListener(this);
    }
    
    public void setPassThrough(Class clzz, boolean activatePassthrough)

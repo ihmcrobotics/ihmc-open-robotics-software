@@ -7,7 +7,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -24,10 +24,10 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
    private static double Shutter;
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> blackFlyClient;
    private final RosMainNode rosMainNode;
-   private final PacketCommunicator packetCommunicator;
+   private final PacketCommunicatorMock packetCommunicator;
    private ParameterTree params;
 
-   public BlackFlyParameterSetter(RosMainNode rosMainNode, PacketCommunicator packetCommunicator)
+   public BlackFlyParameterSetter(RosMainNode rosMainNode, PacketCommunicatorMock packetCommunicator)
    {
       this.rosMainNode = rosMainNode;
       this.packetCommunicator = packetCommunicator;

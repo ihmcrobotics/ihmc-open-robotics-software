@@ -8,9 +8,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import javax.imageio.ImageIO;
 
-import us.ihmc.communication.AbstractNetworkProcessorNetworkingManager;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -29,11 +28,11 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
 
    private RobotConfigurationData lastJointConfigurationData;
 
-   public ArmCalibrationHelper(PacketCommunicator fieldComputerClient, AbstractNetworkProcessorNetworkingManager networkingManager,
+   public ArmCalibrationHelper(PacketCommunicatorMock fieldComputerClient, PacketCommunicatorMock networkingManager,
          DRCRobotJointMap jointMap)
    {
       this.jointMap = jointMap;
-      networkingManager.getControllerCommandHandler().attachListener(CalibrateArmPacket.class, this);
+      networkingManager.attachListener(CalibrateArmPacket.class, this);
       fieldComputerClient.attachListener(RobotConfigurationData.class, new JointAngleConsumer());
       startPeriodicRecording();
    }

@@ -19,15 +19,14 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlane
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunicator;
-import us.ihmc.communication.packetCommunicator.KryoPacketServer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
@@ -74,11 +73,11 @@ public class FootstepDataTest
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
-      int port = 8833;
+	   NetworkPorts port = NetworkPorts.TEST_PORT_E;
 //      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
+      PacketCommunicatorMock tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
+      PacketCommunicatorMock tcpClient = createStreamingDataConsumer(FootstepData.class, footstepDataConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
@@ -108,12 +107,12 @@ public class FootstepDataTest
    {
       Random random = new Random(1582l);
       // setup comms
-      int port = 8833;
+      NetworkPorts port = NetworkPorts.TEST_PORT_D;
 //      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
+      PacketCommunicatorMock tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
+      PacketCommunicatorMock tcpClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
@@ -137,12 +136,12 @@ public class FootstepDataTest
    public void testPassingPauseCommand() throws IOException
    {
       // setup comms
-      int port = 8833;
+	   NetworkPorts port = NetworkPorts.TEST_PORT_C;
 //      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
+      PacketCommunicatorMock tcpServer = createAndStartStreamingDataTCPServer(port);
 
       PauseConsumer pauseConsumer = new PauseConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
+      PacketCommunicatorMock tcpClient = createStreamingDataConsumer(PauseCommand.class, pauseConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 //      queueBasedStreamingDataProducer.startProducingData();
 
@@ -177,20 +176,20 @@ public class FootstepDataTest
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       // Create one server for two types of data
-      int pathPort = 8833;
+	   NetworkPorts pathPort = NetworkPorts.TEST_PORT_B;
 
 //      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
 
 //      QueueBasedStreamingDataProducer<PauseCommand> pauseQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
 
-      PacketCommunicator streamingDataTCPServer = createAndStartStreamingDataTCPServer( pathPort);
+      PacketCommunicatorMock streamingDataTCPServer = createAndStartStreamingDataTCPServer( pathPort);
 //      pauseQueueBasedStreamingDataProducer.addConsumer(streamingDataTCPServer);
 
       // create one client for two types of data
       FootstepPathConsumer footstepPathConsumer = new FootstepPathConsumer();
       PauseConsumer pauseConsumer = new PauseConsumer();
 
-      PacketCommunicator streamingDataTCPClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, pathPort);
+      PacketCommunicatorMock streamingDataTCPClient = createStreamingDataConsumer(FootstepDataList.class, footstepPathConsumer, pathPort);
       streamingDataTCPClient.attachListener(PauseCommand.class, pauseConsumer);
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -248,11 +247,11 @@ public class FootstepDataTest
    public void testPassingFootstepStatus() throws IOException
    {
       // setup comms
-      int port = 8833;
-      PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
+      NetworkPorts port = NetworkPorts.TEST_PORT_A;
+      PacketCommunicatorMock tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
+      PacketCommunicatorMock tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 
       // create test footsteps
@@ -301,20 +300,21 @@ public class FootstepDataTest
       return netClassList;
    }
 
-   private PacketCommunicator createAndStartStreamingDataTCPServer(int port)
+   private PacketCommunicatorMock createAndStartStreamingDataTCPServer(NetworkPorts port)
          throws IOException
    {
 
       
-      KryoPacketServer server = new KryoPacketServer(port, getNetClassList(), PacketDestination.CONTROLLER.ordinal(), getClass().getSimpleName() + "server");
+
+      PacketCommunicatorMock server = PacketCommunicatorMock.createTCPPacketCommunicatorServer(port, getNetClassList());
       server.connect();
 //      queueBasedStreamingDataProducer.addConsumer(server);
       return server;
    }
 
-   private <T extends Packet> PacketCommunicator createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, int port) throws IOException
+   private <T extends Packet> PacketCommunicatorMock createStreamingDataConsumer(Class<T> clazz, PacketConsumer<T> consumer, NetworkPorts port) throws IOException
    {
-      KryoPacketClientEndPointCommunicator client = new KryoPacketClientEndPointCommunicator("localhost", port, getNetClassList(), PacketDestination.NETWORK_PROCESSOR.ordinal(), getClass().getSimpleName() + "client");
+      PacketCommunicatorMock client = PacketCommunicatorMock.createTCPPacketCommunicatorClient("localhost", port, getNetClassList());
       client.connect();
       client.attachListener(clazz, consumer);
       return client;
