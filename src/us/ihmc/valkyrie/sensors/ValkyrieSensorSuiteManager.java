@@ -59,7 +59,6 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       {
          new SCSPointCloudLidarReceiver(sensorInformation.getLidarParameters(0).getSensorNameInSdf(), scsSensorsCommunicator, pointCloudDataReceiver);
       }
-      pointCloudDataReceiver.start();
       cameraDataReceiver.start();
    }
 
@@ -81,7 +80,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       //TODO: Fixme
       //      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, sensorSuitePacketCommunicator, sdfFullRobotModel, sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.IBEO_ID), lidarDataFilter);
       new RosPointCloudReceiver(sensorInformation.getLidarParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
-      pointCloudDataReceiver.start();
+      
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosMainNode.execute();
@@ -92,5 +91,9 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    public void connect() throws IOException
    {
       sensorSuitePacketCommunicator.connect();
+      if (sensorInformation.getLidarParameters().length > 0)
+      {
+         pointCloudDataReceiver.start();
+      }
    }
 }
