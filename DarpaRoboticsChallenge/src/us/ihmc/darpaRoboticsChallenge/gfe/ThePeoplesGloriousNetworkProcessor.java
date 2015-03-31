@@ -25,8 +25,10 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
@@ -107,11 +109,10 @@ public class ThePeoplesGloriousNetworkProcessor
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
-
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
       if(scsSensorCommunicationBridge != null)
       {
-         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher);
+         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher, robotConfigurationPublisher);
       }
 
       Map<String, Class> outputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
@@ -131,17 +132,21 @@ public class ThePeoplesGloriousNetworkProcessor
       System.setErr(printStreamBridge);
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher)
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher, RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
          new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
       }
 
-      if (sensorInformation.getLidarParameters().length > 0)
+      DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
+      if (lidarParameters.length > 0)
       {
          new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
-               sensorInformation.getLidarParameters(), tfPublisher);
+               lidarParameters, tfPublisher);
+         
+         DRCRobotLidarParameters primaryLidar = lidarParameters[0];
+         robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
       }
    }
 
@@ -165,6 +170,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private void setupRosLocalization()
    {
       new RosLocalizationPoseCorrectionSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
+      new IHMCProntoRosLocalizationUpdateSubscriber(rosMainNode, controllerCommunicationBridge, ppsTimestampOffsetProvider);
    }
    
    private void setupErrorTopics()

@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
 import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
 import us.ihmc.ihmcPerception.IHMCETHRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationServiceClient;
+import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -26,7 +27,7 @@ public class RosModule
 {
    private static final boolean DEBUG = false;
 
-   private static final String ROS_NAMESPACE = "networkProcessor/rosModule";
+   private static final String ROS_NODE_NAME = "networkProcessor/rosModule";
 
 //   private final KryoLocalPacketCommunicator rosModulePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(),
 //         PacketDestination.ROS_MODULE.ordinal(), "RosModule");
@@ -37,15 +38,12 @@ public class RosModule
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
-//   private final DRCRobotPhysicalProperties physicalProperties;
-
    
-   
-   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator localObjectCommunicator)
+   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
-      rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
+      rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
+      String rosTopicPrefix = robotModel.getSimpleRobotName().toLowerCase();
       
-//      physicalProperties = robotModel.getPhysicalProperties();
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosModulePacketCommunicator.attachListener(RobotConfigurationData.class, ppsTimestampOffsetProvider);
@@ -54,8 +52,21 @@ public class RosModule
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator, rosMainNode, ppsTimestampOffsetProvider,robotModel.getSimpleRobotName().toLowerCase(),tfPublisher);
-
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
+            rosMainNode, ppsTimestampOffsetProvider, rosTopicPrefix, tfPublisher);
+      
+      if(simulatedSensorCommunicator != null)
+      {
+         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, simulatedSensorCommunicator);
+         
+         DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
+         if (lidarParameters.length > 0)
+         {
+            DRCRobotLidarParameters primaryLidar = lidarParameters[0];
+            robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
+         }
+      }
+      
       if(sensorInformation.setupROSLocationService())
       {
          setupRosLocalization();
@@ -63,10 +74,6 @@ public class RosModule
 
 //      setupFootstepServiceClient();
 //      setupFootstepPathPlannerService();
-      if(localObjectCommunicator != null)
-      {
-         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, localObjectCommunicator);
-      }
 
       try
       {
