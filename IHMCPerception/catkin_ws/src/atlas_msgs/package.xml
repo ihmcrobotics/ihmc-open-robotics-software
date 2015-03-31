@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<package>
+  <name>atlas_msgs</name>
+  <version>3.1.0</version>
+  <description>
+    Message and service data structures for interacting with Atlas from ROS.
+  </description>
+
+  <maintainer email="hsu@osrfoundation.org">John Hsu</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://gazebosim.org/wiki/DRC</url>
+  <url type="bugtracker">https://bitbucket.org/osrf/drcsim/issues</url>
+  <url type="repository">https://bitbucket.org/osrf/drcsim</url>
+
+  <author>John Hsu</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>std_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>trajectory_msgs</build_depend>
+  <build_depend>actionlib_msgs</build_depend>
+  <build_depend>osrf_msgs</build_depend>
+  <build_depend>sandia_hand_msgs</build_depend>
+  <build_depend>control_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>message_runtime</build_depend>
+
+  <run_depend>std_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>trajectory_msgs</run_depend>
+  <run_depend>actionlib_msgs</run_depend>
+  <run_depend>osrf_msgs</run_depend>
+  <run_depend>sandia_hand_msgs</run_depend>
+  <run_depend>control_msgs</run_depend>
+  <run_depend>message_generation</run_depend>
+  <run_depend>message_runtime</run_depend>
+</package>
+
+
