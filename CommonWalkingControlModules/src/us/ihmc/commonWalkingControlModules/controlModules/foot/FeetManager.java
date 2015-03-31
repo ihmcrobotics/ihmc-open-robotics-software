@@ -138,7 +138,7 @@ public class FeetManager
 
    public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining,useLowHeightTrajectory);
+      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
    }
 
    public boolean isInSingularityNeighborhood(RobotSide robotSide)
