@@ -43,7 +43,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final RigidBodyTransform stateEstimatorPelvisTransformInWorld = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisTransformInWorldFrame = new RigidBodyTransform();
    private final RigidBodyTransform iterativeClosestPointTransformInWorldFrame = new RigidBodyTransform();
-   private final RigidBodyTransform errorTransformBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
+   private final RigidBodyTransform totalErrorBetweenPelvisAndLocalizationTransform = new RigidBodyTransform();
+   private final RigidBodyTransform errorBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
    private final IntegerYoVariable pelvisBufferSize;
 
    private final FramePose stateEstimatorInWorldFramePose = new FramePose(worldFrame);
@@ -136,6 +137,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       //////
       correctedPelvisPoseInPelvisReferenceFramePose.getPose(correctedPelvisTransformInWorldFrame);
       correctedPelvisPoseInPelvisReferenceFramePose.changeFrame(pelvisReferenceFrame);
+      correctedPelvisPoseInPelvisReferenceFramePose.getPose(errorBetweenCurrentPositionAndCorrected);
       
       rootJoint.setPositionAndRotation(correctedPelvisTransformInWorldFrame);
    }
@@ -180,7 +182,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       outdatedPoseUpdater.updateOutdatedTransform(timeStampedExternalPose);
       iterativeClosestPointInPelvisReferenceFramePose.setToZero(IterativeClosestPointReferenceFrame);
       iterativeClosestPointInPelvisReferenceFramePose.changeFrame(pelvisReferenceFrame);
-      iterativeClosestPointInPelvisReferenceFramePose.getPose(errorTransformBetweenCurrentPositionAndCorrected);
+      iterativeClosestPointInPelvisReferenceFramePose.getPose(totalErrorBetweenPelvisAndLocalizationTransform);
       
       yoIterativeClosestPointInPelvisReferenceFramePose.set(iterativeClosestPointInPelvisReferenceFramePose);
       offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInPelvisReferenceFramePose, iterativeClosestPointInPelvisReferenceFramePose, confidenceFactor.getDoubleValue());
@@ -197,7 +199,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void sendCorrectionUpdatePacket()
    {
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(iterativeClosestPointTransformInWorldFrame, errorTransformBetweenCurrentPositionAndCorrected);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCurrentPositionAndCorrected);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    
