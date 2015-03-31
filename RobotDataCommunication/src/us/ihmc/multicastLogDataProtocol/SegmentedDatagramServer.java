@@ -11,8 +11,6 @@ import java.nio.channels.DatagramChannel;
 
 import com.google.common.util.concurrent.RateLimiter;
 
-import us.ihmc.utilities.math.TimeTools;
-
 public class SegmentedDatagramServer
 {
    private final RateLimiter lineRateLimiter;
@@ -64,8 +62,6 @@ public class SegmentedDatagramServer
       header.setSegmentCount(segmentCount);
       header.setTimestamp(timestamp);
       
-      long size = data.remaining();
-      long start = System.nanoTime();
       for (int segment = 0; segment < segmentCount; segment++)
       {
          sendBuffer.clear();
@@ -82,7 +78,6 @@ public class SegmentedDatagramServer
          lineRateLimiter.acquire(sendBuffer.remaining());
          channel.send(sendBuffer, address);
       }
-      System.out.println("Send " + size + " in  " + TimeTools.nanoSecondstoSeconds(System.nanoTime() - start) + "s");
    }
 
    public void close()
