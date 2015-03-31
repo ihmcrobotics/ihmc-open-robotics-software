@@ -2242,13 +2242,23 @@
       <inertial>
         <pose>0.0324349 0.0004084 -0.0041783 0 -0 0</pose>
         <mass>0.057664</mass>
-        <inertia>
+        <!-- new inertia but causes unreasonable accel. inertia>
           <ixx>3.8183e-05</ixx>
           <ixy>4.9927e-08</ixy>
           <ixz>1.1003e-05</ixz>
           <iyy>4.3437e-05</iyy>
           <iyz>-9.8165e-09</iyz>
           <izz>4.2686e-05</izz>
+        </inertia-->
+        
+        <!-- Larger inertia so sim doesn't blow up -->
+        <inertia>
+          <ixx>0.000401606</ixx>
+          <ixy>4.9927e-08</ixy>
+          <ixz>1.0997e-05</ixz>
+          <iyy>0.00208115</iyy>
+          <iyz>-9.8165e-09</iyz>
+          <izz>0.00178402</izz>
         </inertia>
       </inertial>
       <collision name='hokuyo_link_collision'>
