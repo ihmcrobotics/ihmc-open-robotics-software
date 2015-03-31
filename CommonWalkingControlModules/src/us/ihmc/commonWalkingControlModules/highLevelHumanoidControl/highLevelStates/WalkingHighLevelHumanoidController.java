@@ -476,9 +476,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                upcomingFootstepList.checkForFootsteps();
                
                if (upcomingFootstepList.getNextFootstep() != null)
+               {
                   upcomingSupportLeg.set(upcomingFootstepList.getNextFootstep().getRobotSide().getOppositeSide());
-
-               readyToGrabNextFootstep.set(false);
+                  readyToGrabNextFootstep.set(false);
+               }
             }
             footstepListHasBeenUpdated.set(true);
          }
