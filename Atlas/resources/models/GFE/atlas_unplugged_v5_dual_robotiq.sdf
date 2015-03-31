@@ -3,15 +3,15 @@
     <link name='pelvis'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
-        <pose>0.0113715 0 0.0268706 0 -0 0</pose>
-        <mass>17.982</mass>
+        <pose>0.011608 0 0.0266707 0 -0 0</pose>
+        <mass>9.609</mass>
         <inertia>
-          <ixx>0.125569</ixx>
+          <ixx>0.125568</ixx>
           <ixy>0.0008</ixy>
-          <ixz>-0.000499757</ixz>
-          <iyy>0.0972062</iyy>
+          <ixz>-0.000500733</ixz>
+          <iyy>0.0972042</iyy>
           <iyz>-0.0005</iyz>
-          <izz>0.117937</izz>
+          <izz>0.117936</izz>
         </inertia>
       </inertial>
       <collision name='pelvis_collision'>
@@ -161,7 +161,7 @@
       <pose>-0.0125 0 0 0 -0 0</pose>
       <inertial>
         <pose>-0.0112984 -3.15366e-06 0.0746835 0 -0 0</pose>
-        <mass>2.409</mass>
+        <mass>2.27</mass>
         <inertia>
           <ixx>0.0039092</ixx>
           <ixy>-5.04491e-08</ixy>
@@ -218,7 +218,7 @@
       <pose>-0.0125 0 0.162 0 -0 0</pose>
       <inertial>
         <pose>-0.00816266 -0.0131245 0.0305974 0 -0 0</pose>
-        <mass>0.69</mass>
+        <mass>0.799</mass>
         <inertia>
           <ixx>0.000454181</ixx>
           <ixy>-6.10764e-05</ixy>
@@ -294,15 +294,15 @@
     <link name='utorso'>
       <pose>-0.0125 0 0.212 0 -0 0</pose>
       <inertial>
-        <pose>-0.0574333 0 0.3071 0 -0 0</pose>
-        <mass>63.93</mass>
+        <pose>-0.0616866 0.00229456 0.316809 0 -0 0</pose>
+        <mass>84.609</mass>
         <inertia>
-          <ixx>1.51477</ixx>
-          <ixy>0.00362</ixy>
-          <ixz>0.315632</ixz>
-          <iyy>1.56489</iyy>
-          <iyz>0.001</iyz>
-          <izz>1.312</izz>
+          <ixx>1.62389</ixx>
+          <ixy>-0.0319003</ixy>
+          <ixz>0.0816618</ixz>
+          <iyy>1.65538</iyy>
+          <iyz>0.0472154</iyz>
+          <izz>0.577362</izz>
         </inertia>
       </inertial>
       <collision name='utorso_collision'>
@@ -598,7 +598,7 @@
       <pose>0.1281 0.2256 0.6896 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.084 0 -0 0</pose>
-        <mass>3.45</mass>
+        <mass>4.466</mass>
         <inertia>
           <ixx>0.011</ixx>
           <ixy>0</ixy>
@@ -714,7 +714,7 @@
       <pose>0.1281 0.3356 0.4446 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>3.012</mass>
+        <mass>3.899</mass>
         <inertia>
           <ixx>0.00319</ixx>
           <ixy>0</ixy>
@@ -847,8 +847,8 @@
     <link name='l_uarm'>
       <pose>0.1281 0.5226 0.4286 0 -0 0</pose>
       <inertial>
-        <pose>0 0.065 0 0 -0 0</pose>
-        <mass>3.388</mass>
+        <pose>0 -0.065 0 0 -0 0</pose>
+        <mass>4.386</mass>
         <inertia>
           <ixx>0.00656</ixx>
           <ixy>0</ixy>
@@ -944,7 +944,7 @@
       <pose>0.1281 0.6416 0.4378 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>2.509</mass>
+        <mass>3.248</mass>
         <inertia>
           <ixx>0.00265</ixx>
           <ixy>0</ixy>
@@ -2250,7 +2250,7 @@
           <iyz>-9.8165e-09</iyz>
           <izz>4.2686e-05</izz>
         </inertia-->
-        
+
         <!-- Larger inertia so sim doesn't blow up -->
         <inertia>
           <ixx>0.000401606</ixx>
@@ -2375,7 +2375,7 @@
       <pose>0.1281 -0.2256 0.6896 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.084 0 -0 0</pose>
-        <mass>3.45</mass>
+        <mass>4.466</mass>
         <inertia>
           <ixx>0.011</ixx>
           <ixy>0</ixy>
@@ -2491,7 +2491,7 @@
       <pose>0.1281 -0.3356 0.4446 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>3.012</mass>
+        <mass>3.899</mass>
         <inertia>
           <ixx>0.00319</ixx>
           <ixy>0</ixy>
@@ -2625,7 +2625,7 @@
       <pose>0.1281 -0.5226 0.4286 0 -0 0</pose>
       <inertial>
         <pose>0 0.065 0 0 -0 0</pose>
-        <mass>3.388</mass>
+        <mass>4.386</mass>
         <inertia>
           <ixx>0.00656</ixx>
           <ixy>0</ixy>
@@ -2721,7 +2721,7 @@
       <pose>0.1281 -0.6416 0.4378 0 -0 0</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
-        <mass>2.509</mass>
+        <mass>3.248</mass>
         <inertia>
           <ixx>0.00265</ixx>
           <ixy>0</ixy>
@@ -3151,16 +3151,16 @@
         <pose>0.00128479 -0.141218 -0.00810888 0 -0 0</pose>
         <mass>1.8839</mass>
         <inertia>
-          <ixx>0.00836233</ixx>
-          <ixy>-1.16647e-05</ixy>
-          <ixz>0.00167662</ixz>
+          <ixx>0.00588743</ixx>
+          <ixy>5.67513e-05</ixy>
+          <ixz>-0.000232263</ixz>
           <iyy>0.013426</iyy>
-          <iyz>-0.000449641</iyz>
-          <izz>0.00692568</izz>
+          <iyz>-0.000489141</iyz>
+          <izz>0.00940058</izz>
         </inertia>
       </inertial>
       <collision name='r_hand_collision'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -0.523599 -1.22259e-22</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -1.57079 -2.65359e-06</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3180,7 +3180,7 @@
         </surface>
       </collision>
       <visual name='r_hand_visual'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -0.523599 -1.22259e-22</pose>
+        <pose>0.00179 -0.168 -0.01176 3.14159 -1.57079 -2.65359e-06</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3223,7 +3223,7 @@
       </physics>
     </joint>
     <link name='r_finger_1_link_0'>
-      <pose>0.108486 -1.13055 0.362903 0.523599 0.000404525 -1.57148</pose>
+      <pose>0.16589 -1.13055 0.37133 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3259,7 +3259,7 @@
       <child>r_finger_1_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.866025 -0.000796327 0.5</xyz>
+        <xyz>-3.20557e-09 -0.000796327 1</xyz>
         <limit>
           <lower>-0.16</lower>
           <upper>0.25</upper>
@@ -3274,7 +3274,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_1'>
-      <pose>0.108472 -1.15055 0.362895 0.523599 0.000404525 -1.57148</pose>
+      <pose>0.16589 -1.15055 0.371314 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3310,7 +3310,7 @@
       <child>r_finger_1_link_1</child>
       <parent>r_finger_1_link_0</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3325,7 +3325,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_2'>
-      <pose>0.0841891 -1.20053 0.348875 0.46429 0.251432 -2.03185</pose>
+      <pose>0.165891 -1.20053 0.343274 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3361,7 +3361,7 @@
       <child>r_finger_1_link_2</child>
       <parent>r_finger_1_link_1</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3376,7 +3376,7 @@
       </axis>
     </joint>
     <link name='r_finger_1_link_3'>
-      <pose>0.0673838 -1.23436 0.339172 0.46429 0.251432 -2.03185</pose>
+      <pose>0.165891 -1.23436 0.323869 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3412,7 +3412,7 @@
       <child>r_finger_1_link_3</child>
       <parent>r_finger_1_link_2</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3427,7 +3427,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_0'>
-      <pose>0.0724858 -1.13055 0.425257 0.523599 0.000404525 -1.57148</pose>
+      <pose>0.09389 -1.13055 0.37133 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3463,7 +3463,7 @@
       <child>r_finger_2_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.866025 -0.000796327 0.5</xyz>
+        <xyz>-3.20557e-09 -0.000796327 1</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3478,7 +3478,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_1'>
-      <pose>0.0724721 -1.15055 0.425249 0.523599 0.000404525 -1.57148</pose>
+      <pose>0.0938901 -1.15055 0.371314 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3514,7 +3514,7 @@
       <child>r_finger_2_link_1</child>
       <parent>r_finger_2_link_0</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3529,7 +3529,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_2'>
-      <pose>0.0481891 -1.20053 0.411229 0.46429 0.251432 -2.03185</pose>
+      <pose>0.0938905 -1.20053 0.343274 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3565,7 +3565,7 @@
       <child>r_finger_2_link_2</child>
       <parent>r_finger_2_link_1</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3580,7 +3580,7 @@
       </axis>
     </joint>
     <link name='r_finger_2_link_3'>
-      <pose>0.0313838 -1.23436 0.401526 0.46429 0.251432 -2.03185</pose>
+      <pose>0.0938908 -1.23436 0.323869 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3616,7 +3616,7 @@
       <child>r_finger_2_link_3</child>
       <parent>r_finger_2_link_2</parent>
       <axis>
-        <xyz>-0.5 -7.34582e-06 0.866025</xyz>
+        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3631,7 +3631,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_0'>
-      <pose>0.169294 -1.13055 0.43958 -2.61799 -0.000398164 -1.57011</pose>
+      <pose>0.12989 -1.13055 0.46233 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3667,7 +3667,7 @@
       <child>r_finger_middle_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
+        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -3682,7 +3682,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_1'>
-      <pose>0.169308 -1.15055 0.439588 -2.61799 -0.000398164 -1.57011</pose>
+      <pose>0.12989 -1.15055 0.462346 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3718,7 +3718,7 @@
       <child>r_finger_middle_link_1</child>
       <parent>r_finger_middle_link_0</parent>
       <axis>
-        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
+        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3733,7 +3733,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_2'>
-      <pose>0.193591 -1.20053 0.453608 -2.6773 -0.251426 -1.10974</pose>
+      <pose>0.12989 -1.20053 0.490386 -1.5708 -0.520796 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -3769,7 +3769,7 @@
       <child>r_finger_middle_link_2</child>
       <parent>r_finger_middle_link_1</parent>
       <axis>
-        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
+        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3784,7 +3784,7 @@
       </axis>
     </joint>
     <link name='r_finger_middle_link_3'>
-      <pose>0.210397 -1.23436 0.463311 -2.6773 -0.251426 -1.10974</pose>
+      <pose>0.12989 -1.23436 0.509791 -1.5708 -0.520796 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -3820,7 +3820,7 @@
       <child>r_finger_middle_link_3</child>
       <parent>r_finger_middle_link_2</parent>
       <axis>
-        <xyz>0.5 -5.89793e-10 -0.866025</xyz>
+        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -3838,7 +3838,7 @@
       <pose>0 0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.00529262 -0.00344732 0.00313046 0 -0 0</pose>
-        <mass>0.648</mass>
+        <mass>1.959</mass>
         <inertia>
           <ixx>0.00074276</ixx>
           <ixy>-3.79607e-08</ixy>
@@ -3935,7 +3935,7 @@
       <pose>0 0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.0133341 0.0170484 -0.0312052 0 -0 0</pose>
-        <mass>0.866</mass>
+        <mass>0.898</mass>
         <inertia>
           <ixx>0.000691326</ixx>
           <ixy>-2.24344e-05</ixy>
@@ -4051,7 +4051,7 @@
       <pose>0.05 0.1115 -0.066 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.21 0 -0 0</pose>
-        <mass>9.209</mass>
+        <mass>8.204</mass>
         <inertia>
           <ixx>0.09</ixx>
           <ixy>0</ixy>
@@ -4206,7 +4206,7 @@
       <pose>0 0.1115 -0.44 0 -0 0</pose>
       <inertial>
         <pose>0.001 0 -0.187 0 -0 0</pose>
-        <mass>5.479</mass>
+        <mass>4.515</mass>
         <inertia>
           <ixx>0.077</ixx>
           <ixy>0</ixy>
@@ -4380,7 +4380,7 @@
       <pose>0 0.1115 -0.862 0 -0 0</pose>
       <inertial>
         <pose>0.027 0 -0.067 0 -0 0</pose>
-        <mass>2.05</mass>
+        <mass>2.41</mass>
         <inertia>
           <ixx>0.002</ixx>
           <ixy>0</ixy>
@@ -4514,7 +4514,7 @@
       <pose>0 -0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.00529262 0.00344732 0.00313046 0 -0 0</pose>
-        <mass>0.648</mass>
+        <mass>1.959</mass>
         <inertia>
           <ixx>0.00074276</ixx>
           <ixy>3.79607e-08</ixy>
@@ -4611,7 +4611,7 @@
       <pose>0 -0.089 0 0 -0 0</pose>
       <inertial>
         <pose>0.0133341 -0.0170484 -0.0312052 0 -0 0</pose>
-        <mass>0.866</mass>
+        <mass>0.898</mass>
         <inertia>
           <ixx>0.000691326</ixx>
           <ixy>2.24344e-05</ixy>
@@ -4727,7 +4727,7 @@
       <pose>0.05 -0.1115 -0.066 0 -0 0</pose>
       <inertial>
         <pose>0 0 -0.21 0 -0 0</pose>
-        <mass>9.209</mass>
+        <mass>8.204</mass>
         <inertia>
           <ixx>0.09</ixx>
           <ixy>0</ixy>
@@ -4882,7 +4882,7 @@
       <pose>0 -0.1115 -0.44 0 -0 0</pose>
       <inertial>
         <pose>0.001 0 -0.187 0 -0 0</pose>
-        <mass>5.479</mass>
+        <mass>4.515</mass>
         <inertia>
           <ixx>0.077</ixx>
           <ixy>-0</ixy>
@@ -5056,7 +5056,7 @@
       <pose>0 -0.1115 -0.862 0 -0 0</pose>
       <inertial>
         <pose>0.027 0 -0.067 0 -0 0</pose>
-        <mass>2.05</mass>
+        <mass>2.41</mass>
         <inertia>
           <ixx>0.002</ixx>
           <ixy>0</ixy>
