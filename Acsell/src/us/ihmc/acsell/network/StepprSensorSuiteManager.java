@@ -6,13 +6,13 @@ import java.net.URI;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 
 public class StepprSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final PacketCommunicatorMock sensorSuitePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
+   private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
    
    public StepprSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
