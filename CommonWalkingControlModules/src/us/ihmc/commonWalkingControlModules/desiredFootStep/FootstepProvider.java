@@ -22,4 +22,6 @@ public interface FootstepProvider
    public abstract boolean isBlindWalking();
    
    public abstract boolean isPaused();
+
+   public abstract void cancelPlan();
 }

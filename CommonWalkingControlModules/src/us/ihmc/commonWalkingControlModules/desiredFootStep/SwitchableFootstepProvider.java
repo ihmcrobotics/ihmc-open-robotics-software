@@ -7,7 +7,6 @@ import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 
-
 public class SwitchableFootstepProvider implements FootstepProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -93,5 +92,11 @@ public class SwitchableFootstepProvider implements FootstepProvider
    public boolean isPaused()
    {
       return false;
+   }
+
+   @Override
+   public void cancelPlan()
+   {
+      getFootstepProviderInUse().cancelPlan();
    }
 }

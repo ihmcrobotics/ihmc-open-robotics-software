@@ -138,4 +138,10 @@ public class FootstepConsumer implements FootstepProvider, StreamingDataConsumer
    {
       return false;
    }
+
+   @Override
+   public void cancelPlan()
+   {
+      footstepQueue.clear();
+   }
 }

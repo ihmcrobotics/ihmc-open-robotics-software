@@ -38,34 +38,34 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 {
    private int footstepCounter = 0;
    private int completedFootstepCount = 0;
-   
+
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
    private final ScriptFileLoader scriptFileLoader;
    private boolean loadedScriptFile = false;
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
 
-   private final DesiredHandPoseProvider desiredHandPoseProvider; 
-   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider; 
+   private final DesiredHandPoseProvider desiredHandPoseProvider;
+   private final DesiredPelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredHandstepProvider handstepProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final DesiredFootPoseProvider desiredFootPoseProvider;
    private final ConcurrentLinkedQueue<Footstep> footstepQueue = new ConcurrentLinkedQueue<Footstep>();
-   
+
    private final DoubleYoVariable time;
    private final DoubleYoVariable scriptEventStartTime, scriptEventDuration;
 
    private final FullRobotModel fullRobotModel;
-   
+
    public ScriptBasedFootstepProvider(ScriptFileLoader scriptFileLoader, DoubleYoVariable time, SideDependentList<ContactablePlaneBody> bipedFeet,
          FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry)
    {
       this.time = time;
       this.bipedFeet = bipedFeet;
       this.fullRobotModel = fullRobotModel;
-      
+
       this.scriptEventStartTime = new DoubleYoVariable("scriptEventStartTime", registry);
       this.scriptEventDuration = new DoubleYoVariable("scriptEventDuration", registry);
-      
+
       this.scriptFileLoader = scriptFileLoader;
       desiredHandPoseProvider = new DesiredHandPoseProvider(fullRobotModel, walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), null);
       desiredPelvisPoseProvider = new DesiredPelvisPoseProvider();
@@ -74,43 +74,48 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       desiredFootPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), null);
    }
-   
+
    private void loadScriptFileIfNecessary()
-   {      
+   {
       FramePoint soleInRootJointFrame = new FramePoint(bipedFeet.get(RobotSide.LEFT).getSoleFrame());
       soleInRootJointFrame.changeFrame(fullRobotModel.getRootJoint().getFrameAfterJoint());
-      if (loadedScriptFile) return;
-      
-//      //TODO: Get to work for more than just left foot frame.
+      if (loadedScriptFile)
+         return;
+
+      // TODO: Get to work for more than just left foot frame.
       ReferenceFrame leftFootFrame = bipedFeet.get(RobotSide.LEFT).getSoleFrame();
-      RigidBodyTransform transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());      
-      
-      ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame); 
+      RigidBodyTransform transformFromLeftFootPlaneFrameToWorldFrame = leftFootFrame.getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
+
+      ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame);
       scriptObjects.addAll(scriptObjectsList);
 
       loadedScriptFile = true;
    }
-   
+
    public void grabNewScriptEventIfNecessary()
-   { 
+   {
       loadScriptFileIfNecessary();
 
-      if (scriptObjects.isEmpty()) return;
-      if (!footstepQueue.isEmpty()) return;
-      if (completedFootstepCount != footstepCounter) return;
-      if (time.getDoubleValue() < scriptEventStartTime.getDoubleValue() + scriptEventDuration.getDoubleValue()) return;
-      
+      if (scriptObjects.isEmpty())
+         return;
+      if (!footstepQueue.isEmpty())
+         return;
+      if (completedFootstepCount != footstepCounter)
+         return;
+      if (time.getDoubleValue() < scriptEventStartTime.getDoubleValue() + scriptEventDuration.getDoubleValue())
+         return;
+
       ScriptObject nextObject = scriptObjects.poll();
       Object scriptObject = nextObject.getScriptObject();
 
       if (scriptObject instanceof FootstepDataList)
-      { 
+      {
          FootstepDataList footstepDataList = (FootstepDataList) scriptObject;
          this.addFootstepDataList(footstepDataList);
          setupTimesForNewScriptEvent(0.5); // Arbitrary half second duration. With footsteps, it waits till they are done before looking for a new command.
       }
       else if (scriptObject instanceof FootPosePacket)
-      { 
+      {
          FootPosePacket footPosePacket = (FootPosePacket) scriptObject;
          desiredFootPoseProvider.receivedPacket(footPosePacket);
          setupTimesForNewScriptEvent(0.5);
@@ -119,14 +124,14 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       {
          HandPosePacket handPosePacket = (HandPosePacket) scriptObject;
          desiredHandPoseProvider.receivedPacket(handPosePacket);
-         
+
          setupTimesForNewScriptEvent(handPosePacket.getTrajectoryTime());
       }
       else if (scriptObject instanceof PelvisPosePacket)
       {
          PelvisPosePacket pelvisPosePacket = (PelvisPosePacket) scriptObject;
          desiredPelvisPoseProvider.receivedPacket(pelvisPosePacket);
-         
+
          setupTimesForNewScriptEvent(pelvisPosePacket.getTrajectoryTime());
       }
       else if (scriptObject instanceof PauseCommand)
@@ -134,15 +139,15 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
          PauseCommand pauseCommand = (PauseCommand) scriptObject;
          setupTimesForNewScriptEvent(0.5);
       }
-      
-      else if (scriptObject instanceof ComHeightPacket )
+
+      else if (scriptObject instanceof ComHeightPacket)
       {
          ComHeightPacket comHeightPacket = (ComHeightPacket) scriptObject;
          desiredComHeightProvider.getComHeightPacketConsumer().receivedPacket(comHeightPacket);
          setupTimesForNewScriptEvent(2.0); // Arbitrary two second duration to allow for changing the CoM height. Might be possible to lower this a little bit. 
       }
    }
-   
+
    private void setupTimesForNewScriptEvent(double scriptEventDuration)
    {
       scriptEventStartTime.set(time.getDoubleValue());
@@ -171,7 +176,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       footstepQueue.addAll(footsteps);
    }
-   
+
    @Override
    public Footstep poll()
    {
@@ -189,7 +194,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    {
       Iterator<Footstep> iterator = footstepQueue.iterator();
 
-      if (iterator.hasNext()) 
+      if (iterator.hasNext())
       {
          iterator.next();
       }
@@ -197,7 +202,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
       {
          return null;
       }
-      if (iterator.hasNext()) 
+      if (iterator.hasNext())
       {
          return iterator.next();
       }
@@ -216,7 +221,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    @Override
    public void notifyComplete(FramePose actualFootPoseInWorld)
    {
-      completedFootstepCount++;      
+      completedFootstepCount++;
    }
 
    @Override
@@ -235,12 +240,12 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    {
       return false;
    }
-   
+
    public DesiredHandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
    }
-   
+
    public DesiredPelvisPoseProvider getDesiredPelvisPoseProvider()
    {
       return desiredPelvisPoseProvider;
@@ -255,7 +260,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    {
       return desiredFootPoseProvider;
    }
-   
+
    public DesiredHandstepProvider getDesiredHandstepProvider()
    {
       return handstepProvider;
@@ -271,5 +276,11 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
    public boolean isPaused()
    {
       return false;
+   }
+
+   @Override
+   public void cancelPlan()
+   {
+      footstepQueue.clear();
    }
 }

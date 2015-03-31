@@ -471,7 +471,15 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (doneFinishingSingleSupportTransfer.getBooleanValue() || (estimatedTimeRemainingForState < 0.02))
          {
-            upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
+            if (readyToGrabNextFootstep.getBooleanValue())
+            {
+               upcomingFootstepList.checkForFootsteps();
+               
+               if (upcomingFootstepList.getNextFootstep() != null)
+                  upcomingSupportLeg.set(upcomingFootstepList.getNextFootstep().getRobotSide().getOppositeSide());
+
+               readyToGrabNextFootstep.set(false);
+            }
             footstepListHasBeenUpdated.set(true);
          }
 
@@ -855,7 +863,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                }
                finalDesiredICPInWorld.set(capturePointPlannerAdapter.getFinalDesiredICP());
 
-               removeAllUpcomingFootstepsAndStand();
+               removeAllUpcomingFootstepsAndStand(nextFootstep);
             }
          }
 
@@ -904,34 +912,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // once the footsteps are refactored this should be rewritten to remove all upcoming footsteps and add
       // a footstep that brings the robot in a standing position.
-      private void removeAllUpcomingFootstepsAndStand()
+      private void removeAllUpcomingFootstepsAndStand(Footstep currentFootstep)
       {
-         int numberOfUpcomingFootsteps = upcomingFootstepList.getNumberOfFootstepsToProvide();
-
-         // horrible hack that does not remove footsteps if we are sending them every tick like in FlatGroundWalking.
-         // Removing this should neither break Bamboo nor Atlas but it messes up the PushRecoveryWalkingTrack.
-         if (numberOfUpcomingFootsteps > 1000)
-            return;
-
-         while (numberOfUpcomingFootsteps > 0)
-         {
-            readyToGrabNextFootstep.set(true);
-            upcomingFootstepList.checkForFootsteps(readyToGrabNextFootstep, upcomingSupportLeg, feet);
-            upcomingFootstepList.notifyComplete(null);
-            numberOfUpcomingFootsteps--;
-         }
-
-         FramePoint2d neutralPosition = new FramePoint2d();
-         nextFootstep.getPosition2d(neutralPosition);
-         double y = swingSide == RobotSide.LEFT ? -0.3 : 0.3;
-         FrameVector2d translate = new FrameVector2d(neutralPosition.getReferenceFrame(), 0.0, y);
-         neutralPosition.add(translate);
-
-         Footstep next = upcomingFootstepList.getNextFootstep();
-         if (next != null)
-         {
-            next.setPositionChangeOnlyXY(neutralPosition);
-         }
+         upcomingFootstepList.requestCancelPlanToProvider();
+         upcomingFootstepList.clearCurrentFootsteps();
+         Footstep squareUpFootstep = createFootstepAtCurrentLocation(swingSide);
+         
+         FramePose squareUpPose = new FramePose(referenceFrames.getFootFrame(swingSide.getOppositeSide()));
+         double y = swingSide.negateIfRightSide(walkingControllerParameters.getInPlaceWidth());
+         squareUpPose.translate(0.0, y, 0.0);
+         squareUpPose.changeFrame(worldFrame);
+         squareUpFootstep.setPose(squareUpPose);
+         upcomingFootstepList.insertNewNextFootstep(squareUpFootstep);
+         upcomingFootstepList.insertNewNextFootstep(currentFootstep);
+         upcomingFootstepList.checkForFootsteps();
       }
 
       @Override
