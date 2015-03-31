@@ -11,6 +11,8 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -49,7 +51,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
    private final PacketCommunicatorMock controllerCommunicationBridge;
-   private final PacketCommunicator scsSensorCommunicationBridge;
+   private final ObjectCommunicator scsSensorCommunicationBridge;
 
    private final ArrayList<AbstractRosTopicSubscriber<?>> subscribers;
    private final ArrayList<RosTopicPublisher<?>> publishers;
@@ -58,13 +60,13 @@ public class ThePeoplesGloriousNetworkProcessor
    private final MessageFactory messageFactory;
    private final FullRobotModel fullRobotModel;
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock gfe_communicator, PacketCommunicator scsSensorCommunicationBridge, PPSTimestampOffsetProvider ppsOffsetProvider, 
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicatorMock gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
                                              DRCRobotModel robotModel, String namespace) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
       this.controllerCommunicationBridge = gfe_communicator;
-      this.scsSensorCommunicationBridge = scsSensorCommunicationBridge;
+      this.scsSensorCommunicationBridge = sensorCommunicator;
       this.ppsTimestampOffsetProvider = ppsOffsetProvider;
       this.ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       this.subscribers = new ArrayList<AbstractRosTopicSubscriber<?>>();

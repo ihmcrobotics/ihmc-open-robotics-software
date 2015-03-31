@@ -5,6 +5,8 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
@@ -41,7 +43,7 @@ public class RosModule
 
    
    
-   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator simulatedSensorCommunicator)
+   public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator localObjectCommunicator)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
       
@@ -63,9 +65,9 @@ public class RosModule
 
 //      setupFootstepServiceClient();
 //      setupFootstepPathPlannerService();
-      if(simulatedSensorCommunicator != null)
+      if(localObjectCommunicator != null)
       {
-         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, simulatedSensorCommunicator);
+         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, localObjectCommunicator);
       }
 
       try
@@ -82,16 +84,16 @@ public class RosModule
       printIfDebug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher, PacketCommunicator simulatedSensorCommunicator)
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher, ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
-         new RosSCSCameraPublisher(simulatedSensorCommunicator, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
+         new RosSCSCameraPublisher(localObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, sensorInformation.getCameraParameters());
       }
 
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         new RosSCSLidarPublisher(simulatedSensorCommunicator, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
+         new RosSCSLidarPublisher(localObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
                sensorInformation.getLidarParameters(), tfPublisher);
       }
    }
