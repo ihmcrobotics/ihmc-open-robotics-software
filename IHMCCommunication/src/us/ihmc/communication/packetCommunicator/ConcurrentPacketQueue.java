@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
-public class ConcurrentPacketQueue<T extends Packet<?>> implements PacketConsumer<T>
+public class ConcurrentPacketQueue<T extends Packet> implements PacketConsumer<T>
 {
    private final ConcurrentLinkedQueue<T> packetQueue = new ConcurrentLinkedQueue<T>();
 
