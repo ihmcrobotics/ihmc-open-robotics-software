@@ -7,7 +7,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@BambooPlan(planType = BambooPlanType.Flaky)
+@BambooPlan(planType = BambooPlanType.Exclude)
 public class ValkyriePointCloudDataReceiverTest extends PointCloudDataReceiverTest
 {
    private final DRCRobotModel robotModel = new ValkyrieRobotModel(false, false);
