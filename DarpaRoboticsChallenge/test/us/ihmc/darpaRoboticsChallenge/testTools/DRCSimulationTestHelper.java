@@ -130,6 +130,9 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
+      
+      if (startNetworkProcessor)
+         simulationStarter.addPacketCommunicatorToNetworkProcessor(packetCommunicator);
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {

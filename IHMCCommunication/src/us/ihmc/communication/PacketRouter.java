@@ -8,13 +8,14 @@ import us.ihmc.communication.packetCommunicator.KryoPacketClientEndPointCommunic
 import us.ihmc.communication.packetCommunicator.KryoPacketServer;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
 
 public class PacketRouter
 {
    private boolean DEBUG = false;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
-   private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE;//set to Integer.MIN_VALUE to debug all destinations
-   private Class[] packetTypesToDebug =null;//set to null to debug all packets
+   private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
+   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
    
    private final int BROADCAST = 0;
    private enum RouteReceieveType {ON_SEND, ON_RECEIVE};
@@ -95,7 +96,7 @@ public class PacketRouter
    {
       if(shouldPrintDebugStatement(source.getId(), packet.getDestination(), packet.getClass()))
       {
-         System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + packet.getDestination() + " from " + source.getName());
+         System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + PacketDestination.fromOrdinal(packet.getDestination()) + " from " + source.getName());
       }
       
       int destination = getPacketDestination(source, packet);
@@ -277,12 +278,12 @@ public class PacketRouter
       this.destinationCommunicatorIdToDebug = destinationCommunicatorIdToDebug;
    }
    
-   public void setPacketTypeToDebug(Class packetTypeToDebug)
+   public void setPacketTypeToDebug(Class<?> packetTypeToDebug)
    {
       this.packetTypesToDebug = new Class[]{ packetTypeToDebug };
    }
    
-   public void setPacketTypesToDebug(Class[] packetTypesToDebug)
+   public void setPacketTypesToDebug(Class<?>[] packetTypesToDebug)
    {
       this.packetTypesToDebug = packetTypesToDebug;
    }
