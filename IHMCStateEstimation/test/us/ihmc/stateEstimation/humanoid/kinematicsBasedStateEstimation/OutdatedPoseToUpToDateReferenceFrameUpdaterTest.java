@@ -95,7 +95,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       PoseReferenceFrame upToDateReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", upToDatePoseInPresent);
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
             numberOfUpToDateTransforms, upToDateReferenceFrameInPresent);
-
+      ReferenceFrame outdatedReferenceFrame_InUpToDateReferenceFrame;
+      outdatedReferenceFrame_InUpToDateReferenceFrame = outdatedPoseToUpToDateReferenceFrameUpdater.getOutdatedReferenceFrameToBeUpdated();
+      
       TimeStampedTransformBuffer upToDateTimeStampedTransformPoseBuffer = new TimeStampedTransformBuffer(numberOfUpToDateTransforms);
       TimeStampedTransformBuffer outdatedTimeStampedTransformBuffer = new TimeStampedTransformBuffer(numberOfOutdatedTransforms);
 
@@ -121,7 +123,6 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          outdatedTimeStampedTransformBuffer.put(outdatedTransform, timeStamp);
       }
 
-      FramePose lastUpdatedOfOutdatedPoseInPresent = new FramePose(upToDateReferenceFrameInPresent);
       int outdatedTimeStampsIndex = -1;
       for (long timeStamp = firstTimeStamp; timeStamp < lastTimeStamp; timeStamp++)
       {
@@ -139,14 +140,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
             {
                TimeStampedTransform3D outdatedTimeStampedTransform = new TimeStampedTransform3D();
                outdatedTimeStampedTransformBuffer.findTransform(outdatedTimeStamps[outdatedTimeStampsIndex], outdatedTimeStampedTransform);
-               lastUpdatedOfOutdatedPoseInPresent.changeFrame(upToDateReferenceFrameInPresent);
                assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.upToDateTimeStampedBufferIsInRange(outdatedTimeStampedTransform.getTimeStamp()));
-               outdatedPoseToUpToDateReferenceFrameUpdater.updateOutdatedTransform(outdatedTimeStampedTransform, lastUpdatedOfOutdatedPoseInPresent);
+               outdatedPoseToUpToDateReferenceFrameUpdater.updateOutdatedTransform(outdatedTimeStampedTransform);
                outdatedTimeStampsIndex++;
             }
          }
-         FramePose outdatedPoseExpressedInUpToDateReferenceFrame = new FramePose(upToDateReferenceFrameInPresent);
-         outdatedPoseExpressedInUpToDateReferenceFrame.setPose(lastUpdatedOfOutdatedPoseInPresent);
+         outdatedReferenceFrame_InUpToDateReferenceFrame.update();
+         FramePose outdatedPoseExpressedInUpToDateReferenceFrame = new FramePose(outdatedReferenceFrame_InUpToDateReferenceFrame);
          outdatedPoseExpressedInUpToDateReferenceFrame.changeFrame(worldFrame);
 
          FramePose testedPose = new FramePose(worldFrame);
