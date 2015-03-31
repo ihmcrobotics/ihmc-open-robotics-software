@@ -62,12 +62,16 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    @Override
    public Footstep peek()
    {
+      if (lastPolledFootstep == null)
+         return null;
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
    }
 
    @Override
    public Footstep peekPeek()
    {
+      if (lastPolledFootstep == null)
+         return null;
       Footstep nextOne = desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue(), lastPolledFootstep);
       return desiredFootstepCalculator.predictFootstepAfterDesiredFootstep(nextSwingLeg.getEnumValue().getOppositeSide(), nextOne);
    }
@@ -116,5 +120,11 @@ public class DesiredFootstepCalculatorFootstepProviderWrapper implements Footste
    public boolean isPaused()
    {
       return false;
+   }
+
+   @Override
+   public void cancelPlan()
+   {
+      setWalk(false);
    }
 }

@@ -31,20 +31,24 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
    private final SideDependentList<ReferenceFrame> ankleZUpReferenceFrames;
 
-   private final IntegerYoVariable userStepsToTake = new IntegerYoVariable("userStepsToTake", registry);
-   private final EnumYoVariable<RobotSide> userStepFirstSide = new EnumYoVariable<RobotSide>("userStepFirstSide", registry, RobotSide.class);
-   private final DoubleYoVariable userStepLength = new DoubleYoVariable("userStepLength", registry);
-   private final DoubleYoVariable userStepWidth = new DoubleYoVariable("userStepWidth", registry);
-   private final DoubleYoVariable userStepSideways = new DoubleYoVariable("userStepSideways", registry);
-   private final DoubleYoVariable userStepMinWidth = new DoubleYoVariable("userStepMinWidth", registry);
-   private final DoubleYoVariable userStepHeight = new DoubleYoVariable("userStepHeight", registry);
-   private final DoubleYoVariable userStepYaw = new DoubleYoVariable("userStepYaw", registry);
-   private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable("userStepsTakeEm", registry);
-   private final BooleanYoVariable userStepSquareUp = new BooleanYoVariable("userStepSquareUp", registry);
-   private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable("userStepsNotifyCompleteCount", registry);
+   private final String namePrefix = "userStep";
 
-   private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable("userStepHeelPercentage", registry);
-   private final DoubleYoVariable userStepToePercentage = new DoubleYoVariable("userStepToePercentage", registry);
+   private final IntegerYoVariable userStepsToTake = new IntegerYoVariable(namePrefix + "sToTake", registry);
+   private final EnumYoVariable<RobotSide> userStepFirstSide = new EnumYoVariable<RobotSide>(namePrefix + "FirstSide", registry, RobotSide.class);
+   private final DoubleYoVariable userStepLength = new DoubleYoVariable(namePrefix + "Length", registry);
+   private final DoubleYoVariable userStepWidth = new DoubleYoVariable(namePrefix + "Width", registry);
+   private final DoubleYoVariable userStepSideways = new DoubleYoVariable(namePrefix + "Sideways", registry);
+   private final DoubleYoVariable userStepMinWidth = new DoubleYoVariable(namePrefix + "MinWidth", registry);
+   private final DoubleYoVariable userStepHeight = new DoubleYoVariable(namePrefix + "Height", registry);
+   private final DoubleYoVariable userStepYaw = new DoubleYoVariable(namePrefix + "Yaw", registry);
+   private final BooleanYoVariable userStepsTakeEm = new BooleanYoVariable(namePrefix + "sTakeEm", registry);
+   private final BooleanYoVariable userStepSquareUp = new BooleanYoVariable(namePrefix + "SquareUp", registry);
+   private final IntegerYoVariable userStepsNotifyCompleteCount = new IntegerYoVariable(namePrefix + "sNotifyCompleteCount", registry);
+
+   private final BooleanYoVariable controllerHasCancelledPlan = new BooleanYoVariable(namePrefix + "ControllerHasCancelledPlan", registry);
+
+   private final DoubleYoVariable userStepHeelPercentage = new DoubleYoVariable(namePrefix + "HeelPercentage", registry);
+   private final DoubleYoVariable userStepToePercentage = new DoubleYoVariable(namePrefix + "ToePercentage", registry);
 
    private final ArrayList<Footstep> footstepList = new ArrayList<Footstep>();
 
@@ -83,6 +87,7 @@ public class UserDesiredFootstepProvider implements FootstepProvider
       {
          footstepList.clear();
          userStepsTakeEm.set(false);
+         controllerHasCancelledPlan.set(false);
 
          RobotSide stepSide = userStepFirstSide.getEnumValue();
          if (stepSide == null)
@@ -291,5 +296,12 @@ public class UserDesiredFootstepProvider implements FootstepProvider
    public boolean isPaused()
    {
       return false;
+   }
+
+   @Override
+   public void cancelPlan()
+   {
+      controllerHasCancelledPlan.set(true);
+      footstepList.clear();
    }
 }
