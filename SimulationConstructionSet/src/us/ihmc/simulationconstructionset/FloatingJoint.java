@@ -110,9 +110,9 @@ public class FloatingJoint extends Joint
       qdd_wy = new DoubleYoVariable("qdd_" + varName + "_wy", "FloatingJoint rotational acceleration about y", registry);
       qdd_wz = new DoubleYoVariable("qdd_" + varName + "_wz", "FloatingJoint rotational acceleration about z", registry);
 
-      q_yaw = new DoubleYoVariable("q_yaw", "FloatingJoint rotation about z", registry);
-      q_pitch = new DoubleYoVariable("q_pitch", "FloatingJoint rotation about y", registry);
-      q_roll = new DoubleYoVariable("q_roll", "FloatingJoint rotation about x", registry);
+      q_yaw = new DoubleYoVariable("q_" + varName + "_yaw", "FloatingJoint rotation about z", registry);
+      q_pitch = new DoubleYoVariable("q_" + varName + "_pitch", "FloatingJoint rotation about y", registry);
+      q_roll = new DoubleYoVariable("q_" + varName + "_roll", "FloatingJoint rotation about x", registry);
       
       this.setFloatingTransform3D(this.jointTransform3D);
       physics.u_i = null;
