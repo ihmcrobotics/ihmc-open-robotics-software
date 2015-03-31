@@ -42,7 +42,7 @@ public class RosFiducialDetector extends RosImageSubscriber
 
    FiducialDetector<ImageFloat32> detector = FactoryFiducial.
    //       squareBinaryRobust(new ConfigFiducialBinary(0.1), 6, ImageFloat32.class);
-         calibChessboard(new ConfigChessboard(7, 9), 0.01, ImageFloat32.class);
+         calibChessboard(new ConfigChessboard(5, 6), 0.09, ImageFloat32.class);
 
    //       calibSquareGrid(new ConfigSquareGrid(5,7), 0.03, ImageFloat32.class);
 
@@ -140,7 +140,7 @@ public class RosFiducialDetector extends RosImageSubscriber
       else
       {
 
-         rosMasterURI = new URI("http://localhost:11311");
+         rosMasterURI = new URI("http://cpu0:11311");
 
       }
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "RosMainNode");

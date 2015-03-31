@@ -29,7 +29,7 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
 
          try
          {
-            mainNode = new RosMainNode(new URI("http://10.7.4.100:11311"), getClass().getSimpleName());
+            mainNode = new RosMainNode(new URI("http://10.7.4.102:11311"), getClass().getSimpleName());
             tfPublisher = new RosTf2Publisher(false);
          }
          catch (URISyntaxException e)
@@ -50,10 +50,10 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
             Transform3d tmpTransform = new Transform3d();
             tmpTransform.setTranslation(rigidBody.xPosition,rigidBody.yPosition,rigidBody.zPosition);
             tmpTransform.setRotation(new Quat4d(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
-            tfPublisher.publish(tmpTransform, mainNode.getCurrentTime().totalNsecs(), "/world", "mocap/rigidBody"+rigidBody.getId());
+            tfPublisher.publish(tmpTransform, mainNode.getCurrentTime().totalNsecs(), "/mocap_world", "mocap/rigidBody"+rigidBody.getId());
          }
 
-         System.out.println("Update rate: " + frequencyCalculator.determineCallFrequency() + " Hz");
+         //System.out.println("Update rate: " + frequencyCalculator.determineCallFrequency() + " Hz");
       }
       
       public void run()
