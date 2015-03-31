@@ -54,6 +54,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final FramePose iterativeClosestPointInWorldFramePose = new FramePose(worldFrame);
    private final YoFramePose yoIterativeClosestPointPoseInWorldFrame;
    
+   private final ReferenceFrame IterativeClosestPointReferenceFrame;
+   
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
    {
@@ -88,6 +90,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       
       offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
+      
+      IterativeClosestPointReferenceFrame = outdatedPoseUpdater.getOutdatedReferenceFrameToBeUpdated();
       
       iterativeClosestPointInPelvisReferenceFramePose = new FramePose(pelvisReferenceFrame);
       correctedPelvisPoseInPelvisReferenceFramePose = new FramePose(pelvisReferenceFrame);
@@ -173,7 +177,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointInWorldFramePose.setPose(iterativeClosestPointTransformInWorldFrame);
       yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
       ////
-      outdatedPoseUpdater.updateOutdatedTransform(timeStampedExternalPose, iterativeClosestPointInPelvisReferenceFramePose);
+      outdatedPoseUpdater.updateOutdatedTransform(timeStampedExternalPose);
+      iterativeClosestPointInPelvisReferenceFramePose.setToZero(IterativeClosestPointReferenceFrame);
+      iterativeClosestPointInPelvisReferenceFramePose.changeFrame(pelvisReferenceFrame);
       iterativeClosestPointInPelvisReferenceFramePose.getPose(errorTransformBetweenCurrentPositionAndCorrected);
       
       yoIterativeClosestPointInPelvisReferenceFramePose.set(iterativeClosestPointInPelvisReferenceFramePose);
