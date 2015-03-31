@@ -33,21 +33,22 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
    private final YoVariableRegistry registry = new YoVariableRegistry(DRCSimGazeboSensorReaderFactory.class.getSimpleName());
 
    private final int estimatorTicksPerControlTick;
+   private final int estimatorFrequencyInHz;
    private final ArrayList<OneDoFJoint> joints = new ArrayList<>();
    private ByteBuffer jointCommand;
-   
+
    // Since the finger joint controller doesn't set the OneDoFJoints used in this writer, this acts as an object communicator for finger joint angles
    private HashMap<String, OneDegreeOfFreedomJoint> fingerJointMap = null;
 
    public AtlasDRCSimGazeboOutputWriter(AtlasRobotModel robotModel)
    {
       estimatorTicksPerControlTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
+      estimatorFrequencyInHz = (int) (1.0 / robotModel.getEstimatorDT());
    }
 
    @Override
    public void initialize()
    {
-
    }
 
    @Override
@@ -57,15 +58,33 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
 
       jointCommand.putLong(estimatorTicksPerControlTick);
       jointCommand.putLong(timestamp);
+      jointCommand.putLong(estimatorFrequencyInHz);
+
+      // if the i_th value of the binary rep of this is 1, it's position controlled
+      long jointsUnderPositionControl = 0;
+
+      for (int i = 0; i < joints.size(); i++)
+      {
+         if (joints.get(i).isUnderPositionControl())
+         {
+            jointsUnderPositionControl += 1 << i;
+         }
+      }
+      jointCommand.putLong(jointsUnderPositionControl);
 
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint joint = joints.get(i);
-         
-         if(fingerJointMap == null || !fingerJointMap.containsKey(joint.getName()))
-            jointCommand.putDouble(joint.getqDesired());
+
+         if (fingerJointMap == null || !fingerJointMap.containsKey(joint.getName()))
+         {
+            if (joint.isUnderPositionControl())
+               jointCommand.putDouble(joint.getqDesired());
+            else
+               jointCommand.putDouble(joint.getTau());
+         }
          else
-            jointCommand.putDouble(fingerJointMap.get(joint.getName()).getqDesired());
+            jointCommand.putDouble(fingerJointMap.get(joint.getName()).getqDesired()); // fingers are always position controlled
       }
 
       jointCommand.flip();
@@ -82,14 +101,14 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          e.printStackTrace();
       }
    }
-   
+
    public void setFingerJointsProvider(SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints)
-   {      
+   {
       fingerJointMap = new HashMap<String, OneDegreeOfFreedomJoint>();
-      
-      for(RobotSide robotSide : RobotSide.values)
+
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for(OneDegreeOfFreedomJoint joint : allFingerJoints.get(robotSide))
+         for (OneDegreeOfFreedomJoint joint : allFingerJoints.get(robotSide))
          {
             fingerJointMap.put(joint.getName(), joint);
          }
@@ -110,7 +129,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       });
 
-      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 16);
+      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 32);
       jointCommand.order(ByteOrder.nativeOrder());
 
       try
@@ -132,6 +151,8 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       {
          throw new RuntimeException(e);
       }
+
+      System.out.println("num of joints = " + joints.size());
    }
 
    private void sendInitialState() throws IOException

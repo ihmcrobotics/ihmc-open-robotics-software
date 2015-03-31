@@ -70,9 +70,9 @@
           </rate>
           <accel>
             <mean>0.0</mean>
-            <stddev>1.7e-2</stddev>
-            <bias_mean>0.1</bias_mean>
-            <bias_stddev>0.001</bias_stddev>
+            <stddev>1.7e-7</stddev>
+            <bias_mean>0.00001</bias_mean>
+            <bias_stddev>0.0000001</bias_stddev>
           </accel>
         </noise>
       </imu>
