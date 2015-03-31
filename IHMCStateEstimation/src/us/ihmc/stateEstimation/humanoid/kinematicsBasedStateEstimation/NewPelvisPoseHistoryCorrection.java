@@ -1,5 +1,8 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -9,6 +12,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -45,6 +49,16 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final RigidBodyTransform iterativeClosestPointTransformInWorldFrame = new RigidBodyTransform();
    private final RigidBodyTransform totalErrorBetweenPelvisAndLocalizationTransform = new RigidBodyTransform();
    private final RigidBodyTransform errorBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
+   private final Vector3d totalErrorTranslation = new Vector3d(); 
+   private final Quat4d totalErrorRotation = new Quat4d(); 
+   private final DoubleYoVariable totalErrorTranslation_X;
+   private final DoubleYoVariable totalErrorTranslation_Y;
+   private final DoubleYoVariable totalErrorTranslation_Z;
+   private final double[] totalErrorYawPitchRoll = new double[3];
+   private final DoubleYoVariable totalErrorRotation_Yaw;
+   private final DoubleYoVariable totalErrorRotation_Pitch;
+   private final DoubleYoVariable totalErrorRotation_Roll;
+   
    private final IntegerYoVariable pelvisBufferSize;
 
    private final FramePose stateEstimatorInWorldFramePose = new FramePose(worldFrame);
@@ -103,6 +117,14 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       yoCorrectedPelvisPoseInPelvisReferenceFramePose = new YoFramePose("correctedPelvisPoseInPelvisReferenceFramePose", pelvisReferenceFrame, registry);
       yoCorrectedPelvisPoseInWorldFrame = new YoFramePose("correctedPelvisPoseInWorldFrame", worldFrame, registry);
       yoIterativeClosestPointPoseInWorldFrame = new YoFramePose("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
+      
+      totalErrorTranslation_X = new DoubleYoVariable("totalErrorTranslation_X", registry);
+      totalErrorTranslation_Y = new DoubleYoVariable("totalErrorTranslation_Y", registry);
+      totalErrorTranslation_Z = new DoubleYoVariable("totalErrorTranslation_Z", registry);
+      totalErrorRotation_Yaw = new DoubleYoVariable("totalErrorRotation_Yaw", registry);
+      totalErrorRotation_Pitch = new DoubleYoVariable("totalErrorRotation_Pitch", registry);
+      totalErrorRotation_Roll = new DoubleYoVariable("totalErrorRotation_Roll", registry);
+      
    }
    
    
@@ -183,6 +205,18 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointInPelvisReferenceFramePose.setToZero(IterativeClosestPointReferenceFrame);
       iterativeClosestPointInPelvisReferenceFramePose.changeFrame(pelvisReferenceFrame);
       iterativeClosestPointInPelvisReferenceFramePose.getPose(totalErrorBetweenPelvisAndLocalizationTransform);
+      
+      ////for SCS feedback
+      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(totalErrorTranslation);
+      totalErrorTranslation_X.set(totalErrorTranslation.getX());
+      totalErrorTranslation_Y.set(totalErrorTranslation.getY());
+      totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
+      totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
+      RotationFunctions.setYawPitchRollBasedOnQuaternion(totalErrorYawPitchRoll, totalErrorRotation);
+      totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
+      totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
+      totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
+      /////
       
       yoIterativeClosestPointInPelvisReferenceFramePose.set(iterativeClosestPointInPelvisReferenceFramePose);
       offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInPelvisReferenceFramePose, iterativeClosestPointInPelvisReferenceFramePose, confidenceFactor.getDoubleValue());
