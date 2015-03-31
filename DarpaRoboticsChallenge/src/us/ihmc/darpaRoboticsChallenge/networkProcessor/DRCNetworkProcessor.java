@@ -172,7 +172,7 @@ public class DRCNetworkProcessor
          PacketCommunicator controllerPacketCommunicator;
          if(params.useLocalControllerCommunicator())
          {
-            System.out.println("Connecting to controller using intra process communication");
+            PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
          }
          else 
@@ -200,15 +200,6 @@ public class DRCNetworkProcessor
          throw new RuntimeException(e);
       }
    }
-//
-//   public void addPacketCommunicatorToRouter(PacketDestination destination, PacketCommunicatorMock packetCommunicator)
-//   {
-//      packetRouter.attachPacketCommunicator(destination, packetCommunicator);
-//      connect(packetCommunicator);
-//      
-//      String methodName = "addPacketCommunicatorToRouter ";
-//      printModuleConnectedDebugStatement(destination, methodName);
-//   }
 
    public PacketRouter<PacketDestination> getPacketRouter()
    {

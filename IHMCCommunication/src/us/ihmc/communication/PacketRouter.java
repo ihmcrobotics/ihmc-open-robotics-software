@@ -6,6 +6,8 @@ import java.util.HashMap;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.utilities.io.printing.PrintTools;
 
 public class PacketRouter<T extends Enum<T>> 
 {
@@ -13,7 +15,7 @@ public class PacketRouter<T extends Enum<T>>
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
+   private Class<?>[] packetTypesToDebug = {}; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
@@ -31,10 +33,8 @@ public class PacketRouter<T extends Enum<T>>
       communicatorDestinations = new HashMap<>();
       redirects = new EnumMap<>(destinationType);
       
-      if(DEBUG)
-      {
-         System.out.println("Creating Packet Router");
-      }
+      if (DEBUG)
+         PrintTools.debug(this, "Creating Packet Router");
    }
 
    public void attachPacketCommunicator(T destination, final PacketCommunicator packetCommunicator)
@@ -49,10 +49,8 @@ public class PacketRouter<T extends Enum<T>>
       communicators.put(destination, packetCommunicator);
       communicatorDestinations.put(packetCommunicator, destination);
       
-      if(DEBUG)
-      {
-         System.out.println(getClass().getSimpleName() + " Attached " + destination + " to the network processor");
-      }
+      if (DEBUG)
+         PrintTools.debug(this, "Attached " + destination + " to the network processor");
    }
    
    private void checkCommunicatorId(final T destination)
@@ -81,7 +79,7 @@ public class PacketRouter<T extends Enum<T>>
    {
       if(shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-         System.out.println(getClass().getSimpleName() + " NP received " + packet.getClass().getSimpleName() + " heading for " + packet.getDestination() + " from " + communicatorDestinations.get(source));
+         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + PacketDestination.fromOrdinal(packet.getDestination()) + " from " + communicatorDestinations.get(source));
       }
       
       T destination = getPacketDestination(source, packet);
@@ -95,7 +93,7 @@ public class PacketRouter<T extends Enum<T>>
       {
          if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
          {
-            System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+            PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
          }
          
          forwardPacket(packet, destinationCommunicator);
@@ -154,7 +152,7 @@ public class PacketRouter<T extends Enum<T>>
             {
                if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))
                {
-                  System.out.println("Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
+                  PrintTools.debug(this, "Sending " + packet.getClass().getSimpleName() + " from " + communicatorDestinations.get(source) + " to " + destination);
                }
                forwardPacket(packet, destinationCommunicator);
             }
@@ -211,10 +209,8 @@ public class PacketRouter<T extends Enum<T>>
    
    private boolean shouldPrintDebugStatement(PacketCommunicator source, int destinationCommunicatorId, Class<?> packetType)
    {
-      if(!DEBUG)
-      {
+      if (!DEBUG)
          return false;
-      }
       
       if(sourceCommunicatorIdToDebug != Integer.MIN_VALUE && sourceCommunicatorIdToDebug != communicatorDestinations.get(source).ordinal())
       {
