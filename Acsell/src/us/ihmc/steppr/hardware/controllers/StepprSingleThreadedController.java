@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.realtime.PriorityParameters;
+import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
@@ -128,6 +129,7 @@ public class StepprSingleThreadedController extends RealtimeThread
       System.gc();
       System.gc();
 
+      RealtimeMemory.lock();
       try
       {
 
