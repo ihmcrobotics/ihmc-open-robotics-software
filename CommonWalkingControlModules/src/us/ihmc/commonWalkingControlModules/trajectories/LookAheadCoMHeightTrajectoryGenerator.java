@@ -681,7 +681,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    }
 
    private final FramePoint height = new FramePoint();
-   private final Point3d anklePosition = new Point3d();
+   private final FramePoint desiredPosition = new FramePoint();
    private final double[] splineOutput = new double[3];
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
@@ -706,7 +706,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
             int lastIndex = pelvisTrajectory.getTimeAtWaypoints().length - 1;
             // TODO (Sylvain) Check if that's the right way to do it
-            double heightOffset = pelvisTrajectory.getPositions()[lastIndex].getZ() - splineOutput[0];
+            desiredPosition.setIncludingFrame(worldFrame, pelvisTrajectory.getPositions()[lastIndex]);
+            desiredPosition.changeFrame(frameOfLastFoostep);
+            
+            double heightOffset = desiredPosition.getZ() - splineOutput[0];
 
             // it is not really the last time, since we have the "settling"
             double totalTime = pelvisTrajectory.getTimeAtWaypoints()[lastIndex];

@@ -220,7 +220,7 @@ public class PelvisOrientationManager
             
             int lastIndex = trajectoryData.getTimeAtWaypoints().length - 1;      
             // it is not really the last time, since we have the "settling"
-            double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex -1 ];
+            double totalTime = trajectoryData.getTimeAtWaypoints()[ lastIndex ];
             
             offsetTrajectoryTime.set( totalTime );
             activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
