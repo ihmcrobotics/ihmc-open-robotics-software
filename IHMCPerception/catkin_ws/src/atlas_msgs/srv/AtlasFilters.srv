@@ -1,0 +1,14 @@
+
+float64[] coef_a                      # filter coefficients.
+                                      # If set, must have length of 2,
+                                      # leave empty to keep previous values.
+float64[] coef_b                      # filter coefficients.
+                                      # If set, must have length of 2,
+                                      # leave empty to keep previous values.
+
+bool filter_velocity                  # turn velocity filter on or off
+bool filter_position                  # turn position filter on or off
+
+---
+bool success
+string status_message

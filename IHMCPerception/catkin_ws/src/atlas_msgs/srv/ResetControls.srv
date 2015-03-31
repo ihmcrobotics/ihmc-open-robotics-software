@@ -1,0 +1,12 @@
+# permissible values for mode
+
+bool reset_bdi_controller             # reset BDI controller internal states.
+bool reset_pid_controller             # reset PID controller internal states.
+bool reload_pid_from_ros              # reload PID gains from ROS param server.
+atlas_msgs/AtlasCommand atlas_command # unless reload_pid_from_ros is true,
+                                      # values from atlas_command will be read
+                                      # into active PID controller.
+
+---
+bool success
+string status_message
