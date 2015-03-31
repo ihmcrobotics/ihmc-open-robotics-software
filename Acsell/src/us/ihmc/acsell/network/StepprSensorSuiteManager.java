@@ -5,8 +5,8 @@ import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 
@@ -20,7 +20,7 @@ public class StepprSensorSuiteManager implements DRCSensorSuiteManager
    }
    
    @Override
-   public void initializeSimulatedSensors(PacketCommunicator packetCommunicator)
+   public void initializeSimulatedSensors(ObjectCommunicator packetCommunicator)
    {
    }
 
