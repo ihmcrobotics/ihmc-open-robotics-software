@@ -12,7 +12,7 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.behaviorTests.AtlasComHeightBehaviorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasDetectCollisionUsingWristSensorTest.class,
    us.ihmc.atlas.behaviorTests.AtlasFootPoseBehaviorTest.class,
-   us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class
+   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class
 })
 
 public class AtlasAFlakyTestSuite

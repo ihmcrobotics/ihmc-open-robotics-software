@@ -34,7 +34,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
 
-public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
+public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterface
 {
    private static final int MINIMUM_SCANS_TO_RECIEVE = 10; // GPU Benchmark
    private static final float SCAN_TOLERANCE = 0.001f;
@@ -126,7 +126,7 @@ public abstract class DepthDataProcessorTest implements MultiRobotTestInterface
       @Override
       public void receivedPacket(PointCloudWorldPacket pointCloud)
       {
-         PrintTools.debug(DepthDataProcessorTest.this, "Point cloud world received.");
+         PrintTools.debug(PointCloudDataReceiverTest.this, "Point cloud world received.");
 
          numberOfLidarScansConsumed++;
          // jmeLidarScanVisualizer.updateLidarNodeTransform(sparseLidarScan.getStartTransform());

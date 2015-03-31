@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.networkProcessor.depthData.AtlasDepthDataProcessorTest.class,
+   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
 })
 
 public class AtlasLidarBambooGraphicalTestSuite
