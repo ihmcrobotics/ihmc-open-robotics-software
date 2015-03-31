@@ -1,17 +1,19 @@
 package us.ihmc.acsell.network;
 
+import java.io.IOException;
 import java.net.URI;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.KryoLocalPacketCommunicator;
+import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 
 public class StepprSensorSuiteManager implements DRCSensorSuiteManager
 {
-   private final KryoLocalPacketCommunicator sensorSuitePacketCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.SENSOR_MANAGER.ordinal(), "STEPPR_SENSOR_MANAGER");
+   private final PacketCommunicatorMock sensorSuitePacketCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
+         new IHMCCommunicationKryoNetClassList());
    
    public StepprSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
    {
@@ -27,10 +29,11 @@ public class StepprSensorSuiteManager implements DRCSensorSuiteManager
    {
    }
 
-
    @Override
-   public PacketCommunicator getProcessedSensorsCommunicator()
+   public void connect() throws IOException
    {
-      return sensorSuitePacketCommunicator;
+      sensorSuitePacketCommunicator.connect();
    }
+
+
 }
