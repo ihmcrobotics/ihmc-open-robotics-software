@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -118,7 +119,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
    private void doConnect() throws IOException
    {
       client.connect(timeOut, host, tcpPort);
-      System.out.println("Success! Connected KryoClient to SCS at ip " + host + " on port " + tcpPort);
+      PrintTools.info(this, "Success! Connected KryoClient to SCS at ip " + host + " on port " + tcpPort);
    }
 
    private void openConnectionOnAThread()

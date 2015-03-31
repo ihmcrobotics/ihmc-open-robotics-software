@@ -69,17 +69,21 @@ public class DRCSimulationTestHelper
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
 
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation,
-         SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
       this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, robotModel);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
-         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+         DRCRobotModel robotModel)
    {
-      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-            new IHMCCommunicationKryoNetClassList());
+      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, null);
+   }
+
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
+         DRCRobotModel robotModel, DRCNetworkModuleParameters drcNetworkModuleParameters)
+   {
+      this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
 
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -111,8 +115,15 @@ public class DRCSimulationTestHelper
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
       simulationStarter.setInitializeEstimatorToActual(true);
 
-      networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseNetworkProcessor(false);
+      if (drcNetworkModuleParameters == null)
+      {
+         networkProcessorParameters = new DRCNetworkModuleParameters();
+         networkProcessorParameters.setUseNetworkProcessor(false);
+      }
+      else
+      {
+         networkProcessorParameters = drcNetworkModuleParameters;
+      }
 
       simulationStarter.startSimulation(networkProcessorParameters, false);
 
@@ -121,7 +132,7 @@ public class DRCSimulationTestHelper
       drcSimulationFactory = simulationStarter.getDRCSimulationFactory();
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
-
+      
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(name, scs);
