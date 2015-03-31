@@ -28,6 +28,7 @@ public class GUICaptureStreamer
 {
    public static final int MAGIC_SESSION_ID = 0x81359;
    public static final int PORT = 12451;
+   public static final int LINERATE = 100000000; // 100 mbit/s
 
    public static final InetAddress group = LogUtils.getByName("239.255.25.1");
 
@@ -54,7 +55,7 @@ public class GUICaptureStreamer
       this.fps = fps;
       try
       {
-         server = new SegmentedDatagramServer(MAGIC_SESSION_ID, iface, group, port);
+         server = new SegmentedDatagramServer(MAGIC_SESSION_ID, iface, group, port, LINERATE);
       }
       catch (IOException e)
       {

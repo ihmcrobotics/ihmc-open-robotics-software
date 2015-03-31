@@ -9,8 +9,14 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import com.google.common.util.concurrent.RateLimiter;
+
+import us.ihmc.utilities.math.TimeTools;
+
 public class SegmentedDatagramServer
 {
+   private final RateLimiter lineRateLimiter;
+   
    private final int maximumPacketSize;
    private final int payloadSize;
 
@@ -26,9 +32,10 @@ public class SegmentedDatagramServer
     * Constructor for multicast server
     * @throws IOException 
     */
-   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port) throws IOException
+   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port, int lineRateInBps) throws IOException
    {
       this.sessionID = sessionID;
+      this.lineRateLimiter = RateLimiter.create(lineRateInBps);
       System.out.println("Binding Segmented Datagram Server to " + iface);
       if(iface.isLoopback())
       {
@@ -57,6 +64,8 @@ public class SegmentedDatagramServer
       header.setSegmentCount(segmentCount);
       header.setTimestamp(timestamp);
       
+      long size = data.remaining();
+      long start = System.nanoTime();
       for (int segment = 0; segment < segmentCount; segment++)
       {
          sendBuffer.clear();
@@ -70,8 +79,10 @@ public class SegmentedDatagramServer
             sendBuffer.put(data.get());
          }
          sendBuffer.flip();
+         lineRateLimiter.acquire(sendBuffer.remaining());
          channel.send(sendBuffer, address);
       }
+      System.out.println("Send " + size + " in  " + TimeTools.nanoSecondstoSeconds(System.nanoTime() - start) + "s");
    }
 
    public void close()

@@ -15,6 +15,8 @@ import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer extends Thread
 {
+   public static final int LINERATE = 100000000; // 100 mbit/s
+   
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
    private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
 
@@ -71,7 +73,7 @@ public class YoVariableProducer extends Thread
       SegmentedDatagramServer server;
       try
       {
-         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
+         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort(), LINERATE);
       }
       catch (IOException e)
       {
