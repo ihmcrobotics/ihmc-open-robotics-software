@@ -1,5 +1,7 @@
 package us.ihmc.utilities.ros;
 
+import geometry_msgs.Point;
+import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 
@@ -23,6 +25,8 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.ros.node.NodeConfiguration;
+
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class RosTools
 {
@@ -171,10 +175,49 @@ public class RosTools
       
    }
 
-   public static void packRosVector3dToVector3d(Vector3 rosVector, Vector3d vector)
+   public static void packRosVector3ToVector3d(Vector3 rosVector, Vector3d vectorToPack)
    {
-      vector.setX(rosVector.getX());
-      vector.setY(rosVector.getY());
-      vector.setZ(rosVector.getZ());
+      vectorToPack.setX(rosVector.getX());
+      vectorToPack.setY(rosVector.getY());
+      vectorToPack.setZ(rosVector.getZ());
+   }
+   
+   public static void packVector3dToGeometry_msgsVector3(Vector3d vector, Vector3 rosVectorToPack)
+   {
+      rosVectorToPack.setX(vector.getX());
+      rosVectorToPack.setY(vector.getY());
+      rosVectorToPack.setZ(vector.getZ());
+   }
+   
+   public static void packVector3dToGeometry_MsgPoint(Vector3d position, Point point)
+   {
+      point.setX(position.getX());
+      point.setY(position.getY());
+      point.setZ(position.getZ());
+   }
+
+   public static void packRigidBodyTransformToGeometry_msgsPose(RigidBodyTransform pelvisTransform, Pose pose)
+   {
+      Vector3d point = new Vector3d();
+      pelvisTransform.getTranslation(point);
+
+      Quat4d rotation = new Quat4d();
+      pelvisTransform.get(rotation);
+      
+      packVector3dAndQuat4dToGeometry_msgsPose(point, rotation, pose);
+   }
+   
+   public static void packVector3dAndQuat4dToGeometry_msgsPose(Vector3d point, Quat4d rotation, Pose pose)
+   {
+      RosTools.packVector3dToGeometry_MsgPoint(point, pose.getPosition());
+      RosTools.packQuat4dToGeometry_msgsQuaternion(rotation, pose.getOrientation());
+   }
+
+   private static void packQuat4dToGeometry_msgsQuaternion(Quat4d quat, Quaternion orientation)
+   {
+      orientation.setW(quat.w);
+      orientation.setX(quat.x);
+      orientation.setY(quat.y);
+      orientation.setZ(quat.z);
    }
  }
