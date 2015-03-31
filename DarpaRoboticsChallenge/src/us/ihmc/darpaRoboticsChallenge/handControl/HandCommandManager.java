@@ -11,21 +11,17 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class HandCommandManager
 {
-   private final boolean DEBUG = true;
    private final String SERVER_ADDRESS = "localhost";
 
    protected final PacketCommunicator handManagerPacketCommunicator;
+   protected final PacketCommunicator packetCommunicator;
 
    protected JavaProcessSpawner spawner = new JavaProcessSpawner(true);
 
-   protected PacketCommunicator packetCommunicator;
 
    public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
    {
-      // decided to decouple the comms startup process for the hands
-      // HandCommandManager should only spawn a HndControlThreadManager when debugging
-      if (DEBUG)
-         spawner.spawn(clazz, new String[] { "-r", robotSide.getLowerCaseName() });
+      spawner.spawn(clazz, new String[] { "-r", robotSide.getLowerCaseName() });
 
       NetworkPorts managerPort = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
       handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
