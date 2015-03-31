@@ -17,7 +17,7 @@ import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 
-public class PacketCommunicatorMock
+public class PacketCommunicator
 {
    public static final int BUFFER_SIZE = 2097152 * 20;
    
@@ -29,33 +29,33 @@ public class PacketCommunicatorMock
    
    private final String description;
    
-   public static PacketCommunicatorMock createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
+   public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
    {
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(true);
-      return new PacketCommunicatorMock("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList.getPacketClassList());
+      return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList.getPacketClassList());
    }
 
-   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
+   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
    {
       return createTCPPacketCommunicatorServer(port, BUFFER_SIZE, BUFFER_SIZE, netClassList);
    }
-   public static PacketCommunicatorMock createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
+   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
+      return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
    }
 
-   public static PacketCommunicatorMock createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
+   public static PacketCommunicator createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList.getPacketClassList());
+      return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList.getPacketClassList());
    }
    
-   public static PacketCommunicatorMock createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
+   public static PacketCommunicator createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
    {
-      return new PacketCommunicatorMock("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList.getPacketClassList());
+      return new PacketCommunicator("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList.getPacketClassList());
    }
 
-   private PacketCommunicatorMock(String description, NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
+   private PacketCommunicator(String description, NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
    {
       this.description = description;
       this.communicator = communicator;

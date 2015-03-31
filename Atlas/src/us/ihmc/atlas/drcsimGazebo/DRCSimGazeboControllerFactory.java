@@ -21,7 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Mo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviderFactory;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -64,7 +64,7 @@ public class DRCSimGazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      PacketCommunicatorMock drcNetworkProcessorServer = PacketCommunicatorMock.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
 
 //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());

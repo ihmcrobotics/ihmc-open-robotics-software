@@ -9,7 +9,7 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -30,7 +30,7 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
    private final ArrayList<RosTopicPublisher<?>> publishers;
 
 
-   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicatorMock gfe_communicator, PacketRouter<PacketDestination> packetRouter)
+   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator gfe_communicator, PacketRouter<PacketDestination> packetRouter)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
       this.nodeConfiguration = NodeConfiguration.newPrivate();
@@ -52,7 +52,7 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 //      }
    }
 
-   private void setupMsgTopics(PacketCommunicatorMock gfe_communicator)
+   private void setupMsgTopics(PacketCommunicator gfe_communicator)
    {
       Map<String, Class> outputPacketList = PACKETS_TO_REDIRECT_TO_ROS;
 

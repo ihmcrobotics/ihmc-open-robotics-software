@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception;
 import org.ros.node.NodeConfiguration;
 
 import std_msgs.Float64;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
@@ -20,7 +20,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber
 
    NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
    
-   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicatorMock rosModulePacketCommunicator,
+   public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicator rosModulePacketCommunicator,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
 	   

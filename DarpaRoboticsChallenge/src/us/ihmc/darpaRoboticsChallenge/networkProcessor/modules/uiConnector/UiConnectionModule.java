@@ -9,7 +9,7 @@ import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.FilteredPacketSendingForwarder;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 
@@ -25,8 +25,8 @@ public class UiConnectionModule implements PacketConsumer<RobotConfigurationData
    
    private final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
    
-   private final PacketCommunicatorMock uiPacketServer = PacketCommunicatorMock.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, NETCLASSLIST);
-   private final PacketCommunicatorMock uiModuleCommunicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NETCLASSLIST);
+   private final PacketCommunicator uiPacketServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, NETCLASSLIST);
+   private final PacketCommunicator uiModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.UI_MODULE, NETCLASSLIST);
    
    public UiConnectionModule()
    {

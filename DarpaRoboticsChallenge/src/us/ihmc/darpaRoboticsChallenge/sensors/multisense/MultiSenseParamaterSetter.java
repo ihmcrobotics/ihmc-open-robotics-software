@@ -10,7 +10,7 @@ import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -35,10 +35,10 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private static String resolution = new String("2048x1088x64");
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
-   private PacketCommunicatorMock packetCommunicator;
+   private PacketCommunicator packetCommunicator;
    private ParameterTree params;
    
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, PacketCommunicatorMock sensorSuitePacketCommunicator)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, PacketCommunicator sensorSuitePacketCommunicator)
    {
       this.rosMainNode = rosMainNode;
       this.packetCommunicator = sensorSuitePacketCommunicator;

@@ -3,7 +3,7 @@ package us.ihmc.communication;
 import java.util.EnumMap;
 import java.util.HashMap;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 
@@ -17,8 +17,8 @@ public class PacketRouter<T extends Enum<T>>
    
    private final int BROADCAST = 0;
 
-   private final EnumMap<T, PacketCommunicatorMock> communicators;
-   private final HashMap<PacketCommunicatorMock, T> communicatorDestinations;
+   private final EnumMap<T, PacketCommunicator> communicators;
+   private final HashMap<PacketCommunicator, T> communicatorDestinations;
 
    private final EnumMap<T, GlobalPacketConsumer> consumers;
    private final EnumMap<T, T> redirects;
@@ -37,7 +37,7 @@ public class PacketRouter<T extends Enum<T>>
       }
    }
 
-   public void attachPacketCommunicator(T destination, final PacketCommunicatorMock packetCommunicator)
+   public void attachPacketCommunicator(T destination, final PacketCommunicator packetCommunicator)
    {
       checkCommunicatorId(destination);
             
@@ -77,7 +77,7 @@ public class PacketRouter<T extends Enum<T>>
     * @param source the source communicator that sent the packet
     * @param packet
     */
-   private void processPacketRouting(PacketCommunicatorMock source, Packet<?> packet)
+   private void processPacketRouting(PacketCommunicator source, Packet<?> packet)
    {
       if(shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
@@ -86,7 +86,7 @@ public class PacketRouter<T extends Enum<T>>
       
       T destination = getPacketDestination(source, packet);
       
-      PacketCommunicatorMock destinationCommunicator = communicators.get(destination);
+      PacketCommunicator destinationCommunicator = communicators.get(destination);
       if(isBroadcast(destination))
       {
          broadcastPacket(source, packet);
@@ -108,12 +108,12 @@ public class PacketRouter<T extends Enum<T>>
       return destination.ordinal() == BROADCAST;
    }
 
-   private void forwardPacket(Packet<?> packet, PacketCommunicatorMock destinationCommunicator)
+   private void forwardPacket(Packet<?> packet, PacketCommunicator destinationCommunicator)
    {
       destinationCommunicator.send(packet);
    }
    
-   private T getPacketDestination(PacketCommunicatorMock source, Packet<?> packet)
+   private T getPacketDestination(PacketCommunicator source, Packet<?> packet)
    {
       if(packet.getDestination() < 0 || packet.getDestination() >= destinationConstants.length)
       {
@@ -137,7 +137,7 @@ public class PacketRouter<T extends Enum<T>>
     * sends the packet to every communicator once, except the sender or any
     * communicators with redirects
    **/
-   private void broadcastPacket(PacketCommunicatorMock source, Packet<?> packet)
+   private void broadcastPacket(PacketCommunicator source, Packet<?> packet)
    {
       for(T destination : destinationConstants)
       {
@@ -146,7 +146,7 @@ public class PacketRouter<T extends Enum<T>>
             continue;
          }
          
-         PacketCommunicatorMock destinationCommunicator = communicators.get(destination);
+         PacketCommunicator destinationCommunicator = communicators.get(destination);
          if(source != destinationCommunicator && !redirects.containsKey(destination))
          {
             
@@ -176,7 +176,7 @@ public class PacketRouter<T extends Enum<T>>
 
    public void detatchObjectCommunicator(T id)
    {
-      PacketCommunicatorMock communicator = communicators.remove(id);
+      PacketCommunicator communicator = communicators.remove(id);
       GlobalPacketConsumer consumer = consumers.remove(id);
       
       if(communicator != null)
@@ -209,7 +209,7 @@ public class PacketRouter<T extends Enum<T>>
       redirects.remove(redirectFrom);
    }
    
-   private boolean shouldPrintDebugStatement(PacketCommunicatorMock source, int destinationCommunicatorId, Class<?> packetType)
+   private boolean shouldPrintDebugStatement(PacketCommunicator source, int destinationCommunicatorId, Class<?> packetType)
    {
       if(!DEBUG)
       {
@@ -269,8 +269,8 @@ public class PacketRouter<T extends Enum<T>>
    
    private class PacketRoutingAction implements GlobalPacketConsumer
    {
-      private final PacketCommunicatorMock communicator;
-      private PacketRoutingAction(PacketCommunicatorMock packetCommunicator)
+      private final PacketCommunicator communicator;
+      private PacketRoutingAction(PacketCommunicator packetCommunicator)
       {
          this.communicator = packetCommunicator;
       }

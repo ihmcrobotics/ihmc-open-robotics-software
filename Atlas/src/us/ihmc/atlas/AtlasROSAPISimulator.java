@@ -7,7 +7,7 @@ import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.LocalObjectCommunicator;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -33,7 +33,7 @@ public class AtlasROSAPISimulator
    private static String defaultStartingLocation = "DEFAULT";
    private final boolean startUI = false;
    private boolean redirectUiPacketsToRos = false;
-   private PacketCommunicatorMock gfe_communicator;
+   private PacketCommunicator gfe_communicator;
 
    public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
    {
@@ -45,7 +45,7 @@ public class AtlasROSAPISimulator
       URI rosUri = NetworkParameters.getROSURI();
       networkProcessorParameters.setRosUri(rosUri);
 
-      gfe_communicator = PacketCommunicatorMock.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
       gfe_communicator.connect();
 
       networkProcessorParameters.setUseGFECommunicator(true);

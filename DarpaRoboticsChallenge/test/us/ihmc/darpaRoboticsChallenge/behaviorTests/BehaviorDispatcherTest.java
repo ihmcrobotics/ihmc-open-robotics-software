@@ -21,7 +21,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
@@ -135,9 +135,9 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
 
    private BooleanYoVariable yoDoubleSupport;
 
-   private PacketCommunicatorMock behaviorCommunicatorServer;
+   private PacketCommunicator behaviorCommunicatorServer;
 
-   private PacketCommunicatorMock behaviorCommunicatorClient;
+   private PacketCommunicator behaviorCommunicatorClient;
 
    @Before
    public void setUp()
@@ -151,10 +151,10 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       this.yoTime = new DoubleYoVariable("yoTime", registry);
 
-      behaviorCommunicatorClient = PacketCommunicatorMock.createIntraprocessPacketCommunicator(
+      behaviorCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(
             NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
 
-      behaviorCommunicatorServer = PacketCommunicatorMock.createIntraprocessPacketCommunicator(
+      behaviorCommunicatorServer = PacketCommunicator.createIntraprocessPacketCommunicator(
             NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
       try
       {
@@ -209,7 +209,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    }
 
    private BehaviorDisptacher setupBehaviorDispatcher(FullRobotModel fullRobotModel, BehaviorCommunicationBridge communicationBridge,
-         YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicatorMock behaviorCommunicatorServer, YoVariableRegistry registry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, PacketCommunicator behaviorCommunicatorServer, YoVariableRegistry registry)
    {
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new RobotDataReceiver(fullRobotModel, forceSensorDataHolder);

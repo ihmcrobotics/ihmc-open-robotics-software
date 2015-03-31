@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.userInterface.util.TimestampedPoint;
 import us.ihmc.utilities.ThreadTools;
@@ -22,10 +22,10 @@ public class PointCloudWorldPacketGenerator implements Runnable
 
    private final ReadLock readLock;
    private final DepthDataStore depthDataFilter;
-   private final PacketCommunicatorMock packetCommunicator;
+   private final PacketCommunicator packetCommunicator;
    private ScheduledFuture<?> scheduled = null;
 
-   public PointCloudWorldPacketGenerator(PacketCommunicatorMock sensorSuitePacketCommunicator, ReadLock readLock, DepthDataStore depthDataFilter)
+   public PointCloudWorldPacketGenerator(PacketCommunicator sensorSuitePacketCommunicator, ReadLock readLock, DepthDataStore depthDataFilter)
    {
       this.packetCommunicator = sensorSuitePacketCommunicator;
       this.readLock = readLock;

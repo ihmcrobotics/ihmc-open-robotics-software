@@ -5,7 +5,7 @@ import java.util.List;
 import org.codehaus.jackson.map.RuntimeJsonMappingException;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
@@ -60,10 +60,10 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final DoubleYoVariable yoImpactStiffnessThreshold_NperM;
    private final DoubleYoVariable yoImpactForceThreshold_N;
 
-   private final PacketCommunicatorMock controllerCommunicator;
+   private final PacketCommunicator controllerCommunicator;
 
    public WristForceSensorFilteredUpdatable(RobotSide robotSide, FullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInfo,
-         ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicatorMock behaviorPacketCommunicator, YoVariableRegistry registry)
+         ForceSensorDataHolder forceSensorDataHolder, double DT, PacketCommunicator behaviorPacketCommunicator, YoVariableRegistry registry)
    {
       this.DT = DT;
       this.robotSide = robotSide;

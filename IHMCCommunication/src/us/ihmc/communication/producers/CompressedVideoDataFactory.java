@@ -1,6 +1,6 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.utilities.VideoStreamer;
 
@@ -13,7 +13,7 @@ public class CompressedVideoDataFactory
 
    public static final Algorithm algorithm = Algorithm.JPEG;
 
-   public static CompressedVideoDataServer createCompressedVideoDataServer(PacketCommunicatorMock sensorSuitePacketCommunicator,
+   public static CompressedVideoDataServer createCompressedVideoDataServer(PacketCommunicator sensorSuitePacketCommunicator,
          CompressedVideoHandler handler)
    {
       switch (algorithm)

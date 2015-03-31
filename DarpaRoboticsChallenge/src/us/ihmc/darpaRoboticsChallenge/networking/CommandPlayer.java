@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.TimestampListener;
-import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -21,7 +21,7 @@ public class CommandPlayer implements TimestampListener
 {
    private final ExecutorService threadPool = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("CommandPlaybackThread"));
    private final TimestampProvider timestampProvider;
-   private final PacketCommunicatorMock fieldComputerClient;
+   private final PacketCommunicator fieldComputerClient;
    
    private final Object syncObject = new Object();
    
@@ -33,7 +33,7 @@ public class CommandPlayer implements TimestampListener
    
    private ScriptFileLoader loader;
    
-   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, PacketCommunicatorMock fieldComputerClient, IHMCCommunicationKryoNetClassList drcNetClassList)
+   public CommandPlayer(AtomicSettableTimestampProvider timestampProvider, PacketCommunicator fieldComputerClient, IHMCCommunicationKryoNetClassList drcNetClassList)
    {
       this.timestampProvider = timestampProvider;
       this.fieldComputerClient = fieldComputerClient;
