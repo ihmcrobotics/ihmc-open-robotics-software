@@ -595,21 +595,21 @@
       </physics>
     </joint>
     <link name='l_clav'>
-      <pose>0.1281 0.2256 0.6896 0 -0 0</pose>
+      <pose>0.1281 0.2256 0.6896 0 -0 -3.14159</pose>
       <inertial>
-        <pose>0 0 -0.084 0 -0 0</pose>
+        <pose>0 -0.048 -0.084 0 -0 0</pose>
         <mass>4.466</mass>
         <inertia>
           <ixx>0.011</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
           <iyy>0.009</iyy>
-          <iyz>-0.004</iyz>
+          <iyz>0.004</iyz>
           <izz>0.004</izz>
         </inertia>
       </inertial>
       <collision name='l_clav_collision'>
-        <pose>0 0.11 -0.248 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <pose>0 -0.11 -0.248 -2.65359e-06 1.57079 -2.65359e-06</pose>
         <geometry>
           <cylinder>
             <length>0.1525</length>
@@ -629,7 +629,7 @@
         </surface>
       </collision>
       <collision name='l_clav_collision_l_clav_1'>
-        <pose>0.005 0.015 -0.08 0 -0 0</pose>
+        <pose>0.005 -0.015 -0.08 0 -0 0</pose>
         <geometry>
           <cylinder>
             <length>0.26</length>
@@ -649,7 +649,7 @@
         </surface>
       </collision>
       <collision name='l_clav_collision_l_clav_2'>
-        <pose>0.004 0.064 -0.247 -1.05 0 0</pose>
+        <pose>0.004 -0.064 -0.247 1.05 -0 0</pose>
         <geometry>
           <box>
             <size>0.1 0.07 0.072</size>
@@ -672,7 +672,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_clav.obj</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_clav.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -711,7 +711,7 @@
       </physics>
     </joint>
     <link name='l_scap'>
-      <pose>0.1281 0.3356 0.4446 0 -0 0</pose>
+      <pose>0.1281 0.3356 0.4446 0 -0 -3.14159</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>3.899</mass>
@@ -725,7 +725,7 @@
         </inertia>
       </inertial>
       <collision name='l_scap_collision'>
-        <pose>-0.005 0.115 -0.014 -1.5708 0 0</pose>
+        <pose>-0.005 -0.115 -0.014 1.5708 -0 0</pose>
         <geometry>
           <cylinder>
             <length>0.105</length>
@@ -745,7 +745,7 @@
         </surface>
       </collision>
       <collision name='l_scap_collision_l_scap_1'>
-        <pose>-0.005 0.075 -0.015 0 -0 0</pose>
+        <pose>-0.005 -0.075 -0.015 0 -0 0</pose>
         <geometry>
           <box>
             <size>0.16 0.17 0.08</size>
@@ -764,7 +764,7 @@
         </surface>
       </collision>
       <collision name='l_scap_collision_l_scap_2'>
-        <pose>0.076 0.0615 0.0128 -2.25 0 0</pose>
+        <pose>0.076 -0.0615 0.0128 2.25 -0 0</pose>
         <geometry>
           <box>
             <size>0.02 0.029 0.018</size>
@@ -783,7 +783,7 @@
         </surface>
       </collision>
       <collision name='l_scap_collision_l_scap_3'>
-        <pose>-0.075 -0.015 0.019 -1 0 0</pose>
+        <pose>-0.075 0.015 0.019 1 -0 0</pose>
         <geometry>
           <box>
             <size>0.028 0.09 0.05</size>
@@ -806,7 +806,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_scap.obj</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_scap.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -818,7 +818,7 @@
       <child>l_scap</child>
       <parent>l_clav</parent>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>1 2.06823e-13 -0</xyz>
         <limit>
           <lower>-1.5708</lower>
           <upper>1.5708</upper>
@@ -845,9 +845,9 @@
       </physics>
     </joint>
     <link name='l_uarm'>
-      <pose>0.1281 0.5226 0.4286 0 -0 0</pose>
+      <pose>0.1281 0.5226 0.4286 0 -0 -3.14159</pose>
       <inertial>
-        <pose>0 -0.065 0 0 -0 0</pose>
+        <pose>0 0.065 0 0 -0 0</pose>
         <mass>4.386</mass>
         <inertia>
           <ixx>0.00656</ixx>
@@ -859,7 +859,7 @@
         </inertia>
       </inertial>
       <collision name='l_uarm_collision'>
-        <pose>0 0.035 -0.005 -1.5708 0 0</pose>
+        <pose>0 -0.035 0 1.5708 -0 0</pose>
         <geometry>
           <cylinder>
             <length>0.11</length>
@@ -879,7 +879,7 @@
         </surface>
       </collision>
       <collision name='l_uarm_collision_l_uarm_1'>
-        <pose>-0.01 0.043 0.002 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <pose>-0.005 -0.111 0.017 3.14159 1.57079 3.14159</pose>
         <geometry>
           <box>
             <size>0.05 0.07 0.15</size>
@@ -902,7 +902,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/l_uarm.obj</uri>
+            <uri>model://atlas_description/meshes_unplugged/r_uarm.obj</uri>
           </mesh>
         </geometry>
       </visual>
@@ -914,7 +914,7 @@
       <child>l_uarm</child>
       <parent>l_scap</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>-2.06823e-13 1 0</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.14159</upper>
@@ -941,7 +941,7 @@
       </physics>
     </joint>
     <link name='l_larm'>
-      <pose>0.1281 0.6416 0.4378 0 -0 0</pose>
+      <pose>0.1281 0.6416 0.4378 0 -0 -3.14159</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>3.248</mass>
@@ -1087,7 +1087,7 @@
       <child>l_larm</child>
       <parent>l_uarm</parent>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>1 2.06823e-13 -0</xyz>
         <limit>
           <lower>0</lower>
           <upper>2.35619</upper>
@@ -1114,7 +1114,7 @@
       </physics>
     </joint>
     <link name='l_ufarm'>
-      <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
+      <pose>0.1281 0.34205 0.42859 0 -0 -3.14159</pose>
       <inertial>
         <pose>0.00015 -0.08296 0.00037 0 -0 0</pose>
         <mass>2.4798</mass>
@@ -1203,7 +1203,7 @@
       <child>l_ufarm</child>
       <parent>l_larm</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>2.06823e-13 -1 0</xyz>
         <limit>
           <lower>-3.011</lower>
           <upper>3.011</upper>
@@ -1230,7 +1230,7 @@
       </physics>
     </joint>
     <link name='l_lfarm'>
-      <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
+      <pose>0.1281 0.34205 0.42859 0 -0 -3.14159</pose>
       <inertial>
         <pose>0.00017 0.02515 0.00163 0 -0 0</pose>
         <mass>0.648</mass>
@@ -1340,7 +1340,7 @@
       <child>l_lfarm</child>
       <parent>l_ufarm</parent>
       <axis>
-        <xyz>1 0 0</xyz>
+        <xyz>-1 -2.06823e-13 0</xyz>
         <limit>
           <lower>-1.7628</lower>
           <upper>1.7628</upper>
@@ -1369,7 +1369,7 @@
       </physics>
     </joint>
     <link name='l_hand'>
-      <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
+      <pose>0.1281 0.34205 0.42859 0 -0 -3.14159</pose>
       <inertial>
         <pose>0.00128479 0.141218 0.00812128 0 -0 0</pose>
         <mass>1.8839</mass>
@@ -1419,7 +1419,7 @@
       <child>l_hand</child>
       <parent>l_lfarm</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz>2.06823e-13 -1 0</xyz>
         <limit>
           <lower>-2.9671</lower>
           <upper>2.9671</upper>
@@ -1446,7 +1446,7 @@
       </physics>
     </joint>
     <link name='l_finger_1_link_0'>
-      <pose>0.09389 1.13055 0.39485 1.5708 0.000796327 1.5708</pose>
+      <pose>0.16231 0.15265 0.39485 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -1482,7 +1482,7 @@
       <child>l_finger_1_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-3.2051e-09 0.000796327 1</xyz>
+        <xyz>3.2051e-09 -0.000796327 1</xyz>
         <limit>
           <lower>-0.16</lower>
           <upper>0.25</upper>
@@ -1497,7 +1497,7 @@
       </axis>
     </joint>
     <link name='l_finger_1_link_1'>
-      <pose>0.0938899 1.15055 0.394834 1.5708 0.000796327 1.5708</pose>
+      <pose>0.16231 0.13265 0.394834 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1533,7 +1533,7 @@
       <child>l_finger_1_link_1</child>
       <parent>l_finger_1_link_0</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1548,7 +1548,7 @@
       </axis>
     </joint>
     <link name='l_finger_1_link_2'>
-      <pose>0.0938895 1.20053 0.366794 1.5708 0.520796 1.5708</pose>
+      <pose>0.162311 0.0826723 0.366794 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1584,7 +1584,7 @@
       <child>l_finger_1_link_2</child>
       <parent>l_finger_1_link_1</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1599,7 +1599,7 @@
       </axis>
     </joint>
     <link name='l_finger_1_link_3'>
-      <pose>0.0938892 1.23436 0.347389 1.5708 0.520796 1.5708</pose>
+      <pose>0.162311 0.0488428 0.347389 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -1635,7 +1635,7 @@
       <child>l_finger_1_link_3</child>
       <parent>l_finger_1_link_2</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1650,7 +1650,7 @@
       </axis>
     </joint>
     <link name='l_finger_2_link_0'>
-      <pose>0.16589 1.13055 0.39485 1.5708 0.000796327 1.5708</pose>
+      <pose>0.09031 0.15265 0.39485 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -1686,7 +1686,7 @@
       <child>l_finger_2_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-3.2051e-09 0.000796327 1</xyz>
+        <xyz>3.2051e-09 -0.000796327 1</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -1701,7 +1701,7 @@
       </axis>
     </joint>
     <link name='l_finger_2_link_1'>
-      <pose>0.16589 1.15055 0.394834 1.5708 0.000796327 1.5708</pose>
+      <pose>0.0903101 0.13265 0.394834 1.5708 0.000796327 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1737,7 +1737,7 @@
       <child>l_finger_2_link_1</child>
       <parent>l_finger_2_link_0</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1752,7 +1752,7 @@
       </axis>
     </joint>
     <link name='l_finger_2_link_2'>
-      <pose>0.165889 1.20053 0.366794 1.5708 0.520796 1.5708</pose>
+      <pose>0.0903105 0.0826723 0.366794 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1788,7 +1788,7 @@
       <child>l_finger_2_link_2</child>
       <parent>l_finger_2_link_1</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1803,7 +1803,7 @@
       </axis>
     </joint>
     <link name='l_finger_2_link_3'>
-      <pose>0.165889 1.23436 0.347389 1.5708 0.520796 1.5708</pose>
+      <pose>0.0903108 0.0488428 0.347389 1.5708 0.520796 -1.57079</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -1839,7 +1839,7 @@
       <child>l_finger_2_link_3</child>
       <parent>l_finger_2_link_2</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>-1 -7.34641e-06 -2.64504e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1854,7 +1854,7 @@
       </axis>
     </joint>
     <link name='l_finger_middle_link_0'>
-      <pose>0.12989 1.13055 0.48585 -1.5708 -0.000796327 1.5708</pose>
+      <pose>0.12631 0.15265 0.48585 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -1890,7 +1890,7 @@
       <child>l_finger_middle_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-1 5.55112e-17 -3.2051e-09</xyz>
+        <xyz>1 2.0689e-13 -3.2051e-09</xyz>
         <limit>
           <lower>-0.25</lower>
           <upper>0.16</upper>
@@ -1905,7 +1905,7 @@
       </axis>
     </joint>
     <link name='l_finger_middle_link_1'>
-      <pose>0.12989 1.15055 0.485866 -1.5708 -0.000796327 1.5708</pose>
+      <pose>0.12631 0.13265 0.485866 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1941,7 +1941,7 @@
       <child>l_finger_middle_link_1</child>
       <parent>l_finger_middle_link_0</parent>
       <axis>
-        <xyz>-1 5.55112e-17 -3.2051e-09</xyz>
+        <xyz>1 2.0689e-13 -3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -1956,7 +1956,7 @@
       </axis>
     </joint>
     <link name='l_finger_middle_link_2'>
-      <pose>0.12989 1.20053 0.513906 -1.5708 -0.520796 1.5708</pose>
+      <pose>0.12631 0.0826723 0.513906 -1.5708 -0.520796 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.15</mass>
@@ -1992,7 +1992,7 @@
       <child>l_finger_middle_link_2</child>
       <parent>l_finger_middle_link_1</parent>
       <axis>
-        <xyz>-1 0 -3.2051e-09</xyz>
+        <xyz>1 2.06835e-13 -3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
@@ -2007,7 +2007,7 @@
       </axis>
     </joint>
     <link name='l_finger_middle_link_3'>
-      <pose>0.12989 1.23436 0.533311 -1.5708 -0.520796 1.5708</pose>
+      <pose>0.12631 0.0488428 0.533311 -1.5708 -0.520796 -1.5708</pose>
       <inertial>
         <pose>0 0 0 0 -0 0</pose>
         <mass>0.05</mass>
@@ -2043,7 +2043,7 @@
       <child>l_finger_middle_link_3</child>
       <parent>l_finger_middle_link_2</parent>
       <axis>
-        <xyz>-1 0 -3.2051e-09</xyz>
+        <xyz>1 2.06835e-13 -3.2051e-09</xyz>
         <limit>
           <lower>0</lower>
           <upper>3.1416</upper>
