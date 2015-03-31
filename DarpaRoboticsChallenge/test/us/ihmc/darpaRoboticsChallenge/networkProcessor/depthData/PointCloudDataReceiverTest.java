@@ -74,7 +74,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @EstimatedDuration(duration = 25.0)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 300000)
    public void testIsReceivingScansAnd95PercentOfPointsAreCorrect() throws SimulationExceededMaximumTimeException
    {
