@@ -15,6 +15,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
 import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
@@ -224,7 +225,7 @@ public class DRCSimulationTestHelper
 
       if (networkProcessorParameters != null)
       {
-         PacketCommunicator simulatedSensorCommunicator = networkProcessorParameters.getSimulatedSensorCommunicator();
+         LocalObjectCommunicator simulatedSensorCommunicator = networkProcessorParameters.getSimulatedSensorCommunicator();
          if (simulatedSensorCommunicator != null)
          {
             simulatedSensorCommunicator.close();

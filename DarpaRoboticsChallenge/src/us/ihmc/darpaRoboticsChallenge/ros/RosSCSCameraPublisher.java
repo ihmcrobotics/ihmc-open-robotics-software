@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 import org.ros.message.Time;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.LocalVideoPacket;
 import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -14,7 +14,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
-public class RosSCSCameraPublisher implements PacketConsumer<LocalVideoPacket>
+public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
 {
    private final RosImagePublisher[] cameraPublisher;
    private final RosMainNode rosMainNode;
@@ -24,7 +24,7 @@ public class RosSCSCameraPublisher implements PacketConsumer<LocalVideoPacket>
 
    private final int nSensors;
 
-   public RosSCSCameraPublisher(PacketCommunicator scsCommunicator, RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
+   public RosSCSCameraPublisher(ObjectCommunicator localObjectCommunicator, RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          DRCRobotCameraParameters[] cameraParameters)
    {
       nSensors = cameraParameters.length;
@@ -49,11 +49,11 @@ public class RosSCSCameraPublisher implements PacketConsumer<LocalVideoPacket>
          }
       }
 
-      scsCommunicator.attachListener(LocalVideoPacket.class, this);
+      localObjectCommunicator.attachListener(LocalVideoPacket.class, this);
    }
 
    @Override
-   public void receivedPacket(LocalVideoPacket object)
+   public void consumeObject(LocalVideoPacket object)
    {
       if (rosMainNode.isStarted())
       {

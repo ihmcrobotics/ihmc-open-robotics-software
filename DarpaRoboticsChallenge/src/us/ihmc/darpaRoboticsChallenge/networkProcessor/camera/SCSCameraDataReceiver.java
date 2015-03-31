@@ -1,9 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicatorMock;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
 import us.ihmc.communication.packets.LocalVideoPacket;
 import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
@@ -14,11 +14,11 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
  * 
  *  Generate simulated camera data and camera info packet from SCS, we use only left eye.
  */
-public class SCSCameraDataReceiver extends CameraDataReceiver implements PacketConsumer<LocalVideoPacket>
+public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {
    private final SCSCameraInfoReceiver scsCameraInfoReceiver;
 
-   public SCSCameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator scsSensorsCommunicator,
+   public SCSCameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
          PacketCommunicatorMock sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider);
@@ -31,7 +31,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements PacketC
       sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, scsCameraInfoReceiver);
    }
 
-   public void receivedPacket(LocalVideoPacket object)
+   public void consumeObject(LocalVideoPacket object)
    {
       if (DEBUG)
       {

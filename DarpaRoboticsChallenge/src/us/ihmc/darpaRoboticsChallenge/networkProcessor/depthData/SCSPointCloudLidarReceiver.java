@@ -5,14 +5,14 @@ import java.util.Arrays;
 
 import javax.vecmath.Point3d;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
+import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
-public class SCSPointCloudLidarReceiver implements PacketConsumer<SimulatedLidarScanPacket>
+public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidarScanPacket>
 {
 
    private final PointCloudDataReceiver pointCloudDataReceiver;
@@ -21,7 +21,7 @@ public class SCSPointCloudLidarReceiver implements PacketConsumer<SimulatedLidar
    private final ReferenceFrame lidarScanFrame;
    private final RigidBodyTransform identityTransform = new RigidBodyTransform();
 
-   public SCSPointCloudLidarReceiver(String lidarName, PacketCommunicator packetCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
+   public SCSPointCloudLidarReceiver(String lidarName, ObjectCommunicator scsSensorsCommunicator, PointCloudDataReceiver pointCloudDataReceiver)
    {
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       this.lidarFrame = pointCloudDataReceiver.getLidarFrame(lidarName);
@@ -31,11 +31,11 @@ public class SCSPointCloudLidarReceiver implements PacketConsumer<SimulatedLidar
       this.lidarScanFrame = ReferenceFrame
             .constructBodyFrameWithUnchangingTransformToParent("lidarScanFrame", lidarAfterJointFrame, lidarBaseToSensorTransform);
 
-      packetCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
+      scsSensorsCommunicator.attachListener(SimulatedLidarScanPacket.class, this);
    }
 
    @Override
-   public void receivedPacket(SimulatedLidarScanPacket packet)
+   public void consumeObject(SimulatedLidarScanPacket packet)
    {
       LidarScan scan = new LidarScan(packet.getLidarScanParameters(), packet.getRanges(), packet.getSensorId());
       // Set the world transforms to nothing, so points are in lidar scan frame

@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.net.LocalObjectCommunicator;
 
 public class DRCNetworkModuleParameters
 {
@@ -23,7 +23,7 @@ public class DRCNetworkModuleParameters
    
    private boolean runAutomaticDiagnostic = false;
 
-   private PacketCommunicator simulatedSensorCommunicator;
+   private LocalObjectCommunicator simulatedSensorCommunicator;
    private URI rosUri;
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
@@ -73,7 +73,7 @@ public class DRCNetworkModuleParameters
       return useUiModule;
    }
 
-   public PacketCommunicator getSimulatedSensorCommunicator()
+   public LocalObjectCommunicator getSimulatedSensorCommunicator()
    {
       return simulatedSensorCommunicator;
    }
@@ -158,7 +158,7 @@ public class DRCNetworkModuleParameters
       return timeToWaitBeforeStartingDiagnostics;
    }
 
-   public void setSimulatedSensorCommunicator(PacketCommunicator simulatedSensorCommunicator)
+   public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
       useSensorModule = true;

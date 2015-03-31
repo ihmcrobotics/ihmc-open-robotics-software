@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.communication.packetCommunicator.interfaces.PacketCommunicator;
+import us.ihmc.communication.net.LocalObjectCommunicator;
+import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.sensing.SimulatedLidarScanPacket;
 import us.ihmc.graphics3DAdapter.GPULidar;
 import us.ihmc.graphics3DAdapter.GPULidarListener;
@@ -41,7 +42,7 @@ public class DRCLidar
       return lidarSensors.get(0);
    }
 
-   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, PacketCommunicator objectCommunicator, DRCRobotJointMap jointMap,
+   public static void setupDRCRobotLidar(DRCSimulationFactory drcSimulation, LocalObjectCommunicator objectCommunicator, DRCRobotJointMap jointMap,
          DRCRobotLidarParameters lidarParams, TimestampProvider timestampProvider, boolean startLidar)
  {
     Graphics3DAdapter graphics3dAdapter = drcSimulation.getSimulationConstructionSet().getGraphics3dAdapter();
@@ -63,11 +64,11 @@ public class DRCLidar
 
    public static class DRCLidarCallback implements GPULidarListener
    {
-      private final PacketCommunicator objectCommunicator;
+      private final ObjectCommunicator objectCommunicator;
       private final LidarScanParameters lidarScanParameters;
       private final int lidarSensorId;
 
-      public DRCLidarCallback(PacketCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int lidarSensorId)
+      public DRCLidarCallback(ObjectCommunicator objectCommunicator, LidarScanParameters lidarScanParameters, int lidarSensorId)
       {
          this.objectCommunicator = objectCommunicator;
          this.lidarScanParameters = lidarScanParameters;
@@ -80,7 +81,7 @@ public class DRCLidar
          final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters,
                TimeTools.secondsToNanoSeconds(time)), Arrays.copyOf(scan, scan.length));
 
-         objectCommunicator.send(lidarScan);
+         objectCommunicator.consumeObject(lidarScan);
       }
    }
 
