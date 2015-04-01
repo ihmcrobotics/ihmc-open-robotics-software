@@ -50,6 +50,11 @@ public class FloatingJoint extends Joint
       this(jname, null, offset, rob, false);
    }
 
+   public FloatingJoint(String jname, Vector3d offset, Robot rob, boolean createYawPitchRollYoVariable)
+   {
+      this(jname, null, offset, rob, createYawPitchRollYoVariable);
+   }
+
    public FloatingJoint(String jname, String varName, Vector3d offset, Robot rob)
    {
       this(jname, varName, offset, rob, false);
