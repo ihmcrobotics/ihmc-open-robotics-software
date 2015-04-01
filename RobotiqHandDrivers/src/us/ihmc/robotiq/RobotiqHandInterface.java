@@ -843,7 +843,7 @@ public final class RobotiqHandInterface
 		}
 		while(status == null && faultCount <= 5);
 		
-		if(status == null)
+		if(status == null || faultCount > 5 || status.length < SCISSOR_CURRENT)
 			throw new IOException("Unable to read hand status at " + address);
 		
 		dataFromHand[0] = (byte) (status[GRIPPER_STATUS] & INITIALIZATON_MASK);
@@ -961,7 +961,6 @@ public final class RobotiqHandInterface
 				dataToSendCopy[i] = dataToSend[i];
 			}
 			return connection.transcieve(RobotiqHandParameters.UNIT_ID, dataToSendCopy);
-//			return connection.transcieve(RobotiqHandParameters.UNIT_ID, Arrays.copyOfRange(dataToSend, 0, dataLength));
 		}
 		catch (IOException e)
 		{
@@ -1018,7 +1017,6 @@ public final class RobotiqHandInterface
 			dataToSendCopy[i] = dataToSend[i];
 		}
 		sendRequest(SET_REGISTERS, REGISTER_START, dataToSendCopy);
-//		sendRequest(SET_REGISTERS, REGISTER_START, Arrays.copyOfRange(dataToSend,0,dataLength));
 	}
 	
 	private byte[] getStatus() throws RobotiqConnectionException
