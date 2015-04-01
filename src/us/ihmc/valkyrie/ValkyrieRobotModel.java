@@ -120,11 +120,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
          loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, transform);
       }
       
-      for(String parentJointName : ValkyrieSensorInformation.copSensors.keySet())
+      for(RobotSide side : RobotSide.values())
       {
-         for(String copSensorName : ValkyrieSensorInformation.copSensors.get(parentJointName).keySet())
+         for(String parentJointName : ValkyrieSensorInformation.contactSensors.get(side).keySet())
          {
-            loader.addForceSensor(jointMap, copSensorName,parentJointName,ValkyrieSensorInformation.copSensors.get(parentJointName).get(copSensorName));
+            for(String sensorName : ValkyrieSensorInformation.contactSensors.get(side).get(parentJointName).keySet())
+            {
+               loader.addContactSensor(jointMap,sensorName, parentJointName, ValkyrieSensorInformation.contactSensors.get(side).get(parentJointName).get(sensorName));
+            }
          }
       }
 
