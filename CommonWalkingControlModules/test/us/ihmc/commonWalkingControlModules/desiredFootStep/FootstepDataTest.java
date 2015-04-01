@@ -73,7 +73,7 @@ public class FootstepDataTest
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
-	   NetworkPorts port = NetworkPorts.TEST_PORT_E;
+	   NetworkPorts port = NetworkPorts.createRandomTestPort();
 //      QueueBasedStreamingDataProducer<FootstepData> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepData>("FootstepData");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
       FootstepDataConsumer footstepDataConsumer = new FootstepDataConsumer();
@@ -107,7 +107,7 @@ public class FootstepDataTest
    {
       Random random = new Random(1582l);
       // setup comms
-      NetworkPorts port = NetworkPorts.TEST_PORT_D;
+      NetworkPorts port = NetworkPorts.createRandomTestPort();
 //      QueueBasedStreamingDataProducer<FootstepDataList> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
@@ -136,7 +136,7 @@ public class FootstepDataTest
    public void testPassingPauseCommand() throws IOException
    {
       // setup comms
-	   NetworkPorts port = NetworkPorts.TEST_PORT_C;
+	   NetworkPorts port = NetworkPorts.createRandomTestPort();
 //      QueueBasedStreamingDataProducer<PauseCommand> queueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<PauseCommand>("PauseCommand");
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
@@ -176,7 +176,7 @@ public class FootstepDataTest
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       // Create one server for two types of data
-	   NetworkPorts pathPort = NetworkPorts.TEST_PORT_B;
+	   NetworkPorts pathPort = NetworkPorts.createRandomTestPort();
 
 //      QueueBasedStreamingDataProducer<FootstepDataList> pathQueueBasedStreamingDataProducer = new QueueBasedStreamingDataProducer<FootstepDataList>("FootstepDataList");
 
@@ -247,7 +247,7 @@ public class FootstepDataTest
    public void testPassingFootstepStatus() throws IOException
    {
       // setup comms
-      NetworkPorts port = NetworkPorts.TEST_PORT_A;
+      NetworkPorts port = NetworkPorts.createRandomTestPort();
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
