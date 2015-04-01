@@ -21,14 +21,14 @@ public class ValkyriePushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepT
    @Override
    protected void setForwardPushParameters()
    {
-      forceMagnitude = 300.0;
+      forceMagnitude = 350.0;
       forceDuration = 0.2;
    }
 
    @Override
    protected void setBackwardPushParameters()
    {
-      forceMagnitude = -300.0;
+      forceMagnitude = -400.0;
       forceDuration = 0.2;
    }
 }
