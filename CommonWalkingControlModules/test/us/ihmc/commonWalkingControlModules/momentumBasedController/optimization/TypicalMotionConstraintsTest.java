@@ -8,8 +8,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 public class TypicalMotionConstraintsTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testDoubleSupportKneesBentTypicalMotionConstraints()
    {
       // Have J x = p; A x = b. Check if an all out solution without requiring optimization. 
@@ -120,8 +120,8 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightNoSingularity()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -239,8 +239,8 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightNoSingularityTwo()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{
@@ -373,8 +373,8 @@ public class TypicalMotionConstraintsTest
 
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testDoubleSupportKneesStraightThree()
    {
       double[][] JPrimaryMotionConstraintsData = new double[][]{

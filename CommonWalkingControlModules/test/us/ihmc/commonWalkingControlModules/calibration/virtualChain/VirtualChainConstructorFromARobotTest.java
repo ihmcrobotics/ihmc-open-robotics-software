@@ -34,8 +34,8 @@ public class VirtualChainConstructorFromARobotTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testOneAtZero()
    {
       VirtualChainConstructorFromARobot constructor = new VirtualChainConstructorFromARobot();
@@ -109,32 +109,32 @@ public class VirtualChainConstructorFromARobotTest
       assertTupleEquals(centerOfMass, comEstimateAtZero);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testOnePartTwo()
    {
       VirtualChainExampleRobot testRobotOne = VirtualChainExampleRobot.constructExampleOne();
       testRobotInRandomPositions(testRobotOne);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testTwo()
    {
       VirtualChainExampleRobot testRobotTwo = VirtualChainExampleRobot.constructExampleTwo();
       testRobotInRandomPositions(testRobotTwo);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testThree()
    {
       VirtualChainExampleRobot testRobotThree = VirtualChainExampleRobot.constructExampleThree();
       testRobotInRandomPositions(testRobotThree);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testFour()
    {
       VirtualChainExampleRobot testRobotFour = VirtualChainExampleRobot.constructExampleFour();

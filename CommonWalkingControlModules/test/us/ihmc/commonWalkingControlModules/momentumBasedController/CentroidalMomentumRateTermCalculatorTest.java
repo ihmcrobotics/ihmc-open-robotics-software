@@ -47,8 +47,8 @@ public class CentroidalMomentumRateTermCalculatorTest
 
 //   @Ignore
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void chainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);
@@ -69,8 +69,8 @@ public class CentroidalMomentumRateTermCalculatorTest
 
 //   @Ignore
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void treeTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);
@@ -91,8 +91,8 @@ public class CentroidalMomentumRateTermCalculatorTest
 
 //   @Ignore
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {
       Random random = new Random(12651L);

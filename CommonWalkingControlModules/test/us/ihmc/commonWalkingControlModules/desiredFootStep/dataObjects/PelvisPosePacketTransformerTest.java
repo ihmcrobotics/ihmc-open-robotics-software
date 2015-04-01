@@ -29,8 +29,8 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class PelvisPosePacketTransformerTest
 {
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPelvisPosePacketTransformer()
    {
       int numberOfTests = 10;

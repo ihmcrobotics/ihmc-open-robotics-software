@@ -73,8 +73,8 @@ public class GroundReactionWrenchDistributorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testSimpleWrenchDistributionWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -127,8 +127,8 @@ public class GroundReactionWrenchDistributorTest
       testSimpleWrenchDistribution(centerOfMassFrame, distributor, parentRegistry, 1e-7);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testRandomFlatGroundExamplesWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -141,8 +141,8 @@ public class GroundReactionWrenchDistributorTest
       testRandomFlatGroundExamples(verifyForcesAreInsideFrictionCones, feasibleMomentSolutions, false, centerOfMassFrame, distributor, 1.0, parentRegistry);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testRandomFlatGroundExamplesWithViableMomentSolutionsWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");
@@ -335,8 +335,8 @@ public class GroundReactionWrenchDistributorTest
       testTroublesomeExampleTwo(centerOfMassFrame, distributor, parentRegistry);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testTroublesomeExamplesWithGeometricFlatGroundDistributor()
    {
       YoVariableRegistry parentRegistry = new YoVariableRegistry("registry");

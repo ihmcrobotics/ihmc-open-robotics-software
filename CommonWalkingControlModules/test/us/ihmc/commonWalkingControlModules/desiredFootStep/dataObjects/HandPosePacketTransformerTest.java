@@ -31,8 +31,8 @@ public class HandPosePacketTransformerTest
 {
    private final static int numberOfArmJoints = 6;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testTransformHandPosePacket()
    {
       int numberOfTests = 10;
