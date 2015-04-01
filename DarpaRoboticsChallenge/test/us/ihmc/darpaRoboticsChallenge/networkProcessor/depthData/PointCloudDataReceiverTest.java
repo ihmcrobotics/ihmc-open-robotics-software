@@ -131,7 +131,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
 
       PrintTools.info(this, "Number of points consumed: " + numberOfLidarPointsConsumed + " Points out of range: " + errorQueue.size() + " Percentage: " + ((double) errorQueue.size() / numberOfLidarPointsConsumed) + " less than .05");
 
-      assertTrue("Too many points are out of range: ", (double) errorQueue.size() / numberOfLidarPointsConsumed < PERCENT_ALLOWABLE_OUT_OF_RANGE);
+      assertTrue("Too many points are out of range: errors: " + errorQueue.size() + "/" + numberOfLidarPointsConsumed, (double) errorQueue.size() / numberOfLidarPointsConsumed < PERCENT_ALLOWABLE_OUT_OF_RANGE);
       if (!ALLOW_PERCENTAGE_OUT_OF_RANGE)
          throwAllAssertionErrors();
 
