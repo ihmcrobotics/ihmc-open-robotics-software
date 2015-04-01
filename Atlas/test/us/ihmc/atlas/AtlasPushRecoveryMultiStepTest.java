@@ -24,14 +24,14 @@ public class AtlasPushRecoveryMultiStepTest extends DRCPushRecoveryMultiStepTest
    @Override
    protected void setForwardPushParameters()
    {
-      forceMagnitude = 400.0;
+      forceMagnitude = 750.0;
       forceDuration = 0.2;
    }
 
    @Override
    protected void setBackwardPushParameters()
    {
-      forceMagnitude = -400.0;
+      forceMagnitude = -700.0;
       forceDuration = 0.2;
       
    }

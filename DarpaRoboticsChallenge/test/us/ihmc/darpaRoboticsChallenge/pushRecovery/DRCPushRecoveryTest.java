@@ -137,8 +137,8 @@ public abstract class DRCPushRecoveryTest
       
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
-      double magnitude = 500.0;
-      double duration = 0.1;
+      double magnitude = 400.0;
+      double duration = 0.15;
       
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);

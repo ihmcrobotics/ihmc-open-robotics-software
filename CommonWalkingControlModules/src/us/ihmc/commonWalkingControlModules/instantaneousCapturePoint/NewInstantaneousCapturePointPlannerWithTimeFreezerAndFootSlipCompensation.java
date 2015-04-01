@@ -216,22 +216,12 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
    }
 
    @Override
-   public void updatePlanForSingleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition, double time)
+   public void updatePlanForSingleSupportDisturbances(double time, FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition)
    {
       timeDelay.set(0.0);
       changeInTransferToFootPosition.reset();
       previousTime.set(time);
-      super.updatePlanForSingleSupportPush(footstepList, actualCapturePointPosition, time);
-   }
-
-   @Override
-   public void updatePlanForDoubleSupportPush(FrameTupleArrayList<FramePoint> footstepList, FramePoint actualCapturePointPosition,
-         double time)
-   {
-      timeDelay.set(0.0);
-      changeInTransferToFootPosition.reset();
-      previousTime.set(time);
-      super.updatePlanForDoubleSupportPush(footstepList, actualCapturePointPosition, time);
+      super.updatePlanForSingleSupportDisturbances(time, footstepList, actualCapturePointPosition);
    }
 
    @Override
@@ -255,12 +245,13 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
       return time - timeDelay.getDoubleValue();
    }
    
-   @Override
-   public void reset(double time)
+   public void reset(double time, RobotSide transferToSide, FramePoint transferToFootLocation)
    {
-	   changeInTransferToFootPosition.reset();
-	   timeDelay.set(0.0);
-	   previousTime.set(time);
+      changeInTransferToFootPosition.reset();
+      timeDelay.set(0.0);
+      previousTime.set(time);
+      initialTransferToFootLocation.setIncludingFrame(transferToFootLocation);
+      currentTransferToSide.set(transferToSide);
 	   super.reset(time);
    }
 

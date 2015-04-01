@@ -102,6 +102,12 @@ public class UpcomingFootstepList
    {
       outputFootstepList.clear();
       footstepIndex.set(0);
+      clearLocalFootstepOnly();
+   }
+
+   public void clearLocalFootstepOnly()
+   {
+      localFootstepList.clear();
    }
 
    public void insertNewNextFootstep(Footstep newNextFootstep)
