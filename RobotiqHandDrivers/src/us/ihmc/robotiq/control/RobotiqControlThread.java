@@ -192,7 +192,8 @@ class RobotiqControlThread extends HandControlThread
                   robotiqHand.scissorGrip();
                   break;
                case HALF_CLOSE:
-                  robotiqHand.close(0.35);
+                  System.out.println("RobotiqControlThread sending HALF_CLOSE");
+                  robotiqHand.close(0.25);
                   break;
                case RESET:
                {

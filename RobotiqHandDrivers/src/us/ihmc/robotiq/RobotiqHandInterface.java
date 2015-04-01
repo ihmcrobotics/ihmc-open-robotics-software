@@ -577,6 +577,8 @@ public final class RobotiqHandInterface
 	      position[SCISSOR] = SCISSOR_MODE_FULLY_CLOSED[SCISSOR];
 	   }
 
+	   percent = percent == 1.0 ? percent : (1.0 - percent) * 0xFF;
+	   
 	   position[FINGER_A] *= percent;
 	   position[FINGER_B] *= percent;
 	   position[FINGER_C] *= percent;
