@@ -45,8 +45,8 @@ public abstract class ArmJointTrajectoryPacketTest implements MultiRobotTestInte
       simulationTestingParameters.setKeepSCSUp(false);
    }
    
-   @EstimatedDuration(duration = 30.0)
-   @Test(timeout = 90000)
+	@EstimatedDuration(duration = 49.7)
+   @Test(timeout = 248511)
    public void testPacketRight() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       int waypoints = 4;
@@ -76,8 +76,8 @@ public abstract class ArmJointTrajectoryPacketTest implements MultiRobotTestInte
       executePacket(packet);
    }
    
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 150000)
+	@EstimatedDuration(duration = 66.8)
+   @Test(timeout = 334152)
    public void testRandomPackets() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       for (int i = 0; i < 100; i++)

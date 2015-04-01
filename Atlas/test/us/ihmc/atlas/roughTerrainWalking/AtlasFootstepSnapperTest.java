@@ -31,8 +31,8 @@ import us.ihmc.utilities.math.geometry.InsufficientDataException;
  */
 public class AtlasFootstepSnapperTest extends FootstepSnapperTest
 {
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.4)
+   @Test(timeout = 30000)
    public void testPointsFromAtlasDataFile() throws NumberFormatException, InsufficientDataException, IOException
    {
       boolean assertPositionConditions = true;
