@@ -44,7 +44,7 @@ public class InterprocessObjectCommunicatorTest
 
    }
 
-	@EstimatedDuration(duration = 0.7)
+	@EstimatedDuration(duration = 1.6)
    @Test(timeout = 30000)
    public void testSendingObjectsToClients() throws IOException
    {

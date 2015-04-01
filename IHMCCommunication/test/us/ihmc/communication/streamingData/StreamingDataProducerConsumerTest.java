@@ -8,7 +8,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 public class StreamingDataProducerConsumerTest
 {
 
-	@EstimatedDuration(duration = 1.7)
+	@EstimatedDuration(duration = 1.8)
 	@Test(timeout = 30000)
    public void testTypicalUsage()
    {
@@ -24,7 +24,7 @@ public class StreamingDataProducerConsumerTest
       }
    }
 
-	@EstimatedDuration(duration = 1.7)
+	@EstimatedDuration(duration = 2.0)
 	@Test(timeout = 30000)
    public void testMultipleProducersAndConsumers()
    {
