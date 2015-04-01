@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.HashMap;
 import java.util.HashSet;
 
+import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.Stoppable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
@@ -16,12 +17,14 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
-public class JointPositionHighLevelController extends HighLevelBehavior
+public class JointPositionHighLevelController extends HighLevelBehavior implements Stoppable
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -31,6 +34,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
 
    private final HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectoryGenerator;
+   private final HashMap<OneDoFJoint, PIDController >   alternativeController;
+   private final HashMap<OneDoFJoint, BooleanYoVariable >   useAlternativeController;
+   
    private final YoVariableDoubleProvider trajectoryTimeProvider;
    private final DoubleYoVariable timeProvider;
 
@@ -43,6 +49,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    private SideDependentList<double[]> armJointAngles, legJointAngles;
    private double[] waistJointAngles;
    private double neckJointAngle;
+   
 
    public JointPositionHighLevelController(MomentumBasedController momentumBasedController, DesiredJointsPositionProvider desiredJointsProvider)
    {
@@ -52,10 +59,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       this.desiredJointsProvider = desiredJointsProvider;
 
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
+      alternativeController = new HashMap<OneDoFJoint, PIDController>();
+      useAlternativeController = new HashMap<OneDoFJoint, BooleanYoVariable>();
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
-
+      
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
@@ -63,15 +72,19 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
          if (joinName.contains("finger"))
             continue;
-         if (joinName.contains("neck"))
-            continue;
 
          jointsBeenControlled.add(joint);
 
          OneDoFJointQuinticTrajectoryGenerator generator = new OneDoFJointQuinticTrajectoryGenerator("jointControl_" + joint.getName(), joint,
                                                               trajectoryTimeProvider, registry);
          trajectoryGenerator.put(joint, generator);
-
+         
+         PIDController pidController = new PIDController( "jointControl_" + joint.getName() , registry);
+         alternativeController.put(joint, pidController);
+         
+         BooleanYoVariable useAlternative = new BooleanYoVariable( "jointControl_" + joint.getName() + "_enableAlternativePID" , registry);
+         useAlternative.set(false);
+         useAlternativeController.put(joint, useAlternative ); 
       }
    }
 
@@ -83,9 +96,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
       System.out.println(" packet.trajectoryTime " + packet.getTrajectoryTime());
 
-      // ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
-
-      // OneDoFJoint[] spineJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(fullRobotModel.getPelvis(), fullRobotModel.getChest()), OneDoFJoint.class);
       if (armJointAngles == null)
       {
          armJointAngles = new SideDependentList<double[]>();
@@ -109,7 +119,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       }
 
       if (waistJointAngles == null)
+      {
          waistJointAngles = new double[packet.getNumberOfWaistJoints()];
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -118,7 +130,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
       setFinalPositionSpineJoints(packet);
       setFinalPositionNeckJoint(packet);
-     
+
 
       if (firstPacket)
       {
@@ -169,6 +181,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior
       
       trajectoryGenerator.get(neckJoint).setFinalPosition(desiredNeckJointAngle);
    }
+   
 
    private void setFinalPositionArmsAndLegs(RobotSide robotSide, JointAnglesPacket packet)
    {
@@ -182,9 +195,25 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          
          //make sure that we do not command an arm joint outside the joint limits
          desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
-         
-         
+                
          trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
+         
+         int jointTorqueLimit = 0;
+         if( robotSide == RobotSide.LEFT ) {
+            jointTorqueLimit = packet.leftArmJointTorqueLimit[i] ;
+         }
+         else{
+            jointTorqueLimit = packet.rightArmJointTorqueLimit[i] ;
+         }
+         if( jointTorqueLimit > 0 )
+         {
+            //useAlternativeController.put( oneDoFJoint, useAlternative);
+            alternativeController.get(oneDoFJoint).setMaximumOutputLimit( jointTorqueLimit );
+         }
+         else{
+            //useAlternativeController.put( oneDoFJoint, dontUseAlternative);
+            alternativeController.get(oneDoFJoint).setMaximumOutputLimit( Double.POSITIVE_INFINITY );
+         }
       }
       
       packet.packLegJointAngle(robotSide, legJointAngles.get(robotSide));
@@ -198,6 +227,23 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          
          trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
+         
+         int jointTorqueLimit = 0;
+         if( robotSide == RobotSide.LEFT ) {
+            jointTorqueLimit = packet.leftLegJointTorqueLimit[i] ;
+         }
+         else{
+            jointTorqueLimit = packet.rightLegJointTorqueLimit[i] ;
+         }
+         if( jointTorqueLimit > 0 )
+         {
+          //  useAlternativeController.put( oneDoFJoint, useAlternative);
+            alternativeController.get(oneDoFJoint).setMaximumOutputLimit( jointTorqueLimit );
+         }
+         else{
+          //  useAlternativeController.put( oneDoFJoint, dontUseAlternative);
+            alternativeController.get(oneDoFJoint).setMaximumOutputLimit( Double.POSITIVE_INFINITY );
+         }
       }      
    }
 
@@ -211,8 +257,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior
 
       double time = timeProvider.getDoubleValue() - initialTrajectoryTime;
 
-      // System.out.println(" time " + time);
-
       for (OneDoFJoint joint : jointsBeenControlled)
       {
          OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
@@ -220,16 +264,23 @@ public class JointPositionHighLevelController extends HighLevelBehavior
          if (generator.isDone() == false)
          {
             generator.compute(time);
-
-            // System.out.println("compute " + time + " / " +  trajectoryTimeProvider.getValue() );
          }
 
-         joint.setUnderPositionControl(true);
-         joint.setqDesired(generator.getValue());
-         joint.setQdDesired(generator.getVelocity());
-
+         if( useAlternativeController.get(joint).getBooleanValue() )
+         {
+            PIDController controller = alternativeController.get(joint);
+            double effort = controller.compute( joint.getQ(), generator.getValue(), joint.getQd(), generator.getVelocity(), 0.003 );
+            
+            joint.setUnderPositionControl(false);
+            joint.setTau( effort );
+         }
+         else{
+            joint.setUnderPositionControl(true);
+            joint.setqDesired(generator.getValue());
+            joint.setQdDesired(generator.getVelocity());
+         }
+         
          previousPosition.put(joint, generator.getValue());
-
       }
    }
 
@@ -255,5 +306,13 @@ public class JointPositionHighLevelController extends HighLevelBehavior
    {
       return registry;
    }
+   
+   @Override
+   public void stopExecution()
+   {
+      //@DAVIDE FREEZEME
+      System.out.println( this.getClass().getSimpleName() + " stopExecution. TODO" );
+   }
+
 
 }
