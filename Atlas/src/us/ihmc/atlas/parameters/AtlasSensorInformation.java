@@ -21,7 +21,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";
    private static final String multisenseHandoffFrame = "head";
-
+   
    /**
     * Force Sensor Parameters
     */
@@ -301,5 +301,11 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 	public static EnumMap<AtlasTarget, ReferenceFrame> getHeadIMUFramesWhenLevel() {
 		return headIMUFramesWhenLevel;
 	}
+
+   @Override
+   public SideDependentList<String> getFeetContactSensorNames()
+   {
+      return null;
+   }
 
 }

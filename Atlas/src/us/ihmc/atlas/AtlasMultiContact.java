@@ -122,7 +122,8 @@ public class AtlasMultiContact
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(
-            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), controllerParameters, armControllerParameters, capturePointPlannerParameters,
+            contactableBodiesFactory, sensorInformation.getFeetForceSensorNames(), sensorInformation.getFeetContactSensorNames(),
+            controllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.DO_NOTHING_BEHAVIOR);
       
       controllerFactory.addHighLevelBehaviorFactory(new MultiContactTestHumanoidControllerFactory(controllerParameters, footContactSides, handContactSides, true));

@@ -53,7 +53,7 @@ public class DRCHighLevelPositionControlDemo
 		SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
 
 		MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-				footForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+				model.getSensorInformation().getFeetForceSensorNames(),model.getSensorInformation().getFeetContactSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
 				HighLevelState.DO_NOTHING_BEHAVIOR);
 		controllerFactory.addHighLevelBehaviorFactory(new HighLevelPositionControllerFactory(true));
 
