@@ -14,9 +14,7 @@ import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer extends Thread
-{
-   public static final int LINERATE = 100000000; // 100 mbit/s
-   
+{   
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
    private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
 
@@ -73,7 +71,7 @@ public class YoVariableProducer extends Thread
       SegmentedDatagramServer server;
       try
       {
-         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort(), LINERATE);
+         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
       }
       catch (IOException e)
       {

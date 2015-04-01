@@ -12,9 +12,7 @@ import java.nio.channels.DatagramChannel;
 import com.google.common.util.concurrent.RateLimiter;
 
 public class SegmentedDatagramServer
-{
-   private final RateLimiter lineRateLimiter;
-   
+{   
    private final int maximumPacketSize;
    private final int payloadSize;
 
@@ -30,10 +28,9 @@ public class SegmentedDatagramServer
     * Constructor for multicast server
     * @throws IOException 
     */
-   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port, int lineRateInBps) throws IOException
+   public SegmentedDatagramServer(long sessionID, NetworkInterface iface, InetAddress group, int port) throws IOException
    {
       this.sessionID = sessionID;
-      this.lineRateLimiter = RateLimiter.create(lineRateInBps);
       System.out.println("Binding Segmented Datagram Server to " + iface);
       if(iface.isLoopback())
       {
@@ -75,7 +72,6 @@ public class SegmentedDatagramServer
             sendBuffer.put(data.get());
          }
          sendBuffer.flip();
-         lineRateLimiter.acquire(sendBuffer.remaining());
          channel.send(sendBuffer, address);
       }
    }
