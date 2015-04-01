@@ -23,7 +23,8 @@ public class JMEPointCloudVisualizer extends JMEGraphics3DWorld
       
       jmePointCloudGenerator = new JMEPointCloudGenerator(getGraphics3DAdapter().getRenderer().getAssetManager());
       
-      startWithGui(1000, 800);
+//      startWithGui(1000, 800);
+      startWithoutGui();
       
       addCoordinateFrame();
    }
