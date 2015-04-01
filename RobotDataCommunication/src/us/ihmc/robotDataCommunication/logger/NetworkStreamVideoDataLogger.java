@@ -14,16 +14,16 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
+import us.ihmc.multicastLogDataProtocol.SegmentedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.SegmentedPacketBuffer;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.robotDataCommunication.gui.GUICaptureStreamer;
 
 import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
-public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements LogPacketHandler
+public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements SegmentedLogPacketHandler
 {
    private final static String description = "NetworkStream";
    private final SegmentedDatagramClient client;

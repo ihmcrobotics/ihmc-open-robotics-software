@@ -1,11 +1,8 @@
 package us.ihmc.robotDataCommunication;
 
 import java.io.IOException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
@@ -46,19 +43,9 @@ public class YoVariableClient
 
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
    {
-      NetworkInterface iface;
-      try
-      {
-         iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(request.getControlIP()));
-      }
-      catch (SocketException e)
-      {
-         throw new RuntimeException(e);
-      }
      
-      System.out.println("Starting YoVariableClient on " + iface);
       this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener, registryPrefix, listener.populateRegistry());
-      this.yoVariableConsumer = new YoVariableConsumer(request.getSessionID(), iface, request.getGroup(), request.getDataPort(), logControlClient.getYoVariablesList(),
+      this.yoVariableConsumer = new YoVariableConsumer(request.getDataIP(), request.getDataPort(), logControlClient.getYoVariablesList(),
             logControlClient.getJointStates(), listener);
       this.listener = listener;
       this.showOverheadView = showOverheadView;

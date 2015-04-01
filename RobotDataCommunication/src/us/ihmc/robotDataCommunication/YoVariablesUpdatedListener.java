@@ -26,7 +26,7 @@ public interface YoVariablesUpdatedListener
 
    public void setYoVariableClient(YoVariableClient client);
 
-   public void receiveTimedOut(long timeoutInMillis);
+   public void receiveTimedOut();
 
    public long getDisplayOneInNPackets();
 

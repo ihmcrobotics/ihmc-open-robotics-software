@@ -1,7 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
@@ -10,8 +9,7 @@ import java.util.List;
 import java.util.zip.CRC32;
 
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
-import us.ihmc.multicastLogDataProtocol.SegmentedPacketBuffer;
+import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
@@ -22,9 +20,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 public class YoVariableConsumer implements LogPacketHandler
 {
 
-   private final long sessionId;
-   private final NetworkInterface iface;
-   private final InetAddress group;
+   private final InetAddress dataIP;
    private final int port;
    
    private final List<YoVariable<?>> variables;
@@ -36,18 +32,16 @@ public class YoVariableConsumer implements LogPacketHandler
    private ByteBuffer decompressed;
 
    private CRC32 crc32 = new CRC32();
-   private SegmentedDatagramClient client;
+   private StreamingDataTCPClient client;
    private ThreadedLogPacketHandler updateHandler;
 
-   public YoVariableConsumer(long sessionId, NetworkInterface iface, byte[] group, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates,
+   public YoVariableConsumer(byte[] dataIP, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates,
          YoVariablesUpdatedListener listener)
    {
-      this.sessionId = sessionId;
-      this.iface = iface;
       this.port = port;
       try
       {
-         this.group = InetAddress.getByAddress(group);
+         this.dataIP = InetAddress.getByAddress(dataIP);
       }
       catch (UnknownHostException e)
       {
@@ -67,7 +61,7 @@ public class YoVariableConsumer implements LogPacketHandler
       updateHandler = new ThreadedLogPacketHandler(this, 128);
       updateHandler.start();
 
-      client = new SegmentedDatagramClient(sessionId, iface, group, port, updateHandler);
+      client = new StreamingDataTCPClient(dataIP, port, updateHandler);
       client.start();
       
    }
@@ -75,26 +69,26 @@ public class YoVariableConsumer implements LogPacketHandler
    private long previous;
    
    @Override
-   public void newDataAvailable(SegmentedPacketBuffer buffer)
+   public void newDataAvailable(LogDataHeader header, ByteBuffer buf)
    {
 
-      if(buffer.getUid() > previous + 1)
+      if(header.getUid() > previous + 1)
       {
-         System.err.println("Skipped " + (buffer.getUid() - (previous + 1)) +" packets");
+         System.err.println("Skipped " + (header.getUid() - (previous + 1)) +" packets");
       }
-      else if(buffer.getUid() <= previous)
+      else if(header.getUid() <= previous)
       {
          System.err.println("Packet skew detected");
       }
-      previous = buffer.getUid();
+      previous = header.getUid();
+      
+      
       
       if (packetNumber++ % listener.getDisplayOneInNPackets() == 0)
-      {
-         ByteBuffer buf = buffer.getBuffer();
+      {         
          decompressed.clear();
          buf.clear();
-
-         long checksum = buf.getInt() & 0xffffffffL;
+         long checksum = header.getCrc32() & 0xFFFFFFFFL;
          crc32.reset();
          crc32.update(buf.array(), buf.position() + buf.arrayOffset(), buf.remaining());
 
@@ -167,8 +161,8 @@ public class YoVariableConsumer implements LogPacketHandler
    }
 
    @Override
-   public void timeout(long timeoutInMillis)
+   public void timeout()
    {
-      listener.receiveTimedOut(timeoutInMillis);
+      listener.receiveTimedOut();
    }
 }

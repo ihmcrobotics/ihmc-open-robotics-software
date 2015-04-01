@@ -7,8 +7,7 @@ import java.util.Collection;
 import java.util.zip.CRC32;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.multicastLogDataProtocol.LogDataType;
-import us.ihmc.multicastLogDataProtocol.SegmentedDatagramServer;
+import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.utilities.compression.SnappyUtils;
@@ -41,7 +40,7 @@ public class YoVariableProducer extends Thread
       byteWriteBuffer = ByteBuffer.allocate(bufferSize);
       writeBuffer = byteWriteBuffer.asLongBuffer();
 
-      compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + 4];
+      compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + LogDataHeader.length()];
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
 
       this.session = session;
@@ -68,18 +67,21 @@ public class YoVariableProducer extends Thread
    public void run()
    {
       
-      SegmentedDatagramServer server;
+      SingleThreadMultiClientStreamingDataTCPServer server;
       try
       {
-         server = new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
+         server = new SingleThreadMultiClientStreamingDataTCPServer(session.getPort());
+         server.start();
+//               new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
       
+      LogDataHeader logDataHeader = new LogDataHeader();
       CRC32 crc32 = new CRC32();
-
+      long uid = 0;
       while (true)
       {
          if (mainBuffer.poll())
@@ -96,7 +98,7 @@ public class YoVariableProducer extends Thread
 
                byteWriteBuffer.clear();
                compressedBuffer.clear();
-               compressedBuffer.position(4);
+               compressedBuffer.position(LogDataHeader.length());
                try
                {
                   SnappyUtils.compress(byteWriteBuffer, compressedBuffer);
@@ -109,17 +111,15 @@ public class YoVariableProducer extends Thread
                }
 
                crc32.reset();
-               crc32.update(compressedBackingArray, 4, compressedBuffer.remaining() - 4);
-               compressedBuffer.putInt(0, (int) crc32.getValue());
+               int dataSize = compressedBuffer.remaining() - LogDataHeader.length();
+               crc32.update(compressedBackingArray, LogDataHeader.length() + compressedBuffer.arrayOffset(), dataSize);
+               logDataHeader.setUid(++uid);
+               logDataHeader.setTimestamp(fullStateBuffer.getTimestamp());
+               logDataHeader.setDataSize(dataSize);
+               logDataHeader.setCrc32((int) crc32.getValue());
+               logDataHeader.writeBuffer(0, compressedBuffer);
                
-               try
-               {
-                  server.send(LogDataType.DATA, fullStateBuffer.getTimestamp(), compressedBuffer);
-               }
-               catch (IOException e)
-               {
-                  e.printStackTrace();
-               }
+               server.send(compressedBuffer);
             }
             mainBuffer.flush();
          }

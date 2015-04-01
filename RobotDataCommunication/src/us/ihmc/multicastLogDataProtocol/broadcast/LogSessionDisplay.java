@@ -43,7 +43,7 @@ public class LogSessionDisplay extends JFrame
 
       JScrollPane scroller = new JScrollPane();
 
-      String[] columnNames = { "Controller", "Session ID", "Interface", "IP", "Port", "Group", "Data port" };
+      String[] columnNames = { "Controller", "Session ID", "Interface", "Control IP", "Control Port", "Data IP", "Data port" };
       model = new DefaultTableModel(columnNames, 0)
       {
          private static final long serialVersionUID = 7807098301637938830L;
@@ -177,7 +177,7 @@ public class LogSessionDisplay extends JFrame
          final long sessionId = description.getSessionID();
          final String controlIp = ipToString(description.getControlIP());
          final int port = description.getControlPort();
-         final String group = ipToString(description.getGroup());
+         final String group = ipToString(description.getDataIP());
          final int dataPort = description.getDataPort();
          SwingUtilities.invokeLater(new Runnable()
          {

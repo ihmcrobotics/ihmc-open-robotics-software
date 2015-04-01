@@ -62,7 +62,7 @@ public class SegmentedPacketSimulation
    }
    
    
-   private class Handler implements LogPacketHandler 
+   private class Handler implements SegmentedLogPacketHandler 
    {
       private long lastUid;
 

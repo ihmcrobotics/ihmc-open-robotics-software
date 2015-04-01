@@ -79,7 +79,7 @@ public class YoVariableServer implements RobotVisualizer
       startControlServer();
       
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
-      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, mainClazz, logSettings);
+      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
       producer = new YoVariableProducer(sessionBroadcaster, controlServer, mainBuffer,
             buffers.values());
             

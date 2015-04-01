@@ -39,7 +39,7 @@ public class AnnounceRequest
 
    public AnnounceRequest.AnnounceType type;
    public long sessionID;
-   public byte[] group = new byte[4];
+   public byte[] dataIP = new byte[4];
    public short dataPort;
    public byte[] controlIP = new byte[4];
    public short controlPort;
@@ -60,7 +60,7 @@ public class AnnounceRequest
    {
       this.type = original.type;
       this.sessionID = original.sessionID;
-      System.arraycopy(original.group, 0, group, 0, group.length);
+      System.arraycopy(original.dataIP, 0, dataIP, 0, dataIP.length);
       this.dataPort = original.dataPort;
       System.arraycopy(original.controlIP, 0, controlIP, 0, controlIP.length);
       this.controlPort = original.controlPort;
@@ -81,7 +81,7 @@ public class AnnounceRequest
       {
          type = AnnounceType.fromHeader(buffer.get());
          sessionID = buffer.getLong();
-         buffer.get(group);
+         buffer.get(dataIP);
          log = buffer.get() == 1;
          
          dataPort = buffer.getShort();
@@ -148,7 +148,7 @@ public class AnnounceRequest
       byte[] namebytes = name.getBytes();
       buffer.put((byte) type.getHeader());
       buffer.putLong(sessionID);
-      buffer.put(group);
+      buffer.put(dataIP);
       buffer.put(log ? (byte)1 : (byte)0);
       buffer.putShort(dataPort);
       buffer.put(controlIP);
@@ -192,14 +192,14 @@ public class AnnounceRequest
       this.sessionID = sessionID;
    }
 
-   public byte[] getGroup()
+   public byte[] getDataIP()
    {
-      return group;
+      return dataIP;
    }
 
-   public void setGroup(byte[] group)
+   public void setDataIP(byte[] dataIP)
    {
-      this.group = group;
+      this.dataIP = dataIP;
    }
 
    public String getName()
@@ -309,7 +309,7 @@ public class AnnounceRequest
       result = prime * result + Arrays.hashCode(controlIP);
       result = prime * result + controlPort;
       result = prime * result + dataPort;
-      result = prime * result + Arrays.hashCode(group);
+      result = prime * result + Arrays.hashCode(dataIP);
       result = prime * result + (log ? 1231 : 1237);
       result = prime * result + ((name == null) ? 0 : name.hashCode());
       result = prime * result + (int) (sessionID ^ (sessionID >>> 32));
@@ -337,7 +337,7 @@ public class AnnounceRequest
          return false;
       if (dataPort != other.dataPort)
          return false;
-      if (!Arrays.equals(group, other.group))
+      if (!Arrays.equals(dataIP, other.dataIP))
          return false;
       if (log != other.log)
          return false;

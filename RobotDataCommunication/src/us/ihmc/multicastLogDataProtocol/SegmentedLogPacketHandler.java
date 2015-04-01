@@ -1,10 +1,7 @@
 package us.ihmc.multicastLogDataProtocol;
 
-import java.nio.ByteBuffer;
 
-import us.ihmc.robotDataCommunication.LogDataHeader;
-
-public interface LogPacketHandler
+public interface SegmentedLogPacketHandler
 {
    /**
     * Gets called the first time a new timestamp is seen, even if the whole packet hasn't been received yet.
@@ -18,7 +15,7 @@ public interface LogPacketHandler
     * 
     * @param buffer
     */
-   public void newDataAvailable(LogDataHeader header, ByteBuffer buffer);
+   public void newDataAvailable(SegmentedPacketBuffer buffer);
    
-   public void timeout();
+   public void timeout(long timeoutInMillis);
 }

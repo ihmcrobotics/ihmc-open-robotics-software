@@ -23,14 +23,14 @@ public class SegmentedDatagramClient extends Thread
    private final long sessionId;
    private final NetworkInterface iface;
    private final InetAddress group;
-   private final LogPacketHandler handler;
+   private final SegmentedLogPacketHandler handler;
    private final int port;
 
    private final SegmentedPacketBuffer[] ringBuffer = new SegmentedPacketBuffer[PACKAGE_BUFFER];
 
    private volatile boolean running = true;
    
-   public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, int port, LogPacketHandler handler)
+   public SegmentedDatagramClient(long sessionId, NetworkInterface iface, InetAddress group, int port, SegmentedLogPacketHandler handler)
    {
       super("SegmentedDataClient" + sessionId);
       this.sessionId = sessionId;
