@@ -1,16 +1,12 @@
 package us.ihmc.valkyrie;
 
-import org.junit.Ignore;
-import org.junit.Test;
-
 import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryStandingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
+@BambooPlan(planType = BambooPlanType.Flaky)
 public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 {
    @Override
