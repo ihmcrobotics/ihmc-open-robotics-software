@@ -125,4 +125,10 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    public ReferenceFrame getHeadIMUFrameWhenLevel(){
 	   return null;
    }
+
+   @Override
+   public SideDependentList<String> getFeetContactSensorNames()
+   {
+      return null;
+   }
 }
