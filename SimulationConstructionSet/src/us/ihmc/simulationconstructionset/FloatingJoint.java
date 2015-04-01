@@ -42,12 +42,20 @@ public class FloatingJoint extends Joint
    public DoubleYoVariable qdd_x, qdd_y, qdd_z;    // in world-fixed frame
    public DoubleYoVariable qdd_wx, qdd_wy, qdd_wz;    // angular acceleration, expressed in body-fixed frame.
 
+   private final boolean createYawPitchRollYoVariable;
+   public DoubleYoVariable q_yaw, q_pitch, q_roll;    // in world-fixed frame.
+   
    public FloatingJoint(String jname, Vector3d offset, Robot rob)
    {
-      this(jname, null, offset, rob);
+      this(jname, null, offset, rob, false);
    }
 
    public FloatingJoint(String jname, String varName, Vector3d offset, Robot rob)
+   {
+      this(jname, varName, offset, rob, false);
+   }
+   
+   public FloatingJoint(String jname, String varName, Vector3d offset, Robot rob, boolean createYawPitchRollYoVariable)
    {
       super(jname, offset, rob, 6);
 
@@ -55,6 +63,8 @@ public class FloatingJoint extends Joint
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
 
+      this.createYawPitchRollYoVariable = createYawPitchRollYoVariable;
+      
       if (varName == null)
       {
          varName = "";
@@ -85,6 +95,19 @@ public class FloatingJoint extends Joint
       qdd_wy = new DoubleYoVariable("qdd_" + varName + "wy", "FloatingJoint rotational acceleration about y", registry);
       qdd_wz = new DoubleYoVariable("qdd_" + varName + "wz", "FloatingJoint rotational acceleration about z", registry);
 
+      if(createYawPitchRollYoVariable)
+      {
+         q_yaw = new DoubleYoVariable("q_" + varName + "yaw", "FloatingJoint yaw orientation", registry);
+         q_pitch = new DoubleYoVariable("q_" + varName + "pitch", "FloatingJoint pitch orientation", registry);
+         q_roll = new DoubleYoVariable("q_" + varName + "roll", "FloatingJoint roll orientation", registry);
+      }
+      else
+      {
+         q_yaw = null;
+         q_pitch = null;
+         q_roll = null;
+      }
+      
       this.setFloatingTransform3D(this.jointTransform3D);
       physics.u_i = null;
    }
@@ -478,6 +501,10 @@ public class FloatingJoint extends Joint
    public void update()
    {
       this.setFloatingTransform3D(this.jointTransform3D);
+      if(createYawPitchRollYoVariable)
+      {
+         getYawPitchRoll(q_yaw, q_pitch, q_roll);
+      }
    }
 
 // private Matrix3d tempRotationMatrix = new Matrix3d();
