@@ -27,8 +27,8 @@ public class GroundContactPointBasedWrenchCalculatorTest
    WrenchCalculatorInterface calculator;
    OneDegreeOfFreedomJoint joint;
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
    public void testWrenchCalculation()
    {
       double epsilon = 1e-7;

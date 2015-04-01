@@ -54,8 +54,8 @@ public class FootstepPathCoordinatorTest
     * This test only verifies that polling returns the first footstep in the list *
     */
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testPoll() throws Exception
    {
       // create a random list of footsteps
@@ -83,8 +83,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testIsEmpty() throws Exception
    {
       // verify list is initially empty
@@ -117,8 +117,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testUpdatePath() throws Exception
    {
       // create a random list of footsteps
@@ -160,8 +160,8 @@ public class FootstepPathCoordinatorTest
       footstepPathCoordinator.close();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testSetPaused() throws Exception
    {
       // create a random list of footsteps

@@ -43,8 +43,8 @@ public class CaptureRegionCalculatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testOne()
    {
       ReferenceFrame leftAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("leftAnkleZUp");

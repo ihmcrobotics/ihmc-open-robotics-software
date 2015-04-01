@@ -50,8 +50,8 @@ public class MomentumOptimizerOldTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testFloatingChain()
    {
       Random random = new Random(44345L);
@@ -79,8 +79,8 @@ public class MomentumOptimizerOldTest
       doChecks(random, elevator, rootJoint, joints);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testFloatingTree()
    {
       Random random = new Random(44345L);

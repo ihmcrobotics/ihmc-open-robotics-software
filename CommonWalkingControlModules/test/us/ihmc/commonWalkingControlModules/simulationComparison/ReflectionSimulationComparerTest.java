@@ -45,8 +45,8 @@ public class ReflectionSimulationComparerTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testTwoEmptySimulations()
    {
       ReflectionSimulationComparer comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -96,8 +96,8 @@ public class ReflectionSimulationComparerTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.1)
+	@Test(timeout = 30000)
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = createSimpleRobot();
@@ -137,8 +137,8 @@ public class ReflectionSimulationComparerTest
       return robot0;
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.0)
+	@Test(timeout = 30000)
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
       Robot robot0 = new Robot("robot");

@@ -37,8 +37,8 @@ public class VirtualChainBuilderTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testOne()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleOne();
@@ -47,8 +47,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.9)
+	@Test(timeout = 30000)
    public void testTwo()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleTwo();
@@ -57,8 +57,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testThree()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleThree();
@@ -67,8 +67,8 @@ public class VirtualChainBuilderTest
       testVirtualChainBuilderForARobot(numberOfDataPoints, comNoiseMaximum, exampleRobot, exampleRobot);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 1.7)
+	@Test(timeout = 30000)
    public void testFour()
    {
       VirtualChainExampleRobot exampleRobot = VirtualChainExampleRobot.constructExampleFour();

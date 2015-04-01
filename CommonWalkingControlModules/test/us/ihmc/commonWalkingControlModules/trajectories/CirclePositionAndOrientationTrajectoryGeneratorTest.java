@@ -71,8 +71,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       trajectoryGenerator.initialize();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testOrientation()
    {
       // v = omega x r
@@ -81,8 +81,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       checkOrientationAtVariousPoints(trajectoryGenerator, initialOrientationProvider, trajectoryTimeProvider.getValue(), frame);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testCompute()
    {
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() * 0.5);
@@ -123,8 +123,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       trajectoryGenerator.getPosition().getX();
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testIsDone()
    {
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() / 2.0);
@@ -134,8 +134,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertTrue(trajectoryGenerator.isDone());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGet_FramePoint()
    {
       FramePoint positionToPack = new FramePoint();
@@ -145,8 +145,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertEquals(frame, positionToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testGet_FrameOrientation()
    {
       FrameOrientation orientationToPack = new FrameOrientation();
@@ -156,8 +156,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertEquals(frame, orientationToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackVelocity()
    {
       FrameVector velocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -172,8 +172,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, velocityToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackAcceleration()
    {
       FrameVector accelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -188,8 +188,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, accelerationToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackAngularVelocity()
    {
       FrameVector angularVelocityToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -204,8 +204,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, angularVelocityToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackAngularAcceleration()
    {
       FrameVector angularAccelerationToPack = new FrameVector(ReferenceFrame.constructARootFrame("root"), 10.0, 10.0, 10.0);
@@ -220,8 +220,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, angularAccelerationToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackLinearData()
    {
       FramePoint positionToPack = new FramePoint(frame);
@@ -262,8 +262,8 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       assertSame(frame, accelerationToPack.getReferenceFrame());
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPackAngularData()
    {
       FramePoint positionToPack = new FramePoint(frame);

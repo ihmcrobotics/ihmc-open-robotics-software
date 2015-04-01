@@ -39,8 +39,8 @@ public class SwingHeightTrajectoryCalculatorTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testHeightFromPose()
    {
       double boxHeight = 0.2;
@@ -71,8 +71,8 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testHeightFromOffsetBox()
    {
       double boxHeight = 0.2;
@@ -107,8 +107,8 @@ public class SwingHeightTrajectoryCalculatorTest
       assertTrue(swingHeight >= boxHeight + verticalBuffer);
    }
 
-   @EstimatedDuration(duration = 0.1)
-       @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+       @Test(timeout = 30000)
        public void testWithBoxOutOfRange()
 {
    double boxHeight = 0.5;
@@ -142,8 +142,8 @@ public class SwingHeightTrajectoryCalculatorTest
    assertTrue(swingHeight < boxHeight + verticalBuffer);
 }
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testWithMultipleBoxes()
    {
       double EPSILON = 1e-13;
@@ -222,8 +222,8 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testSmallXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
@@ -264,8 +264,8 @@ public class SwingHeightTrajectoryCalculatorTest
       }
    }
 
-   @EstimatedDuration(duration = 0.1)
-   @Test(timeout = 300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testBigXAxisDistanceWithoutHeightMap()
    {
       boolean VISUALIZE = false;

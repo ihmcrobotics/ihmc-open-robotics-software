@@ -48,8 +48,8 @@ public class GeometricVirtualToePointCalculatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.4)
+	@Test(timeout = 30000)
    public void testSimpleCaseWithRectangularFeetAllSquaredUp()
    {
       RobotSide upcomingSupportSide = null;
@@ -101,8 +101,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootTranslation(leftFootPoints, rightFootPoints, copDesired, footTranslation, upcomingSupportSide);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testRotationWhenOnEdge()
    {
       RobotSide upcomingSupportSide = null;
@@ -114,8 +114,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToFootRotation(leftFootPoints, rightFootPoints, copDesired, upcomingSupportSide);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testTranslationIntoFoot()
    {
       RobotSide upcomingSupportSide = RobotSide.LEFT;
@@ -129,8 +129,8 @@ public class GeometricVirtualToePointCalculatorTest
       testSensitivityToCoPMotion(leftFootPoints, rightFootPoints, startCoPDesired, endCoPDesired, upcomingSupportSide);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.3)
+	@Test(timeout = 30000)
    public void testTranslationOfFoot()
    {
       RobotSide upcomingSupportSide = RobotSide.LEFT;

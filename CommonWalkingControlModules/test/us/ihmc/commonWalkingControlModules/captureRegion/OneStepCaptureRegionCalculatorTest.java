@@ -55,8 +55,8 @@ public class OneStepCaptureRegionCalculatorTest
    
    @SuppressWarnings("unused")
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testConstructor()
    {
       double midFootAnkleXOffset = 0.0;
@@ -67,8 +67,8 @@ public class OneStepCaptureRegionCalculatorTest
             midFootAnkleXOffset, footWidth, kineamaticStepRange, ankleZUpFrames, registry, null);
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testPointsInsideCaptureRegion()
    {
       // do not change parameters
@@ -149,8 +149,8 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testProjectedFootCorners()
    {
       // do not change parameters
@@ -223,8 +223,8 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testCalculationWithICPInFootPolygon()
    {
       double midFootAnkleXOffset = 0.2;
@@ -297,8 +297,8 @@ public class OneStepCaptureRegionCalculatorTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+	@Test(timeout = 30000)
    public void testCalculationWithHighSwingTime()
    {
       // do not change parameters

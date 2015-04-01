@@ -31,15 +31,15 @@ public class TwoWaypointPositionTrajectoryGeneratorTest {
 
 	private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-	@EstimatedDuration
-   @Test(timeout=300000)
+	@EstimatedDuration(duration = 0.0)
+   @Test(timeout = 30000)
    public void testRegisteringYoVariables()
    {
       assertTrue(TwoWaypointPositionTrajectoryGenerator.REGISTER_YOVARIABLES);
    }
 	
-	@EstimatedDuration
-	@Test(timeout=300000)
+	@EstimatedDuration(duration = 0.1)
+	@Test(timeout = 30000)
 	public void testSimpleTrajectories()
 	{
 		testSimpleTrajectory(3);

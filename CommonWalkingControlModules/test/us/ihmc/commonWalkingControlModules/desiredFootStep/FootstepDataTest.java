@@ -68,8 +68,8 @@ public class FootstepDataTest
     * @throws IOException 
     */
 
-	@EstimatedDuration
-	@Test(timeout=300000) //(timeout = 6000)
+	@EstimatedDuration(duration = 2.0)
+	@Test(timeout = 30000) //(
    public void testPassingFootstepData() throws IOException
    {
       // setup comms
@@ -101,8 +101,8 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration
-	@Test(timeout = 6000)
+	@EstimatedDuration(duration = 1.9)
+	@Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
       Random random = new Random(1582l);
@@ -131,8 +131,8 @@ public class FootstepDataTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-	@EstimatedDuration
-	@Test(timeout = 6000)
+	@EstimatedDuration(duration = 1.9)
+	@Test(timeout = 30000)
    public void testPassingPauseCommand() throws IOException
    {
       // setup comms
@@ -171,8 +171,8 @@ public class FootstepDataTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout = 6000)
+	@EstimatedDuration(duration = 3.4)
+	@Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
       // Create one server for two types of data
@@ -242,8 +242,8 @@ public class FootstepDataTest
       }
    }
 
-	@EstimatedDuration
-	@Test(timeout = 6000)
+	@EstimatedDuration(duration = 1.9)
+	@Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {
       // setup comms
