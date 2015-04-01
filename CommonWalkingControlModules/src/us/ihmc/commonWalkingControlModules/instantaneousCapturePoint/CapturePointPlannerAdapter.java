@@ -209,12 +209,11 @@ public class CapturePointPlannerAdapter
       }
    }
 
-   public void updatePlanForSingleSupportPush(FramePoint actualCapturePointPosition, double time, RobotSide supportSide)
+   public void updatePlanForSingleSupportDisturbances(FramePoint actualCapturePointPosition, double time, RobotSide supportSide)
    {
       if (USE_NEW_PLANNER)
       {
-         icpPlanner.initializeSingleSupport(time, supportSide);
-         icpPlanner.updatePlanForSingleSupportPush(actualCapturePointPosition, time);
+         icpPlanner.updatePlanForSingleSupportDisturbances(time, actualCapturePointPosition);
       }
       else
       {
@@ -222,25 +221,7 @@ public class CapturePointPlannerAdapter
          supportLeg.set(supportSide);
          setSupportFootLocation(supportSide, supportFootLocation);
 
-         capturePointPlanner.initializeSingleSupport(time, footstepLocations);
-         capturePointPlanner.updatePlanForSingleSupportPush(footstepLocations, actualCapturePointPosition, time);
-      }
-   }
-
-   public void updatePlanForDoubleSupportPush(FramePoint actualCapturePointPosition, double time, RobotSide supportSide)
-   {
-      if (USE_NEW_PLANNER)
-      {
-         icpPlanner.initializeSingleSupport(time, supportSide);
-         icpPlanner.updatePlanForDoubleSupportPush(actualCapturePointPosition, time);
-      }
-      else
-      {
-         FramePoint supportFootLocation = footstepLocations.insertAtIndex(0);
-         supportLeg.set(supportSide);
-         setSupportFootLocation(supportSide, supportFootLocation);
-         capturePointPlanner.initializeSingleSupport(time, footstepLocations);
-         capturePointPlanner.updatePlanForDoubleSupportPush(footstepLocations, actualCapturePointPosition, time);
+         capturePointPlanner.updatePlanForSingleSupportDisturbances(time, footstepLocations, actualCapturePointPosition);
       }
    }
 
@@ -283,7 +264,11 @@ public class CapturePointPlannerAdapter
       if (USE_NEW_PLANNER)
          icpPlanner.reset(time);
       else
-         capturePointPlanner.reset(time);
+      {
+         transferToFootLocation.setToZero(referenceFrames.getSoleFrame(currentTransferToSide.getEnumValue()));
+         transferToFootLocation.changeFrame(worldFrame);
+         capturePointPlanner.reset(time, currentTransferToSide.getEnumValue(), transferToFootLocation);
+      }
    }
 
    public boolean isDone(double time)

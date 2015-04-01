@@ -108,7 +108,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       pushRobotController.applyForceDelayed(pushCondition, PUSH_DELAY, forceDirection, forceMagnitude, forceDuration);
 
       // simulate for a little while longer
-      blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
+      blockingSimulationRunner.simulateAndBlock(forceDuration + 6.0);
 
       //re-enable walking
       walk.set(true);

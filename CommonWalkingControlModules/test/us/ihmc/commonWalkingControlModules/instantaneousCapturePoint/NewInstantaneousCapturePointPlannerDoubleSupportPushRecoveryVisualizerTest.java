@@ -31,6 +31,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFrameLineSegment2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
+// FIXME I've changed the way push recovery is handled with the planner but didn't take the time to fix the visualizer. (Sylvain)
+
 @BambooPlan(planType={BambooPlanType.UI})
 public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest
 {
@@ -466,7 +468,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
          actualICPPosition.setY(actualICPPosition.getY());
          actualICPPositionYoFramePoint.set(actualICPPosition);
          
-         icpPlanner.updatePlanForDoubleSupportPush(footstepList, actualICPPosition, time);
+         icpPlanner.updatePlanForSingleSupportDisturbances(time, footstepList, actualICPPosition);
          
          updatePointsVis(footstepList);
       }

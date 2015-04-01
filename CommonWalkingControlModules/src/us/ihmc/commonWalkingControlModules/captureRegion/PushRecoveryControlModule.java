@@ -84,8 +84,6 @@ public class PushRecoveryControlModule
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
    
    private Footstep recoverFromDoubleSupportFallFootstep;
-   private RobotSide swingSideFromHighLevel;
-   private Footstep nextFootstepFromHighLevel;
    private double omega0;
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
@@ -364,8 +362,6 @@ public class PushRecoveryControlModule
    public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep, FrameConvexPolygon2d footPolygon)
    {
       this.swingTimeRemaining.set(swingTimeRemaining);
-      this.swingSideFromHighLevel = swingSide;
-      this.nextFootstepFromHighLevel = nextFootstep;
 
       if (enablePushRecovery.getBooleanValue())
       {
@@ -494,18 +490,6 @@ public class PushRecoveryControlModule
       return footstep;
    }
    
-   public double getDistanceBetweenCurrentAndDesiredFootStep()
-   {
-      Footstep currentFootstep = createFootstepAtCurrentLocation(this.swingSideFromHighLevel);
-      FramePoint framePointToPack = new FramePoint();
-      this.nextFootstepFromHighLevel.getPositionIncludingFrame(framePointToPack);
-      
-      FramePoint framePointToPack2 = new FramePoint();
-      currentFootstep.getPositionIncludingFrame(framePointToPack2);
-      
-      return framePointToPack.getXYplaneDistance(framePointToPack2);
-   }
-
    public Footstep getRecoverFromDoubleSupportFootStep()
    {
       return recoverFromDoubleSupportFallFootstep;
@@ -540,11 +524,6 @@ public class PushRecoveryControlModule
    public boolean isRecoveringFromDoubleSupportFall()
    {
       return recoveringFromDoubleSupportFall;
-   }
-
-   public boolean isPerformingUncertainRecover()
-   {
-      return tryingUncertainRecover.getBooleanValue();
    }
 
    public void setSwingTimeRemaining(double value)

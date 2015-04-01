@@ -520,7 +520,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 				{
 					updateFootstepsFromPush(footstepList);
 
-				   icpPlanner.updatePlanForSingleSupportPush(footstepList, actualICPPosition, time);
+				   icpPlanner.updatePlanForSingleSupportDisturbances(time, footstepList, actualICPPosition);
 					if (visualize)
 					{
 						updatePointsVis(footstepList);
