@@ -25,13 +25,13 @@ public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTes
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
    
-   @Ignore
-   @QuarantinedTest("Need to fix the ICP planner so that after a push it does the right thing.")
-   @EstimatedDuration(duration = 45.6)
-   @Test(timeout = 227903)
-   @Override
-   public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
-   {
-   }
+//   @Ignore
+//   @QuarantinedTest("Need to fix the ICP planner so that after a push it does the right thing.")
+//   @EstimatedDuration(duration = 45.6)
+//   @Test(timeout = 227903)
+//   @Override
+//   public void TestDoublePushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
+//   {
+//   }
 
 }
