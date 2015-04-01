@@ -52,10 +52,9 @@ public class DRCFlatGroundWalkingTrack
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
 
-      SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
-
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            footForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
+            model.getSensorInformation().getFeetForceSensorNames(),model.getSensorInformation().getFeetContactSensorNames()
+            , walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
             HighLevelState.WALKING);
       
       HeightMap heightMapForCheating = null;

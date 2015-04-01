@@ -55,7 +55,9 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.DO_NOTHING_BEHAVIOR);
+      MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames, 
+            model.getSensorInformation().getFeetContactSensorNames(),
+            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.DO_NOTHING_BEHAVIOR);
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);

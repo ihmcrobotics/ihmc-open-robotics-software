@@ -169,7 +169,8 @@ public class DRCSimGazeboControllerFactory
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            sensorInformation.getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
+            sensorInformation.getFeetForceSensorNames(), sensorInformation.getFeetContactSensorNames(),
+            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
       
 //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 

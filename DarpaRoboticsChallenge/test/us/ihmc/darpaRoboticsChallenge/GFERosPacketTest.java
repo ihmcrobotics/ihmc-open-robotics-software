@@ -336,7 +336,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-    		  robotModel.getSensorInformation().getFeetForceSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
+    		  robotModel.getSensorInformation().getFeetForceSensorNames(), robotModel.getSensorInformation().getFeetContactSensorNames(),
+    		  walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
       VariousWalkingProviderFactory variousWalkingProviderFactory;

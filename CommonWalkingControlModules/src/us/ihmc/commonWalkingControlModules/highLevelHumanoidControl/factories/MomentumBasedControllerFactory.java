@@ -20,8 +20,10 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.ContactSensorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantSwingTimeCalculator;
 import us.ihmc.commonWalkingControlModules.trajectories.ConstantTransferTimeCalculator;
@@ -30,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProv
 import us.ihmc.commonWalkingControlModules.trajectories.TransferTimeCalculationProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
@@ -37,6 +40,8 @@ import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensor;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -81,17 +86,19 @@ public class MomentumBasedControllerFactory
    private ArrayList<HighLevelBehaviorFactory> highLevelBehaviorFactories = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
+   private final SideDependentList<String> footContactSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
 
-   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footSensorNames,
-         WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
+   public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+         SideDependentList<String> footContactSensorNames, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
-      this.footSensorNames = footSensorNames;
+      this.footSensorNames = footForceSensorNames;
+      this.footContactSensorNames = footContactSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.initialBehavior = initialBehavior;
 
@@ -128,7 +135,7 @@ public class MomentumBasedControllerFactory
    
    public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-         ForceSensorDataHolder forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         ForceSensorDataHolder forceSensorDataHolder, ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
@@ -136,7 +143,7 @@ public class MomentumBasedControllerFactory
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, contactSensorHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the different ContactablePlaneBodies ///////////////////////////////////////////////
@@ -242,7 +249,7 @@ public class MomentumBasedControllerFactory
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
-         ForceSensorDataHolder forceSensorDataHolder, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+         ForceSensorDataHolder forceSensorDataHolder, ContactSensorHolder contactSensorHolder, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
@@ -250,18 +257,30 @@ public class MomentumBasedControllerFactory
       {
          FootSwitchInterface footSwitch = null;
          String footName = bipedFeet.get(robotSide).getName();
+         ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
+         double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
+         
          switch (walkingControllerParameters.getFootSwitchType())
          {
          case KinematicBased:
-            footSwitch = new KinematicsBasedFootSwitch(footName, bipedFeet, walkingControllerParameters.getContactThresholdHeight(), totalRobotWeight, robotSide, registry); //controller switch doesnt need com
+            footSwitch = new KinematicsBasedFootSwitch(footName, bipedFeet, walkingControllerParameters.getContactThresholdHeight(), totalRobotWeight,
+                  robotSide, registry); //controller switch doesnt need com
             break;
 
          case WrenchBased:
-            ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
-            double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
-            double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
             footSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide),
                   yoGraphicsListRegistry, contactThresholdForce, registry);
+            break;
+
+         case ContactSensorBased:
+            footSwitch = new ContactSensorBasedFootswitch(footName, contactSensorHolder.getByName(footContactSensorNames.get(robotSide)), registry);
+            break;
+            
+         case WrenchAndContactSensorFused:
+            footSwitch = new WrenchAndContactSensorFusedFootSwitch(footName, footForceSensor, contactSensorHolder.getByName(footContactSensorNames.get(robotSide)), 
+                  footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), yoGraphicsListRegistry, contactThresholdForce, registry);
+            break;
          }
 
          assert footSwitch != null;

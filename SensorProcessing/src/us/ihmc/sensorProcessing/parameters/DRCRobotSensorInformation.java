@@ -11,6 +11,8 @@ public interface DRCRobotSensorInformation
 
    public SideDependentList<String> getFeetForceSensorNames();
    
+   public SideDependentList<String> getFeetContactSensorNames();
+   
    public SideDependentList<String> getWristForceSensorNames();
 
    public String getPrimaryBodyImu();

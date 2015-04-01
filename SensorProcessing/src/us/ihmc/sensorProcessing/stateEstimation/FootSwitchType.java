@@ -2,5 +2,5 @@ package us.ihmc.sensorProcessing.stateEstimation;
 
 public enum FootSwitchType
 {
-   KinematicBased, WrenchBased
+   KinematicBased, WrenchBased, ContactSensorBased, WrenchAndContactSensorFused
 }
