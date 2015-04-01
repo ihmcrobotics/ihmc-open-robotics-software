@@ -3,9 +3,11 @@ package us.ihmc.steppr.hardware.command;
 import java.nio.ByteBuffer;
 
 import us.ihmc.steppr.hardware.StepprActuator;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public abstract class StepprActuatorCommand
 {
@@ -30,6 +32,17 @@ public abstract class StepprActuatorCommand
       this.qddDesired = new DoubleYoVariable(name + "qdd_d", registry);
       this.damping = new DoubleYoVariable(name + "Damping", registry);
       this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
+      
+      currentDesired.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+        	 final double maxCurrent = 22.0;
+        	 if(v.getValueAsDouble()>maxCurrent) v.setValueFromDouble(maxCurrent);
+        	 if(v.getValueAsDouble()<-maxCurrent) v.setValueFromDouble(-maxCurrent);        	 
+         }
+      });
       
       parentRegistry.addChild(registry);
    }

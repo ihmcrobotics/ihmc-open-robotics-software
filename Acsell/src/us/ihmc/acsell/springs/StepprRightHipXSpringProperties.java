@@ -23,7 +23,7 @@ public class StepprRightHipXSpringProperties implements HystereticSpringProperti
 	
 	@Override
 	public double getLoadingSpringConstant() {
-		return 320;
+		return 300;
 	}
 	
 	@Override
@@ -53,7 +53,7 @@ public class StepprRightHipXSpringProperties implements HystereticSpringProperti
 
 	@Override
 	public double getLoadingRestLength() {
-		return 0.02;
+		return -0.02;
 	}
 	
 	@Override
@@ -63,7 +63,7 @@ public class StepprRightHipXSpringProperties implements HystereticSpringProperti
 	
 	@Override
 	public double getUnloadingRestLength() {
-		return -0.03;
+		return -0.06;
 	}
 	
 	@Override

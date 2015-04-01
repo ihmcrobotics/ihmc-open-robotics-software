@@ -11,7 +11,8 @@ public enum StepprStandPrepSetpoints
    HIP_X(0.03, 2600, 0, 100, -1, StepprJoint.LEFT_HIP_X, StepprJoint.RIGHT_HIP_X),
    HIP_Z(0, 390, 0, 10, -1, StepprJoint.LEFT_HIP_Z, StepprJoint.RIGHT_HIP_Z), // damping must < 20
    HIP_Y(-0.24, 1546, 0, 89.3, 1, StepprJoint.LEFT_HIP_Y, StepprJoint.RIGHT_HIP_Y),
-   KNEE(0.45, 866, 0, 75, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y),
+//   KNEE(0.45, 866, 0, 75, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y), //original knee motors
+   KNEE(0.45, 989, 0, 58, 1, StepprJoint.LEFT_KNEE_Y, StepprJoint.RIGHT_KNEE_Y), //v2 knee motors (same as hip y)
    ANKLE_X(0, 10, 0, 41.5, -1, StepprJoint.LEFT_ANKLE_X, StepprJoint.RIGHT_ANKLE_X),
    ANKLE_Y(-0.234, 1472, 0, 15, 1, StepprJoint.LEFT_ANKLE_Y, StepprJoint.RIGHT_ANKLE_Y);
 //   TORSO_Z(0, 11820, 0, 455.04, 1, StepprJoint.TORSO_Z),
