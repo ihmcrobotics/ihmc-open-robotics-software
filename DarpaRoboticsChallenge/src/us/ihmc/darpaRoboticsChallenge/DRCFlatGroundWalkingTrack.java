@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.HeightMap;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 
@@ -51,12 +52,15 @@ public class DRCFlatGroundWalkingTrack
       DRCRobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            model.getSensorInformation().getFeetForceSensorNames(),model.getSensorInformation().getFeetContactSensorNames()
-            , walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.WALKING);
-      
+
       HeightMap heightMapForCheating = null;
       if (cheatWithGroundHeightAtForFootstep)
       {

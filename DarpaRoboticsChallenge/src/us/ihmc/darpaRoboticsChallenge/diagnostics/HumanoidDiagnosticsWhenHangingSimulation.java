@@ -21,6 +21,7 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -51,13 +52,16 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       robotInitialSetup.setInitialGroundHeight(0.0);
 
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
-      SideDependentList<String> footSensorNames = model.getSensorInformation().getFeetForceSensorNames();
+      DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
+      SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames, 
-            model.getSensorInformation().getFeetContactSensorNames(),
-            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.DO_NOTHING_BEHAVIOR);
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+      MomentumBasedControllerFactory momentumBasedControllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, footSensorNames,
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+            HighLevelState.DO_NOTHING_BEHAVIOR);
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingControllerFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging);
       diagnosticsWhenHangingControllerFactory.setTransitionRequested(true);
       momentumBasedControllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingControllerFactory);

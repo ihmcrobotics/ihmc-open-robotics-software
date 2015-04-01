@@ -5,7 +5,7 @@ import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.FingerJoint;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -91,11 +91,11 @@ public class SandiaHandModel
 
    private final ArrayList<FingerJoint> allJoints = new ArrayList<FingerJoint>();
 
-   private final ForceSensorData wristForceSensor;
+   private final ForceSensorDataReadOnly wristForceSensor;
    private final OneDoFJoint wristJoint;
    private final RobotSide robotSide;
 
-   public SandiaHandModel(SDFFullRobotModel fullRobotModel, ForceSensorData forceSensorDataForController, RobotSide robotSide)
+   public SandiaHandModel(SDFFullRobotModel fullRobotModel, ForceSensorDataReadOnly forceSensorDataForController, RobotSide robotSide)
    {
       this.robotSide = robotSide;
       String prefix = robotSide == RobotSide.LEFT ? "left_" : "right_";
@@ -140,7 +140,7 @@ public class SandiaHandModel
       return wristJoint;
    }
 
-   public ForceSensorData getWristForceSensor()
+   public ForceSensorDataReadOnly getWristForceSensor()
    {
       return wristForceSensor;
    }

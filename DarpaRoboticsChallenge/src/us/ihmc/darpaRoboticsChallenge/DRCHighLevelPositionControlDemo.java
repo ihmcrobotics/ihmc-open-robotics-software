@@ -10,7 +10,6 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelPositionControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -18,6 +17,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -45,17 +45,17 @@ public class DRCHighLevelPositionControlDemo
 			recordFrequency = 1;
 		scsInitialSetup.setRecordFrequency(recordFrequency);
 
-		FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters
-				.createForFastWalkingInSimulation(walkingControllerParameters);
-
 		ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
-		SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
+		DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-		MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-				model.getSensorInformation().getFeetForceSensorNames(),model.getSensorInformation().getFeetContactSensorNames(), walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-				HighLevelState.DO_NOTHING_BEHAVIOR);
-		controllerFactory.addHighLevelBehaviorFactory(new HighLevelPositionControllerFactory(true));
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+            HighLevelState.DO_NOTHING_BEHAVIOR);
+      controllerFactory.addHighLevelBehaviorFactory(new HighLevelPositionControllerFactory(true));
 
 		drcSimulation = new DRCSimulationFactory(model, controllerFactory, null, robotInitialSetup, scsInitialSetup, guiInitialSetup, null);
 

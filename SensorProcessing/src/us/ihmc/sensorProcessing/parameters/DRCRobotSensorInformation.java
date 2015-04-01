@@ -10,7 +10,7 @@ public interface DRCRobotSensorInformation
    public String[] getForceSensorNames();
 
    public SideDependentList<String> getFeetForceSensorNames();
-   
+
    public SideDependentList<String> getFeetContactSensorNames();
    
    public SideDependentList<String> getWristForceSensorNames();
