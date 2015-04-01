@@ -44,6 +44,7 @@ import us.ihmc.utilities.humanoidRobot.model.ContactSensor;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -87,6 +88,7 @@ public class MomentumBasedControllerFactory
 
    private final SideDependentList<String> footSensorNames;
    private final SideDependentList<String> footContactSensorNames;
+   private final SideDependentList<String> wristSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
@@ -94,11 +96,12 @@ public class MomentumBasedControllerFactory
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-         SideDependentList<String> footContactSensorNames, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
+         SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
+      this.wristSensorNames = wristSensorNames;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.initialBehavior = initialBehavior;
 
@@ -144,6 +147,7 @@ public class MomentumBasedControllerFactory
       double totalRobotWeight = totalMass * gravityZ;
 
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, contactSensorHolder, totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the different ContactablePlaneBodies ///////////////////////////////////////////////
@@ -193,7 +197,7 @@ public class MomentumBasedControllerFactory
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the MomentumBasedController ////////////////////////////////////////////////////////
-      momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, yoTime, gravityZ,
+      momentumBasedController = new MomentumBasedController(fullRobotModel, centerOfMassJacobian, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ,
             twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
             oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
@@ -288,6 +292,19 @@ public class MomentumBasedControllerFactory
       }
 
       return footSwitches;
+   }
+
+   private SideDependentList<ForceSensorDataReadOnly> createWristForceSensors(ForceSensorDataHolder forceSensorDataHolder)
+   {
+      if (wristSensorNames == null) return null;
+
+      SideDependentList<ForceSensorDataReadOnly> wristForceSensors = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getByName(wristSensorNames.get(robotSide));
+         wristForceSensors.put(robotSide, wristForceSensor);
+      }
+      return wristForceSensors;
    }
 
    private void createRegisteredControllers()

@@ -19,6 +19,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -47,14 +48,15 @@ public class DRCInverseDynamicsControllerDemo
       CapturePointPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
-      FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForFastWalkingInSimulation(walkingControllerParameters);
       ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
 
-      SideDependentList<String> footForceSensorNames = model.getSensorInformation().getFeetForceSensorNames();
+      DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            model.getSensorInformation().getFeetForceSensorNames(),model.getSensorInformation().getFeetContactSensorNames(),
-            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, 
+      MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
             HighLevelState.DO_NOTHING_BEHAVIOR);
       controllerFactory.addHighLevelBehaviorFactory(new InverseDynamicsJointControllerFactory(true));
 

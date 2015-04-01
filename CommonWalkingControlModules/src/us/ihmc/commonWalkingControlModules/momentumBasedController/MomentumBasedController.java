@@ -41,6 +41,7 @@ import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.MathTools;
@@ -152,6 +153,7 @@ public class MomentumBasedController
    private final GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final SideDependentList<ForceSensorDataReadOnly> wristForceSensors;
    private final DoubleYoVariable alphaCoPControl = new DoubleYoVariable("alphaCoPControl", registry);
    private final DoubleYoVariable maxAnkleTorqueCoPControl = new DoubleYoVariable("maxAnkleTorqueCoPControl", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector2d> desiredTorquesForCoPControl;
@@ -215,7 +217,7 @@ public class MomentumBasedController
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
 
    public MomentumBasedController(FullRobotModel fullRobotModel, CenterOfMassJacobian centerOfMassJacobian, CommonHumanoidReferenceFrames referenceFrames,
-                                  SideDependentList<FootSwitchInterface> footSwitches, DoubleYoVariable yoTime, double gravityZ,
+                                  SideDependentList<FootSwitchInterface> footSwitches, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
                                   TwistCalculator twistCalculator, SideDependentList<ContactablePlaneBody> feet,
                                   SideDependentList<ContactablePlaneBody> handsWithFingersBentBack, SideDependentList<ContactablePlaneBody> thighs,
                                   ContactablePlaneBody pelvis, ContactablePlaneBody pelvisBack, double controlDT,
@@ -229,6 +231,7 @@ public class MomentumBasedController
       totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
 
       this.footSwitches = footSwitches;
+      this.wristForceSensors = wristForceSensors;
 
       if (SPY_ON_MOMENTUM_BASED_CONTROLLER)
          momentumBasedControllerSpy = new MomentumBasedControllerSpy(registry);
@@ -1338,6 +1341,16 @@ public class MomentumBasedController
    public SideDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
+   }
+
+   public SideDependentList<ForceSensorDataReadOnly> getWristForceSensors()
+   {
+      return wristForceSensors;
+   }
+
+   public ForceSensorDataReadOnly getWristForceSensor(RobotSide robotSide)
+   {
+      return wristForceSensors.get(robotSide);
    }
 
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
