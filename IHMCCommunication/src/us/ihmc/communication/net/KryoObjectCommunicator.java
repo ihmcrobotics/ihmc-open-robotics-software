@@ -15,7 +15,6 @@ import javax.swing.table.DefaultTableModel;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.ThreadTools;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.EndPoint;
 import com.esotericsoftware.kryonet.FrameworkMessage.KeepAlive;

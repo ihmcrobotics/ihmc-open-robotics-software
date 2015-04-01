@@ -1,7 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
 import us.ihmc.robotDataCommunication.logger.LogSettings;
-import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -26,21 +25,15 @@ public class TestYoVariableConnection
    private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
    
    private final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, 0.001);
-   private final YoVariableClient client;
    
    
    private volatile long timestamp = 0;
    
    public TestYoVariableConnection()
    {
-      int bufferSize=8192;
-      SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
       server.setMainRegistry(registry, null, null);
       new ThreadTester(server).start();
       server.start();
-      boolean showOverheadView = false;
-      client = new YoVariableClient(scsYoVariablesUpdatedListener, "", showOverheadView);
-      client.start();
       var4.set(5000);
       
       int i = 0;

@@ -9,7 +9,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
@@ -33,6 +32,9 @@ public class LogSessionBroadcaster extends Thread
 
    private final NetworkInterface iface;
    private final InetSocketAddress controlAddress;
+   private final InetAddress dataAddress;
+   private int dataPort;
+   
    private final LogSettings logSettings;
    
    private final long sessionID;
@@ -45,21 +47,20 @@ public class LogSessionBroadcaster extends Thread
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
    private final ByteBuffer sendBuffer = ByteBuffer.allocate(65535);
 
-   private final byte[] multicastGroupAddress = new byte[4];
-   private int dataPort;
 
    private DatagramChannel channel;
    private MembershipKey receiveKey;
    private final Selector selector;
    private SelectionKey key;
 
-   public LogSessionBroadcaster(InetSocketAddress controlAddress, Class<?> clazz, LogSettings logSettings)
+   public LogSessionBroadcaster(InetSocketAddress controlAddress, InetAddress dataAddress, Class<?> clazz, LogSettings logSettings)
    {
       try
       {
          this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
          System.out.println(iface);
          this.controlAddress = controlAddress;
+         this.dataAddress = dataAddress;
          this.logSettings = logSettings;
          this.className = clazz.getSimpleName();
          long mac;
@@ -96,6 +97,7 @@ public class LogSessionBroadcaster extends Thread
       canIHazRequest.setSessionID(sessionID);
       canIHazRequest.setControlIP(controlAddress.getAddress().getAddress());
       canIHazRequest.setControlPort((short) controlAddress.getPort());
+      canIHazRequest.setDataIP(dataAddress.getAddress());
       if(logSettings.getVideoStream() != null)
       {
          canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
@@ -105,9 +107,11 @@ public class LogSessionBroadcaster extends Thread
       canIHazRequest.setLog(logSettings.isLog());
       canIHazRequest.setName(className);
 
-      setRandomGroupId();
+		setRandomPort();
       try
       {
+         canIHazRequest.setDataPort(dataPort);
+      
          channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
                .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface).bind(address);
          receiveKey = channel.join(announceGroup, iface);
@@ -121,8 +125,6 @@ public class LogSessionBroadcaster extends Thread
 
       for (int i = 0; i < GROUP_REQUEST_ATTEMPTS; i++)
       {
-         canIHazRequest.setGroup(multicastGroupAddress);
-         canIHazRequest.setDataPort(dataPort);
          canIHazRequest.createRequest(sendBuffer);
          try
          {
@@ -140,10 +142,10 @@ public class LogSessionBroadcaster extends Thread
                      channel.receive(receiveBuffer);
                      receiveBuffer.flip();
                      reply.readHeader(receiveBuffer);
-                     if (reply.getSessionID() != sessionID && (Arrays.equals(reply.getGroup(), multicastGroupAddress) || reply.getDataPort() == dataPort))
+                     if (reply.getSessionID() != sessionID && (Arrays.equals(reply.getDataIP(), dataAddress.getAddress()) && reply.getDataPort() == dataPort))
                      {
-                        System.out.println(Arrays.toString(multicastGroupAddress) + ":" + dataPort + " is already taken.");
-                        setRandomGroupId();
+                        System.out.println(Arrays.toString(dataAddress.getAddress()) + ":" + dataPort + " is already taken.");
+                        setRandomPort();
                         i = 0;
                         break;
                      }
@@ -167,7 +169,7 @@ public class LogSessionBroadcaster extends Thread
       AnnounceRequest announcement = new AnnounceRequest();
       announcement.setType(AnnounceRequest.AnnounceType.ANNOUNCE);
       announcement.setSessionID(sessionID);
-      announcement.setGroup(multicastGroupAddress);
+      announcement.setDataIP(dataAddress.getAddress());
       announcement.setDataPort(dataPort);
       announcement.setControlIP(controlAddress.getAddress().getAddress());
       announcement.setControlPort((short) controlAddress.getPort());
@@ -202,7 +204,7 @@ public class LogSessionBroadcaster extends Thread
                      receiveBuffer.flip();
                      reply.readHeader(receiveBuffer);
                      if (reply.getSessionID() != sessionID && reply.getType() == AnnounceRequest.AnnounceType.CAN_I_HAZ
-                           && (Arrays.equals(reply.getGroup(), multicastGroupAddress) || reply.getDataPort() == dataPort))
+                           && (Arrays.equals(reply.getDataIP(), dataAddress.getAddress()) && reply.getDataPort() == dataPort))
                      {
                         break;
                      }
@@ -234,23 +236,6 @@ public class LogSessionBroadcaster extends Thread
       return sessionID;
    }
 
-   public InetAddress getGroup()
-   {
-      try
-      {
-         return InetAddress.getByAddress(multicastGroupAddress);
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
-   public int getPort()
-   {
-      return dataPort;
-   }
-   
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
@@ -271,22 +256,18 @@ public class LogSessionBroadcaster extends Thread
       return sessionID;
    }
 
-   public void setRandomGroupId()
+   public void setRandomPort()
    {
-      multicastGroupAddress[0] = announceGroupAddress[0];
-      multicastGroupAddress[1] = announceGroupAddress[1];
-      multicastGroupAddress[2] = announceGroupAddress[2];
-      multicastGroupAddress[3] = (byte) (new Random().nextInt(253) + 1);
-      dataPort = LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START + (multicastGroupAddress[3] & 0xFF);
+      dataPort = LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START + (new Random().nextInt(253) + 1);
 
-      System.out.println("Trying " + (multicastGroupAddress[0] & 0xFF) + "." + (multicastGroupAddress[1] & 0xFF) + "." + (multicastGroupAddress[2] & 0xFF)
-            + "." + (multicastGroupAddress[3] & 0xFF));
+      System.out.println("Trying port " + dataPort);
    }
 
    public static void main(String[] args) throws SocketException, IOException, InterruptedException
    {
       InetSocketAddress controlAddress = new InetSocketAddress("127.0.0.1", LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
-      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, LogSessionBroadcaster.class, LogSettings.SIMULATION);
+      InetAddress dataAddress = InetAddress.getByName("127.0.0.1");
+      LogSessionBroadcaster logSessionAnnounce = new LogSessionBroadcaster(controlAddress, dataAddress, LogSessionBroadcaster.class, LogSettings.SIMULATION);
       logSessionAnnounce.start();
       logSessionAnnounce.join();
    }
@@ -306,5 +287,10 @@ public class LogSessionBroadcaster extends Thread
       catch (InterruptedException e)
       {
       }
+   }
+
+   public int getPort()
+   {
+      return dataPort;
    }
 }

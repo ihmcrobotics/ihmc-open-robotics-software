@@ -30,7 +30,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
    private static final int DISPLAY_ONE_IN_N_PACKETS = 6;
-   private final static int disconnectTimeout = 10000;
 
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
@@ -47,7 +46,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final JButton disconnectButton = new JButton("Disconnect");
    private final JButton clearLogButton = new JButton("Clear log");
-   private int totalTimeout = 0;
 
    private int bufferSize;
    private boolean showGUI;
@@ -73,7 +71,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
    {
-      totalTimeout = 0;
       if (recording)
       {
          for (int i = 0; i < jointUpdaters.size(); i++)
@@ -118,14 +115,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       return true;
    }
 
-   public void receiveTimedOut(long timeoutInMillis)
+   public void receiveTimedOut()
    {
-      totalTimeout += timeoutInMillis;
-      if (totalTimeout > disconnectTimeout)
-      {
-         System.out.println("Timeout reached: " + totalTimeout + ". Connection lost, closing client.");
-         client.close();
-      }
+      System.out.println("Connection lost, closing client.");
+      client.close();
 
    }
 
@@ -189,7 +182,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          this.robot = logModelLoader.createRobot();
       }
 
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(); 
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(showGUI);
       parameters.setDataBufferSize(this.bufferSize);
       this.scs = new SimulationConstructionSet(robot, parameters);
@@ -213,17 +206,17 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       scs.addButton(clearLogButton);
       clearLogButton.addActionListener(new ActionListener()
       {
-         
+
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            if(client != null)
+            if (client != null)
             {
                client.sendClearLogRequest();
             }
          }
       });
-      
+
       this.registry.addChild(yoVariableRegistry);
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
@@ -236,7 +229,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       for (String yoVariableName : buttons.keySet())
       {
-         @SuppressWarnings("deprecation")
          final YoVariable<?> var = registry.getVariable(yoVariableName);
          final JButton button = new JButton(yoVariableName);
          final double newValue = buttons.get(yoVariableName);
@@ -269,14 +261,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void timestampReceived(long timestamp)
    {
-      // TODO Auto-generated method stub
-      
    }
 
    @Override
    public void clearLog()
    {
-      // TODO Auto-generated method stub
-      
    }
 }

@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0ProximalPosition,root.remotemain.rightSRIHand.rightFinger0ProximalVelocity</Variables>
+		<Variables>root.remotemain.tester.var2</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1ProximalPosition,root.remotemain.rightSRIHand.rightFinger1ProximalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2ProximalPosition,root.remotemain.rightSRIHand.rightFinger2ProximalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0MedialPosition,root.remotemain.rightSRIHand.rightFinger0MedialVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1MedialPosition,root.remotemain.rightSRIHand.rightFinger1MedialVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2MedialPosition,root.remotemain.rightSRIHand.rightFinger2MedialVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -73,7 +73,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0DistalPosition,root.remotemain.rightSRIHand.rightFinger0DistalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -85,7 +85,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1DistalPosition,root.remotemain.rightSRIHand.rightFinger1DistalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2DistalPosition,root.remotemain.rightSRIHand.rightFinger2DistalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -109,7 +109,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0CompoundVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1CompoundVelocity,root.remotemain.rightSRIHand.rightFinger1DistalVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2CompoundVelocity</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0Force,root.remotemain.rightSRIHand.rightFinger0DesiredForce</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -157,7 +157,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger1Force,root.remotemain.rightSRIHand.rightFinger1DesiredForce</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -169,7 +169,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2Force,root.remotemain.rightSRIHand.rightFinger2DesiredForce</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -181,7 +181,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightStateMachine</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -193,7 +193,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger0Current</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -205,7 +205,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightFinger2Current</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -217,7 +217,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.rightSRIHand.rightTime</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -234,19 +234,19 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>rightdesiredMode,rightFinger0DesiredCurrent,rightFinger1DesiredCurrent,rightFinger2DesiredCurrent,fingerVelocityAlpha,rightCommandClose,rightCommandOpen,rightCloseForce</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Tab1
 </Title>
-<Entry Boxes>rightFinger0DesiredForce,rightFinger1DesiredForce,rightFinger2DesiredForce</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
 Tab2
 </Title>
-<Entry Boxes>rightFinger0ForceKp,rightFinger1ForceKp,rightFinger2ForceKp,rightFinger0ForceKi,rightFinger1ForceKi,rightFinger2ForceKi</Entry Boxes>
+<Entry Boxes></Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -266,8 +266,8 @@ Tab2
 <Current View>Normal View</Current View>
  <Canvas 1> 
  <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera Y>-49.45958136579704</Camera Y>
+ <Camera Z>3.897305424386469</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

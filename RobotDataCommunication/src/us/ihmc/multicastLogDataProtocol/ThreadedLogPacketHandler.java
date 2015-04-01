@@ -1,11 +1,15 @@
 package us.ihmc.multicastLogDataProtocol;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
+
+import us.ihmc.robotDataCommunication.LogDataHeader;
+import us.ihmc.utilities.Pair;
 
 public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
 {
    private final LogPacketHandler handler;
-   private final ArrayBlockingQueue<SegmentedPacketBuffer> dataBuffer;
+   private final ArrayBlockingQueue<Pair<LogDataHeader, ByteBuffer>> dataBuffer;
    
    private volatile boolean stopped;
    
@@ -22,8 +26,8 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
       {
          try
          {
-            SegmentedPacketBuffer buffer = dataBuffer.take();
-            handler.newDataAvailable(buffer);
+            Pair<LogDataHeader, ByteBuffer> buffer = dataBuffer.take();
+            handler.newDataAvailable(buffer.first(), buffer.second());
          }
          catch (InterruptedException e)
          {
@@ -47,15 +51,15 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    }
 
    @Override
-   public void newDataAvailable(SegmentedPacketBuffer buffer)
+   public void newDataAvailable(LogDataHeader header, ByteBuffer buffer)
    {
-      dataBuffer.offer(buffer);
+      dataBuffer.offer(new Pair<>(header, buffer));
    }
 
    @Override
-   public void timeout(long timeoutInMillis)
+   public void timeout()
    {
-      handler.timeout(timeoutInMillis);
+      handler.timeout();
    }
    
 }

@@ -29,8 +29,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
    public static final String propertyFile = "robotData.log";
-   private static final long connectTimeout = 20000;
-   private static final long disconnectTimeout = 5000;
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bsz";
    private static final String modelFilename = "model.sdf";
@@ -52,7 +50,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private YoVariableClient yoVariableClient;
    private volatile boolean connected = false;
-   private long totalTimeout = 0;
 
    private final LogPropertiesWriter logProperties;
    private ArrayList<VideoDataLoggerInterface> videoDataLoggers = new ArrayList<VideoDataLoggerInterface>();
@@ -159,7 +156,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
    {
       connected = true;
-      totalTimeout = 0;
 
       synchronized (synchronizer)
       {
@@ -303,24 +299,17 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       this.yoVariableClient = client;
    }
 
-   public void receiveTimedOut(long timeoutInMillis)
+   public void receiveTimedOut()
    {
-      totalTimeout += timeoutInMillis;
       if (connected)
       {
-         if (totalTimeout > disconnectTimeout)
-         {
-            System.out.println("Timeout reached: " + totalTimeout + ". Connection lost, closing client.");
-            yoVariableClient.close();
-         }
+         System.out.println("Connection lost, closing client.");
+         yoVariableClient.close();
       }
       else
       {
-         if (totalTimeout > connectTimeout)
-         {
-            System.out.println("Cannot connect to client, closing");
-            yoVariableClient.close();
-         }
+         System.out.println("Cannot connect to client, closing");
+         yoVariableClient.close();
       }
    }
 
@@ -388,9 +377,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    @Override
    public void timestampReceived(long timestamp)
    {
-      for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
+      for(int i = 0; i < videoDataLoggers.size(); i++)
       {
-         videoDataLogger.timestampChanged(timestamp);
+         videoDataLoggers.get(i).timestampChanged(timestamp);
       }
    }
 

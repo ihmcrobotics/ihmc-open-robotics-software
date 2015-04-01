@@ -1,4 +1,5 @@
 root*false*false
 root.DummyRobot*false*false
 root.remotemain*false*false
-root.remotemain.rightSRIHand*false*false
+root.remotemain.tester*false*false
+root.remotemain.Thread*false*false

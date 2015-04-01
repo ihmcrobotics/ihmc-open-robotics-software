@@ -18,9 +18,9 @@ import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
+import us.ihmc.multicastLogDataProtocol.SegmentedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.SegmentedPacketBuffer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 
@@ -77,7 +77,7 @@ public class GUICaptureViewer
       main.pack();
    }
 
-   private class Handler implements LogPacketHandler
+   private class Handler implements SegmentedLogPacketHandler
    {
       private final JLabel label = new JLabel();
       private final JPEGDecoder decoder = new JPEGDecoder();
