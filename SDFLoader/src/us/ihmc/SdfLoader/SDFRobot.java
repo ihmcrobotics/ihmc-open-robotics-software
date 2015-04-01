@@ -104,7 +104,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       Vector3d offset = new Vector3d();
       Quat4d orientation = new Quat4d();
       generalizedSDFRobotModel.getTransformToRoot().get(orientation, offset);
-      rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this);
+      rootJoint = new FloatingJoint(rootLink.getName(), new Vector3d(), this, true);
       setPositionInWorld(offset);
       setOrientation(orientation);
 
