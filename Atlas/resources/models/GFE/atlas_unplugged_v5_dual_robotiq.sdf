@@ -1371,24 +1371,23 @@
     <link name='l_hand'>
       <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
       <inertial>
-        <pose>0.00128479 0.141218 0.00812128 0 -0 0</pose>
+        <pose>-0.00118561 0.141218 6.19884e-06 0 -0 0</pose>
         <mass>1.8839</mass>
         <inertia>
-          <ixx>0.00588705</ixx>
-          <ixy>-5.67513e-05</ixy>
-          <ixz>0.00023229</ixz>
-          <iyy>0.0134256</iyy>
-          <iyz>-0.000329748</iyz>
-          <izz>0.00940058</izz>
+          <ixx>0.00689651</ixx>
+          <ixy>6.78926e-05</ixy>
+          <ixz>-1.57141e-08</ixz>
+          <iyy>0.00397853</iyy>
+          <iyz>6.96335e-07</iyz>
+          <izz>0.00688905</izz>
         </inertia>
       </inertial>
       <collision name='l_hand_collision'>
-        <pose>0.00179 0.168 0.01176 -2.65359e-06 -1.57079 -2.65359e-06</pose>
+        <pose>-0.00179 0.168 0 0 -1.57079 0</pose>
         <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/palm.STL</uri>
-          </mesh>
+          <box>
+            <size>0.1 0.1 0.1</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -1403,7 +1402,7 @@
         </surface>
       </collision>
       <visual name='l_hand_visual'>
-        <pose>0.00179 0.168 0.01176 -2.65359e-06 -1.57079 -2.65359e-06</pose>
+        <pose>-0.00179 0.168 0 0 -1.57079 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1411,6 +1410,7 @@
           </mesh>
         </geometry>
       </visual>
+      <velocity_decay/>
       <gravity>1</gravity>
       <velocity_decay/>
       <self_collide>0</self_collide>
@@ -1446,30 +1446,41 @@
       </physics>
     </joint>
     <link name='l_finger_1_link_0'>
-      <pose>0.09389 1.13055 0.39485 1.5708 0.000796327 1.5708</pose>
+      <pose>0.0903097 1.13055 0.38309 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_1_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_1_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1477,37 +1488,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_palm_finger_1_joint' type='revolute'>
       <child>l_finger_1_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-3.2051e-09 0.000796327 1</xyz>
+        <xyz>6.32679e-06 0.000796327 1</xyz>
         <limit>
-          <lower>-0.16</lower>
-          <upper>0.25</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.2967</lower>
+          <upper>0.2967</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_1_link_1'>
-      <pose>0.0938899 1.15055 0.394834 1.5708 0.000796327 1.5708</pose>
+      <pose>0.0903097 1.13055 0.38309 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_1_link_1_collision'>
@@ -1518,6 +1544,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_1_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -1528,37 +1565,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_1_joint_1' type='revolute'>
       <child>l_finger_1_link_1</child>
       <parent>l_finger_1_link_0</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_1_link_2'>
-      <pose>0.0938895 1.20053 0.366794 1.5708 0.520796 1.5708</pose>
+      <pose>0.0903092 1.18053 0.35505 1.5708 0.520796 1.57081</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_1_link_2_collision'>
@@ -1569,6 +1621,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_1_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -1579,50 +1642,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_1_joint_2' type='revolute'>
       <child>l_finger_1_link_2</child>
       <parent>l_finger_1_link_1</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_1_link_3'>
-      <pose>0.0938892 1.23436 0.347389 1.5708 0.520796 1.5708</pose>
+      <pose>0.0903088 1.21436 0.335645 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_1_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_1_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1630,50 +1719,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_1_joint_3' type='revolute'>
       <child>l_finger_1_link_3</child>
       <parent>l_finger_1_link_2</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_2_link_0'>
-      <pose>0.16589 1.13055 0.39485 1.5708 0.000796327 1.5708</pose>
+      <pose>0.16231 1.13055 0.38309 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_2_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_2_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1681,37 +1796,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_palm_finger_2_joint' type='revolute'>
       <child>l_finger_2_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-3.2051e-09 0.000796327 1</xyz>
+        <xyz>6.32679e-06 0.000796327 1</xyz>
         <limit>
-          <lower>-0.25</lower>
-          <upper>0.16</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.2967</lower>
+          <upper>0.2967</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_2_link_1'>
-      <pose>0.16589 1.15055 0.394834 1.5708 0.000796327 1.5708</pose>
+      <pose>0.16231 1.13055 0.38309 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_2_link_1_collision'>
@@ -1722,6 +1852,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_2_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -1732,37 +1873,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_2_joint_1' type='revolute'>
       <child>l_finger_2_link_1</child>
       <parent>l_finger_2_link_0</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_2_link_2'>
-      <pose>0.165889 1.20053 0.366794 1.5708 0.520796 1.5708</pose>
+      <pose>0.162309 1.18053 0.35505 1.5708 0.520796 1.57081</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_2_link_2_collision'>
@@ -1773,6 +1929,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_2_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -1783,50 +1950,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_2_joint_2' type='revolute'>
       <child>l_finger_2_link_2</child>
       <parent>l_finger_2_link_1</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_2_link_3'>
-      <pose>0.165889 1.23436 0.347389 1.5708 0.520796 1.5708</pose>
+      <pose>0.162309 1.21436 0.335645 1.5708 0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_2_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_2_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1834,50 +2027,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_2_joint_3' type='revolute'>
       <child>l_finger_2_link_3</child>
       <parent>l_finger_2_link_2</parent>
       <axis>
-        <xyz>1 7.34641e-06 -2.64504e-09</xyz>
+        <xyz>1 7.34641e-06 -6.33265e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_middle_link_0'>
-      <pose>0.12989 1.13055 0.48585 -1.5708 -0.000796327 1.5708</pose>
+      <pose>0.12631 1.13055 0.47409 -1.57079 -0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_middle_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_middle_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1885,37 +2104,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_palm_finger_middle_joint' type='revolute'>
       <child>l_finger_middle_link_0</child>
       <parent>l_hand</parent>
       <axis>
-        <xyz>-1 5.55112e-17 -3.2051e-09</xyz>
+        <xyz>-6.32679e-06 0.000796327 -1</xyz>
         <limit>
-          <lower>-0.25</lower>
-          <upper>0.16</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_middle_link_1'>
-      <pose>0.12989 1.15055 0.485866 -1.5708 -0.000796327 1.5708</pose>
+      <pose>0.12631 1.13055 0.47409 -1.57079 -0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_middle_link_1_collision'>
@@ -1926,6 +2160,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_middle_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -1936,37 +2181,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_middle_joint_1' type='revolute'>
       <child>l_finger_middle_link_1</child>
       <parent>l_finger_middle_link_0</parent>
       <axis>
-        <xyz>-1 5.55112e-17 -3.2051e-09</xyz>
+        <xyz>-1 0 6.32679e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_middle_link_2'>
-      <pose>0.12989 1.20053 0.513906 -1.5708 -0.520796 1.5708</pose>
+      <pose>0.12631 1.18053 0.50213 -1.57079 -0.520796 1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_middle_link_2_collision'>
@@ -1977,6 +2237,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_middle_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -1987,50 +2258,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_middle_joint_2' type='revolute'>
       <child>l_finger_middle_link_2</child>
       <parent>l_finger_middle_link_1</parent>
       <axis>
-        <xyz>-1 0 -3.2051e-09</xyz>
+        <xyz>-1 -2.77556e-17 6.32679e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_finger_middle_link_3'>
-      <pose>0.12989 1.23436 0.533311 -1.5708 -0.520796 1.5708</pose>
+      <pose>0.126311 1.21436 0.521535 -1.57079 -0.000796327 1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='l_finger_middle_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='l_finger_middle_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -2038,24 +2335,39 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='l_finger_middle_joint_3' type='revolute'>
       <child>l_finger_middle_link_3</child>
       <parent>l_finger_middle_link_2</parent>
       <axis>
-        <xyz>-1 0 -3.2051e-09</xyz>
+        <xyz>-1 -5.55112e-17 6.32679e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='head'>
       <pose>0.2821 0 0.7885 0 -0 0</pose>
@@ -2242,7 +2554,7 @@
       <inertial>
         <pose>0.0324349 0.0004084 -0.0041783 0 -0 0</pose>
         <mass>0.057664</mass>
-        <!-- new inertia but causes unreasonable accel. inertia>
+                <!-- new inertia but causes unreasonable accel. inertia>
           <ixx>3.8183e-05</ixx>
           <ixy>4.9927e-08</ixy>
           <ixz>1.1003e-05</ixz>
@@ -2250,7 +2562,7 @@
           <iyz>-9.8165e-09</iyz>
           <izz>4.2686e-05</izz>
         </inertia-->
-
+        
         <!-- Larger inertia so sim doesn't blow up -->
         <inertia>
           <ixx>0.000401606</ixx>
@@ -3148,24 +3460,23 @@
     <link name='r_hand'>
       <pose>0.1281 -0.94115 0.42859 0 -0 0</pose>
       <inertial>
-        <pose>0.00128479 -0.141218 -0.00810888 0 -0 0</pose>
+        <pose>-0.00118561 -0.141218 6.19884e-06 0 -0 0</pose>
         <mass>1.8839</mass>
         <inertia>
-          <ixx>0.00588743</ixx>
-          <ixy>5.67513e-05</ixy>
-          <ixz>-0.000232263</ixz>
-          <iyy>0.013426</iyy>
-          <iyz>-0.000489141</iyz>
-          <izz>0.00940058</izz>
+          <ixx>0.00689651</ixx>
+          <ixy>-6.78926e-05</ixy>
+          <ixz>-1.57141e-08</ixz>
+          <iyy>0.00397853</iyy>
+          <iyz>-6.96335e-07</iyz>
+          <izz>0.00688905</izz>
         </inertia>
       </inertial>
       <collision name='r_hand_collision'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -1.57079 -2.65359e-06</pose>
+        <pose>-0.00179 -0.168 0 3.14159 -1.57079 0</pose>
         <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/palm.STL</uri>
-          </mesh>
+          <box>
+            <size>0.1 0.1 0.1</size>
+          </box>
         </geometry>
         <surface>
           <contact>
@@ -3180,7 +3491,7 @@
         </surface>
       </collision>
       <visual name='r_hand_visual'>
-        <pose>0.00179 -0.168 -0.01176 3.14159 -1.57079 -2.65359e-06</pose>
+        <pose>-0.00179 -0.168 0 3.14159 -1.57079 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3188,6 +3499,7 @@
           </mesh>
         </geometry>
       </visual>
+      <velocity_decay/>
       <gravity>1</gravity>
       <velocity_decay/>
       <self_collide>0</self_collide>
@@ -3223,30 +3535,41 @@
       </physics>
     </joint>
     <link name='r_finger_1_link_0'>
-      <pose>0.16589 -1.13055 0.37133 1.5708 0.000796327 -1.57079</pose>
+      <pose>0.16231 -1.13055 0.38309 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_1_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_1_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3254,37 +3577,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_palm_finger_1_joint' type='revolute'>
       <child>r_finger_1_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>-3.20557e-09 -0.000796327 1</xyz>
+        <xyz>6.32627e-06 -0.000796327 1</xyz>
         <limit>
-          <lower>-0.16</lower>
-          <upper>0.25</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.2967</lower>
+          <upper>0.2967</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_1_link_1'>
-      <pose>0.16589 -1.15055 0.371314 1.5708 0.000796327 -1.57079</pose>
+      <pose>0.16231 -1.13055 0.38309 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_1_link_1_collision'>
@@ -3295,6 +3633,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_1_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -3305,37 +3654,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_1_joint_1' type='revolute'>
       <child>r_finger_1_link_1</child>
       <parent>r_finger_1_link_0</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_1_link_2'>
-      <pose>0.165891 -1.20053 0.343274 1.5708 0.520796 -1.57079</pose>
+      <pose>0.16231 -1.18053 0.35505 1.57079 0.520796 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_1_link_2_collision'>
@@ -3346,6 +3710,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_1_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -3356,50 +3731,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_1_joint_2' type='revolute'>
       <child>r_finger_1_link_2</child>
       <parent>r_finger_1_link_1</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_1_link_3'>
-      <pose>0.165891 -1.23436 0.323869 1.5708 0.520796 -1.57079</pose>
+      <pose>0.16231 -1.21436 0.335645 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_1_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_1_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3407,50 +3808,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_1_joint_3' type='revolute'>
       <child>r_finger_1_link_3</child>
       <parent>r_finger_1_link_2</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_2_link_0'>
-      <pose>0.09389 -1.13055 0.37133 1.5708 0.000796327 -1.57079</pose>
+      <pose>0.0903097 -1.13055 0.38309 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_2_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_2_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3458,37 +3885,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_palm_finger_2_joint' type='revolute'>
       <child>r_finger_2_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>-3.20557e-09 -0.000796327 1</xyz>
+        <xyz>6.32627e-06 -0.000796327 1</xyz>
         <limit>
-          <lower>-0.25</lower>
-          <upper>0.16</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.2967</lower>
+          <upper>0.2967</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_2_link_1'>
-      <pose>0.0938901 -1.15055 0.371314 1.5708 0.000796327 -1.57079</pose>
+      <pose>0.0903097 -1.13055 0.38309 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_2_link_1_collision'>
@@ -3499,6 +3941,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_2_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -3509,37 +3962,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_2_joint_1' type='revolute'>
       <child>r_finger_2_link_1</child>
       <parent>r_finger_2_link_0</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_2_link_2'>
-      <pose>0.0938905 -1.20053 0.343274 1.5708 0.520796 -1.57079</pose>
+      <pose>0.0903099 -1.18053 0.35505 1.57079 0.520796 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_2_link_2_collision'>
@@ -3550,6 +4018,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_2_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -3560,50 +4039,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_2_joint_2' type='revolute'>
       <child>r_finger_2_link_2</child>
       <parent>r_finger_2_link_1</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_2_link_3'>
-      <pose>0.0938908 -1.23436 0.323869 1.5708 0.520796 -1.57079</pose>
+      <pose>0.09031 -1.21436 0.335645 1.57079 0.000796327 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_2_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_2_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3611,50 +4116,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_2_joint_3' type='revolute'>
       <child>r_finger_2_link_3</child>
       <parent>r_finger_2_link_2</parent>
       <axis>
-        <xyz>-1 -7.34582e-06 -9.05525e-09</xyz>
+        <xyz>-1 -6.69282e-06 6.32094e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_middle_link_0'>
-      <pose>0.12989 -1.13055 0.46233 -1.5708 -0.000796327 -1.5708</pose>
+      <pose>0.12631 -1.13055 0.47409 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>-0.01 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>1.8e-05</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.5e-05</iyy>
           <iyz>0</iyz>
-          <izz>0.01</izz>
+          <izz>2.5e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_middle_link_0_collision'>
-        <pose>-0.0455 0.0414 0.036 3.14159 -7.34641e-06 1.57159</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_0.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_middle_link_0_visual'>
-        <pose>0.02 0 0 0 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3662,37 +4193,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_palm_finger_middle_joint' type='revolute'>
       <child>r_finger_middle_link_0</child>
       <parent>r_hand</parent>
       <axis>
-        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
+        <xyz>-6.32731e-06 -0.000796327 -1</xyz>
         <limit>
-          <lower>-0.25</lower>
-          <upper>0.16</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_middle_link_1'>
-      <pose>0.12989 -1.15055 0.462346 -1.5708 -0.000796327 -1.5708</pose>
+      <pose>0.12631 -1.13055 0.47409 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.0282 -0.0155 0 0 0 -0.52</pose>
+        <mass>0.047</mass>
         <inertia>
-          <ixx>0.016</ixx>
+          <ixx>4.99332e-06</ixx>
           <ixy>9.1312e-07</ixy>
           <ixz>-1.2e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>6.43453e-05</iyy>
           <iyz>-7e-11</iyz>
-          <izz>0.01</izz>
+          <izz>6.06192e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_middle_link_1_collision'>
@@ -3703,6 +4249,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_1.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_middle_link_1_visual'>
         <pose>0.05 -0.028 0 0 0 -0.52</pose>
@@ -3713,37 +4270,52 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_middle_joint_1' type='revolute'>
       <child>r_finger_middle_link_1</child>
       <parent>r_finger_middle_link_0</parent>
       <axis>
-        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
+        <xyz>1 -6.5359e-07 -6.32679e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.2217</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_middle_link_2'>
-      <pose>0.12989 -1.20053 0.490386 -1.5708 -0.520796 -1.5708</pose>
+      <pose>0.12631 -1.18053 0.50213 -1.5708 -0.520796 -1.57079</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.15</mass>
+        <pose>0.02167 0.00048 0.00018 0 -0 0</pose>
+        <mass>0.03284</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.48008e-06</ixx>
           <ixy>3.194e-07</ixy>
           <ixz>1.3041e-07</ixz>
-          <iyy>0.01</iyy>
+          <iyy>2.24812e-05</iyy>
           <iyz>2.91e-09</iyz>
-          <izz>0.01</izz>
+          <izz>1.98635e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_middle_link_2_collision'>
@@ -3754,6 +4326,17 @@
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_2.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_middle_link_2_visual'>
         <pose>0.039 0 0.0075 0 -0 0</pose>
@@ -3764,50 +4347,76 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_middle_joint_2' type='revolute'>
       <child>r_finger_middle_link_2</child>
       <parent>r_finger_middle_link_1</parent>
       <axis>
-        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
+        <xyz>1 -6.5359e-07 -6.32679e-06</xyz>
         <limit>
           <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <upper>1.5708</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='r_finger_middle_link_3'>
-      <pose>0.12989 -1.23436 0.509791 -1.5708 -0.520796 -1.5708</pose>
+      <pose>0.126311 -1.21436 0.521535 -1.5708 -0.000796327 -1.5708</pose>
       <inertial>
-        <pose>0 0 0 0 -0 0</pose>
-        <mass>0.05</mass>
+        <pose>0.01626 0.00049 0.0002 0 -0 0</pose>
+        <mass>0.03354</mass>
         <inertia>
-          <ixx>0.01</ixx>
+          <ixx>3.05151e-06</ixx>
           <ixy>8.9792e-07</ixy>
           <ixz>2.49e-09</ixz>
-          <iyy>0.01</iyy>
+          <iyy>1.42798e-05</iyy>
           <iyz>-1.191e-08</iyz>
-          <izz>0.01</izz>
+          <izz>1.26413e-05</izz>
         </inertia>
       </inertial>
       <collision name='r_finger_middle_link_3_collision'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
             <uri>model://robotiq_hand_description/meshes/s-model_articulated/collision/link_3.STL</uri>
           </mesh>
         </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.1</mu>
+              <mu2>1.1</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name='r_finger_middle_link_3_visual'>
-        <pose>0 0 0 0 -0 0.52</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -3815,24 +4424,39 @@
           </mesh>
         </geometry>
       </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
     </link>
     <joint name='r_finger_middle_joint_3' type='revolute'>
       <child>r_finger_middle_link_3</child>
       <parent>r_finger_middle_link_2</parent>
       <axis>
-        <xyz>1 -5.89793e-10 3.2051e-09</xyz>
+        <xyz>1 -6.5359e-07 -6.32679e-06</xyz>
         <limit>
-          <lower>0</lower>
-          <upper>3.1416</upper>
-          <effort>100</effort>
-          <velocity>100</velocity>
+          <lower>-0.6632</lower>
+          <upper>1.0471</upper>
+          <effort>60</effort>
+          <velocity>-1</velocity>
         </limit>
         <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
           <spring_reference>0</spring_reference>
           <spring_stiffness>0</spring_stiffness>
         </dynamics>
         <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
     </joint>
     <link name='l_uglut'>
       <pose>0 0.089 0 0 -0 0</pose>
