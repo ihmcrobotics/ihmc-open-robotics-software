@@ -20,6 +20,7 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.containers.ContainerTools;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -68,6 +69,7 @@ public class SDFFullRobotModel implements FullRobotModel
    private final SideDependentList<RigidBody> hands = new SideDependentList<RigidBody>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
+   private final ArrayList<ContactSensorDefinition> contactSensorDefinitions = new ArrayList<ContactSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
@@ -326,6 +328,12 @@ public class SDFFullRobotModel implements FullRobotModel
       {
          ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransform());
          forceSensorDefinitions.add(forceSensorDefinition);
+      }
+      
+      for(SDFContactSensor sdfContactSensor : joint.getContactSensors())
+      {
+         ContactSensorDefinition contactSensorDefinition = new ContactSensorDefinition(sdfContactSensor.getName(), inverseDynamicsJoint.getSuccessor(),sdfContactSensor.getSensorType());
+         contactSensorDefinitions.add(contactSensorDefinition);
       }
 
       for (SDFJointHolder sdfJoint : childLink.getChildren())
@@ -587,6 +595,13 @@ public class SDFFullRobotModel implements FullRobotModel
    public ForceSensorDefinition[] getForceSensorDefinitions()
    {
       return this.forceSensorDefinitions.toArray(new ForceSensorDefinition[this.forceSensorDefinitions.size()]);
+   }
+   
+   /** {@inheritDoc} */
+   @Override
+   public ContactSensorDefinition[] getContactSensorDefinitions()
+   {
+      return this.contactSensorDefinitions.toArray(new ContactSensorDefinition[this.contactSensorDefinitions.size()]);
    }
 
    public ReferenceFrame getCameraFrame(String name)

@@ -96,7 +96,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       sensorReaderFactory
             .build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
-                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
+                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorContactSensorHolder(), threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");

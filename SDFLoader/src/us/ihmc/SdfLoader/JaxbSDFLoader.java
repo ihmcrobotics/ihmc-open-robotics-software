@@ -17,6 +17,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorType;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -111,6 +112,11 @@ public class JaxbSDFLoader
    public void addForceSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, RigidBodyTransform transformToParentJoint)
    {
       generalizedSDFRobotModels.get(jointMap.getModelName()).addForceSensor(sensorName, parentJointName, transformToParentJoint);
+   }
+   
+   public void addContactSensor(SDFJointNameMap jointMap, String sensorName, String parentJointName, ContactSensorType type)
+   {
+      generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
    
    public SDFFullRobotModel createFullRobotModel(SDFJointNameMap sdfJointNameMap)

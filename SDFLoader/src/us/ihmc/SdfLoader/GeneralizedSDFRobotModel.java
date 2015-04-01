@@ -12,6 +12,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.simulationconstructionset.graphics.GraphicsObjectsHolder;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorType;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
@@ -144,5 +145,11 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
    {
       SDFForceSensor sdfForceSensor = new SDFForceSensor(sensorName, transformToParentJoint);
       joints.get(parentJointName).addForceSensor(sdfForceSensor);
+   }
+   
+   public void addContactSensor(String sensorName, String parentJointName, ContactSensorType type)
+   {
+      SDFContactSensor sdfContactSensor = new SDFContactSensor(sensorName, parentJointName, type);
+      joints.get(parentJointName).addContactSensor(sdfContactSensor);
    }
 }

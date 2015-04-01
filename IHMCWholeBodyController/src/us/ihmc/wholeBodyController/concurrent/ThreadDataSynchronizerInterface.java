@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.concurrent;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 
@@ -28,6 +29,10 @@ public interface ThreadDataSynchronizerInterface
    public abstract CenterOfPressureDataHolder getEstimatorCenterOfPressureDataHolder();
 
    public abstract CenterOfPressureDataHolder getControllerCenterOfPressureDataHolder();
+   
+   public abstract ContactSensorHolder getControllerContactSensorHolder();
+   
+   public abstract ContactSensorHolder getEstimatorContactSensorHolder();
 
    public abstract RobotMotionStatusHolder getEstimatorRobotMotionStatusHolder();
 
