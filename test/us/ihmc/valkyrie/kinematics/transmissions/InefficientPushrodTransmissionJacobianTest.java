@@ -22,7 +22,7 @@ public class InefficientPushrodTransmissionJacobianTest
    private final boolean visualizeAndKeepUp = false;
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionJacobianForAnklesAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -44,7 +44,7 @@ public class InefficientPushrodTransmissionJacobianTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionJacobianForWaistAtZero()
    {
       Robot robot = new Robot("testPushrodTransmission");
@@ -65,7 +65,7 @@ public class InefficientPushrodTransmissionJacobianTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionForAnkles()
    {
       Robot robot = new ValkyrieAnkleRobot();
@@ -165,7 +165,7 @@ public class InefficientPushrodTransmissionJacobianTest
    }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 3000)
+	@Test(timeout = 30000)
    public void testInefficientPushrodTransmissionForWaist()
    {
       Robot robot = new ValkyrieWaistRobot();      

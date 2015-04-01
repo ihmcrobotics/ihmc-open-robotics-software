@@ -66,7 +66,7 @@ public class ClosedFormJacobianTest
     };
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void testJacobianMatchesMATLABAnkle() 
     {
         for (int i = 0; i < 7; i++) 
@@ -84,7 +84,7 @@ public class ClosedFormJacobianTest
     }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void testJacobianMatchesMATLABWaist() 
     {
         for (int i = 0; i < 7; i++) 
@@ -102,7 +102,7 @@ public class ClosedFormJacobianTest
     }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void testEfficientMatchesInefficientJacobianAnkle() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -149,7 +149,7 @@ public class ClosedFormJacobianTest
     }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void testEfficientMatchesInefficientJacobianWaist() 
     {
         InefficientPushrodTransmissionJacobian inefficientButReadablePushrodTransmission =
@@ -170,8 +170,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@EstimatedDuration(duration = 1.0)
-	@Test(timeout = 9000)
+	@EstimatedDuration(duration = 1.4)
+	@Test(timeout = 30000)
     public void testEfficentMatchesInterpolatedJacobianAnkle() 
     {
         closedFormJacobianAnkleRenishaws.useFuteks(false);
@@ -194,8 +194,8 @@ public class ClosedFormJacobianTest
         }
     }
 
-	@EstimatedDuration(duration = 0.5)
-	@Test(timeout = 9000)
+	@EstimatedDuration(duration = 0.8)
+	@Test(timeout = 30000)
     public void testEfficentMatchesInterpolatedJacobianWaist() 
     {
         closedFormJacobianWaistRenishaws.useFuteks(false);
@@ -220,7 +220,7 @@ public class ClosedFormJacobianTest
     }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void cosineTestAnkles() 
     {
 
@@ -258,7 +258,7 @@ public class ClosedFormJacobianTest
     }
 
 	@EstimatedDuration(duration = 0.0)
-	@Test(timeout = 9000)
+	@Test(timeout = 30000)
     public void consineTestWaist() 
     {
 //      A Test to ensure Renishaw and Futek Jacobians are in agreement with each other
