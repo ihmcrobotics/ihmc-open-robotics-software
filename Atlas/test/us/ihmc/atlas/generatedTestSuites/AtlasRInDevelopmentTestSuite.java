@@ -7,8 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.stateEstimation.AtlasPelvisPoseHistoryCorrectorTest.class,
-   us.ihmc.atlas.ToBeMovedOrDeletedWholeBodyIkSolverTest.class
+   us.ihmc.atlas.roughTerrainWalking.AtlasFootExplorationTest.class
 })
 
 public class AtlasRInDevelopmentTestSuite
