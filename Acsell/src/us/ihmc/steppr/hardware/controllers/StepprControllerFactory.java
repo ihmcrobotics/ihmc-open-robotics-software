@@ -36,6 +36,7 @@ import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
@@ -170,8 +171,11 @@ public class StepprControllerFactory
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParamaters);
 
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            sensorInformation.getFeetForceSensorNames(), sensorInformation.getFeetContactSensorNames(),
+            feetForceSensorNames, feetContactSensorNames, wristForceSensorNames ,
             walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
 
       double kneeAngleMultiplicationFactor = -1.0;
