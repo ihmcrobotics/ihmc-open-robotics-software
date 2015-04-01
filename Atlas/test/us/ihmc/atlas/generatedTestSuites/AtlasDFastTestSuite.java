@@ -9,7 +9,8 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.hikSim.AtlasWholeBodyIkSolverTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
-   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class
+   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class
 })
 
 public class AtlasDFastTestSuite
