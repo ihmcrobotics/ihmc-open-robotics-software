@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.atlas.AtlasObstacleCourseDemoGUITest.class,
+   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class
 })
 
