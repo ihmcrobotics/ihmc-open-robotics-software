@@ -59,8 +59,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
    }
 
 
-	@EstimatedDuration(duration = 49.6)
-	@Test(timeout = 158814)
+	@EstimatedDuration(duration = 68.7)
+	@Test(timeout = 343521)
    public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
@@ -93,8 +93,8 @@ public abstract class DRCObstacleCourseEveryBuildTest implements MultiRobotTestI
       BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 43.6)
-	@Test(timeout = 140655)
+	@EstimatedDuration(duration = 61.7)
+	@Test(timeout = 308260)
    public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
