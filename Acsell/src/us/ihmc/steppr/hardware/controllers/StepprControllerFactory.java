@@ -171,7 +171,8 @@ public class StepprControllerFactory
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParamaters);
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory,
-            sensorInformation.getFeetForceSensorNames(), walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+            sensorInformation.getFeetForceSensorNames(), sensorInformation.getFeetContactSensorNames(),
+            walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
 
       double kneeAngleMultiplicationFactor = -1.0;
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList(kneeAngleMultiplicationFactor);
