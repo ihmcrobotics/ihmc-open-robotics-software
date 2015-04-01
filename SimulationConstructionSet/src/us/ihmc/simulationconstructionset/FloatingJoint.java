@@ -41,8 +41,6 @@ public class FloatingJoint extends Joint
    public DoubleYoVariable qd_wz;    // angular velocity, expressed in body-fixed frame.
    public DoubleYoVariable qdd_x, qdd_y, qdd_z;    // in world-fixed frame
    public DoubleYoVariable qdd_wx, qdd_wy, qdd_wz;    // angular acceleration, expressed in body-fixed frame.
-   
-   public DoubleYoVariable q_yaw, q_pitch, q_roll; // in world frame
 
    public FloatingJoint(String jname, Vector3d offset, Robot rob)
    {
@@ -73,10 +71,6 @@ public class FloatingJoint extends Joint
       qdd_wy = new DoubleYoVariable("qdd_wy", "FloatingJoint rotational acceleration about y", registry);
       qdd_wz = new DoubleYoVariable("qdd_wz", "FloatingJoint rotational acceleration about z", registry);
 
-      q_yaw = new DoubleYoVariable("q_yaw", "FloatingJoint rotation about z", registry);
-      q_pitch = new DoubleYoVariable("q_pitch", "FloatingJoint rotation about y", registry);
-      q_roll = new DoubleYoVariable("q_roll", "FloatingJoint rotation about x", registry);
-      
       this.setFloatingTransform3D(this.jointTransform3D);
       physics.u_i = null;
    }
@@ -110,10 +104,6 @@ public class FloatingJoint extends Joint
       qdd_wy = new DoubleYoVariable("qdd_" + varName + "_wy", "FloatingJoint rotational acceleration about y", registry);
       qdd_wz = new DoubleYoVariable("qdd_" + varName + "_wz", "FloatingJoint rotational acceleration about z", registry);
 
-      q_yaw = new DoubleYoVariable("q_" + varName + "_yaw", "FloatingJoint rotation about z", registry);
-      q_pitch = new DoubleYoVariable("q_" + varName + "_pitch", "FloatingJoint rotation about y", registry);
-      q_roll = new DoubleYoVariable("q_" + varName + "_roll", "FloatingJoint rotation about x", registry);
-      
       this.setFloatingTransform3D(this.jointTransform3D);
       physics.u_i = null;
    }
@@ -273,7 +263,7 @@ public class FloatingJoint extends Joint
       y.set(q_y.getDoubleValue());
       z.set(q_z.getDoubleValue());
    }
-   
+
    public void getVelocity(DoubleYoVariable xDot, DoubleYoVariable yDot, DoubleYoVariable zDot)
    {
       xDot.set(qd_x.getDoubleValue());
@@ -504,15 +494,9 @@ public class FloatingJoint extends Joint
       return yawPitchRollToReturn;
    }
 
-   private void updateYawPitchRoll()
-   {
-      getYawPitchRoll(q_yaw, q_pitch, q_roll);
-   }
-   
    public void update()
    {
       this.setFloatingTransform3D(this.jointTransform3D);
-      updateYawPitchRoll();
    }
 
 // private Matrix3d tempRotationMatrix = new Matrix3d();
