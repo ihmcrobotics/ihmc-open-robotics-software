@@ -23,6 +23,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -55,7 +56,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    }
 
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
+         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
