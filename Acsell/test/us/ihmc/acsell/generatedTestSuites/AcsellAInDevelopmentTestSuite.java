@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
    us.ihmc.acsell.BonoFlatGroundWalkingTest.class
 })
 
-public class AcsellAFastTestSuite
+public class AcsellAInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {
