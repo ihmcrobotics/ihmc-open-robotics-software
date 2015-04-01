@@ -191,6 +191,9 @@ class RobotiqControlThread extends HandControlThread
                case SCISSOR_GRIP:
                   robotiqHand.scissorGrip();
                   break;
+               case HALF_CLOSE:
+                  robotiqHand.close(0.35);
+                  break;
                case RESET:
                {
                   robotiqHand.reset();
