@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang.mutable.MutableDouble;
 import org.apache.commons.lang.mutable.MutableInt;
@@ -63,7 +62,6 @@ public class InterprocessObjectCommunicatorTest
       // Check if no packets of the wrong type get received
       port128ClientB.attachListener(MutableDouble.class, new FailConsumer<MutableDouble>());
 
-      final AtomicReference<MutableInt> reference = new AtomicReference<>();
       port128ClientB.attachListener(MutableInt.class, new ObjectConsumer<MutableInt>()
       {
          Random random = new Random(1511358L);
@@ -72,8 +70,6 @@ public class InterprocessObjectCommunicatorTest
          public void consumeObject(MutableInt object)
          {
             assertEquals(random.nextInt(), object.intValue());
-            assertEquals(reference.get().intValue(), object.intValue());
-            assertFalse(object == reference.get());
          }
       });
 
@@ -86,7 +82,6 @@ public class InterprocessObjectCommunicatorTest
       for (int i = 0; i < iterations; i++)
       {
          MutableInt object = new MutableInt(random.nextInt());
-         reference.set(object);
          port128ClientA.consumeObject(object);
       }
 
