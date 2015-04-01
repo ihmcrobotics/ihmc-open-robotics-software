@@ -136,7 +136,6 @@ class RobotiqControlThread extends HandControlThread
             }
             catch (IOException e)
             {
-               e.printStackTrace();
                continue;
             }
 
