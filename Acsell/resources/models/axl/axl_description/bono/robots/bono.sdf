@@ -205,10 +205,10 @@
     </joint>
     <link name='utorso'>
       <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
-<!-- Inertial pose with mass shifted by 0.01 in Y -->
+<!-- Inertial pose with mass shifted by 0.02 in Y -->
 <!-- With dummy mass  original sdf said 18.9 added 2.2kg to accomodate full robot mass -->
        <inertial>
-        <pose>-0.0195224 0.010144025 0.313439 0 -0 0</pose>
+        <pose>-0.0195224 0.020144025 0.313439 0 -0 0</pose>
         <mass>21.14268</mass>
         <inertia>
           <ixx>0.272494</ixx>

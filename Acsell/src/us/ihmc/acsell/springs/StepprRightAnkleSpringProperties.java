@@ -13,7 +13,7 @@ public class StepprRightAnkleSpringProperties implements HystereticSpringPropert
    
    @Override
    public double getLinearSpringConstant() {
-      return 300;
+      return 400;
    }
    
    @Override
@@ -28,7 +28,7 @@ public class StepprRightAnkleSpringProperties implements HystereticSpringPropert
    
    @Override
    public double getLinearSpringRestLength() {
-      return -0.18;
+      return -0.230;
    }
    
    @Override

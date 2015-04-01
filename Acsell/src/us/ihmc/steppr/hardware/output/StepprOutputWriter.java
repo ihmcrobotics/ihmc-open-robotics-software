@@ -11,12 +11,12 @@ import us.ihmc.acsell.springs.StepprLeftAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprLeftHipXSpringProperties;
 import us.ihmc.acsell.springs.StepprRightAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprRightHipXSpringProperties;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+//import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-//import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.command.StepprCommand;
@@ -33,7 +33,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
-   boolean USE_LEFT_HIP_X_SPRING = false;
+   boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_LEFT_ANKLE_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
    boolean USE_RIGHT_ANKLE_SPRING = true;
@@ -62,6 +62,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauInertiaViz = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumYoVariable<WalkingState>  yoWalkingState = new EnumYoVariable<WalkingState>("sow_walkingState", registry, WalkingState.class);
    
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
    
@@ -309,13 +310,15 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       {
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
-        return USE_LEFT_ANKLE_SPRING ? leftAnkleSpringCalculator.getSpringForce() : 0.0;
+        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingState.RIGHT_SUPPORT)) ? 
+        		leftAnkleSpringCalculator.getSpringForce() : 0.0;
       }
       case RIGHT_ANKLE_Y:
       {
         yoAngleSpring.get(joint).set(q);
         rightAnkleSpringCalculator.update(q);
-        return USE_RIGHT_ANKLE_SPRING ? rightAnkleSpringCalculator.getSpringForce() : 0.0;
+        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingState.LEFT_SUPPORT)) ?
+        		rightAnkleSpringCalculator.getSpringForce() : 0.0;
       }
       default:
          return 0.0;
@@ -341,12 +344,13 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       return registry;
    }
    
-   //@Override
+   @Override
    public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
    {
       if(newState instanceof WalkingState)
       {
          currentWalkingState = (WalkingState)newState;
+         yoWalkingState.set(currentWalkingState);
       }
    }
    

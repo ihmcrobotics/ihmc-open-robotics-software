@@ -167,7 +167,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
       desiredVelocityX.set(desiredVelocityX_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
-    		  -0.25+desiredVelocityX_Bias, 0.25+desiredVelocityX_Bias, deadZone, true));
+    		  -0.35+desiredVelocityX_Bias, 0.35+desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override

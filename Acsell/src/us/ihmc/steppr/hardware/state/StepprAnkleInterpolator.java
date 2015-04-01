@@ -11,7 +11,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class StepprAnkleInterpolator implements StepprAnkleAngleCalculator
 {
-	   private static final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = true;//If false use joint
+	   private static final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = false;//If false use joint
 	   private static final boolean COMPUTE_JACOBIAN_FROM_JOINT_ANGLES = true;
 	   private static final boolean COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES = true;
 	   
