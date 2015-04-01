@@ -156,12 +156,12 @@ import us.ihmc.utilities.ThreadTools;
 
          if (isConnected(sender))
          {
-            final Object copy = sender.copyPacket(object);
             for (int i = 0; i < clients.size(); i++)
             {
                final IntraprocessObjectCommunicator client = clients.get(i);
                if (client != sender)
                {
+                  final Object copy = sender.copyPacket(object);
                   callBackExecutor.execute(new Runnable()
                   {
 
