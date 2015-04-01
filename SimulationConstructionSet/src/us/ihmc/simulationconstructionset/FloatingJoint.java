@@ -44,35 +44,7 @@ public class FloatingJoint extends Joint
 
    public FloatingJoint(String jname, Vector3d offset, Robot rob)
    {
-      super(jname, offset, rob, 6);
-
-      physics = new FloatJointPhysics(this);
-
-      YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
-
-      q_x = new DoubleYoVariable("q_x", "FloatingJoint x position", registry);
-      q_y = new DoubleYoVariable("q_y", "FloatingJoint y position", registry);
-      q_z = new DoubleYoVariable("q_z", "FloatingJoint z position", registry);
-      qd_x = new DoubleYoVariable("qd_x", "FloatingJoint x velocity", registry);
-      qd_y = new DoubleYoVariable("qd_y", "FloatingJoint y velocity", registry);
-      qd_z = new DoubleYoVariable("qd_z", "FloatingJoint z velocity", registry);
-      qdd_x = new DoubleYoVariable("qdd_x", "FloatingJoint x acceleration", registry);
-      qdd_y = new DoubleYoVariable("qdd_y", "FloatingJoint x acceleration", registry);
-      qdd_z = new DoubleYoVariable("qdd_z", "FloatingJoint x acceleration", registry);
-      q_qs = new DoubleYoVariable("q_qs", "FloatingJoint orientation quaternion qs", registry);
-      q_qs.set(1.0);
-      q_qx = new DoubleYoVariable("q_qx", "FloatingJoint orientation quaternion qx", registry);
-      q_qy = new DoubleYoVariable("q_qy", "FloatingJoint orientation quaternion qy", registry);
-      q_qz = new DoubleYoVariable("q_qz", "FloatingJoint orientation quaternion qz", registry);
-      qd_wx = new DoubleYoVariable("qd_wx", "FloatingJoint rotational velocity about x", registry);
-      qd_wy = new DoubleYoVariable("qd_wy", "FloatingJoint rotational velocity about y", registry);
-      qd_wz = new DoubleYoVariable("qd_wz", "FloatingJoint rotational velocity about z", registry);
-      qdd_wx = new DoubleYoVariable("qdd_wx", "FloatingJoint rotational acceleration about x", registry);
-      qdd_wy = new DoubleYoVariable("qdd_wy", "FloatingJoint rotational acceleration about y", registry);
-      qdd_wz = new DoubleYoVariable("qdd_wz", "FloatingJoint rotational acceleration about z", registry);
-
-      this.setFloatingTransform3D(this.jointTransform3D);
-      physics.u_i = null;
+      this(jname, null, offset, rob);
    }
 
    public FloatingJoint(String jname, String varName, Vector3d offset, Robot rob)
@@ -83,26 +55,35 @@ public class FloatingJoint extends Joint
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
 
-      q_x = new DoubleYoVariable("q_" + varName + "_x", "FloatingJoint x position", registry);
-      q_y = new DoubleYoVariable("q_" + varName + "_y", "FloatingJoint y position", registry);
-      q_z = new DoubleYoVariable("q_" + varName + "_z", "FloatingJoint z position", registry);
-      qd_x = new DoubleYoVariable("qd_" + varName + "_x", "FloatingJoint x velocity", registry);
-      qd_y = new DoubleYoVariable("qd_" + varName + "_y", "FloatingJoint y velocity", registry);
-      qd_z = new DoubleYoVariable("qd_" + varName + "_z", "FloatingJoint z velocity", registry);
-      qdd_x = new DoubleYoVariable("qdd_" + varName + "_x", "FloatingJoint x acceleration", registry);
-      qdd_y = new DoubleYoVariable("qdd_" + varName + "_y", "FloatingJoint yx acceleration", registry);
-      qdd_z = new DoubleYoVariable("qdd_" + varName + "_z", "FloatingJoint z acceleration", registry);
-      q_qs = new DoubleYoVariable("q_" + varName + "_qs", "FloatingJoint orientation quaternion qs", registry);
+      if (varName == null)
+      {
+         varName = "";
+      }
+      else if (!varName.isEmpty())
+      {
+         varName += "_";
+      }
+      
+      q_x = new DoubleYoVariable("q_" + varName + "x", "FloatingJoint x position", registry);
+      q_y = new DoubleYoVariable("q_" + varName + "y", "FloatingJoint y position", registry);
+      q_z = new DoubleYoVariable("q_" + varName + "z", "FloatingJoint z position", registry);
+      qd_x = new DoubleYoVariable("qd_" + varName + "x", "FloatingJoint x velocity", registry);
+      qd_y = new DoubleYoVariable("qd_" + varName + "y", "FloatingJoint y velocity", registry);
+      qd_z = new DoubleYoVariable("qd_" + varName + "z", "FloatingJoint z velocity", registry);
+      qdd_x = new DoubleYoVariable("qdd_" + varName + "x", "FloatingJoint x acceleration", registry);
+      qdd_y = new DoubleYoVariable("qdd_" + varName + "y", "FloatingJoint yx acceleration", registry);
+      qdd_z = new DoubleYoVariable("qdd_" + varName + "z", "FloatingJoint z acceleration", registry);
+      q_qs = new DoubleYoVariable("q_" + varName + "qs", "FloatingJoint orientation quaternion qs", registry);
       q_qs.set(1.0);
-      q_qx = new DoubleYoVariable("q_" + varName + "_qx", "FloatingJoint orientation quaternion qx", registry);
-      q_qy = new DoubleYoVariable("q_" + varName + "_qy", "FloatingJoint orientation quaternion qy", registry);
-      q_qz = new DoubleYoVariable("q_" + varName + "_qz", "FloatingJoint orientation quaternion qz", registry);
-      qd_wx = new DoubleYoVariable("qd_" + varName + "_wx", "FloatingJoint rotational velocity about x", registry);
-      qd_wy = new DoubleYoVariable("qd_" + varName + "_wy", "FloatingJoint rotational velocity about y", registry);
-      qd_wz = new DoubleYoVariable("qd_" + varName + "_wz", "FloatingJoint rotational velocity about z", registry);
-      qdd_wx = new DoubleYoVariable("qdd_" + varName + "_wx", "FloatingJoint rotational acceleration about x", registry);
-      qdd_wy = new DoubleYoVariable("qdd_" + varName + "_wy", "FloatingJoint rotational acceleration about y", registry);
-      qdd_wz = new DoubleYoVariable("qdd_" + varName + "_wz", "FloatingJoint rotational acceleration about z", registry);
+      q_qx = new DoubleYoVariable("q_" + varName + "qx", "FloatingJoint orientation quaternion qx", registry);
+      q_qy = new DoubleYoVariable("q_" + varName + "qy", "FloatingJoint orientation quaternion qy", registry);
+      q_qz = new DoubleYoVariable("q_" + varName + "qz", "FloatingJoint orientation quaternion qz", registry);
+      qd_wx = new DoubleYoVariable("qd_" + varName + "wx", "FloatingJoint rotational velocity about x", registry);
+      qd_wy = new DoubleYoVariable("qd_" + varName + "wy", "FloatingJoint rotational velocity about y", registry);
+      qd_wz = new DoubleYoVariable("qd_" + varName + "wz", "FloatingJoint rotational velocity about z", registry);
+      qdd_wx = new DoubleYoVariable("qdd_" + varName + "wx", "FloatingJoint rotational acceleration about x", registry);
+      qdd_wy = new DoubleYoVariable("qdd_" + varName + "wy", "FloatingJoint rotational acceleration about y", registry);
+      qdd_wz = new DoubleYoVariable("qdd_" + varName + "wz", "FloatingJoint rotational acceleration about z", registry);
 
       this.setFloatingTransform3D(this.jointTransform3D);
       physics.u_i = null;
