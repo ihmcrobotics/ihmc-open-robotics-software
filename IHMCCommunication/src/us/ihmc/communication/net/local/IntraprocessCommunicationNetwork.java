@@ -153,8 +153,10 @@ import us.ihmc.utilities.ThreadTools;
       private synchronized void send(IntraprocessObjectCommunicator sender, final Object object)
       {
 
+
          if (isConnected(sender))
          {
+            final Object copy = sender.copyPacket(object);
             for (int i = 0; i < clients.size(); i++)
             {
                final IntraprocessObjectCommunicator client = clients.get(i);
@@ -166,7 +168,7 @@ import us.ihmc.utilities.ThreadTools;
                      @Override
                      public void run()
                      {
-                        client.receiveObject(object);
+                        client.receiveObject(copy);
                      }
                   });
                }

@@ -58,10 +58,9 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    @SuppressWarnings("unchecked")
    /* package-private */void receiveObject(Object object)
    {
-      Object copy = kryo.copy(object);
       for (GlobalObjectConsumer listener : globalListeners)
       {
-         listener.consumeObject(copy);
+         listener.consumeObject(object);
       }
 
       ArrayList<ObjectConsumer<?>> objectListeners = listeners.get(object.getClass());
@@ -70,7 +69,7 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
          for (@SuppressWarnings("rawtypes")
          ObjectConsumer listener : objectListeners)
          {
-            listener.consumeObject(copy);
+            listener.consumeObject(object);
          }
       }
    }
@@ -163,5 +162,10 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
       {
          close();         
       }
+   }
+
+   public Object copyPacket(Object object)
+   {
+      return kryo.copy(object);
    }
 }
