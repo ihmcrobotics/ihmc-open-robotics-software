@@ -16,8 +16,7 @@ import org.junit.runners.Suite;
    us.ihmc.valkyrie.kinematics.will.WillsPushrodTransmissionTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
    us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
-   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class,
-   us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class
+   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
 })
 
 public class ValkyrieHardwareDriversAFastTestSuite
