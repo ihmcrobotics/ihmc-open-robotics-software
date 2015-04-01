@@ -16,4 +16,11 @@ public class AtlasWholeBodyTrajectoryPacketTest extends WholeBodyTrajectoryPacke
    public DRCRobotModel getRobotModel() {
          return robotModel;
    }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }

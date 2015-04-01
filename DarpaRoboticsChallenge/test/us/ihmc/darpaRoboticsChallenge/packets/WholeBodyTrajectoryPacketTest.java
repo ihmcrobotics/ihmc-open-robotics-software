@@ -1,9 +1,14 @@
 package us.ihmc.darpaRoboticsChallenge.packets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Tuple3d;
+import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -11,9 +16,10 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -28,7 +34,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-public abstract class WholeBodyTrajectoryPacketTest
+public abstract class WholeBodyTrajectoryPacketTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -44,8 +50,6 @@ public abstract class WholeBodyTrajectoryPacketTest
    {
       simulationTestingParameters.setKeepSCSUp(false);
    }
-   
-   public abstract DRCRobotModel getRobotModel();
    
    @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90000)
@@ -70,31 +74,36 @@ public abstract class WholeBodyTrajectoryPacketTest
          packet.rightArmTrajectory.trajectoryPoints[1].positions[jointIdx] = rightArmHome[jointIdx];
       }
       
-      packet.leftArmTrajectory.trajectoryPoints[0].time = 3.0;
-      packet.rightArmTrajectory.trajectoryPoints[0].time = 3.0;
-      packet.leftArmTrajectory.trajectoryPoints[1].time = 6.0;
-      packet.rightArmTrajectory.trajectoryPoints[1].time = 6.0;
+      packet.timeAtWaypoint[0] = 3.0;
+      packet.timeAtWaypoint[1] = 6.0;
+      
+      for (int i = 0; i < waypoints; i++)
+      {
+         packet.rightArmTrajectory.trajectoryPoints[i].time = packet.timeAtWaypoint[i];
+         packet.leftArmTrajectory.trajectoryPoints[i].time = packet.timeAtWaypoint[i];
+      }
       
       executePacket(packet);
    }
    
-//   @EstimatedDuration(duration = 30.0)
-//   @Test(timeout = 90000)
-//   public void testChestPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
-//   {
-//      int waypoints = 2;
-//      WholeBodyTrajectoryPacket packet = createEmptyPacket(waypoints, 0);
-//      
-//      packet.allocatePelvisTrajectory();
-//      
-//      packet.pelvisWorldPosition[0] = new Point3d(0.0, 0.0, 0.3);
-//      packet.pelvisWorldPosition[1] = new Point3d(0.0, 0.0, 0.8);
-//      
-//      packet.timeAtWaypoint[0] = 2.0;
-//      packet.timeAtWaypoint[1] = 4.0;
-//      
-//      executePacket(packet);
-//   }
+   @EstimatedDuration(duration = 30.0)
+   @Test(timeout = 90000)
+   public void testPelvisHeightPacket() throws SimulationExceededMaximumTimeException, ControllerFailureException
+   {
+      // currently the pelvis does not support multiple waypoints:
+      int waypoints = 1;
+      WholeBodyTrajectoryPacket packet = createEmptyPacket(waypoints, 0);
+      
+      packet.allocatePelvisTrajectory();
+      Vector3d actualPelvis = drcSimulationTestHelper.getRobot().getPositionInWorld();
+      
+      packet.pelvisWorldPosition[0] = new Point3d(actualPelvis);
+      packet.pelvisWorldPosition[0].add(new Point3d(0.0, 0.0, 0.1));
+      
+      packet.timeAtWaypoint[0] = 1.0;
+      
+      executePacket(packet);
+   }
    
    private void executePacket(WholeBodyTrajectoryPacket packet) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -106,14 +115,14 @@ public abstract class WholeBodyTrajectoryPacketTest
          System.out.println("Starting execution of waypoint " + (i+1) + "/" + waypoints + "...");
          
          double startWaypointTime;
-         double endWaypointTime = packet.leftArmTrajectory.trajectoryPoints[i].time;
+         double endWaypointTime = packet.timeAtWaypoint[i];
          if (i == 0)
          {
             startWaypointTime = 0.0;
          }
          else
          {
-            startWaypointTime = packet.leftArmTrajectory.trajectoryPoints[i-1].time;
+            startWaypointTime = packet.timeAtWaypoint[i-1];
          }
          
          drcSimulationTestHelper.simulateAndBlock(endWaypointTime - startWaypointTime);
@@ -125,43 +134,39 @@ public abstract class WholeBodyTrajectoryPacketTest
          // check if both arms reached target
          for (RobotSide robotSide : RobotSide.values)
          {
-            ArrayList<OneDoFJoint> armJoints = fullRobotModel.armJointIDsList.get(robotSide);
-            double[] desiredQ;
-            double[] desiredQd;
-            if (robotSide == RobotSide.LEFT)
+            ArmJointTrajectoryPacket armJointPacket = null;
+            if (robotSide.equals(RobotSide.LEFT))
             {
-               desiredQ = packet.leftArmTrajectory.trajectoryPoints[i].positions;
-               desiredQd = packet.leftArmTrajectory.trajectoryPoints[i].velocities;
+               armJointPacket = packet.leftArmTrajectory;
             }
-            else
+            if (robotSide.equals(RobotSide.RIGHT))
             {
-               desiredQ = packet.rightArmTrajectory.trajectoryPoints[i].positions;
-               desiredQd = packet.rightArmTrajectory.trajectoryPoints[i].velocities;
+               armJointPacket = packet.rightArmTrajectory;
             }
             
+            if (armJointPacket == null)
+            {
+               continue;
+            }
+            
+            ArrayList<OneDoFJoint> armJoints = fullRobotModel.armJointIDsList.get(robotSide);
             for (int jointIdx = 0; jointIdx < armJoints.size(); jointIdx++)
             {
                OneDegreeOfFreedomJoint joint = sdfRobot.getOneDegreeOfFreedomJoint(armJoints.get(jointIdx).getName());
-               // if the desired position is null the waypoint is set to the actual position internally
-               if (desiredQ != null)
-               {
-                  assertEquals(joint.getQ().getDoubleValue(), desiredQ[jointIdx], epsilonQ);
-               }
-               
-               // if the desired velocity is null the waypoint is set to velocity zero internally
-               if (desiredQd != null)
-               {
-                  assertEquals(joint.getQD().getDoubleValue(), desiredQd[jointIdx], epsilonQd);
-               }
-               else
-               {
-                  assertEquals(joint.getQD().getDoubleValue(), 0.0, epsilonQd);
-               }
+
+               assertEquals(armJointPacket.trajectoryPoints[i].positions[jointIdx], joint.getQ().getDoubleValue(), epsilonQ);
+               assertEquals(armJointPacket.trajectoryPoints[i].velocities[jointIdx], joint.getQD().getDoubleValue(), epsilonQd);
             }
          }
          
          // check if pelvis reached target
-         
+         if (packet.pelvisWorldPosition != null)
+         {
+            Tuple3d actualPelvis = sdfRobot.getPositionInWorld();
+            Tuple3d desiredPelvis = packet.pelvisWorldPosition[i];
+            
+            assertTrue(actualPelvis.epsilonEquals(desiredPelvis, epsilonQ));
+         }
          
          // check if chest reached target
          

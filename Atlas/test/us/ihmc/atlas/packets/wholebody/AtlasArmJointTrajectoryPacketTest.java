@@ -17,4 +17,10 @@ public class AtlasArmJointTrajectoryPacketTest extends ArmJointTrajectoryPacketT
    {
          return robotModel;
    }
+
+   @Override
+   public String getSimpleRobotName()
+   {
+      return null;
+   }
 }
