@@ -13,7 +13,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
-import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -28,7 +28,7 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations.ArmConfigurations;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-public abstract class ArmJointTrajectoryPacketTest
+public abstract class ArmJointTrajectoryPacketTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -44,8 +44,6 @@ public abstract class ArmJointTrajectoryPacketTest
    {
       simulationTestingParameters.setKeepSCSUp(false);
    }
-   
-   public abstract DRCRobotModel getRobotModel();
    
    @EstimatedDuration(duration = 30.0)
    @Test(timeout = 90000)
