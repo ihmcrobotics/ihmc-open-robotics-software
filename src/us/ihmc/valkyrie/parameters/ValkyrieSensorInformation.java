@@ -31,11 +31,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    }
    
    private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
-   private static final SideDependentList<String> tekscanSensorNames = new SideDependentList<String>("LeftTekscanFootSensor", "RightTekscanFootSensor");
+   private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("LeftFootContactSensor","RightFootContactSensor");
    private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
-   private static final LinkedHashMap<String, LinkedHashMap<String, RigidBodyTransform>> forceSensors = new LinkedHashMap<>();
-   public static final LinkedHashMap<String, LinkedHashMap<String, RigidBodyTransform>> copSensors = new LinkedHashMap<>();
    public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>> contactSensors = new SideDependentList<LinkedHashMap<String,LinkedHashMap<String,ContactSensorType>>>();
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
@@ -78,14 +76,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    static
    {
-      copSensors.put("LeftAnkle", new LinkedHashMap<String, RigidBodyTransform>());
-      copSensors.get("LeftAnkle").put("LeftFootTekscan", transformFromTekscanMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
-      copSensors.put("RightAnkle", new LinkedHashMap<String, RigidBodyTransform>());
-      copSensors.get("RightAnkle").put("LeftFootTekscan", transformFromTekscanMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
-      
       contactSensors.put(RobotSide.LEFT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
       contactSensors.get(RobotSide.LEFT).put("LeftAnkle",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftFootContactSensor", ContactSensorType.SOLE);
+      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
 //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftToeContactSensor", ContactSensorType.TOE);
@@ -93,7 +86,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       
       contactSensors.put(RobotSide.RIGHT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
       contactSensors.get(RobotSide.RIGHT).put("RightAnkle",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightFootContactSensor", ContactSensorType.SOLE);
+      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.      
 //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightToeContactSensor", ContactSensorType.TOE);
@@ -305,5 +298,11 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public String getRightPelvisIMUSensor()
    {
       return rightPelvisIMUSensor;
+   }
+
+   @Override
+   public SideDependentList<String> getFeetContactSensorNames()
+   {
+      return footContactSensorNames;
    }
 }
