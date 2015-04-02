@@ -3,6 +3,8 @@ package us.ihmc.multicastLogDataProtocol.broadcast;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -38,7 +40,16 @@ public class LogSessionDisplay extends JFrame
       while(networkInterfaces.hasMoreElements())
       {
          NetworkInterface iface = networkInterfaces.nextElement();
-         clients.add(new LogSessionBroadcastClient(iface, new LogSessionCallback(iface)));
+         Enumeration<InetAddress> addresses = iface.getInetAddresses();
+         while(addresses.hasMoreElements())
+         {
+            InetAddress address = addresses.nextElement();
+            if(address instanceof Inet4Address)
+            {
+               clients.add(new LogSessionBroadcastClient(iface, new LogSessionCallback(iface)));
+               break;
+            }
+         }
       }
 
       JScrollPane scroller = new JScrollPane();
