@@ -81,7 +81,7 @@ public class SimulatedRobotiqHandJointAngleProducer
             jointAngleCommunicators.get(robotSide).updateHandAngles(new HandSensorData()
             {
                @Override
-               public double[][] getFingerJointAngles()
+               public double[][] getFingerJointAngles(RobotSide robotSide)
                {
                   return new double[][]{indexJoints, middleJoints, thumbJoints};
                }
