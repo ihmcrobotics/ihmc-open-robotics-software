@@ -12,6 +12,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -39,12 +40,27 @@ public class DRCNetworkProcessor
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
          setupGFEModule(params);
+         setupMocapModule(robotModel, params);
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
-      
+ }
+
+   private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
+   {
+     if (params.useMocapModule())
+     {
+        new MocapModule(robotModel, params.getRosUri());
+
+        PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, new IHMCCommunicationKryoNetClassList());
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
+        mocapModuleCommunicator.connect();
+        
+        String methodName = "setupMocapModule";
+        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
+     }
    }
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException

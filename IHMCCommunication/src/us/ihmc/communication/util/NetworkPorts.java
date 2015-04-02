@@ -30,6 +30,7 @@ public class NetworkPorts
    public static final NetworkPorts RIGHT_HAND_MANAGER_PORT = new NetworkPorts(6005); 
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
    public static final NetworkPorts GFE_COMMUNICATOR = new NetworkPorts(6007);
+   public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
    
    public static final NetworkPorts createRandomTestPort()
    {
