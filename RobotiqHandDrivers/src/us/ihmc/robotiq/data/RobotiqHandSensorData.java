@@ -3,6 +3,7 @@ package us.ihmc.robotiq.data;
 import java.util.Arrays;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandSensorData implements HandSensorData
 {
@@ -194,20 +195,20 @@ public class RobotiqHandSensorData implements HandSensorData
 	}
 	
 	double[] temp = new double[4];
-	public double[][] getFingerJointAngles()
+	public double[][] getFingerJointAngles(RobotSide robotSide)
 	{
 		double[][] fingerJointAngles = new double[3][];
 		temp[0] = ((double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE - (4.0/45)) * Math.PI; //32 degrees
 		temp[1] = (double)position[FINGER_A] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[2] = (double)position[FINGER_A] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
-		fingerJointAngles[0] = Arrays.copyOf(temp, 4);
+		fingerJointAngles[robotSide == RobotSide.LEFT ? 0 : 1] = Arrays.copyOf(temp, 4);
 		
-		temp[0] = ((double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE + (4.0/45)) * Math.PI; //32 degrees
+		temp[0] = -((double)position[SCISSOR] * (8.0/45) / MAX_POSITION_VALUE - (4.0/45)) * Math.PI; //32 degrees
 		temp[1] = (double)position[FINGER_B] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[2] = (double)position[FINGER_B] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees
 		temp[3] = 0.0;
-		fingerJointAngles[1] = Arrays.copyOf(temp, 4);
+		fingerJointAngles[robotSide == RobotSide.LEFT ? 1 : 0] = Arrays.copyOf(temp, 4);
 		
 		temp[0] = (double)position[FINGER_C] * (25.0/72) * Math.PI  / MAX_POSITION_VALUE; //62.5 degrees
 		temp[1] = (double)position[FINGER_C] * (0.5) * Math.PI / MAX_POSITION_VALUE; //90 degrees

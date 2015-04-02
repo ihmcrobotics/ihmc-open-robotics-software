@@ -79,7 +79,7 @@ public class HandJointAngleCommunicator
 
    public void updateHandAngles(HandSensorData sensorDataFromHand)
    {
-      fingers = sensorDataFromHand.getFingerJointAngles();
+      fingers = sensorDataFromHand.getFingerJointAngles(side);
 
       connected.set(true);
    }
