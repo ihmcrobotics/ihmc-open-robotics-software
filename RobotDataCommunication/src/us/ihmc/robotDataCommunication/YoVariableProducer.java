@@ -21,6 +21,7 @@ public class YoVariableProducer extends Thread
    private final ByteBuffer byteWriteBuffer;
    private final LongBuffer writeBuffer;
    private final ByteBuffer compressedBuffer;
+   private final ByteBuffer compressedBufferDirect;
 
    private final int jointStateOffset;
    
@@ -42,7 +43,7 @@ public class YoVariableProducer extends Thread
 
       compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + LogDataHeader.length()];
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
-
+      compressedBufferDirect = ByteBuffer.allocateDirect(compressedBuffer.capacity());
       this.session = session;
    }
 
@@ -118,8 +119,10 @@ public class YoVariableProducer extends Thread
                logDataHeader.setDataSize(dataSize);
                logDataHeader.setCrc32((int) crc32.getValue());
                logDataHeader.writeBuffer(0, compressedBuffer);
-               
-               server.send(compressedBuffer);
+               compressedBufferDirect.clear();
+               compressedBufferDirect.put(compressedBuffer);
+               compressedBufferDirect.flip();
+               server.send(compressedBufferDirect);
             }
             mainBuffer.flush();
          }
