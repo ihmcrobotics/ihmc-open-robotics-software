@@ -10,6 +10,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
+import us.ihmc.simulationconstructionset.util.environments.ContactableSteeringWheelRobot;
 import us.ihmc.simulationconstructionset.util.environments.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.environments.ValveType;
@@ -68,7 +69,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(pitch_degrees), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
-      ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);
+      ContactableSteeringWheelRobot valve = new ContactableSteeringWheelRobot(valveRobotName, valveType, 1.0, valvePose);
 
       valve.createValveRobot();
       valve.createAvailableContactPoints(1, 30, forceVectorScale, true);
