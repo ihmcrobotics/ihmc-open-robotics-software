@@ -9,6 +9,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -190,8 +191,8 @@ public class BambooTools
          // the other specified directories don't exist
          System.out.println("Saving movies to tmp dir before uploading..");
 
-         String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
-         File movieDir = new File(temporaryDirectoryPathName, "atlas-movies");
+         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         File movieDir = temporaryDirectoryPath.resolve("atlas-movies").toFile();
          if (movieDir.exists() || movieDir.mkdirs())
          {
             System.out.println("Using " + movieDir.getAbsolutePath());
