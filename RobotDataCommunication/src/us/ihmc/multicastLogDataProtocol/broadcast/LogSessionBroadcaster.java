@@ -14,6 +14,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
@@ -239,7 +240,7 @@ public class LogSessionBroadcaster extends Thread
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
-      String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
+      Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
 
       SecureRandom random = new SecureRandom();
 
@@ -248,7 +249,7 @@ public class LogSessionBroadcaster extends Thread
       do
       {
          sessionID = random.nextInt(65535);
-         sessionFile = new File(temporaryDirectoryPathName, prefix + sessionID);
+         sessionFile = temporaryDirectoryPath.resolve(prefix + sessionID).toFile();
       }
       while (!sessionFile.createNewFile());
       sessionFile.deleteOnExit();

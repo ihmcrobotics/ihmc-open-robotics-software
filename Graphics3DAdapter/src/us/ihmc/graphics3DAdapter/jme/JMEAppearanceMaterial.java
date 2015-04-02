@@ -253,15 +253,15 @@ public class JMEAppearanceMaterial
       }
       else
       {
-         String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
+         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
         
-         printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPathName);
+         printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPath);
          
-         String ogreCacheDirectoryName = temporaryDirectoryPathName + File.separator + "SCSCache" + File.separator + "ogre_materials";
+         Path ogreCacheDirectoryPath = temporaryDirectoryPath.resolve("SCSCache").resolve("ogre_materials");
          
-         printIfDebug("ogreCacheDirectoryName = " + ogreCacheDirectoryName);
+         printIfDebug("ogreCacheDirectoryName = " + ogreCacheDirectoryPath);
 
-         File cacheDir = new File(ogreCacheDirectoryName);
+         File cacheDir = ogreCacheDirectoryPath.toFile();
          if (!cacheDir.exists())
          {
             cacheDir.mkdir();
