@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -83,27 +84,14 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    static
    {
-      String temporaryDirectoryPathName = FileTools.getTemporaryDirectoryPathName();
-      String tempDir = temporaryDirectoryPathName + File.separator + "SCSCache";
-      File tempDirFile = new File(tempDir);
-      if (!tempDirFile.exists())
-      {
-         if (!tempDirFile.mkdirs())
-         {
-            throw new RuntimeException("Cannot make directory " + tempDir + ", check permissions");
-         }
-      }
-      else if (tempDirFile.isFile())
-      {
-         throw new RuntimeException(tempDir + " is not a directory. Please remove or rename");
-      }
-
-      String nativeLibraryPath = System.getProperty("java.library.path") + File.pathSeparator + tempDir;
-      System.setProperty("java.library.path", nativeLibraryPath);
+      Path scsCachePath = FileTools.getTemporaryDirectoryPath().resolve("SCSCache");
       
-      NativeLibraryLoader.setCustomExtractionFolder(tempDir);
-   }
+      FileTools.ensureDirectoryExists(scsCachePath);
 
+      System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + scsCachePath.toString());
+      NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
+   }
+   
    private final Object loadingStatus = new Object();
    private final Object graphicsConch = new Object();
 

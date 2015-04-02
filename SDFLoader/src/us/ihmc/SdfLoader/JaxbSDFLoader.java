@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,7 +19,6 @@ import us.ihmc.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorType;
-import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class JaxbSDFLoader
@@ -29,7 +29,7 @@ public class JaxbSDFLoader
    
    public JaxbSDFLoader(File file, String resourceDirectory) throws JAXBException, FileNotFoundException
    {
-      this(new FileInputStream(file), FileTools.createArrayListOfOneURL(resourceDirectory));
+      this(new FileInputStream(file), Arrays.asList(resourceDirectory));
    }
    
    public JaxbSDFLoader(InputStream inputStream, List<String> resourceDirectories) throws JAXBException, FileNotFoundException
@@ -60,7 +60,7 @@ public class JaxbSDFLoader
       }
    }
    
-   public JaxbSDFLoader(File file, ArrayList<String> resourceDirectories) throws FileNotFoundException, JAXBException
+   public JaxbSDFLoader(File file, List<String> resourceDirectories) throws FileNotFoundException, JAXBException
    {
       this(new FileInputStream(file), resourceDirectories);
    }

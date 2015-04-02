@@ -3,7 +3,9 @@ package us.ihmc.SdfLoader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.xml.bind.JAXBException;
@@ -15,7 +17,6 @@ import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.io.files.FileTools;
 
 public class SDFWorldLoader
 {
@@ -24,10 +25,10 @@ public class SDFWorldLoader
 
    public SDFWorldLoader(File file, String resourceDirectory) throws FileNotFoundException, JAXBException
    {
-      this(file, FileTools.createArrayListOfOneURL(resourceDirectory));
+      this(file, Arrays.asList(resourceDirectory));
    }
 
-   public SDFWorldLoader(File file, ArrayList<String> resourceDirectories) throws FileNotFoundException, JAXBException
+   public SDFWorldLoader(File file, List<String> resourceDirectories) throws FileNotFoundException, JAXBException
    {
       jaxbSDFLoader = new JaxbSDFLoader(file, resourceDirectories);
       for (GeneralizedSDFRobotModel generalizedSDFRobotModel : jaxbSDFLoader.getGeneralizedSDFRobotModels())
