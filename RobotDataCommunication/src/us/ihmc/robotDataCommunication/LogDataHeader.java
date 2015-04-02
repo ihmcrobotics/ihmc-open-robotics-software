@@ -31,6 +31,10 @@ public class LogDataHeader
       timestamp = buffer.getLong();
       dataSize = buffer.getInt();
       crc32 = buffer.getInt();
+      if(dataSize < 0)
+      {
+         return false;
+      }
       return true;
    }
 
