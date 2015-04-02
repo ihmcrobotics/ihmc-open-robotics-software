@@ -34,12 +34,12 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    private String name;
 
-   private double valveRadius;
+   protected double valveRadius;
    private double valveOffsetFromWall;
    private double valveThickness;
 
    private int numberOfSpokes;
-   private double spokesThickness;
+   protected double spokesThickness;
 
    private FramePose valvePoseInWorld = new FramePose();
 
@@ -51,14 +51,14 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private Matrix3d inertiaMatrix;
 
    private FrameTorus3d valveTorus;
-   private ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
+   protected ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
 
-   private Link valveLink;
+   protected Link valveLink;
    private PinJoint valvePinJoint;
-   private Graphics3DObject valveLinkGraphics = new Graphics3DObject();
+   protected Graphics3DObject valveLinkGraphics = new Graphics3DObject();
    private final DoubleYoVariable valveDamping;
 
-   private PoseReferenceFrame valveFrame;
+   protected PoseReferenceFrame valveFrame;
 
    private final RigidBodyTransform originalValvePose = new RigidBodyTransform();
 
