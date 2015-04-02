@@ -18,6 +18,7 @@ public class DRCNetworkModuleParameters
    private boolean useRosModule;
    private boolean useGFECommunicator;
    private boolean useNetworkProcessor = true;
+   private boolean useMocapModule;
    
    private boolean useLocalControllerCommunicator;
    
@@ -208,5 +209,15 @@ public class DRCNetworkModuleParameters
    public void setUseNetworkProcessor(boolean useNetworkProcessor)
    {
       this.useNetworkProcessor = useNetworkProcessor;
+   }
+
+   public void setUseMocapModule(boolean enableMocapModule)
+   {
+      this.useMocapModule = enableMocapModule;
+   }
+   
+   public boolean useMocapModule()
+   {
+      return this.useMocapModule;
    }
 }
