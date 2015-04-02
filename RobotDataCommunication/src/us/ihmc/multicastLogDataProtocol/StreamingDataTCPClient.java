@@ -52,17 +52,20 @@ public class StreamingDataTCPClient extends Thread
          try
          {
             headerBuffer.clear();
-            int read = connection.read(headerBuffer);
-            if(read == -1)
+            while(headerBuffer.hasRemaining())
             {
-               updateHandler.timeout();
-               break DATALOOP;
+               int read = connection.read(headerBuffer);
+               if(read == -1)
+               {
+                  updateHandler.timeout();
+                  break DATALOOP;
+               }
             }
             headerBuffer.clear();
             LogDataHeader header = new LogDataHeader();
             if(!header.readBuffer(headerBuffer))
             {
-//               System.err.println("Expected header, got data. Scanning till new header found.");
+               System.err.println("Expected header, got data. Scanning till new header found.");
                continue DATALOOP; // Cannot read buffer, continue with data loop hopefully latching on to the data stream again
             }
             updateHandler.timestampReceived(header.getTimestamp());
@@ -71,7 +74,7 @@ public class StreamingDataTCPClient extends Thread
            
             while(dataBuffer.hasRemaining())
             {
-               read = connection.read(dataBuffer);
+               int read = connection.read(dataBuffer);
                if(read == -1)
                {
                   updateHandler.timeout();
