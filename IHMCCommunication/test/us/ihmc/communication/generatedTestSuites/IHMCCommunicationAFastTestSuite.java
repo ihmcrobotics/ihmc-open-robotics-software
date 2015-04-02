@@ -10,7 +10,6 @@ import org.junit.runners.Suite;
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
    us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
    us.ihmc.communication.packets.wholebody.JointAnglesPacketTest.class,
-   us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class,
    us.ihmc.communication.serializers.driving.OverheadMapPacketSerializerTest.class,
    us.ihmc.communication.serializers.driving.VehiclePosePacketSerializerTest.class,
    us.ihmc.communication.serializers.HighLevelStatePacketSerializerTest.class,
