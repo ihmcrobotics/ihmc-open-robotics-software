@@ -62,7 +62,7 @@ public class StreamingDataTCPClient extends Thread
             LogDataHeader header = new LogDataHeader();
             if(!header.readBuffer(headerBuffer))
             {
-               System.err.println("Expected header, got data. Scanning till new header found.");
+//               System.err.println("Expected header, got data. Scanning till new header found.");
                continue DATALOOP; // Cannot read buffer, continue with data loop hopefully latching on to the data stream again
             }
             updateHandler.timestampReceived(header.getTimestamp());
