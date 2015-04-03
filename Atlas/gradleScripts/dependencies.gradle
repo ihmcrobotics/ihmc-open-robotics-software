@@ -2,6 +2,7 @@ evaluationDependsOn(':DarpaRoboticsChallenge')
 evaluationDependsOn(':CommonWalkingControlModules')
 evaluationDependsOn(':Graphics3DAdapter')
 evaluationDependsOn(':IHMCHumanoidOperatorInterface')
+evaluationDependsOn(':IHMCWholeBodyController')
 evaluationDependsOn(':PathGeneration')
 
 dependencies {
