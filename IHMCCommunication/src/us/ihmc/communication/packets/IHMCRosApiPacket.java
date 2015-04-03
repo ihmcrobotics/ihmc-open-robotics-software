@@ -9,4 +9,9 @@ public abstract class IHMCRosApiPacket<T> extends Packet<T>
       if(!this.getClass().isAnnotationPresent(ClassDocumentation.class))
          throw new RuntimeException("Documentation annotation could not be found for " + this.getClass().getName());
    }
+   
+   public boolean rosConversionEpsilonEquals(T other, double epsilon)
+   {
+      return epsilonEquals(other, epsilon);
+   }
 }
