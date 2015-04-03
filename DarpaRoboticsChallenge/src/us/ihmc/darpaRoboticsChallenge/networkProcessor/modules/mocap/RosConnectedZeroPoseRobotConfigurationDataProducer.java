@@ -3,6 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
 import org.ros.node.AbstractNodeMain;
@@ -91,13 +94,21 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
    private void receivedClockMessage(long totalNsecs)
    {
-      RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.getAndSet(null);
+      RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.get();
+      fullRobotModel.updateFrames();
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions);
+
+      robotConfigurationData.setTimestamp(totalNsecs);
       if(pelvisPoseInMocapFrame != null)
       {
-         rootJoint.setPositionAndRotation(pelvisPoseInMocapFrame);
+         Vector3d translation = new Vector3d();
+         Quat4d orientation = new Quat4d();
+         pelvisPoseInMocapFrame.getTranslation(translation);
+         pelvisPoseInMocapFrame.getRotation(orientation);
+         robotConfigurationData.setRootTranslation(translation);
+         robotConfigurationData.setRootOrientation(orientation);
+         System.out.println("update");
       }
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions);
-      robotConfigurationData.setTimestamp(totalNsecs);
       
       packetCommunicator.send(robotConfigurationData);
    }

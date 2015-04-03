@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector;
 import java.util.HashMap;
 
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
+import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModeResponsePacket;
@@ -59,7 +60,8 @@ public class PacketsForwardedToTheUi
       WholeBodyTrajectoryPacket.class,
       JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
-      InvalidPacketNotificationPacket.class
+      InvalidPacketNotificationPacket.class,
+      DetectedObjectPacket.class
    };
    
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
