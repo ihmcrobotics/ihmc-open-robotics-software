@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
-import us.ihmc.utilities.ClassLoaderUtils;
+import us.ihmc.utilities.ClassLoaderTools;
 
 public class SDFLogModelProvider implements LogModelProvider
 {
@@ -50,7 +50,7 @@ public class SDFLogModelProvider implements LogModelProvider
       try
       {
          Pattern zipExclude = null; //Pattern.compile(".*\\.(?i)(zip)$");
-         ClassLoaderUtils.createZipBundle(os, zipExclude, resourceDirectories);
+         ClassLoaderTools.createZipBundle(os, zipExclude, resourceDirectories);
       }
       catch (IOException e)
       {
