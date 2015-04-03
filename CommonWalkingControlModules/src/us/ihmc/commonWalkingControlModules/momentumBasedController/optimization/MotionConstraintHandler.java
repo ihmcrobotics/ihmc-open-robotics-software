@@ -438,7 +438,7 @@ public class MotionConstraintHandler
       for (int index = 0; index < joints.length; index++){
          InverseDynamicsJoint joint = joints[index];
 //         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
-         indicesIntoCompactBlock.clear();
+         indicesIntoCompactBlock.reset();
          ScrewTools.computeIndicesForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
 
