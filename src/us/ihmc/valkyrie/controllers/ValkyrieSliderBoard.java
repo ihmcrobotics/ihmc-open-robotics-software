@@ -146,7 +146,7 @@ public class ValkyrieSliderBoard
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredHeadingDot, joystickUpdater.findComponent(Component.Identifier.Axis.RZ),
-            -0.2 + desiredHeadingDot_Bias, 0.2 + desiredHeadingDot_Bias, deadZone, true));
+            -0.1 + desiredHeadingDot_Bias, 0.1 + desiredHeadingDot_Bias, deadZone, true));
 
       joystickUpdater.listComponents();
 
