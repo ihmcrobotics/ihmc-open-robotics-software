@@ -9,6 +9,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -29,6 +30,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinema
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -56,6 +58,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private final RobotVisualizer robotVisualizer;
    private final SDFFullRobotModel estimatorFullRobotModel;
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
+   private final ContactSensorHolder contactSensorHolder;
    private final ModularRobotController estimatorController;
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final DRCKinematicsBasedStateEstimator drcStateEstimator;
@@ -93,6 +96,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       rootFrame = estimatorFullRobotModel.getRootJoint().getFrameAfterJoint();
       
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
+      contactSensorHolder = threadDataSynchronizer.getEstimatorContactSensorHolder();
 
       sensorReaderFactory
             .build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
@@ -109,7 +113,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (sensorReaderFactory.useStateEstimator())
       {
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
-               contactPointParameters, forceSensorDataHolderForEstimator, centerOfPressureDataHolderFromController, robotMotionStatusFromController,
+               contactPointParameters, forceSensorDataHolderForEstimator, contactSensorHolder, centerOfPressureDataHolderFromController, robotMotionStatusFromController,
                yoGraphicsListRegistry, estimatorRegistry);
          estimatorController.addRobotController(drcStateEstimator);
       }
@@ -246,6 +250,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
          DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+         ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
@@ -262,12 +267,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
+         String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
          ForceSensorData footForceSensorForEstimator = forceSensorDataHolderForEstimator.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
          double footSwitchCoPThresholdFraction = stateEstimatorParameters.getFootSwitchCoPThresholdFraction();
-         double contactTresholdForce = stateEstimatorParameters.getContactThresholdForce();
+         double contactThresholdForce = stateEstimatorParameters.getContactThresholdForce();
          
          switch(stateEstimatorParameters.getFootSwitchType())
          {
@@ -278,9 +284,16 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
             break;
          case WrenchBased:
                  WrenchBasedFootSwitch wrenchBasedFootSwitchForEstimator = new WrenchBasedFootSwitch(namePrefix, footForceSensorForEstimator,
-                       footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactTresholdForce, registry);
+                       footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
                  footSwitchesForEstimator.put(robotSide, wrenchBasedFootSwitchForEstimator);
                  break;
+                 
+         case WrenchAndContactSensorFused:
+            WrenchAndContactSensorFusedFootSwitch wrenchAndContactSensorBasedFootswitch = new WrenchAndContactSensorFusedFootSwitch(namePrefix, 
+                  footForceSensorForEstimator, contactSensorHolder.getByName(footContactSensorName), 
+                  footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide), null, contactThresholdForce, registry);
+            footSwitchesForEstimator.put(robotSide, wrenchAndContactSensorBasedFootswitch);
+            break;
          default:
             throw new Error("unknown foot switch type");
          }
