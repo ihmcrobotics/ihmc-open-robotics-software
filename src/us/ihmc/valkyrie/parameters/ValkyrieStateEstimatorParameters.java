@@ -293,5 +293,6 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
+//      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
    }
 }

@@ -771,9 +771,6 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       String[] jointsToIgnore = new String[]
       {
-         // jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH),
-         // jointMap.getNeckJointName(NeckJointName.NECK_YAW),
-         // jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH)
       };
 
       return jointsToIgnore;
@@ -806,6 +803,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
+//      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
    }
 
    @Override
