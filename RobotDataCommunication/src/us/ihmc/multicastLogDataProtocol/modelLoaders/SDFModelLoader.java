@@ -19,7 +19,7 @@ import javax.xml.bind.JAXBException;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.robotDataCommunication.VisualizerRobot;
-import us.ihmc.utilities.ClassLoaderUtils;
+import us.ihmc.utilities.ClassLoaderTools;
 
 public class SDFModelLoader implements LogModelLoader
 {
@@ -81,7 +81,7 @@ public class SDFModelLoader implements LogModelLoader
          
          try
          {
-            ClassLoaderUtils.addURLToSystemClassLoader(resourceDirectory.toUri().toURL());
+            ClassLoaderTools.addURLToSystemClassLoader(resourceDirectory.toUri().toURL());
          }
          catch (IntrospectionException | MalformedURLException e)
          {

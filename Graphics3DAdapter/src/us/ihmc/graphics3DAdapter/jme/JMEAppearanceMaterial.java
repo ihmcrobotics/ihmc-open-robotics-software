@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceMaterial;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceRGBColor;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.utilities.ClassLoaderUtils;
+import us.ihmc.utilities.ClassLoaderTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
@@ -270,7 +270,7 @@ public class JMEAppearanceMaterial
          try
          {
             Path path = cacheDir.toPath();
-            ClassLoaderUtils.copyToFileSystem(path, "models/gazebo/media/materials");
+            ClassLoaderTools.copyToFileSystem(path, "models/gazebo/media/materials");
             GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials";
          }
          catch (IOException e)
