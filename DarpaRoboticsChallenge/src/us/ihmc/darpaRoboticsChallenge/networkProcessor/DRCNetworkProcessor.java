@@ -75,17 +75,18 @@ public class DRCNetworkProcessor
          
          for(RobotSide robotSide : RobotSide.values)
          {
-            NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
-            PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
-            PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
-            packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
-            handModuleCommunicator.connect();
-            
-            String methodName = "setupHandModules ";
-            printModuleConnectedDebugStatement(destination, methodName);
+            if(handCommandModule.get(robotSide) != null)
+            {
+               NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
+               PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
+               PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
+               packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
+               handModuleCommunicator.connect();
+               
+               String methodName = "setupHandModules ";
+               printModuleConnectedDebugStatement(destination, methodName);
+            }
          }
-         
-            
       }
    }
 
