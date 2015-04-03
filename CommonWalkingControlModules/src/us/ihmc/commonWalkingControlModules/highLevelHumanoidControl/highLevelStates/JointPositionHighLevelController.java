@@ -177,9 +177,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       neckJointAngle = packet.getNeckJointAngle();
       
       OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(NeckJointName.LOWER_NECK_PITCH);
+      if( neckJoint == null) return;
       double desiredNeckJointAngle = MathTools.clipToMinMax(neckJointAngle, neckJoint.getJointLimitLower(), neckJoint.getJointLimitUpper());
       
-      trajectoryGenerator.get(neckJoint).setFinalPosition(desiredNeckJointAngle);
+      OneDoFJointQuinticTrajectoryGenerator trajectory = trajectoryGenerator.get(neckJoint);
+      if( trajectory == null) return;
+      trajectory.setFinalPosition(desiredNeckJointAngle);
    }
    
 
