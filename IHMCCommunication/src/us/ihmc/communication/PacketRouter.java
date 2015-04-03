@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
+import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -15,7 +16,7 @@ public class PacketRouter<T extends Enum<T>>
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
+   private Class<?>[] packetTypesToDebug = {DetectedObjectPacket.class}; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
