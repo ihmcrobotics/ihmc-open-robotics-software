@@ -65,17 +65,16 @@ import com.jme3.math.Transform;
 
 public class AtlasRobotModel implements DRCRobotModel
 {
-   public enum AtlasTarget
-   {
-      SIM, GAZEBO, REAL_ROBOT
-   }
+   private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
+
+   public enum AtlasTarget {SIM, GAZEBO, REAL_ROBOT}
 
    private final AtlasRobotVersion selectedVersion;
    private final AtlasTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
    private static final double ESTIMATOR_DT = TimeTools.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
-   private static final double CONTROL_DT = 0.004; //0.006;
+   private static final double CONTROL_DT = 0.004;    // 0.006;
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
    public static final double ATLAS_ONBOARD_DT = 1.0 / ATLAS_ONBOARD_SAMPLINGFREQ;
@@ -100,7 +99,7 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return new AtlasWholeBodyIK(this);
    }
-   
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, AtlasTarget target, boolean headless)
    {
       selectedVersion = atlasVersion;
@@ -113,7 +112,9 @@ public class AtlasRobotModel implements DRCRobotModel
       }
       else
       {
-         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[] {}, selectedVersion.getSdfFileAsStream(), headless);
+         this.loader = DRCRobotSDFLoader.loadDRCRobot(new String[]
+         {
+         }, selectedVersion.getSdfFileAsStream(), headless);
       }
 
       for (String forceSensorNames : AtlasSensorInformation.forceSensorNames)
@@ -229,7 +230,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public void setEnableJointDamping(boolean enableJointDamping)
    {
-      this.enableJointDamping  = enableJointDamping;
+      this.enableJointDamping = enableJointDamping;
    }
 
    @Override
@@ -243,6 +244,7 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       if (selectedVersion.hasRobotiqHands())
          return new RobotiqHandModel();
+
       return null;
    }
 
@@ -262,35 +264,45 @@ public class AtlasRobotModel implements DRCRobotModel
    public SDFFullRobotModel createFullRobotModel()
    {
       SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(getJointMap(), sensorInformation.getSensorFramesToTrack());
-//      for (RobotSide robotSide : RobotSide.values())
-//      {
-//         double range = joint.getJointLimitUpper() - joint.getJointLimitLower();
-//         double safetyDelta = range * (1.0 - HARDSTOP_RESTRICTION_THRESHOLD_PERCENTAGE);
-//
-//         double safeUpperBound = joint.getJointLimitUpper() - safetyDelta;
-//         double safeLowerBound = joint.getJointLimitLower() + safetyDelta;
-//
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH).setJointLimitLower();
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH).setJointLimitUpper();
-//
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL).setJointLimitLower();
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL).setJointLimitUpper();
-//
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH).setJointLimitLower();
-//         fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH).setJointLimitUpper();
-//
-//
-//      }
+      for (RobotSide robotSide : RobotSide.values())
+      {
+         ArmJointName[] armJointNames = new ArmJointName[] {ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};
+
+         for (ArmJointName armJointName : armJointNames)
+         {
+            double lowerLimit = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
+            double upperLimit = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
+
+            double range = upperLimit - lowerLimit;
+
+            if (range > 2.0 * HARDSTOP_RESTRICTION_ANGLE)
+            {
+               double safeLowerBound = lowerLimit + HARDSTOP_RESTRICTION_ANGLE;
+               double safeUpperBound = upperLimit - HARDSTOP_RESTRICTION_ANGLE;
+
+
+               fullRobotModel.getArmJoint(robotSide, armJointName).setJointLimitLower(safeLowerBound);
+               fullRobotModel.getArmJoint(robotSide, armJointName).setJointLimitUpper(safeUpperBound);
+            }
+            else
+            {
+               System.out.println(this.getClass().getName() + ", createFullRobotModel(): range not large enough to reduce for side="
+                                  + robotSide.getLowerCaseName() + " joint=" + armJointName.getCamelCaseNameForStartOfExpression());
+            }
+         }
+      }
+
       return fullRobotModel;
    }
-   
+
    @Override
    public SDFRobot createSdfRobot(boolean createCollisionMeshes)
-   { 
+   {
       boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
       AtlasJointMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
+
       return loader.createRobot(jointMap.getModelName(), jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
    }
 
@@ -326,7 +338,7 @@ public class AtlasRobotModel implements DRCRobotModel
          return AtlasPPSTimestampOffsetProvider.getInstance(sensorInformation);
       }
 
-      if (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
+      if ((target == AtlasTarget.SIM) && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS)
       {
          return new SimulationRosClockPPSTimestampOffsetProvider();
       }
@@ -338,7 +350,7 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return new AtlasSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-            getFootstepParameters(), getDRCHandType(), target);
+                                         getFootstepParameters(), getDRCHandType(), target);
    }
 
    @Override
@@ -355,20 +367,25 @@ public class AtlasRobotModel implements DRCRobotModel
          SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
          switch (selectedVersion)
          {
-         case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
-            handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-         case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-            handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-            handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
-            return handCommandManagers;
-         case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
-            break;
-         case ATLAS_UNPLUGGED_V5_NO_HANDS:
-            break;
-         case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS:
-            break;
-         default:
-            break;
+            case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI :
+               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
+            case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ :
+               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
+               handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
+
+               return handCommandManagers;
+
+            case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS :
+               break;
+
+            case ATLAS_UNPLUGGED_V5_NO_HANDS :
+               break;
+
+            case GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS :
+               break;
+
+            default :
+               break;
          }
       }
 
@@ -383,14 +400,15 @@ public class AtlasRobotModel implements DRCRobotModel
 
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         GlobalDataProducer globalDataProducer)
+           GlobalDataProducer globalDataProducer)
    {
       switch (getDRCHandType())
       {
-      case ROBOTIQ:
-         return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
-      default:
-         return null;
+         case ROBOTIQ :
+            return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
+
+         default :
+            return null;
       }
    }
 
@@ -418,12 +436,13 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       switch (target)
       {
-      case REAL_ROBOT:
-         return LogSettings.ATLAS_IAN;
-      case GAZEBO:
-      case SIM:
-      default:
-         return LogSettings.SIMULATION;
+         case REAL_ROBOT :
+            return LogSettings.ATLAS_IAN;
+
+         case GAZEBO :
+         case SIM :
+         default :
+            return LogSettings.SIMULATION;
       }
    }
 
@@ -436,7 +455,8 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public Pair<Class<?>, String[]> getOperatorInterfaceStarter()
    {
-      String[] args = { "-m " + getAtlasVersion().name() };
+      String[] args = {"-m " + getAtlasVersion().name()};
+
       return new Pair<Class<?>, String[]>(AtlasOperatorUserInterface.class, args);
    }
 
@@ -452,7 +472,8 @@ public class AtlasRobotModel implements DRCRobotModel
       return heightCalculatorParameters;
    }
 
-   @Override public String getSimpleRobotName()
+   @Override
+   public String getSimpleRobotName()
    {
       return "Atlas";
    }
