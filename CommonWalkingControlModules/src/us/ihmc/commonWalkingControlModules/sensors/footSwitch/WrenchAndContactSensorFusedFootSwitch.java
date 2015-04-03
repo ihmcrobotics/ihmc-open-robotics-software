@@ -8,13 +8,15 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterface
 {
    private final WrenchBasedFootSwitch wrenchBasedFootSwitch;
-   private final ContactSensorBasedFootswitch contactSensorBasedFootSwitch;
+   private final ContactSensor contactSensor;
    private final YoVariableRegistry registry;
+   private final BooleanYoVariable inContact;
    
    public WrenchAndContactSensorFusedFootSwitch(String namePrefix, ForceSensorData forceSensorData, ContactSensor contactSensor, 
          double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
@@ -22,7 +24,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    {
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       
-      if(forceSensorData.getMeasurementLink() != contactSensor.getRigidBody())
+      if(!forceSensorData.getMeasurementLink().equals(contactSensor.getRigidBody()))
       {
          throw new RuntimeException("The force sensor and the contact sensor are not on the same link.");
       }
@@ -31,13 +33,18 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
             footSwitchCoPThresholdFraction, robotTotalWeight, contactablePlaneBody,
             yoGraphicsListRegistry, contactThresholdForce, registry);
       
-      this.contactSensorBasedFootSwitch = new ContactSensorBasedFootswitch(namePrefix + "ContactSensorBasedFootSwitch", contactSensor, registry);
+      this.contactSensor = contactSensor;
+      
+      this.inContact = new BooleanYoVariable(namePrefix + "InContact", registry);
+      
+      parentRegistry.addChild(registry);
    }
 
    @Override
    public boolean hasFootHitGround()
    {  
-      return wrenchBasedFootSwitch.hasFootHitGround() & contactSensorBasedFootSwitch.hasFootHitGround();
+      inContact.set(wrenchBasedFootSwitch.hasFootHitGround() && contactSensor.isInContact());
+      return inContact.getBooleanValue();
    }
 
    @Override
@@ -68,7 +75,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    public void reset()
    {
       wrenchBasedFootSwitch.reset();
-      contactSensorBasedFootSwitch.reset();
+      contactSensor.reset();
    }
 
    @Override

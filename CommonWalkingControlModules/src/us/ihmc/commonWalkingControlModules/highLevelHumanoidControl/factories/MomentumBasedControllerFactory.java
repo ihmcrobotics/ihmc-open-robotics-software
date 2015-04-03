@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.momentumBasedController.OldMomentumControlModule;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
-import us.ihmc.commonWalkingControlModules.sensors.footSwitch.ContactSensorBasedFootswitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
@@ -275,10 +274,6 @@ public class MomentumBasedControllerFactory
          case WrenchBased:
             footSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide),
                   yoGraphicsListRegistry, contactThresholdForce, registry);
-            break;
-
-         case ContactSensorBased:
-            footSwitch = new ContactSensorBasedFootswitch(footName, contactSensorHolder.getByName(footContactSensorNames.get(robotSide)), registry);
             break;
             
          case WrenchAndContactSensorFused:
