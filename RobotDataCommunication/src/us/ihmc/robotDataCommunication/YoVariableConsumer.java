@@ -1,5 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -12,6 +13,7 @@ import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
+import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -21,7 +23,6 @@ public class YoVariableConsumer implements LogPacketHandler
 {
 
    private final InetAddress dataIP;
-   private final int port;
    
    private final List<YoVariable<?>> variables;
    private final List<JointState<?>> jointStates;
@@ -32,13 +33,12 @@ public class YoVariableConsumer implements LogPacketHandler
    private ByteBuffer decompressed;
 
    private CRC32 crc32 = new CRC32();
-   private StreamingDataTCPClient client;
-   private ThreadedLogPacketHandler updateHandler;
+   private final StreamingDataTCPClient client;
+   private final ThreadedLogPacketHandler updateHandler;
 
    public YoVariableConsumer(byte[] dataIP, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates,
          YoVariablesUpdatedListener listener)
    {
-      this.port = port;
       try
       {
          this.dataIP = InetAddress.getByAddress(dataIP);
@@ -52,16 +52,16 @@ public class YoVariableConsumer implements LogPacketHandler
       this.jointStates = jointStates;
       this.listener = listener;
 
+      updateHandler = new ThreadedLogPacketHandler(this, 128);
+      client = new StreamingDataTCPClient(this.dataIP, port, updateHandler);
    }
 
    public void start(int bufferSize)
    {
       decompressed = ByteBuffer.allocate(bufferSize);
 
-      updateHandler = new ThreadedLogPacketHandler(this, 128);
       updateHandler.start();
 
-      client = new StreamingDataTCPClient(dataIP, port, updateHandler);
       client.start();
       
    }
@@ -164,5 +164,17 @@ public class YoVariableConsumer implements LogPacketHandler
    public void timeout()
    {
       listener.receiveTimedOut();
+   }
+
+   public LogHandshake getHandshake()
+   {
+      try
+      {
+         return client.getHandshake();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }

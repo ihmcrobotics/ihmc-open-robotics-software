@@ -8,7 +8,6 @@ public class LogControlClassList extends NetClassList
    {
       registerPacketClass(LogHandshake.class);
       registerPacketField(byte[].class);
-      registerPacketClass(HandshakeRequest.class);
       registerPacketClass(VariableChangeRequest.class);
       
       registerPacketField(String[].class);
