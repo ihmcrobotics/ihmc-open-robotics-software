@@ -57,6 +57,8 @@ public class YoVariableServer implements RobotVisualizer
    private LogSessionBroadcaster sessionBroadcaster;
    private LogControlServer controlServer;
    private YoVariableProducer producer;
+   private YoVariableHandShakeBuilder handshakeBuilder;
+
    
    
    public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
@@ -75,12 +77,13 @@ public class YoVariableServer implements RobotVisualizer
          throw new RuntimeException("Server already started");
       }
       
-      
+      handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
+
       startControlServer();
       
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
-      producer = new YoVariableProducer(sessionBroadcaster, controlServer, mainBuffer,
+      producer = new YoVariableProducer(sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
             buffers.values());
             
       sessionBroadcaster.start();
@@ -91,7 +94,8 @@ public class YoVariableServer implements RobotVisualizer
 
    private List<JointHolder> startControlServer()
    {
-      controlServer = new LogControlServer(logModelProvider, mainBodies, variableChangeData, dt);
+      
+      controlServer = new LogControlServer(handshakeBuilder, variableChangeData, dt);
       List<JointHolder> jointHolders = controlServer.getHandshakeBuilder().getJointHolders();
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();

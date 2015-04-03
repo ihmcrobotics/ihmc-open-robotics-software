@@ -6,22 +6,25 @@ import java.net.SocketTimeoutException;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
+import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 
 public class YoVariableClient
 {
    private enum ClientState
    {
-      WAITING,
-      RUNNING,
-      STOPPED
+      WAITING, RUNNING, STOPPED
    }
-   
+
    private final YoVariablesUpdatedListener listener;
 
    private final LogControlClient logControlClient;
    private final YoVariableConsumer yoVariableConsumer;
    private final boolean showOverheadView;
    private ClientState state = ClientState.WAITING;
+
+   private final YoVariableHandshakeParser handshakeParser;
 
    private static AnnounceRequest getRequest()
    {
@@ -43,10 +46,11 @@ public class YoVariableClient
 
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
    {
-     
-      this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener, registryPrefix, listener.populateRegistry());
-      this.yoVariableConsumer = new YoVariableConsumer(request.getDataIP(), request.getDataPort(), logControlClient.getYoVariablesList(),
-            logControlClient.getJointStates(), listener);
+
+      this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener);
+      this.handshakeParser = new YoVariableHandshakeParser(registryPrefix, listener.populateRegistry());
+      this.yoVariableConsumer = new YoVariableConsumer(request.getDataIP(), request.getDataPort(), handshakeParser.getYoVariablesList(),
+            handshakeParser.getJointStates(), listener);
       this.listener = listener;
       this.showOverheadView = showOverheadView;
 
@@ -71,34 +75,45 @@ public class YoVariableClient
       {
          throw new RuntimeException("Client already started");
       }
-      
-      logControlClient.connect();
-      logControlClient.waitForHandshake();
 
-      int numberOfVariables = logControlClient.getNumberOfVariables();
-      int numberOfJointStateVariables = logControlClient.getNumberOfJointStateVariables();
+      LogHandshake handshake = yoVariableConsumer.getHandshake();
+
+      handshakeParser.parseFrom(handshake.protoShake);
+      listener.receivedHandshake(handshake);
+      LogModelLoader modelLoader = null;
+      System.out.println(handshake.modelLoaderClass);
+      if (handshake.modelLoaderClass != null)
+      {
+         modelLoader = new SDFModelLoader();
+         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
+      }
+
+      logControlClient.connect();
+
+      int numberOfVariables = handshakeParser.getNumberOfVariables();
+      int numberOfJointStateVariables = handshakeParser.getNumberOfJointStateVariables();
       int bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
-      
-      listener.start(logControlClient.getModelLoader(), logControlClient.getRootRegistry(), logControlClient.getJointStates(), logControlClient.getDynamicGraphicObjectsListRegistry(), bufferSize, showOverheadView);
-      
+
+      listener.start(modelLoader, handshakeParser.getRootRegistry(), handshakeParser.getJointStates(),
+            handshakeParser.getDynamicGraphicObjectsListRegistry(), bufferSize, showOverheadView);
+
       if (listener.changesVariables())
       {
-         logControlClient.startVariableChangedProducers();
+         logControlClient.startVariableChangedProducers(handshakeParser.getYoVariablesList());
       }
       yoVariableConsumer.start(bufferSize);
 
       state = ClientState.RUNNING;
    }
 
-
    public synchronized void close()
    {
-      if(state == ClientState.RUNNING)
+      if (state == ClientState.RUNNING)
       {
          yoVariableConsumer.close();
          logControlClient.close();
          listener.disconnected();
-         
+
          state = ClientState.STOPPED;
       }
    }
@@ -107,7 +122,7 @@ public class YoVariableClient
    {
       return state == ClientState.RUNNING;
    }
-   
+
    public void sendClearLogRequest()
    {
       logControlClient.sendClearLogRequest();

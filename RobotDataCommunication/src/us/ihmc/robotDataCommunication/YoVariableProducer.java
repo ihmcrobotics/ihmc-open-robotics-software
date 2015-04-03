@@ -9,7 +9,7 @@ import java.util.zip.CRC32;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
-import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer extends Thread
@@ -26,16 +26,20 @@ public class YoVariableProducer extends Thread
    private final int jointStateOffset;
    
    private final LogSessionBroadcaster session;
+   private final YoVariableHandShakeBuilder handshakeBuilder;
+   private final LogModelProvider logModelProvider;
    
-   public YoVariableProducer(LogSessionBroadcaster session, LogControlServer controlServer, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
+   public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
          Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
       super("YoVariableProducer");
       this.mainBuffer = mainBuffer;
+      this.handshakeBuilder = handshakeBuilder;
+      this.logModelProvider = logModelProvider;
       this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
 
-      this.jointStateOffset = controlServer.getHandshakeBuilder().getNumberOfVariables();
-      int numberOfJointStates = controlServer.getHandshakeBuilder().getNumberOfJointStates();
+      this.jointStateOffset = handshakeBuilder.getNumberOfVariables();
+      int numberOfJointStates = handshakeBuilder.getNumberOfJointStates();
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
 
       byteWriteBuffer = ByteBuffer.allocate(bufferSize);
@@ -71,7 +75,7 @@ public class YoVariableProducer extends Thread
       SingleThreadMultiClientStreamingDataTCPServer server;
       try
       {
-         server = new SingleThreadMultiClientStreamingDataTCPServer(session.getPort());
+         server = new SingleThreadMultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider);
          server.start();
 //               new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
       }
