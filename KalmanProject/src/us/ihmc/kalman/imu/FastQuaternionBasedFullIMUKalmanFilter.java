@@ -1,5 +1,7 @@
 package us.ihmc.kalman.imu;
 
+import us.ihmc.utilities.math.geometry.QuaternionTools;
+
 
 /**
  * <p>Title: </p>

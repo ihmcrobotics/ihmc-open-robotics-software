@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
+import us.ihmc.utilities.math.geometry.QuaternionTools;
 import Jama.Matrix;
 
 public class QuaternionToolsTest
