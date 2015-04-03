@@ -24,13 +24,13 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandCommandManager extends HandCommandManager
 {
-	public RobotiqHandCommandManager(RobotSide robotSide)
-	{
-	   super(RobotiqControlThread.class, robotSide);
-	   
-	   setupOutboundPacketListeners();
-	   setupInboundPacketListeners();
-	}
+   public RobotiqHandCommandManager(RobotSide robotSide)
+   {
+      super(RobotiqControlThread.class, robotSide);
+
+      setupOutboundPacketListeners();
+      setupInboundPacketListeners();
+   }
 
    protected void setupInboundPacketListeners()
    {
@@ -41,7 +41,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
             sendHandCommand(object);
          }
       });
-      
+
       handManagerPacketCommunicator.attachListener(ManualHandControlPacket.class, new PacketConsumer<ManualHandControlPacket>()
       {
          public void receivedPacket(ManualHandControlPacket object)
@@ -61,49 +61,49 @@ public class RobotiqHandCommandManager extends HandCommandManager
          }
       });
    }
-   
- public static void main(String[] args)
- {
-    JFrame frame = new JFrame();
-    FlowLayout layout = new FlowLayout();
-    frame.setLayout(layout);
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    for(final RobotSide robotSide : RobotSide.values)
-    {
-       NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
-       final PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, new IHMCCommunicationKryoNetClassList());
-       PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
-       try
-      {
-         handModuleCommunicator.connect();
-      }
-      catch (IOException e1)
-      {
-         e1.printStackTrace();
-      }
-       
-       final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(robotSide);
-       
-       final JComboBox<FingerState> stateToSend = new JComboBox<FingerState>(FingerState.values());
-       stateToSend.setSelectedItem(FingerState.CALIBRATE);
-       
-       final JButton button = new JButton("Send");
-       button.addActionListener(new ActionListener()
-       {
-          @Override
-          public void actionPerformed(ActionEvent e)
-          {
-             handModuleCommunicator.send(new FingerStatePacket(robotSide,
-                   (FingerState)(stateToSend.getSelectedItem())));
-          }
-       });
-       frame.getContentPane().add(new JLabel(robotSide.name()));
-       frame.getContentPane().add(stateToSend);
-       frame.getContentPane().add(button);
-    }
+   public static void main(String[] args)
+   {
+      JFrame frame = new JFrame();
+      FlowLayout layout = new FlowLayout();
+      frame.setLayout(layout);
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    frame.pack();
-    frame.setVisible(true);
- }
+      for (final RobotSide robotSide : RobotSide.values)
+      {
+         NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
+         final PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port,
+               new IHMCCommunicationKryoNetClassList());
+         PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
+         try
+         {
+            handModuleCommunicator.connect();
+         }
+         catch (IOException e1)
+         {
+            e1.printStackTrace();
+         }
+
+         final RobotiqHandCommandManager commandManager = new RobotiqHandCommandManager(robotSide);
+
+         final JComboBox<FingerState> stateToSend = new JComboBox<FingerState>(FingerState.values());
+         stateToSend.setSelectedItem(FingerState.CALIBRATE);
+
+         final JButton button = new JButton("Send");
+         button.addActionListener(new ActionListener()
+         {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+               handModuleCommunicator.send(new FingerStatePacket(robotSide, (FingerState) (stateToSend.getSelectedItem())));
+            }
+         });
+         frame.getContentPane().add(new JLabel(robotSide.name()));
+         frame.getContentPane().add(stateToSend);
+         frame.getContentPane().add(button);
+      }
+
+      frame.pack();
+      frame.setVisible(true);
+   }
 }
