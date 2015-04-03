@@ -49,11 +49,13 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
@@ -259,7 +261,27 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public SDFFullRobotModel createFullRobotModel()
    {
-      return loader.createFullRobotModel(getJointMap(), sensorInformation.getSensorFramesToTrack());
+      SDFFullRobotModel fullRobotModel = loader.createFullRobotModel(getJointMap(), sensorInformation.getSensorFramesToTrack());
+//      for (RobotSide robotSide : RobotSide.values())
+//      {
+//         double range = joint.getJointLimitUpper() - joint.getJointLimitLower();
+//         double safetyDelta = range * (1.0 - HARDSTOP_RESTRICTION_THRESHOLD_PERCENTAGE);
+//
+//         double safeUpperBound = joint.getJointLimitUpper() - safetyDelta;
+//         double safeLowerBound = joint.getJointLimitLower() + safetyDelta;
+//
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH).setJointLimitLower();
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.FIRST_WRIST_PITCH).setJointLimitUpper();
+//
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL).setJointLimitLower();
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.WRIST_ROLL).setJointLimitUpper();
+//
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH).setJointLimitLower();
+//         fullRobotModel.getArmJoint(robotSide, ArmJointName.SECOND_WRIST_PITCH).setJointLimitUpper();
+//
+//
+//      }
+      return fullRobotModel;
    }
    
    @Override
