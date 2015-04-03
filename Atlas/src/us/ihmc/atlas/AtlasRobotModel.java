@@ -161,11 +161,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return jointMap;
    }
 
-   public DRCHandType getHandType()
-   {
-      return selectedVersion.getHandModel();
-   }
-
    public AtlasRobotVersion getAtlasVersion()
    {
       return selectedVersion;
@@ -226,7 +221,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public void setJointDamping(SDFRobot simulatedRobot)
    {
-      AtlasDampingParameters.setDampingParameters(simulatedRobot, getHandType(), getJointMap());
+      AtlasDampingParameters.setDampingParameters(simulatedRobot, getDRCHandType(), getJointMap());
    }
 
    @Override
@@ -321,7 +316,7 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return new AtlasSensorSuiteManager(this, getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-            getFootstepParameters(), getHandType(), target);
+            getFootstepParameters(), getDRCHandType(), target);
    }
 
    @Override
@@ -366,7 +361,7 @@ public class AtlasRobotModel implements DRCRobotModel
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer,
          GlobalDataProducer globalDataProducer)
    {
-      switch (getHandType())
+      switch (getDRCHandType())
       {
       case ROBOTIQ:
          return new SimulatedRobotiqHandsController(simulatedRobot, this, threadDataSynchronizer, globalDataProducer);
