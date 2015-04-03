@@ -129,6 +129,6 @@ public class BonoSensorInformation implements DRCRobotSensorInformation
    @Override
    public SideDependentList<String> getFeetContactSensorNames()
    {
-      return null;
+      return new SideDependentList<String>();
    }
 }
