@@ -398,6 +398,15 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       setController(new RobotControllerAndParameters(controller, simulationTicksPerControlTick));
    }
    
+   public void setController(ArrayList<RobotController> controllers, int simulationTicksPerControlTick)
+   {
+      for(int i = 0; i<controllers.size(); i++)
+      {
+         RobotController controller = controllers.get(i);
+         setController(controller,simulationTicksPerControlTick);
+      }
+   }
+   
    public void setControllersAndCallInitialization(ArrayList<RobotControllerAndParameters> robotControllersAndParameters)
    {
       for (RobotControllerAndParameters robotControllerAndParameters : robotControllersAndParameters)

@@ -12,9 +12,11 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
 {
    private final String forceSensorName;
    private final OneDegreeOfFreedomJoint forceTorqueSensorJoint;
+   private boolean doWrenchCorruption = false;
    
    
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    
    public FeatherStoneJointBasedWrenchCalculator(String forceSensorName,
          OneDegreeOfFreedomJoint forceTorqueSensorJoint)
@@ -47,6 +49,14 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
       wrenchMatrix.set(3, 0, force.x);
       wrenchMatrix.set(4, 0, force.y);
       wrenchMatrix.set(5, 0, force.z);
+      
+      if(doWrenchCorruption)
+      {
+         for(int i = 0; i < Wrench.SIZE; i++)
+         {
+            wrenchMatrix.add(i, 0, corruptionMatrix.get(i,0));
+         }
+      }
    }
 
 
@@ -61,8 +71,18 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
       return wrenchMatrix;
    }
    
+   public void corruptWrenchElement(int row, double value)
+   {
+      corruptionMatrix.add(row, 0, value);
+   }
+   
    public String toString()
    {
       return forceSensorName;
+   }
+
+   public void setDoWrenchCorruption(boolean value)
+   {
+      this.doWrenchCorruption = value;
    }
 }

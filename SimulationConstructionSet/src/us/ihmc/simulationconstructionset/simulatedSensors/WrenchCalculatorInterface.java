@@ -11,5 +11,7 @@ public interface WrenchCalculatorInterface
    public abstract void calculate();
    public abstract DenseMatrix64F getWrench();
    public abstract OneDegreeOfFreedomJoint getJoint();
+   public abstract void corruptWrenchElement(int row, double value);
+   public abstract void setDoWrenchCorruption(boolean value);
 
 }

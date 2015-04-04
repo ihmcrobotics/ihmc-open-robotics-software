@@ -72,6 +72,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    private final LinkedHashMap<String, OneDegreeOfFreedomJoint> oneDoFJoints = new LinkedHashMap<String, OneDegreeOfFreedomJoint>();
 
    private final FloatingJoint rootJoint;
+   
+   private final SideDependentList<String> jointsBeforeFeet = new SideDependentList<String>();
 
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
@@ -138,6 +140,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
          handGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
+         jointsBeforeFeet.put(robotSide, sdfJointNameMap.getJointBeforeFootName(robotSide));
       }
 
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
@@ -732,6 +735,11 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    public List<GroundContactPoint> getHandGroundContactPoints(RobotSide robotSide)
    {
       return handGroundContactPoints.get(robotSide);
+   }
+   
+   public SideDependentList<String> getJointNamesBeforeFeet()
+   {
+      return jointsBeforeFeet;
    }
    
    public Vector3d getPositionInWorld()

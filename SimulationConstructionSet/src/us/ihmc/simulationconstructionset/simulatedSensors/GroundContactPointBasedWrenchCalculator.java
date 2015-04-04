@@ -20,8 +20,9 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    
    private final RigidBodyTransform transformToParentJoint;
    
-   
+   private boolean doWrenchCorruption = false;
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    
    public GroundContactPointBasedWrenchCalculator(String forceSensorName, List<GroundContactPoint> contactPoints, 
          OneDegreeOfFreedomJoint forceTorqueSensorJoint, RigidBodyTransform transformToParentJoint)
@@ -71,6 +72,14 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
          wrenchMatrix.set(4, 0, wrenchMatrix.get(4, 0) + force.y);
          wrenchMatrix.set(5, 0, wrenchMatrix.get(5, 0) + force.z);
       }
+      
+      if(doWrenchCorruption)
+      {
+         for(int i = 0; i < Wrench.SIZE; i++)
+         {
+            wrenchMatrix.add(i, 0, corruptionMatrix.get(i,0));
+         }
+      }
    }
 
 
@@ -83,6 +92,16 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    public DenseMatrix64F getWrench()
    {
       return wrenchMatrix;
+   }
+   
+   public void setDoWrenchCorruption(boolean value)
+   {
+      doWrenchCorruption = value;
+   }
+   
+   public void corruptWrenchElement(int row, double value)
+   {
+      this.corruptionMatrix.add(row, 0, value);
    }
    
    public String toString()
