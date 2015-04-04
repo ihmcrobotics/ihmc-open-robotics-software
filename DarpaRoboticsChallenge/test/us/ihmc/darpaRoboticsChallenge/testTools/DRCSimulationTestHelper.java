@@ -29,11 +29,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
@@ -44,6 +47,7 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
@@ -342,5 +346,46 @@ public class DRCSimulationTestHelper
    public PacketCommunicator getControllerCommunicator()
    {
       return controllerCommunicator;
+   }
+   
+   public ArrayList<RobotController> getFootForceSensorHysteresisCreators()
+   {
+      SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors = new SideDependentList<ArrayList<WrenchCalculatorInterface>>();
+      packFootForceSensors(footForceSensors);
+      
+      ArrayList<RobotController> footForceSensorSignalCorruptors = new ArrayList<RobotController>();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {  
+         for(int i = 0; i<footForceSensors.get(robotSide).size(); i++)
+         {
+            ForceSensorHysteresisCreator forceSensorSignalCorruptor = new ForceSensorHysteresisCreator(sdfRobot.computeCenterOfMass(new Point3d()), 
+                  footForceSensors.get(robotSide).get(i).getName(), footForceSensors.get(robotSide).get(i));
+            
+            footForceSensorSignalCorruptors.add(forceSensorSignalCorruptor);
+         }
+      }
+      
+      return footForceSensorSignalCorruptors;
+   }
+   
+   public void packFootForceSensors(SideDependentList<ArrayList<WrenchCalculatorInterface>> footForceSensors)
+   {  
+      ArrayList<WrenchCalculatorInterface> forceSensors = new ArrayList<WrenchCalculatorInterface>();
+      sdfRobot.getForceSensors(forceSensors);
+      
+      SideDependentList<String> jointNamesBeforeFeet = sdfRobot.getJointNamesBeforeFeet();
+      
+      for(RobotSide robotSide : RobotSide.values)
+      {  
+         footForceSensors.put(robotSide,new ArrayList<WrenchCalculatorInterface>());
+         for(int i = 0; i<forceSensors.size(); i++)
+         {
+            if(forceSensors.get(i).getJoint().getName().equals(jointNamesBeforeFeet.get(robotSide)))
+            {
+               footForceSensors.get(robotSide).add(forceSensors.get(i));
+            }
+         }
+      }
    }
 }

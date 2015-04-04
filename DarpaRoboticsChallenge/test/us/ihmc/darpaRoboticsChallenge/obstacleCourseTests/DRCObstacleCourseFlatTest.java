@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.vecmath.Point3d;
@@ -21,6 +22,7 @@ import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
@@ -33,6 +35,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
@@ -343,6 +347,42 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       BambooTools.reportTestFinishedMessage();
    }
+	
+	@EstimatedDuration(duration = 75)
+	@Test(timeout = 120000)
+	public void testFlatGroundWithFootForceSensorHysteresis() throws SimulationExceededMaximumTimeException
+	{
+		BambooTools.reportTestStartedMessage();
+
+		String scriptName = "scripts/ExerciseAndJUnitScripts/BunchOfStepsForwardAndBackward.xml";
+
+		String name = "DRCFlatGroundForceSensorHysteresisTest";
+		
+		FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      setupCameraForWalkingUpToRamp();
+        
+      ArrayList<RobotController> footForceSensorSignalCorruptors = new ArrayList<RobotController>();
+
+      footForceSensorSignalCorruptors = drcSimulationTestHelper.getFootForceSensorHysteresisCreators();
+      
+      robot.setController(footForceSensorSignalCorruptors, 1);
+      
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+	}
 
 	@EstimatedDuration(duration = 58.9)
 	@Test(timeout = 186582)
