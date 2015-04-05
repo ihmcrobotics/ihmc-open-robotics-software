@@ -109,7 +109,8 @@ public class ThePeoplesGloriousNetworkProcessor
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
-      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, namespace, tfPublisher);
+      RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
+            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, namespace, tfPublisher);
       if(scsSensorCommunicationBridge != null)
       {
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher, robotConfigurationPublisher);
