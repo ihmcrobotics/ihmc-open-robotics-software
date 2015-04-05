@@ -53,7 +53,7 @@ public class RosModule
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
 
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
-            rosMainNode, ppsTimestampOffsetProvider, rosTopicPrefix, tfPublisher);
+            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, rosTopicPrefix, tfPublisher);
       
       if(simulatedSensorCommunicator != null)
       {
