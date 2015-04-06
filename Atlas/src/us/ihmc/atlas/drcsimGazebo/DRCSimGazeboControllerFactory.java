@@ -64,8 +64,9 @@ public class DRCSimGazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
+      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
             new IHMCCommunicationKryoNetClassList());
+      
 
       //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
       YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
@@ -146,7 +147,7 @@ public class DRCSimGazeboControllerFactory
          networkModuleParameters.setRosUri(rosURI);
          networkModuleParameters.setUseUiModule(true);
          networkModuleParameters.setUseRosModule(true);
-         networkModuleParameters.setUseLocalControllerCommunicator(false);
+         networkModuleParameters.setUseLocalControllerCommunicator(true);
          new DRCNetworkProcessor(robotModel, networkModuleParameters);
       }
       try
