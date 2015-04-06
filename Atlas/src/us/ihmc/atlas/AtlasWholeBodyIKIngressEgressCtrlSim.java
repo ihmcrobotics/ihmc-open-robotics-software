@@ -189,7 +189,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       rBT = desiredWristReference.getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
-      System.out.format("Desired position : %.3f  %.3f  %.3f\n",  
+      System.out.format("Desired position : %.3f  %.3f  %.3f%n",
             vector.getX(), vector.getY(), vector.getZ());
       //--------------------------------------
 
@@ -200,45 +200,45 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       yoGraphicsShapeActual.setToReferenceFrame(rightHandPosition);
       
       rBT.getTranslation(vector);
-      System.out.format("Actual position : %.3f  %.3f  %.3f\n\n",  
+      System.out.format("Actual position : %.3f  %.3f  %.3f%n%n",
             vector.getX(), vector.getY(), vector.getZ());
       //-------------------------------
       rBT = desiredFullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
-      System.out.format("Position of the LEFT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
+      System.out.format("Position of the LEFT Sole [%.3f] : %.3f  %.3f  %.3f%n",
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
       
       rBT = desiredFullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToDesiredFrame( ReferenceFrame.getWorldFrame());
 
       rBT.getTranslation(vector);
-      System.out.format("Position of the RIGHT Sole [%.3f] : %.3f  %.3f  %.3f\n",  
+      System.out.format("Position of the RIGHT Sole [%.3f] : %.3f  %.3f  %.3f%n",
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
 
       //-------------------------------
       rBT = rightHandPosition.getTransformToDesiredFrame(desiredWristReference);
 
       rBT.getTranslation(vector);
-      System.out.format("Error in final position [%.3f] : %.3f  %.3f  %.3f\n",  
+      System.out.format("Error in final position [%.3f] : %.3f  %.3f  %.3f%n",
             vector.length(), vector.getX(), vector.getY(), vector.getZ());
 
       //-------------------------------
-      String[] jointNames = {
-            "r_leg_akx", "r_leg_aky",
-            "r_leg_kny",
-            "r_leg_hpy", "r_leg_hpx", "r_leg_hpz",    
+//      String[] jointNames = {
+//            "r_leg_akx", "r_leg_aky",
+//            "r_leg_kny",
+//            "r_leg_hpy", "r_leg_hpx", "r_leg_hpz",
+//
+//            "l_leg_akx", "l_leg_aky",
+//            "l_leg_kny",
+//            "l_leg_hpy", "l_leg_hpx", "l_leg_hpz",
+//
+//            "back_bkz", "back_bky",  "back_bkx",
+//            "r_arm_shz", "r_arm_shx", "r_arm_ely",
+//            "r_arm_elx",
+//            "r_arm_wry", "r_arm_wrx" };
 
-            "l_leg_akx", "l_leg_aky",
-            "l_leg_kny",
-            "l_leg_hpy", "l_leg_hpx", "l_leg_hpz",  
-
-            "back_bkz", "back_bky",  "back_bkx",           
-            "r_arm_shz", "r_arm_shx", "r_arm_ely",
-            "r_arm_elx",
-            "r_arm_wry", "r_arm_wrx" };
-
-      Vector3d A = new Vector3d(); 
-      Vector3d B = new Vector3d(); 
+//      Vector3d A = new Vector3d();
+//      Vector3d B = new Vector3d();
 
 //      for(int i=0; i< jointNames.length; i++)
 //      {    
@@ -267,10 +267,11 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       {
          System.out.println(this.getClass().getName() + ": " + (success == ComputeResult.SUCCEEDED ? "HIK REPORTS POSSIBLE BUT" : "HIK REPORTS IMPOSSIBLE THUS") + " FAILED TO REACH DESIRED POINT " );
       }
-      else{
+      else
+      {
          System.out.println(this.getClass().getName() + ": SUCCESFULLY REACHED POINT");
       }
-   };
+   }
 
    private boolean ingressEgressModeActivated()
    {
@@ -283,14 +284,7 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
             @SuppressWarnings("unchecked")
             EnumYoVariable<HighLevelState> enumYoVariable = (EnumYoVariable<HighLevelState>) yoVariable;
             // enumYoVariable.set(HighLevelState.INGRESS_EGRESS);
-            if (enumYoVariable.getEnumValue() == HighLevelState.INGRESS_EGRESS)
-            {
-               bool = true;
-            }
-            else
-            {
-               bool = false;
-            }
+            bool = (enumYoVariable.getEnumValue() == HighLevelState.INGRESS_EGRESS);
          }
       }
       return bool;

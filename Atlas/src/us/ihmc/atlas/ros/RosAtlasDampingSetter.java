@@ -24,8 +24,6 @@ public class RosAtlasDampingSetter
    private final RosServiceClient<atlas_msgs.SetJointDampingRequest, atlas_msgs.SetJointDampingResponse> sandiaHandDampingClient = new RosServiceClient<SetJointDampingRequest, SetJointDampingResponse>(
          SetJointDamping._TYPE);
 
-   NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
-
    public RosAtlasDampingSetter(String rosMasterURI, final RosMainNode rosMainNode)
    {
       this.rosMainNode = rosMainNode;

@@ -29,9 +29,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.logger.LogPropertiesReader;
 import us.ihmc.robotDataCommunication.logger.MultiVideoDataPlayer;
-import us.ihmc.robotDataCommunication.logger.YoVariableLogCropper;
 import us.ihmc.robotDataCommunication.logger.YoVariableLogPlaybackRobot;
-import us.ihmc.robotDataCommunication.logger.YoVariableLogVisualizerGUI;
 import us.ihmc.robotDataCommunication.logger.YoVariableLoggerListener;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
@@ -59,7 +57,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    SimulationConstructionSet scs;
    YoVariableHandshakeParser parser;
    MultiVideoDataPlayer players = null;
-   YoVariableLogVisualizerGUI yoVariableLogVisualizerGUI;
    SimulateAndExport simulateExport;
    Thread simulation;
    boolean exportSCSVideo;
@@ -77,7 +74,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    public static void main(String[] args) throws IOException
    {
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
-      String[] vars = null;
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, AtlasRobotModel.AtlasTarget.SIM, false);
       DRCRobotJointMap jointMap = model.getJointMap();
@@ -99,7 +95,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       String[] timeVariable;
 
       // variables to export (starts from 1: vars[0] is reserved for timeVariable)
-      vars = new String[49];
+      String[] vars = new String[49];
       int i = 0;
       int jj = 0;
       
@@ -569,7 +565,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       {
          if (exportM3Data.players != null)
          {
-            if (videoName == "none" || !showCameraVideo)
+            if (videoName.equals("none") || !showCameraVideo)
             {
                exportM3Data.players.setActivePlayer(null);
             }
@@ -664,9 +660,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          if (startTimestamp > endTimestamp)
          {
-            JOptionPane.showMessageDialog(exportM3Data.yoVariableLogVisualizerGUI,
-                  "startTimestamp > endTimestamp. Please set the in-point and out-point correctly", "Timestmap error", JOptionPane.ERROR_MESSAGE);
-
+            JOptionPane.showMessageDialog(null, "startTimestamp > endTimestamp. Please set the in-point and out-point correctly", "Timestmap error", JOptionPane.ERROR_MESSAGE);
             return new long[0];
          }
 

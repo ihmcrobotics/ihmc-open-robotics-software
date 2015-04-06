@@ -37,8 +37,6 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
 
-   RigidBodyTransform targetToEE = new RigidBodyTransform();
-
    protected final Map<String, Double> qbias = new HashMap<>();
    protected final SDFFullRobotModel fullRobotModel;
 
@@ -184,7 +182,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
-      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(),useLeftArm);
+      KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(),useLeftArm);
 
       for (int i = 0; i < jointNames.size(); i++)
       {
@@ -205,6 +203,11 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
 
       File[] files = new File(directory).listFiles();
+      if (files == null)
+      {
+         System.out.println("Cannot list files in " + directory);
+         return;
+      }
 
       Arrays.sort(files);
 
@@ -226,6 +229,7 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
          q.add(qEntry);
          qout.add(qoutEntry);
       }
+
       System.out.println("loaded " + q.size() + " data files");
    }
 
@@ -238,7 +242,5 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
       calib.loadData("data/armCalibratoin20131209/calibration_right");
 //      calib.loadData("data/chessboard_joints_20131204");
       calib.optimizeData();
-
-
    }
 }

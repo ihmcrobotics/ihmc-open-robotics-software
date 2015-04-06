@@ -56,9 +56,6 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
           0, 0,-1,
          -1, 0, 0);
 
-
-   private Matrix3d targetRotation;
-
    public final RobotSide activeSide;
 
    public KinematicCalibrationHeadLoopResidual(SDFFullRobotModel fullRobotModel,
@@ -76,14 +73,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       this.isLeft = isLeft;
       this.activeSide = isLeft ? RobotSide.LEFT : RobotSide.RIGHT;
 
-      if( isLeft ) {
-         targetRotation = TARGET_LEFT_ROT;
-      } else {
-         targetRotation = TARGET_RIGHT_ROT;
-      }
-
       this.calJointNames = getOrderedArmJointsNames(fullRobotModel, isLeft);
-
    }
 
    public static List<String> getOrderedArmJointsNames(SDFFullRobotModel fullRobotModel, boolean isLeft)
