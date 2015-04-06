@@ -48,7 +48,7 @@ public class AtlasOrderedJointMap
 
    public final static int numberOfJoints = r_arm_wry2 + 1;
 
-   public static String[] jointNames = new String[numberOfJoints];
+   public static final String[] jointNames = new String[numberOfJoints];
    static
    {
       jointNames[back_bkz] = "back_bkz";
@@ -83,7 +83,7 @@ public class AtlasOrderedJointMap
       jointNames[r_arm_wry2] = "r_arm_wry2";
    }
 
-   public static LinkedHashMap<String, Integer> nameToIndexMap = new LinkedHashMap<String, Integer>();
+   public static final LinkedHashMap<String, Integer> nameToIndexMap = new LinkedHashMap<String, Integer>();
    static
    {
       for (int i = 0; i < jointNames.length; i++)

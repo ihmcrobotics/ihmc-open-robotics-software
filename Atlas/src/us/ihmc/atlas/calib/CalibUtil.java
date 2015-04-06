@@ -21,8 +21,8 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class CalibUtil
 {
-   public static Quat4d quat0 = new Quat4d(0, 0, 0, 1);
-   public static ReferenceFrame world = ReferenceFrame.getWorldFrame();
+   protected static final Quat4d quat0 = new Quat4d(0, 0, 0, 1);
+   protected static final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
    public static Map<String, Double> addQ(Map<String, Double> q1, Map<String, Double> q2)
    {

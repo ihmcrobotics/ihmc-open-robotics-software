@@ -370,10 +370,10 @@ public class AtlasRobotModel implements DRCRobotModel
             case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI :
                handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
                return handCommandManagers;
+
             case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ :
                handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
                handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
-
                return handCommandManagers;
 
             case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS :

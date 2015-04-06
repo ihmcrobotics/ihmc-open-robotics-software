@@ -18,12 +18,12 @@ import com.martiansoftware.jsap.JSAPResult;
 
 public class AtlasRobotModelFactory
 {
-   private static String[] AvailableRobotModels = new String[AtlasRobotVersion.values().length];
+   private static final String[] AVAILABLE_ROBOT_MODELS = new String[AtlasRobotVersion.values().length];
    static
    {
       for (AtlasRobotVersion version : AtlasRobotVersion.values())
       {
-         AvailableRobotModels[version.ordinal()] = version.toString();
+         AVAILABLE_ROBOT_MODELS[version.ordinal()] = version.toString();
       }
    }
    
@@ -52,20 +52,20 @@ public class AtlasRobotModelFactory
 
    public static String robotModelsToString()
    {
-      return Arrays.toString(AvailableRobotModels);
+      return Arrays.toString(AVAILABLE_ROBOT_MODELS);
    }
 
    public static String[] getAvailableRobotModels()
    {
-      return AvailableRobotModels;
+      return AVAILABLE_ROBOT_MODELS;
    }
 
    public static int getOrdinalOfModel(String st)
    {
       st = st.toUpperCase();
-      for (int i = 0; i < AvailableRobotModels.length; i++)
+      for (int i = 0; i < AVAILABLE_ROBOT_MODELS.length; i++)
       {
-         if (st.equals( AvailableRobotModels[i].toUpperCase() ) )
+         if (st.equals( AVAILABLE_ROBOT_MODELS[i].toUpperCase() ) )
          {
             return i;
          }
@@ -85,7 +85,7 @@ public class AtlasRobotModelFactory
 
       JLabel userMessageLabel = new JLabel("What robot?");
 
-      JComboBox<String> robotTypeComboBox = new JComboBox<>(AvailableRobotModels);
+      JComboBox<String> robotTypeComboBox = new JComboBox<>(AVAILABLE_ROBOT_MODELS);
       robotTypeComboBox.setSelectedItem(defaultOption.toString());
 
       comboBoxPanel.add(robotTypeComboBox, BorderLayout.NORTH);
@@ -118,7 +118,7 @@ public class AtlasRobotModelFactory
       // Add flag to set robot model
       JSAP jsap = new JSAP();
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      robotModel.setHelp("Robot models: " + Arrays.toString(AvailableRobotModels));
+      robotModel.setHelp("Robot models: " + Arrays.toString(AVAILABLE_ROBOT_MODELS));
       try
       {
          jsap.registerParameter(robotModel);

@@ -25,8 +25,8 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 // TODO create box for each foot
 public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
 {
-   public static int GROUP_GROUND = 0xFFFFFFFF;
-   public static int GROUP_FEET = 0xFFFFFFFF;
+   private static final int GROUP_GROUND = 0xFFFFFFFF;
+   private static final int GROUP_FEET = 0xFFFFFFFF;
 
    private DRCRobotJointMap jointMap;
    private SDFRobot sdfRobot;
@@ -40,7 +40,6 @@ public class AtlasPhysicsEngineConfiguration implements ScsCollisionConfigure
    @Override
    public void setup(Robot robot, ScsCollisionDetector collisionDetector)
    {
-
       String leftFootJointName = jointMap.getJointBeforeFootName(RobotSide.LEFT);
       String rightFootJointName = jointMap.getJointBeforeFootName(RobotSide.RIGHT);
 
