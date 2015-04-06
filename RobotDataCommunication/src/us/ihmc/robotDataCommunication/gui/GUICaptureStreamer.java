@@ -18,6 +18,7 @@ import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
+import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.utilities.ThreadTools;
@@ -46,7 +47,8 @@ public class GUICaptureStreamer
       try
       {
          server = new SingleThreadMultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT);
-         broadcast = new GUICaptureBroadcast(InetAddress.getByName(hostToBindTo), group.getAddress());
+         System.out.println("Conn ecting to host " + hostToBindTo);
+         broadcast = new GUICaptureBroadcast(LogUtils.getMyIP(hostToBindTo), group.getAddress());
       }
       catch (IOException e)
       {
