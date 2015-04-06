@@ -66,7 +66,6 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
       rawImuData.setDdz(rawImuLinearAcceleration.getZ());
       rawImuData.setPacketCount(rawImuCounter);
       rawImuCounter++;
-      System.out.println(rawImuCounter);
       availableImuData.add(rawImuData);
       if(availableImuData.size() == 15)
       {
