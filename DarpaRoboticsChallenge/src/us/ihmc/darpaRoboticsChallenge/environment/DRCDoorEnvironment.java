@@ -66,16 +66,12 @@ public class DRCDoorEnvironment implements CommonAvatarEnvironmentInterface
    @Override
    public void createAndSetContactControllerToARobot()
    {
-      // door contact controller
-      ContactController doorContactController = new ContactController();
-      doorContactController.setContactParameters(100000.0, 100.0, 0.5, 0.3);
+      ContactController contactController = new ContactController();
+      contactController.setContactParameters(100000.0, 100.0, 0.5, 0.3);
 
-      doorContactController.addContactPoints(contactPoints);
-      doorContactController.addContactables(doorRobots);
-      doorRobots.get(0).setController(doorContactController);
-      
-      // handle contact controller
-      ContactController handleContactController = new ContactController();
+      contactController.addContactPoints(contactPoints);
+      contactController.addContactables(doorRobots);
+      doorRobots.get(0).setController(contactController);    
    }
 
    @Override
