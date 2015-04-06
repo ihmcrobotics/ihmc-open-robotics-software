@@ -95,7 +95,6 @@ import us.ihmc.yoUtilities.dataStructure.listener.RewoundListener;
 import us.ihmc.yoUtilities.dataStructure.listener.YoVariableRegistryChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariableList;
 import us.ihmc.yoUtilities.graphics.YoGraphic;
@@ -318,7 +317,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Creates a SimulationConstructionSet with the specified Robot.
     * The GUI will be displayed and the initial DataBuffer size will be set to the default size.
     *
-    * @param rob Robot to simulate.
+    * @param robot Robot to simulate.
     */
    public SimulationConstructionSet(Robot robot)
    {
@@ -350,9 +349,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * It is possible to run simulations without displaying the GUI, which can be useful when attempting to run
     * several simulations as a batch.
     *
-    * @param rob               Robot to simulate.
-    * @param showGUI           boolean specifying whether or not to display the GUI.
-    * @param initialBufferSize Initial size of the DataBuffer.
+    * @param robot               Robot to simulate.
     */
    public SimulationConstructionSet(Robot robot, SimulationConstructionSetParameters parameters)
    {
@@ -535,7 +532,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * be displayed using the specified JApplet and the initial DataBuffer size
     * will be set to the default size.
     *
-    * @param rob     Robot to simulate.
+    * @param robots  Robots to simulate.
     * @param jApplet JApplet to display the GUI in.
     */
    public SimulationConstructionSet(Robot[] robots, JApplet jApplet, SimulationConstructionSetParameters parameters)
@@ -964,7 +961,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param dollyX Enable or disable dolly in the x direction.
     * @param dollyY Enable or disable dolly in the y direction.
     * @param dollyZ Enable or disable dolly in the z direction.
-    * @see ViewportAdapter#setDolly(boolean, boolean, boolean, boolean) Camera.setDolly
     */
    public void setCameraDolly(boolean dolly, boolean dollyX, boolean dollyY, boolean dollyZ)
    {
@@ -981,7 +977,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param xName Name of the YoVariable to be referenced for x direction tracking.
     * @param yName Name of the YoVariable to be referenced for y direction tracking.
     * @param zName Name of the YoVariable to be referenced for z direction tracking.
-    * @see ViewportAdapter#setTrackingVars(DoubleYoVariable, DoubleYoVariable, DoubleYoVariable) Camera.setTrackingVars
     */
    public void setCameraTrackingVars(String xName, String yName, String zName)
    {
@@ -998,7 +993,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param xName Name of the YoVariable to be referenced for x direction following.
     * @param yName Name of the YoVariable to be referenced for y direction following.
     * @param zName Name of the YoVariable to be referenced for z direction following.
-    * @see ViewportAdapter#setDollyVars(DoubleYoVariable, DoubleYoVariable, DoubleYoVariable) Camera.setDollyVars
     */
    public void setCameraDollyVars(String xName, String yName, String zName)
    {
@@ -1016,7 +1010,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param dx Offset in the x direction from the target.
     * @param dy Offset in the y direction from the target.
     * @param dz Offset in the z direction from the target.
-    * @see ViewportAdapter#setTrackingOffsets(double, double, double) Camera.setTrackingOffsets
     * @see #setCameraTrackingVars(String, String, String) setCameraTrackingVars
     */
    public void setCameraTrackingOffsets(double dx, double dy, double dz)
@@ -1036,7 +1029,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param dx Offset in the x direction from the target.
     * @param dy Offset in the y direction from the target.
     * @param dz Offset in the z direction from the target.
-    * @see ViewportAdapter#setDollyOffsets(double, double, double) Camera.setDollyOffsets
     * @see #setCameraDollyVars(String, String, String) setCameraDollyVars
     */
    public void setCameraDollyOffsets(double dx, double dy, double dz)
@@ -1055,7 +1047,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * @param fixX X coordinate of the fix point.
     * @param fixY Y coordinate of the fix point.
     * @param fixZ Z coordinate of the fix point.
-    * @see ViewportAdapter#setFixPosition(double, double, double) Camera.setFixPosition
     */
    public void setCameraFix(double fixX, double fixY, double fixZ)
    {
@@ -1403,7 +1394,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * completes the robot is updated based on those values without updating the
     * display. (This probably deals with playback only, simulation is separate)
     *
-    * @param tickAmmount The amount to tick.
+    * @param ticks The amount to tick.
     * @return Did the data buffer roll between the in and out points?
     */
    private boolean tick(int ticks, boolean notifySimulationRewoundListeners)
@@ -1679,19 +1670,18 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private boolean isDefaultFileExist()
    {
-      File Configs = new File("Configurations");
+      File configs = new File("Configurations");
 
-      if (!Configs.exists())
+      if (!configs.exists())
       {
-         Configs.mkdir();
+         boolean res = configs.mkdir();
+         if (!res) { return false; }
       }
 
-      String path = Configs.toURI().getPath();
-
+      String path = configs.toURI().getPath();
       File defaultConfiguration = new File(path + "defaultConfiguration.guiConf");
 
       return defaultConfiguration.exists();
-
    }
 
    /**
@@ -1843,7 +1833,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Set the robot to be used by this simulation.
     *
-    * @param rob Robot to be used by the simulation.
+    * @param robot Robot to be used by the simulation.
     */
    public void setRobot(Robot robot)
    {
@@ -1905,30 +1895,26 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       // TODO: Fix the variable adding after sim starts problem and write unit tests for it!
       // addVariablesToGUI(rootRegistry);
 
-      if (myGUI != null)
+      HeightMap heightMap = null;
+
+      // TODO: GroundProfile is just that of the first robot. Need to make it part of the sim or something...
+      if ((robots != null) && (robots.length > 0))
       {
-         HeightMap heightMap = null;
-
-         // TODO: GroundProfile is just that of the first robot. Need to make it part of the sim or something...
-         if ((robots != null) && (robots.length > 0))
+         GroundContactModel groundContactModel = robots[0].getGroundContactModel();
+         if (groundContactModel != null)
          {
-            GroundContactModel groundContactModel = robots[0].getGroundContactModel();
-            if (groundContactModel != null)
-            {
-               heightMap = HeightMapFromGroundContactModel.getHeightMap(groundContactModel);
-            }
-         }
-
-         myGUI.setup(heightMap);
-
-         // myGUI.updateCamera();
-         if (robots != null)
-         {
-            myGUI.updateRobotsAndCamera();
-            myGUI.updateSimulationGraphics();
+            heightMap = HeightMapFromGroundContactModel.getHeightMap(groundContactModel);
          }
       }
-      
+
+      myGUI.setup(heightMap);
+
+      // myGUI.updateCamera();
+      if (robots != null)
+      {
+         myGUI.updateRobotsAndCamera();
+         myGUI.updateSimulationGraphics();
+      }
    }
 
    /**
@@ -2013,7 +1999,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Set the specified background image
     *
     * @param fileURL        URL
-    * @param imageScaleMode int
+    * @param backgroundScaleMode int
     */
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode)
    {
@@ -2336,8 +2322,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    }
 
    private long nextWakeMillis;
-   private long currentTime;
-
    // private long graphDelayTicks = 0, graphTicks = 0;
 
    /**
@@ -2355,6 +2339,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       //    count++;
 
       //
+      long currentTime;
       while ((currentTime = System.currentTimeMillis()) < nextWakeMillis)
       {
          try
@@ -2573,21 +2558,19 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          return;
       }
-      else
-      {
-         isSimulating = false;
-         isPlaying = true;
-         nextWakeMillis = System.currentTimeMillis();
 
-         synchronized (simulationSynchronizer)
+      isSimulating = false;
+      isPlaying = true;
+      nextWakeMillis = System.currentTimeMillis();
+
+      synchronized (simulationSynchronizer)
+      {
+         if (this.playbackListeners != null)
          {
-            if (this.playbackListeners != null)
+            for (int i = 0; i < playbackListeners.size(); i++)
             {
-               for (int i = 0; i < playbackListeners.size(); i++)
-               {
-                  PlaybackListener listener = playbackListeners.get(i);
-                  listener.play(REAL_TIME_RATE);
-               }
+               PlaybackListener listener = playbackListeners.get(i);
+               listener.play(REAL_TIME_RATE);
             }
          }
       }
@@ -2791,7 +2774,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Add a simulate done listener to the simulation.  All SimulateDoneListeners will be triggered when the simulation completes.
     *
     * @param listener SimulationDoneListener
-    * @see SimulateDoneListener SimulationDoneListener
     */
    public void addSimulateDoneListener(SimulationDoneListener listener)
    {
@@ -3232,7 +3214,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * As an example stuffVars.data.gz would be an acceptable name for a compressed file.<br />
     * VarGroup "all" contains all simulation variables.
     *
-    * @param varGroup   Name of the desired varGroup.
+    * @param varGroupName   Name of the desired varGroup.
     * @param binary     Specify the file format, binary or ASCII.
     * @param compress   Specify the presence of compression.
     * @param chosenFile File to which data will be saved
@@ -3312,7 +3294,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Needed for things like doing FFTs and Bode Diagrams in the GUI.
     * Defaults to "t"
     * 
-    * @param timeVariableName
+    * @param timeVariableName Variable name.
     */
    public void setTimeVariableName(String timeVariableName)
    {
@@ -3322,9 +3304,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    /**
     * Returns the variable that the GUI uses for time. 
     * Needed for things like doing FFTs and Bode Diagrams in the GUI.
-    * 
-    * @param
-    * @return
     */
    public String getTimeVariableName()
    {
@@ -3373,7 +3352,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Depending on the presence of compression the proper file extension is either .state or .state.gz<br />
     * VarGroup "all" contains all simulation variables.
     *
-    * @param varGroup   Name of the variable group to store.
+    * @param varGroupName   Name of the variable group to store.
     * @param binary     Specify binary data format as opposed to ASCII text.
     * @param compress   Indicates whether or not the data is to be compressed.
     * @param chosenFile File in which the states are to be stored.
@@ -3887,7 +3866,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     * Adds the specified SelectedListener.  This listener will be able to react to any mouse event on any camera and is provided with the MouseEvent,  point clicked, camera position, and camera fix point.  Points are provided as Point3D objects.
     * For more information see the SelectedListener class.
     *
-    * @param SelectedListener SelectedListener
+    * @param selectedListener SelectedListener
     * @see SelectedListener SelectedListener
     */
    public void attachSelectedListener(SelectedListener selectedListener)
@@ -4110,11 +4089,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       displayYoGraphicMenu();
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
-      
-
    }
-
-   
    
    private void addCheckBoxesToDynamicGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
    {
@@ -4136,8 +4111,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          }
       }); 
    }
-
-  
 
    public void hideAllDynamicGraphicObjects()
    {
@@ -4289,8 +4262,4 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
       
    }
-
-
-
-
 }
