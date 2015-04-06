@@ -140,7 +140,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       {
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
          handGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
-         jointsBeforeFeet.put(robotSide, sdfJointNameMap.getJointBeforeFootName(robotSide));
+         if(sdfJointNameMap != null)
+         {
+            jointsBeforeFeet.put(robotSide, sdfJointNameMap.getJointBeforeFootName(robotSide));            
+         }
       }
 
       LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
