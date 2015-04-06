@@ -4,16 +4,23 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.Collection;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.compression.SnappyUtils;
 
-public class YoVariableProducer extends Thread
-{   
+public class YoVariableProducer implements Runnable
+{
+   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GUICaptureBroadcast"));
+
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
    private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
 
@@ -24,17 +31,22 @@ public class YoVariableProducer extends Thread
    private final ByteBuffer compressedBufferDirect;
 
    private final int jointStateOffset;
-   
+
    private final LogSessionBroadcaster session;
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LogModelProvider logModelProvider;
-   
+
+   private ScheduledFuture<?> future;
    private SingleThreadMultiClientStreamingDataTCPServer server;
    
-   public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
-         Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
+   private final LogDataHeader logDataHeader = new LogDataHeader();
+   private final CRC32 crc32 = new CRC32();
+   private long uid = 0;
+
+   @SuppressWarnings("unchecked")
+   public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
+         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
-      super("YoVariableProducer");
       this.mainBuffer = mainBuffer;
       this.handshakeBuilder = handshakeBuilder;
       this.logModelProvider = logModelProvider;
@@ -71,7 +83,6 @@ public class YoVariableProducer extends Thread
       }
    }
 
-   @Override
    public void start()
    {
       try
@@ -84,81 +95,61 @@ public class YoVariableProducer extends Thread
       {
          throw new RuntimeException(e);
       }
-      super.start();
+
+      future = scheduler.scheduleAtFixedRate(this, 0, 1, TimeUnit.MILLISECONDS);
    }
-   
+
    public void run()
    {
-      
-      LogDataHeader logDataHeader = new LogDataHeader();
-      CRC32 crc32 = new CRC32();
-      long uid = 0;
-      while (true)
+
+      if (mainBuffer.poll())
       {
-         if (mainBuffer.poll())
-         {
-            FullStateBuffer fullStateBuffer;
+         FullStateBuffer fullStateBuffer;
 
-            while ((fullStateBuffer = mainBuffer.read()) != null)
+         while ((fullStateBuffer = mainBuffer.read()) != null)
+         {
+
+            writeBuffer.put(0, fullStateBuffer.getTimestamp());
+            fullStateBuffer.getIntoBuffer(writeBuffer, 1);
+            fullStateBuffer.getJointStatesInBuffer(writeBuffer, jointStateOffset + 1);
+            updateBuffers(fullStateBuffer.getTimestamp());
+
+            byteWriteBuffer.clear();
+            compressedBuffer.clear();
+            compressedBuffer.position(LogDataHeader.length());
+            try
             {
-               
-               writeBuffer.put(0, fullStateBuffer.getTimestamp());
-               fullStateBuffer.getIntoBuffer(writeBuffer, 1);
-               fullStateBuffer.getJointStatesInBuffer(writeBuffer, jointStateOffset + 1);
-               updateBuffers(fullStateBuffer.getTimestamp());
-
-               byteWriteBuffer.clear();
-               compressedBuffer.clear();
-               compressedBuffer.position(LogDataHeader.length());
-               try
-               {
-                  SnappyUtils.compress(byteWriteBuffer, compressedBuffer);
-                  compressedBuffer.flip();
-               }
-               catch (IllegalArgumentException | IOException e)
-               {
-                  e.printStackTrace();
-                  continue;
-               }
-
-               crc32.reset();
-               int dataSize = compressedBuffer.remaining() - LogDataHeader.length();
-               crc32.update(compressedBackingArray, LogDataHeader.length() + compressedBuffer.arrayOffset(), dataSize);
-               logDataHeader.setUid(++uid);
-               logDataHeader.setTimestamp(fullStateBuffer.getTimestamp());
-               logDataHeader.setDataSize(dataSize);
-               logDataHeader.setCrc32((int) crc32.getValue());
-               logDataHeader.writeBuffer(0, compressedBuffer);
-               compressedBufferDirect.clear();
-               compressedBufferDirect.put(compressedBuffer);
-               compressedBufferDirect.flip();
-               server.send(compressedBufferDirect);
+               SnappyUtils.compress(byteWriteBuffer, compressedBuffer);
+               compressedBuffer.flip();
             }
-            mainBuffer.flush();
+            catch (IllegalArgumentException | IOException e)
+            {
+               e.printStackTrace();
+               continue;
+            }
+
+            crc32.reset();
+            int dataSize = compressedBuffer.remaining() - LogDataHeader.length();
+            crc32.update(compressedBackingArray, LogDataHeader.length() + compressedBuffer.arrayOffset(), dataSize);
+            logDataHeader.setUid(++uid);
+            logDataHeader.setTimestamp(fullStateBuffer.getTimestamp());
+            logDataHeader.setDataSize(dataSize);
+            logDataHeader.setCrc32((int) crc32.getValue());
+            logDataHeader.writeBuffer(0, compressedBuffer);
+            compressedBufferDirect.clear();
+            compressedBufferDirect.put(compressedBuffer);
+            compressedBufferDirect.flip();
+            server.send(compressedBufferDirect);
          }
-         try
-         {
-            Thread.sleep(1);
-         }
-         catch (InterruptedException e)
-         {
-            // Allow calling Thread.interrupt from YoVariableServer
-            break;
-         }
+         mainBuffer.flush();
       }
 
-      server.close();
    }
 
    public void close()
    {
-      interrupt();
-      try
-      {
-         join();
-      }
-      catch (InterruptedException e)
-      {
-      }
+      future.cancel(false);
+      server.close();
+      
    }
 }

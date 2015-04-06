@@ -71,7 +71,11 @@ public class YoVariableLogVisualizerGUI extends JPanel
       {
          if (!isSeeking && !scs.isSimulating())
          {
-            robot.seek(newValue-1); //Do -1 so that we'll get to sliderValue after doing the seek.
+            if(newValue > 0)
+            {
+               newValue -= 1;
+            }
+            robot.seek(newValue); //Do -1 so that we'll get to sliderValue after doing the seek.
 
             try
             {
@@ -209,7 +213,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       timePanel.add(new JLabel("Position: "), BorderLayout.WEST);
 
       //    timePanel.add(new JLabel(String.valueOf(robot.getInitialTimestamp())));
-      final MarkableJSlider slider = new MarkableJSlider(0, robot.getNumberOfEntries(), 0);
+      final MarkableJSlider slider = new MarkableJSlider(0, robot.getNumberOfEntries() - 1, 0);
 
       final JLabel currentTime = new JLabel(String.valueOf(robot.getFinalTimestamp()));
 
