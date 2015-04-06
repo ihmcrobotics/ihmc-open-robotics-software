@@ -217,7 +217,7 @@ public class DetectChessboardInKinematicsData
          out.println("# List of detected calibration points in pixels");
          for (Point2D_F64 p : observations)
          {
-            out.printf("%f %f\n", p.x, p.y);
+            out.printf("%f %f%n", p.x, p.y);
          }
          out.close();
 

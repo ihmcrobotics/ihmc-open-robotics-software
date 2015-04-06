@@ -91,7 +91,6 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
 
          if (AtlasKinematicCalibrator.RESIDUAL_DOF == 6)
          {
-
             boolean QUAT_DIFF = false;
             double scaleRadToCM = 0.01 / (Math.PI / 8); //30deg -> 1cm
             if (QUAT_DIFF)
@@ -117,7 +116,7 @@ public class KinematicCalibrationWristLoopResidual implements FunctionNtoM
                Matrix3d mRight = new Matrix3d();
                leftEE.getOrientation(mLeft);
                rightEE.getOrientation(mRight);
-               Vector3d vDiff = CalibUtil.RotationDiff(mLeft, mRight);
+               Vector3d vDiff = CalibUtil.rotationDiff(mLeft, mRight);
                output[outputCounter++] = scaleRadToCM * vDiff.x;
                output[outputCounter++] = scaleRadToCM * vDiff.y;
                output[outputCounter++] = scaleRadToCM * vDiff.z;

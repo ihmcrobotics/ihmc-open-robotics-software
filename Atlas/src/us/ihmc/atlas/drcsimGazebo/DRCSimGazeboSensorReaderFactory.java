@@ -36,16 +36,20 @@ public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      HashMap<String, OneDoFJoint> allJoints = new HashMap<String, OneDoFJoint>();
-      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
-      {
-         if (joint instanceof OneDoFJoint)
-         {
-            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
-            allJoints.put(oneDoFJoint.getName(), oneDoFJoint);
-         }
-      }
+      /**
+       * The following code seems to be useless. Consider removing.
+       */
+
+//      HashMap<String, OneDoFJoint> allJoints = new HashMap<String, OneDoFJoint>();
+//      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+//      {
+//         if (joint instanceof OneDoFJoint)
+//         {
+//            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+//            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
+//            allJoints.put(oneDoFJoint.getName(), oneDoFJoint);
+//         }
+//      }
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
@@ -75,5 +79,4 @@ public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
    {
       return true;
    }
-
 }
