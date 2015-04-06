@@ -18,6 +18,7 @@
 #include <sdf/sdf.hh>
 
 #include <stdio.h>
+#include <string>
 
 #include "ByteBuffer.h"
 #include "TCPServer.h"
@@ -58,190 +59,26 @@ private:
     double estimatorFrequencyInHz;
     int tcpSendModulus;
     int modulusCounter;
-    int numCtrlMsgsReceived;
 
 public:
     DRCSimIHMCPlugin() :
         tcpDataServer(1234, BUFFER_SIZE),
         tcpCommandListener(1235, BUFFER_SIZE),
-        initialized(false),
+		initialized(false),
         receivedControlMessage(false),
         cyclesRemainingTillControlMessage(0),
         simulationCyclesPerControlCycle(-1),
-		tcpSendModulus(1),
-		numCtrlMsgsReceived(0)
+		tcpSendModulus(1)
     {
         std::cout << "IHMC Plugin Loaded" << std::endl;
     }
 
-    static bool sortJoints(const physics::JointPtr& a, const physics::JointPtr& b) {
-        return a->GetName().compare(b->GetName()) < 0;
-    }
-
-    void Load(physics::ModelPtr _parent, sdf::ElementPtr sdf) {
-        this->model = _parent;
-
-        this->gzPhysicsTimeStep = model->GetWorld()->GetPhysicsEngine()->GetMaxStepSize();
-        this->tcpSendModulus = (int)((1.0 / (this->gzPhysicsTimeStep * 1e3)) + 0.5); // TODO replace 1 with Estimator DT in milliseconds
-        this->modulusCounter = 3;
-
-        std::cout << "Send Modulus: " << this->tcpSendModulus << std::endl << std::flush;
-
-        joints = this->model->GetJoints();
-        jointController = this->model->GetJointController();
-        std::sort(joints.begin(), joints.end(), DRCSimIHMCPlugin::sortJoints);
-
-        this->rosNode = new ros::NodeHandle("");
-
-        std::string startupParameter = "none";
-
-        this->rosNode->getParam("atlas/startup_mode", startupParameter);
-
-        this->rosNode->shutdown();
-
-        std::cout << "startupParameter: "<< startupParameter << std::endl;
-
-        sensors::Sensor_V sensors = sensors::SensorManager::Instance()->GetSensors();
-        for (unsigned int i = 0; i < sensors.size(); i++) {
-            gazebo::sensors::ImuSensorPtr imu = boost::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(sensors.at(i));
-            if (imu) {
-                std::cout << imu->GetParentName() << std::endl;
-                if (imu->GetParentName() == "atlas::pelvis") {
-                    imus.push_back(imu);
-                }
-            }
-
-            gazebo::sensors::ForceTorqueSensorPtr forcetorque = boost::dynamic_pointer_cast<gazebo::sensors::ForceTorqueSensor>(sensors.at(i));
-            if (forcetorque) {
-                std::cout << "Gazebo bug is fixed. Get force torque from sdf now" << std::endl;
-            }
-        }
-
-        forceSensors.push_back(this->model->GetJoint("l_arm_wrx"));
-        forceSensors.push_back(this->model->GetJoint("r_arm_wrx"));
-        forceSensors.push_back(this->model->GetJoint("l_leg_akx"));
-        forceSensors.push_back(this->model->GetJoint("r_leg_akx"));
-
-        tcpCommandListener.addReadListener(boost::bind(&DRCSimIHMCPlugin::readControlMessage, this, _1, _2));
-
-        this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&DRCSimIHMCPlugin::OnUpdate, this, _1));
-
-        // Nasty initial angles hacks. Works great though. Note alphabetical order of joints!
-
-        double initialAngles[] = { -0.0, 0.0, 0.0, 0.0, //back_bkx back_bky back_bkz hokuyo_joint
-                                   0.498, 2.0,   0.1, -1.1,   -0.004, 0.0, 0.0,  // l_arm_elx l_arm_ely l_arm_shx l_arm_shy l_arm_wrx l_arm_wry, l_arm_wry2
-//								   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // l_finger_1_joint_1, l_finger_1_joint_2, l_finger_1_joint_3, l_finger_2_joint_1, l_finger_2_joint_2, l_finger_2_joint_3
-//								   0.0, 0.0, 0.0, // l_finger_middle_joint_1, l_finger_middle_joint_2, l_finger_middle_joint_3
-                                   -0.0, -0.28, 0.0, -0.2, 0.0, 0.5,  // l_leg_akx l_leg_aky l_leg_hpx l_leg_hpy l_leg_hpz l_leg_kny
-//								   0.0, 0.0, 0.0, // l_palm_finger_1_joint, l_palm_finger_2_joint, l_palm_finger_middle_joint
-                                   0, //neck_ry
-                                   -0.498, 2.0,   -0.1, 1.1,   0.004, 0.0,  0.0, //r_arm_elx r_arm_ely r_arm_shx r_arm_shy r_arm_wrx r_arm_wry, l_arm_wry2
-//								   0.0, 0.0, 0.0, 0.0, 0.0, 0.0, // r_finger_1_joint_1, r_finger_1_joint_2, r_finger_1_joint_3, r_finger_2_joint_1, r_finger_2_joint_2, r_finger_2_joint_3
-//								   0.0, 0.0, 0.0, // r_finger_middle_joint_1, r_finger_middle_joint_2, r_finger_middle_joint_3
-                                   0.0, -0.28, -0.0, -0.2, 0.0, 0.5}; // r_leg_akx r_leg_aky r_leg_hpx r_leg_hpy r_leg_hpz r_leg_kny
-//								   0.0, 0.0, 0.0 };  // r_palm_finger_1_joint, r_palm_finger_2_joint, r_palm_finger_middle_joint
-
-        if (startupParameter.find( "car_front") != std::string::npos)
-        {
-            initialAngles[1] = 0.0; // back pitch
-            initialAngles[23] = initialAngles[49] = -1.3; // hip y
-            initialAngles[25] = initialAngles[51] = 1.4;  // knee
-            initialAngles[21] = initialAngles[47] = -0.2; // ankle y
-        }
-        else if (startupParameter.find( "car_lateral") != std::string::npos)
-        {
-            initialAngles[1] = 0.0; // back pitch
-            initialAngles[23] = initialAngles[49] = -1.7; // hip y
-         //   initialAngles[13] += 0.2;
-            initialAngles[25] = initialAngles[51] = 1.5;  // knee
-            initialAngles[21] = initialAngles[47] = -0.0; // ankle y
-        }
-        else if( startupParameter.find( "standing" ) != std::string::npos )
-        {
-            initialAngles[1] = 0.1; // back pitch
-            initialAngles[7]  = initialAngles[21] = -0.0; // shoulder X
-
-            initialAngles[6]  = - 1.0; // shoulder Y
-            initialAngles[20] = - initialAngles[6];
-
-            initialAngles[14] = initialAngles[28] = -0.35; // hip y
-            initialAngles[16] = initialAngles[30] = 0.7;  // knee
-            initialAngles[12] = initialAngles[26] = -0.35; // ankle y
-        }
-
-
-        for (unsigned int i = 0; i < joints.size(); i++) {
-            if(joints.at(i)->GetName() != "hokuyo_joint")
-            {
-                joints.at(i)->SetPosition(0, initialAngles[i]);
-                joints.at(i)->SetUpperLimit(0, initialAngles[i] + 3.02);
-                joints.at(i)->SetLowerLimit(0, initialAngles[i] - 3.02);
-            }
-        }
-
-        std::map< std::string, physics::JointPtr > jointsByName =	jointController->GetJoints ();
-        int i=0;
-
-        desiredPositionsOrTorques.resize(joints.size(), 0.0);
-        jointsUnderPositionControl.resize(joints.size(), 0.0);
-
-		for (unsigned int i = 0; i < joints.size(); i++) {
-			if(joints.at(i)->GetName() != "hokuyo_joint")
-			{
-				joints.at(i)->SetPosition(0, initialAngles[i]);
-				joints.at(i)->SetUpperLimit(0, initialAngles[i]);
-				joints.at(i)->SetLowerLimit(0, initialAngles[i]);
-			}
-		}
-    }
- public:
-
-    void OnUpdate(const common::UpdateInfo & info) {
-        boost::unique_lock<boost::mutex> lock(robotControlLock);
-        {
-            if (!initialized)
-            {
-                if (!receivedControlMessage) {
-                    jointController->Update();
-                } else {
-                    // First control tick. Unlock joints
-                    std::cout << "Unlocking joints. Starting control." << std::endl;
-                    for (unsigned int i = 0; i < joints.size(); i++) {
-                        if(joints.at(i)->GetName() != "hokuyo_joint")
-                        {
-                            joints.at(i)->SetLowerLimit(0, -3.14);
-                            joints.at(i)->SetUpperLimit(0, 3.14);
-                            joints.at(i)->SetEffortLimit(0, -1);
-                            joints.at(i)->SetDamping(0, 0.1);
-                        }
-                    }
-                    initialized = true;
-                }
-                lock.unlock();	// make sure to unlock
-                return;
-            }
-
-            if (cyclesRemainingTillControlMessage == 0) {
-                // Block for control message
-                while (!receivedControlMessage) {
-                    condition.wait(lock);
-                }
-                cyclesRemainingTillControlMessage = simulationCyclesPerControlCycle;
-                receivedControlMessage = false;
-            }
-
-            for (unsigned int i = 0; i < joints.size(); i++) {
-                joints.at(i)->SetForce(0, desiredPositionsOrTorques[i]);
-            }
-            cyclesRemainingTillControlMessage--;
-        }
-
-        int64_t localLastReceivedTimestamp = lastReceivedTimestamp;
-        lock.unlock();
-
+    void SendDataToController(int64_t localLastReceivedTimestamp) {
         ByteBuffer data;
         gazebo::common::Time time = this->model->GetWorld()->GetSimTime();
         uint64_t timeStamp = (uint64_t) time.sec * 1000000000ull + (uint64_t) time.nsec;
+
+        std::cout << "local last timestamp = " << localLastReceivedTimestamp << std::endl;
 
         data.put(timeStamp);
         data.put(localLastReceivedTimestamp);
@@ -250,6 +87,7 @@ public:
             physics::JointPtr joint = joints.at(i);
             data.put(joint->GetAngle(0).Radian());
             data.put(joint->GetVelocity(0));
+            std::cout << "joint " << joint->GetName() << " " << joint->GetAngle(0).Radian() << std::endl;
         }
 
         for (unsigned int i = 0; i < imus.size(); i++) {
@@ -287,31 +125,146 @@ public:
 
         }
 
-        if(this->modulusCounter >= this->tcpSendModulus)
-        {
-        	tcpDataServer.send(data);
-        	this->modulusCounter = 0;
+    	tcpDataServer.send(data);
+
+//        if(this->modulusCounter >= this->tcpSendModulus)
+//        {
+//        	tcpDataServer.send(data);
+//        	this->modulusCounter = 0;
+//        }
+//
+//        this->modulusCounter++;
+    }
+
+    static bool sortJoints(const physics::JointPtr& a, const physics::JointPtr& b) {
+        return a->GetName().compare(b->GetName()) < 0;
+    }
+
+    void Load(physics::ModelPtr _parent, sdf::ElementPtr sdf) {
+        this->model = _parent;
+
+        this->gzPhysicsTimeStep = model->GetWorld()->GetPhysicsEngine()->GetMaxStepSize();
+        this->tcpSendModulus = (int)((1.0 / (this->gzPhysicsTimeStep * 1e3)) + 0.5); // TODO replace 1 with Estimator DT in milliseconds
+        this->modulusCounter = 3;
+
+        joints = this->model->GetJoints();
+        jointController = this->model->GetJointController();
+        std::sort(joints.begin(), joints.end(), DRCSimIHMCPlugin::sortJoints);
+
+        this->rosNode = new ros::NodeHandle("");
+
+        std::string startupParameter = "none";
+
+        this->rosNode->getParam("atlas/startup_mode", startupParameter);
+
+        std::cout << "startupParameter: "<< startupParameter << std::endl;
+
+        sensors::Sensor_V sensors = sensors::SensorManager::Instance()->GetSensors();
+        for (unsigned int i = 0; i < sensors.size(); i++) {
+            gazebo::sensors::ImuSensorPtr imu = boost::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(sensors.at(i));
+            if (imu) {
+                std::cout << imu->GetParentName() << std::endl;
+                if (imu->GetParentName() == "atlas::pelvis") {
+                    imus.push_back(imu);
+                }
+            }
+
+            gazebo::sensors::ForceTorqueSensorPtr forcetorque = boost::dynamic_pointer_cast<gazebo::sensors::ForceTorqueSensor>(sensors.at(i));
+            if (forcetorque) {
+                std::cout << "Gazebo bug is fixed. Get force torque from sdf now" << std::endl;
+            }
         }
 
-        this->modulusCounter++;
+        forceSensors.push_back(this->model->GetJoint("l_arm_wrx"));
+        forceSensors.push_back(this->model->GetJoint("r_arm_wrx"));
+        forceSensors.push_back(this->model->GetJoint("l_leg_akx"));
+        forceSensors.push_back(this->model->GetJoint("r_leg_akx"));
+
+        tcpCommandListener.addReadListener(boost::bind(&DRCSimIHMCPlugin::readControlMessage, this, _1, _2));
+
+        this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&DRCSimIHMCPlugin::OnUpdate, this, _1));
+
+        for (unsigned int i = 0; i < joints.size(); i++) {
+            if(joints.at(i)->GetName() != "hokuyo_joint")
+            {
+            	double initialAngle;
+            	std::string key = "robot_initial_configuration/" + joints.at(i)->GetName();
+            	bool param = this->rosNode->getParam(key, initialAngle);
+
+                joints.at(i)->SetPosition(0, initialAngle);
+                joints.at(i)->SetUpperLimit(0, initialAngle);
+                joints.at(i)->SetLowerLimit(0, initialAngle);
+            }
+        }
+
+        desiredPositionsOrTorques.resize(joints.size(), 0.0);
+        jointsUnderPositionControl.resize(joints.size(), 0.0);
+
+        this->rosNode->shutdown();
+    }
+ public:
+
+    void OnUpdate(const common::UpdateInfo & info) {
+        boost::unique_lock<boost::mutex> lock(robotControlLock);
+        {
+        	if(!initialized) {
+        		if(!receivedControlMessage) {
+        			jointController->Update();
+        		} else {
+        			std::cout << "Unlocking joints. Starting control." << std::endl;
+                    initialized = true;
+        		}
+    			lock.unlock();
+    			return;
+        	}
+
+//        	std::cout << "controlling, cycles remaining = " << cyclesRemainingTillControlMessage << std::endl;
+
+            if (cyclesRemainingTillControlMessage == 0) {
+                // Block for control message
+                while (!receivedControlMessage) {
+                    condition.wait(lock);
+                }
+                cyclesRemainingTillControlMessage = simulationCyclesPerControlCycle;
+                receivedControlMessage = false;
+            }
+
+            int i = 0;
+            std::map< std::string, physics::JointPtr > jointsByName = jointController->GetJoints();
+            for (std::map< std::string, physics::JointPtr>::iterator J = jointsByName.begin(); J != jointsByName.end(); J++) {
+            	jointController->SetPositionTarget(J->first, desiredPositionsOrTorques[i]);
+            	i++;
+            }
+
+            jointController->Update();
+            cyclesRemainingTillControlMessage--;
+        }
+
+        int64_t localLastReceivedTimestamp = lastReceivedTimestamp;
+        lock.unlock();
+
+        DRCSimIHMCPlugin::SendDataToController(localLastReceivedTimestamp);
     }
 
      void readControlMessage(char* buffer, std::size_t bytes_transffered)
     {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
-            if (true || bytes_transffered == 32 + joints.size() * 8) {
+//        	std::cout << "receiving ctrl message" << std::endl;
+
+        	if (true || bytes_transffered == 32 + joints.size() * 8) {
                 int64_t* longBuffer = ((int64_t*) (buffer));
 
-                simulationCyclesPerControlCycle = longBuffer[0];
+                int estimatorTicksPerControlTick = longBuffer[0];
                 lastReceivedTimestamp = longBuffer[1];
                 estimatorFrequencyInHz = longBuffer[2];
                 int jointPosOrTorqueData = longBuffer[3]; // if the i_th value of the binary rep of this is 1, it's position controlled
 
-                int simCyclesFromEstimatorFreq = simulationCyclesPerControlCycle / (this->gzPhysicsTimeStep * estimatorFrequencyInHz);
-                int simCyclesAssuming1kHz = simulationCyclesPerControlCycle / (this->gzPhysicsTimeStep * 1e3);
+                int simCyclesFromEstimatorFreq = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * estimatorFrequencyInHz);
+                int simCyclesAssuming1kHz = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * 1e3);
 
-                simulationCyclesPerControlCycle = simCyclesAssuming1kHz;
+                simulationCyclesPerControlCycle = longBuffer[0];
+//                std::cout << "simulation cycles per control cycle = " << simulationCyclesPerControlCycle << std::endl;
 
                 for (unsigned int i = 0; i < joints.size(); i++) {
                 	jointsUnderPositionControl[i] = jointPosOrTorqueData % 2 == 1;
