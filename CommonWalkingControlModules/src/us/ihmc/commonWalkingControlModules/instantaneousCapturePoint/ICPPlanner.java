@@ -313,9 +313,8 @@ public class ICPPlanner
       else
          footLocation = footstepLocations.insertAtIndex(0);
 
-      FrameConvexPolygon2d supportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
+      FrameConvexPolygon2d supportFootPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       footLocation.setXYIncludingFrame(supportFootPolygon.getCentroid());
-      footLocation.changeFrame(referenceFrames.getSoleFrame(supportSide));
       footLocation.setX(footLocation.getX() + constantCMPForwardFromFootCenter.getDoubleValue());
       footLocation.setY(footLocation.getY() + supportSide.negateIfLeftSide(constantCMPInFromFootCenter.getDoubleValue()));
       footLocation.setZ(0.0); // Otherwise we end up with the ankle height
