@@ -1,14 +1,13 @@
 package us.ihmc.communication;
 
-import java.util.EnumMap;
-import java.util.HashMap;
-
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
-import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.utilities.io.printing.PrintTools;
+
+import java.util.EnumMap;
+import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
@@ -16,7 +15,7 @@ public class PacketRouter<T extends Enum<T>>
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
-   private Class<?>[] packetTypesToDebug = {DetectedObjectPacket.class}; //set to null to debug all packets
+   private Class<?>[] packetTypesToDebug = null; //set to null to debug all packets
    
    private final int BROADCAST = 0;
 
@@ -129,7 +128,7 @@ public class PacketRouter<T extends Enum<T>>
             packet.setDestination(destination.ordinal());
          }
       }
-      return destination;
+      return destinationConstants[packet.getDestination()];
    }
    
    /**
@@ -148,7 +147,6 @@ public class PacketRouter<T extends Enum<T>>
          PacketCommunicator destinationCommunicator = communicators.get(destination);
          if(source != destinationCommunicator && !redirects.containsKey(destination))
          {
-            
             if (destinationCommunicator != null && destinationCommunicator.isConnected())
             {
                if(shouldPrintDebugStatement(source, destination.ordinal(), packet.getClass()))

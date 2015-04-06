@@ -36,10 +36,10 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
+      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER, PacketDestination.GFE);
       setupMsgTopics(gfe_communicator);
       rosMainNode.execute();
-      gfe_communicator.attachGlobalListener(this);
-      packetRouter.setPacketRedirects(PacketDestination.CONTROLLER, PacketDestination.GFE);
+//      gfe_communicator.attachGlobalListener(this);
    }
 
    @Override
