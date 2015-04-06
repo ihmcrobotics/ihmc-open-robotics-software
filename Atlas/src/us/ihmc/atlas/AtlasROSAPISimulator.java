@@ -29,12 +29,11 @@ import com.martiansoftware.jsap.Switch;
 
 public class AtlasROSAPISimulator
 {
-   private static String defaultPrefix = "/ihmc_ros/atlas";
-   private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
-   private static String defaultStartingLocation = "DEFAULT";
-   private final boolean startUI = false;
-   private boolean redirectUiPacketsToRos = false;
-   private PacketCommunicator gfe_communicator;
+   private static final String DEFAULT_PREFIX = "/ihmc_ros/atlas";
+   private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
+   private static final String DEFAULT_STARTING_LOCATION = "DEFAULT";
+   private static final boolean START_UI = false;
+   private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
 
    public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
@@ -46,7 +45,7 @@ public class AtlasROSAPISimulator
       URI rosUri = NetworkParameters.getROSURI();
       networkProcessorParameters.setRosUri(rosUri);
 
-      gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
       networkProcessorParameters.setUseGFECommunicator(true);
       if (runAutomaticDiagnosticRoutine)
@@ -56,7 +55,7 @@ public class AtlasROSAPISimulator
          networkProcessorParameters.setRunAutomaticDiagnostic(true, 5);
       }
 
-      if (startUI)
+      if (START_UI)
       {
          networkProcessorParameters.setUseUiModule(true);
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
@@ -72,7 +71,7 @@ public class AtlasROSAPISimulator
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.startSimulation(networkProcessorParameters, true);
 
-      if (redirectUiPacketsToRos)
+      if (REDIRECT_UI_PACKETS_TO_ROS)
       {
          PacketRouter<PacketDestination> packetRouter = simulationStarter.getPacketRouter();
          new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator, packetRouter);
@@ -81,7 +80,6 @@ public class AtlasROSAPISimulator
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
       new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
-
    }
 
    public static void main(String[] args) throws JSAPException, IOException
@@ -90,16 +88,16 @@ public class AtlasROSAPISimulator
 
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
-      rosNameSpace.setDefault(defaultPrefix);
+      rosNameSpace.setDefault(DEFAULT_PREFIX);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
-      model.setDefault(defaultRobotModel);
+      model.setDefault(DEFAULT_ROBOT_MODEL);
       
       FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(
             JSAP.STRING_PARSER);
       location.setHelp("Starting locations: " + DRCObstacleCourseStartingLocation.optionsToString());
-      location.setDefault(defaultStartingLocation);
+      location.setDefault(DEFAULT_STARTING_LOCATION);
 
       Switch visualizeSCSSwitch = new Switch("disable-visualize").setShortFlag('d').setLongFlag("disable-visualize");
       visualizeSCSSwitch.setHelp("Disable rendering/visualization of Simulation Construction Set");

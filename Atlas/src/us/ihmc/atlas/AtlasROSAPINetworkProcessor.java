@@ -24,15 +24,14 @@ public class AtlasROSAPINetworkProcessor
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
-   private final boolean enableUIPacketToROSConverter = true;
+   private static final boolean ENABLE_UI_PACKET_TO_ROS_CONVERTER = true;
    
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       PacketCommunicator gfeCommunicator = null;
       URI rosUri = NetworkParameters.getROSURI();
-      String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-      
-      if (enableUIPacketToROSConverter)
+
+      if (ENABLE_UI_PACKET_TO_ROS_CONVERTER)
       {
          gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          
@@ -45,6 +44,7 @@ public class AtlasROSAPINetworkProcessor
       }
       else 
       {
+         String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
          gfeCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       }
       

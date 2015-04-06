@@ -21,8 +21,7 @@ import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 
 public class AtlasWholeBodyIK extends WholeBodyIkSolver
 { 
-
-   @Override 
+   @Override
    public String getGripperPalmLinkName(RobotSide side)  {
       return (side == RobotSide.LEFT) ? "l_gripper_palm" :  "r_gripper_palm";
    }
@@ -32,8 +31,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       return (side == RobotSide.LEFT) ? "l_gripper_attachment" :  "r_gripper_attachment";
    }
 
-
-   @Override 
+   @Override
    public String getFootLinkName(RobotSide side) {
       return (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
    }
@@ -51,9 +49,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    public RobotSide getSideOfTheFootRoot(){
       return RobotSide.RIGHT;
    }
-   
-   int[] waitstJointId;
-   
+
    public int[] getWaistJointId()
    {
       int back_bkz = jointNamesToIndex.get("back_bkz");
@@ -71,12 +67,12 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       return actualSdfModel.getOneDoFJointByName("r_leg_akx").getFrameAfterJoint();
    }*/
 
-   static private String modelLocationPathString = null;
+   private String modelLocationPathString = null;
 
    @Override 
    public String getURDFConfigurationFileName() throws IOException
    {
-      if( modelLocationPathString == null)
+      if (modelLocationPathString == null)
       {
          String urdf_filename = "models/atlas_v5.wb.urdf";
 
@@ -96,6 +92,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
             throw new IOException("urdf not found in resources/" + urdf_filename);
          }
       }
+
       return modelLocationPathString;
    }
 
@@ -297,9 +294,6 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
    
    private HashMap<String,Double> suggestedAnglesForReseed = new HashMap<String,Double>();
    
-
-   
-
    @Override
    public HashMap<String,Double> getSuggestedAnglesForReseed()
    {
@@ -326,5 +320,4 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       return suggestedAnglesForReseed;
    }
-   
 }

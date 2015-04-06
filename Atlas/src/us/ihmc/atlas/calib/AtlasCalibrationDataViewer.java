@@ -141,7 +141,7 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
                      String[] items = line.split("\\s");
 
                      if (items[0].equals("neck_ay"))
-                        items[0] = new String("neck_ry");
+                        items[0] = "neck_ry";
                      q_.put(items[0], new Double(items[1]));
                      qout_.put(items[0], new Double(items[2]));
                   }

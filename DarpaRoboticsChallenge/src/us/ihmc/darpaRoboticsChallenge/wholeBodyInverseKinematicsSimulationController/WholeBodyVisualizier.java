@@ -12,13 +12,8 @@ public class WholeBodyVisualizier
       //model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
    
       SDFRobot simulatedRobot = robotModel.createSdfRobot(false);
-      
-    
+
       scs = new SimulationConstructionSet(simulatedRobot);
-      
-      
       scs.startOnAThread();
    }
-   
-  
 }

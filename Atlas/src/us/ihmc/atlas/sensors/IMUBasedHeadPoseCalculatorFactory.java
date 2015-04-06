@@ -21,10 +21,9 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class IMUBasedHeadPoseCalculatorFactory {
-	
-	
-	private IMUBasedHeadPoseCalculatorFactory() 
+public class IMUBasedHeadPoseCalculatorFactory
+{
+	private IMUBasedHeadPoseCalculatorFactory()
 	{
 	}
 	
@@ -47,9 +46,7 @@ public class IMUBasedHeadPoseCalculatorFactory {
 		}
 		return calculator;
 	}
-
-
-} 
+}
 
 class RunningStatistics
 {
@@ -77,7 +74,6 @@ class RunningStatistics
                   sum.sub(removeData);
                   squared_sum.sub(new Vector3d(removeData.x*removeData.x, removeData.y*removeData.y, removeData.z*removeData.z));
 		}
-
 	}
 	
 	public Vector3d getMean()
@@ -98,24 +94,19 @@ class RunningStatistics
 		stdev.z = Math.sqrt(squared_sum.z/windowSize - mean.z*mean.z);
 		return stdev;
 	}
-	
 }
 
 class IMUBasedHeadPoseCalculator extends AbstractRosTopicSubscriber<multisense_ros.RawImuData> implements PacketConsumer<RawIMUPacket>
 {
-	
 	PacketCommunicator packetCommunicator;
-	HeadPosePacket headPosePacket=new HeadPosePacket();
-	DRCRobotSensorInformation sensorInformation;
+	HeadPosePacket headPosePacket = new HeadPosePacket();
 	ReferenceFrame headIMUFrameWhenLevel;
 	RunningStatistics stat = new RunningStatistics(100);
-	
 
 	public IMUBasedHeadPoseCalculator(PacketCommunicator sensorSuitePacketCommunicator, DRCRobotSensorInformation sensorInformation) {
 		super(multisense_ros.RawImuData._TYPE);
 		this.packetCommunicator = sensorSuitePacketCommunicator;
-		this.sensorInformation = sensorInformation;
-		
+
 		headIMUFrameWhenLevel = sensorInformation.getHeadIMUFrameWhenLevel();
 	}
 	

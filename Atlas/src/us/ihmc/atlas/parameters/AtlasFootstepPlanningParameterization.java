@@ -9,14 +9,10 @@ import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanState;
 
 public class AtlasFootstepPlanningParameterization extends FootstepPlanningParameterization
 {
-   private static final double goalRadius = 0.25;
-   private final double baseOffset = 0.3;
    public double maxStepUp = 0.20;
    public double minStepDown = -0.17;
    public double maxStepDistance = 0.6;
    public double dangerDistance = 0.75;
-
-   private double yawCostGain = 1;
 
    public AtlasFootstepPlanningParameterization()
    {
@@ -33,7 +29,6 @@ public class AtlasFootstepPlanningParameterization extends FootstepPlanningParam
       maxSupportPolygonArea = cropWidth * cropLength;
       //minSupportPolygonArea = maxSupportPolygonArea/2;
       minSupportPolygonArea = maxSupportPolygonArea * .99;
-
    }
 
    private void setOffsets()
