@@ -78,6 +78,7 @@ public class ThePeoplesGloriousNetworkProcessor
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
+      gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace);
