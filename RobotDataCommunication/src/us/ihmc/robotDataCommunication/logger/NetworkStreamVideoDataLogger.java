@@ -4,7 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -14,19 +13,18 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
+import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
-import us.ihmc.multicastLogDataProtocol.SegmentedLogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.SegmentedPacketBuffer;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
-import us.ihmc.robotDataCommunication.gui.GUICaptureStreamer;
+import us.ihmc.robotDataCommunication.LogDataHeader;
+import us.ihmc.robotDataCommunication.gui.GUICaptureReceiver;
 
 import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
-public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements SegmentedLogPacketHandler
+public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements LogPacketHandler
 {
    private final static String description = "NetworkStream";
-   private final SegmentedDatagramClient client;
+   private final GUICaptureReceiver client;
    
    private MP4MJPEGMovieBuilder builder;
    private PrintStream timestampStream;
@@ -39,11 +37,9 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
       super(logPath, logProperties, description, false);
       
       NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(request.getControlIP()));
-
-      System.out.println("Connecting network stream to " + iface);
-      client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, iface,
-            InetAddress.getByAddress(request.getVideoStream())
-            , request.getVideoPort(), this);
+      
+      
+      client = new GUICaptureReceiver(iface, address.getAddress(), this);
       client.start();
    }
 
@@ -106,15 +102,15 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    }
 
    @Override
-   public void newDataAvailable(SegmentedPacketBuffer buffer)
+   public void newDataAvailable(LogDataHeader header, ByteBuffer buffer)
    {
-      ByteBuffer byteBuffer = buffer.getBuffer();
       if(builder == null)
       {
          try
          {
+            // Decode the first image using ImageIO, to get the dimensions
             ByteBufferInputStream is = new ByteBufferInputStream();
-            is.setByteBuffer(byteBuffer);
+            is.setByteBuffer(buffer);
             BufferedImage img = ImageIO.read(is);
             if(img == null)
             {
@@ -127,7 +123,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
             timestampStream = new PrintStream(timestampFile);
             timestampStream.println("1");
             timestampStream.println("10");
-            byteBuffer.clear();
+            buffer.clear();
             
             dts = 0;
          }
@@ -141,7 +137,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
       }
       try
       {
-         builder.encodeFrame(byteBuffer);
+         builder.encodeFrame(buffer);
          timestampStream.println(timestamp + " " +  dts);
          dts++;
       }
@@ -153,7 +149,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    }
 
    @Override
-   public void timeout(long timeoutInMillis)
+   public void timeout()
    {
       
    }

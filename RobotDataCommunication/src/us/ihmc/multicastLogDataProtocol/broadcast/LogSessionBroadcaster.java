@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.Random;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
-import us.ihmc.robotDataCommunication.gui.GUICaptureStreamer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.utilities.io.files.FileTools;
 
@@ -41,7 +40,7 @@ public class LogSessionBroadcaster extends Thread
    private final long sessionID;
    private final String className;
 
-   private final InetSocketAddress address = new InetSocketAddress(LogDataProtocolSettings.LOG_DATA_ANNOUNCE_PORT);
+   private final InetSocketAddress address = new InetSocketAddress(LogDataProtocolSettings.UI_ANNOUNCE_PORT);
    private final InetAddress announceGroup;
    private final InetSocketAddress sendAddress;
 
@@ -59,7 +58,7 @@ public class LogSessionBroadcaster extends Thread
       try
       {
          this.iface = NetworkInterface.getByInetAddress(controlAddress.getAddress());
-         System.out.println(iface);
+         System.out.println("Announcing logging session on: " + iface);
          this.controlAddress = controlAddress;
          this.dataAddress = dataAddress;
          this.logSettings = logSettings;
@@ -86,7 +85,7 @@ public class LogSessionBroadcaster extends Thread
       }
    }
 
-   public void start()
+   public void requestPort()
    {
       if (getState() != Thread.State.NEW)
       {
@@ -102,7 +101,7 @@ public class LogSessionBroadcaster extends Thread
       if(logSettings.getVideoStream() != null)
       {
          canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
-         canIHazRequest.setVideoPort(GUICaptureStreamer.PORT);
+         canIHazRequest.setVideoPort(LogDataProtocolSettings.UI_DATA_PORT);
       }
       canIHazRequest.setCameras(logSettings.getCameras());
       canIHazRequest.setLog(logSettings.isLog());
@@ -160,7 +159,6 @@ public class LogSessionBroadcaster extends Thread
          }
       }
 
-      super.start();
    }
 
    @Override
@@ -177,7 +175,7 @@ public class LogSessionBroadcaster extends Thread
       if(logSettings.getVideoStream() != null)
       {
          announcement.setVideoStream(logSettings.getVideoStream().getAddress());
-         announcement.setVideoPort(GUICaptureStreamer.PORT);
+         announcement.setVideoPort(LogDataProtocolSettings.UI_ANNOUNCE_PORT);
       }
       announcement.setCameras(logSettings.getCameras());
       announcement.setLog(logSettings.isLog());

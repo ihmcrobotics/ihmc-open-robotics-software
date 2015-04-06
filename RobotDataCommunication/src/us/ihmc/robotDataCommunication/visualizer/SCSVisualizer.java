@@ -97,7 +97,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private void disconnect(final JButton disconnectButton)
    {
       disconnectButton.setEnabled(false);
-      client.close();
+      client.requestStop();
    }
 
    public void addButton(String yoVariableName, double newValue)
@@ -118,7 +118,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void receiveTimedOut()
    {
       System.out.println("Connection lost, closing client.");
-      client.close();
+      client.disconnected();
 
    }
 
@@ -143,7 +143,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       recording = false;
       if (client != null)
       {
-         client.close();
+         client.requestStop();
       }
    }
 

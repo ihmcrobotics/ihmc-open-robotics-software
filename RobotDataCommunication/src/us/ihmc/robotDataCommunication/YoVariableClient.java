@@ -86,6 +86,7 @@ public class YoVariableClient
       {
          modelLoader = new SDFModelLoader();
          modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
+         System.out.println(modelLoader);
       }
 
       logControlClient.connect();
@@ -106,11 +107,15 @@ public class YoVariableClient
       state = ClientState.RUNNING;
    }
 
-   public synchronized void close()
+   public void requestStop()
+   {
+      yoVariableConsumer.requestStopS();      
+   }
+   
+   public synchronized void disconnected()
    {
       if (state == ClientState.RUNNING)
       {
-         yoVariableConsumer.close();
          logControlClient.close();
          listener.disconnected();
 

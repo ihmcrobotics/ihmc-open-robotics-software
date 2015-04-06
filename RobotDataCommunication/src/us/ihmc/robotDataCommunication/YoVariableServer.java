@@ -86,8 +86,9 @@ public class YoVariableServer implements RobotVisualizer
       producer = new YoVariableProducer(sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
             buffers.values());
             
-      sessionBroadcaster.start();
+      sessionBroadcaster.requestPort();
       producer.start();
+      sessionBroadcaster.start();
       
       started = true;
    }

@@ -47,6 +47,7 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    @Override
    public void timestampReceived(long timestamp)
    {
+      // Immediately notify for video synchronization
       handler.timestampReceived(timestamp);
    }
 

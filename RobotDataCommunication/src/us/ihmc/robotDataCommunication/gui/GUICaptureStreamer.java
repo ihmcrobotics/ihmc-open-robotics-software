@@ -5,7 +5,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -18,18 +17,14 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
-import us.ihmc.multicastLogDataProtocol.LogDataType;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.SegmentedDatagramServer;
+import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
+import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
+import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.TimeTools;
 
 public class GUICaptureStreamer
 {
-   public static final int MAGIC_SESSION_ID = 0x81359;
-   public static final int PORT = 12451;
-   public static final InetAddress group = LogUtils.getByName("239.255.25.1");
-
    private final JFrame window;
    private final int fps;
 
@@ -39,21 +34,19 @@ public class GUICaptureStreamer
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
-   private final SegmentedDatagramServer server;
+   private final SingleThreadMultiClientStreamingDataTCPServer server;
+   private final GUICaptureBroadcast broadcast;
    private JPEGEncoder encoder = new JPEGEncoder();
 
-   public GUICaptureStreamer(JFrame window, int fps, float quality, String hostToBindTo, InetAddress group, int port)
+   public GUICaptureStreamer(JFrame window, int fps, float quality, String hostToBindTo, InetAddress group)
    {
-      this(window, fps, quality, LogUtils.getMyInterface(hostToBindTo), group, port);
-   }
 
-   public GUICaptureStreamer(JFrame window, int fps, float quality, NetworkInterface iface, InetAddress group, int port)
-   {
       this.window = window;
       this.fps = fps;
       try
       {
-         server = new SegmentedDatagramServer(MAGIC_SESSION_ID, iface, group, port);
+         server = new SingleThreadMultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT);
+         broadcast = new GUICaptureBroadcast(InetAddress.getByName(hostToBindTo), group.getAddress());
       }
       catch (IOException e)
       {
@@ -64,17 +57,37 @@ public class GUICaptureStreamer
 
    public synchronized void start()
    {
-      stop();
+      scheduler.remove(captureRunner);
       scheduler.scheduleAtFixedRate(captureRunner, 10, TimeTools.nano / fps, TimeUnit.NANOSECONDS);
+      broadcast.start();
+      server.start();
    }
 
    public synchronized void stop()
    {
       scheduler.remove(captureRunner);
+      broadcast.stop();
+      server.close();
    }
 
    private class CaptureRunner implements Runnable
    {
+      private ByteBuffer directBuffer;
+
+      private ByteBuffer getOrCreateBuffer(int size)
+      {
+         if (directBuffer == null)
+         {
+            directBuffer = ByteBuffer.allocateDirect(size);
+         }
+         else if (directBuffer.capacity() < size)
+         {
+            directBuffer = ByteBuffer.allocateDirect(size);
+         }
+
+         directBuffer.clear();
+         return directBuffer;
+      }
 
       @Override
       public void run()
@@ -96,8 +109,18 @@ public class GUICaptureStreamer
             {
                YUVPicture yuv = img.toYUV(YUVSubsamplingType.YUV420);
                ByteBuffer buffer = encoder.encode(yuv, 90);
-
-               server.send(LogDataType.VIDEO, System.nanoTime(), buffer);
+               int dataLength = buffer.remaining();
+               ByteBuffer sendBuffer = getOrCreateBuffer(dataLength + LogDataHeader.length());
+               LogDataHeader header = new LogDataHeader();
+               header.setUid(0);
+               header.setDataSize(dataLength);
+               header.setTimestamp(System.nanoTime());
+               header.setCrc32(0);
+               header.writeBuffer(0, sendBuffer);
+               sendBuffer.position(LogDataHeader.length());
+               sendBuffer.put(buffer);
+               sendBuffer.flip();
+               server.send(sendBuffer);
                yuv.delete();
                img.delete();
             }
