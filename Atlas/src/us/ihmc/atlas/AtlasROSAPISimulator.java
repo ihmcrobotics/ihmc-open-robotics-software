@@ -10,6 +10,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
@@ -35,7 +36,7 @@ public class AtlasROSAPISimulator
    private boolean redirectUiPacketsToRos = false;
    private PacketCommunicator gfe_communicator;
 
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine) throws IOException
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
       simulationStarter.setRunMultiThreaded(true);
@@ -46,7 +47,6 @@ public class AtlasROSAPISimulator
       networkProcessorParameters.setRosUri(rosUri);
 
       gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
-      gfe_communicator.connect();
 
       networkProcessorParameters.setUseGFECommunicator(true);
       if (runAutomaticDiagnosticRoutine)
@@ -60,6 +60,12 @@ public class AtlasROSAPISimulator
       {
          networkProcessorParameters.setUseUiModule(true);
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
+      }
+
+      if(disableViz)
+      {
+         DRCGuiInitialSetup guiSetup = new DRCGuiInitialSetup(false, false, false);
+         simulationStarter.setGuiInitialSetup(guiSetup);
       }
 
       simulationStarter.setStartingLocation(startingLocation);
@@ -90,9 +96,13 @@ public class AtlasROSAPISimulator
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(defaultRobotModel);
       
-      FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(
+            JSAP.STRING_PARSER);
       location.setHelp("Starting locations: " + DRCObstacleCourseStartingLocation.optionsToString());
       location.setDefault(defaultStartingLocation);
+
+      Switch visualizeSCSSwitch = new Switch("disable-visualize").setShortFlag('d').setLongFlag("disable-visualize");
+      visualizeSCSSwitch.setHelp("Disable rendering/visualization of Simulation Construction Set");
 
       Switch requestAutomaticDiagnostic = new Switch("requestAutomaticDiagnostic").setLongFlag("requestAutomaticDiagnostic").setShortFlag(JSAP.NO_SHORTFLAG);
       requestAutomaticDiagnostic.setHelp("enable automatic diagnostic routine");
@@ -101,6 +111,7 @@ public class AtlasROSAPISimulator
       jsap.registerParameter(location);
       jsap.registerParameter(rosNameSpace);
       jsap.registerParameter(requestAutomaticDiagnostic);
+      jsap.registerParameter(visualizeSCSSwitch);
       JSAPResult config = jsap.parse(args);
 
       DRCRobotModel robotModel;
@@ -114,6 +125,8 @@ public class AtlasROSAPISimulator
          System.out.println(jsap.getHelp());
          return;
       }
+
+      boolean disableViz = config.getBoolean(visualizeSCSSwitch.getID());
       
       DRCStartingLocation startingLocation;
       try
@@ -127,6 +140,6 @@ public class AtlasROSAPISimulator
          return;
       }
 
-      new AtlasROSAPISimulator(robotModel, startingLocation, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()));
+      new AtlasROSAPISimulator(robotModel, startingLocation, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()), disableViz);
    }
 }
