@@ -24,6 +24,38 @@
   <param name="robot_initial_pose/roll"  value="0.0" type="double"/>
   <param name="robot_initial_pose/pitch" value="-0.1" type="double"/>
   <param name="robot_initial_pose/yaw"   value="-0.0" type="double"/>  
+  
+  <param name="/robot_initial_configuration/back_bkx"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/back_bky"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/back_bkz"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/hokuyo_joint"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_arm_elx"	value="0.498"	type="double"/>
+  <param name="/robot_initial_configuration/l_arm_ely"	value="2.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_arm_shx"	value="0.1"		type="double"/>
+  <param name="/robot_initial_configuration/l_arm_shy"	value="-1.1"		type="double"/>
+  <param name="/robot_initial_configuration/l_arm_wrx"	value="-0.004"	type="double"/>
+  <param name="/robot_initial_configuration/l_arm_wry"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_arm_wry2"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_leg_akx"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_leg_aky"	value="-0.2"	type="double"/>
+  <param name="/robot_initial_configuration/l_leg_hpx"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_leg_hpy"	value="-1.3"	type="double"/>
+  <param name="/robot_initial_configuration/l_leg_hpz"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/l_leg_kny"	value="1.4"		type="double"/>
+  <param name="/robot_initial_configuration/neck_ry"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_arm_elx"	value="-0.498"	type="double"/>
+  <param name="/robot_initial_configuration/r_arm_ely"	value="2.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_arm_shx"	value="-0.1"	type="double"/>
+  <param name="/robot_initial_configuration/r_arm_shy"	value="1.1"		type="double"/>
+  <param name="/robot_initial_configuration/r_arm_wrx"	value="0.004"	type="double"/>
+  <param name="/robot_initial_configuration/r_arm_wry"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_arm_wry2"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_leg_akx"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_leg_aky"	value="-0.2"	type="double"/>
+  <param name="/robot_initial_configuration/r_leg_hpx"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_leg_hpy"	value="-1.3"	type="double"/>
+  <param name="/robot_initial_configuration/r_leg_hpz"	value="0.0"		type="double"/>
+  <param name="/robot_initial_configuration/r_leg_kny"	value="1.4"		type="double"/> 
     
   <include file="$(find ihmc_gazebo)/launch/ihmc_atlas_v5_bringup.launch"/>
 </launch>

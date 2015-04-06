@@ -40,7 +40,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
    private final ByteBuffer data;
 
    private final LongYoVariable delay = new LongYoVariable("delay", registry);
-   private final LongYoVariable timeStampDelta = new LongYoVariable("timeStampDelta", registry);
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final SensorProcessing sensorProcessing;
    private final List<OneDoFJoint> jointList;
@@ -104,8 +103,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
       parentRegistry.addChild(registry);
    }
 
-   private long previousTimestamp = 0L;
-   private long currentTimestamp = 0L;
    @Override
    public void read()
    {
@@ -117,21 +114,17 @@ public class DRCSimGazeboSensorReader implements SensorReader
             channel.read(data);
          }
          data.flip();
-         
-         previousTimestamp = currentTimestamp;
-         currentTimestamp = data.getLong();
-         timeStampDelta.set(currentTimestamp - previousTimestamp);
+
+         long timestamp = data.getLong();
          long controlTimestamp = data.getLong();
          
-         delay.set(currentTimestamp - controlTimestamp);
+         delay.set(timestamp - controlTimestamp);
          for (int i = 0; i < jointList.size(); i++)
          {
             OneDoFJoint joint = jointList.get(i);
             sensorProcessing.setJointPositionSensorValue(joint, data.getDouble());
             sensorProcessing.setJointVelocitySensorValue(joint, data.getDouble());
          }
-
-
 
          orientation.setW(data.getDouble());
          orientation.setX(data.getDouble());
@@ -165,7 +158,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
             dataHolder.setWrench(wrench);
          }
 
-         sensorProcessing.startComputation(currentTimestamp, currentTimestamp, -1);
+         sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       }
       catch (IOException e)

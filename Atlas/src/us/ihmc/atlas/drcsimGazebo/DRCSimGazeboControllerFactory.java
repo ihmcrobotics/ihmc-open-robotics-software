@@ -49,7 +49,7 @@ public class DRCSimGazeboControllerFactory
 
    private static final double gravity = -9.81;
    private static final boolean useRobotiqHands = false;
-   
+
    public DRCSimGazeboControllerFactory()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.GAZEBO_ATLAS_UNPLUGGED_V5_NO_HANDS, AtlasRobotModel.AtlasTarget.GAZEBO, false);
@@ -64,10 +64,12 @@ public class DRCSimGazeboControllerFactory
       /*
        * Create network servers/clients
        */
-      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT,
+            new IHMCCommunicationKryoNetClassList());
 
-//      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(), robotModel.getEstimatorDT());
+      //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
+            robotModel.getEstimatorDT());
 
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
@@ -95,12 +97,12 @@ public class DRCSimGazeboControllerFactory
        * Build controller
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
-      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(), robotModel.getStateEstimatorParameters(),
-    		  sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
+      DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
-      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, outputWriter, dataProducer,
-            yoVariableServer, gravity, robotModel.getEstimatorDT());
- 
+      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
+            outputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
+
       /*
        * Setup threads
        */
@@ -110,21 +112,22 @@ public class DRCSimGazeboControllerFactory
 
       robotController.addController(estimatorThread, estimatorTicksPerSimulationTick, false);
       robotController.addController(controllerThread, controllerTicksPerSimulationTick, true);
-      
-      if(useRobotiqHands)
+
+      if (useRobotiqHands)
       {
          boolean createCollisionMeshes = false;
          SDFRobot sdfRobot = robotModel.createSdfRobot(createCollisionMeshes);
-         SimulatedRobotiqHandsController simulatedHandsController = (SimulatedRobotiqHandsController) robotModel.createSimulatedHandController(sdfRobot, threadDataSynchronizer, dataProducer);
+         SimulatedRobotiqHandsController simulatedHandsController = (SimulatedRobotiqHandsController) robotModel.createSimulatedHandController(sdfRobot,
+               threadDataSynchronizer, dataProducer);
          robotController.addController(simulatedHandsController, controllerTicksPerSimulationTick, true);
-         
+
          SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = simulatedHandsController.getAllFingerJoints();
          outputWriter.setFingerJointsProvider(allFingerJoints);
       }
 
       try
       {
-    	  drcNetworkProcessorServer.connect();
+         drcNetworkProcessorServer.connect();
       }
       catch (IOException e)
       {
@@ -135,8 +138,8 @@ public class DRCSimGazeboControllerFactory
 
       Thread simulationThread = new Thread(robotController);
       simulationThread.start();
-      
-      if(USE_GUI)
+
+      if (USE_GUI)
       {
          DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
          URI rosURI = NetworkParameters.getROSURI();
@@ -162,7 +165,8 @@ public class DRCSimGazeboControllerFactory
       ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
 
       ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();      final HighLevelState initialBehavior;
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      final HighLevelState initialBehavior;
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       initialBehavior = HighLevelState.WALKING; // HERE!!
 
@@ -174,7 +178,7 @@ public class DRCSimGazeboControllerFactory
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, initialBehavior);
 
-      //      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
+      controllerFactory.addHighLevelBehaviorFactory(new JointPositionControllerFactory(true));
 
       if (USE_GUI)
       {
