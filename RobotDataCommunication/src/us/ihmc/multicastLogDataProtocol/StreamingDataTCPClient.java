@@ -114,6 +114,8 @@ public class StreamingDataTCPClient extends Thread
          }
          catch (ClosedByInterruptException e)
          {
+            // Clear interrupted status for close handlers.
+            interrupted();
             break DATALOOP;
          }
          catch (SocketTimeoutException e)
@@ -122,7 +124,7 @@ public class StreamingDataTCPClient extends Thread
          }
          catch (IOException e)
          {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             break DATALOOP;
          }
 
@@ -172,9 +174,22 @@ public class StreamingDataTCPClient extends Thread
       return running;
    }
 
-   public void close()
+   public void requestStop()
    {
       running = false;
-      interrupt();
+      
+      // Interrupt and join when this is not the current thread.
+      if(currentThread() != this)
+      {
+         interrupt();
+         try
+         {
+            join();
+         }
+         catch (InterruptedException e)
+         {
+            e.printStackTrace();
+         }
+      }
    }
 }

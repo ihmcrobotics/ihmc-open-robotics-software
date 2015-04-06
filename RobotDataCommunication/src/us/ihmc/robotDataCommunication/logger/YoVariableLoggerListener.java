@@ -304,12 +304,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       if (connected)
       {
          System.out.println("Connection lost, closing client.");
-         yoVariableClient.close();
+         yoVariableClient.disconnected();
       }
       else
       {
          System.out.println("Cannot connect to client, closing");
-         yoVariableClient.close();
+         yoVariableClient.disconnected();
       }
    }
 

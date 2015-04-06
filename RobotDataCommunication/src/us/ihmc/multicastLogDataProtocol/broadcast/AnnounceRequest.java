@@ -292,7 +292,7 @@ public class AnnounceRequest
 
    public int getVideoPort()
    {
-      return videoPort;
+      return videoPort & 0xFFFF;
    }
 
    public void setVideoPort(int videoPort)

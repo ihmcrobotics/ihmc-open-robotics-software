@@ -29,6 +29,8 @@ public class YoVariableProducer extends Thread
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LogModelProvider logModelProvider;
    
+   private SingleThreadMultiClientStreamingDataTCPServer server;
+   
    public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, ConcurrentRingBuffer<FullStateBuffer> mainBuffer,
          Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
@@ -69,20 +71,24 @@ public class YoVariableProducer extends Thread
       }
    }
 
-   public void run()
+   @Override
+   public void start()
    {
-      
-      SingleThreadMultiClientStreamingDataTCPServer server;
       try
       {
+         // Make server here, so it is open before the logger connects
          server = new SingleThreadMultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider);
          server.start();
-//               new SegmentedDatagramServer(session.getSessionID(), session.getInterface(), session.getGroup(), session.getPort());
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
+      super.start();
+   }
+   
+   public void run()
+   {
       
       LogDataHeader logDataHeader = new LogDataHeader();
       CRC32 crc32 = new CRC32();

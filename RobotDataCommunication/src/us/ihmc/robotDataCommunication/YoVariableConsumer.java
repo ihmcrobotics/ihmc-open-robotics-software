@@ -52,7 +52,7 @@ public class YoVariableConsumer implements LogPacketHandler
       this.jointStates = jointStates;
       this.listener = listener;
 
-      updateHandler = new ThreadedLogPacketHandler(this, 128);
+      updateHandler = new ThreadedLogPacketHandler(this, 512);
       client = new StreamingDataTCPClient(this.dataIP, port, updateHandler);
    }
 
@@ -145,12 +145,11 @@ public class YoVariableConsumer implements LogPacketHandler
 
    }
 
-   public void close()
+   public void requestStopS()
    {
       if(client.isRunning())
       {
-         client.close();
-         updateHandler.shutdown();  
+         client.requestStop();
       }
    }
 
@@ -164,6 +163,7 @@ public class YoVariableConsumer implements LogPacketHandler
    public void timeout()
    {
       listener.receiveTimedOut();
+      updateHandler.shutdown();  
    }
 
    public LogHandshake getHandshake()

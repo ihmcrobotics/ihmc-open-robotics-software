@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
+import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 
@@ -18,10 +19,9 @@ import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.SegmentedDatagramClient;
-import us.ihmc.multicastLogDataProtocol.SegmentedLogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.SegmentedPacketBuffer;
+import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 
 public class GUICaptureViewer
@@ -46,14 +46,12 @@ public class GUICaptureViewer
 
       main.setVisible(true);
 
-      for (LogSettings setting : LogSettings.values())
+      for (final LogSettings setting : LogSettings.values())
       {
          if (setting.getVideoStream() != null)
          {
-            SegmentedDatagramClient client = new SegmentedDatagramClient(GUICaptureStreamer.MAGIC_SESSION_ID, LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.logger)),
-                  setting.getVideoStream(), GUICaptureStreamer.PORT, new Handler());
-
-            client.start();
+            NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.logger));
+            new GUICaptureReceiver(iface, setting.getVideoStream(), new Handler()).start();
          }
 
       }
@@ -77,7 +75,7 @@ public class GUICaptureViewer
       main.pack();
    }
 
-   private class Handler implements SegmentedLogPacketHandler
+   private class Handler implements LogPacketHandler
    {
       private final JLabel label = new JLabel();
       private final JPEGDecoder decoder = new JPEGDecoder();
@@ -85,15 +83,13 @@ public class GUICaptureViewer
       @Override
       public void timestampReceived(long timestamp)
       {
-         // TODO Auto-generated method stub
-
       }
 
       @Override
-      public void newDataAvailable(SegmentedPacketBuffer buffer)
+      public void newDataAvailable(LogDataHeader header, ByteBuffer buffer)
       {
 
-         final ByteBuffer imageBuffer = buffer.getBuffer();
+         final ByteBuffer imageBuffer = buffer;
          SwingUtilities.invokeLater(new Runnable()
          {
 
@@ -114,7 +110,7 @@ public class GUICaptureViewer
                }
 
                YUVPicture img = decoder.decode(imageBuffer);
-               
+
                double scaleWidth = ((double) labelSize.getWidth()) / ((double) img.getWidth());
                double scaleHeight = ((double) labelSize.getHeight()) / ((double) img.getHeight());
 
@@ -136,7 +132,7 @@ public class GUICaptureViewer
       }
 
       @Override
-      public void timeout(long timeoutInMillis)
+      public void timeout()
       {
          SwingUtilities.invokeLater(new Runnable()
          {

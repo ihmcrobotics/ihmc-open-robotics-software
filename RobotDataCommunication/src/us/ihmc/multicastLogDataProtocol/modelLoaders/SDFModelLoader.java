@@ -41,6 +41,13 @@ public class SDFModelLoader implements LogModelLoader
    }
 
    @Override
+   public String toString()
+   {
+      return "SDFModelLoader [modelName=" + modelName + ", model=" + model.length + ", resourceDirectories=" + Arrays.toString(resourceDirectories)
+            + ", resourceZip=" + resourceZip.length + "]";
+   }
+
+   @Override
    public SDFRobot createRobot()
    {
       return new VisualizerRobot(createJaxbSDFLoader().getGeneralizedSDFRobotModel(modelName), null);

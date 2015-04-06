@@ -176,7 +176,7 @@ public class LogSessionDisplay extends JFrame
       
       public LogSessionCallback(NetworkInterface iface)
       {
-         System.out.println(iface);
+         System.out.println("Listening on interface " + iface);
          this.iface = iface;
       }
 
