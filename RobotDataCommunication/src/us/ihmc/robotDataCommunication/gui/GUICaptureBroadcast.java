@@ -9,7 +9,9 @@ import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
@@ -19,11 +21,12 @@ public class GUICaptureBroadcast implements Runnable
 {
    public static final byte HEADER = 0x42;
 
-   private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, ThreadTools.getNamedThreadFactory("GUICaptureBroadcast"));
-
+   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GUICaptureBroadcast"));
    private final InetSocketAddress sendAddress;
    private final ByteBuffer ipBuffer = ByteBuffer.allocateDirect(5);
    private final DatagramChannel channel;
+   
+   private ScheduledFuture<?> future = null;
 
    public GUICaptureBroadcast(InetAddress myIP, byte[] group) throws IOException
    {
@@ -42,13 +45,19 @@ public class GUICaptureBroadcast implements Runnable
 
    public synchronized void start()
    {
-      scheduler.remove(this);
-      scheduler.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
+      if(future != null)
+      {
+         future.cancel(false);
+      }
+      future = scheduler.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
    }
 
    public synchronized void stop()
    {
-      scheduler.remove(this);
+      if(future != null)
+      {
+         future.cancel(false);
+      }
    }
 
    @Override

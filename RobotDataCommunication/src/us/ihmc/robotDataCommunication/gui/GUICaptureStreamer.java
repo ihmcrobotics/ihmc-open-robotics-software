@@ -6,7 +6,9 @@ import java.awt.Toolkit;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JFrame;
@@ -31,13 +33,15 @@ public class GUICaptureStreamer
 
    private final ScreenCapture screenCapture = ScreenCaptureFactory.getScreenCapture();
 
-   private final ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1, ThreadTools.getNamedThreadFactory("GUICaptureStreamer"));
+   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GUICaptureStreamer"));
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
    private final SingleThreadMultiClientStreamingDataTCPServer server;
    private final GUICaptureBroadcast broadcast;
    private JPEGEncoder encoder = new JPEGEncoder();
+   
+   private ScheduledFuture<?> future = null;
 
    public GUICaptureStreamer(JFrame window, int fps, float quality, String hostToBindTo, InetAddress group)
    {
@@ -47,7 +51,7 @@ public class GUICaptureStreamer
       try
       {
          server = new SingleThreadMultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT);
-         System.out.println("Conn ecting to host " + hostToBindTo);
+         System.out.println("Connecting to host " + hostToBindTo);
          broadcast = new GUICaptureBroadcast(LogUtils.getMyIP(hostToBindTo), group.getAddress());
       }
       catch (IOException e)
@@ -59,7 +63,10 @@ public class GUICaptureStreamer
 
    public synchronized void start()
    {
-      scheduler.remove(captureRunner);
+      if(future != null)
+      {
+         future.cancel(false);
+      }
       scheduler.scheduleAtFixedRate(captureRunner, 10, TimeTools.nano / fps, TimeUnit.NANOSECONDS);
       broadcast.start();
       server.start();
@@ -67,7 +74,10 @@ public class GUICaptureStreamer
 
    public synchronized void stop()
    {
-      scheduler.remove(captureRunner);
+      if(future != null)
+      {
+         future.cancel(false);
+      }
       broadcast.stop();
       server.close();
    }
