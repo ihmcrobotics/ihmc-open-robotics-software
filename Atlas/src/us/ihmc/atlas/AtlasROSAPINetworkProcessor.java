@@ -10,6 +10,9 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 
 import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
@@ -21,14 +24,31 @@ public class AtlasROSAPINetworkProcessor
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
+   private final boolean enableUIPacketToROSConverter = true;
+   
    public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
+      PacketCommunicator gfeCommunicator = null;
+      URI rosUri = NetworkParameters.getROSURI();
       String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
       
-      PacketCommunicator controllerCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      if (enableUIPacketToROSConverter)
+      {
+         gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
+         
+         DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
+         networkProcessorParameters.setUseLocalControllerCommunicator(false);
+         networkProcessorParameters.setUseUiModule(true);
+         networkProcessorParameters.setUseGFECommunicator(true);
+         DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
+         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfeCommunicator, networkProcessor.getPacketRouter());
+      }
+      else 
+      {
+         gfeCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
+      }
       
-      URI rosUri = NetworkParameters.getROSURI();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, controllerCommunicator, robotModel, nameSpace);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfeCommunicator, robotModel, nameSpace);
    }
    
    public static void main(String[] args) throws JSAPException, IOException
