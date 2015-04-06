@@ -31,10 +31,8 @@ public class CalibUtil
       return qbuffer;
    }
 
-
    public static void addQ(Map<String, Double> q1, Map<String, Double> q2, Map<String, Double> qout)
    {
-
       assert (q1.size() == q2.size());
       for (String jointName : q1.keySet())
       {
@@ -44,7 +42,7 @@ public class CalibUtil
             v += q1.get(jointName);
          if (q2.containsKey(jointName))
             v += q2.get(jointName);
-         qout.put(jointName, new Double(v));
+         qout.put(jointName, v);
       }
    }
 
@@ -72,7 +70,6 @@ public class CalibUtil
             joint.setQ(0);
          }
       }
-
    }
 
    public static void setRobotModelFromData(SDFFullRobotModel fullRobotModel, Map<String, Double> qmap, Map<String, Double> qbias)
@@ -97,17 +94,16 @@ public class CalibUtil
             joint.setQ(0);
          }
       }
-
    }
 
-   public static Vector3d Matrix3dToAxisAngle3d(Matrix3d m)
+   public static Vector3d matrix3dToAxisAngle3d(Matrix3d m)
    {
       DenseMatrix64F md = new DenseMatrix64F(3, 3);
       MatrixTools.matrix3DToDenseMatrix(m, md, 0, 0);
-      return Matrix3dToAxisAngle3d(md);
+      return matrix3dToAxisAngle3d(md);
    }
 
-   public static Vector3d Matrix3dToAxisAngle3d(DenseMatrix64F md)
+   public static Vector3d matrix3dToAxisAngle3d(DenseMatrix64F md)
    {
       Rodrigues_F64 r = RotationMatrixGenerator.matrixToRodrigues(md, (Rodrigues_F64)null);
       r.unitAxisRotation.scale(r.theta);
@@ -115,7 +111,7 @@ public class CalibUtil
       return angleAxis;
    }
 
-   public static Vector3d RotationDiff(Matrix3d r1, Matrix3d r2)
+   public static Vector3d rotationDiff(Matrix3d r1, Matrix3d r2)
    {
       DenseMatrix64F m1 = new DenseMatrix64F(3, 3), m2 = new DenseMatrix64F(3, 3);
       MatrixTools.matrix3DToDenseMatrix(r1, m1, 0, 0);
@@ -123,6 +119,6 @@ public class CalibUtil
 
       DenseMatrix64F mDiff = new DenseMatrix64F(3, 3);
       CommonOps.multTransB(m1, m2, mDiff);
-      return Matrix3dToAxisAngle3d(mDiff);
+      return matrix3dToAxisAngle3d(mDiff);
    }
 }

@@ -78,6 +78,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          robot.getOneDegreeOfFreedomJoint(prefix + "_f2_j2").setQ(0.883);//0.4);
          robot.getOneDegreeOfFreedomJoint(prefix + "_f3_j2").setQ(0.837);
       }
+
       switch(SELECTED_METHOD)
       {
       case FACING_LHAND_GRABBING_RHAND_SEAT:
@@ -91,6 +92,10 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          robot.getOneDegreeOfFreedomJoint("right_f1_j2").setQ(-1.4706);
          robot.getOneDegreeOfFreedomJoint("right_f2_j2").setQ(-1.4706);
          robot.getOneDegreeOfFreedomJoint("right_f3_j2").setQ(0.0);
+         break;
+
+      default:
+         break;
       }
       
       robot.update();

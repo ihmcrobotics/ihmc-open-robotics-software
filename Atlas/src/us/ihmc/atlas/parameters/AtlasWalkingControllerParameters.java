@@ -397,7 +397,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoPDGains gains = new YoPDGains("CoMHeight", registry);
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
-      double kp = realRobot ? 40.0 : 40.0;
+      double kp = 40.0;
       double zeta = realRobot ? 0.4 : 0.8;
       double maxAcceleration = 0.5 * 9.81;
       double maxJerk = maxAcceleration / 0.05;
@@ -483,7 +483,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
-      double kp = realRobot ? 80.0 : 80.0;
+      double kp = 80.0;
       double zeta = realRobot ? 0.25 : 0.8;
       double maxAcceleration = realRobot ? 6.0 : 36.0;
       double maxJerk = realRobot ? 60.0 : 540.0;
@@ -609,10 +609,10 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
       double kp = 0.0;
-      double zetaXYZ = realRobot ? 0.0 : 0.0;
+      double zetaXYZ = 0.0;
       double kpXYOrientation = realRobot ? 40.0 : 300.0;
       double kpZOrientation = realRobot ? 40.0 : 300.0;
-      double zetaOrientation = realRobot ? 0.4 : 0.4;
+      double zetaOrientation = 0.4;
       double maxLinearAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;

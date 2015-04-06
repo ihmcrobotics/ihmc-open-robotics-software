@@ -83,14 +83,12 @@ public class StandaloneAtlasHeadLoopKinematicsCalibrator
 
          String dataName = (String) metaData.get(i).get(DATA_NAME);
 
-         System.out.printf("%5d  Image %20s error = %f\n", i, dataName, averageError);
+         System.out.printf("%5d  Image %20s error = %f%n", i, dataName, averageError);
       }
    }
 
-
    private void computeErrorStatistics(double[] output, double[] found)
    {
-
       double averageError = 0;
       double errors[] = new double[output.length / 2];
       for (int i = 0; i < output.length; i += 2)
