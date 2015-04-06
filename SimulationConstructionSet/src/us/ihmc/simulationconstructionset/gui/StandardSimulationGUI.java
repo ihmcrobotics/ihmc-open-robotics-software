@@ -265,7 +265,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
             robot.getCameraMountList(cameraMountList);
          }
       }
-
    }
 
    public ExtraPanelConfigurationList getExtraPanelConfigurationList()

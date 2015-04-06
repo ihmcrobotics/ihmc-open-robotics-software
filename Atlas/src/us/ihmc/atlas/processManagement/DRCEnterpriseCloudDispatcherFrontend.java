@@ -66,22 +66,23 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
    private static String controllerMachineIpAddress = "192.168.130.112";
 
    private JFrame frame;
-   private JPanel netProcPanel, controllerPanel, selectControllerPanel, selectRobotModelPanel;
+   private JPanel netProcPanel;
+   private JPanel controllerPanel;
+   private JPanel selectControllerPanel;
 
-   private JButton netProcStartButton, netProcStopButton, netProcRestartButton, connectNetProcConsoleButton;
+   private JButton netProcStartButton, netProcStopButton, netProcRestartButton;
    private final JLabel netProcRunningStatusLabel =
       new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel netProcConnectedStatusLabel =
       new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
-   private JButton controllerStartButton, controllerStopButton, connectControllerConsoleButton;
+   private JButton controllerStartButton, controllerStopButton;
    private final JLabel controllerRunningStatusLabel =
       new JLabel("<html><body>Running: <span style=\"color:red;font-style:italic;\">Not Running</span></body></html>", JLabel.CENTER);
    private final JLabel controllerConnectedStatusLabel =
       new JLabel("<html><body>Connected: <span style=\"color:red;font-style:italic;\">Disconnected</span></body></html>", JLabel.CENTER);
 
    private ButtonGroup selectControllerRadioButtonGroup, selectRobotModelRadioButtonGroup;
-   private JRadioButton atlasBDIControllerRadioButton, atlasControllerFactoryRadioButton;
    private final JTextArea netProcConsole, controllerConsole;
    private JScrollPane robotModelScrollPane;
 
@@ -696,7 +697,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void setupSelectRobotModelPanel()
    {
-      selectRobotModelPanel = new JPanel(new GridLayout(AtlasRobotModelFactory.getAvailableRobotModels().length + 1, 1));
+      JPanel selectRobotModelPanel = new JPanel(new GridLayout(AtlasRobotModelFactory.getAvailableRobotModels().length + 1, 1));
       robotModelScrollPane = new JScrollPane(selectRobotModelPanel);
 
       selectRobotModelRadioButtonGroup = new ButtonGroup();
@@ -721,13 +722,13 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
       selectControllerRadioButtonGroup = new ButtonGroup();
 
-      atlasBDIControllerRadioButton = new JRadioButton("Atlas BDI Controller");
+      JRadioButton atlasBDIControllerRadioButton = new JRadioButton("Atlas BDI Controller");
       atlasBDIControllerRadioButton.setActionCommand(RED_TEAM_ACTION_COMMAND);
       atlasBDIControllerRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasBDIControllerRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
       atlasBDIControllerRadioButton.setHorizontalTextPosition(AbstractButton.TRAILING);
 
-      atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
+      JRadioButton atlasControllerFactoryRadioButton = new JRadioButton("Atlas Controller Factory");
       atlasControllerFactoryRadioButton.setActionCommand(BLUE_TEAM_ACTION_COMMAND);
       atlasControllerFactoryRadioButton.setBorder(BorderFactory.createEmptyBorder(0, 35, 0, -35));
       atlasControllerFactoryRadioButton.setHorizontalAlignment(AbstractButton.LEADING);
@@ -805,7 +806,6 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
                DataInputStream inputStream = new DataInputStream(clientSocket.getInputStream());
                final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-               connectNetProcConsoleButton.setEnabled(false);
 
                while (true)
                {

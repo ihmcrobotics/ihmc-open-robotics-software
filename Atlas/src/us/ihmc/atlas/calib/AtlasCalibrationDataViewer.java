@@ -108,12 +108,17 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
          {
             ZipFile zip = new ZipFile(calib_file);
             reader = new BufferedReader(new InputStreamReader(zip.getInputStream(zip.getEntries().nextElement())));
-         } else
+         }
+         else
+         {
             reader = new BufferedReader(new FileReader(calib_file));
-      } catch (IOException e1)
+         }
+      }
+      catch (IOException e1)
       {
          System.out.println("Cannot load calibration file " + calib_file);
          e1.printStackTrace();
+         return;
       }
 
       String line;
@@ -139,7 +144,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
                         items[0] = new String("neck_ry");
                      q_.put(items[0], new Double(items[1]));
                      qout_.put(items[0], new Double(items[2]));
-                  } else
+                  }
+                  else
                   {
                      System.out.println("One ill-formed data entry");
                      break;
@@ -153,7 +159,8 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
                   qout.add((Map) qout_);
             }
          }
-      } catch (IOException e1)
+      }
+      catch (IOException e1)
       {
          System.err.println("File reading error");
          e1.printStackTrace();
@@ -174,16 +181,14 @@ public class AtlasCalibrationDataViewer extends AtlasKinematicCalibrator
       calib.createQoutYoVariables();
 
       calib.createDisplay(calib.q.size());
-      
 
       Map<String, Double> q0 = new HashMap<String, Double>();
       
       for(String key: calib.q.get(0).keySet())
-         q0.put(key,new Double(0));
+         q0.put(key, 0.0);
 
       
       CalibUtil.setRobotModelFromData(calib.fullRobotModel,q0);
-      return;
 //    
 //      for(int i=0;i<calib.q.size();i++)
 //      {

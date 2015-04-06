@@ -57,7 +57,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
    YoVariableLogPlaybackRobot robot;
    SimulationConstructionSet scs;
-   YoVariableLogCropper yoVariableLogCropper;
    YoVariableHandshakeParser parser;
    MultiVideoDataPlayer players = null;
    YoVariableLogVisualizerGUI yoVariableLogVisualizerGUI;
@@ -173,16 +172,11 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
                e.printStackTrace();
             }
          }
+
          System.out.println("Simulation finished");
          simulateExport.closeSCS();
          ThreadTools.sleep(CLOSING_SLEEP_TIME);
-         exportData = null;
-         simulateExport = null;
-         ThreadTools.sleep(CLOSING_SLEEP_TIME);
-         System.gc();
       }
-
-      System.exit(0);
    }
 
    private static File selectInputFile()
@@ -242,8 +236,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          for (int i = 0; i < numberOfEntries; i++)
          {
             count = d.readLine();
-            String[] splittedLine = count.split(",");
+            if (count == null) { break; }
 
+            String[] splittedLine = count.split(",");
             cameraName[i] = splittedLine[0];
             simulationCameraHeight[i] = Double.parseDouble(splittedLine[1]);
             simulationCameraRadius[i] = Double.parseDouble(splittedLine[2]);
@@ -259,9 +254,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          d.close();
       }
-      catch (Exception e)
+      catch (IOException e)
       {
-         System.out.println("Can not read input file");
+         System.out.println("Can not read input file: " + e.getMessage());
          return null;
       }
 
@@ -387,7 +382,6 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          e.printStackTrace();
       }
 
-      yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);
       scs.hideAllDynamicGraphicObjects();
       scs.setDynamicGraphicObjectsListVisible("DesiredExternalWrench", true);
    }

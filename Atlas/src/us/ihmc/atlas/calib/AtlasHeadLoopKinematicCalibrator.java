@@ -430,7 +430,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       //read translation
       reader.readLine();
-      String s[] = reader.readLine().split(" ");
+      String line = reader.readLine();
+      if (line == null) { return false; }
+
+      String s[] = line.split(" ");
       targetToCamera.getT().set(parseDouble(s[0]), parseDouble(s[1]), parseDouble(s[2]));
 
       // read calibration point stuff
@@ -439,7 +442,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       ArrayList<Point2D_F64> detections = new ArrayList<>();
       while (true)
       {
-         String line = reader.readLine();
+         line = reader.readLine();
          if (line == null)
             break;
          s = line.split(" ");
@@ -463,7 +466,6 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //load image
       if (loadImages)
          mEntry.put(CAMERA_IMAGE_KEY, ImageIO.read(new File(f, "/detected.jpg")));
-
 
       // load joint angles
       Properties properties = new Properties();
@@ -512,7 +514,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //         //System.out.println(jointName + " "+ qoffset.get(jointName));
 //      }
 //      System.out.println("wristSpacing "+prm[prm.length-1]);
-//
+
       //push data to visualizer
       boolean start_scs = true;
       if (start_scs)
@@ -532,6 +534,5 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
             calib.displayUpdate(i);
          }
       } //viz
-
    }
 }

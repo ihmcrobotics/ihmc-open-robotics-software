@@ -197,8 +197,6 @@ public class YoVariableLogCropper
             indexChannel.write(indexBuffer);
             
             outputChannel.write(compressedData);
-            
-            
          }
 
          outputChannel.close();
@@ -216,12 +214,8 @@ public class YoVariableLogCropper
       catch (IOException e)
       {
          throw new RuntimeException(e);
-      } finally
-      {
-
       }
    }
-
 
    public void close()
    {

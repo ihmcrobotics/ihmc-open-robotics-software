@@ -83,8 +83,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializePhysicalSensors(URI rosCoreURI)
    {
-      if(rosCoreURI==null)
-         new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in "+ NetworkParameters.defaultParameterFile);
+      if (rosCoreURI == null)
+        throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
+
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
       RosMainNode rosMainNode = new RosMainNode(rosCoreURI, "atlas/sensorSuiteManager", true);
