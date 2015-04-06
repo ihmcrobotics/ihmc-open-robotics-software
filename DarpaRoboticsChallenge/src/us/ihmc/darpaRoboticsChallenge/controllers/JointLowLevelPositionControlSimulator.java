@@ -12,12 +12,13 @@ public class JointLowLevelPositionControlSimulator implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
    private final PIDController jointController;
-   
+
    private final double controlDT;
    private final OneDegreeOfFreedomJoint simulatedJoint;
    private final OneDoFJoint highLevelControllerOutputJoint;
 
-   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, double controlDT)
+   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, boolean isUpperBodyJoint,
+         double controlDT)
    {
       registry = new YoVariableRegistry(simulatedJoint.getName() + name);
       this.controlDT = controlDT;
@@ -26,18 +27,22 @@ public class JointLowLevelPositionControlSimulator implements RobotController
       this.simulatedJoint = simulatedJoint;
       this.highLevelControllerOutputJoint = highLevelControllerOutputJoint;
 
-      
-     /* double subtreeMass = TotalMassCalculator.computeSubTreeMass(highLevelControllerOutputJoint.getSuccessor());
-      jointController.setProportionalGain(50.0 * subtreeMass);
-      jointController.setIntegralGain(35.0 * subtreeMass);
-      jointController.setMaxIntegralError(0.3);
-      jointController.setDerivativeGain(7.0 * subtreeMass);*/
-      
-      jointController.setProportionalGain(5000.0);
-      jointController.setIntegralGain(1000.0*50.0);
-      jointController.setMaxIntegralError(0.2);
-      jointController.setDerivativeGain(500.0);
-      jointController.setMaximumOutputLimit( 400.0 );
+      if (isUpperBodyJoint)
+      {
+         double subtreeMass = TotalMassCalculator.computeSubTreeMass(highLevelControllerOutputJoint.getSuccessor());
+         jointController.setProportionalGain(50.0 * subtreeMass);
+         jointController.setIntegralGain(35.0 * subtreeMass);
+         jointController.setMaxIntegralError(0.3);
+         jointController.setDerivativeGain(7.0 * subtreeMass);
+      }
+      else
+      {
+         jointController.setProportionalGain(5000.0);
+         jointController.setIntegralGain(1000.0 * 50.0);
+         jointController.setMaxIntegralError(0.2);
+         jointController.setDerivativeGain(500.0);
+         jointController.setMaximumOutputLimit(400.0);
+      }
    }
 
    public void doControl()

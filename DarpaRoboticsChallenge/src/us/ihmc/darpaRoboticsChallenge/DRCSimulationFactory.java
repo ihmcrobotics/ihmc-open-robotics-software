@@ -7,6 +7,7 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFJointNameMap.JointRole;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -271,7 +272,9 @@ public class DRCSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
             SDFFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, drcRobotModel.getSimulateDT());
+            boolean isUpperBodyJoint = jointMap.getJointRole(jointName) != JointRole.LEG;
+            
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }
