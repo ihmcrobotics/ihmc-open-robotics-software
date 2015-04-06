@@ -214,7 +214,14 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       try
       {
          BufferedReader d = new BufferedReader(new InputStreamReader(new FileInputStream(input)));
+
          String header = d.readLine();
+         if (header == null)
+         {
+            System.out.println("Can not read input file!");
+            return null;
+         }
+
          numberOfEntries = Integer.parseInt(header.split(",")[11]);
 
          cameraName = new String[numberOfEntries];

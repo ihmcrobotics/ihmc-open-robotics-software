@@ -90,6 +90,12 @@ public class DetectChessboardInKinematicsData
          return;
 
       File[] files = dir.listFiles();
+      if (files == null)
+      {
+         System.out.println("Cannot list files in " + dir.getAbsolutePath());
+         return;
+      }
+
       for (File f : files)
       {
          if (!f.delete())
@@ -123,6 +129,11 @@ public class DetectChessboardInKinematicsData
       PlanarCalibrationDetector detector = FactoryPlanarCalibrationTarget.detectorChessboard(new ConfigChessboard(boardWidth, boardHeight));
 
       File files[] = directory.listFiles();
+      if (files == null)
+      {
+         System.out.println("Cannot list files in " + directory);
+         return;
+      }
 
       List<File> fileList = new ArrayList<>();
       fileList.addAll(Arrays.asList(files));

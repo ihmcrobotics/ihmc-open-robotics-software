@@ -61,12 +61,11 @@ import boofcv.struct.calib.IntrinsicParameters;
 
 public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 {   
-   public static String TARGET_TO_CAMERA_KEY = "targetToCamera";
-   public static String CAMERA_IMAGE_KEY = "cameraImage";
-   public static String CHESSBOARD_DETECTIONS_KEY = "chessboardDetections";
-   
+   public static final String TARGET_TO_CAMERA_KEY = "targetToCamera";
+   public static final String CAMERA_IMAGE_KEY = "cameraImage";
+   public static final String CHESSBOARD_DETECTIONS_KEY = "chessboardDetections";
 
-   public static final boolean useLeftArm = false;
+   public static final boolean USE_LEFT_ARM = false;
 
    //YoVariables for Display
    private final YoFramePoint ypLeftEE, ypRightEE;
@@ -74,7 +73,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    private final ArrayList<Map<String, Object>> metaData;
    final ReferenceFrame cameraFrame;
 
-   public static final RobotSide activeSide = useLeftArm ? RobotSide.LEFT : RobotSide.RIGHT;
+   public static final RobotSide activeSide = USE_LEFT_ARM ? RobotSide.LEFT : RobotSide.RIGHT;
 
    RigidBodyTransform targetToEE = new RigidBodyTransform();
 
@@ -235,7 +234,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       Graphics2D g2 = work.createGraphics();
       g2.drawImage(original, 0, 0, null);
 
-      double magicNumber = useLeftArm ? 0.13 : -0.13;
+      double magicNumber = USE_LEFT_ARM ? 0.13 : -0.13;
 
       FramePoint activeArmEEtoCamera = new FramePoint(fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM), 0, magicNumber, 0); // todo look at this later
       activeArmEEtoCamera.changeFrame(cameraImageFrame);
@@ -339,7 +338,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
    public void optimizeData()
    {
-      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, useLeftArm, intrinsic, calibGrid, metaData, q);
+      KinematicCalibrationHeadLoopResidual function = new KinematicCalibrationHeadLoopResidual(fullRobotModel, USE_LEFT_ARM, intrinsic, calibGrid, metaData, q);
 
       UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
 
@@ -363,7 +362,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 
       java.util.List<String> jointNames = function.getCalJointNames();
 
-      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(), useLeftArm);
+      targetToEE = KinematicCalibrationHeadLoopResidual.computeTargetToEE(found, jointNames.size(), USE_LEFT_ARM);
 
       for (int i = 0; i < jointNames.size(); i++)
       {
@@ -378,6 +377,11 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       intrinsic = UtilIO.loadXML("../DarpaRoboticsChallenge/data/calibration_images/intrinsic_ros.xml");
 
       File[] files = new File(directory).listFiles();
+      if (files == null)
+      {
+         System.out.println("Cannot list files in " + directory);
+         return;
+      }
 
       Arrays.sort(files);
 
