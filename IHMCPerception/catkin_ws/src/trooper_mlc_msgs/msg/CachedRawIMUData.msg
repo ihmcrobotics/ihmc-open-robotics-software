@@ -1,2 +1,2 @@
 Header header
-RawIMUData[15] data
+RawIMUData[] data #15
