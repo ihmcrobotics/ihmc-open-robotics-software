@@ -227,9 +227,8 @@ public class CapturePointPlannerAdapter
 
    private void setSupportFootLocation(RobotSide supportSide, FramePoint footLocationToPack)
    {
-      FrameConvexPolygon2d supportFootPolygon = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
+      FrameConvexPolygon2d supportFootPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(supportSide);
       footLocationToPack.setXYIncludingFrame(supportFootPolygon.getCentroid());
-      footLocationToPack.changeFrame(referenceFrames.getSoleFrame(supportSide));
       footLocationToPack.setX(footLocationToPack.getX() + capturePointForwardFromFootCenter.getDoubleValue());
       footLocationToPack.setY(footLocationToPack.getY() + supportSide.negateIfLeftSide(capturePointInFromFootCenter.getDoubleValue()));
       footLocationToPack.setZ(0.0); // Otherwise we end up with the ankle height
