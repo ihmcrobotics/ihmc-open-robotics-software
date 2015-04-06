@@ -122,7 +122,7 @@ class RobotiqControlThread extends HandControlThread
 
    public void run()
    {
-      fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+//      fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -146,18 +146,18 @@ class RobotiqControlThread extends HandControlThread
             {
                FingerStatePacket packet = fingerStateProvider.pullPacket();
                FingerState state = packet.getFingerState();
-               if (!robotiqHand.isConnected())
-               {
-                  if (state.equals(FingerState.CALIBRATE))
-                  {
-                     this.initialize();
-                  }
-                  else
-                  {
-                     System.out.println(robotSide.toString() + " Hand Not Connected");
-                     continue;
-                  }
-               }
+//               if (!robotiqHand.isConnected())
+//               {
+//                  if (state.equals(FingerState.CALIBRATE))
+//                  {
+//                     this.initialize();
+//                  }
+//                  else
+//                  {
+//                     System.out.println(robotSide.toString() + " Hand Not Connected");
+//                     continue;
+//                  }
+//               }
                
                switch (state)
                {
