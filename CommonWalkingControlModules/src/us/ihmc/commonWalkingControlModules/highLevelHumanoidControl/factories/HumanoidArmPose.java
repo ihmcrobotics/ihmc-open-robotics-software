@@ -200,4 +200,17 @@ public enum HumanoidArmPose
             throw new RuntimeException("Shouldn't get here!");
       }
    }
+   
+   /**
+    * Get the orientation of the hand w.r.t. to the upper arm.
+    * @return
+    */
+   public double[] getDesiredHandYawPitchRoll()
+   {
+      switch (this)
+      {
+         default:
+            return new double[]{0.0, 0.0, 0.0};
+      }
+   }
 }
