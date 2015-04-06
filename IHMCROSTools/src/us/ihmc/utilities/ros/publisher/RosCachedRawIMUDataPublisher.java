@@ -81,21 +81,21 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
    
    public ArrayList<trooper_mlc_msgs.RawIMUData> createRandomRawImuData(Random random, int size)
    {
-      long timestampInNanoSeconds = 1;//random.nextLong();
+      long timestampInNanoSeconds = random.nextLong();
       ArrayList<trooper_mlc_msgs.RawIMUData> imuBatch = new ArrayList<RawIMUData>();
-      int randomImuCounter = 2;//random.nextInt();
+      int randomImuCounter = random.nextInt();
       for(int i = 0; i < size; i++)
       {
          RawIMUData rawImuData = newMessageFromType(trooper_mlc_msgs.RawIMUData._TYPE);
-         rawImuData.setImuTimestamp(3);//TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
-         rawImuData.setDax(4);//random.nextInt());
-         rawImuData.setDay(5);//random.nextInt());
-         rawImuData.setDaz(6);//random.nextInt());
+         rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
+         rawImuData.setPacketCount(randomImuCounter);
+         rawImuData.setDax(random.nextInt());
+         rawImuData.setDay(random.nextInt());
+         rawImuData.setDaz(random.nextInt());
          //linear acceleration (m/s^2) in the frame of the IM
-         rawImuData.setDdx(7);//random.nextInt());
-         rawImuData.setDdy(8);//random.nextInt());
-         rawImuData.setDdz(9);//random.nextInt());
-         rawImuData.setPacketCount(10);//randomImuCounter);
+         rawImuData.setDdx(random.nextInt());
+         rawImuData.setDdy(random.nextInt());
+         rawImuData.setDdz(random.nextInt());
          randomImuCounter++;
          imuBatch.add(rawImuData);
       }
