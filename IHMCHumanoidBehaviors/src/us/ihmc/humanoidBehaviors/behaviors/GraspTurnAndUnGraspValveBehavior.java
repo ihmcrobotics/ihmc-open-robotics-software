@@ -8,12 +8,14 @@ import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveTurnDirection;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicBehavior;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspValveTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseRelativeToCurrentTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.utilities.Axis;
@@ -64,8 +66,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
 
       graspValveBehavior = new GraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
       childBehaviors.add(graspValveBehavior);
-      rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, wholeBodyControllerParameters,
-            yoTime, useWholeBodyInverseKinematics);
+      rotateGraspedValveBehavior = new RotateHandAboutAxisBehavior("", outgoingCommunicationBridge, fullRobotModel, yoTime);
       childBehaviors.add(rotateGraspedValveBehavior);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
       childBehaviors.add(fingerStateBehavior);
@@ -88,11 +89,10 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
       }
    }
 
-   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
-         Axis valvePinJointAxisInValveFrame, double valveRadius, double turnValveAngle)
+   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation graspLocation, ValveGraspMethod graspMethod, double graspApproachConeAngle,
+	         Axis valvePinJointAxisInValveFrame, double valveRadius, double turnValveAngle, double valveRotationRateRadPerSec, boolean stopHandIfGraspCollision, boolean stopHandIfTurnCollision)
    {
       RobotSide robotSideOfHandToUse = RobotSide.RIGHT;
-      double valveRotationRateRadPerSec = Math.PI / 2.0;
       double trajectoryTimeMoveHandAwayFromValve = 2.0;
 
       ValveTurnDirection valveTurnDirection;
@@ -105,15 +105,15 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
          valveTurnDirection = ValveTurnDirection.COUNTERCLOCKWISE;
       }
          
-      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, valveGraspLocation, valveTurnDirection, graspApproachConeAngle,
-            valvePinJointAxisInValveFrame, valveRadius, yoTime);
+      GraspValveTask graspValveTask = new GraspValveTask(graspValveBehavior, valveTransformToWorld, graspLocation, graspMethod, valveTurnDirection, graspApproachConeAngle,
+              valvePinJointAxisInValveFrame, valveRadius, stopHandIfGraspCollision, yoTime);
 
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
-            valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, valveRotationRateRadPerSec);
+              valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, valveRotationRateRadPerSec, stopHandIfTurnCollision);
 
       FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime);
 
-      HandPoseTask moveHandAwayFromValveTask = new HandPoseTask(robotSideOfHandToUse, -0.3, fullRobotModel, yoTime,
+      HandPoseRelativeToCurrentTask moveHandAwayFromValveTask = new HandPoseRelativeToCurrentTask(robotSideOfHandToUse, -0.3, fullRobotModel, yoTime,
             handPoseBehavior, trajectoryTimeMoveHandAwayFromValve);
 
       pipeLine.submitSingleTaskStage(graspValveTask);

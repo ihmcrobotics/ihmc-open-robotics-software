@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.behaviorTests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
@@ -34,7 +35,9 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -408,6 +411,176 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       BambooTools.reportTestFinishedMessage();
    }
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testAimPalmNormalXaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      final HandPoseBehavior aimPalmBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
+      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideOfGraspingHand);
+      FramePoint targetPoint = new FramePoint(handFrame, 0.0, 0.0, 0.0);
+      targetPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      targetPoint.add(1.0, 0.0, 0.0);
+
+      aimPalmBehavior.initialize();
+      aimPalmBehavior.aimPalmNormalAtPoint(robotSideOfGraspingHand, targetPoint, drcBehaviorTestHelper.getSDFFullRobotModel(), 1.0);
+      assertTrue(aimPalmBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(aimPalmBehavior);
+      assertTrue(success);
+
+      assertTrue(aimPalmBehavior.isDone());
+      
+      ReferenceFrame world = ReferenceFrame.getWorldFrame();
+      
+      FrameVector xAxis = new FrameVector(world, 1.0, 0.0, 0.0);
+      FrameVector palmNormal = new FrameVector(handFrame, 1.0, 0.0, 0.0);
+      palmNormal.changeFrame(world);
+      assertTrue( palmNormal.isEpsilonParallel(xAxis, ORIENTATION_THRESHOLD) );
+
+      BambooTools.reportTestFinishedMessage();
+   }
+      
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testAimPalmNormalYaxis() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      final HandPoseBehavior aimPalmBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
+      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideOfGraspingHand);
+      FramePoint targetPoint = new FramePoint(handFrame, 0.0, 0.0, 0.0);
+      targetPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      targetPoint.add(0.0, 1.0, 0.0);
+
+      aimPalmBehavior.initialize();
+      aimPalmBehavior.aimPalmNormalAtPoint(robotSideOfGraspingHand, targetPoint, drcBehaviorTestHelper.getSDFFullRobotModel(), 1.0);
+      assertTrue(aimPalmBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(aimPalmBehavior);
+      assertTrue(success);
+
+      assertTrue(aimPalmBehavior.isDone());
+      
+      ReferenceFrame world = ReferenceFrame.getWorldFrame();
+      
+      FrameVector yAxis = new FrameVector(world, 0.0, 1.0, 0.0);
+      FrameVector palmNormal = new FrameVector(handFrame, 1.0, 0.0, 0.0);
+      palmNormal.changeFrame(world);
+      assertTrue( palmNormal.isEpsilonParallel(yAxis, ORIENTATION_THRESHOLD) );
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testAimPalmNormalXaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      final HandPoseBehavior aimPalmBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
+      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideOfGraspingHand);
+      FramePoint targetPoint = new FramePoint(handFrame, 0.0, 0.0, 0.0);
+      targetPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      targetPoint.add(1.0, 0.0, 0.0);
+      FrameVector zUp = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+
+      aimPalmBehavior.initialize();
+      aimPalmBehavior.orientHandToGraspCylinder(robotSideOfGraspingHand, zUp, targetPoint, drcBehaviorTestHelper.getSDFFullRobotModel(), 1.0);
+      assertTrue(aimPalmBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(aimPalmBehavior);
+      assertTrue(success);
+
+      assertTrue(aimPalmBehavior.isDone());
+
+      ReferenceFrame world = ReferenceFrame.getWorldFrame();
+      
+      FrameVector xAxis = new FrameVector(world, 1.0, 0.0, 0.0);
+      FrameVector zAxis = new FrameVector(world, 0.0, 0.0, 1.0);
+      
+      FrameVector palmNormal = new FrameVector(handFrame, 1.0, 0.0, 0.0);
+      FrameVector handGraspVector = new FrameVector(handFrame, 0.0, 1.0, 0.0);
+
+      palmNormal.changeFrame(world);
+      handGraspVector.changeFrame(world);
+      
+      assertTrue( palmNormal.isEpsilonParallel(xAxis, ORIENTATION_THRESHOLD) );
+      assertTrue( handGraspVector.isEpsilonParallel(zAxis, ORIENTATION_THRESHOLD) );
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   @EstimatedDuration(duration = 50.0)
+   @Test(timeout = 300000)
+   public void testAimPalmNormalYaxisZupGrasp() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      
+      final HandPoseBehavior aimPalmBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(), drcBehaviorTestHelper.getYoTime());
+
+      drcBehaviorTestHelper.updateRobotModel();
+
+      RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
+      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSideOfGraspingHand);
+      FramePoint targetPoint = new FramePoint(handFrame, 0.0, 0.0, 0.0);
+      targetPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      targetPoint.add(0.0, 1.0, 0.0);
+      FrameVector zUp = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+
+      aimPalmBehavior.initialize();
+      aimPalmBehavior.orientHandToGraspCylinder(robotSideOfGraspingHand, zUp, targetPoint, drcBehaviorTestHelper.getSDFFullRobotModel(), 1.0);
+      assertTrue(aimPalmBehavior.hasInputBeenSet());
+
+      success = drcBehaviorTestHelper.executeBehaviorUntilDone(aimPalmBehavior);
+      assertTrue(success);
+
+      assertTrue(aimPalmBehavior.isDone());
+      
+      ReferenceFrame world = ReferenceFrame.getWorldFrame();
+      
+      FrameVector yAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 1.0, 0.0);
+      FrameVector zAxis = new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
+      
+      FrameVector palmNormal = new FrameVector(handFrame, 1.0, 0.0, 0.0);
+      FrameVector handGraspVector = new FrameVector(handFrame, 0.0, 1.0, 0.0);
+
+      palmNormal.changeFrame(world);
+      handGraspVector.changeFrame(world);
+      
+      assertTrue( palmNormal.isEpsilonParallel(yAxis, ORIENTATION_THRESHOLD) );
+      assertTrue( handGraspVector.isEpsilonParallel(zAxis, ORIENTATION_THRESHOLD) );      
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
 
    private double[] getCurrentArmPose(RobotSide robotSide)
    {

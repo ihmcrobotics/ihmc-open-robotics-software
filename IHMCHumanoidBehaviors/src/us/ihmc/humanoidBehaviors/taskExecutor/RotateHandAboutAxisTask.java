@@ -14,11 +14,12 @@ public class RotateHandAboutAxisTask extends BehaviorTask
    private final Axis pinJointAxisInGraspedObjectFrame;
    private final double turnAngleRad;
    private final double rotationRateRadPerSec;
+   private final boolean stopHandIfCollision;
 
    private final RotateHandAboutAxisBehavior rotateHandAboutAxisBehavior;
 
    public RotateHandAboutAxisTask(RobotSide robotSide, DoubleYoVariable yoTime, RotateHandAboutAxisBehavior rotateGraspedPinJointBodyBehavior,
-         RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad, double rotationRateRadPerSec)
+	         RigidBodyTransform graspedObjectTransformToWorld, Axis pinJointAxisInGraspedObjectFrame, double turnAngleRad, double rotationRateRadPerSec, boolean stopHandIfCollision)
    {
       super(rotateGraspedPinJointBodyBehavior, yoTime);
       this.rotateHandAboutAxisBehavior = rotateGraspedPinJointBodyBehavior;
@@ -27,11 +28,12 @@ public class RotateHandAboutAxisTask extends BehaviorTask
       this.pinJointAxisInGraspedObjectFrame = pinJointAxisInGraspedObjectFrame;
       this.turnAngleRad = turnAngleRad;
       this.rotationRateRadPerSec = rotationRateRadPerSec;
+      this.stopHandIfCollision = stopHandIfCollision;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      rotateHandAboutAxisBehavior.setInput(robotSide, pinJointAxisInGraspedObjectFrame, graspedObjectTransformToWorld, turnAngleRad, rotationRateRadPerSec);
+	   rotateHandAboutAxisBehavior.setInput(robotSide, pinJointAxisInGraspedObjectFrame, graspedObjectTransformToWorld, turnAngleRad, rotationRateRadPerSec, stopHandIfCollision);
    }
 }

@@ -22,7 +22,7 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final List<ContactableValveRobot> valveRobot = new ArrayList<ContactableValveRobot>();
+   private final List<ContactableValveRobot> wheelRobots = new ArrayList<ContactableValveRobot>();
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -32,7 +32,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       this(0.5, 0.0, 1.0, 0.0, 57.0);
    }
 
-   public DRCSteeringWheelEnvironment(ArrayList<Point3d> valveLocations, LinkedHashMap<Point3d, Double> valveYawAngles_degrees, LinkedHashMap<Point3d, Double> valvePitchAngles_degrees)
+   public DRCSteeringWheelEnvironment(ArrayList<Point3d> wheelLocations, LinkedHashMap<Point3d, Double> wheelYawAngles_degrees, LinkedHashMap<Point3d, Double> wheelPitchAngles_degrees)
    {
       double forceVectorScale = 1.0 / 50.0;
 
@@ -40,10 +40,10 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
       int i = 0;
-      for (Point3d valveLocation : valveLocations)
+      for (Point3d wheelLocation : wheelLocations)
       {
-         String valveRobotName = "ValveRobot" + i;
-         createValve(valveRobotName, ValveType.BIG_VALVE, valveLocation.x, valveLocation.y, valveLocation.z, valveYawAngles_degrees.get(valveLocation), valvePitchAngles_degrees.get(valveLocation),
+         String wheelRobotName = "SteeringWheelRobot" + i;
+         createSteeringWheel(wheelRobotName, ValveType.BIG_VALVE, wheelLocation.x, wheelLocation.y, wheelLocation.z, wheelYawAngles_degrees.get(wheelLocation), wheelPitchAngles_degrees.get(wheelLocation),
                forceVectorScale);
          i++;
       }
@@ -56,30 +56,26 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
-      createValve("ValveRobot", ValveType.SMALL_VALVE, valveX, valveY, valveZ, valveYaw_degrees, valvePitch_degrees, forceVectorScale);
+      createSteeringWheel("SteeringWheelRobot", ValveType.SMALL_VALVE, valveX, valveY, valveZ, valveYaw_degrees, valvePitch_degrees, forceVectorScale);
 
    }
    
-   private void createValve(String valveRobotName, ValveType valveType, double x, double y, double z, double yaw_degrees, double pitch_degrees, double forceVectorScale)
+   private void createSteeringWheel(String wheelRobotName, ValveType valveType, double x, double y, double z, double yaw_degrees, double pitch_degrees, double forceVectorScale)
    {
-      FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
+      FramePose wheelPose = new FramePose(ReferenceFrame.getWorldFrame());
       Point3d position = new Point3d(x, y, z);
       Quat4d orientation = new Quat4d();
 
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(pitch_degrees), Math.toRadians(0));
-      valvePose.setPose(position, orientation);
+      wheelPose.setPose(position, orientation);
 
-      ContactableSteeringWheelRobot valve = new ContactableSteeringWheelRobot(valveRobotName, valveType, 1.0, valvePose);
+      ContactableSteeringWheelRobot wheel = new ContactableSteeringWheelRobot(wheelRobotName, valveType, 2.0, wheelPose);
 
-      valve.createValveRobot();
-      valve.createAvailableContactPoints(1, 30, forceVectorScale, true);
-
-      valveRobot.add(valve);
-   }
-
-   private void createValve(String valveRobotName, ValveType valveType, double x, double y, double z, double yaw_degrees, double forceVectorScale)
-   {
-      createValve(valveRobotName, valveType, x, y, z, yaw_degrees, 0.0, forceVectorScale);
+      wheel.createValveRobot();
+      wheel.createAvailableContactPoints(1, 30, forceVectorScale, true);
+      wheel.setClosePercentage(50.0);
+      
+      wheelRobots.add(wheel);
    }
 
    private CombinedTerrainObject3D setUpGround(String name)
@@ -100,7 +96,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
    @Override
    public List<ContactableValveRobot> getEnvironmentRobots()
    {
-      return valveRobot;
+      return wheelRobots;
    }
 
    @Override
@@ -109,8 +105,8 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       ContactController contactController = new ContactController();
       contactController.setContactParameters(1000.0, 100.0, 0.5, 0.3);
       contactController.addContactPoints(contactPoints);
-      contactController.addContactables(valveRobot);
-      valveRobot.get(0).setController(contactController);
+      contactController.addContactables(wheelRobots);
+      wheelRobots.get(0).setController(contactController);
    }
 
    @Override

@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.GraspTurnAndUnGraspValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior.ValveGraspLocation;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -13,30 +14,39 @@ public class GraspTurnAndUnGraspValveTask extends BehaviorTask
    private final Axis valvePinJointAxisInValveFrame;
    private final double valveRadius;
    private final double turnValveAngle;
+   private final double valveRotationRateRadPerSec;
 
-   private final ValveGraspLocation valveGraspLocation;
+   private final ValveGraspLocation graspLocation;
+   private final ValveGraspMethod graspMethod;
    private final double graspApproachConeAngle;
 
+   boolean stopHandIfGraspCollision;
+   boolean stopHandIfTurnCollision;
+   
    private final boolean DEBUG = false;
 
    public GraspTurnAndUnGraspValveTask(GraspTurnAndUnGraspValveBehavior graspTurnAndUnGraspValveBehavior, RigidBodyTransform valveTransformToWorld,
-         ValveGraspLocation valveGraspLocation, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame,
-         double valveRadius, double turnValveAngle, DoubleYoVariable yoTime)
+         ValveGraspLocation graspLocation, ValveGraspMethod graspMethod, double graspApproachConeAngle, Axis valvePinJointAxisInValveFrame,
+         double valveRadius, double turnValveAngle, double valveRotationRateRadPerSec, boolean stopHandIfGraspCollision, boolean stopHandIfTurnCollision, DoubleYoVariable yoTime)
    {
       super(graspTurnAndUnGraspValveBehavior, yoTime);
       this.graspValveTurnAndUnGraspBehavior = graspTurnAndUnGraspValveBehavior;
       this.valveTransformToWorld = new RigidBodyTransform(valveTransformToWorld);
-      this.valveGraspLocation = valveGraspLocation;
+      this.graspLocation = graspLocation;
+      this.graspMethod = graspMethod;
       this.graspApproachConeAngle = graspApproachConeAngle;
       this.valvePinJointAxisInValveFrame = valvePinJointAxisInValveFrame;
       this.valveRadius = valveRadius;
       this.turnValveAngle = turnValveAngle;
+      this.valveRotationRateRadPerSec = valveRotationRateRadPerSec;
+      this.stopHandIfGraspCollision = stopHandIfGraspCollision;
+      this.stopHandIfTurnCollision = stopHandIfTurnCollision;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      graspValveTurnAndUnGraspBehavior.setInput(valveTransformToWorld, valveGraspLocation, graspApproachConeAngle,
-            valvePinJointAxisInValveFrame, valveRadius, turnValveAngle);
+      graspValveTurnAndUnGraspBehavior.setInput(valveTransformToWorld, graspLocation, graspMethod, graspApproachConeAngle,
+              valvePinJointAxisInValveFrame, valveRadius, turnValveAngle, valveRotationRateRadPerSec, stopHandIfGraspCollision, stopHandIfTurnCollision);
    }
 }
