@@ -419,13 +419,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          chestOrientationManager.setUp(baseForChestOrientationControl, jacobianForChestOrientationControlId);
       }
 
+      pelvisICPBasedTranslationManager.disable();
       pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
+      manipulationControlModule.freeze();
 
       icpAndMomentumBasedController.initialize();
       desiredICP.setByProjectionOntoXYPlane(capturePoint);
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
-
    }
 
    private void initializeContacts()
