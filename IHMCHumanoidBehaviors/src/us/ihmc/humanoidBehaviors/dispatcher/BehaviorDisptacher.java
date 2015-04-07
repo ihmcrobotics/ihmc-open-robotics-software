@@ -2,6 +2,9 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
@@ -33,7 +36,8 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionAction;
 public class BehaviorDisptacher implements Runnable
 {
    private static final boolean DEBUG = true;
-
+   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("BehaviorDispatcher"));
+   
    private final String name = getClass().getSimpleName();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -213,28 +217,30 @@ public class BehaviorDisptacher implements Runnable
       }
    }
 
-   boolean runningBehavior = true;
  
    @Override
    public void run()
    {
-      while (runningBehavior)
+      try
       {
          if (!hasBeenInitialized.getBooleanValue())
          {
             initialize();
             hasBeenInitialized.set(true);
          }
-
+   
          doControl();
-
+   
          if (yoVaribleServer != null)
          {
             yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
          }
-
-         ThreadTools.sleep(1);
       }
+      catch(Exception e)
+      {
+         e.printStackTrace();
+      }
+
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -278,8 +284,24 @@ public class BehaviorDisptacher implements Runnable
       communicationBridge.detachGlobalListener(behavior.getNetworkProcessorGlobalObjectConsumer());
    }
    
+   public void start()
+   {
+      // do start
+      scheduler.scheduleAtFixedRate(this, 0, 10, TimeUnit.MILLISECONDS);
+   }
+   
    public void closeAndDispose()
    {
-      this.runningBehavior = false;
+      
+      // do stop
+      scheduler.shutdown();
+      try
+      {
+         scheduler.awaitTermination(10, TimeUnit.SECONDS);
+      }
+      catch (InterruptedException e)
+      {
+         throw new RuntimeException("Cannot shutdown BehaviorDispatcher", e);
+      }
    }
 }

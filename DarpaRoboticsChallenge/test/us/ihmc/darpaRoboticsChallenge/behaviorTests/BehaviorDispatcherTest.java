@@ -242,8 +242,7 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
       PelvisPoseBehavior pelvisPoseBehavior = new PelvisPoseBehavior(communicationBridge, yoTime);
       behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.TEST, pelvisPoseBehavior);
 
-      Thread dispatcherThread = new Thread(behaviorDispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
+      behaviorDispatcher.start();
 
       HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
       behaviorCommunicatorClient.send(requestPelvisPoseBehaviorPacket);
@@ -287,8 +286,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
             walkingControllerParameters);
       behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
-      Thread dispatcherThread = new Thread(behaviorDispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
+      behaviorDispatcher.start();
+
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
@@ -342,8 +341,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
             walkingControllerParameters);
       behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
-      Thread dispatcherThread = new Thread(behaviorDispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
+      behaviorDispatcher.start();
+
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
@@ -391,8 +390,8 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
             walkingControllerParameters);
       behaviorDispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_OBJECT, walkToLocationBehavior);
 
-      Thread dispatcherThread = new Thread(behaviorDispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
+      behaviorDispatcher.start();
+
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_OBJECT);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
