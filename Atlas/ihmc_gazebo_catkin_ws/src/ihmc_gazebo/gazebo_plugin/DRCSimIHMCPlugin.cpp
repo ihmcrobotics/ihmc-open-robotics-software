@@ -78,8 +78,6 @@ public:
         gazebo::common::Time time = this->model->GetWorld()->GetSimTime();
         uint64_t timeStamp = (uint64_t) time.sec * 1000000000ull + (uint64_t) time.nsec;
 
-        std::cout << "local last timestamp = " << localLastReceivedTimestamp << std::endl;
-
         data.put(timeStamp);
         data.put(localLastReceivedTimestamp);
 
@@ -87,7 +85,6 @@ public:
             physics::JointPtr joint = joints.at(i);
             data.put(joint->GetAngle(0).Radian());
             data.put(joint->GetVelocity(0));
-            std::cout << "joint " << joint->GetName() << " " << joint->GetAngle(0).Radian() << std::endl;
         }
 
         for (unsigned int i = 0; i < imus.size(); i++) {
@@ -184,7 +181,15 @@ public:
 
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&DRCSimIHMCPlugin::OnUpdate, this, _1));
 
-        for (unsigned int i = 0; i < joints.size(); i++) {
+        desiredPositionsOrTorques.resize(joints.size(), 0.0);
+        jointsUnderPositionControl.resize(joints.size(), 0.0);
+
+        std::map< std::string, physics::JointPtr > jointsByName = jointController->GetJoints();
+        int i = 0;
+        for (std::map< std::string, physics::JointPtr>::iterator  J = jointsByName.begin(); J != jointsByName.end(); J++)
+        {
+            jointController->SetPositionPID( J->first, common::PID(4000, 5, 15, 50, -50, 300, -300));
+
             if(joints.at(i)->GetName() != "hokuyo_joint")
             {
             	double initialAngle;
@@ -192,13 +197,15 @@ public:
             	bool param = this->rosNode->getParam(key, initialAngle);
 
                 joints.at(i)->SetPosition(0, initialAngle);
-                joints.at(i)->SetUpperLimit(0, initialAngle);
-                joints.at(i)->SetLowerLimit(0, initialAngle);
-            }
-        }
+                joints.at(i)->SetUpperLimit(0, initialAngle + 3.14);
+                joints.at(i)->SetLowerLimit(0, initialAngle - 3.14);
 
-        desiredPositionsOrTorques.resize(joints.size(), 0.0);
-        jointsUnderPositionControl.resize(joints.size(), 0.0);
+                jointController->SetPositionTarget(J->first, initialAngle);
+
+                desiredPositionsOrTorques[i] = initialAngle;
+            }
+            i++;
+        }
 
         this->rosNode->shutdown();
     }
@@ -217,8 +224,6 @@ public:
     			lock.unlock();
     			return;
         	}
-
-//        	std::cout << "controlling, cycles remaining = " << cyclesRemainingTillControlMessage << std::endl;
 
             if (cyclesRemainingTillControlMessage == 0) {
                 // Block for control message
@@ -250,8 +255,6 @@ public:
     {
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
-//        	std::cout << "receiving ctrl message" << std::endl;
-
         	if (true || bytes_transffered == 32 + joints.size() * 8) {
                 int64_t* longBuffer = ((int64_t*) (buffer));
 
@@ -264,7 +267,6 @@ public:
                 int simCyclesAssuming1kHz = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * 1e3);
 
                 simulationCyclesPerControlCycle = longBuffer[0];
-//                std::cout << "simulation cycles per control cycle = " << simulationCyclesPerControlCycle << std::endl;
 
                 for (unsigned int i = 0; i < joints.size(); i++) {
                 	jointsUnderPositionControl[i] = jointPosOrTorqueData % 2 == 1;
@@ -273,6 +275,7 @@ public:
 
                 // Pointer arithmetic is evil
                 double* jointPositionsOrTorques = (double*) (buffer + 32);
+
                 for (unsigned int i = 0; i < joints.size(); i++) {
                     desiredPositionsOrTorques[i] = jointPositionsOrTorques[i];
                 }
