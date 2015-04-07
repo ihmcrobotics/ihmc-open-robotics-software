@@ -104,10 +104,11 @@ public class HandPoseBehavior extends BehaviorInterface
    {              
       this.robotSide = robotSide;
       fullRobotModel.updateFrames();
-      ReferenceFrame desiredHandFrame = aimReferenceFrameAxisAtPoint(robotSide, fullRobotModel.getHandControlFrame(robotSide), Axis.X, targetToAimAt);
+      ReferenceFrame desiredHandFrame = fullRobotModel.getHandControlFrame(robotSide).copyAndAimAxisAtPoint(Axis.X, targetToAimAt);
+      
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
-
+   
    public void orientHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
    {
       this.robotSide = robotSide;
@@ -134,29 +135,16 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandTransformToWorld, robotSide, trajectoryTime));
    }
    
-   private ReferenceFrame aimReferenceFrameAxisAtPoint(RobotSide robotSide, ReferenceFrame currentFrame, Axis currentFrameAxis, FramePoint targetToAimAt)
+   public static ReferenceFrame orientHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
    {
-      ReferenceFrame initialFrame = targetToAimAt.getReferenceFrame();
-      
-      targetToAimAt.changeFrame(currentFrame);
-      FrameVector targetRelativeToCurrentFrame = new FrameVector(currentFrame, targetToAimAt.getX(), targetToAimAt.getY(), targetToAimAt.getZ());
-      targetToAimAt.changeFrame(initialFrame);
-      
-      return currentFrame.getRotatedReferenceFrameCopyAlignedWithVector(currentFrameAxis, targetRelativeToCurrentFrame);
-   }
-   
-   private ReferenceFrame orientHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
-   {
-      this.robotSide = robotSide;
       fullRobotModel.updateFrames();
       
-      ReferenceFrame frameWithPalmNormalAimedAtCylinder = aimReferenceFrameAxisAtPoint(robotSide, fullRobotModel.getHandControlFrame(robotSide), Axis.X, cylinderOrigin);
-      ReferenceFrame frameOrientedForGrasping = frameWithPalmNormalAimedAtCylinder.getRotatedReferenceFrameCopyAlignedWithVector(Axis.Y, cylinderLongAxis);
+      ReferenceFrame frameOrientedForGrasping = fullRobotModel.getHandControlFrame(robotSide).copyAndAimAxisAtPoint(Axis.X, cylinderOrigin);
+      frameOrientedForGrasping = frameOrientedForGrasping.copyAndAlignAxisWithVector(Axis.Y, cylinderLongAxis);
         
       return frameOrientedForGrasping;
    }
    
-
    public void setInput(HandPosePacket handPosePacket, boolean stopHandIfCollision)
    {
       outgoingPacket = handPosePacket;
