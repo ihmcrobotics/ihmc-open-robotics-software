@@ -48,6 +48,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    private final FramePoint outdatedPositionInThePastInWorldFrame;
    
    private final FrameVector translationOffsetFrameVector = new FrameVector(worldFrame);
+   private final Vector3d translationOffsetVector = new Vector3d();
+   
+   private final RigidBodyTransform totalErrorTransform = new RigidBodyTransform(); 
    
    /**
     * Constructor
@@ -154,15 +157,17 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
       outdatedPositionInThePastInWorldFrame.changeFrame(worldFrame);
       
       translationOffsetFrameVector.sub(outdatedPositionInThePastInWorldFrame, upToDatePositionInThePastInWorldFrame);
-
-      Vector3d translationOffsetVector = new Vector3d();
       translationOffsetFrameVector.get(translationOffsetVector);
       
       outdatedPoseTransformInThePast_InUpToDateReferenceFrameInThePast_Translation.setTranslationAndIdentityRotation(translationOffsetVector);
       
+      
       outdatedPoseInThePast.changeFrame(upToDateReferenceFrameInThePast);
       outdatedPoseInThePast.getPose(outdatedPoseTransformInThePast_InUpToDateReferenceFrameInThePast_Rotation);
       outdatedPoseTransformInThePast_InUpToDateReferenceFrameInThePast_Rotation.zeroTranslation();
+
+      totalErrorTransform.set(outdatedPoseTransformInThePast_InUpToDateReferenceFrameInThePast_Rotation);
+      totalErrorTransform.setTranslation(translationOffsetVector);
       
       outdatedReferenceFrameInPresent_Rotation.update();
    }
@@ -199,5 +204,10 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    public long getUpToDateTimeStampedBufferOldestTimestamp()
    {
       return upToDateTimeStampedTransformBuffer.getOldestTimestamp();
+   }
+   
+   public void getTotalErrorTransform(RigidBodyTransform rigidBodyTransformToPack)
+   {
+      rigidBodyTransformToPack.set(totalErrorTransform);
    }
 }

@@ -9,6 +9,7 @@ import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterfa
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -47,7 +48,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final RigidBodyTransform correctedPelvisTransformInWorldFrame = new RigidBodyTransform();
    
    private final RigidBodyTransform totalErrorBetweenPelvisAndLocalizationTransform = new RigidBodyTransform();
-   private final RigidBodyTransform errorBetweenCurrentPositionAndCorrected = new RigidBodyTransform();
+   private final RigidBodyTransform errorBetweenCorrectedAndLocalizationTransform = new RigidBodyTransform();
    private final Vector3d totalErrorTranslation = new Vector3d(); 
    private final Quat4d totalErrorRotation = new Quat4d(); 
    private final DoubleYoVariable totalErrorTranslation_X;
@@ -70,6 +71,15 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final FramePose correctedPelvisPoseInWorldFrame = new FramePose(worldFrame);
    
    private final BooleanYoVariable hasOneIcpPacketEverBeenReceived;
+   
+   private final Vector3d localizationTranslation = new Vector3d();
+   private final Vector3d correctedPelvisTranslation = new Vector3d();
+   private final Vector3d errorBetweenCorrectedAndLocalizationTransform_Translation = new Vector3d();
+   
+   private final FrameOrientation localizationOrientation = new FrameOrientation(worldFrame);
+   private final FrameOrientation correctedPelvisOrientation = new FrameOrientation(worldFrame);
+   private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
+   private final Quat4d errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quat4d();
    
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
@@ -150,12 +160,24 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       if(!hasOneIcpPacketEverBeenReceived.getBooleanValue())
          correctedPelvisPoseInWorldFrame.setPose(stateEstimatorPelvisTransformInWorld);
       
+      correctedPelvisPoseInWorldFrame.getPose(correctedPelvisTransformInWorldFrame);
+      
+      correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
+      iterativeClosestPointInWorldFramePose.getPosition(localizationTranslation);
+      
+      iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(localizationOrientation);
+      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame);
+      
+      errorBetweenCorrectedAndLocalizationTransform_Rotation.setOrientationFromOneToTwo(localizationOrientation, correctedPelvisOrientation);
+      errorBetweenCorrectedAndLocalizationTransform_Rotation.getQuaternion(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
+
+      errorBetweenCorrectedAndLocalizationTransform_Translation.sub(localizationTranslation, correctedPelvisTranslation);
+      
       ////// for SCS feedback
       yoCorrectedPelvisPoseInWorldFrame.set(correctedPelvisPoseInWorldFrame);
       //////
-      correctedPelvisPoseInWorldFrame.getPose(correctedPelvisTransformInWorldFrame);
-//      correctedPelvisPoseInPelvisReferenceFramePose.changeFrame(pelvisReferenceFrame); // TODO add again the difference between current position and corrected
-//      correctedPelvisPoseInPelvisReferenceFramePose.getPose(errorBetweenCurrentPositionAndCorrected);
+      errorBetweenCorrectedAndLocalizationTransform.setTranslation(errorBetweenCorrectedAndLocalizationTransform_Translation);
+      errorBetweenCorrectedAndLocalizationTransform.setRotation(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
       
       rootJoint.setPositionAndRotation(correctedPelvisTransformInWorldFrame);
    }
@@ -200,8 +222,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
       ////for SCS feedback
       yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
-      ////
-      iterativeClosestPointInWorldFramePose.getPose(totalErrorBetweenPelvisAndLocalizationTransform); // TODO verify that
+      
+//      iterativeClosestPointInWorldFramePose.getPose(totalErrorBetweenPelvisAndLocalizationTransform); // TODO verify that
+      outdatedPoseUpdater.getTotalErrorTransform(totalErrorBetweenPelvisAndLocalizationTransform);
       
       ////for SCS feedback
       totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(totalErrorTranslation);
@@ -229,7 +252,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void sendCorrectionUpdatePacket()
    {
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCurrentPositionAndCorrected);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCorrectedAndLocalizationTransform);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    
