@@ -130,8 +130,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final DoubleYoVariable previousIcpPacketSentTime;
    private final TimeStampedTransformBuffer stateEstimatorPelvisPoseBuffer;
    private final DoubleYoVariable icpTimeDelay;
-   private final FramePose pelvisPoseInThePast;
-   private final PoseReferenceFrame pelvisReferenceFrameInThePast;
 
    private final YoFrameConvexPolygon2d yoSupportPolygon;
 
@@ -264,8 +262,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(10000);
       icpTimeDelay = new DoubleYoVariable(getName() + "IcpTimeDelay", registry);
       icpTimeDelay.set(0.99);
-      pelvisPoseInThePast = new FramePose(worldFrame);
-      pelvisReferenceFrameInThePast = new PoseReferenceFrame("pelvisReferenceFrameInThePast", pelvisPoseInThePast);
       ///////////////////
 
       String behaviorNameFirstLowerCase = FormattingTools.lowerCaseFirstLetter(getName());
@@ -2268,18 +2264,25 @@ public class DiagnosticBehavior extends BehaviorInterface
             TimeStampedTransform3D pelvisTimeStampedTransformInThePast = new TimeStampedTransform3D();
             stateEstimatorPelvisPoseBuffer.findTransform(timestamp, pelvisTimeStampedTransformInThePast);
             
-            pelvisPoseInThePast.setPose(pelvisTimeStampedTransformInThePast.getTransform3D());
-            pelvisReferenceFrameInThePast.setPoseAndUpdate(pelvisPoseInThePast);
+            RigidBodyTransform pelvisTransformInPast_Translation = new RigidBodyTransform(pelvisTimeStampedTransformInThePast.getTransform3D());
+            RigidBodyTransform pelvisTransformInPast_Rotation = new RigidBodyTransform(pelvisTransformInPast_Translation);
+            pelvisTransformInPast_Translation.setRotationToIdentity();
+            pelvisTransformInPast_Rotation.zeroTranslation();
+            
+            Quat4d orientationOffset = RandomTools.generateRandomQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
+            Vector3d translationOffset = RandomTools.generateRandomVector(random, minMaxIcpTranslationOffset.getDoubleValue());
 
-            FramePose pelvisPoseWithOffsetFramePose = new FramePose(pelvisReferenceFrameInThePast);
-            RigidBodyTransform pelvistransformWithOffset = new RigidBodyTransform();
-            Quat4d rotation = RandomTools.generateRandomQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
-            Vector3d translation = RandomTools.generateRandomVector(random, minMaxIcpTranslationOffset.getDoubleValue());
-            pelvisPoseWithOffsetFramePose.setPose(translation, rotation);
-            pelvisPoseWithOffsetFramePose.changeFrame(worldFrame);
-            pelvisPoseWithOffsetFramePose.getPose(pelvistransformWithOffset);
+            RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3d());
+            RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quat4d(), translationOffset);
+            RigidBodyTransform pelvisTransformWithOffset = new RigidBodyTransform();
 
-            TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvistransformWithOffset, timestamp);
+            pelvisTransformWithOffset.setIdentity();
+            pelvisTransformWithOffset.multiply(pelvisTransformInPast_Translation);
+            pelvisTransformWithOffset.multiply(offsetTranslationTransform);
+            pelvisTransformWithOffset.multiply(pelvisTransformInPast_Rotation);
+            pelvisTransformWithOffset.multiply(offsetRotationTransform);
+            
+            TimeStampedTransform3D timeStampedTransform3D = new TimeStampedTransform3D(pelvisTransformWithOffset, timestamp);
             StampedPosePacket stampedPosePacket = new StampedPosePacket("/pelvis", timeStampedTransform3D, 1.0);
 
             outgoingCommunicationBridge.sendPacketToController(stampedPosePacket);
