@@ -3,12 +3,16 @@ package us.ihmc.wholeBodyController;
 import java.util.ArrayList;
 
 import javax.vecmath.Matrix4d;
+import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.badlogic.gdx.math.Quaternion;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -19,6 +23,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -582,5 +587,47 @@ public abstract class WholeBodyIkSolverTest
       wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P3R, ControlledDoF.DOF_3P3R, handTargetArray, true, USE_RANDOM_START_LOCATIONS);
    }
 
+   @Ignore
+   @Test(timeout = 200000)
+   public void testWorkingSpaceFor5DoF()
+   {
+      WholeBodyIkSolverTestHelper wholeBodyTrajectoryTestHelper = getWholeBodyIkSolverTestHelper();
+
+      ArrayList<Pair<FramePose, FramePose>> handTargetArray = new  ArrayList<Pair<FramePose, FramePose>> ();
+
+      Point3d point = new Point3d();
+      Quat4d  orientation = new Quat4d( 0, 0, -0.7, 0.7); 
+      orientation.normalize();
+      
+      for (double x = 0.3; x<= 0.8; x += 0.1 )
+      {
+         for (double y = -0.5; y<= 0.5; y += 0.1 )
+         {
+            for (double z = 0.5; z<= 1.9; z += 0.1 )
+            {
+               FramePose handTarget = new FramePose();
+               point.set( x,y,z);
+               handTarget.setPoseIncludingFrame( ReferenceFrame.getWorldFrame(), point, orientation);
+               handTargetArray.add( new Pair<FramePose, FramePose>(handTarget, null));
+            }
+         }
+      }
+
+      
+      FullRobotModel actualRobotModel = wholeBodyTrajectoryTestHelper.getActualFullRobotModel();
+
+      Vector3d rootPosition = new Vector3d(0, 0, 0.93);
+      actualRobotModel.getRootJoint().setPosition(rootPosition);
+
+      scs = new SimulationConstructionSet(wholeBodyTrajectoryTestHelper.getRobot(), simulationTestingParameters);
+      FullRobotModelVisualizer modelVisualizer = new FullRobotModelVisualizer(scs, actualRobotModel, 0.01);
+
+      wholeBodyTrajectoryTestHelper.addGraphics(scs, modelVisualizer);
+
+      scs.startOnAThread();
+
+      wholeBodyTrajectoryTestHelper.executeHandTargetTest(ControlledDoF.DOF_3P2R, ControlledDoF.DOF_NONE, handTargetArray, true, false);
+   }
+   
 
 }
