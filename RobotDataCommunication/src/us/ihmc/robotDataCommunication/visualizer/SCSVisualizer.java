@@ -148,7 +148,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public long getDisplayOneInNPackets()
+   public int getDisplayOneInNPackets()
    {
       return displayOneInNPackets;
    }

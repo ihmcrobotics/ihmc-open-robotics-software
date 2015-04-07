@@ -319,7 +319,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public long getDisplayOneInNPackets()
+   public int getDisplayOneInNPackets()
    {
       return 1;
    }

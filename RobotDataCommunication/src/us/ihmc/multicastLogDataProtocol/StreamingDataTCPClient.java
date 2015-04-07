@@ -20,11 +20,14 @@ public class StreamingDataTCPClient extends Thread
 
    private final InetSocketAddress address;
    private final LogPacketHandler updateHandler;
+   
+   private final byte sendEveryNthTick;
 
-   public StreamingDataTCPClient(InetAddress dataIP, int port, LogPacketHandler updateHandler)
+   public StreamingDataTCPClient(InetAddress dataIP, int port, LogPacketHandler updateHandler, int sendEveryNthTick)
    {
       this.address = new InetSocketAddress(dataIP, port);
       this.updateHandler = updateHandler;
+      this.sendEveryNthTick = (byte) sendEveryNthTick;
    }
 
    public static int selectAndRead(SelectionKey key, ByteBuffer destination, int timeout) throws IOException
@@ -63,7 +66,7 @@ public class StreamingDataTCPClient extends Thread
          connection.configureBlocking(false);
          Selector selector = Selector.open();
          key = connection.register(selector, SelectionKey.OP_READ);
-         sendRequest(connection, LogHandshake.STREAM_REQUEST);
+         sendRequest(connection, LogHandshake.STREAM_REQUEST, sendEveryNthTick);
 
       }
       catch (IOException e)
@@ -147,7 +150,7 @@ public class StreamingDataTCPClient extends Thread
       SocketChannel connection = SocketChannel.open();
       connection.connect(address);
       
-      sendRequest(connection, LogHandshake.HANDSHAKE_REQUEST);
+      sendRequest(connection, LogHandshake.HANDSHAKE_REQUEST, (byte)0);
       connection.configureBlocking(false);
       
       Selector selector = Selector.open();
@@ -161,10 +164,11 @@ public class StreamingDataTCPClient extends Thread
 
    }
 
-   private void sendRequest(SocketChannel connection, byte request) throws IOException
+   private void sendRequest(SocketChannel connection, byte request, byte aNumber) throws IOException
    {
-      ByteBuffer command = ByteBuffer.allocateDirect(1);
+      ByteBuffer command = ByteBuffer.allocateDirect(2);
       command.put(request);
+      command.put(aNumber);
       command.flip();
       connection.write(command);
    }
