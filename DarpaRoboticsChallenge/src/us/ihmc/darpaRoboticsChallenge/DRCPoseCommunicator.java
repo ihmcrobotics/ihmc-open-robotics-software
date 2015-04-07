@@ -17,6 +17,7 @@ import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
 import us.ihmc.utilities.ThreadTools;
@@ -49,7 +50,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
-   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
+   public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, SensorReader sensorReader,
          GlobalDataProducer dataProducer, SensorOutputMapReadOnly sensorOutputMapReadOnly, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation)
    {
       this.dataProducer = dataProducer;
@@ -60,7 +61,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       setupForceSensorMassCompensators(estimatorModel);
 
-      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(jointConfigurationGathererAndProducer.getJoints(), jointConfigurationGathererAndProducer.getForceSensorDefinitions()), 16);
+      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(jointConfigurationGathererAndProducer.getJoints(), jointConfigurationGathererAndProducer.getForceSensorDefinitions(), sensorReader), 16);
       startWriterThread();
    }
 
@@ -162,6 +163,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
       state.setRawImuData(rawImuLinearAccelerationToPack, orientationQuat, rawImuAngularVelocityToPack);
       
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
+
+      state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
       
       robotConfigurationDataRingBuffer.commit();
    }
@@ -170,17 +173,19 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       private final OneDoFJoint[] joints;
       private final ForceSensorDefinition[] forceSensorDefinitions;
+      private final SensorReader sensorReader;
 
-      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions)
+      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, SensorReader sensorReader)
       {
          this.joints = joints;
          this.forceSensorDefinitions = forceSensorDefinitions;
+         this.sensorReader = sensorReader;
       }
 
       @Override
       public RobotConfigurationData newInstance()
       {
-         return new RobotConfigurationData(joints, forceSensorDefinitions);
+         return new RobotConfigurationData(joints, forceSensorDefinitions, sensorReader.newAuxiliaryRobotDataInstance());
       }
 
    }

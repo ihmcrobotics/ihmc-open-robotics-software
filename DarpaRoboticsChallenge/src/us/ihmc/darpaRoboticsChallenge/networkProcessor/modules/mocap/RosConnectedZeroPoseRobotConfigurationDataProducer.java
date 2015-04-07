@@ -96,7 +96,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    {
       RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.get();
       fullRobotModel.updateFrames();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions);
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null);
 
       robotConfigurationData.setTimestamp(totalNsecs);
       if(pelvisPoseInMocapFrame != null)

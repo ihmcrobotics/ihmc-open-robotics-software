@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
@@ -85,5 +86,10 @@ public class DRCPerfectSensorReader implements SensorReader
    public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
    {
       forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
+   }
+
+   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   {
+      return null;
    }
 }
