@@ -57,4 +57,11 @@ public class ConstantCenterOfMassHeightTrajectoryGenerator implements CoMHeightT
       // TODO Auto-generated method stub
       
    }
+
+   @Override
+   public void initializeDesiredHeightToCurrent()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

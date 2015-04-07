@@ -20,4 +20,6 @@ public interface CoMHeightTrajectoryGenerator
    public abstract void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, ContactStatesAndUpcomingFootstepData centerOfMassHeightInputData);
 
    public abstract boolean hasBeenInitializedWithNextStep();
+
+   public abstract void initializeDesiredHeightToCurrent();
 }
