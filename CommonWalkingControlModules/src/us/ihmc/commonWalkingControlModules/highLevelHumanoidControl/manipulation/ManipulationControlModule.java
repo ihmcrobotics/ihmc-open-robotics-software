@@ -280,6 +280,14 @@ public class ManipulationControlModule
       }
    }
 
+   public void freeze()
+   {
+      for (HandControlModule handControlModule : handControlModules)
+      {
+         freeze(handControlModule);
+      }
+   }
+
    private void freeze(HandControlModule handControlModule)
    {
       if (handControlModule.isControllingPoseInWorld())
