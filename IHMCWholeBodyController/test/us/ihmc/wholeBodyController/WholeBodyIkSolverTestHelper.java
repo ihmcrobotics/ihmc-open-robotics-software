@@ -76,7 +76,7 @@ public class WholeBodyIkSolverTestHelper
       this.scs = scs;
       this.modelVisualizer = modelVisualizer;
       YoGraphicsListRegistry listRegistry = new YoGraphicsListRegistry();
-      bagOfBalls = new BagOfBalls(150, 0.03, "targets", YoAppearance.Transparent(), registry, listRegistry);
+      bagOfBalls = new BagOfBalls(1000, 0.03, "targets", YoAppearance.Transparent(), registry, listRegistry);
       scs.addYoGraphicsListRegistry(listRegistry);
    }
 
@@ -86,7 +86,8 @@ public class WholeBodyIkSolverTestHelper
       executeHandTargetTest(dofToControlLeft, dofToControlRight, handTargetPairsArray, thisTestIsStaticsBased, true);
    }
 
-   public void executeHandTargetTest(ControlledDoF dofToControlLeft, ControlledDoF dofToControlRight,
+   public void executeHandTargetTest(ControlledDoF dofToControlLeft, 
+                                     ControlledDoF dofToControlRight,
                                      ArrayList<Pair<FramePose, FramePose>> handTargetPairsArray, boolean thisTestIsStaticsBased,
                                      boolean useRandomRobotLocations)
    {
