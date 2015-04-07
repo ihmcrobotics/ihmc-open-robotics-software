@@ -50,7 +50,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameConvexPolygon2d;
 
 public class IHMCHumanoidBehaviorManager
 {
-   public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.006;
+   public static final double BEHAVIOR_YO_VARIABLE_SERVER_DT = 0.01;
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
@@ -145,8 +145,7 @@ public class IHMCHumanoidBehaviorManager
          yoVariableServer.start();
       }
 
-      Thread dispatcherThread = new Thread(dispatcher, "BehaviorDispatcher");
-      dispatcherThread.start();
+      dispatcher.start();
    }
 
    /**
