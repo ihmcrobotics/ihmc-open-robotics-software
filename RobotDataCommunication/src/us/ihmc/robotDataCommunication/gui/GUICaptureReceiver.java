@@ -38,7 +38,7 @@ public class GUICaptureReceiver extends Thread
             System.out.println("Listening for new streams on " + iface);
             address = GUICaptureBroadcast.getIP(iface, announceGroup);
             System.out.println("Found stream. Connecting to " + address);
-            StreamingDataTCPClient client = new StreamingDataTCPClient(address, LogDataProtocolSettings.UI_DATA_PORT, handler);
+            StreamingDataTCPClient client = new StreamingDataTCPClient(address, LogDataProtocolSettings.UI_DATA_PORT, handler, 1);
             client.run(); // Run the runnable, making it blocking
          }
          catch (IOException e)

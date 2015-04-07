@@ -28,7 +28,7 @@ public interface YoVariablesUpdatedListener
 
    public void receiveTimedOut();
 
-   public long getDisplayOneInNPackets();
+   public int getDisplayOneInNPackets();
 
    public void timestampReceived(long timestamp);
 
