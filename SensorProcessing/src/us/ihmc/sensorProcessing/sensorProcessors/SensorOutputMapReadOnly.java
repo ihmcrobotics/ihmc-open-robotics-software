@@ -20,6 +20,8 @@ public interface SensorOutputMapReadOnly
    public double getJointAccelerationProcessedOutput(OneDoFJoint oneDoFJoint);
 
    public double getJointTauProcessedOutput(OneDoFJoint oneDoFJoint);
+
+   public boolean isJointEnabled(OneDoFJoint oneDoFJoint);
    
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs();
 }

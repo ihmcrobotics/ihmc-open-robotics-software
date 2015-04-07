@@ -103,8 +103,10 @@ public class JointStateUpdater
          double positionSensorData = sensorMap.getJointPositionProcessedOutput(oneDoFJoint);
          double velocitySensorData = sensorMap.getJointVelocityProcessedOutput(oneDoFJoint);
          double torqueSensorData = sensorMap.getJointTauProcessedOutput(oneDoFJoint);
+         boolean jointEnabledIndicator = sensorMap.isJointEnabled(oneDoFJoint);
          
          oneDoFJoint.setQ(positionSensorData);
+         oneDoFJoint.setEnabled(jointEnabledIndicator);
 
          if (enableIMUBasedPelvisToTorsoEncodersVelocityFilter.getBooleanValue()
                && iMUBasedPelvisToTorsoEncodersVelocityFilter.getJointVelocities().get(oneDoFJoint) != null)

@@ -10,6 +10,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -19,6 +20,7 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameQuaternion;
@@ -74,11 +76,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final List<OneDoFJoint> jointSensorDefinitions;
    private final List<IMUDefinition> imuSensorDefinitions;
 
+   private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> jointEnabledIndicators = new LinkedHashMap<>();
+
    private final double updateDT;
 
    private final Matrix3d tempOrientation = new Matrix3d();
    private final Vector3d tempAngularVelocity = new Vector3d();
    private final Vector3d tempLinearAcceleration = new Vector3d();
+
+   private AuxiliaryRobotData auxiliaryRobotData;
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
          YoVariableRegistry parentRegistry)
@@ -87,6 +93,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
       jointSensorDefinitions = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       imuSensorDefinitions = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
+      this.auxiliaryRobotData = null;
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
       {
@@ -112,6 +119,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          inputJointTaus.put(oneDoFJoint, rawJointTau);
          outputJointTaus.put(oneDoFJoint, rawJointTau);
          processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
+
+         BooleanYoVariable jointEnabledIndicator = new BooleanYoVariable("joint_enabled_" + jointName, registry);
+         jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
       }
 
       SensorNoiseParameters sensorNoiseParameters = sensorProcessingConfiguration.getSensorNoiseParameters();
@@ -682,6 +692,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return sensorHeadPPSTimetamp.getLongValue();
    }
 
+   public void setJointEnabled(OneDoFJoint oneDoFJoint, boolean enabled)
+   {
+      jointEnabledIndicators.get(oneDoFJoint).set(enabled);
+   }
+
    public void setJointPositionSensorValue(OneDoFJoint oneDoFJoint, double value)
    {
       inputJointPositions.get(oneDoFJoint).set(value);
@@ -781,9 +796,24 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return inputJointTaus.get(oneDoFJoint).getDoubleValue();
    }
 
+   @Override public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   {
+      return jointEnabledIndicators.get(oneDoFJoint).getBooleanValue();
+   }
+
    @Override
    public List<? extends IMUSensorReadOnly> getIMURawOutputs()
    {
       return inputIMUs;
+   }
+
+   @Override public AuxiliaryRobotData getAuxiliaryRobotData()
+   {
+      return this.auxiliaryRobotData;
+   }
+
+   public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
+   {
+      this.auxiliaryRobotData = auxiliaryRobotData;
    }
 }

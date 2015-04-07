@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -171,5 +172,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();
+   }
+
+   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   {
+      return null;
    }
 }

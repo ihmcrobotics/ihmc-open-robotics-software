@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -234,9 +235,19 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return oneDoFJoint.getTau();
    }
 
+   @Override public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   {
+      return oneDoFJoint.isEnabled();
+   }
+
    @Override
    public List<? extends IMUSensorReadOnly> getIMURawOutputs()
    {
       return new ArrayList<>();
+   }
+
+   @Override public AuxiliaryRobotData getAuxiliaryRobotData()
+   {
+      return null;
    }
 }

@@ -16,6 +16,7 @@ import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -178,5 +179,10 @@ public class DRCSimGazeboSensorReader implements SensorReader
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
+   }
+
+   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   {
+      return null;
    }
 }
