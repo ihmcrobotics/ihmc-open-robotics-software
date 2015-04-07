@@ -201,6 +201,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FootExplorationControlModule footExplorationControlModule;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
+   private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
+   private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
+
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
@@ -327,6 +330,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       resetIntegratorsAfterSwing.set(true);
       alwaysIntegrateAnkleAcceleration.set(true);
+
+      // Just to allocate memory
+      safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+      supportPolygonSafeMargin.set(0.015);
    }
 
    private void setupStateMachine()
@@ -513,9 +520,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pelvisICPBasedTranslationManager.compute(null);
             pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
 
-            FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
-            supportPolygonInMidFeetZUp.orthogonalProjection(desiredICPLocal);
-            supportPolygonInMidFeetZUp.pullPointTowardsCentroid(desiredICPLocal, 0.10);
+            safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+            safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
+            safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
          }
@@ -880,9 +887,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICPLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
             pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
 
-            FrameConvexPolygon2d footPolygonInAnkleZUp = bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide);
-            footPolygonInAnkleZUp.orthogonalProjection(desiredICPLocal);
-            footPolygonInAnkleZUp.pullPointTowardsCentroid(desiredICPLocal, 0.10);
+            safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
+            safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
+            safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
          }
