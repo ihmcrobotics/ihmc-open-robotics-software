@@ -383,4 +383,10 @@ public class FeetManager
    {
       return footControlModules.get(robotSide).isLegDoingToeOffAndAtLimit();
    }
+
+   public void resetHeightCorrectionParametersForSingularityAvoidance()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footControlModules.get(robotSide).resetHeightCorrectionParametersForSingularityAvoidance();
+   }
 }

@@ -436,6 +436,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
    }
 
+   public void initializeDesiredHeightToCurrent()
+   {
+      centerOfMassHeightTrajectoryGenerator.initializeDesiredHeightToCurrent();
+      coMHeightTimeDerivativesSmoother.reset();
+      feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
+   }
+
    private void initializeContacts()
    {
       momentumBasedController.clearContacts();
