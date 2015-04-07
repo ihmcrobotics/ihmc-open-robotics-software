@@ -318,6 +318,11 @@ public class MomentumBasedControllerFactory
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.WALKING);
    }
+   
+   public void reinitializePositionControl()
+   {
+      highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.JOINT_POSITION_CONTROL);
+   }
 
    public void addHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
    {
