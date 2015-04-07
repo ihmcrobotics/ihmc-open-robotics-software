@@ -36,20 +36,14 @@ public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
-      /**
-       * The following code seems to be useless. Consider removing.
-       */
-
-//      HashMap<String, OneDoFJoint> allJoints = new HashMap<String, OneDoFJoint>();
-//      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
-//      {
-//         if (joint instanceof OneDoFJoint)
-//         {
-//            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
-//            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
-//            allJoints.put(oneDoFJoint.getName(), oneDoFJoint);
-//         }
-//      }
+      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(rootJoint.getSuccessor()))
+      {
+         if (joint instanceof OneDoFJoint)
+         {
+            OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
+         }
+      }
 
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
