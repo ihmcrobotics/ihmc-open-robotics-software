@@ -4,18 +4,20 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Random;
 
-import javax.vecmath.Vector3d;
+import javax.vecmath.AxisAngle4d;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -29,16 +31,17 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.MemoryTools;
+import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -86,7 +89,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
    private int numberOfArmJoints;
    private LinkedHashMap<ArmJointName, Integer> armJointIndices = new LinkedHashMap<ArmJointName, Integer>();
 
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    @Before
    public void setUp()
@@ -109,7 +112,8 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
 
    @EstimatedDuration(duration = 50.0)
    @Test(timeout = 300000)
-   public void testRotateInJointSpaceAndUnRotateInTaskSpace() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   public void testRotateSingleArmJointAndUnrotateInTaskSpace() throws FileNotFoundException,
+         SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -118,101 +122,109 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       assertTrue(success);
 
       RobotSide robotSide = RobotSide.LEFT;
-      double trajectoryTime = 2.0;
-      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
-      ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
-      OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
+      double trajectoryTime = 1.0;
+      int randomArmJointIndex = RandomTools.generateRandomInt(new Random(), 0, numberOfArmJoints - 1);
+      ArmJointName armJointToRotateName = armJointNames[randomArmJointIndex];
+     
+      ReferenceFrame armJointFrame = drcBehaviorTestHelper.getReferenceFrames().getArmFrame(robotSide, armJointToRotateName);
 
-      PrintTools.debug(this, "Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName);
       FramePose initialHandPose = getCurrentHandPose(robotSide);
-      Axis handFrameAxisAlignedWithWristPitchJoint = getReferenceFrameAxisThatIsAlignedWithParentArmJoint(robotSide, handFrame, wristPitchJointName);
-      FramePose handPoseAfterJointSpaceRotation = getCurrentHandPose(robotSide);
-      PrintTools.debug(this, "Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint);
+      double q_armJointInitial = getCurrentArmJointAngle(robotSide, armJointToRotateName);
+      double q_armJointDesired = q_armJointInitial + Math.toRadians(90.0);
+      q_armJointDesired = clipDesiredToJointLimits(robotSide, armJointToRotateName, q_armJointDesired);
+      double desiredRotationAngle = q_armJointDesired - q_armJointInitial;
+      
+//      rotateSingleArmJoint(robotSide, armJointToRotateName, q_armJointDesired, trajectoryTime);
+//      moveHandInTaskSpaceAlongLine(robotSide, initialHandPose, trajectoryTime);
 
-      double jointSpaceRotation = initialHandPose.getOrientationDistance(handPoseAfterJointSpaceRotation);
-      assertEquals("", Math.toRadians(90.0), Math.abs(jointSpaceRotation), Math.toRadians(1.0));
+      TransformReferenceFrame armJointFrameInitial = new TransformReferenceFrame("beforeRotationStaticFrame", ReferenceFrame.getWorldFrame(),
+            armJointFrame.getTransformToWorldFrame());
+      rotateSingleArmJoint(robotSide, armJointToRotateName, q_armJointDesired, trajectoryTime);
+      
+      assertEquals("Arm Joint Should Have Rotated " + Math.toDegrees(desiredRotationAngle) + " Degrees!", Math.abs(desiredRotationAngle),
+            initialHandPose.getOrientationDistance(getCurrentHandPose(robotSide)), Math.toRadians(1.0));
+      
+      Axis rotationAxis = getAxisOfRotation(armJointFrameInitial, armJointFrame);
 
-      double turnAngleRad = Math.toRadians(90.0);
-      double q_wristPitchInitial = getCurrentArmPose(robotSide)[armJointIndices.get(wristPitchJointName)];
-      double q_wristDesired = -getJointMotionDirectionThatDoesNotExceedJointLimits(wristPitchOneDoFJoint, q_wristPitchInitial, turnAngleRad);
+      RotateHandAboutAxisBehavior taskSpaceBehavior = moveHandInTaskSpaceAboutAxis(robotSide, rotationAxis, armJointFrame, -desiredRotationAngle, trajectoryTime);
 
-      boolean useWholeBodyInverseKinematics = false;
-      final RotateHandAboutAxisBehavior rotateHandBehavior = createNewRotateHandBehavior(useWholeBodyInverseKinematics);
-      rotateHandBehavior.initialize();
-      rotateHandBehavior.setInput(robotSide, handPoseAfterJointSpaceRotation, handFrameAxisAlignedWithWristPitchJoint, handFrame.getTransformToWorldFrame(),
-            q_wristDesired, trajectoryTime);
-
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateHandBehavior);
-      FramePose handPoseAfterTaskSpaceUnRotation = getCurrentHandPose(robotSide);
-
-      success = success & rotateHandBehavior.isDone();
+      assertTrue(taskSpaceBehavior.isDone());
       assertTrue(success);
-      assertPosesAreWithinThresholds(initialHandPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(25.0));  //TODO: Looks decent in sim, but need to figure out why orientation threshold is so large.
+      assertPosesAreWithinThresholds(initialHandPose, getCurrentHandPose(robotSide), 0.05, Math.toRadians(1.0));
 
       BambooTools.reportTestFinishedMessage();
+   }
+
+   private HandPoseBehavior rotateSingleArmJoint(RobotSide robotSide, ArmJointName armJointToRotateName, double q_armJointDesired, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      HandPoseBehavior jointSpaceBehavior = createJointSpaceHandPoseBehavior(robotSide, armJointToRotateName, q_armJointDesired, trajectoryTime);
+      
+      PrintTools.debug(this,"Rotating " + armJointToRotateName + " to desired position: " + q_armJointDesired);
+      drcBehaviorTestHelper.executeBehaviorUntilDone(jointSpaceBehavior);
+      PrintTools.debug(this,"Done Rotating");
+      
+      return jointSpaceBehavior;
+   }
+      
+   private RotateHandAboutAxisBehavior moveHandInTaskSpaceAboutAxis(RobotSide robotSide, Axis rotationAxis, ReferenceFrame rotationAxisFrame, double rotationAngle, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      final RotateHandAboutAxisBehavior rotateAboutAxisBehavior = createRotateHandBehavior(robotSide, false);
+      rotateAboutAxisBehavior.initialize();
+
+      double rotationRate = Math.abs(rotationAngle) / trajectoryTime;
+      boolean stopHandIfCollision = false;
+      rotateAboutAxisBehavior.setInput(robotSide, getCurrentHandPose(robotSide), rotationAxis, rotationAxisFrame.getTransformToWorldFrame(),
+            rotationAngle, rotationRate, stopHandIfCollision);
+
+      PrintTools.debug(this,"Moving Hand Along Circular Trajectory");
+      boolean success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateAboutAxisBehavior);
+      assertTrue(success);
+      PrintTools.debug(this,"Un-Rotating Should Be Done");
+      
+      return rotateAboutAxisBehavior;
+   }
+
+   private void moveHandInTaskSpaceAlongLine(RobotSide robotSide, FramePose desiredPose, double trajectoryTime) throws SimulationExceededMaximumTimeException
+   {
+      final HandPoseBehavior handPoseBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
+      
+      handPoseBehavior.initialize();
+      RigidBodyTransform worldToDesiredHandPoseTransform = new RigidBodyTransform();
+      desiredPose.getPose(worldToDesiredHandPoseTransform);
+      handPoseBehavior.setInput(Frame.WORLD, worldToDesiredHandPoseTransform, robotSide, trajectoryTime);
+
+      PrintTools.debug(this,"Un-Rotating ArmJoint Using Straight-Line Trajectory");
+      boolean success = drcBehaviorTestHelper.executeBehaviorUntilDone(handPoseBehavior);
+      assertTrue(success);
+      PrintTools.debug(this,"Un-Rotating Should Be Done");
+
+      assertTrue(handPoseBehavior.isDone());
+      FramePose handPoseAfterTaskSpaceUnRotation = getCurrentHandPose(robotSide);
+      assertPosesAreWithinThresholds(desiredPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(1.0));
    }
    
-   @EstimatedDuration(duration = 50.0)
-   @Test(timeout = 300000)
-   public void testRotateInJointSpaceAndUnRotateInTaskSpaceUsingWholeBodyInverseKinematics() throws FileNotFoundException, SimulationExceededMaximumTimeException
+   private HandPoseBehavior createJointSpaceHandPoseBehavior(RobotSide robotSide, ArmJointName armJointToRotateName, double q_armJointDesired, double trajectoryTime)
    {
-      BambooTools.reportTestStartedMessage();
-
-      PrintTools.debug(this, "Initializing Simulation");
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      RobotSide robotSide = RobotSide.LEFT;
-      double trajectoryTime = 2.0;
-      ReferenceFrame handFrame = drcBehaviorTestHelper.getSDFFullRobotModel().getHandControlFrame(robotSide);
-      ArmJointName wristPitchJointName = ArmJointName.FIRST_WRIST_PITCH;
-      OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, wristPitchJointName);
-
-      PrintTools.debug(this, "Determining which Axis (X,Y,or Z) in " + handFrame + " is aligned with: " + wristPitchJointName);
-      FramePose initialHandPose = getCurrentHandPose(robotSide);
-      Axis handFrameAxisAlignedWithWristPitchJoint = getReferenceFrameAxisThatIsAlignedWithParentArmJoint(robotSide, handFrame, wristPitchJointName);
-      FramePose handPoseAfterJointSpaceRotation = getCurrentHandPose(robotSide);
-      PrintTools.debug(this, "Axis aligned with " + wristPitchJointName + " : " + handFrameAxisAlignedWithWristPitchJoint);
-
-      double jointSpaceRotation = initialHandPose.getOrientationDistance(handPoseAfterJointSpaceRotation);
-      assertEquals("", Math.toRadians(90.0), Math.abs(jointSpaceRotation), Math.toRadians(1.0));
-
-      double turnAngleRad = Math.toRadians(90.0);
-      double q_wristPitchInitial = getCurrentArmPose(robotSide)[armJointIndices.get(wristPitchJointName)];
-      double q_wristDesired = -getJointMotionDirectionThatDoesNotExceedJointLimits(wristPitchOneDoFJoint, q_wristPitchInitial, turnAngleRad);
-
-      boolean useWholeBodyInverseKinematics = true;
-      final RotateHandAboutAxisBehavior rotateHandBehavior = createNewRotateHandBehavior(useWholeBodyInverseKinematics);
-      rotateHandBehavior.initialize();
-      rotateHandBehavior.setInput(robotSide, handPoseAfterJointSpaceRotation, handFrameAxisAlignedWithWristPitchJoint, handFrame.getTransformToWorldFrame(),
-            q_wristDesired, trajectoryTime);
-
-      success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateHandBehavior);
-      FramePose handPoseAfterTaskSpaceUnRotation = getCurrentHandPose(robotSide);
-
-      success = success & rotateHandBehavior.isDone();
-      assertTrue(success);
-      assertPosesAreWithinThresholds(initialHandPose, handPoseAfterTaskSpaceUnRotation, 0.05, Math.toRadians(25.0));  //TODO: Looks decent in sim, but need to figure out why orientation threshold is so large.
-
-      BambooTools.reportTestFinishedMessage();
+      final HandPoseBehavior jointSpaceBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+            drcBehaviorTestHelper.getYoTime());
+      
+      jointSpaceBehavior.initialize();
+      double[] desiredJointAngles = getCurrentArmPose(robotSide);
+      setDesiredAngleOfSingleArmJoint(desiredJointAngles, robotSide, armJointToRotateName, q_armJointDesired, false);
+      HandPosePacket handPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredJointAngles);
+      jointSpaceBehavior.setInput(handPosePacket);
+      
+      return jointSpaceBehavior;
    }
-
-   private void printArmJointAngles(double[] armJointAngles)
-   {
-      for (int i = 0; i < numberOfArmJoints; i++)
-      {
-         PrintTools.debug(this, "desired q_" + armJointNames[i] + " : " + armJointAngles[i]);
-      }
-   }
-
-   private RotateHandAboutAxisBehavior createNewRotateHandBehavior(boolean useWholeBodyInverseKinematics)
+   
+   private RotateHandAboutAxisBehavior createRotateHandBehavior(RobotSide robotSide, boolean useWholeBodyInverseKinematics)
    {
       BehaviorCommunicationBridge communicationBridge = drcBehaviorTestHelper.getBehaviorCommunicationBridge();
-      SDFFullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      ReferenceFrames referenceFrames = drcBehaviorTestHelper.getReferenceFrames();
       DoubleYoVariable yoTime = drcBehaviorTestHelper.getYoTime();
 
-      RotateHandAboutAxisBehavior ret = new RotateHandAboutAxisBehavior(communicationBridge, fullRobotModel, referenceFrames, getRobotModel(), yoTime, useWholeBodyInverseKinematics);
+      RotateHandAboutAxisBehavior ret = new RotateHandAboutAxisBehavior(robotSide.getLowerCaseName(), communicationBridge,
+            drcBehaviorTestHelper.getSDFFullRobotModel(), yoTime);
       return ret;
    }
 
@@ -224,119 +236,82 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       ret.changeFrame(ReferenceFrame.getWorldFrame());
       return ret;
    }
-
-   private FramePose getRobotPose(ReferenceFrames referenceFrames)
+   
+   private Axis getAxisOfRotation(TransformReferenceFrame frameBeforeRotation, ReferenceFrame frameAfterRotation)
    {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      RigidBodyTransform beforeToAfterRotationTransform = frameBeforeRotation.getTransformToDesiredFrame(frameAfterRotation);
+      AxisAngle4d beforeToAfterRotationAxisAngle = new AxisAngle4d();
+      beforeToAfterRotationTransform.getRotation(beforeToAfterRotationAxisAngle);
 
-      FramePose ret = new FramePose();
-
-      drcBehaviorTestHelper.updateRobotModel();
-      ReferenceFrame midFeetFrame = referenceFrames.getMidFeetZUpFrame();
-
-      ret.setToZero(midFeetFrame);
-      ret.changeFrame(worldFrame);
-
-      return ret;
-   }
-
-   private Axis getReferenceFrameAxisThatIsAlignedWithParentArmJoint(RobotSide robotSide, ReferenceFrame referenceFrame, ArmJointName parentOfReferenceFrame)
-         throws SimulationExceededMaximumTimeException
-   {
-      drcBehaviorTestHelper.updateRobotModel();
-      double turnAngleRad = Math.toRadians(90.0);
-      double trajectoryTime = 1.0;
-
-      OneDoFJoint wristPitchOneDoFJoint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, parentOfReferenceFrame);
-      double[] initialJointAngles = getCurrentArmPose(robotSide);
-      if (DEBUG)
-         printArmJointAngles(initialJointAngles);
-
-      double q_wristPitchInitial = initialJointAngles[armJointIndices.get(parentOfReferenceFrame)];
-      double q_wristDesired = getJointMotionDirectionThatDoesNotExceedJointLimits(wristPitchOneDoFJoint, q_wristPitchInitial, turnAngleRad);
-
-      ArrayList<FrameVector> handFrameXYZAxes = new ArrayList<FrameVector>();
-      handFrameXYZAxes.add(new FrameVector(referenceFrame, 1.0, 0.0, 0.0));
-      handFrameXYZAxes.add(new FrameVector(referenceFrame, 0.0, 1.0, 0.0));
-      handFrameXYZAxes.add(new FrameVector(referenceFrame, 0.0, 0.0, 1.0));
-
-      double[] desiredJointAngles = initialJointAngles;
-      setSingleJoint(desiredJointAngles, robotSide, parentOfReferenceFrame, q_wristDesired, true);
-
-      if (q_wristDesired != desiredJointAngles[armJointIndices.get(parentOfReferenceFrame)])
-         throw new RuntimeException("Desired joint angles array has not been properly set.  Desired wrist pitch angle (" + q_wristDesired
-               + ") does not equal that specified in the array (" + desiredJointAngles[armJointIndices.get(parentOfReferenceFrame)]);
+      double rotationAngle = beforeToAfterRotationAxisAngle.angle;
+      Axis rotationAxis = null;
+      if (Math.abs(Math.round(beforeToAfterRotationAxisAngle.x)) == 1.0)
+      {
+         rotationAxis = Axis.X;
+         rotationAngle *= Math.signum(beforeToAfterRotationAxisAngle.x);
+      }
+      if (Math.abs(Math.round(beforeToAfterRotationAxisAngle.y)) == 1.0)
+      {
+         rotationAxis = Axis.Y;
+         rotationAngle *= Math.signum(beforeToAfterRotationAxisAngle.y);
+      }
+      if (Math.abs(Math.round(beforeToAfterRotationAxisAngle.z)) == 1.0)
+      {
+         rotationAxis = Axis.Z;
+         rotationAngle *= Math.signum(beforeToAfterRotationAxisAngle.z);
+      }
 
       if (DEBUG)
-         printArmJointAngles(desiredJointAngles);
-
-      ArrayList<Vector3d> initialHandFrameAxesInWorld = new ArrayList<Vector3d>();
-      for (FrameVector framePoint : handFrameXYZAxes)
       {
-         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         initialHandFrameAxesInWorld.add(framePoint.getVectorCopy());
-         framePoint.changeFrame(referenceFrame);
+         PrintTools.debug(this,"beforeToAfterRotationAxisAngle: " + beforeToAfterRotationAxisAngle);
+         PrintTools.debug(this,"Rotation Axis: " + rotationAxis);
+         PrintTools.debug(this,"Rotation Angle: " + rotationAngle);
       }
-
-      final HandPoseBehavior rotateWristPitchBehavior = new HandPoseBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getYoTime());
-      rotateWristPitchBehavior.initialize();
-      HandPosePacket handPosePacket = new HandPosePacket(robotSide, trajectoryTime, desiredJointAngles);
-      rotateWristPitchBehavior.setInput(handPosePacket);
-
-      boolean success = drcBehaviorTestHelper.executeBehaviorUntilDone(rotateWristPitchBehavior);
-      assertTrue(success);
-
-      ArrayList<Vector3d> finalHandFrameAxesInWorld = new ArrayList<Vector3d>();
-      double maxDotProduct = 0.0;
-      Axis axisAlignedWithWristPitchJoint = null;
-
-      int i = 0;
-      System.out.println("\n");
-      for (FrameVector framePoint : handFrameXYZAxes)
-      {
-         framePoint.changeFrame(ReferenceFrame.getWorldFrame());
-         finalHandFrameAxesInWorld.add(framePoint.getVectorCopy());
-         framePoint.changeFrame(referenceFrame);
-
-         Axis currentAxis = Axis.values()[i];
-
-         double dotProduct = initialHandFrameAxesInWorld.get(i).dot(finalHandFrameAxesInWorld.get(i));
-         if (DEBUG)
-            PrintTools.debug(this, currentAxis + "dotProduct : " + dotProduct);
-
-         if (Math.abs(dotProduct) > maxDotProduct)
-         {
-            maxDotProduct = Math.abs(dotProduct);
-            axisAlignedWithWristPitchJoint = currentAxis;
-         }
-
-         i++;
-      }
-
-      return axisAlignedWithWristPitchJoint;
+      
+      return rotationAxis;
    }
 
-   private double getJointMotionDirectionThatDoesNotExceedJointLimits(OneDoFJoint wristPitchOneDoFJoint, double q_wristPitchInitial, double turnAngleRad)
+   private void switchDirectionOfRotationIfNecessaryToAvoidJointLimits(RobotSide robotSide, ArmJointName armJointName, double q_initial, double q_desired)
    {
+      OneDoFJoint joint = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, armJointName);
 
-      double q_wristPitchInitialProximityToLowerLimit = Math.abs(q_wristPitchInitial - wristPitchOneDoFJoint.getJointLimitLower());
-      double q_wristPitchInitialProximityToUpperLimit = Math.abs(q_wristPitchInitial - wristPitchOneDoFJoint.getJointLimitUpper());
+      double initialProximityToLowerLimit = Math.abs(q_initial - joint.getJointLimitLower());
+      double initialProximityToUpperLimit = Math.abs(q_initial - joint.getJointLimitUpper());
 
-      double q_wristDesired = q_wristPitchInitial + turnAngleRad;
+      double turnAngleRad = q_desired - q_initial;
 
-      if (q_wristPitchInitialProximityToLowerLimit < Math.abs(turnAngleRad))
+      if (initialProximityToLowerLimit < Math.abs(turnAngleRad))
       {
-         q_wristDesired = q_wristPitchInitial + Math.abs(turnAngleRad);
+         q_desired = q_initial + Math.abs(turnAngleRad);
       }
-      else if (q_wristPitchInitialProximityToUpperLimit < Math.abs(turnAngleRad))
+      else if (initialProximityToUpperLimit < Math.abs(turnAngleRad))
       {
-         q_wristDesired = q_wristPitchInitial - Math.abs(turnAngleRad);
+         q_desired = q_initial - Math.abs(turnAngleRad);
       }
-      return q_wristDesired;
    }
 
-   private void setSingleJoint(double[] armPoseToPack, RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle,
+   private void printArmJointAngles(double[] armJointAngles)
+   {
+      for (int i = 0; i < numberOfArmJoints; i++)
+      {
+         PrintTools.debug(this,"desired q_" + armJointNames[i] + " : " + armJointAngles[i]);
+      }
+   }
+   
+   private double[] createRandomArmPose(RobotSide robotSide)
+   {
+      double[] armPose = new double[numberOfArmJoints];
+
+      for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
+      {
+         double qDesired = clipDesiredToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(new Random(), 1.5));
+         armPose[jointNum] = qDesired;
+      }
+
+      return armPose;
+   }
+
+   private void setDesiredAngleOfSingleArmJoint(double[] armPoseToPack, RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle,
          boolean clipDesiredQToJointLimits)
    {
       if (clipDesiredQToJointLimits)
@@ -345,10 +320,9 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
       armPoseToPack[armJointIndices.get(armJointName)] = desiredJointAngle;
    }
 
-   private double clipDesiredToJointLimits(RobotSide robotSide, ArmJointName armJointName, double desiredJointAngle)
+   private double clipDesiredToJointLimits(RobotSide robotSide, ArmJointName armJointName, double qDesired)
    {
       FullRobotModel fullRobotModel = drcBehaviorTestHelper.getSDFFullRobotModel();
-      double q;
       double qMin = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitLower();
       double qMax = fullRobotModel.getArmJoint(robotSide, armJointName).getJointLimitUpper();
 
@@ -358,9 +332,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
          qMax = qMin;
          qMin = temp;
       }
-
-      q = MathTools.clipToMinMax(desiredJointAngle, qMin, qMax);
-      return q;
+      return MathTools.clipToMinMax(qDesired, qMin, qMax);
    }
 
    private double[] getCurrentArmPose(RobotSide robotSide)
@@ -369,12 +341,14 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
 
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
-         ArmJointName jointName = armJointNames[jointNum];
-         double currentAngle = drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, jointName).getQ();
-         armPose[jointNum] = currentAngle;
+         armPose[jointNum] = getCurrentArmJointAngle(robotSide, armJointNames[jointNum]);
       }
-
       return armPose;
+   }
+
+   private double getCurrentArmJointAngle(RobotSide robotSide, ArmJointName armJointName)
+   {
+      return drcBehaviorTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, armJointName).getQ();
    }
 
    private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)

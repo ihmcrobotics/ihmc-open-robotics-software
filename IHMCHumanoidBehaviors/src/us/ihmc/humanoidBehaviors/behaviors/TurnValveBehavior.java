@@ -8,10 +8,13 @@ import us.ihmc.communication.packets.behaviors.TurnValvePacket;
 import us.ihmc.communication.packets.behaviors.script.ScriptBehaviorInputPacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior.WalkingOrientation;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspValveBehavior.ValveGraspMethod;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.GraspTurnAndUnGraspValveTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ScriptTask;
@@ -50,6 +53,9 @@ public class TurnValveBehavior extends BehaviorInterface
    public static final ValveGraspLocation DEFAULT_GRASP_LOCATION = ValveGraspLocation.TWELVE_O_CLOCK;
    public static final double DEFAULT_GRASP_APPROACH_CONE_ANGLE = Math.toRadians(20.0);
    public static final double MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE = Math.toRadians(160.0);
+   public static final double DEFAULT_ROTATION_RATE_RAD_PER_SEC = 2.0 * Math.PI / 7.0;
+   public static final boolean STOP_HAND_IF_GRASP_COLLISION = true;
+   public static final boolean STOP_HAND_IF_TURN_COLLISION = true;
    public static final double howFarToStandToTheRightOfValve = 2.0 * robotSideOfHandToUse.negateIfRightSide(0.13); //0.13
    public static final double howFarToStandBackFromValve = 1.25 * 0.64; //0.64
 
@@ -65,6 +71,7 @@ public class TurnValveBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private WalkToLocationTask walkToValveTask;
    private final GraspTurnAndUnGraspValveBehavior graspValveTurnAndUnGraspBehavior;
+   private final ComHeightBehavior comHeightBehavior;
    private final ScriptBehavior scriptBehavior;
 
    private final ConcurrentListeningQueue<ScriptBehaviorInputPacket> scriptBehaviorInputPacketListener;
@@ -97,6 +104,8 @@ public class TurnValveBehavior extends BehaviorInterface
       graspValveTurnAndUnGraspBehavior = new GraspTurnAndUnGraspValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
             wholeBodyControllerParameters, tippingDetectedBoolean, USE_WHOLE_BODY_INVERSE_KINEMATICS);
       childBehaviors.add(graspValveTurnAndUnGraspBehavior);
+      comHeightBehavior = new ComHeightBehavior(outgoingCommunicationBridge, yoTime);
+      childBehaviors.add(comHeightBehavior);
       scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
       childBehaviors.add(scriptBehavior);
 
@@ -160,12 +169,12 @@ public class TurnValveBehavior extends BehaviorInterface
          valveGraspLocation = ValveGraspLocation.SIX_O_CLOCK;
       }
       
-      setInput(turnValvePacket.getValveTransformToWorld(), valveGraspLocation, turnValvePacket.getGraspApproachConeAngle(), Axis.X,
-            turnValvePacket.getValveRadius(), turnValvePacket.getTurnValveAngle());
+      setInput(turnValvePacket.getValveTransformToWorld(), valveGraspLocation, ValveGraspMethod.RIM, turnValvePacket.getGraspApproachConeAngle(), Axis.X,
+              turnValvePacket.getValveRadius(), turnValvePacket.getTurnValveAngle(), turnValvePacket.getValveRotationRate());
    }
 
-   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation valveGraspLocation, double graspApproachConeAngle,
-         Axis valvePinJointAxisInValveFrame, double valveRadius, double totalAngleToRotateValve)
+   public void setInput(RigidBodyTransform valveTransformToWorld, ValveGraspLocation graspLocation, ValveGraspMethod graspMethod, double graspApproachConeAngle,
+	         Axis valvePinJointAxisInValveFrame, double valveRadius, double totalAngleToRotateValve, double valveRotationRateRadPerSec)
    {
       PrintTools.debug(this, "Not using script behavior.");
 
@@ -182,18 +191,23 @@ public class TurnValveBehavior extends BehaviorInterface
       {
          double angleToRotateOnThisGraspUngraspCycle = MathTools.clipToMinMax(totalAngleToRotateValveRemaining, MAX_ANGLE_TO_ROTATE_PER_GRASP_CYCLE);
 
-         graspTurnAndUngraspValveTasks.add(new GraspTurnAndUnGraspValveTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld,
-               valveGraspLocation, graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotateOnThisGraspUngraspCycle, yoTime));
-
+         graspTurnAndUngraspValveTasks.add(new GraspTurnAndUnGraspValveTask(graspValveTurnAndUnGraspBehavior, valveTransformToWorld, graspLocation, graspMethod,
+                 graspApproachConeAngle, valvePinJointAxisInValveFrame, valveRadius, angleToRotateOnThisGraspUngraspCycle, valveRotationRateRadPerSec,
+                 STOP_HAND_IF_GRASP_COLLISION, STOP_HAND_IF_TURN_COLLISION, yoTime));
+         
          totalAngleToRotateValveRemaining -= angleToRotateOnThisGraspUngraspCycle;
       }
 
-      pipeLine.submitSingleTaskStage(moveHandToHomeTask);
+      CoMHeightTask goToDefaultCoMHeightTask = new CoMHeightTask(0.0, yoTime, comHeightBehavior, 1.0);
+      
+//      pipeLine.submitSingleTaskStage(moveHandToHomeTask);  //FIXME: Go To Home HandPosePacket doesn't work at the moment...
       if (walkToValveTask != null)
          pipeLine.submitSingleTaskStage(walkToValveTask);
       pipeLine.submitAll(graspTurnAndUngraspValveTasks);
-      pipeLine.submitSingleTaskStage(moveHandToHomeTask);
-      
+//      pipeLine.submitTaskForPallelPipesStage(moveHandToHomeBehavior, moveHandToHomeTask); //FIXME: Go To Home HandPosePacket doesn't work at the moment...
+//      pipeLine.submitTaskForPallelPipesStage(comHeightBehavior, goToDefaultCoMHeightTask); //FIXME: Go To Home HandPosePacket doesn't work at the moment...
+      pipeLine.submitSingleTaskStage(goToDefaultCoMHeightTask);
+
       hasInputBeenSet.set(true);
    }
 

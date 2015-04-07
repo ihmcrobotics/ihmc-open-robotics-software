@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
@@ -11,8 +12,13 @@ import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -25,21 +31,24 @@ public class HandPoseBehavior extends BehaviorInterface
 
    private final ConcurrentListeningQueue<HandPoseStatus> inputListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
    private final ConcurrentListeningQueue<HandCollisionDetectedPacket> collisionListeningQueue = new ConcurrentListeningQueue<HandCollisionDetectedPacket>();
-   private Status status;
+   
+   private final ReferenceFrame world = ReferenceFrame.getWorldFrame();
+   protected RobotSide robotSide;
+   protected Status status;
+   
+   protected Packet<?> outgoingPacket;
 
-   private HandPosePacket outgoingHandPosePacket;
-
-   private final BooleanYoVariable hasPacketBeenSent;
-   private final DoubleYoVariable yoTime;
-   private final DoubleYoVariable startTime;
-   private final DoubleYoVariable trajectoryTime;
+   protected final BooleanYoVariable hasPacketBeenSent;
+   protected final DoubleYoVariable yoTime;
+   protected final DoubleYoVariable startTime;
+   protected final DoubleYoVariable trajectoryTime;
    private final DoubleYoVariable trajectoryTimeElapsed;
    private final DoubleYoVariable percentTimeRemainingAtCollision;
 
-   private final BooleanYoVariable hasInputBeenSet;
-   private final BooleanYoVariable hasStatusBeenReceived;
+   protected final BooleanYoVariable hasInputBeenSet;
+   protected final BooleanYoVariable hasStatusBeenReceived;
    private final BooleanYoVariable isDone;
-   private final BooleanYoVariable stopHandIfCollision;
+   protected final BooleanYoVariable stopHandIfCollision;
    private final BooleanYoVariable isPausedDueToCollision;
    private final IntegerYoVariable numberOfConsecutiveCollisions;
    private final DoubleYoVariable yoCollisionTime;
@@ -81,20 +90,82 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(frame, pose, robotSide, trajectoryTime, false);
    }
 
-   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime, boolean stopHandIfCollision)
-   {
-      setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), stopHandIfCollision);
-   }
-
    public void setInput(HandPosePacket handPosePacket)
    {
       setInput(handPosePacket, false);
    }
+   
+   public void setInput(Frame frame, RigidBodyTransform pose, RobotSide robotSide, double trajectoryTime, boolean stopHandIfCollision)
+   {
+      setInput(PacketControllerTools.createHandPosePacket(frame, pose, robotSide, trajectoryTime), stopHandIfCollision);
+   }
+   
+   public void aimPalmNormalAtPoint(RobotSide robotSide, FramePoint targetToAimAt, FullRobotModel fullRobotModel, double trajectoryTime)
+   {              
+      this.robotSide = robotSide;
+      fullRobotModel.updateFrames();
+      ReferenceFrame desiredHandFrame = aimReferenceFrameAxisAtPoint(robotSide, fullRobotModel.getHandControlFrame(robotSide), Axis.X, targetToAimAt);
+      setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
+   }
+
+   public void orientHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
+   {
+      this.robotSide = robotSide;
+      fullRobotModel.updateFrames();
+      
+      ReferenceFrame desiredHandFrame = orientHandFrameToGraspCylinder(robotSide, cylinderLongAxis, cylinderOrigin, fullRobotModel, trajectoryTime);
+      setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
+   }
+   
+   public void graspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
+   {
+      this.robotSide = robotSide;
+      fullRobotModel.updateFrames();
+      
+      ReferenceFrame frameOrientedForGrasping = orientHandFrameToGraspCylinder(robotSide, cylinderLongAxis, cylinderOrigin, fullRobotModel, trajectoryTime);
+      RigidBodyTransform desiredHandTransformToWorld = frameOrientedForGrasping.getTransformToWorldFrame();
+
+      cylinderOrigin.changeFrame(frameOrientedForGrasping);
+      cylinderOrigin.setX(cylinderOrigin.getX() - 0.1);
+      
+      cylinderOrigin.changeFrame(world);
+      desiredHandTransformToWorld.setTranslation(cylinderOrigin.getVectorCopy());
+
+      setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandTransformToWorld, robotSide, trajectoryTime));
+   }
+   
+   private ReferenceFrame aimReferenceFrameAxisAtPoint(RobotSide robotSide, ReferenceFrame currentFrame, Axis currentFrameAxis, FramePoint targetToAimAt)
+   {
+      ReferenceFrame initialFrame = targetToAimAt.getReferenceFrame();
+      
+      targetToAimAt.changeFrame(currentFrame);
+      FrameVector targetRelativeToCurrentFrame = new FrameVector(currentFrame, targetToAimAt.getX(), targetToAimAt.getY(), targetToAimAt.getZ());
+      targetToAimAt.changeFrame(initialFrame);
+      
+      return currentFrame.getRotatedReferenceFrameCopyAlignedWithVector(currentFrameAxis, targetRelativeToCurrentFrame);
+   }
+   
+   private ReferenceFrame orientHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
+   {
+      this.robotSide = robotSide;
+      fullRobotModel.updateFrames();
+      
+      ReferenceFrame frameWithPalmNormalAimedAtCylinder = aimReferenceFrameAxisAtPoint(robotSide, fullRobotModel.getHandControlFrame(robotSide), Axis.X, cylinderOrigin);
+      ReferenceFrame frameOrientedForGrasping = frameWithPalmNormalAimedAtCylinder.getRotatedReferenceFrameCopyAlignedWithVector(Axis.Y, cylinderLongAxis);
+        
+      return frameOrientedForGrasping;
+   }
+   
 
    public void setInput(HandPosePacket handPosePacket, boolean stopHandIfCollision)
    {
+      outgoingPacket = handPosePacket;
       this.stopHandIfCollision.set(stopHandIfCollision);
-      this.outgoingHandPosePacket = handPosePacket;
+
+      robotSide = handPosePacket.getRobotSide();
+      startTime.set(yoTime.getDoubleValue());
+      trajectoryTime.set(handPosePacket.getTrajectoryTime());
+      
       hasInputBeenSet.set(true);
    }
 
@@ -112,7 +183,7 @@ public class HandPoseBehavior extends BehaviorInterface
             && trajectoryTimeElapsed.getDoubleValue() > trajectoryTime.getDoubleValue())
       {
          if (DEBUG)
-            PrintTools.debug(this, outgoingHandPosePacket.getRobotSide() + " HandPoseBehavior setting isDone = true");
+             PrintTools.debug(this, robotSide + " HandPoseBehavior setting isDone = true");
          isDone.set(true);
          numberOfConsecutiveCollisions.set(0);
       }
@@ -128,19 +199,15 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          if (retryHandPose && yoTime.getDoubleValue() > yoCollisionTime.getDoubleValue() + 0.5)
          {
-            //            HandPosePacket gentlerVersionOfPreviousPacket = PacketControllerTools.createHandPosePacket(outgoingHandPosePacket.referenceFrame,
-            //                  outgoingHandPosePacket.position, outgoingHandPosePacket.orientation, outgoingHandPosePacket.robotSide,
-            //                  2.0 * outgoingHandPosePacket.trajectoryTime);
-
             resume();
             isPausedDueToCollision.set(false);
             PrintTools.debug(this, "Re-Attemping HandPoseBehavior");
          }
       }
 
-      if (!hasPacketBeenSent.getBooleanValue() && (outgoingHandPosePacket != null))
+      if (!hasPacketBeenSent.getBooleanValue() && (outgoingPacket != null))
       {
-         sendHandPosePacketToController(outgoingHandPosePacket);
+          sendOutgoingPacketToControllerAndNetworkProcessor();
       }
    }
 
@@ -192,36 +259,31 @@ public class HandPoseBehavior extends BehaviorInterface
       return status;
    }
 
-   private void sendHandPosePacketToController(HandPosePacket handPosePacket)
+   private void sendOutgoingPacketToControllerAndNetworkProcessor()
    {
       if (!isPaused.getBooleanValue() && !isStopped.getBooleanValue())
       {
-         handPosePacket.setDestination(PacketDestination.UI);
+          outgoingPacket.setDestination(PacketDestination.UI);
 
-         if (DEBUG)
-            PrintTools.debug(this, "sending handPose packet to controller and network processor: " + handPosePacket);
-         sendPacketToController(handPosePacket);
-         sendPacketToNetworkProcessor(handPosePacket);
+          sendPacketToController(outgoingPacket);
+          sendPacketToNetworkProcessor(outgoingPacket);
 
          hasPacketBeenSent.set(true);
-         startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(handPosePacket.getTrajectoryTime());
+
+         if (DEBUG)
+             PrintTools.debug(this, "sending packet to controller and network processor: " + outgoingPacket);
       }
    }
 
-   private void stopArmMotion()
-   {
-      if (outgoingHandPosePacket != null)
-      {
-         RobotSide robotSide = outgoingHandPosePacket.getRobotSide();
-         if (robotSide != null)
-         {
-            StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
-            pausePacket.setDestination(PacketDestination.CONTROLLER);
-            sendPacketToController(pausePacket);
-         }
-      }
-   }
+	private void stopArmMotion()
+	{
+		if (outgoingPacket != null && robotSide != null) 
+		{
+			StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
+			pausePacket.setDestination(PacketDestination.CONTROLLER);
+			sendPacketToController(pausePacket);
+		}
+	}
 
    @Override
    public void initialize()
@@ -234,7 +296,7 @@ public class HandPoseBehavior extends BehaviorInterface
       status = null;
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
-      outgoingHandPosePacket = null;
+      outgoingPacket = null;
 
       hasStatusBeenReceived.set(false);
       isPaused.set(false);
@@ -254,7 +316,7 @@ public class HandPoseBehavior extends BehaviorInterface
    public void finalize()
    {
       hasPacketBeenSent.set(false);
-      outgoingHandPosePacket = null;
+      outgoingPacket = null;
 
       isPaused.set(false);
       isPausedDueToCollision.set(false);
@@ -310,7 +372,7 @@ public class HandPoseBehavior extends BehaviorInterface
 
          if (hasInputBeenSet())
          {
-            sendHandPosePacketToController(outgoingHandPosePacket);
+             sendOutgoingPacketToControllerAndNetworkProcessor();
          }
       }
    }
@@ -323,13 +385,15 @@ public class HandPoseBehavior extends BehaviorInterface
 
    private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
    {
-      if ((handPoseStatus != null) && (handPoseStatus.getRobotSide() == outgoingHandPosePacket.getRobotSide()))
-      {
-         if (DEBUG)
-            PrintTools.debug(this, "Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = " + yoTime.getDoubleValue());
-         status = handPoseStatus.getStatus();
-         hasStatusBeenReceived.set(true);
-      }
+	      RobotSide statusRobotSide = handPoseStatus.getRobotSide();
+	      
+	      if (statusRobotSide == robotSide)
+	      {
+	         status = handPoseStatus.getStatus();
+	         hasStatusBeenReceived.set(true);
+	         if (DEBUG)
+	            PrintTools.debug(this, "Received a hand pose status: " + handPoseStatus.getStatus() + ", " + handPoseStatus.getRobotSide() + " at t = " + yoTime.getDoubleValue());
+	      }
    }
 
    @Override
