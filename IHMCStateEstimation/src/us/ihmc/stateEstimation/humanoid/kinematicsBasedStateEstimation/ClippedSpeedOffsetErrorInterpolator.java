@@ -284,6 +284,10 @@ public class ClippedSpeedOffsetErrorInterpolator
       offsetPoseToPack.setPose(interpolatedTransform);
 
       //scs feedback only
+      yoStartOffsetErrorPose.setPosition(startTranslation);
+      yoStartOffsetErrorPose.setOrientation(startRotation_quat);
+      yoGoalOffsetErrorPose.setPosition(goalTranslation);
+      yoGoalOffsetErrorPose.setOrientation(goalRotation_quat);
       yoInterpolatedOffset.set(offsetPoseToPack);
    }
 }
