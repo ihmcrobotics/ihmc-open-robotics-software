@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
@@ -67,6 +68,7 @@ public class AtlasROSAPISimulator
          simulationStarter.setGuiInitialSetup(guiSetup);
       }
 
+      simulationStarter.registerHighLevelController(new JointPositionControllerFactory(false));
       simulationStarter.setStartingLocation(startingLocation);
       simulationStarter.setInitializeEstimatorToActual(true);
       simulationStarter.startSimulation(networkProcessorParameters, true);
