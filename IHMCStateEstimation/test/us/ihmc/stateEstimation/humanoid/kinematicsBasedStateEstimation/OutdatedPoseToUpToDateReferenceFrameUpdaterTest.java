@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.utilities.RandomTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
@@ -95,12 +94,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       PoseReferenceFrame upToDateReferenceFrameInPresent = new PoseReferenceFrame("upToDateReferenceFrameInPresent", upToDatePoseInPresent);
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
             numberOfUpToDateTransforms, upToDateReferenceFrameInPresent);
-      ReferenceFrame outdatedReferenceFrame_InUpToDateReferenceFrame;
-      outdatedReferenceFrame_InUpToDateReferenceFrame = outdatedPoseToUpToDateReferenceFrameUpdater.getOutdatedReferenceFrameToBeUpdated();
+      ReferenceFrame outdatedReferenceFrame_ToBeUpdated;
+      outdatedReferenceFrame_ToBeUpdated = outdatedPoseToUpToDateReferenceFrameUpdater.getOutdatedReferenceFrameToBeUpdated();
       
       TimeStampedTransformBuffer upToDateTimeStampedTransformPoseBuffer = new TimeStampedTransformBuffer(numberOfUpToDateTransforms);
       TimeStampedTransformBuffer outdatedTimeStampedTransformBuffer = new TimeStampedTransformBuffer(numberOfOutdatedTransforms);
 
+      //generate uptoDateTransforms used later in the test as waypoints
       for (int i = 0; i < numberOfUpToDateTransforms; i++)
       {
          long timeStamp = (long) (i * (lastTimeStamp - firstTimeStamp) / numberOfUpToDateTransforms + firstTimeStamp);
@@ -108,7 +108,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          upToDateTimeStampedTransformPoseBuffer.put(upToDateTransform, timeStamp);
          outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(upToDateTransform, timeStamp);
       }
-
+      
+      //generate outdatedTransforms offsets based on the upToDateTransforms
       for (int j = 0; j < numberOfOutdatedTransforms; j++)
       {
          long timeStamp = (long) (j * (lastTimeStamp * 0.8 - firstTimeStamp * 0.8) / numberOfOutdatedTransforms + firstTimeStamp * 1.2);
@@ -145,18 +146,23 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
                outdatedTimeStampsIndex++;
             }
          }
-         outdatedReferenceFrame_InUpToDateReferenceFrame.update();
-         FramePose outdatedPoseExpressedInUpToDateReferenceFrame = new FramePose(outdatedReferenceFrame_InUpToDateReferenceFrame);
-         outdatedPoseExpressedInUpToDateReferenceFrame.changeFrame(worldFrame);
+         outdatedReferenceFrame_ToBeUpdated.update();
+         FramePose outdatedPoseUpdatedInWorldFrame = new FramePose(outdatedReferenceFrame_ToBeUpdated);
+         outdatedPoseUpdatedInWorldFrame.changeFrame(worldFrame);
 
+         Vector3d upToDateReferenceFrameInPresent_Translation = new Vector3d();
+         upToDatePoseInPresent.getPosition(upToDateReferenceFrameInPresent_Translation);
+         Vector3d outdatedPoseUpdatedInWorldFrame_Translation = new Vector3d();
+         outdatedPoseUpdatedInWorldFrame.getPosition(outdatedPoseUpdatedInWorldFrame_Translation);
+         
          FramePose testedPose = new FramePose(worldFrame);
-         testedPose.setPose(outdatedPoseExpressedInUpToDateReferenceFrame);
+         testedPose.setPose(outdatedPoseUpdatedInWorldFrame);
          testedPose.changeFrame(upToDateReferenceFrameInPresent);
 
+         Vector3d testedTranslation = new Vector3d();
+         testedTranslation.sub(outdatedPoseUpdatedInWorldFrame_Translation, upToDateReferenceFrameInPresent_Translation);
          Quat4d testedOrientation = new Quat4d();
-         Tuple3d testedTranslation = new Vector3d();
          testedPose.getOrientation(testedOrientation);
-         testedPose.getPosition(testedTranslation);
 
          if (timeStamp < (int) (firstTimeStamp * 1.2 + numberOfTicksOfDelay))
          {
@@ -175,20 +181,22 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          long timeStamp, Quat4d orientationOffset, Vector3d translationOffset)
    {
       TimeStampedTransform3D upToDateTimeStampedTransformInPast = new TimeStampedTransform3D();
-      RigidBodyTransform errorTransform = new RigidBodyTransform(orientationOffset, translationOffset);
-
       upToDateTimeStampedTransformPoseBuffer.findTransform(timeStamp, upToDateTimeStampedTransformInPast);
-
-      RigidBodyTransform upToDateTransformInPast = upToDateTimeStampedTransformInPast.getTransform3D();
-      FramePose upToDatePoseInPast = new FramePose(worldFrame, upToDateTransformInPast);
-      PoseReferenceFrame currentOutdatedPoseReferenceFrame = new PoseReferenceFrame("currentOutdatedPoseReferenceFrame", upToDatePoseInPast);
-      FramePose transformedOutdatedPose = new FramePose(currentOutdatedPoseReferenceFrame);
-      transformedOutdatedPose.setPose(errorTransform);
-      transformedOutdatedPose.changeFrame(worldFrame);
-
+      
+      RigidBodyTransform upToDateTransformInPast_Translation = new RigidBodyTransform(upToDateTimeStampedTransformInPast.getTransform3D());
+      RigidBodyTransform upToDateTransformInPast_Rotation = new RigidBodyTransform(upToDateTransformInPast_Translation);
+      upToDateTransformInPast_Translation.setRotationToIdentity();
+      upToDateTransformInPast_Rotation.zeroTranslation();
+      
+      RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3d());
+      RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quat4d(), translationOffset);
       RigidBodyTransform transformedOutdatedTransform = new RigidBodyTransform();
-      transformedOutdatedPose.getPose(transformedOutdatedTransform);
 
+      transformedOutdatedTransform.multiply(upToDateTransformInPast_Translation);
+      transformedOutdatedTransform.multiply(offsetTranslationTransform);
+      transformedOutdatedTransform.multiply(upToDateTransformInPast_Rotation);
+      transformedOutdatedTransform.multiply(offsetRotationTransform);
+      
       return transformedOutdatedTransform;
    }
 
