@@ -118,7 +118,7 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg)
+   public void compute(RobotSide supportLeg, FramePoint2d actualICP)
    {
       if (isUsingWaypointTrajectory != null)
       {
@@ -232,7 +232,7 @@ public class PelvisICPBasedTranslationManager
       desiredICPOffset.add(integralTerm);
    }
 
-   public void addICPOffset(FramePoint2d desiredICPToModify)
+   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
    {
       if (!isEnabled.getBooleanValue())
       {
