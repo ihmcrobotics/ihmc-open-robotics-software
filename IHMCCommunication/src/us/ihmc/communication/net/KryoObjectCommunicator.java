@@ -254,7 +254,10 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    @Override
    public abstract boolean isConnected();
 
-   protected abstract void closeConnection();
+   /**
+    * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a later moment.
+    */
+   public abstract void closeConnection();
 
    private class TableData
    {

@@ -118,6 +118,11 @@ public class PacketCommunicator
    {
       return communicator.isConnected();
    }
+   
+   public void closeConnection()
+   {
+      communicator.closeConnection();
+   }
 
    public void close()
    {

@@ -128,6 +128,12 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    }
 
    @Override
+   public void closeConnection()
+   {
+      close();
+   }
+   
+   @Override
    public void close()
    {
       IntraprocessCommunicationNetwork.disconnect(this, port);
