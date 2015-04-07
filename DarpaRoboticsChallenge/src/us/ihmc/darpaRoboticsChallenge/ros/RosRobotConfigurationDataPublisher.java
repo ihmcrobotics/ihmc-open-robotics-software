@@ -216,7 +216,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                tfPublisher.publish(transformFromHeadToMultisenseHeadRoot, timeStamp, "head", "multisense/head_root");
             }
          }
-         ThreadTools.sleep(1);
+         Thread.yield();
       }
    }
 
