@@ -60,6 +60,8 @@ public class YoVariableServer implements RobotVisualizer
    private YoVariableHandShakeBuilder handshakeBuilder;
 
    
+   private long uid = 0; 
+   
    
    public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
@@ -147,7 +149,7 @@ public class YoVariableServer implements RobotVisualizer
       ConcurrentRingBuffer<? extends RegistryBuffer> ringBuffer;
       if(registry.equals(mainRegistry))
       {
-         ringBuffer = mainBuffer;
+         updateMainVariableBuffer(timestamp);
       }
       else
       {
@@ -156,8 +158,8 @@ public class YoVariableServer implements RobotVisualizer
          {
             throw new RuntimeException("Cannot find root registry " + registry.getName());
          }
+         updateVariableBuffer(timestamp, ringBuffer);
       }
-      updateVariableBuffer(timestamp, ringBuffer);
       updateChangedVariables(registry);
       
       
@@ -199,6 +201,15 @@ public class YoVariableServer implements RobotVisualizer
       {
          buffer.update(timestamp);
          ringBuffer.commit();
+      }
+   }
+   private void updateMainVariableBuffer(long timestamp)
+   {
+      FullStateBuffer buffer = mainBuffer.next();
+      if(buffer != null)
+      {
+         buffer.update(timestamp, ++uid);
+         mainBuffer.commit();
       }
    }
    

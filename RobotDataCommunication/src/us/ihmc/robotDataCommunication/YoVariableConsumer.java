@@ -80,7 +80,7 @@ public class YoVariableConsumer implements LogPacketHandler
       }
       else if(header.getUid() <= previous)
       {
-         System.err.println("Packet skew detected");
+         System.err.println("Packet skew detected " + header.getUid());
       }
       previous = header.getUid();
       
