@@ -517,14 +517,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
 
             desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
-            pelvisICPBasedTranslationManager.compute(null);
-            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
+            desiredICPVelocityLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
+            pelvisICPBasedTranslationManager.compute(null, capturePoint2d);
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
 
             safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
             safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
             safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
+            desiredICPVelocityLocal.changeFrame(worldFrame);
          }
 
          desiredICP.set(desiredICPLocal);
@@ -880,18 +882,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining, desiredICPLocal);
          }
 
-         pelvisICPBasedTranslationManager.compute(supportSide);
+         pelvisICPBasedTranslationManager.compute(supportSide, capturePoint2d);
 
          if (isInFlamingoStance.getBooleanValue())
          {
             desiredICPLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
-            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal);
+            desiredICPVelocityLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
 
             safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
             safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
             safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
+            desiredICPVelocityLocal.changeFrame(worldFrame);
          }
 
          desiredICP.set(desiredICPLocal);
