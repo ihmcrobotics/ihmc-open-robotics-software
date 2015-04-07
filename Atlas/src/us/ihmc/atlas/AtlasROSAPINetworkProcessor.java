@@ -3,10 +3,12 @@ package us.ihmc.atlas;
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
@@ -18,11 +20,14 @@ import com.martiansoftware.jsap.FlaggedOption;
 import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
+import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasROSAPINetworkProcessor
 {
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
+
+   private static String nodeName = "/robot_data";
 
    private static final boolean ENABLE_UI_PACKET_TO_ROS_CONVERTER = true;
    
@@ -47,7 +52,12 @@ public class AtlasROSAPINetworkProcessor
          String kryoIP = NetworkParameters.getHost(NetworkParameterKeys.robotController);
          gfeCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(kryoIP, NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       }
-      
+
+      RosMainNode rosMainNode = new RosMainNode(rosUri, nameSpace + nodeName);
+      RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosMainNode, nameSpace);
+      rosMainNode.execute();
+
+      gfeCommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
       new ThePeoplesGloriousNetworkProcessor(rosUri, gfeCommunicator, robotModel, nameSpace);
    }
    
