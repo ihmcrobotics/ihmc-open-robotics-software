@@ -70,9 +70,9 @@ public class YoVariableConsumer implements LogPacketHandler
    public void newDataAvailable(LogDataHeader header, ByteBuffer buf)
    {
 
-      if (header.getUid() > previous + 1)
+      if (header.getUid() > previous + listener.getDisplayOneInNPackets())
       {
-         System.err.println("Skipped " + (header.getUid() - (previous + 1)) + " packets");
+         System.err.println("Skipped " + (header.getUid() - (previous + listener.getDisplayOneInNPackets())) + " packets");
       }
       else if (header.getUid() <= previous)
       {
