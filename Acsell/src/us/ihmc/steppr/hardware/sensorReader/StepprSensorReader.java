@@ -7,6 +7,7 @@ import java.util.List;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -159,5 +160,10 @@ public class StepprSensorReader implements SensorReader
    public SensorRawOutputMapReadOnly getSensorRawOutputMapReadOnly()
    {
       return sensorProcessing;
+   }
+
+   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   {
+      return null;
    }
 }
