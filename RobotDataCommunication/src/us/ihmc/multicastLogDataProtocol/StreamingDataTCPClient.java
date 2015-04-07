@@ -66,7 +66,11 @@ public class StreamingDataTCPClient extends Thread
          connection.configureBlocking(false);
          Selector selector = Selector.open();
          key = connection.register(selector, SelectionKey.OP_READ);
-         sendRequest(connection, LogHandshake.STREAM_REQUEST, sendEveryNthTick);
+         ByteBuffer command = ByteBuffer.allocateDirect(2);
+         command.put(LogHandshake.STREAM_REQUEST);
+         command.put(sendEveryNthTick);
+         command.flip();
+         connection.write(command);
 
       }
       catch (IOException e)
@@ -150,7 +154,10 @@ public class StreamingDataTCPClient extends Thread
       SocketChannel connection = SocketChannel.open();
       connection.connect(address);
       
-      sendRequest(connection, LogHandshake.HANDSHAKE_REQUEST, (byte)0);
+      ByteBuffer command = ByteBuffer.allocateDirect(1);
+      command.put(LogHandshake.HANDSHAKE_REQUEST);
+      command.flip();
+      connection.write(command);
       connection.configureBlocking(false);
       
       Selector selector = Selector.open();
@@ -162,15 +169,6 @@ public class StreamingDataTCPClient extends Thread
 
       return handshake;
 
-   }
-
-   private void sendRequest(SocketChannel connection, byte request, byte aNumber) throws IOException
-   {
-      ByteBuffer command = ByteBuffer.allocateDirect(2);
-      command.put(request);
-      command.put(aNumber);
-      command.flip();
-      connection.write(command);
    }
 
    public boolean isRunning()
