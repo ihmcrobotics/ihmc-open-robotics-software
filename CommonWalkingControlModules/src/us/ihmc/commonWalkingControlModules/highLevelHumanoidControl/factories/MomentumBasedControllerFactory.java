@@ -186,9 +186,10 @@ public class MomentumBasedControllerFactory
 
       DesiredComHeightProvider desiredComHeightProvider = variousWalkingProviders.getDesiredComHeightProvider();
 
+      ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       LookAheadCoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider,
-            minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, doubleSupportPercentageIn, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
       CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry,
