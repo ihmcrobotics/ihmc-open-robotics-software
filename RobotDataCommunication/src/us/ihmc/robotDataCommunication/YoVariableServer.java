@@ -26,7 +26,7 @@ import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
 public class YoVariableServer implements RobotVisualizer
 {
-   private static final int VARIABLE_BUFFER_CAPACITY = 128;
+   private static final int VARIABLE_BUFFER_CAPACITY = 512;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
