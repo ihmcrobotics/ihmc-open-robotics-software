@@ -5,14 +5,19 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.math.geometry.FrameOrientation;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class ClippedSpeedOffsetErrorInterpolator
 {
@@ -86,9 +91,25 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final AxisAngle4d axisAngletoTravel = new AxisAngle4d();
    
    //for feedBack in scs
-   private final YoFramePose yoStartOffsetErrorPose;
-   private final YoFramePose yoGoalOffsetErrorPose;
-   private final YoFramePose yoInterpolatedOffset;
+   private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
+   private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
+   private final YoFramePose yoInterpolatedOffset_InWorldFrame;
+   
+   private final FramePose startOffsetErrorPose_Translation = new FramePose(worldFrame); 
+   private final FramePose startOffsetErrorPose_Rotation = new FramePose(worldFrame);
+   private final PoseReferenceFrame startOffsetErrorReferenceFrame_Translation = new PoseReferenceFrame("startOffsetErrorReferenceFrame_Translation", startOffsetErrorPose_Translation);
+   private final PoseReferenceFrame startOffsetErrorReferenceFrame_Rotation= new PoseReferenceFrame("startOffsetErrorReferenceFrame_Rotation", startOffsetErrorPose_Rotation);
+
+   private final FramePoint goalOffsetFramePoint_Translation = new FramePoint(worldFrame);
+   private final FramePoint interpolatedOffsetFramePoint_Translation = new FramePoint(worldFrame);
+   private final FrameOrientation goalOffsetFrameOrientation_Rotation = new FrameOrientation(worldFrame);
+   private final FrameOrientation interpolatedOffsetFrameOrientation_Rotation = new FrameOrientation(worldFrame);
+
+   private final YoFramePoint yoGoalOffsetFramePoint_Translation;
+   private final YoFramePoint yoInterpolatedOffsetFramePoint_Translation;
+
+   private final YoFrameOrientation yoGoalOffsetFrameOrientation_Rotation;
+   private final YoFrameOrientation yoInterpolatedOffsetFrameOrientation_Rotation;
    
    public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, DoubleYoVariable alphaFilterBreakFrequency,
          double dt, boolean correctRotation)
@@ -137,9 +158,16 @@ public class ClippedSpeedOffsetErrorInterpolator
       temporaryRotationAlphaClipped = new DoubleYoVariable("temporaryRotationAlphaClipped", registry);
 
       // for feedback in SCS
-      yoStartOffsetErrorPose = new YoFramePose("yoStartOffsetErrorPose", worldFrame, registry);
-      yoGoalOffsetErrorPose = new YoFramePose("yoGoalOffsetErrorPose", worldFrame, registry);
-      yoInterpolatedOffset = new YoFramePose("yoInterpolatedOffset", worldFrame, registry);
+      yoStartOffsetErrorPose_InWorldFrame = new YoFramePose("yoStartOffsetErrorPose_InWorldFrame", worldFrame, registry);
+      yoGoalOffsetErrorPose_InWorldFrame = new YoFramePose("yoGoalOffsetErrorPose_InWorldFrame", worldFrame, registry);
+      yoInterpolatedOffset_InWorldFrame = new YoFramePose("yoInterpolatedOffset_InWorldFrame", worldFrame, registry);
+      
+      yoGoalOffsetFramePoint_Translation = new YoFramePoint("yoGoalOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
+      yoInterpolatedOffsetFramePoint_Translation = new YoFramePoint("yoInterpolatedOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
+      
+     yoGoalOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
+     yoInterpolatedOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoInterpolatedOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
+      
    }
 
    public void setInterpolatorInputs(FramePose startOffsetError, FramePose goalOffsetError, double alphaFilterPosition)
@@ -153,8 +181,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       }
 
       //scs feedback only
-      yoStartOffsetErrorPose.set(startOffsetErrorPose);
-      yoGoalOffsetErrorPose.set(goalOffsetErrorPose);
+      yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
+      yoGoalOffsetErrorPose_InWorldFrame.set(goalOffsetErrorPose);
       ///////////
 
       startOffsetErrorPose.getPosition(startTranslation);
@@ -264,7 +292,6 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       interpolatedRotationFrameOrientation.set(interpolatedRotation);
       
-      
       correctionToBeApplied_Translation.sub(referenceFrameToBeCorrected_Translation, interpolatedTranslation);
       correctionToBeApplied_Translation.negate();
       correctionToBeAppliedFrameOrientation_Rotation.setOrientationFromOneToTwo(interpolatedRotationFrameOrientation, referenceFrameToBeCorrectedFrameOrientation_Rotation);
@@ -284,10 +311,40 @@ public class ClippedSpeedOffsetErrorInterpolator
       offsetPoseToPack.setPose(interpolatedTransform);
 
       //scs feedback only
-      yoStartOffsetErrorPose.setPosition(startTranslation);
-      yoStartOffsetErrorPose.setOrientation(startRotation_quat);
-      yoGoalOffsetErrorPose.setPosition(goalTranslation);
-      yoGoalOffsetErrorPose.setOrientation(goalRotation_quat);
-      yoInterpolatedOffset.set(offsetPoseToPack);
+      yoStartOffsetErrorPose_InWorldFrame.setPosition(startTranslation);
+      yoStartOffsetErrorPose_InWorldFrame.setOrientation(startRotation_quat);
+      yoGoalOffsetErrorPose_InWorldFrame.setPosition(goalTranslation);
+      yoGoalOffsetErrorPose_InWorldFrame.setOrientation(goalRotation_quat);
+      yoInterpolatedOffset_InWorldFrame.set(offsetPoseToPack);
+
+      //here we express the goal and interpolated translation and rotation with respect to the start Translation and rotation so that the graphs are easier to read in SCS 
+      startOffsetErrorPose_Translation.setToZero(worldFrame);
+      startOffsetErrorPose_Translation.setPosition(startTranslation);
+      startOffsetErrorReferenceFrame_Translation.setPoseAndUpdate(startOffsetErrorPose_Translation);
+      
+      startOffsetErrorPose_Rotation.setToZero(worldFrame);
+      startOffsetErrorPose_Rotation.setOrientation(startRotation);
+      startOffsetErrorReferenceFrame_Rotation.setPoseAndUpdate(startOffsetErrorPose_Rotation);
+
+      goalOffsetFramePoint_Translation.changeFrame(worldFrame);
+      goalOffsetFramePoint_Translation.set(goalTranslation);
+      goalOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
+      yoGoalOffsetFramePoint_Translation.setAndMatchFrame(goalOffsetFramePoint_Translation);
+      
+      interpolatedOffsetFramePoint_Translation.changeFrame(worldFrame);
+      interpolatedOffsetFramePoint_Translation.set(interpolatedTranslation);
+      interpolatedOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
+      yoInterpolatedOffsetFramePoint_Translation.setAndMatchFrame(interpolatedOffsetFramePoint_Translation);
+      
+      
+      goalOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
+      goalOffsetFrameOrientation_Rotation.set(goalRotation);
+      goalOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
+      yoGoalOffsetFrameOrientation_Rotation.setAndMatchFrame(goalOffsetFrameOrientation_Rotation);
+      
+      interpolatedOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
+      interpolatedOffsetFrameOrientation_Rotation.set(interpolatedRotation);
+      interpolatedOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
+      yoInterpolatedOffsetFrameOrientation_Rotation.setAndMatchFrame(interpolatedOffsetFrameOrientation_Rotation);
    }
 }

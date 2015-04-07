@@ -1,5 +1,5 @@
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.atlas.t</Variables>
 		<GraphConfiguration>
@@ -12,14 +12,20 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.alphaFilter,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.cLippedAlphaFilterValue</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
-<EntryBoxTab>
-<Title>
-Tab
-</Title>
-<Entry Boxes>maxTranslationalCorrectionVelocity</Entry Boxes>
-</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -35,19 +41,7 @@ Tab
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPoseX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPoseX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetX</Variables>
-		<GraphConfiguration>
-			<Name>config2</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPoseYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPoseYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetYaw</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFrameX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFrameY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFrameX</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -59,7 +53,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPoseY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPoseY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFrameYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFrameYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFrameYaw</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -71,7 +65,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPosePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPosePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetPitch</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFrameY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFrameY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFrameY</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -83,7 +77,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPoseZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPoseZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFramePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFramePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFramePitch</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -95,7 +89,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPoseRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPoseRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetRoll</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFrameZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFrameZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFrameZ</Variables>
 		<GraphConfiguration>
 			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -107,7 +101,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.alphaFilter,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.cLippedAlphaFilterValue</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoStartOffsetErrorPose_InWorldFrameRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetErrorPose_InWorldFrameRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffset_InWorldFrameRoll</Variables>
 		<GraphConfiguration>
 			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -119,7 +113,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.distanceToTravel</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -131,21 +125,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.distanceToTravel</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
 		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.angleToTravel</Variables>
 		<GraphConfiguration>
-			<Name>config11</Name>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -162,7 +144,19 @@ Tab
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePoseX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFrameX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFramePoint_TranslationX,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFramePoint_TranslationX</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFrameOrientation_RotationYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFrameOrientation_RotationYaw</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -174,7 +168,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePoseYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFrameYaw,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameYaw</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFramePoint_TranslationY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFramePoint_TranslationY</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -186,7 +180,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePoseY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFrameY,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFrameOrientation_RotationPitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFrameOrientation_RotationPitch</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -198,7 +192,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePosePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFramePitch,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFramePitch</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFramePoint_TranslationZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFramePoint_TranslationZ</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -210,7 +204,7 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePoseZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFrameZ,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameZ</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoGoalOffsetFrameOrientation_RotationRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.yoInterpolatedOffsetFrameOrientation_RotationRoll</Variables>
 		<GraphConfiguration>
 			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -222,9 +216,21 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.stateEstimatorInWorldFramePoseRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointPoseInWorldFrameRoll,root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameRoll</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.distanceToTravel</Variables>
 		<GraphConfiguration>
 			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.atlas.DRCSimulation.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.ClippedSpeedOffsetErrorInterpolator.distanceToTravel</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
