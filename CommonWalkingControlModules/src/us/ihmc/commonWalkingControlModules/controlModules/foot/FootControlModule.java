@@ -402,4 +402,9 @@ public class FootControlModule
    {
       footControlHelper.enableAnkleLimitAvoidanceInSupportState(enable);
    }
+
+   public void resetHeightCorrectionParametersForSingularityAvoidance()
+   {
+      legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
+   }
 }

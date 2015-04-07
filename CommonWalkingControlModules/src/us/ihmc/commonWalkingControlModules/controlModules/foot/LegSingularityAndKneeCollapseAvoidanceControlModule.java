@@ -355,6 +355,15 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       currentLegLength.set(-anklePosition.getZ());
    }
 
+   public void resetHeightCorrectionParameters()
+   {
+      doSmoothTransitionOutOfCollapseAvoidance.set(false);
+      doSmoothTransitionOutOfSingularityAvoidance.set(false);
+
+      isSupportCollapseAvoidanceUsed.set(false);
+      isSupportSingularityAvoidanceUsed.set(false);
+   }
+
    public void resetSwingParameters()
    {
       yoDesiredFootPosition.setToNaN();
