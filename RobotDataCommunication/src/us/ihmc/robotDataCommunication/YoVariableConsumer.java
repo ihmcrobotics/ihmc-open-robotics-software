@@ -21,7 +21,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class YoVariableConsumer implements LogPacketHandler
 {
-
+   private final int RECEIVE_BUFFER_SIZE = 1024;
+   
    private final InetAddress dataIP;
    
    private final List<YoVariable<?>> variables;
@@ -52,7 +53,8 @@ public class YoVariableConsumer implements LogPacketHandler
       this.jointStates = jointStates;
       this.listener = listener;
 
-      updateHandler = new ThreadedLogPacketHandler(this, 512);
+      
+      updateHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
       client = new StreamingDataTCPClient(this.dataIP, port, updateHandler);
    }
 

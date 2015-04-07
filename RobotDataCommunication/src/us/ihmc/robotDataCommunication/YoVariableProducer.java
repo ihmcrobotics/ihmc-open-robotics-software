@@ -41,7 +41,6 @@ public class YoVariableProducer implements Runnable
    
    private final LogDataHeader logDataHeader = new LogDataHeader();
    private final CRC32 crc32 = new CRC32();
-   private long uid = 0;
 
    @SuppressWarnings("unchecked")
    public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
@@ -131,7 +130,7 @@ public class YoVariableProducer implements Runnable
             crc32.reset();
             int dataSize = compressedBuffer.remaining() - LogDataHeader.length();
             crc32.update(compressedBackingArray, LogDataHeader.length() + compressedBuffer.arrayOffset(), dataSize);
-            logDataHeader.setUid(++uid);
+            logDataHeader.setUid(fullStateBuffer.getUid());
             logDataHeader.setTimestamp(fullStateBuffer.getTimestamp());
             logDataHeader.setDataSize(dataSize);
             logDataHeader.setCrc32((int) crc32.getValue());
