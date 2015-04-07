@@ -186,4 +186,9 @@ public class CoMHeightTimeDerivativesSmoother
       
       this.hasBeenInitialized.set(true);
    }
+
+   public void reset()
+   {
+      hasBeenInitialized.set(false);
+   }
 }

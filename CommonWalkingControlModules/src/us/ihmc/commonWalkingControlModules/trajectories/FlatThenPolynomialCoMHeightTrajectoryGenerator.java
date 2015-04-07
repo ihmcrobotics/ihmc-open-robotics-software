@@ -278,4 +278,11 @@ public class FlatThenPolynomialCoMHeightTrajectoryGenerator implements CoMHeight
       // TODO Auto-generated method stub
       
    }
+
+   @Override
+   public void initializeDesiredHeightToCurrent()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

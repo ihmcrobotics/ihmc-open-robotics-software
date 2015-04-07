@@ -302,4 +302,11 @@ public class FourPointCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       // TODO Auto-generated method stub
       
    }
+
+   @Override
+   public void initializeDesiredHeightToCurrent()
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

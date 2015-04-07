@@ -86,6 +86,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final YoGraphicPosition pointS0MaxViz, pointSFMaxViz, pointD0MaxViz, pointDFMaxViz, pointSNextMaxViz;
 
    private final BooleanYoVariable correctForCoMHeightDrift = new BooleanYoVariable("correctForCoMHeightDrift", registry);
+   private final BooleanYoVariable initializeToCurrent = new BooleanYoVariable("initializeCoMHeightToCurrent", registry);
 
    private final BagOfBalls bagOfBalls;
 
@@ -95,13 +96,15 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final DoubleYoVariable yoTime;
 
    private ReferenceFrame frameOfLastFoostep;
+   private final ReferenceFrame pelvisFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
-         double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, SideDependentList<ReferenceFrame> ankleZUpFrames,
+         double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames,
          final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
+      this.pelvisFrame = pelvisFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
@@ -691,7 +694,21 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
 
       spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
 
-      if (desiredComHeightProvider != null)
+      if (initializeToCurrent.getBooleanValue())
+      {
+         initializeToCurrent.set(false);
+
+         desiredPosition.setToZero(pelvisFrame);
+         desiredPosition.changeFrame(frameOfLastFoostep);
+
+         double heightOffset = desiredPosition.getZ() - splineOutput[0];
+
+         offsetHeightAboveGround.set(heightOffset);
+         offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
+         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
+         offsetHeightAboveGroundTrajectory.initialize();
+      }
+      else if (desiredComHeightProvider != null)
       {
          if (desiredComHeightProvider.isNewComHeightInformationAvailable())
          {
@@ -752,6 +769,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       coMHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
 
       desiredCoMHeight.set(z);
+   }
+
+   public void initializeDesiredHeightToCurrent()
+   {
+      initializeToCurrent.set(true);
    }
 
    private double[] getPartialDerivativesWithRespectToS(LineSegment2d segment)
