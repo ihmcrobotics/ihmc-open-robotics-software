@@ -37,12 +37,10 @@ public class FullStateBuffer extends RegistryBuffer
       return numberOfJointStates;
    }
 
-   @Override
-   public void update(long timestamp)
+   public void update(long timestamp, long uid)
    {
       super.update(timestamp);
-      
-      uid++;
+      this.uid = uid;
       int offset = 0;
       
       for (int i = 0; i < jointHolders.size(); i++)
