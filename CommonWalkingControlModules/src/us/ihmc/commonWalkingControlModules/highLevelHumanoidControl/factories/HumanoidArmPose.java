@@ -216,47 +216,47 @@ public enum HumanoidArmPose
       case REACH_WAY_BACK:
          return new double[]{0.0, 0.0, 0.0};
       case ARMS_03:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, Math.PI/2.0, 0.0};
       case REACH_FORWARD:
          return new double[]{0.0, 0.0, 0.0};
       case SMALL_CHICKEN_WINGS:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{Math.PI/2.0, 0.0, 0.0};
       case LARGE_CHICKEN_WINGS:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{Math.PI/4.0, 0.0, 0.0};
       case STRAIGHTEN_ELBOWS:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, -Math.PI/2.0, 0.0};
       case SUPPINATE_ARMS_IN_A_LITTLE:
          return new double[]{0.0, 0.0, 0.0};
       case ARMS_BACK:
          return new double[]{0.0, 0.0, 0.0};
       case LARGER_CHICKEN_WINGS:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, 0.0, -Math.PI/4.0};
       case ARMS_OUT_EXTENDED:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{-Math.PI/2.0, 0.0, 0.0};
       case SUPPINATE_ARMS_IN_MORE:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, -Math.PI/4.0, 0.0};
       case SUPPINATE_ARMS_IN_A_LOT:
          return new double[]{0.0, 0.0, 0.0};
       case SUPER_CHICKEN_WINGS:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, Math.PI/2.0, 0.0};
       case FLYING:
          return new double[]{0.0, 0.0, 0.0};
       case FLYING_SUPPINATE_IN:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{Math.PI/2.0, 0.0, 0.0};
       case FLYING_SUPPINATE_OUT:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{Math.PI/4.0, 0.0, 0.0};
       case ARM_NINETY_ELBOW_DOWN:
          return new double[]{0.0, 0.0, 0.0};
       case ARM_NINETY_ELBOW_FORWARD:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, 0.0, Math.PI/4.0};
       case ARM_NINETY_ELBOW_UP:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{-Math.PI/2.0, 0.0, 0.0};
       case ARM_FORTFIVE_ELBOW_UP:
          return new double[]{0.0, 0.0, 0.0};
       case ARM_FORTFIVE_ELBOW_DOWN:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{0.0, -Math.PI/4.0, 0.0};
       case ARM_OUT_TRICEP_EXERCISE:
-         return new double[]{0.0, 0.0, 0.0};
+         return new double[]{Math.PI/4.0, 0.0, 0.0};
       case ARM_STRAIGHT_DOWN:
          return new double[]{0.0, 0.0, 0.0};
          

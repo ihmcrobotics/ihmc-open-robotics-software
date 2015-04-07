@@ -62,7 +62,6 @@ import us.ihmc.utilities.math.geometry.FramePose2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
-import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -103,6 +102,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final BooleanYoVariable automaticDiagnosticRoutineHasStarted;
    private final DoubleYoVariable timeWhenControllerWokeUp;
    private final DoubleYoVariable timeToWaitBeforeEnable;
+   private final BooleanYoVariable enableHandOrientation;
 
    private final SideDependentList<HandPoseBehavior> handPoseBehaviors = new SideDependentList<>();
    private final SideDependentList<HandPoseListBehavior> handPoseListBehaviors = new SideDependentList<>();
@@ -235,6 +235,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       automaticDiagnosticRoutineHasStarted = new BooleanYoVariable("diagnosticBehaviorAutomaticDiagnosticRoutineHasStarted", registry);
       timeWhenControllerWokeUp = new DoubleYoVariable("diagnosticBehaviorTimeWhenControllerWokeUp", registry);
       timeToWaitBeforeEnable = new DoubleYoVariable("diagnosticBehaviorTimeToWaitBeforeEnable", registry);
+      enableHandOrientation = new BooleanYoVariable("diagnosticEnableHandOrientation", registry);
 
       numberOfArmJoints = fullRobotModel.getRobotSpecificJointNames().getArmJointNames().length;
       this.yoTime = yoTime;
@@ -1764,7 +1765,12 @@ public class DiagnosticBehavior extends BehaviorInterface
    {
       FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame(), armPose.getDesiredUpperArmYawPitchRoll());
       double elbowAngle = armPose.getDesiredElbowAngle();
-      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide), armPose.getDesiredHandYawPitchRoll());
+      double[] handOrientation = new double[3];
+      if (enableHandOrientation.getBooleanValue())
+      {
+         handOrientation = armPose.getDesiredHandYawPitchRoll();
+      }
+      FrameOrientation desiredHandOrientation = new FrameOrientation(lowerArmsFrames.get(robotSide), handOrientation);
       submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation, true);
    }
 
