@@ -6,6 +6,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
 {
    private boolean runningOnRealRobot;
    private final boolean useTwoCMPsPerSupport = false;
+   private final boolean useNewICPPlanner = false;
 
    public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
@@ -124,7 +125,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public boolean useNewICPPlanner()
    {
-      return true;
+      return useNewICPPlanner;
    }
 
    @Override
