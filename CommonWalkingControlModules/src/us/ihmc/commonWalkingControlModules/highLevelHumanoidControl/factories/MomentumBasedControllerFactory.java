@@ -89,6 +89,8 @@ public class MomentumBasedControllerFactory
    private final SideDependentList<String> footContactSensorNames;
    private final SideDependentList<String> wristSensorNames;
    private final ContactableBodiesFactory contactableBodiesFactory;
+   
+   private WalkingHighLevelHumanoidController walkingBehavior;
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
@@ -227,7 +229,7 @@ public class MomentumBasedControllerFactory
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
 
-      WalkingHighLevelHumanoidController walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
+      walkingBehavior = new WalkingHighLevelHumanoidController(variousWalkingProviders, variousWalkingManagers,
             centerOfMassHeightTrajectoryGenerator, transferTimeCalculationProvider, swingTimeCalculationProvider, walkingControllerParameters,
             instantaneousCapturePointPlanner, icpAndMomentumBasedController, momentumBasedController);
       highLevelBehaviors.add(walkingBehavior);
@@ -315,9 +317,13 @@ public class MomentumBasedControllerFactory
       }
    }
 
-   public void reinitializeWalking()
+   public void reinitializeWalking(boolean keepPosition)
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.WALKING);
+      if( keepPosition && walkingBehavior!= null )
+      {
+         walkingBehavior.initializeDesiredHeightToCurrent();
+      }
    }
    
    public void reinitializePositionControl()
