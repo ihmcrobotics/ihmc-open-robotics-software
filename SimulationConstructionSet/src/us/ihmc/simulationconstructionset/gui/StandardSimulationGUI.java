@@ -809,8 +809,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
 
       // else if (jApplet != null) device = jApplet.getGraphicsConfiguration().getDevice();
-      ViewportPanel viewportPanel = new ViewportPanel(yoVariableHolder, allCommandsExecutor, standardGUIActions, cameraConfigurationList, cameraMountList,
-            graphics3dAdapter);
+      ViewportPanel viewportPanel = new ViewportPanel(yoVariableHolder, allCommandsExecutor, standardGUIActions, cameraConfigurationList, cameraMountList, graphics3dAdapter);
       viewportPanel.setupViews(device, null);
 
       return viewportPanel;
