@@ -8,7 +8,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.ContextManager;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -91,8 +90,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    private Graphics3DAdapter graphics3dAdapter;
 
-   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter,
-         CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
+   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
    {
       ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       graphics3dAdapter.addKeyListener(classicCameraController);
@@ -103,8 +101,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       return classicCameraController;
    }
 
-   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter,
-         CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
+   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
       if (graphics3dAdapter == null) throw new RuntimeException("graphics3dAdapter == null");
       this.graphics3dAdapter = graphics3dAdapter;
@@ -561,7 +558,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
             transitioning = false;
          }
       }
-
    }
 
    public void addKeyFrame(int time)
@@ -686,42 +682,36 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    public void setFixX(double fx)
    {
       this.fixX = fx;
-
    }
 
    @Override
    public void setFixY(double fy)
    {
       this.fixY = fy;
-
    }
 
    @Override
    public void setFixZ(double fz)
    {
       this.fixZ = fz;
-
    }
 
    @Override
    public void setCamX(double cx)
    {
       this.camX = cx;
-
    }
 
    @Override
    public void setCamY(double cy)
    {
       this.camY = cy;
-
    }
 
    @Override
    public void setCamZ(double cz)
    {
       this.camZ = cz;
-
    }
 
    @Override
@@ -730,7 +720,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       this.fixX = fx;
       this.fixY = fy;
       this.fixZ = fz;
-
    }
 
    @Override
@@ -739,7 +728,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       this.camX = cx;
       this.camY = cy;
       this.camZ = cz;
-
    }
 
    private Vector3d v3d = new Vector3d();
@@ -798,7 +786,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
 
       // transformChanged(currXform);
-
    }
    
    public void rotateAroundFix(double dx, double dy)
@@ -900,24 +887,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
 
       // transformChanged(currXform);
-
-   }
-   
-   double maxX = 0.0;
-   
-
-   @Override
-   public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
-   {
-//      doMouseDraggedRight(drz, drx);
-//      doMouseDraggedMiddle(0.0, dz);
-//      moveCameraForward(dy);
-      
-      double rotateGain = 7.0;
-      double translateGain = 2.0;
-      
-      rotateAroundFix(drz * rotateGain, drx * rotateGain);
-      translateFix(dx * translateGain, dy * translateGain, dz * translateGain);
    }
 
    @Override
@@ -975,7 +944,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
 
       // transformChanged(currXform);
-
    }
 
    private void moveCameraForward(double distance)
@@ -1291,8 +1259,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    @Override
    public void reset()
    {
-      // TODO Auto-generated method stub
-
+      
    }
 
    private Matrix3d rotationMatrix = new Matrix3d();
@@ -1331,157 +1298,178 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       currXform.setTranslation(positionOffset);
       currXform.normalize();
    }
+   
+   private boolean shouldAcceptDeviceInput()
+   {
+      if (alreadyClosing || graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+         return false;
+      
+      return true;
+   }
 
    @Override
    public void keyPressed(Key key)
    {
-      if (alreadyClosing) return;
-
-      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
-         return;
-
-      switch (key)
+      if (shouldAcceptDeviceInput())
       {
-      case W:
-         forward = true;
+         switch (key)
+         {
+         case W:
+            forward = true;
 
-         break;
+            break;
 
-      case S:
-         backward = true;
+         case S:
+            backward = true;
 
-         break;
+            break;
 
-      case A:
-         left = true;
+         case A:
+            left = true;
 
-         break;
+            break;
 
-      case D:
-         right = true;
+         case D:
+            right = true;
 
-         break;
+            break;
 
-      case Q:
-         up = true;
+         case Q:
+            up = true;
 
-         break;
+            break;
 
-      case Z:
-         down = true;
+         case Z:
+            down = true;
 
-         break;
+            break;
+            
+         default:
+            
+            break;
+         }
       }
-
    }
 
    @Override
    public void keyReleased(Key key)
    {
-      if (alreadyClosing) return;
-
-      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
-         return;
-
-      switch (key)
+      if (shouldAcceptDeviceInput())
       {
-      case W:
-         forward = false;
+         switch (key)
+         {
+         case W:
+            forward = false;
 
-         break;
+            break;
 
-      case S:
-         backward = false;
+         case S:
+            backward = false;
 
-         break;
+            break;
 
-      case A:
-         left = false;
+         case A:
+            left = false;
 
-         break;
+            break;
 
-      case D:
-         right = false;
+         case D:
+            right = false;
 
-         break;
+            break;
 
-      case Q:
-         up = false;
+         case Q:
+            up = false;
 
-         break;
+            break;
 
-      case Z:
-         down = false;
+         case Z:
+            down = false;
 
-         break;
+            break;
 
-      case RIGHT:
-         nextStoredPosition();
+         case RIGHT:
+            nextStoredPosition();
 
-         break;
+            break;
 
-      case LEFT:
-         previousStoredPosition();
+         case LEFT:
+            previousStoredPosition();
 
-         break;
+            break;
 
-      case K:
-         storePosition();
+         case K:
+            storePosition();
 
-         break;
+            break;
+         default:
+
+            break;
+         }
       }
-
    }
 
    @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
    {
-      if (alreadyClosing) return;
-
-      if (graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
-         return;
-
-      if (modifierKeyHolder.isKeyPressed(Key.SHIFT))
+      if (shouldAcceptDeviceInput())
       {
-         if (!isTracking() || !isTrackingX())
-            setFixX(location.x);
-         if (!isTracking() || !isTrackingY())
-            setFixY(location.y);
-         if (!isTracking() || !isTrackingZ())
-            setFixZ(location.z);
+         if (modifierKeyHolder.isKeyPressed(Key.SHIFT))
+         {
+            if (!isTracking() || !isTrackingX())
+               setFixX(location.x);
+            if (!isTracking() || !isTrackingY())
+               setFixY(location.y);
+            if (!isTracking() || !isTrackingZ())
+               setFixZ(location.z);
+         }
       }
    }
 
    @Override
    public void mouseDragged(MouseButton mouseButton, double dx, double dy)
    {
-      if (alreadyClosing) return;
-      
-      ContextManager contextManager = graphics3dAdapter.getContextManager();
-      if (contextManager.getCurrentViewport() != viewportAdapter)
-         return;
-
-      switch (mouseButton)
+      if (shouldAcceptDeviceInput())
       {
-      case LEFT:
-         doMouseDraggedLeft(dx, dy);
+         switch (mouseButton)
+         {
+         case LEFT:
+            doMouseDraggedLeft(dx, dy);
 
-         break;
+            break;
 
-      case RIGHT:
-         doMouseDraggedRight(dx, dy);
+         case RIGHT:
+            doMouseDraggedRight(dx, dy);
 
-         break;
+            break;
 
-      case MIDDLE:
-         doMouseDraggedMiddle(dx, dy);
+         case MIDDLE:
+            doMouseDraggedMiddle(dx, dy);
 
-         break;
+            break;
 
-      case LEFTRIGHT:
-         pan(dx, dy);
+         case LEFTRIGHT:
+            pan(dx, dy);
 
-         break;
+            break;
+         }
+      }
+   }
+
+   @Override
+   public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
+   {
+      if (shouldAcceptDeviceInput())
+      {
+         //      doMouseDraggedRight(drz, drx);
+         //      doMouseDraggedMiddle(0.0, dz);
+         //      moveCameraForward(dy);
+
+         double rotateGain = 7.0;
+         double translateGain = 2.0;
+
+         rotateAroundFix(drz * rotateGain, drx * rotateGain);
+         translateFix(dx * translateGain, dy * translateGain, dz * translateGain);
       }
    }
 
@@ -1563,7 +1551,6 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
          System.out.println("Copying camera keys");
       }
-
    }
 
    private boolean alreadyClosing = false;
