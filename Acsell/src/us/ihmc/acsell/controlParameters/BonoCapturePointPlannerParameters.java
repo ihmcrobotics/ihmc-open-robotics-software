@@ -151,7 +151,7 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    }
 
    @Override
-   public double getSafeDistanceForSupportEdges()
+   public double getCMPSafeDistanceAwayFromSupportEdges()
    {
       return 0.03;
    }
