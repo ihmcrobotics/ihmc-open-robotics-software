@@ -96,15 +96,23 @@ public class DRCPoseCommunicator implements RawOutputWriter
          @Override
          public void run()
          {
-            if (robotConfigurationDataRingBuffer.poll())
+            try
             {
-               RobotConfigurationData robotConfigData;
-               while ((robotConfigData = robotConfigurationDataRingBuffer.read()) != null)
+               if (robotConfigurationDataRingBuffer.poll())
                {
-                  dataProducer.send(robotConfigData);
+                  RobotConfigurationData robotConfigData;
+                  while ((robotConfigData = robotConfigurationDataRingBuffer.read()) != null)
+                  {
+                     dataProducer.send(robotConfigData);
+                  }
+                  robotConfigurationDataRingBuffer.flush();
                }
-               robotConfigurationDataRingBuffer.flush();
             }
+            catch(Throwable throwable)
+            {
+               throwable.printStackTrace();
+            }
+
          }
 
       }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
