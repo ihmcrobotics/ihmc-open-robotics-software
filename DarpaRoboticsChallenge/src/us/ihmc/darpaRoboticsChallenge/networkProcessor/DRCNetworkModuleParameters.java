@@ -200,6 +200,11 @@ public class DRCNetworkModuleParameters
    {
       this.useGFECommunicator = useGFECommunicator;
    }
+   
+   public void setUseControllerCommunicator(boolean useControllerCommunicator)
+   {
+      this.useController = useControllerCommunicator;
+   }
 
    public boolean useNetworkProcessor()
    {
