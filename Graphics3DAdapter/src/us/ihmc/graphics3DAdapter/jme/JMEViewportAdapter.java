@@ -108,6 +108,8 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
          jmeRenderer.getContextManager().addJMEViewportAdapter(this);
          this.jmeInputManager = new JMEInputManager(jmeRenderer, rootNode, jmeCamera);
       }
+      
+      jmeRenderer.registerViewport(this);
    }
 
 
