@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
@@ -56,8 +57,13 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
    {
       return activeView.getCameraController();
    }
-
+   
    public void setupViews(GraphicsDevice graphicsDevice, ViewportConfiguration viewportConfig)
+   {
+      setupViews(graphicsDevice, viewportConfig, null);
+   }
+
+   public void setupViews(GraphicsDevice graphicsDevice, ViewportConfiguration viewportConfig, JFrame jFrame)
    {
       this.removeAll();
 
@@ -71,10 +77,14 @@ public class ViewportPanel extends JPanel implements CameraSelector, ActiveCamer
          CameraTrackAndDollyYoVariablesHolder cameraTrackAndDollyYoVariablesHolder = new CameraTrackAndDollyYoVariablesHolder(yoVariableHolder);
 
          ViewportAdapter standard3DView = graphics3DAdapter.createNewViewport(graphicsDevice, false, false);
-         ClassicCameraController classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(standard3DView,
-               cameraTrackAndDollyYoVariablesHolder, graphics3DAdapter);
-         ViewportAdapterAndCameraControllerHolder viewportAdapterAndCameraControllerHolder = new ViewportAdapterAndCameraControllerHolder(standard3DView,
-               classicCameraController);
+         
+         ClassicCameraController classicCameraController;
+         if (jFrame != null)
+            classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(standard3DView, cameraTrackAndDollyYoVariablesHolder, graphics3DAdapter, jFrame);
+         else
+            classicCameraController = ClassicCameraController.createClassicCameraControllerAndAddListeners(standard3DView, cameraTrackAndDollyYoVariablesHolder, graphics3DAdapter);  
+         
+         ViewportAdapterAndCameraControllerHolder viewportAdapterAndCameraControllerHolder = new ViewportAdapterAndCameraControllerHolder(standard3DView, classicCameraController);
          standard3DView.setCameraController(classicCameraController);
 
          standard3DViews.add(viewportAdapterAndCameraControllerHolder);
