@@ -21,6 +21,7 @@ import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
@@ -131,7 +132,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       setFinalPositionSpineJoints(packet);
       setFinalPositionNeckJoint(packet);
 
-
       if (firstPacket)
       {
          firstPacket = false;
@@ -166,10 +166,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          
          trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPostion);
       }
-      
-//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setFinalPosition(waistJointAngles[0]);
-//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setFinalPosition(waistJointAngles[1]);
-//    trajectoryGenerator.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setFinalPosition(waistJointAngles[2]);
    }
    
    private void setFinalPositionNeckJoint(JointAnglesPacket packet)
@@ -177,11 +173,15 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       neckJointAngle = packet.getNeckJointAngle();
       
       OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(NeckJointName.LOWER_NECK_PITCH);
+      
       if( neckJoint == null) return;
+      
       double desiredNeckJointAngle = MathTools.clipToMinMax(neckJointAngle, neckJoint.getJointLimitLower(), neckJoint.getJointLimitUpper());
       
       OneDoFJointQuinticTrajectoryGenerator trajectory = trajectoryGenerator.get(neckJoint);
+      
       if( trajectory == null) return;
+      
       trajectory.setFinalPosition(desiredNeckJointAngle);
    }
    
@@ -292,10 +292,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    {
       for (OneDoFJoint joint : jointsBeenControlled)
       {
-         trajectoryGenerator.get(joint).setFinalPosition(joint.getQ());
-         trajectoryGenerator.get(joint).initialize(joint.getQ(), joint.getQd());
+         double previousDesired = joint.getqDesired();
+         trajectoryGenerator.get(joint).setFinalPosition(previousDesired);
+         trajectoryGenerator.get(joint).initialize(previousDesired, 0.0);
       }
-      
       trajectoryTimeProvider.set(0.1);
    }
 
