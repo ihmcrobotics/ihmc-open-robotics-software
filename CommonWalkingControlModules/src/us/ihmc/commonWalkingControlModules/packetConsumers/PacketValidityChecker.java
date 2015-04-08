@@ -344,6 +344,12 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
       
+      if (packetToCheck.trajectoryPoints == null)
+      {
+         String errorMessage = "Trajectory pointes are empty.";
+         return errorMessage;
+      }
+      
       int waypoints = packetToCheck.trajectoryPoints.length;
       if (waypoints == 0)
       {

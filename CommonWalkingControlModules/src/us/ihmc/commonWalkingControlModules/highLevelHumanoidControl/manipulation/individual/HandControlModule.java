@@ -596,9 +596,8 @@ public class HandControlModule
       int armJoints = trajectoryPacket.trajectoryPoints[0].positions.length;
       if (armJoints != oneDoFJoints.length)
       {
-         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket package contains " + armJoints + " joints - expected was "
+         System.out.println(this.getClass().getSimpleName() + ": in ArmJointTrajectoryPacket packet contains " + armJoints + " joints - expected was "
                             + oneDoFJoints.length);
-
          return;
       }
 
@@ -664,8 +663,8 @@ public class HandControlModule
 
                   if (jointIdx == 0)
                   {
-                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds"
-                                        + "for new arm safety (this only affects the arms)");
+                     System.out.println(this.getClass().getSimpleName() + " set time in between waypoints to " + minDeltaTime + " seconds "
+                                        + "for safety (this only affects the arms)");
                   }
                }
             }
