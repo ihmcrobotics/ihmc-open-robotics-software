@@ -3,6 +3,7 @@ package us.ihmc.robotDataCommunication.gui;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.nio.channels.ClosedByInterruptException;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
@@ -40,6 +41,10 @@ public class GUICaptureReceiver extends Thread
             System.out.println("Found stream. Connecting to " + address);
             StreamingDataTCPClient client = new StreamingDataTCPClient(address, LogDataProtocolSettings.UI_DATA_PORT, handler, 1);
             client.run(); // Run the runnable, making it blocking
+         }
+         catch (ClosedByInterruptException e)
+         {
+            System.out.println("Got interrupted. Closing GUICaptureReceiver");
          }
          catch (IOException e)
          {

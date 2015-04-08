@@ -76,17 +76,16 @@ public class YoVariableClient
          throw new RuntimeException("Client already started");
       }
 
+      System.out.println("Requesting handshake");
       LogHandshake handshake = yoVariableConsumer.getHandshake();
 
       handshakeParser.parseFrom(handshake.protoShake);
       listener.receivedHandshake(handshake);
       LogModelLoader modelLoader = null;
-      System.out.println(handshake.modelLoaderClass);
       if (handshake.modelLoaderClass != null)
       {
          modelLoader = new SDFModelLoader();
          modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
-         System.out.println(modelLoader);
       }
 
       logControlClient.connect();
