@@ -1095,15 +1095,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       Thread thread = new Thread(this);
       thread.start();
-      try
-      {
-         thread.join();
-      }
-      catch (InterruptedException e)
-      {
-         Thread.currentThread().interrupt();
-      }
 
+      while (this.isSimulationThreadUpAndRunning())
+      {
+         Thread.yield();
+      }
    }
 
    public void closeAndDispose()
