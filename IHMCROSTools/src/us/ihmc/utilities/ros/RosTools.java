@@ -23,6 +23,7 @@ import java.net.UnknownHostException;
 import javax.imageio.ImageIO;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import org.ros.node.NodeConfiguration;
 
@@ -183,6 +184,13 @@ public class RosTools
    }
    
    public static void packVector3dToGeometry_msgsVector3(Vector3d vector, Vector3 rosVectorToPack)
+   {
+      rosVectorToPack.setX(vector.getX());
+      rosVectorToPack.setY(vector.getY());
+      rosVectorToPack.setZ(vector.getZ());
+   }
+   
+   public static void packVector3fToGeometry_msgsVector3(Vector3f vector, Vector3 rosVectorToPack)
    {
       rosVectorToPack.setX(vector.getX());
       rosVectorToPack.setY(vector.getY());

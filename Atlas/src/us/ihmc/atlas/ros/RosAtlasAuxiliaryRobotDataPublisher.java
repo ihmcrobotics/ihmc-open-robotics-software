@@ -1,5 +1,8 @@
 package us.ihmc.atlas.ros;
 
+import java.util.LinkedHashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
@@ -10,16 +13,13 @@ import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
 import us.ihmc.utilities.ros.publisher.RosInt64Publisher;
 
-import java.util.LinkedHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 /**
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
 public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
-   private final ConcurrentLinkedQueue<AtlasAuxiliaryRobotData> availableAtlasAuxiliaryData = new ConcurrentLinkedQueue<>();
+   private final ArrayBlockingQueue<AtlasAuxiliaryRobotData> availableAtlasAuxiliaryData = new ArrayBlockingQueue<>(30);
    private final RosMainNode rosMainNode;
 
    private final LinkedHashMap<AtlasElectricMotorPacketEnum, RosBoolPublisher> electricForearmEnabledPublishers = new LinkedHashMap<>();
@@ -100,20 +100,24 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
    {
       while (true)
       {
-         AtlasAuxiliaryRobotData auxiliaryRobotData = availableAtlasAuxiliaryData.poll();
-         if(auxiliaryRobotData != null)
+         AtlasAuxiliaryRobotData auxiliaryRobotData;
+         try
          {
-            if(rosMainNode.isStarted())
-            {
-               publishElectricForearmData(auxiliaryRobotData);
-
-               publishPumpData(auxiliaryRobotData);
-
-               publishBatteryData(auxiliaryRobotData);
-            }
+            auxiliaryRobotData = availableAtlasAuxiliaryData.take();
          }
+         catch (InterruptedException e)
+         {
+            // Continue on
+            continue;
+         }
+         if(rosMainNode.isStarted())
+         {
+            publishElectricForearmData(auxiliaryRobotData);
 
-         Thread.yield();
+            publishPumpData(auxiliaryRobotData);
+
+            publishBatteryData(auxiliaryRobotData);
+         }
       }
    }
 
@@ -160,8 +164,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
 
       if(auxiliaryRobotData != null && auxiliaryRobotData instanceof AtlasAuxiliaryRobotData)
       {
-         availableAtlasAuxiliaryData.add((AtlasAuxiliaryRobotData) auxiliaryRobotData);
-         if(availableAtlasAuxiliaryData.size() > 30)
+         if(!availableAtlasAuxiliaryData.offer((AtlasAuxiliaryRobotData) auxiliaryRobotData))
          {
             availableAtlasAuxiliaryData.clear();
          }
