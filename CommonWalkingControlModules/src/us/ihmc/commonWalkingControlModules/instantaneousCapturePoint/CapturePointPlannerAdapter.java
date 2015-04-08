@@ -6,8 +6,8 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -16,17 +16,18 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class CapturePointPlannerAdapter
 {
-   private static final boolean USE_NEW_PLANNER = false;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable capturePointInFromFootCenter = new DoubleYoVariable("icpInFromCenter", registry);
    private final DoubleYoVariable capturePointForwardFromFootCenter = new DoubleYoVariable("icpForwardFromCenter", registry);
@@ -41,7 +42,7 @@ public class CapturePointPlannerAdapter
    private final FramePoint tmpFramePoint2 = new FramePoint(worldFrame);
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d(worldFrame);
    private final FrameVector tmpFrameVector = new FrameVector(worldFrame);
-   private final CommonHumanoidReferenceFrames referenceFrames;
+   private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final BipedSupportPolygons bipedSupportPolygons;
    private final EnumYoVariable<RobotSide> supportLeg = new EnumYoVariable<>("icpPlannerAdapterSupportLeg", registry, RobotSide.class, true);
 
@@ -49,20 +50,24 @@ public class CapturePointPlannerAdapter
    private final FramePoint currentDesiredICP = new FramePoint();
    private final FrameVector currentDesiredICPVelocity = new FrameVector();
 
+   private final boolean useNewICPPlanner;
    private final NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation capturePointPlanner;
    private final ICPPlannerWithTimeFreezer icpPlanner;
 
    public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry registry,
-         YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, CommonHumanoidReferenceFrames referenceFrames,
+         YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          BipedSupportPolygons bipedSupportPolygons)
    {
-      this.referenceFrames = referenceFrames;
+      useNewICPPlanner = capturePointPlannerParameters.useNewICPPlanner();
       this.currentTransferToSide = new EnumYoVariable<RobotSide>("icpPlannerAdapterCurrentTransferToSide", registry, RobotSide.class);
 
-      if (USE_NEW_PLANNER)
+      for (RobotSide robotSide : RobotSide.values)
+         soleFrames.put(robotSide, contactableFeet.get(robotSide).getSoleFrame());
+
+      if (useNewICPPlanner)
       {
          capturePointPlanner = null;
-         icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, referenceFrames, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+         icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       }
       else
       {
@@ -79,7 +84,7 @@ public class CapturePointPlannerAdapter
 
    public void setSingleSupportTime(double singleSupportTime)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.setSingleSupportTime(singleSupportTime + additionalSwingTimeForICP.getDoubleValue());
       else
          capturePointPlanner.setSingleSupportTime(singleSupportTime + additionalSwingTimeForICP.getDoubleValue());
@@ -87,7 +92,7 @@ public class CapturePointPlannerAdapter
 
    public void setDoubleSupportTime(double doubleSupportTime)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.setDoubleSupportTime(doubleSupportTime);
       else
          capturePointPlanner.setDoubleSupportTime(doubleSupportTime);
@@ -95,7 +100,7 @@ public class CapturePointPlannerAdapter
 
    public void setInitialDoubleSupportTime(double doubleSupportTime)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.setInitialDoubleSupportTime(doubleSupportTime);
       else      
          capturePointPlanner.setInitialDoubleSupportTime(doubleSupportTime);
@@ -103,7 +108,7 @@ public class CapturePointPlannerAdapter
 
    public void setOmega0(double omega0)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.setOmega0(omega0);
       else
          capturePointPlanner.setOmega0(omega0);
@@ -111,7 +116,7 @@ public class CapturePointPlannerAdapter
 
    public void clear()
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.clearPlan();
 
       footstepLocations.clear();
@@ -119,7 +124,7 @@ public class CapturePointPlannerAdapter
 
    public void addFootstep(Footstep footstep)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
       {
          icpPlanner.addFootstepToPlan(footstep);
       }
@@ -149,6 +154,18 @@ public class CapturePointPlannerAdapter
       }
    }
 
+   public void setDesiredCapturePointState(YoFramePoint desiredICP, YoFrameVector desiredICPVelocity)
+   {
+      desiredICP.getFrameTupleIncludingFrame(currentDesiredICP);
+      desiredICPVelocity.getFrameTupleIncludingFrame(currentDesiredICPVelocity);
+   }
+   
+   public void setDesiredCapturePointState(FramePoint2d desiredICP, FrameVector2d desiredICPVelocity)
+   {
+      currentDesiredICP.setXY(desiredICP);
+      currentDesiredICPVelocity.setXY(desiredICPVelocity);
+   }
+
    public void setCurrentDesiredICPState(YoFramePoint2d desiredICP, YoFrameVector2d desiredICPVelocity)
    {
       desiredICP.getFrameTupleIncludingFrame(currentDesiredICP);
@@ -159,7 +176,7 @@ public class CapturePointPlannerAdapter
    {
       this.supportLeg.set(supportSide);
 
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.initializeSingleSupport(initialTime, supportSide);
       else
       {
@@ -172,11 +189,12 @@ public class CapturePointPlannerAdapter
 
    public void initializeDoubleSupport(YoFramePoint2d desiredICP, YoFrameVector2d desiredICPVelocity, double initialTime, RobotSide transferToSide)
    {
-      setCurrentDesiredICPState(desiredICP, desiredICPVelocity);
+      if (desiredICP != null)
+         setCurrentDesiredICPState(desiredICP, desiredICPVelocity);
       
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
       {
-         icpPlanner.setDesiredCapturePointState(desiredICP, desiredICPVelocity);
+         icpPlanner.setDesiredCapturePointState(currentDesiredICP, currentDesiredICPVelocity);
          icpPlanner.initializeDoubleSupport(initialTime, transferToSide);
       }
       else
@@ -202,7 +220,7 @@ public class CapturePointPlannerAdapter
          setSupportFootLocation(transferFromSide, transferFromFootLocation);
          setSupportFootLocation(transferToSide, transferToFootLocation);
 
-      transferToFootLocation = new FramePoint(referenceFrames.getSoleFrame(transferToSide));
+      transferToFootLocation = new FramePoint(soleFrames.get(transferToSide));
       transferToFootLocation.changeFrame(worldFrame);
 
          capturePointPlanner.initializeDoubleSupport(currentDesiredICP, currentDesiredICPVelocity, initialTime, footstepLocations, transferToSide, transferToFootLocation);
@@ -211,7 +229,7 @@ public class CapturePointPlannerAdapter
 
    public void updatePlanForSingleSupportDisturbances(FramePoint actualCapturePointPosition, double time, RobotSide supportSide)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
       {
          icpPlanner.updatePlanForSingleSupportDisturbances(time, actualCapturePointPosition);
       }
@@ -238,11 +256,11 @@ public class CapturePointPlannerAdapter
    public void getICPPositionAndVelocity(FramePoint2d icpPositionToPack, FrameVector2d icpVelocityToPack, FramePoint2d ecmpToPack, FramePoint2d actualICP,
          double time)
    {
-      transferToFootLocation.setToZero(referenceFrames.getSoleFrame(currentTransferToSide.getEnumValue()));
+      transferToFootLocation.setToZero(soleFrames.get(currentTransferToSide.getEnumValue()));
       transferToFootLocation.changeFrame(worldFrame);
 
       tmpFramePoint2.set(actualICP.getX(), actualICP.getY(), 0.0);
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, tmpFramePoint2, time);
       else
          capturePointPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, time, tmpFramePoint2, transferToFootLocation);
@@ -251,7 +269,7 @@ public class CapturePointPlannerAdapter
 
       icpVelocityToPack.set(tmpFrameVector.getX(), tmpFrameVector.getY());
 
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.packDesiredCentroidalMomentumPivotPosition(tmpFramePoint);
       else
          capturePointPlanner.packDesiredCentroidalMomentumPivotPosition(tmpFramePoint);
@@ -260,11 +278,11 @@ public class CapturePointPlannerAdapter
 
    public void reset(double time)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.reset(time);
       else
       {
-         transferToFootLocation.setToZero(referenceFrames.getSoleFrame(currentTransferToSide.getEnumValue()));
+         transferToFootLocation.setToZero(soleFrames.get(currentTransferToSide.getEnumValue()));
          transferToFootLocation.changeFrame(worldFrame);
          capturePointPlanner.reset(time, currentTransferToSide.getEnumValue(), transferToFootLocation);
       }
@@ -272,7 +290,7 @@ public class CapturePointPlannerAdapter
 
    public boolean isDone(double time)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
       {
          if (icpPlanner.getHasBeenWokenUp())
          {
@@ -303,7 +321,7 @@ public class CapturePointPlannerAdapter
 
    public double getEstimatedTimeRemainingForState(double time)
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          return icpPlanner.computeAndReturnTimeRemaining(time);
       else
          return capturePointPlanner.computeAndReturnTimeRemaining(time);
@@ -311,7 +329,7 @@ public class CapturePointPlannerAdapter
 
    public boolean isPerformingICPDoubleSupport()
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          return icpPlanner.isInDoubleSupport();
       else
          return capturePointPlanner.isDoubleSupport.getBooleanValue();
@@ -319,7 +337,7 @@ public class CapturePointPlannerAdapter
 
    public FramePoint2d getFinalDesiredICP()
    {
-      if (USE_NEW_PLANNER)
+      if (useNewICPPlanner)
          icpPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
       else         
          capturePointPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);

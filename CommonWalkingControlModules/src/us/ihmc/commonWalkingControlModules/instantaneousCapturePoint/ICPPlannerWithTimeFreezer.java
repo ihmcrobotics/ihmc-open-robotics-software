@@ -3,11 +3,12 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
-import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -29,10 +30,10 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final FramePoint tmpCapturePointPosition;
    private final FrameVector tmpCapturePointVelocity;
    
-   public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, CommonHumanoidReferenceFrames referenceFrames,
+   public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(bipedSupportPolygons, referenceFrames, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
+      super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
       this.timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
       this.capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);

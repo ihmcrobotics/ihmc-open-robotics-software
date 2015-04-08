@@ -111,6 +111,41 @@ public class CapturePointTools
    }
 
    /**
+    * Backward calculation of the ICP corner points as the method {@link #computeDesiredCornerPoints(ArrayList, ArrayList, boolean, double, double)}
+    * but considering two constant CMPs per support: an entryCMP and an exitCMP.
+    * @param entryCornerPointsToPack
+    * @param exitCornerPointsToPack
+    * @param entryCMPs
+    * @param exitCMPs
+    * @param stepTime
+    * @param timeInPercentSpentOnExitCMPs
+    * @param omega0
+    */
+   public static void computeDesiredCornerPoints(ArrayList<YoFramePoint> entryCornerPointsToPack, ArrayList<YoFramePoint> exitCornerPointsToPack,
+         ArrayList<YoFramePoint> entryCMPs, ArrayList<YoFramePoint> exitCMPs, double stepTime, double timeInPercentSpentOnExitCMPs, double omega0)
+   {
+      double timeSpentOnExitCMP = stepTime * timeInPercentSpentOnExitCMPs;
+      double timeSpentOnEntryCMP = stepTime * (1.0 - timeInPercentSpentOnExitCMPs);
+      double entryExponentialTerm = Math.exp(- omega0 * timeSpentOnEntryCMP);
+      double exitExponentialTerm = Math.exp(- omega0 * timeSpentOnExitCMP);
+
+      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+      
+      for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
+      {
+         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
+         YoFramePoint exitCMP = exitCMPs.get(i);
+         YoFramePoint entryCMP = entryCMPs.get(i);
+
+         exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
+         entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
+         
+         nextEntryCornerPoint = entryCornerPoint;
+      }
+   }
+
+   /**
     * Given a desired capturePoint location and an initial position of the capture point,
     * compute the constant CMP that will drive the capture point from the 
     * initial position to the final position.
@@ -129,8 +164,8 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point position at a given time. ICP_d =
-    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*CMP_0
+    * Compute the desired capture point position at a given time. 
+    * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
     * 
     * @param omega0
     * @param time
@@ -147,8 +182,8 @@ public class CapturePointTools
    }
 
    /**
-    * Compute the desired capture point position at a given time. ICP_d =
-    * e^{w0*t}*ICP_0 + (1-e^{w0*t})*CMP_0
+    * Compute the desired capture point position at a given time.
+    * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
     * 
     * @param omega0
     * @param time

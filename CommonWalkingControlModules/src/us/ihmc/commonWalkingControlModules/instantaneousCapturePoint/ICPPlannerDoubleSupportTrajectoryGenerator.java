@@ -30,16 +30,20 @@ public class ICPPlannerDoubleSupportTrajectoryGenerator implements PositionTraje
       doubleSupportCapturePointTrajectory.setTrajectoryTime(duration);
    }
 
-   public void setInitialConditions(FramePoint initialPosition, FrameVector initialVelocity)
+   public void setInitialConditions(YoFramePoint initialPosition, YoFrameVector initialVelocity, ReferenceFrame attachedFrame)
    {
-      initialPositionInSpecificFrame.setIncludingFrame(initialPosition);
-      initialVelocityInSpecificFrame.setIncludingFrame(initialVelocity);
+      initialPosition.getFrameTupleIncludingFrame(initialPositionInSpecificFrame);
+      initialVelocity.getFrameTupleIncludingFrame(initialVelocityInSpecificFrame);
+      initialPositionInSpecificFrame.changeFrame(attachedFrame);
+      initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
-
-   public void setFinalConditions(FramePoint finalPosition, FrameVector finalVelocity)
+   
+   public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity, ReferenceFrame attachedFrame)
    {
-      finalPositionInSpecificFrame.setIncludingFrame(finalPosition);
-      finalVelocityInSpecificFrame.setIncludingFrame(finalVelocity);
+      finalPosition.getFrameTupleIncludingFrame(finalPositionInSpecificFrame);
+      finalVelocity.getFrameTupleIncludingFrame(finalVelocityInSpecificFrame);
+      finalPositionInSpecificFrame.changeFrame(attachedFrame);
+      finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
    @Override
