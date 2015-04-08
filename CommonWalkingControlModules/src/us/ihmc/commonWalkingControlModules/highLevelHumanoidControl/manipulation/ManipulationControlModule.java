@@ -274,21 +274,18 @@ public class ManipulationControlModule
 
    public void prepareForLocomotion()
    {
-      for (HandControlModule handControlModule : handControlModules)
-      {
-         freeze(handControlModule);
-      }
+      holdCurrentArmConfiguration();
    }
 
-   public void freeze()
+   public void holdCurrentArmConfiguration()
    {
-      for (HandControlModule handControlModule : handControlModules)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         freeze(handControlModule);
+         holdArmCurrentConfiguration(handControlModules.get(robotSide));
       }
    }
 
-   private void freeze(HandControlModule handControlModule)
+   private void holdArmCurrentConfiguration(HandControlModule handControlModule)
    {
       if (handControlModule.isControllingPoseInWorld())
       {
