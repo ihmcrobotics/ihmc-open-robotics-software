@@ -188,6 +188,11 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    {
       return wristForceSensorUpdatables.get(robotSide);
    }
+   
+   public SideDependentList<WristForceSensorFilteredUpdatable> getWristForceSensorUpdatableSideDependentList()
+   {
+      return wristForceSensorUpdatables;
+   }
 
    public BehaviorCommunicationBridge getBehaviorCommunicationBridge()
    {
