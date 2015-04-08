@@ -33,7 +33,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 
 // FIXME I've changed the way push recovery is handled with the planner but didn't take the time to fix the visualizer. (Sylvain)
 
-@BambooPlan(planType={BambooPlanType.UI})
+@BambooPlan(planType = { BambooPlanType.UI })
 public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisualizerTest
 {
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -166,17 +166,17 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
 
       @Override
-      public double getCapturePointInFromFootCenterDistance()
+      public double getReferenceCMPInsideOffset()
       {
          return 0.006;
       }
 
       @Override
-      public double getCapturePointForwardFromFootCenterDistance()
+      public double getReferenceCMPForwardOffset()
       {
          return 0;
       }
-      
+
       @Override
       public double getMaxAllowedErrorWithoutPartialTimeFreeze()
       {
@@ -187,6 +187,42 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
       {
          return true;
+      }
+
+      @Override
+      public boolean useNewICPPlanner()
+      {
+         return false;
+      }
+
+      @Override
+      public boolean useTwoCMPsPerSupport()
+      {
+         return false;
+      }
+
+      @Override
+      public double getTimeSpentOnExitCMPInPercentOfStepTime()
+      {
+         return 0.50;
+      }
+
+      @Override
+      public double getMaxReferenceCMPForwardOffset()
+      {
+         return 0.05;
+      }
+
+      @Override
+      public double getMinReferenceCMPForwardOffset()
+      {
+         return -0.02;
+      }
+
+      @Override
+      public double getSafeDistanceForSupportEdges()
+      {
+         return 0.03;
       }
    };
 
@@ -239,8 +275,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityLineSegment = null;
    }
 
-	@EstimatedDuration
-	@Test(timeout=300000)
+   @EstimatedDuration
+   @Test(timeout = 300000)
    public void visualizePlanner()
    {
       boolean testPushInDoubleSupport = true;
@@ -255,8 +291,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       listOfFootPolygons.add(footLineSegments1);
       listOfFootPolygons.add(footLineSegments2);
 
-      icpPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(testICPPlannerParams, registry,
-            yoGraphicsListRegistry);
+      icpPlanner = new NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation(testICPPlannerParams, registry, yoGraphicsListRegistry);
 
       createVisualizers(maxNumberOfConsideredFootsteps);
 
@@ -270,8 +305,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
       double omega0 = Math.sqrt(gravitationalAcceleration / comHeight);
 
-      FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList,
-            stepLength, halfStepWidth);
+      FrameTupleArrayList<FramePoint> footLocations = createABunchOfUniformWalkingSteps(stepSide, startSquaredUp, numberOfStepsInStepList, stepLength,
+            halfStepWidth);
 
       FramePoint initialICPPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       FramePoint singleSupportStartICP = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -290,7 +325,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       actualICPPosition.set(initialICPPosition);
 
       icpPlanner.setOmega0(omega0);
-      icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations,robotSide,footLocations.get(1));
+      icpPlanner.initializeDoubleSupport(initialICPPosition, initialICPVelocity, initialTime, footLocations, robotSide, footLocations.get(1));
 
       icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
       singleSupportInitialICPPosition.set(singleSupportStartICP);
@@ -303,24 +338,23 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
             doubleSupportInitialTransferDuration, deltaT, omega0, initialICPPosition, testPushInDoubleSupport);
 
       footLocations.remove(0);
-      
+
       while (footLocations.size() >= 2)
       {
-         if(!testPushInDoubleSupport)  
+         if (!testPushInDoubleSupport)
          {
             icpPlanner.initializeSingleSupport(initialTime, footLocations);
             icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
             singleSupportInitialICPPosition.set(singleSupportStartICP);
          }
-         
+
          updatePointsVis(footLocations);
 
-         icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
-               null);
+         icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, null);
 
-         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration,
-               omega0, initialICPPosition, footLocations, testPushInDoubleSupport);
-         
+         simulateForwardAndCheckSingleSupport(icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, singleSupportDuration, omega0,
+               initialICPPosition, footLocations, testPushInDoubleSupport);
+
          if (testPushInDoubleSupport)
          {
             testPushInDoubleSupport = false;
@@ -330,22 +364,21 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
          initialTime = initialTime + singleSupportDuration;
 
-         icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations,robotSide.getOppositeSide(),footLocations.get(1));
-         icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition,
-               footLocations.get(1));
+         icpPlanner.initializeDoubleSupport(icpPosition, icpVelocity, initialTime, footLocations, robotSide.getOppositeSide(), footLocations.get(1));
+         icpPlanner.packDesiredCapturePointPositionAndVelocity(initialICPPosition, initialICPVelocity, initialTime, actualICPPosition, footLocations.get(1));
 
          icpPlanner.getSingleSupportInitialCapturePointPosition(singleSupportStartICP);
          singleSupportInitialICPPosition.set(singleSupportStartICP);
 
          updatePointsVis(footLocations);
 
-         simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner,
-               doubleSupportDuration, deltaT, omega0, initialICPPosition, testPushInDoubleSupport);
+         simulateForwardAndCheckDoubleSupport(footLocations, icpPosition, icpVelocity, icpAcceleration, cmpPosition, icpPlanner, doubleSupportDuration, deltaT,
+               omega0, initialICPPosition, testPushInDoubleSupport);
 
          footLocations.remove(0);
 
          updatePointsVis(footLocations);
-         
+
       }
 
       if (visualize)
@@ -357,8 +390,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
    }
 
-   private FrameTupleArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp,
-         int numberOfStepsInStepList, double stepLength, double halfStepWidth)
+   private FrameTupleArrayList<FramePoint> createABunchOfUniformWalkingSteps(RobotSide stepSide, boolean startSquaredUp, int numberOfStepsInStepList,
+         double stepLength, double halfStepWidth)
    {
       FrameTupleArrayList<FramePoint> footLocations = FrameTupleArrayList.createFramePointArrayList();
 
@@ -427,15 +460,13 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
-         YoFramePoint constantCoPPoint = pointAndLinePlotter
-               .plotPoint3d("constantCoPsViz" + i, new Point3d(), YoAppearance.Red(), 0.004);
+         YoFramePoint constantCoPPoint = pointAndLinePlotter.plotPoint3d("constantCoPsViz" + i, new Point3d(), YoAppearance.Red(), 0.004);
          constantCoPsViz.add(constantCoPPoint);
       }
 
       for (int i = 0; i < maxNumberOfConsideredFootsteps - 1; i++)
       {
-         YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("icpCornerPoint" + i, new Point3d(), YoAppearance.Green(),
-               0.003);
+         YoFramePoint cornerICPFramePoint = pointAndLinePlotter.plotPoint3d("icpCornerPoint" + i, new Point3d(), YoAppearance.Green(), 0.003);
          icpFootCenterCornerPointsViz.add(cornerICPFramePoint);
       }
 
@@ -454,29 +485,27 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       yoGraphicsListRegistry = pointAndLinePlotter.getDynamicGraphicObjectsListRegistry();
    }
 
-   private void simulateForwardAndCheckSingleSupport(FramePoint icpPositionToPack, FrameVector icpVelocityToPack,
-         FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
-         NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double singleSupportDuration,
+   private void simulateForwardAndCheckSingleSupport(FramePoint icpPositionToPack, FrameVector icpVelocityToPack, FrameVector icpAccelerationToPack,
+         FramePoint cmpPositionToPack, NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double singleSupportDuration,
          double omega0, FramePoint initialICPPosition, FrameTupleArrayList<FramePoint> footstepList, boolean testPushInDoubleSupport)
    {
       double time = initialTime + deltaT;
-      
-      if(testPushInDoubleSupport)
+
+      if (testPushInDoubleSupport)
       {
          actualICPPosition.set(icpPositionToPack);
          actualICPPosition.setX(actualICPPosition.getX() + 0.1);
          actualICPPosition.setY(actualICPPosition.getY());
          actualICPPositionYoFramePoint.set(actualICPPosition);
-         
+
          icpPlanner.updatePlanForSingleSupportDisturbances(time, footstepList, actualICPPosition);
-         
+
          updatePointsVis(footstepList);
       }
-      
+
       while (!icpPlanner.isDone(time))
       {
-         icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
-               footstepList.get(1));
+         icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition, footstepList.get(1));
          icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
          actualICPPosition.set(icpPositionToPack);
@@ -498,21 +527,19 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
          time += deltaT;
       }
-      
+
       initialTime = time;
    }
 
-   private void simulateForwardAndCheckDoubleSupport(FrameTupleArrayList<FramePoint> footstepList, FramePoint icpPositionToPack,
-         FrameVector icpVelocityToPack, FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack,
-         NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner, double doubleSupportDuration,
-         double deltaT, double omega0, FramePoint initialICPPosition, boolean testPushInDoubleSupport)
+   private void simulateForwardAndCheckDoubleSupport(FrameTupleArrayList<FramePoint> footstepList, FramePoint icpPositionToPack, FrameVector icpVelocityToPack,
+         FrameVector icpAccelerationToPack, FramePoint cmpPositionToPack, NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation icpPlanner,
+         double doubleSupportDuration, double deltaT, double omega0, FramePoint initialICPPosition, boolean testPushInDoubleSupport)
    {
-      
+
       double time = initialTime + deltaT;
       while (!icpPlanner.isDone(time))
       {
-         icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition,
-               footstepList.get(1));
+         icpPlanner.packDesiredCapturePointPositionAndVelocity(icpPositionToPack, icpVelocityToPack, time, actualICPPosition, footstepList.get(1));
          icpPlanner.packDesiredCentroidalMomentumPivotPosition(cmpPositionToPack);
 
          actualICPPosition.set(icpPositionToPack);
@@ -524,8 +551,8 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
          {
             visualizeICPAndECMP(icpPositionToPack, icpVelocityToPack, cmpPositionToPack, time);
          }
-         
-         if(testPushInDoubleSupport && time > (initialTime + 0.15))
+
+         if (testPushInDoubleSupport && time > (initialTime + 0.15))
          {
             break;
          }
@@ -534,7 +561,7 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
 
          time += deltaT;
       }
-      
+
       initialTime = time;
    }
 
@@ -544,11 +571,9 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       icpVelocityYoFramePoint.set(icpVelocity);
       cmpPositionYoFramePoint.set(cmpPosition);
 
-      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition.getPointCopy(), icpVelocity.getVectorCopy(),
-            0.5);
+      PointAndLinePlotter.setEndPointGivenStartAndAdditionalVector(icpArrowTip, icpPosition.getPointCopy(), icpVelocity.getVectorCopy(), 0.5);
       Point2d icpPosition2d = new Point2d(icpPosition.getX(), icpPosition.getY());
-      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d, icpArrowTip
-            .getFramePoint2dCopy().getPointCopy());
+      PointAndLinePlotter.setLineSegmentBasedOnStartAndEndFramePoints(icpVelocityLineSegment, icpPosition2d, icpArrowTip.getFramePoint2dCopy().getPointCopy());
 
       timeYoVariable.set(time);
       scs.tickAndUpdate();
@@ -600,16 +625,16 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
 
    }
-   
+
    private void updatePointsVis(FrameTupleArrayList<FramePoint> footLocations)
    {
-      for(int i = 0; i < Math.min(footstepYoFramePoints.size(),footLocations.size()); i++)
+      for (int i = 0; i < Math.min(footstepYoFramePoints.size(), footLocations.size()); i++)
       {
          footstepYoFramePoints.get(i).set(footLocations.get(i));
       }
-      
+
       plotFootPolygon(footLocations, listOfFootPolygons);
-      
+
       for (int i = 0; i < maxNumberOfConsideredFootsteps; i++)
       {
          constantCoPsViz.get(i).set(icpPlanner.getConstantCentroidalMomentumPivots().get(i).getFramePointCopy());

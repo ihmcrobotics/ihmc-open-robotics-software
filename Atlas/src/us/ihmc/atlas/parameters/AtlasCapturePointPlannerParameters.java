@@ -4,24 +4,25 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 
 public class AtlasCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
-	private boolean runningOnRealRobot;
+   private boolean runningOnRealRobot;
+   private final boolean useTwoCMPsPerSupport = false;
 
-	public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
-	{
-		this.runningOnRealRobot = runningOnRealRobot;
-	}
-	
-	@Override
-	public double getDoubleSupportInitialTransferDuration()
-	{
-		return runningOnRealRobot ? 2.0 : 1.0; 
-	}
+   public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
+   {
+      this.runningOnRealRobot = runningOnRealRobot;
+   }
 
-	@Override
-	public double getDoubleSupportDuration()
-	{
-		return runningOnRealRobot ? 1.5 : 0.25;
-	}
+   @Override
+   public double getDoubleSupportInitialTransferDuration()
+   {
+      return runningOnRealRobot ? 2.0 : 1.0;
+   }
+
+   @Override
+   public double getDoubleSupportDuration()
+   {
+      return runningOnRealRobot ? 1.5 : 0.25;
+   }
 
    @Override
    public double getAdditionalTimeForSingleSupport()
@@ -29,35 +30,36 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
       return 0.1;
    }
 
-	@Override
-	public double getSingleSupportDuration()
-	{
-		return runningOnRealRobot ? 1.5 : 0.7;
-	}
+   @Override
+   public double getSingleSupportDuration()
+   {
+      return runningOnRealRobot ? 1.5 : 0.7;
+   }
 
-	@Override
-	public int getNumberOfFootstepsToConsider()
-	{
-		return 3;
-	}
+   @Override
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 3;
+   }
 
-	@Override
-	public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
-	{
-		return 5;
-	}
+   @Override
+   public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
+   {
+      // Using higher order for the trajectory degrade the pseudo CMP trajectory (going a lot outside the support polygon) when using two CMPs per support.
+      return useTwoCMPsPerSupport ? 4 : 5;
+   }
 
-	@Override
-	public int getNumberOfFootstepsToStop()
-	{
-		return 2;
-	}
+   @Override
+   public int getNumberOfFootstepsToStop()
+   {
+      return 2;
+   }
 
-	@Override
-	public double getIsDoneTimeThreshold()
-	{
-		return -1e-4;
-	}
+   @Override
+   public double getIsDoneTimeThreshold()
+   {
+      return -1e-4;
+   }
 
    @Override
    public double getDoubleSupportSplitFraction()
@@ -95,27 +97,63 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
       return 0.65;
    }
 
-	@Override
-	public double getCapturePointInFromFootCenterDistance()
-	{
-		return -0.005; //0.006;
-	}
+   @Override
+   public double getReferenceCMPInsideOffset()
+   {
+      return -0.005; //0.006;
+   }
 
-	@Override
-	public double getCapturePointForwardFromFootCenterDistance()
-	{
-		return 0.0;
-	}
+   @Override
+   public double getReferenceCMPForwardOffset()
+   {
+      return 0.0;
+   }
 
-	@Override
-	public double getMaxAllowedErrorWithoutPartialTimeFreeze()
-	{
-		return 0.03;
-	}
+   @Override
+   public double getMaxAllowedErrorWithoutPartialTimeFreeze()
+   {
+      return 0.03;
+   }
 
    @Override
    public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
    {
       return false;
+   }
+
+   @Override
+   public boolean useNewICPPlanner()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean useTwoCMPsPerSupport()
+   {
+      return useTwoCMPsPerSupport;
+   }
+
+   @Override
+   public double getTimeSpentOnExitCMPInPercentOfStepTime()
+   {
+      return 0.50;
+   }
+
+   @Override
+   public double getMaxReferenceCMPForwardOffset()
+   {
+      return 0.06;
+   }
+
+   @Override
+   public double getMinReferenceCMPForwardOffset()
+   {
+      return -0.05;
+   }
+
+   @Override
+   public double getSafeDistanceForSupportEdges()
+   {
+      return 0.03;
    }
 }

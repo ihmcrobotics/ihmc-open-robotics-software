@@ -163,13 +163,13 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 		}
 
 		@Override
-		public double getCapturePointInFromFootCenterDistance()
+		public double getReferenceCMPInsideOffset()
 		{
 			return 0.006;
 		}
 
 		@Override
-		public double getCapturePointForwardFromFootCenterDistance()
+		public double getReferenceCMPForwardOffset()
 		{
 			return 0;
 		}
@@ -184,6 +184,42 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	   public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
 	   {
 	      return true;
+	   }
+
+	   @Override
+	   public boolean useNewICPPlanner()
+	   {
+	      return false;
+	   }
+
+	   @Override
+	   public boolean useTwoCMPsPerSupport()
+	   {
+	      return false;
+	   }
+
+	   @Override
+	   public double getTimeSpentOnExitCMPInPercentOfStepTime()
+	   {
+	      return 0.50;
+	   }
+
+	   @Override
+	   public double getMaxReferenceCMPForwardOffset()
+	   {
+	      return 0.05;
+	   }
+
+	   @Override
+	   public double getMinReferenceCMPForwardOffset()
+	   {
+	      return -0.02;
+	   }
+
+	   @Override
+	   public double getSafeDistanceForSupportEdges()
+	   {
+	      return 0.03;
 	   }
 	};
 
