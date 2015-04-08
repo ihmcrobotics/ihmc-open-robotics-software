@@ -110,8 +110,8 @@ public class ICPPlanner
       isDoneTimeThreshold.set(capturePointPlannerParameters.getIsDoneTimeThreshold());
       doubleSupportSplitFraction.set(capturePointPlannerParameters.getDoubleSupportSplitFraction());
 
-      constantCMPInFromFootCenter.set(capturePointPlannerParameters.getCapturePointInFromFootCenterDistance());
-      constantCMPForwardFromFootCenter.set(capturePointPlannerParameters.getCapturePointForwardFromFootCenterDistance());
+      constantCMPInFromFootCenter.set(capturePointPlannerParameters.getReferenceCMPInsideOffset());
+      constantCMPForwardFromFootCenter.set(capturePointPlannerParameters.getReferenceCMPForwardOffset());
 
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
