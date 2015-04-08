@@ -2,6 +2,7 @@ package us.ihmc.graphics3DAdapter.camera;
 
 import java.util.ArrayList;
 
+import javax.swing.JFrame;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
@@ -52,6 +53,7 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private double dollyDX = 2.0, dollyDY = 12.0, dollyDZ = 0.0;
 
    private ViewportAdapter viewportAdapter;
+   private JFrame jFrame;
 
    // Flying
    private boolean fly = true;
@@ -92,7 +94,12 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter)
    {
-      ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
+      return createClassicCameraControllerAndAddListeners(viewportAdapter, cameraTrackAndDollyVariablesHolder, graphics3dAdapter, null);
+   }
+   
+   public static ClassicCameraController createClassicCameraControllerAndAddListeners(ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, Graphics3DAdapter graphics3dAdapter, JFrame jFrame)
+   {
+      ClassicCameraController classicCameraController = new ClassicCameraController(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder, jFrame);
       graphics3dAdapter.addKeyListener(classicCameraController);
       graphics3dAdapter.addMouseListener(classicCameraController);
       graphics3dAdapter.addMouse3DListener(classicCameraController);
@@ -103,9 +110,15 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
 
    public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder)
    {
+      this(graphics3dAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder, null);
+   }
+   
+   public ClassicCameraController(Graphics3DAdapter graphics3dAdapter, ViewportAdapter viewportAdapter, CameraTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder, JFrame jFrame)
+   {
       if (graphics3dAdapter == null) throw new RuntimeException("graphics3dAdapter == null");
       this.graphics3dAdapter = graphics3dAdapter;
       this.viewportAdapter = viewportAdapter;
+      this.jFrame = jFrame;
 
       this.camX = CAMERA_START_X;
       this.camY = CAMERA_START_Y;
@@ -1302,6 +1315,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
    private boolean shouldAcceptDeviceInput()
    {
       if (alreadyClosing || graphics3dAdapter.getContextManager().getCurrentViewport() != viewportAdapter)
+         return false;
+      
+      if (jFrame != null && !jFrame.isActive())
          return false;
       
       return true;
