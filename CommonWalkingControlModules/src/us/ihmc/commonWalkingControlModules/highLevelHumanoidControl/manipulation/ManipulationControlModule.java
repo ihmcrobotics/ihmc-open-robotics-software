@@ -36,7 +36,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
  */
 public class ManipulationControlModule
 {
-   public static final boolean HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION = true;
+   public static final boolean HOLD_POSE_IN_JOINT_SPACE = true;
    private static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -292,7 +292,7 @@ public class ManipulationControlModule
    {
       if (handControlModule.isControllingPoseInWorld())
       {
-         if (HOLD_POSE_IN_JOINT_SPACE_WHEN_PREPARE_FOR_LOCOMOTION)
+         if (HOLD_POSE_IN_JOINT_SPACE)
             handControlModule.holdPositionInJointSpace();
          else
             handControlModule.holdPositionInBase();

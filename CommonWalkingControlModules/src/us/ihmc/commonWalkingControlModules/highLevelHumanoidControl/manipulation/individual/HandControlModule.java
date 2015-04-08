@@ -10,10 +10,10 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LowLevelInverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -123,6 +123,8 @@ public class HandControlModule
    private final HandPoseStatusProducer handPoseStatusProducer;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
+   private final BooleanYoVariable areAllArmJointEnabled;
+
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
                             YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains,
                             ControlStatusProducer controlStatusProducer, HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
@@ -148,8 +150,11 @@ public class HandControlModule
 
       this.handPoseStatusProducer = handPoseStatusProducer;
 
-      hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", parentRegistry);
+      hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", registry);
       hasHandPoseStatusBeenSent.set(false);
+
+      areAllArmJointEnabled = new BooleanYoVariable(namePrefix + "AreAllArmJointEnabled", registry);
+      areAllArmJointEnabled.set(true);
 
       stateChangedlistener = new StateChangedListener<HandControlState>()
       {
@@ -316,10 +321,36 @@ public class HandControlModule
 
    public void doControl()
    {
+      boolean isAtLeastOneJointDisabled = checkIfAtLeastOneJointIsDisabled();
+
+      if (isAtLeastOneJointDisabled && areAllArmJointEnabled.getBooleanValue())
+      {
+         if (ManipulationControlModule.HOLD_POSE_IN_JOINT_SPACE)
+            holdPositionInJointSpace();
+         else
+            holdPositionInBase();
+
+         areAllArmJointEnabled.set(false);
+      }
+      else
+      {
+         areAllArmJointEnabled.set(true);
+      }
+
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
 
       checkAndSendHandPoseStatusIsCompleted();
+   }
+
+   private boolean checkIfAtLeastOneJointIsDisabled()
+   {
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         if (!oneDoFJoints[i].isEnabled())
+            return true;
+      }
+      return false;
    }
 
    private void checkAndSendHandPoseStatusIsCompleted()
