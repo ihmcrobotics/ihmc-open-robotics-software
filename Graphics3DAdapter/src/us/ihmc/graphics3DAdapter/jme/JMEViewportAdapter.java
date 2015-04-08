@@ -14,7 +14,7 @@ import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.jme.context.PBOAwtPanel;
 import us.ihmc.graphics3DAdapter.jme.context.PBOAwtPanelsContext;
-import us.ihmc.graphics3DAdapter.jme.input.JMESelectedListener;
+import us.ihmc.graphics3DAdapter.jme.input.JMEInputManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.utilities.time.Timer;
@@ -45,7 +45,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
    public enum ViewportType {OFFSCREEN, CANVAS, MULTICAM}
 
    private JMECamera jmeCamera;
-   private JMESelectedListener selectedListener;
+   private JMEInputManager jmeInputManager;
    private final boolean isMainViewport;
 
    private JmeContext context;
@@ -106,7 +106,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       if (viewportType.equals(ViewportType.MULTICAM) || viewportType.equals(ViewportType.CANVAS))
       {
          jmeRenderer.getContextManager().addJMEViewportAdapter(this);
-         this.selectedListener = new JMESelectedListener(jmeRenderer, rootNode, jmeCamera);
+         this.jmeInputManager = new JMEInputManager(jmeRenderer, rootNode, jmeCamera);
       }
 
       jmeRenderer.registerViewport(this);
@@ -186,7 +186,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
          jmeCamera.closeAndDispose();
          jmeCamera = null;
       }
-      selectedListener = null;
+      jmeInputManager = null;
 
       context = null;
 
@@ -259,12 +259,12 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    public void setDefaultInputMappings()
    {
-      selectedListener.registerWithInputManager();
+      jmeInputManager.registerWithInputManager();
    }
 
    public void reset()
    {
-      selectedListener.reset();
+      jmeInputManager.reset();
    }
 
    public void setClipDistances(double near, double far)
