@@ -387,7 +387,9 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
             chestOrientationTrajectoryGenerator.get(previousDesiredChestOrientation);
             initialDesiredChestOrientation.setOrientation(previousDesiredChestOrientation);
 
-            finalDesiredChestOrientation.setOrientation(chestOrientationProvider.getDesiredChestOrientation());
+            FrameOrientation desiredChestOrientation = chestOrientationProvider.getDesiredChestOrientation();
+            desiredChestOrientation.changeFrame(finalDesiredChestOrientation.getReferenceFrame());
+            finalDesiredChestOrientation.setOrientation(desiredChestOrientation);
             chestTrajectoryStartTime = yoTime.getDoubleValue();
 
             chestOrientationTrajectoryGenerator.initialize();
@@ -463,14 +465,14 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       for (RobotSide robotSide : RobotSide.values)
       {
          // If the foot is already in load bearing state, do nothing:
-         if (footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
+         if (footLoadBearingProvider != null && footLoadBearingProvider.checkForNewLoadBearingRequest(robotSide))
             feetManager.setFlatFootContactState(robotSide);
 
-         if (thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
+         if (thighLoadBearingProvider != null && thighLoadBearingProvider.checkForNewLoadBearingState(robotSide))
             requestedThighLoadBearing.get(robotSide).set(thighLoadBearingProvider.getDesiredThighLoadBearingState(robotSide));
       }
 
-      if (pelvisLoadBearingProvider.checkForNewLoadBearingState())
+      if (pelvisLoadBearingProvider != null && pelvisLoadBearingProvider.checkForNewLoadBearingState())
          requestedPelvisLoadBearing.set(desiredPelvisLoadBearingState);
    }
 
