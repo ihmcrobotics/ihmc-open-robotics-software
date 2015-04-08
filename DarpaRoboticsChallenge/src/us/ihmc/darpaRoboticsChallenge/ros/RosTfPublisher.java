@@ -9,9 +9,23 @@ import us.ihmc.utilities.ros.publisher.RosTfPublisherInterface;
 public class RosTfPublisher implements RosTfPublisherInterface
 {
    private final RosTfPublisherInterface tfPublisher;
+   private final String tfPrefix;
 
-   public RosTfPublisher(final RosMainNode rosMainNode)
+   public RosTfPublisher(final RosMainNode rosMainNode, String tfPrefix)
    {
+      if(tfPrefix == null)
+      {
+         this.tfPrefix = "";
+      } 
+      else
+      {
+         if(tfPrefix.length() > 1 && !tfPrefix.endsWith("/"))
+         {
+            tfPrefix = tfPrefix + "/";
+         }
+         this.tfPrefix = tfPrefix;
+      }
+      
       if (rosMainNode.isUseTf2())
       {
          tfPublisher = new RosTf2Publisher(false);
@@ -22,12 +36,20 @@ public class RosTfPublisher implements RosTfPublisherInterface
          tfPublisher = new RosTf1Publisher(false);
          rosMainNode.attachPublisher("/tf", (RosTf1Publisher) tfPublisher);
       }
+      System.out.println(tfPrefix);
    }
 
    @Override
    public void publish(RigidBodyTransform transform3d, long timeStamp,
          String parentFrame, String childFrame)
    {
-      tfPublisher.publish(transform3d, timeStamp, parentFrame, childFrame);
+      if(tfPrefix.length() > 0)
+      {
+         tfPublisher.publish(transform3d, timeStamp, tfPrefix + parentFrame, tfPrefix + childFrame);
+      }
+      else
+      {
+         tfPublisher.publish(transform3d, timeStamp, parentFrame, childFrame);
+      }
    }
 }

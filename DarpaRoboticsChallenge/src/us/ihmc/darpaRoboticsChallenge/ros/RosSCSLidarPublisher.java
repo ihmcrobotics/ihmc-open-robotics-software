@@ -23,8 +23,7 @@ public class RosSCSLidarPublisher implements ObjectConsumer<SimulatedLidarScanPa
          RosMainNode rosMainNode,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider,
          SDFFullRobotModel fullRobotModel,
-         DRCRobotLidarParameters[] lidarParameters,
-         RosTfPublisher tfPublisher)
+         DRCRobotLidarParameters[] lidarParameters)
    {
       nSensors = lidarParameters.length;
       this.rosMainNode = rosMainNode;

@@ -159,7 +159,8 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       {
          SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
          String nameSpace = "/ihmc_ros/atlas";
-         new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace);
+         String tfPrefix = null;
+         new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator_server, null, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
       }
       catch (IOException e)
       {

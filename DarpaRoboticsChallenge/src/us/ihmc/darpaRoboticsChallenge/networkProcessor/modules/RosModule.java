@@ -50,14 +50,14 @@ public class RosModule
       
       sensorInformation = robotModel.getSensorInformation();
 
-      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
+      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
             rosMainNode, ppsTimestampOffsetProvider, sensorInformation, rosTopicPrefix, tfPublisher);
       
       if(simulatedSensorCommunicator != null)
       {
-         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, tfPublisher, simulatedSensorCommunicator);
+         publishSimulatedCameraAndLidar(robotModel.createFullRobotModel(), sensorInformation, simulatedSensorCommunicator);
          
          DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
          if (lidarParameters.length > 0)
@@ -89,7 +89,7 @@ public class RosModule
       printIfDebug("Finished creating ROS Module.");
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher, ObjectCommunicator localObjectCommunicator)
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, ObjectCommunicator localObjectCommunicator)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
@@ -99,7 +99,7 @@ public class RosModule
       if (sensorInformation.getLidarParameters().length > 0)
       {
          new RosSCSLidarPublisher(localObjectCommunicator, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
-               sensorInformation.getLidarParameters(), tfPublisher);
+               sensorInformation.getLidarParameters());
       }
    }
 

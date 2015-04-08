@@ -30,13 +30,14 @@ import com.martiansoftware.jsap.Switch;
 
 public class AtlasROSAPISimulator
 {
+   private static final String DEFAULT_TF_PREFIX = null;
    private static final String DEFAULT_PREFIX = "/ihmc_ros/atlas";
    private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    private static final String DEFAULT_STARTING_LOCATION = "DEFAULT";
    private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
 
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
+   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
       simulationStarter.setRunMultiThreaded(true);
@@ -81,7 +82,7 @@ public class AtlasROSAPISimulator
       
       LocalObjectCommunicator sensorCommunicator = simulationStarter.getSimulatedSensorsPacketCommunicator();
       SimulationRosClockPPSTimestampOffsetProvider ppsOffsetProvider = new SimulationRosClockPPSTimestampOffsetProvider();
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
    }
 
    public static void main(String[] args) throws JSAPException, IOException
@@ -91,6 +92,10 @@ public class AtlasROSAPISimulator
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
       rosNameSpace.setDefault(DEFAULT_PREFIX);
+      
+      FlaggedOption tfPrefix = new FlaggedOption("tfPrefix").setLongFlag("tfPrefix").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
+      tfPrefix.setDefault(DEFAULT_TF_PREFIX);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
@@ -110,6 +115,7 @@ public class AtlasROSAPISimulator
       jsap.registerParameter(model);
       jsap.registerParameter(location);
       jsap.registerParameter(rosNameSpace);
+      jsap.registerParameter(tfPrefix);
       jsap.registerParameter(requestAutomaticDiagnostic);
       jsap.registerParameter(visualizeSCSSwitch);
       JSAPResult config = jsap.parse(args);
@@ -140,6 +146,9 @@ public class AtlasROSAPISimulator
          return;
       }
 
-      new AtlasROSAPISimulator(robotModel, startingLocation, config.getString("namespace"), config.getBoolean(requestAutomaticDiagnostic.getID()), disableViz);
+      String tfPrefixArg = config.getString("tfPrefix");
+      String nodePrefix = config.getString("namespace");
+      boolean enableAutomaticDiagnostic = config.getBoolean(requestAutomaticDiagnostic.getID());
+      new AtlasROSAPISimulator(robotModel, startingLocation, nodePrefix, tfPrefixArg, enableAutomaticDiagnostic, disableViz);
    }
 }
