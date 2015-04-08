@@ -35,7 +35,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.Bucket;
 import com.jme3.scene.Node;
 
-public class JMESelectedListener implements AnalogListener, ActionListener, Mouse3DListener
+public class JMEInputManager implements AnalogListener, ActionListener, Mouse3DListener
 {
    private final static float mouseFactor = 10.0f;
 
@@ -57,7 +57,7 @@ public class JMESelectedListener implements AnalogListener, ActionListener, Mous
    private boolean middleMouseClicked = false;
    private boolean rightMouseClicked = false;
 
-   public JMESelectedListener(JMERenderer jmeRenderer, Node rootNode, JMECamera jmeCamera)
+   public JMEInputManager(JMERenderer jmeRenderer, Node rootNode, JMECamera jmeCamera)
    {
       this.jmeGraphicsNodes = jmeRenderer.getJmeGraphicsNodes().inverse();
       this.jmeCamera = jmeCamera;
