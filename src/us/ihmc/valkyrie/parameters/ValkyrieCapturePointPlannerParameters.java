@@ -150,7 +150,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    }
 
    @Override
-   public double getSafeDistanceForSupportEdges()
+   public double getCMPSafeDistanceAwayFromSupportEdges()
    {
       return 0.03;
    }
