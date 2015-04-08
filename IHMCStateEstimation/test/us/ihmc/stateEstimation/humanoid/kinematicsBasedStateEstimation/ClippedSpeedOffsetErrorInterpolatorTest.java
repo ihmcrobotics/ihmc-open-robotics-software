@@ -51,8 +51,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   @EstimatedDuration(duration = 1.0)
-   @Test(timeout = 60000)
+   @EstimatedDuration(duration = 4.0)
+   @Test(timeout = 240000)
    public void testRandomTranslationErrorInterpolation()
    {
       Random random = new Random();
@@ -81,8 +81,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @EstimatedDuration(duration = 2.0)
-   @Test(timeout = 60000)
+   @EstimatedDuration(duration = 6.0)
+   @Test(timeout = 360000)
    public void testRandomRotationErrorInterpolation()
    {
       Random random = new Random();
@@ -111,8 +111,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @EstimatedDuration(duration = 2.0)
-   @Test(timeout = 60000)
+   @EstimatedDuration(duration = 6.0)
+   @Test(timeout = 360000)
    public void testTranslationAndRotationErrorsInterpolation()
    {
       Random random = new Random();
@@ -177,7 +177,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       assertTrue(Math.abs(startPose.getRoll() - interpolatedOffsetAfterOneSecond.getRoll()) <= 0.05);
    }
 
-   @EstimatedDuration(duration = 0.1)
+   @EstimatedDuration(duration = 0.3)
    @Test(timeout = 60000)
    public void testMaxRotationalCorrectionSpeedClip()
    {
@@ -282,8 +282,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
    }
 
-   @EstimatedDuration(duration = 1.0)
-   @Test(timeout = 60000)
+   @EstimatedDuration(duration = 4.0)
+   @Test(timeout = 240000)
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
       Random random = new Random();
