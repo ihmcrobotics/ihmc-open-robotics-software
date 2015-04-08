@@ -8,6 +8,7 @@ import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -309,6 +310,20 @@ public class CapturePointTools
     * @param desiredCMPToPack
     */
    public static void computeDesiredCentroidalMomentumPivot(FramePoint desiredCapturePointPosition, FrameVector desiredCapturePointVelocity, double omega0, YoFramePoint desiredCMPToPack)
+   {
+      desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
+   }
+
+   /**
+    * Computes the desired centroidal momentum pivot by,
+    * CMP_{d} = ICP_{d} - \dot{ICP}_{d}/omega0
+    * 
+    * @param desiredCapturePointPosition
+    * @param desiredCapturePointVelocity
+    * @param omega0
+    * @param desiredCMPToPack
+    */
+   public static void computeDesiredCentroidalMomentumPivot(FramePoint2d desiredCapturePointPosition, FrameVector2d desiredCapturePointVelocity, double omega0, FramePoint2d desiredCMPToPack)
    {
       desiredCMPToPack.scaleAdd(- 1.0 / omega0, desiredCapturePointVelocity, desiredCapturePointPosition);
    }

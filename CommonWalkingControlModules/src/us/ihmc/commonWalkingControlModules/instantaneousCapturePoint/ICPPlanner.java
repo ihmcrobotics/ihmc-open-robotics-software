@@ -116,7 +116,7 @@ public class ICPPlanner
       referenceCMPsCalculator.setSymmetricCMPConstantOffsets(cmpForwardOffset, cmpInsideOffset);
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.setMinMaxForwardCMPLocationFromFootCenter(icpPlannerParameters.getMinReferenceCMPForwardOffset(), icpPlannerParameters.getMaxReferenceCMPForwardOffset());
-      referenceCMPsCalculator.setSafeDistanceFromSupportEdges(icpPlannerParameters.getSafeDistanceForSupportEdges());
+      referenceCMPsCalculator.setSafeDistanceFromSupportEdges(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());
 
       for (RobotSide robotSide : RobotSide.values)
       {

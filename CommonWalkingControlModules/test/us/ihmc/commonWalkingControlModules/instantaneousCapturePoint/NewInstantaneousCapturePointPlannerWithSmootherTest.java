@@ -208,7 +208,7 @@ public class NewInstantaneousCapturePointPlannerWithSmootherTest
 	   }
 
 	   @Override
-	   public double getSafeDistanceForSupportEdges()
+	   public double getCMPSafeDistanceAwayFromSupportEdges()
 	   {
 	      return 0.03;
 	   }

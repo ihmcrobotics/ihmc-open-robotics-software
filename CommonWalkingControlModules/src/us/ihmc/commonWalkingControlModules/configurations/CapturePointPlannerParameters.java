@@ -54,7 +54,7 @@ public interface CapturePointPlannerParameters
 
    public abstract double getMinReferenceCMPForwardOffset();
 
-   public abstract double getSafeDistanceForSupportEdges();
+   public abstract double getCMPSafeDistanceAwayFromSupportEdges();
 
    public abstract boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer();
 }
