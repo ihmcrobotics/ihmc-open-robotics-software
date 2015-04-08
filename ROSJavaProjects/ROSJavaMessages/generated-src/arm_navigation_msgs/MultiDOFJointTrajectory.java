@@ -13,4 +13,4 @@ public interface MultiDOFJointTrajectory extends org.ros.internal.message.Messag
   void setChildFrameIds(java.util.List<java.lang.String> value);
   java.util.List<arm_navigation_msgs.MultiDOFJointTrajectoryPoint> getPoints();
   void setPoints(java.util.List<arm_navigation_msgs.MultiDOFJointTrajectoryPoint> value);
-}
+  }
