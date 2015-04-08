@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.lists.FrameTupleArrayList;
@@ -53,6 +54,8 @@ public class CapturePointPlannerAdapter
    private final boolean useNewICPPlanner;
    private final NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation capturePointPlanner;
    private final ICPPlannerWithTimeFreezer icpPlanner;
+
+   private double omega0;
 
    public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -108,6 +111,7 @@ public class CapturePointPlannerAdapter
 
    public void setOmega0(double omega0)
    {
+      this.omega0 = omega0;
       if (useNewICPPlanner)
          icpPlanner.setOmega0(omega0);
       else
@@ -259,21 +263,16 @@ public class CapturePointPlannerAdapter
       transferToFootLocation.setToZero(soleFrames.get(currentTransferToSide.getEnumValue()));
       transferToFootLocation.changeFrame(worldFrame);
 
-      tmpFramePoint2.set(actualICP.getX(), actualICP.getY(), 0.0);
+      tmpFramePoint2.setXYIncludingFrame(actualICP);
       if (useNewICPPlanner)
          icpPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, tmpFramePoint2, time);
       else
          capturePointPlanner.packDesiredCapturePointPositionAndVelocity(tmpFramePoint, tmpFrameVector, time, tmpFramePoint2, transferToFootLocation);
 
-      icpPositionToPack.set(tmpFramePoint.getX(), tmpFramePoint.getY());
+      icpPositionToPack.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
+      icpVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tmpFrameVector);
 
-      icpVelocityToPack.set(tmpFrameVector.getX(), tmpFrameVector.getY());
-
-      if (useNewICPPlanner)
-         icpPlanner.packDesiredCentroidalMomentumPivotPosition(tmpFramePoint);
-      else
-         capturePointPlanner.packDesiredCentroidalMomentumPivotPosition(tmpFramePoint);
-      ecmpToPack.set(tmpFramePoint.getX(), tmpFramePoint.getY());
+      CapturePointTools.computeDesiredCentroidalMomentumPivot(icpPositionToPack, icpVelocityToPack, omega0, ecmpToPack);
    }
 
    public void reset(double time)

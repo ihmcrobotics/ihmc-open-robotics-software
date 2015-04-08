@@ -142,18 +142,18 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getMaxReferenceCMPForwardOffset()
    {
-      return 0.06;
+      return 0.08;
    }
 
    @Override
    public double getMinReferenceCMPForwardOffset()
    {
-      return -0.05;
+      return 0.0;
    }
 
    @Override
-   public double getSafeDistanceForSupportEdges()
+   public double getCMPSafeDistanceAwayFromSupportEdges()
    {
-      return 0.03;
+      return 0.01;
    }
 }

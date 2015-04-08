@@ -217,7 +217,7 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	   }
 
 	   @Override
-	   public double getSafeDistanceForSupportEdges()
+	   public double getCMPSafeDistanceAwayFromSupportEdges()
 	   {
 	      return 0.03;
 	   }
