@@ -1471,6 +1471,9 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          }
       }
    }
+   
+   private double rotateGain = 0.35;
+   private double translateGain = 0.1;
 
    @Override
    public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
@@ -1481,11 +1484,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
          //      doMouseDraggedMiddle(0.0, dz);
          //      moveCameraForward(dy);
 
-         double rotateGain = 7.0;
-         double translateGain = 2.0;
-
-         rotateAroundFix(drz * rotateGain, drx * rotateGain);
-         translateFix(dx * translateGain, dy * translateGain, dz * translateGain);
+         rotateAroundFix(-drz * rotateGain, -drx * rotateGain);
+         translateFix(-dx * translateGain, -dy * translateGain, dz * translateGain);
       }
    }
 
