@@ -47,7 +47,6 @@ public class ThePeoplesGloriousNetworkProcessor
 {
    private static final String nodeName = "/controller";
 
-   private final AtomicSettableTimestampProvider timestampProvider = new AtomicSettableTimestampProvider();
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RosMainNode rosMainNode;
    private final DRCRobotModel robotModel;
@@ -62,7 +61,7 @@ public class ThePeoplesGloriousNetworkProcessor
    private final FullRobotModel fullRobotModel;
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator gfe_communicator, ObjectCommunicator sensorCommunicator, PPSTimestampOffsetProvider ppsOffsetProvider, 
-                                             DRCRobotModel robotModel, String namespace) throws IOException
+                                             DRCRobotModel robotModel, String namespace, String tfPrefix) throws IOException
    {
       this.rosMainNode = new RosMainNode(rosUri, namespace + nodeName);
       this.robotModel = robotModel;
@@ -77,12 +76,11 @@ public class ThePeoplesGloriousNetworkProcessor
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();
       this.fullRobotModel = robotModel.createFullRobotModel();
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
-      ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
-      setupOutputs(namespace);
+      setupOutputs(namespace, tfPrefix);
       setupRosLocalization();
       setupErrorTopics();
 
@@ -98,24 +96,24 @@ public class ThePeoplesGloriousNetworkProcessor
       System.out.println("IHMC ROS API node successfully connected to controller.");
    }
 
-   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace) throws
+   public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace, String tfPrefix) throws
          IOException
    {
-      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace);
+      this(rosUri, controllerCommunicationBridge, null, robotModel.getPPSTimestampOffsetProvider(), robotModel, namespace, tfPrefix);
    }
 
-   private void setupOutputs(String namespace)
+   private void setupOutputs(String namespace, String tfPrefix)
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
-      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode);
+      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
 
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
             rosMainNode, ppsTimestampOffsetProvider, sensorInformation, namespace, tfPublisher);
       if(scsSensorCommunicationBridge != null)
       {
-         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, tfPublisher, robotConfigurationPublisher);
+         publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
       }
 
       Map<String, Class> outputPacketList = IHMCRosApiMessageMap.OUTPUT_PACKET_MESSAGE_NAME_MAP;
@@ -135,7 +133,7 @@ public class ThePeoplesGloriousNetworkProcessor
       System.setErr(printStreamBridge);
    }
 
-   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosTfPublisher tfPublisher, RosRobotConfigurationDataPublisher robotConfigurationPublisher)
+   private void publishSimulatedCameraAndLidar(SDFFullRobotModel fullRobotModel, DRCRobotSensorInformation sensorInformation, RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
       if (sensorInformation.getCameraParameters().length > 0)
       {
@@ -145,8 +143,7 @@ public class ThePeoplesGloriousNetworkProcessor
       DRCRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
       if (lidarParameters.length > 0)
       {
-         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel,
-               lidarParameters, tfPublisher);
+         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, ppsTimestampOffsetProvider, fullRobotModel, lidarParameters);
          
          DRCRobotLidarParameters primaryLidar = lidarParameters[0];
          robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());

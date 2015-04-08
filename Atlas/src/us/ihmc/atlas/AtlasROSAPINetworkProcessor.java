@@ -24,6 +24,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 
 public class AtlasROSAPINetworkProcessor
 {
+   private static final String DEFAULT_TF_PREFIX = null;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
@@ -31,7 +32,7 @@ public class AtlasROSAPINetworkProcessor
 
    private static final boolean ENABLE_UI_PACKET_TO_ROS_CONVERTER = true;
    
-   public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
+   public AtlasROSAPINetworkProcessor(DRCRobotModel robotModel, String nameSpace, String tfPrefix) throws IOException
    {
       PacketCommunicator gfeCommunicator = null;
       URI rosUri = NetworkParameters.getROSURI();
@@ -59,7 +60,7 @@ public class AtlasROSAPINetworkProcessor
       rosMainNode.execute();
 
       gfeCommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
-      new ThePeoplesGloriousNetworkProcessor(rosUri, gfeCommunicator, robotModel, nameSpace);
+      new ThePeoplesGloriousNetworkProcessor(rosUri, gfeCommunicator, robotModel, nameSpace, tfPrefix);
    }
    
    public static void main(String[] args) throws JSAPException, IOException
@@ -69,11 +70,16 @@ public class AtlasROSAPINetworkProcessor
       FlaggedOption rosNameSpace = new FlaggedOption("namespace").setLongFlag("namespace").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
             .setStringParser(JSAP.STRING_PARSER);
       rosNameSpace.setDefault(defaultRosNameSpace);
+      
+      FlaggedOption tfPrefix = new FlaggedOption("tfPrefix").setLongFlag("tfPrefix").setShortFlag(JSAP.NO_SHORTFLAG).setRequired(false)
+            .setStringParser(JSAP.STRING_PARSER);
+      tfPrefix.setDefault(DEFAULT_TF_PREFIX);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(defaultRobotModel);
       
+      jsap.registerParameter(tfPrefix);
       jsap.registerParameter(model);
       jsap.registerParameter(rosNameSpace);
       JSAPResult config = jsap.parse(args);
@@ -92,7 +98,8 @@ public class AtlasROSAPINetworkProcessor
          System.out.println(jsap.getHelp());
          return;
       }
-
-      new AtlasROSAPINetworkProcessor(robotModel, config.getString("namespace"));
+      String tfPrefixArg = config.getString("tfPrefix");
+      String nodeNameSpacePrefix = config.getString("namespace");
+      new AtlasROSAPINetworkProcessor(robotModel, nodeNameSpacePrefix, tfPrefixArg);
    }
 }
