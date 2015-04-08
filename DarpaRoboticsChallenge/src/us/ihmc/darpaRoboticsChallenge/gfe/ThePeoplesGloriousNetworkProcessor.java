@@ -41,7 +41,7 @@ import us.ihmc.utilities.ros.publisher.PrintStreamToRosBridge;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosJointTrajectorySubscriber;
+import us.ihmc.utilities.ros.subscriber.RosArmJointTrajectorySubscriber;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -166,7 +166,7 @@ public class ThePeoplesGloriousNetworkProcessor
       TimestampedPoseFootStepGenerator footPoseGenerator = new TimestampedPoseFootStepGenerator(robotDataReceiver, fullRobotModel, controllerCommunicationBridge);
       rosMainNode.attachSubscriber(namespace + "/control/endpoint_footstep_generator", footPoseGenerator);
       
-      RosJointTrajectorySubscriber rosJointTrajectorySubscriber = new RosJointTrajectorySubscriber(controllerCommunicationBridge);
+      RosArmJointTrajectorySubscriber rosJointTrajectorySubscriber = new RosArmJointTrajectorySubscriber(controllerCommunicationBridge, fullRobotModel);
       rosMainNode.attachSubscriber(namespace + "/control/arm_joint_trajectory2", rosJointTrajectorySubscriber);
    }
 
