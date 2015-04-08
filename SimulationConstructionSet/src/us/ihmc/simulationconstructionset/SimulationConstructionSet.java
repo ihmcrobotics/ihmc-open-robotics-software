@@ -35,7 +35,6 @@ import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -1096,11 +1095,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       Thread thread = new Thread(this);
       thread.start();
-
-      while (this.isSimulationThreadUpAndRunning())
+      try
       {
-         Thread.yield();
+         thread.join();
       }
+      catch (InterruptedException e)
+      {
+         Thread.currentThread().interrupt();
+      }
+
    }
 
    public void closeAndDispose()

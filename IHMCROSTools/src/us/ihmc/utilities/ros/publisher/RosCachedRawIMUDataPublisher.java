@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
 
@@ -50,7 +50,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
     * @param rawImuAngularVelocity
     * @param rawImuLinearAcceleration
     */
-   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4d rawImuOrientation, Vector3d rawImuLinearAcceleration)
+   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4f rawImuOrientation, Vector3f rawImuLinearAcceleration)
    {
       RawIMUData rawImuData = newMessageFromType(trooper_mlc_msgs.RawIMUData._TYPE);
       RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, rawImuOrientation);

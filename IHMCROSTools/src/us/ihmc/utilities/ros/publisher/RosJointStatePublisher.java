@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros.publisher;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.ros.message.Time;
@@ -67,5 +68,20 @@ public class RosJointStatePublisher extends RosTopicPublisher<JointState>
       }
 
       publish(message);
+   }
+   
+   public double[] toDoubleArray(float[] data)
+   {
+      double[] doubleData = new double[data.length];
+      for(int i = 0; i < data.length; i++)
+      {
+         doubleData[i] = data[i];
+      }
+      return doubleData;
+   }
+
+   public void publish(ArrayList<String> nameList, float[] jointAngles, float[] jointVelocities, float[] jointTorques, Time t)
+   {
+      publish(nameList, toDoubleArray(jointAngles), toDoubleArray(jointVelocities), toDoubleArray(jointTorques), t);
    }
 }

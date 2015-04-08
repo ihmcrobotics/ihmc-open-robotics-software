@@ -1,7 +1,5 @@
 package us.ihmc.utilities.ros.publisher;
 
-import javax.vecmath.Vector3d;
-
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import geometry_msgs.PoseWithCovariance;
@@ -9,6 +7,9 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Twist;
 import geometry_msgs.TwistWithCovariance;
 import geometry_msgs.Vector3;
+
+import javax.vecmath.Vector3f;
+
 import nav_msgs.Odometry;
 
 import org.ros.message.Time;
@@ -25,7 +26,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       super(nav_msgs.Odometry._TYPE,latched);
    }
    
-   public void publish(long timestamp, RigidBodyTransform transform, Vector3d linearVelocity, Vector3d angularVelocity, String childFrame)
+   public void publish(long timestamp, RigidBodyTransform transform, Vector3f linearVelocity, Vector3f angularVelocity, String childFrame)
    {
       Odometry message = getMessage();
 
@@ -43,7 +44,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       publish(message);
    }
 
-   private TwistWithCovariance createTwistWithCovariance(Vector3d linearVelocity, Vector3d angularVelocity)
+   private TwistWithCovariance createTwistWithCovariance(Vector3f linearVelocity, Vector3f angularVelocity)
    {
       TwistWithCovariance twistWithCovariance = newMessageFromType(TwistWithCovariance._TYPE);
       Twist twist = createTwistMsg(linearVelocity, angularVelocity);
@@ -51,7 +52,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       return twistWithCovariance;
    }
 
-   private Twist createTwistMsg(Vector3d linearVelocity, Vector3d angularVelocity)
+   private Twist createTwistMsg(Vector3f linearVelocity, Vector3f angularVelocity)
    {
       Twist twist = newMessageFromType(Twist._TYPE);
       
@@ -64,10 +65,10 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       return twist;
    }
 
-   private Vector3 getVector3(Vector3d vector3d)
+   private Vector3 getVector3(Vector3f angularVelocity)
    {
       Vector3 rosVector3 = newMessageFromType(Vector3._TYPE);
-      RosTools.packVector3dToGeometry_msgsVector3(vector3d, rosVector3);
+      RosTools.packVector3fToGeometry_msgsVector3(angularVelocity, rosVector3);
       return rosVector3;
    }
 

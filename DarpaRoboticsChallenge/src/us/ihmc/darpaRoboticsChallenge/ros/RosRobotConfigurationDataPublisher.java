@@ -3,7 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.ros;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ros.message.Time;
@@ -14,7 +14,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -52,7 +51,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
-   private final ConcurrentLinkedQueue<RobotConfigurationData> availableRobotConfigurationData = new ConcurrentLinkedQueue<RobotConfigurationData>();
+   private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
    private final RigidBodyTransform transformFromHeadToMultisenseHeadRoot = new RigidBodyTransform();
    private final int jointNameHash;
    
@@ -134,8 +133,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    @Override
    public void receivedPacket(RobotConfigurationData robotConfigurationData)
    {
-      availableRobotConfigurationData.add(robotConfigurationData);
-      if (availableRobotConfigurationData.size() > 30)
+      if(!availableRobotConfigurationData.offer(robotConfigurationData))
       {
          availableRobotConfigurationData.clear();
       }
@@ -163,60 +161,64 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    {
       while (true)
       {
-         RobotConfigurationData robotConfigurationData = availableRobotConfigurationData.poll();
-         if (robotConfigurationData != null)
+         RobotConfigurationData robotConfigurationData;
+         try
          {
-            if (rosMainNode.isStarted())
-            {
-               double[] jointAngles = robotConfigurationData.getJointAngles();
-               double[] jointVelocities = robotConfigurationData.getJointVelocities();
-               double[] jointTorques = robotConfigurationData.getJointTorques();
-
-               long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
-               Time t = Time.fromNano(timeStamp);
-
-               if (robotConfigurationData.jointNameHash != jointNameHash)
-               {
-                  throw new RuntimeException("Joint names do not match for RobotConfigurationData");
-               }
-
-               for (int i = 0; i < additionalJointStatePublishers.length; i++)
-               {
-                  RosJointStatePublisher jointStatePublisher = additionalJointStatePublishers[i];
-                  JointStatePublisherHelper pubData = additionalJointStatePublisherMap.get(jointStatePublisher);
-                  pubData.publish(jointAngles, jointVelocities, jointTorques, t);
-               }
-
-               RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getOrientation(), robotConfigurationData.getTranslation());
-
-               jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
-
-               for(RobotSide robotSide : RobotSide.values())
-               {
-                  footForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)));
-                  footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
-                  
-                  wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
-                  wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
-               }
-               
-               bothFeetForceSensorPublisher.publish(timeStamp, footForceSensorWrenches.get(RobotSide.LEFT), footForceSensorWrenches.get(RobotSide.RIGHT));
-               
-               pelvisImuPublisher.publish(timeStamp, robotConfigurationData.getRawImuLinearAcceleration(), robotConfigurationData.getRawImuOrientation(),
-                     robotConfigurationData.getRawImuAngularVelocity());
-               batchImuPublisher.appendRawImuData(timeStamp, robotConfigurationData.getRawImuOrientation(),
-                     robotConfigurationData.getRawImuLinearAcceleration());
-               pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                     robotConfigurationData.getRawImuAngularVelocity(), "/pelvis_imu");
-
-               robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
-               robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
-
-               tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, "pelvis");
-               tfPublisher.publish(transformFromHeadToMultisenseHeadRoot, timeStamp, "head", "multisense/head_root");
-            }
+            robotConfigurationData = availableRobotConfigurationData.take();
          }
-         Thread.yield();
+         catch (InterruptedException e)
+         {
+            // Ignore and skip to the next loop iteration
+            continue;
+         }
+         if (rosMainNode.isStarted())
+         {
+            float[] jointAngles = robotConfigurationData.getJointAngles();
+            float[] jointVelocities = robotConfigurationData.getJointVelocities();
+            float[] jointTorques = robotConfigurationData.getJointTorques();
+
+            long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
+            Time t = Time.fromNano(timeStamp);
+
+            if (robotConfigurationData.jointNameHash != jointNameHash)
+            {
+               throw new RuntimeException("Joint names do not match for RobotConfigurationData");
+            }
+
+            for (int i = 0; i < additionalJointStatePublishers.length; i++)
+            {
+               RosJointStatePublisher jointStatePublisher = additionalJointStatePublishers[i];
+               JointStatePublisherHelper pubData = additionalJointStatePublisherMap.get(jointStatePublisher);
+               pubData.publish(jointAngles, jointVelocities, jointTorques, t);
+            }
+
+            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getOrientation(), robotConfigurationData.getTranslation());
+
+            jointStatePublisher.publish(nameList, jointAngles, jointVelocities, jointTorques, t);
+
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               footForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)));
+               footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
+
+               wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
+               wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
+            }
+
+            bothFeetForceSensorPublisher.publish(timeStamp, footForceSensorWrenches.get(RobotSide.LEFT), footForceSensorWrenches.get(RobotSide.RIGHT));
+
+            pelvisImuPublisher.publish(timeStamp, robotConfigurationData.getRawImuLinearAcceleration(), robotConfigurationData.getRawImuOrientation(),
+                  robotConfigurationData.getRawImuAngularVelocity());
+            batchImuPublisher.appendRawImuData(timeStamp, robotConfigurationData.getRawImuOrientation(), robotConfigurationData.getRawImuLinearAcceleration());
+            pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
+                  robotConfigurationData.getRawImuAngularVelocity(), "/pelvis_imu");
+
+            robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
+            robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
+
+            tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, "pelvis");
+            tfPublisher.publish(transformFromHeadToMultisenseHeadRoot, timeStamp, "head", "multisense/head_root");
+         }
       }
    }
 
@@ -250,7 +252,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          jointJointTorquesSubSet = new double[this.jointNames.size()];
       }
 
-      public void publish(double[] jointAngles, double[] jointVelocities, double[] jointTorques, Time t)
+      public void publish(float[] jointAngles, float[] jointVelocities, float[] jointTorques, Time t)
       {
          for (int i = 0; i < jointIndices.length; i++)
          {

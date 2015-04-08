@@ -3,8 +3,8 @@ package us.ihmc.utilities.ros.publisher;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
 
@@ -18,7 +18,7 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       super(sensor_msgs.Imu._TYPE,latched);
    }
    
-   public void publish(long timestamp, Vector3d linearAcceleration, Quat4d orientation, Vector3d angularVelocity)
+   public void publish(long timestamp, Vector3f linearAcceleration, Quat4f orientation, Vector3f angularVelocity)
    {
       sensor_msgs.Imu message = getMessage();
 
