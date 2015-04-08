@@ -48,7 +48,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
 
    private SideDependentList<double[]> armJointAngles, legJointAngles;
-   private double[] waistJointAngles;
+   private double[] spineJointAngles;
    private double neckJointAngle;
    
 
@@ -119,9 +119,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          }
       }
 
-      if (waistJointAngles == null)
+      if (spineJointAngles == null)
       {
-         waistJointAngles = new double[packet.getNumberOfWaistJoints()];
+         spineJointAngles = new double[packet.getNumberOfSpineJoints()];
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -153,13 +153,13 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)
    {
-      packet.packWaistJointAngle(waistJointAngles);
+      packet.packSpineJointAngle(spineJointAngles);
 
       SpineJointName[] spineJointNames = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
       for(int i=0; i<spineJointNames.length; i++)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getSpineJoint(spineJointNames[i]);
-         double desiredPostion = waistJointAngles[i];
+         double desiredPostion = spineJointAngles[i];
          
          //make sure that we do not command an arm joint outside the joint limits
          desiredPostion = MathTools.clipToMinMax(desiredPostion, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
