@@ -13,7 +13,7 @@ dependencies {
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' //force svnkit dependency jna-3.5.2 to use jna-4.1.0
     
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.+'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.+'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.1'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.+'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.+'
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.+'
