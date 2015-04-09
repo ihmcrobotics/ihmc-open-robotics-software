@@ -1,0 +1,125 @@
+atlas:
+  back_bkx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  back_bky:
+    initial_angle: 0.1
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  back_bkz:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  hokuyo_joint:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_elx:
+    initial_angle: 0.498
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_ely:
+    initial_angle: 2.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_shx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_shz:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_wrx:
+    initial_angle: -0.004
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_wry:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_arm_wry2:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_akx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_aky:
+    initial_angle: -0.35
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_hpx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_hpy:
+    initial_angle: -0.35
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_hpz:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  l_leg_kny:
+    initial_angle: 0.7
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  neck_ry:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_elx:
+    initial_angle: -0.498
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_ely:
+    initial_angle: 2.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_shx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_shz:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_wrx:
+    initial_angle: 0.004
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_wry:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_arm_wry2:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_akx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_aky:
+    initial_angle: -0.35
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_hpx:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_hpy:
+    initial_angle: -0.35
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_hpz:
+    initial_angle: 0.0
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
+  r_leg_kny:
+    initial_angle: 0.7
+    control_mode: pid
+    pid: {p: 4000.0, i: 5.0, d: 15.0, imax: 50.0, imin: -50.0, cmdMax: 300.0, cmdMin: -300.0}
