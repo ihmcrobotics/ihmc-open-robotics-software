@@ -2,7 +2,6 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix4d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -11,8 +10,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import com.badlogic.gdx.math.Quaternion;
 
 import us.ihmc.SdfLoader.FullRobotModelVisualizer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -588,6 +585,7 @@ public abstract class WholeBodyIkSolverTest
    }
 
    @Ignore
+   @EstimatedDuration(duration = 45.0)
    @Test(timeout = 200000)
    public void testWorkingSpaceFor5DoF()
    {
