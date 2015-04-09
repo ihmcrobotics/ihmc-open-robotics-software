@@ -224,6 +224,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       cmpIndex++;
 
       computeReferenceCMPsWithUpcomingFootsteps(transferToSide, numberOfUpcomingFootsteps, cmpIndex);
+      changeFrameOfCMPs(2, worldFrame);
    }
 
    public void computeReferenceCMPsStartingFromSingleSupport(RobotSide supportSide)
@@ -262,6 +263,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
 
       computeReferenceCMPsWithUpcomingFootsteps(supportSide, numberOfUpcomingFootsteps, constantCMPIndex);
+      changeFrameOfCMPs(1, worldFrame);
    }
 
    private void computeReferenceCMPsWithUpcomingFootsteps(RobotSide firstSupportSide, int numberOfUpcomingFootsteps, int cmpIndex)
@@ -298,6 +300,14 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          entryCMPs.get(i).setIncludingFrame(entryCMPs.get(lastComputedCMPIndex));
       for (int i = lastComputedCMPIndex + 1; i < exitCMPs.size(); i++)
          exitCMPs.get(i).setIncludingFrame(exitCMPs.get(lastComputedCMPIndex));
+   }
+
+   private void changeFrameOfCMPs(int fromIndex, ReferenceFrame desiredFrame)
+   {
+      for (int i = fromIndex; i < entryCMPs.size(); i++)
+         entryCMPs.get(i).changeFrame(desiredFrame);
+      for (int i = fromIndex; i < exitCMPs.size(); i++)
+         exitCMPs.get(i).changeFrame(desiredFrame);
    }
 
    private void computeEntryCMPForSupportFoot(FramePoint entryCMPToPack, RobotSide robotSide, ReferenceFrame soleFrameOfPreviousSupportFoot, YoFramePoint previousLateCMP)
