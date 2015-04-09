@@ -4,6 +4,7 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 
 import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
@@ -18,14 +19,14 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       super(sensor_msgs.Imu._TYPE,latched);
    }
    
-   public void publish(long timestamp, Vector3f linearAcceleration, Quat4f orientation, Vector3f angularVelocity)
+   public void publish(long timestamp, Vector3d vector3d, Quat4f orientation, Vector3f angularVelocity)
    {
       sensor_msgs.Imu message = getMessage();
 
       Vector3  localLinearAcceleration = newMessageFromType(Vector3._TYPE);
-      localLinearAcceleration.setX(linearAcceleration.x);
-      localLinearAcceleration.setY(linearAcceleration.y);
-      localLinearAcceleration.setZ(linearAcceleration.z);
+      localLinearAcceleration.setX(vector3d.x);
+      localLinearAcceleration.setY(vector3d.y);
+      localLinearAcceleration.setZ(vector3d.z);
       
       Quaternion localOrientation = newMessageFromType(Quaternion._TYPE);
       localOrientation.setW(orientation.w);

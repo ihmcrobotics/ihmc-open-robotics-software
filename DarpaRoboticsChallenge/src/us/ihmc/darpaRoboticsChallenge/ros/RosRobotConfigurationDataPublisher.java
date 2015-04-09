@@ -207,11 +207,13 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
             bothFeetForceSensorPublisher.publish(timeStamp, footForceSensorWrenches.get(RobotSide.LEFT), footForceSensorWrenches.get(RobotSide.RIGHT));
 
-            pelvisImuPublisher.publish(timeStamp, robotConfigurationData.getRawImuLinearAcceleration(), robotConfigurationData.getRawImuOrientation(),
-                  robotConfigurationData.getRawImuAngularVelocity());
+            pelvisImuPublisher.publish(timeStamp, robotConfigurationData.getPelvisLinearAcceleration(), robotConfigurationData.getRawImuOrientation(),
+                  robotConfigurationData.getRawImuAngularVelocity());//TODO: XXX: FIXME: this has both pelvis and imu frame data in it! fix this!
+            
             batchImuPublisher.appendRawImuData(timeStamp, robotConfigurationData.getRawImuOrientation(), robotConfigurationData.getRawImuLinearAcceleration());
+            
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                  robotConfigurationData.getRawImuAngularVelocity(), "/pelvis_imu");
+                  robotConfigurationData.getPelvisAngularVelocity(), "/pelvis_imu");
 
             robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
             robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());

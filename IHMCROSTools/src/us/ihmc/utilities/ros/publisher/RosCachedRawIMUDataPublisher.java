@@ -57,9 +57,9 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
       
       rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
       //delta angle (radians) in the frame of the IMU
-      rawImuData.setDax(currentImuOrientation[1] - previousImuOrientation[1]);
-      rawImuData.setDay(currentImuOrientation[0] - previousImuOrientation[0]);
-      rawImuData.setDaz(currentImuOrientation[2] - previousImuOrientation[2]);
+      rawImuData.setDax(currentImuOrientation[2] - previousImuOrientation[2]);
+      rawImuData.setDay(currentImuOrientation[1] - previousImuOrientation[1]);
+      rawImuData.setDaz(currentImuOrientation[0] - previousImuOrientation[0]);
       //linear acceleration (m/s^2) in the frame of the IM
       rawImuData.setDdx(rawImuLinearAcceleration.getX());
       rawImuData.setDdy(rawImuLinearAcceleration.getY());
@@ -76,6 +76,11 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
          }
          publish(timestampInNanoSeconds, imuBatch);
          availableImuData.remove(0);
+      }
+      
+      for (int i = 0; i < currentImuOrientation.length; i++)
+      {
+         previousImuOrientation[i] = currentImuOrientation[i];
       }
    }
    
