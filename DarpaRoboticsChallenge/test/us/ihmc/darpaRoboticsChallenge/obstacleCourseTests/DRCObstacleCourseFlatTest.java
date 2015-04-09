@@ -347,42 +347,6 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       
       BambooTools.reportTestFinishedMessage();
    }
-	
-	@EstimatedDuration(duration = 75)
-	@Test(timeout = 120000)
-	public void testFlatGroundWithFootForceSensorHysteresis() throws SimulationExceededMaximumTimeException
-	{
-		BambooTools.reportTestStartedMessage();
-
-		String scriptName = "scripts/ExerciseAndJUnitScripts/BunchOfStepsForwardAndBackward.xml";
-
-		String name = "DRCFlatGroundForceSensorHysteresisTest";
-		
-		FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, name, scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
-      SDFRobot robot = drcSimulationTestHelper.getRobot();
-      setupCameraForWalkingUpToRamp();
-        
-      ArrayList<RobotController> footForceSensorSignalCorruptors = new ArrayList<RobotController>();
-
-      footForceSensorSignalCorruptors = drcSimulationTestHelper.getFootForceSensorHysteresisCreators();
-      
-      robot.setController(footForceSensorSignalCorruptors, 1);
-      
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
-
-      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
-
-      assertTrue(success);
-      
-      BambooTools.reportTestFinishedMessage();
-	}
 
 	@EstimatedDuration(duration = 58.9)
 	@Test(timeout = 186582)
