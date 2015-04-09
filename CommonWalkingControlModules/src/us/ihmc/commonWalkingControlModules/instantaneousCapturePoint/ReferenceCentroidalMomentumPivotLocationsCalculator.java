@@ -25,6 +25,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicPosition.GraphicType;
 import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.plotting.ArtifactList;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class ReferenceCentroidalMomentumPivotLocationsCalculator
@@ -39,12 +40,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
     * <li> When using two CMPs per support:
     * Desired CMP locations on the feet in the early single support phase. </li>
     * */
-   private final ArrayList<YoFramePoint> entryCMPs = new ArrayList<YoFramePoint>();
+   private final ArrayList<YoFramePointInMultipleFrames> entryCMPs = new ArrayList<YoFramePointInMultipleFrames>();
+   private final ArrayList<YoFramePoint> entryCMPsInWorldFrameReadOnly = new ArrayList<YoFramePoint>();
+
    /**
     * Only used when computing two CMPs per support.
     * Desired CMP locations on the feet in the late single support phase.
     */
-   private final ArrayList<YoFramePoint> exitCMPs = new ArrayList<YoFramePoint>();
+   private final ArrayList<YoFramePointInMultipleFrames> exitCMPs = new ArrayList<YoFramePointInMultipleFrames>();
+   private final ArrayList<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<YoFramePoint>();
+   
    private final BooleanYoVariable isDoneWalking = new BooleanYoVariable("isDoneWalking", registry);
    private final DoubleYoVariable maxForwardCMPOffset = new DoubleYoVariable("maxForwardConstantCMPOffset", registry);
    private final DoubleYoVariable minForwardCMPOffset = new DoubleYoVariable("minForwardConstantCMPOffset", registry);
@@ -90,16 +95,26 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         YoFramePoint entryConstantCMP = new YoFramePoint(namePrefix + "EntryConstantCMP" + i, worldFrame, registry);
+         YoFramePointInMultipleFrames entryConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "EntryConstantCMP" + i, parentRegistry, worldFrame, soleFrames.get(RobotSide.LEFT), soleFrames.get(RobotSide.RIGHT));
          entryConstantCMP.setToNaN();
          entryCMPs.add(entryConstantCMP);
+         entryCMPsInWorldFrameReadOnly.add(entryConstantCMP.buildUpdatedYoFramePointForVisualizationOnly());
 
-         YoFramePoint exitConstantCMP = new YoFramePoint(namePrefix + "ExitConstantCMP" + i, worldFrame, registry);
+         YoFramePointInMultipleFrames exitConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "ExitConstantCMP" + i, parentRegistry, worldFrame, soleFrames.get(RobotSide.LEFT), soleFrames.get(RobotSide.RIGHT));
          exitConstantCMP.setToNaN();
          exitCMPs.add(exitConstantCMP);
+         exitCMPsInWorldFrameReadOnly.add(exitConstantCMP.buildUpdatedYoFramePointForVisualizationOnly());
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void update()
+   {
+      for (int i = 0; i < entryCMPs.size(); i++)
+         entryCMPs.get(i).notifyVariableChangedListeners();
+      for (int i = 0; i < exitCMPs.size(); i++)
+         exitCMPs.get(i).notifyVariableChangedListeners();
    }
 
    public void setUseTwoCMPsPerSupport(boolean useTwoCMPsPerSupport)
@@ -122,14 +137,14 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       for (int i = 0; i < entryCMPs.size(); i++)
       {
-         YoGraphicPosition entryCMPViz = new YoGraphicPosition("Entry CMP" + i, entryCMPs.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
+         YoGraphicPosition entryCMPViz = new YoGraphicPosition("Entry CMP" + i, entryCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
          yoGraphicsList.add(entryCMPViz);
          artifactList.add(entryCMPViz.createArtifact());
       }
 
       for (int i = 0; i < exitCMPs.size(); i++)
       {
-         YoGraphicPosition exitCMPViz = new YoGraphicPosition("Exit CMP" + i, exitCMPs.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.BALL);
+         YoGraphicPosition exitCMPViz = new YoGraphicPosition("Exit CMP" + i, exitCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.BALL);
          yoGraphicsList.add(exitCMPViz);
          artifactList.add(exitCMPViz.createArtifact());
       }
@@ -163,12 +178,17 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       int cmpIndex = 0;
       boolean noUpcomingFootsteps = numberOfUpcomingFootsteps == 0;
       isDoneWalking.set(noUpcomingFootsteps);
+      ReferenceFrame transferToSoleFrame = soleFrames.get(transferToSide);
+      ReferenceFrame transferFromSoleFrame = soleFrames.get(transferFromSide);
 
       if (atAStop || noUpcomingFootsteps)
       {
          computeEntryCMPForSupportFoot(firstCMP, RobotSide.LEFT, null, null);
          computeEntryCMPForSupportFoot(secondCMP, RobotSide.RIGHT, null, null);
-
+         firstCMP.changeFrame(transferFromSoleFrame);
+         secondCMP.changeFrame(transferFromSoleFrame);
+         entryCMPs.get(cmpIndex).switchCurrentReferenceFrame(transferFromSoleFrame);
+         exitCMPs.get(cmpIndex).switchCurrentReferenceFrame(transferFromSoleFrame);
          entryCMPs.get(cmpIndex).interpolate(firstCMP, secondCMP, 0.5);
          exitCMPs.get(cmpIndex).interpolate(firstCMP, secondCMP, 0.5);
          cmpIndex++;
@@ -182,18 +202,21 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       else
       {
          computeEntryCMPForSupportFoot(cmp, transferFromSide, null, null);
-         entryCMPs.get(cmpIndex).set(cmp);
-         computeExitCMPForSupportFoot(cmp, transferFromSide, soleFrames.get(transferToSide));
-         exitCMPs.get(cmpIndex).set(cmp);
+         cmp.changeFrame(transferFromSoleFrame);
+         entryCMPs.get(cmpIndex).setIncludingFrame(cmp);
+         computeExitCMPForSupportFoot(cmp, transferFromSide, transferToSoleFrame);
+         cmp.changeFrame(transferFromSoleFrame);
+         exitCMPs.get(cmpIndex).setIncludingFrame(cmp);
          cmpIndex++;
       }
 
-      computeEntryCMPForSupportFoot(cmp, transferToSide, soleFrames.get(transferFromSide), exitCMPs.get(cmpIndex - 1));
-      entryCMPs.get(cmpIndex).set(cmp);
-      cmp.changeFrame(soleFrames.get(transferToSide));
+      computeEntryCMPForSupportFoot(cmp, transferToSide, transferFromSoleFrame, exitCMPs.get(cmpIndex - 1));
+      cmp.changeFrame(transferToSoleFrame);
+      entryCMPs.get(cmpIndex).setIncludingFrame(cmp);
       firstEntryCMPForSingleSupport.setByProjectionOntoXYPlaneIncludingFrame(cmp);
       computeExitCMPForSupportFoot(cmp, transferToSide, upcomingFootsteps.get(0).getSoleReferenceFrame());
-      exitCMPs.get(cmpIndex).set(cmp);
+      cmp.changeFrame(transferToSoleFrame);
+      exitCMPs.get(cmpIndex).setIncludingFrame(cmp);
       cmpIndex++;
 
       computeReferenceCMPsWithUpcomingFootsteps(transferToSide, numberOfUpcomingFootsteps, cmpIndex);
@@ -212,16 +235,22 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       else
          cmp.setXYIncludingFrame(firstEntryCMPForSingleSupport);
 
-      cmp.changeFrame(worldFrame);
-      entryCMPs.get(constantCMPIndex).set(cmp);
+      ReferenceFrame supportSoleFrame = soleFrames.get(supportSide);
+      cmp.changeFrame(supportSoleFrame);
+      entryCMPs.get(constantCMPIndex).setIncludingFrame(cmp);
       computeExitCMPForSupportFoot(cmp, supportSide, upcomingFootsteps.get(0).getSoleReferenceFrame());
-      exitCMPs.get(constantCMPIndex).set(cmp);
+      cmp.changeFrame(supportSoleFrame);
+      exitCMPs.get(constantCMPIndex).setIncludingFrame(cmp);
       constantCMPIndex++;
 
       if (onlyOneUpcomingFootstep)
       {
          computeEntryCMPForSupportFoot(firstCMP, supportSide, null, null);
          computeEntryCMPForFootstep(secondCMP, upcomingFootsteps.get(0), null, null);
+         firstCMP.changeFrame(supportSoleFrame);
+         secondCMP.changeFrame(supportSoleFrame);
+         entryCMPs.get(constantCMPIndex).switchCurrentReferenceFrame(supportSoleFrame);
+         exitCMPs.get(constantCMPIndex).switchCurrentReferenceFrame(supportSoleFrame);
          entryCMPs.get(constantCMPIndex).interpolate(firstCMP, secondCMP, 0.5);
          exitCMPs.get(constantCMPIndex).interpolate(firstCMP, secondCMP, 0.5);
          setRemainingCMPsToDuplicateLastComputedCMP(constantCMPIndex);
@@ -242,11 +271,13 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          if (i < upcomingFootsteps.size() - 1) soleOfNextFootstep = upcomingFootsteps.get(i + 1).getSoleReferenceFrame();
          
          computeExitCMPForFootstep(cmp, currentFootstep, soleOfNextFootstep);
-         exitCMPs.get(cmpIndex).set(cmp);
+         cmp.changeFrame(soleFrames.get(firstSupportSide));
+         exitCMPs.get(cmpIndex).setIncludingFrame(cmp);
 
          YoFramePoint previousExitCMP = exitCMPs.get(cmpIndex - 1);
          computeEntryCMPForFootstep(cmp, currentFootstep, soleFrameOfPreviousFootstep, previousExitCMP);
-         entryCMPs.get(cmpIndex).set(cmp);
+         cmp.changeFrame(soleFrames.get(firstSupportSide));
+         entryCMPs.get(cmpIndex).setIncludingFrame(cmp);
          
          cmpIndex++;
          soleFrameOfPreviousFootstep = currentFootstep.getSoleReferenceFrame();
@@ -260,9 +291,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private void setRemainingCMPsToDuplicateLastComputedCMP(int lastComputedCMPIndex)
    {
       for (int i = lastComputedCMPIndex + 1; i < entryCMPs.size(); i++)
-         entryCMPs.get(i).set(entryCMPs.get(lastComputedCMPIndex));
+         entryCMPs.get(i).setIncludingFrame(entryCMPs.get(lastComputedCMPIndex));
       for (int i = lastComputedCMPIndex + 1; i < exitCMPs.size(); i++)
-         exitCMPs.get(i).set(exitCMPs.get(lastComputedCMPIndex));
+         exitCMPs.get(i).setIncludingFrame(exitCMPs.get(lastComputedCMPIndex));
    }
 
    private void computeEntryCMPForSupportFoot(FramePoint entryCMPToPack, RobotSide robotSide, ReferenceFrame soleFrameOfPreviousSupportFoot, YoFramePoint previousLateCMP)
@@ -384,22 +415,22 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public ArrayList<YoFramePoint> getEntryCMPs()
    {
-      return entryCMPs;
+      return entryCMPsInWorldFrameReadOnly;
    }
 
    public ArrayList<YoFramePoint> getExitCMPs()
    {
-      return exitCMPs;
+      return exitCMPsInWorldFrameReadOnly;
    }
 
    public YoFramePoint getNextEntryCMP()
    {
-      return entryCMPs.get(0);
+      return entryCMPsInWorldFrameReadOnly.get(0);
    }
 
-   public YoFramePoint getEntryCMP(int index)
+   public void getNextEntryCMP(FramePoint entryCMPToPack)
    {
-      return entryCMPs.get(index);
+      entryCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
    }
 
    public boolean isDoneWalking()

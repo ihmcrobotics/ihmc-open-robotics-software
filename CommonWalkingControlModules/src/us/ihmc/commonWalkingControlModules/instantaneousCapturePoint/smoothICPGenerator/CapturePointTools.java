@@ -94,7 +94,7 @@ public class CapturePointTools
     * @param stepTime equals to the single plus double support durations
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint, double stepTime, double omega0)
+   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> cornerPointsToPack, ArrayList<YoFramePoint> constantCMPs, boolean skipFirstCornerPoint, double stepTime, double omega0)
    {
       double exponentialTerm = Math.exp(- omega0 * stepTime);
       YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
@@ -122,7 +122,7 @@ public class CapturePointTools
     * @param timeInPercentSpentOnExitCMPs
     * @param omega0
     */
-   public static void computeDesiredCornerPoints(ArrayList<YoFramePoint> entryCornerPointsToPack, ArrayList<YoFramePoint> exitCornerPointsToPack,
+   public static void computeDesiredCornerPoints(ArrayList<? extends YoFramePoint> entryCornerPointsToPack, ArrayList<? extends YoFramePoint> exitCornerPointsToPack,
          ArrayList<YoFramePoint> entryCMPs, ArrayList<YoFramePoint> exitCMPs, double stepTime, double timeInPercentSpentOnExitCMPs, double omega0)
    {
       double timeSpentOnExitCMP = stepTime * timeInPercentSpentOnExitCMPs;
@@ -201,6 +201,24 @@ public class CapturePointTools
    }
 
    /**
+    * Compute the desired capture point position at a given time.
+    * x<sup>ICP<sub>des</sub></sup> = (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0 t</sup>)x<sup>CMP<sub>0</sub></sup>
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCMP
+    * @param desiredCapturePointToPack
+    */
+   public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFramePoint desiredCapturePointToPack)
+   {
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
+      else
+         desiredCapturePointToPack.set(initialCapturePoint);
+   }
+
+   /**
     * Compute the desired capture point velocity at a given time. 
     * ICPv_d = w * e^{w*t} * ICP0 - p0 * w * e^{w*t}
     * 
@@ -229,6 +247,24 @@ public class CapturePointTools
     * @param desiredCapturePointVelocityToPack
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointVelocityToPack)
+   {
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointVelocityToPack.setToZero();
+   }
+
+   /**
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w * * e^{w*t} * ICP0 - p0 * w * e^{w*t}
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCMP
+    * @param desiredCapturePointVelocityToPack
+    */
+   public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFrameVector desiredCapturePointVelocityToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
@@ -279,6 +315,24 @@ public class CapturePointTools
     * @param desiredCapturePointAccelerationToPack
     */
    public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointAccelerationToPack)
+   {
+      if (initialCapturePoint.distance(initialCMP) > EPSILON)
+         desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
+      else
+         desiredCapturePointAccelerationToPack.setToZero();
+   }
+
+   /**
+    * Compute the desired capture point velocity at a given time.
+    * ICPv_d = w^2 * e^{w*t} * ICP0 - p0 * w^2 * e^{w*t}
+    * 
+    * @param omega0
+    * @param time
+    * @param initialCapturePoint
+    * @param initialCMP
+    * @param desiredCapturePointAccelerationToPack
+    */
+   public static void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, YoFrameVector desiredCapturePointAccelerationToPack)
    {
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointAccelerationToPack.subAndScale(omega0 * omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);

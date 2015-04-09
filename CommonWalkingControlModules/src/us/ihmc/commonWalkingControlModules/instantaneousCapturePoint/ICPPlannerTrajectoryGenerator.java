@@ -9,7 +9,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
 
-public class ICPPlannerDoubleSupportTrajectoryGenerator implements PositionTrajectoryGenerator
+public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -20,7 +20,7 @@ public class ICPPlannerDoubleSupportTrajectoryGenerator implements PositionTraje
    private final FramePoint finalPositionInSpecificFrame = new FramePoint();
    private final FrameVector finalVelocityInSpecificFrame = new FrameVector();
 
-   public ICPPlannerDoubleSupportTrajectoryGenerator(String namePrefix, int numberOfCoefficients, YoVariableRegistry registry)
+   public ICPPlannerTrajectoryGenerator(String namePrefix, int numberOfCoefficients, YoVariableRegistry registry)
    {
       doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "DoubleSupportTrajectory", numberOfCoefficients, worldFrame, registry);
    }
