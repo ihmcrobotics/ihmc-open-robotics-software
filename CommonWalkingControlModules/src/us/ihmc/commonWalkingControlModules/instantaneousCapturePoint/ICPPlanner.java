@@ -112,9 +112,12 @@ public class ICPPlanner
       timeCorrectionFactor.set(0.5); // TODO Need to be extracted
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider.getIntegerValue(), registry);
-      double cmpForwardOffset = icpPlannerParameters.getReferenceCMPForwardOffset();
-      double cmpInsideOffset = icpPlannerParameters.getReferenceCMPInsideOffset();
-      referenceCMPsCalculator.setSymmetricCMPConstantOffsets(cmpForwardOffset, cmpInsideOffset);
+      double entryCMPForwardOffset = icpPlannerParameters.getEntryCMPForwardOffset();
+      double entryCMPInsideOffset = icpPlannerParameters.getEntryCMPInsideOffset();
+      double exitCMPForwardOffset = icpPlannerParameters.getExitCMPForwardOffset();
+      double exitCMPInsideOffset = icpPlannerParameters.getExitCMPInsideOffset();
+      referenceCMPsCalculator.setSymmetricEntryCMPConstantOffsets(entryCMPForwardOffset, entryCMPInsideOffset);
+      referenceCMPsCalculator.setSymmetricExitCMPConstantOffsets(exitCMPForwardOffset, exitCMPInsideOffset);
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.setMinMaxForwardCMPLocationFromFootCenter(icpPlannerParameters.getMinReferenceCMPForwardOffset(), icpPlannerParameters.getMaxReferenceCMPForwardOffset());
       referenceCMPsCalculator.setSafeDistanceFromSupportEdges(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());

@@ -40,14 +40,22 @@ public interface CapturePointPlannerParameters
 
    public abstract double getAlphaDeltaFootPositionForFootslipCompensation();
 
-   public abstract double getReferenceCMPInsideOffset();
+   public abstract double getEntryCMPInsideOffset();
 
-   public abstract double getReferenceCMPForwardOffset();
+   /** Only used when using the new ICP planner with two CMPs per support. */
+   public abstract double getExitCMPInsideOffset();
+
+   public abstract double getEntryCMPForwardOffset();
+
+   /** Only used when using the new ICP planner with two CMPs per support. */
+   public abstract double getExitCMPForwardOffset();
 
    public abstract boolean useNewICPPlanner();
 
+   /** Only used when using the new ICP planner. */
    public abstract boolean useTwoCMPsPerSupport();
 
+   /** Only used when using the new ICP planner with two CMPs per support. */
    public abstract double getTimeSpentOnExitCMPInPercentOfStepTime();
 
    public abstract double getMaxReferenceCMPForwardOffset();
