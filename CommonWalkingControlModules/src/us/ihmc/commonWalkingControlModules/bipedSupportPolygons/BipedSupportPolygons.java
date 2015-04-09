@@ -263,6 +263,11 @@ public class BipedSupportPolygons
       footToFootLineSegmentInWorld.changeFrame(worldFrame);
    }
 
+   public ReferenceFrame getMidFeetZUpFrame()
+   {
+      return midFeetZUp;
+   }
+
    public String toString()
    {
       return "supportPolygonInMidFeetZUp = " + supportPolygonInMidFeetZUp;
