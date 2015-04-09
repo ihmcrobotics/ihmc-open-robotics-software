@@ -45,6 +45,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
    private final double dt;
    private final boolean[] doIntegrateDesiredAccerations;
 
+   private final boolean[] hasJointBeenDisabledAtLeastOnce;
+
    public JointSpaceHandControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, InverseDynamicsJoint[] controlledJoints,
          boolean doPositionControl, MomentumBasedController momentumBasedController, ArmControllerParameters armControllerParameters, YoPIDGains gains,
          double dt, YoVariableRegistry parentRegistry)
@@ -64,6 +66,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
       initialized.set(false);
 
       this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
+
+      hasJointBeenDisabledAtLeastOnce = new boolean[oneDoFJoints.length];
 
       for (OneDoFJoint joint : oneDoFJoints)
       {
@@ -97,7 +101,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
       parentRegistry.addChild(registry);
    }
 
-   private void setDesiredJointAccelerations()
+   @Override
+   public void doAction()
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -107,34 +112,43 @@ public class JointSpaceHandControlState extends State<HandControlState>
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
          trajectoryGenerator.compute(getTimeInCurrentState());
 
-         desiredPosition.set(trajectoryGenerator.getValue());
-         desiredVelocity.set(trajectoryGenerator.getVelocity());
-         double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
-
          double currentPosition = joint.getQ();
          double currentVelocity = joint.getQd();
 
-         PIDController pidController = pidControllers.get(joint);
-         double desiredAcceleration = feedforwardAcceleration
-               + pidController.computeForAngles(currentPosition, desiredPosition.getDoubleValue(), currentVelocity, desiredVelocity.getDoubleValue(), dt);
-
-         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
-
          RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
-         rateLimitedAcceleration.update(desiredAcceleration);
-         desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
-         momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+         if (!joint.isEnabled())
+            hasJointBeenDisabledAtLeastOnce[i] = true;
 
-         joint.setqDesired(desiredPosition.getDoubleValue());
-         joint.setQdDesired(desiredVelocity.getDoubleValue());
+         // The joint uncontrollable so just all the desired position to the actual, and the rest to zero.
+         if (hasJointBeenDisabledAtLeastOnce[i])
+         {
+            desiredPosition.set(currentPosition);
+            desiredVelocity.set(0.0);
+            rateLimitedAcceleration.set(0.0);
+            momentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
+         }
+         else
+         {
+            desiredPosition.set(trajectoryGenerator.getValue());
+            desiredVelocity.set(trajectoryGenerator.getVelocity());
+            double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
+
+            PIDController pidController = pidControllers.get(joint);
+            double desiredAcceleration = feedforwardAcceleration
+                  + pidController.computeForAngles(currentPosition, desiredPosition.getDoubleValue(), currentVelocity, desiredVelocity.getDoubleValue(), dt);
+
+            desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
+
+            rateLimitedAcceleration.update(desiredAcceleration);
+            desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
+
+            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+
+            joint.setqDesired(desiredPosition.getDoubleValue());
+            joint.setQdDesired(desiredVelocity.getDoubleValue());
+         }
       }
-   }
-
-   @Override
-   public void doAction()
-   {
-      setDesiredJointAccelerations();
    }
 
    @Override
@@ -163,6 +177,9 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
       if (doPositionControl.getBooleanValue())
          enablePositionControl();
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+         hasJointBeenDisabledAtLeastOnce[i] = !oneDoFJoints[i].isEnabled();
    }
 
    @Override
