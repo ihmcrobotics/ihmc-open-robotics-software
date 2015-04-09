@@ -166,13 +166,25 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       }
 
       @Override
-      public double getReferenceCMPInsideOffset()
+      public double getEntryCMPInsideOffset()
       {
          return 0.006;
       }
 
       @Override
-      public double getReferenceCMPForwardOffset()
+      public double getExitCMPInsideOffset()
+      {
+         return 0.006;
+      }
+
+      @Override
+      public double getEntryCMPForwardOffset()
+      {
+         return 0;
+      }
+
+      @Override
+      public double getExitCMPForwardOffset()
       {
          return 0;
       }

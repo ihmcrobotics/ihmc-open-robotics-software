@@ -58,7 +58,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2d> supportFootPolygons = new SideDependentList<>();
 
-   private final SideDependentList<YoFrameVector2d> cmpUserOffsets = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector2d> entryCMPUserOffsets = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector2d> exitCMPUserOffsets = new SideDependentList<>();
 
    private final ArrayList<Footstep> upcomingFootsteps = new ArrayList<>();
 
@@ -88,8 +89,10 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          defaultFootPolygons.put(robotSide, defaultFootPolygon.getConvexPolygon2d());
 
          String sidePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFrameVector2d cmpUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "CMPConstantOffsets", null, registry);
-         cmpUserOffsets.put(robotSide, cmpUserOffset);
+         YoFrameVector2d entryCMPUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "EntryCMPConstantOffsets", null, registry);
+         entryCMPUserOffsets.put(robotSide, entryCMPUserOffset);
+         YoFrameVector2d exitCMPUserOffset = new YoFrameVector2d(namePrefix + sidePrefix + "ExitCMPConstantOffsets", null, registry);
+         exitCMPUserOffsets.put(robotSide, exitCMPUserOffset);
          supportFootPolygons.put(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide));
          tempSupportPolygon.setIncludingFrameAndUpdate(supportFootPolygons.get(robotSide)); // Just to allocate memory
       }
@@ -154,13 +157,23 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       }
    }
 
-   public void setSymmetricCMPConstantOffsets(double cmpForwardOffset, double cmpInsideOffset)
+   public void setSymmetricEntryCMPConstantOffsets(double entryCMPForwardOffset, double entryCMPInsideOffset)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameVector2d cmpUserOffset = cmpUserOffsets.get(robotSide);
-         cmpUserOffset.setX(cmpForwardOffset);
-         cmpUserOffset.setY(robotSide.negateIfLeftSide(cmpInsideOffset));
+         YoFrameVector2d entryCMPUserOffset = entryCMPUserOffsets.get(robotSide);
+         entryCMPUserOffset.setX(entryCMPForwardOffset);
+         entryCMPUserOffset.setY(robotSide.negateIfLeftSide(entryCMPInsideOffset));
+      }
+   }
+
+   public void setSymmetricExitCMPConstantOffsets(double exitCMPForwardOffset, double exitCMPInsideOffset)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         YoFrameVector2d exitCMPUserOffset = exitCMPUserOffsets.get(robotSide);
+         exitCMPUserOffset.setX(exitCMPForwardOffset);
+         exitCMPUserOffset.setY(robotSide.negateIfLeftSide(exitCMPInsideOffset));
       }
    }
 
@@ -352,12 +365,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
                cmp2d.set(previousExitCMP2d);
          }
 
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide);
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, entryCMPUserOffsets.get(robotSide));
       }
       else
       {
          cmp2d.setIncludingFrame(tempSupportPolygon.getCentroid());
-         YoFrameVector2d offset = cmpUserOffsets.get(robotSide);
+         YoFrameVector2d offset = entryCMPUserOffsets.get(robotSide);
          cmp2d.add(offset.getX(), offset.getY());
       }
 
@@ -410,17 +423,17 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          cmp2d.setToZero(soleFrame);
       cmp2d.changeFrameAndProjectToXYPlane(soleFrame);
 
-      constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide);
+      constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide));
 
       exitCMPToPack.setXYIncludingFrame(cmp2d);
       exitCMPToPack.changeFrame(worldFrame);
    }
 
-   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(RobotSide robotSide)
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(RobotSide robotSide, YoFrameVector2d cmpOffset)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
-      cmp2d.setX(MathTools.clipToMinMax(cmp2d.getX(), minForwardCMPOffset.getDoubleValue(), maxForwardCMPOffset.getDoubleValue()));
-      cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpUserOffsets.get(robotSide).getY());
+      cmp2d.setX(MathTools.clipToMinMax(cmp2d.getX() + cmpOffset.getX(), minForwardCMPOffset.getDoubleValue(), maxForwardCMPOffset.getDoubleValue()));
+      cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygon.shrink(safeMarginDistanceForFootPolygon.getDoubleValue());

@@ -79,8 +79,8 @@ public class CapturePointPlannerAdapter
       }
 
       registry.addChild(this.registry);
-      capturePointInFromFootCenter.set(capturePointPlannerParameters.getReferenceCMPInsideOffset());
-      capturePointForwardFromFootCenter.set(capturePointPlannerParameters.getReferenceCMPForwardOffset());
+      capturePointInFromFootCenter.set(capturePointPlannerParameters.getEntryCMPInsideOffset());
+      capturePointForwardFromFootCenter.set(capturePointPlannerParameters.getEntryCMPForwardOffset());
       additionalSwingTimeForICP.set(capturePointPlannerParameters.getAdditionalTimeForSingleSupport());
       this.bipedSupportPolygons = bipedSupportPolygons;
    }

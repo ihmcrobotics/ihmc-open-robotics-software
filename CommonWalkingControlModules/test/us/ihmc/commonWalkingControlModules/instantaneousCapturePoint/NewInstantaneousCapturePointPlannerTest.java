@@ -150,18 +150,30 @@ public class NewInstantaneousCapturePointPlannerTest
 			return 0.65;
 		}
 
-		@Override
-		public double getReferenceCMPInsideOffset()
-		{
-			return 0.006;
-		}
-		
-		@Override
-		public double getReferenceCMPForwardOffset()
-		{
-			return 0.0;
-		}
-		
+      @Override
+      public double getEntryCMPInsideOffset()
+      {
+         return 0.006;
+      }
+
+      @Override
+      public double getExitCMPInsideOffset()
+      {
+         return 0.006;
+      }
+
+      @Override
+      public double getEntryCMPForwardOffset()
+      {
+         return 0.0;
+      }
+
+      @Override
+      public double getExitCMPForwardOffset()
+      {
+         return 0.0;
+      }
+      
 		@Override
 		public double getMaxAllowedErrorWithoutPartialTimeFreeze()
 		{
