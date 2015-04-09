@@ -26,6 +26,7 @@ public class JointConfigurationGatherer
 
    private final Vector3d rootLinearVelocity = new Vector3d();
    private final Vector3d rootAngularVelocity = new Vector3d();
+   private final Vector3d rootLinearAcceleration = new Vector3d();
 
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final ArrayList<String> forceSensorNameList = new ArrayList<String>();
@@ -81,9 +82,11 @@ public class JointConfigurationGatherer
       rootJoint.packRotation(rootOrientation);
       rootJoint.getAngularVelocity(rootAngularVelocity);
       rootJoint.getLinearVelocity(rootLinearVelocity);
+      rootJoint.getLinearAcceleration(rootLinearAcceleration);
       
       jointConfigurationData.setPelvisAngularVelocity(rootAngularVelocity);
       jointConfigurationData.setPelvisLinearVelocity(rootLinearVelocity);
+      jointConfigurationData.setPelvisLinearAcceleration(rootLinearAcceleration);
       jointConfigurationData.setRootTranslation(rootTranslation);
       jointConfigurationData.setRootOrientation(rootOrientation);
       jointConfigurationData.setJointState(joints);
