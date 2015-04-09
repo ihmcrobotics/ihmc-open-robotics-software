@@ -59,19 +59,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       jointCommand.putLong(estimatorTicksPerControlTick);
       jointCommand.putLong(timestamp);
       jointCommand.putLong(estimatorFrequencyInHz);
-
-      // if the i_th value of the binary rep of this is 1, it's position controlled
-      long jointsUnderPositionControl = 0;
-
-      for (int i = 0; i < joints.size(); i++)
-      {
-         if (joints.get(i).isUnderPositionControl())
-         {
-            jointsUnderPositionControl += 1 << i;
-         }
-      }
-      jointCommand.putLong(jointsUnderPositionControl);
-
+      
       for (int i = 0; i < joints.size(); i++)
       {
          OneDoFJoint joint = joints.get(i);
@@ -79,7 +67,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          if (fingerJointMap == null || !fingerJointMap.containsKey(joint.getName()))
          {
             if (joint.isUnderPositionControl())
-               jointCommand.putDouble(joint.getqDesired());
+               jointCommand.putDouble(joint.getqDesired());               
             else
                jointCommand.putDouble(joint.getTau());
          }
@@ -129,7 +117,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
          }
       });
 
-      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 32);
+      jointCommand = ByteBuffer.allocate(joints.size() * 8 + 24);
       jointCommand.order(ByteOrder.nativeOrder());
 
       try
