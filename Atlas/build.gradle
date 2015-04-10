@@ -70,37 +70,37 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
 }
 
 task gfeDevCompile(dependsOn:distTar) << {
-    if(!project.hasProperty("catkinWorkspaceLocation"))
+    if(!project.hasProperty("ihmcRosPackageLocation"))
     {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("gfeDevCompile requires the project property catkinWorkspaceLocation to be set. Check your gradle.properties or set \"-PcatkinWorkspaceLocation=<absolute path>\" from the command line."))
+        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("gfeDevCompile requires the project property ihmcRosPackageLocation to be set. Check your gradle.properties or set \"-PihmcRosPackageLocation=<absolute path>\" from the command line."))
     }
 
-    if(catkinWorkspaceLocation.startsWith("~"))
+    if(ihmcRosPackageLocation.startsWith("~"))
     {
-        catkinWorkspaceLocation = catkinWorkspaceLocation.replace("~", System.getProperty("user.home"))
+        ihmcRosPackageLocation = ihmcRosPackageLocation.replace("~", System.getProperty("user.home"))
     }
 
     String buildName = applicationName.toString() + "-" + version;
     java.nio.file.Path messagesLocation = Paths.get(project(':ROSJavaBootstrap').projectDir.absolutePath, "ROSMessagesAndServices", "ihmc_msgs", "msg")
-    java.nio.file.Path catkinWorkspaceLocationPath = Paths.get("$catkinWorkspaceLocation")
-    java.nio.file.Path ihmcMsgsLocation = catkinWorkspaceLocationPath.resolve("src").resolve("ihmc_ros").resolve("ihmc_msgs")
-    java.nio.file.Path ihmcSimLocation = catkinWorkspaceLocationPath.resolve("src").resolve("ihmc_ros").resolve("ihmc_sim")
+    java.nio.file.Path ihmcRosPackageLocationPath = Paths.get("$ihmcRosPackageLocation")
+    java.nio.file.Path ihmcMsgsLocation = ihmcRosPackageLocationPath.resolve("ihmc_msgs")
+    java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_sim")
     java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
 
     if(!Files.exists(ihmcMsgsLocation))
     {
-        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("ihmc_msgs not in catkin workspace \"src\" directory. Check out ihmc_msgs from BitBucket."))
+        throw new TaskExecutionException(tasks.gfeDevCompile, new StopActionException("ihmc_msgs not in ihmc_ros directory. Check out ihmc_ros from BitBucket."))
     }
 
     copy {
-        println "Copying ROS messages from ROSJavaBootstrop in to ihmc_msgs in catkin workspace"
+        println "Copying ROS messages from ROSJavaBootstrop in to ihmc_ros"
         from messagesLocation.toAbsolutePath().toString()
         into ihmcMsgsLocation.resolve("msg").toAbsolutePath().toString()
         exclude { details -> !details.file.name.endsWith(".msg") }
     }
 
     copy {
-        println "Expanding the distribution archive in to ihmc_msgs/scripts"
+        println "Expanding the distribution archive in to ihmc_sim/scripts"
         from tarTree(archiveLocation.toAbsolutePath().toString())
         into ihmcSimLocation.toAbsolutePath().toString()
     }
