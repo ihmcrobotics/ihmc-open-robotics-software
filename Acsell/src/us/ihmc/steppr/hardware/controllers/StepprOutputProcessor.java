@@ -8,7 +8,9 @@ import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprAnkleAngleCalculator;
 import us.ihmc.steppr.hardware.state.StepprAnkleInterpolator;
+import us.ihmc.steppr.hardware.state.StepprFourbarCalculator;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -24,6 +26,8 @@ public class StepprOutputProcessor implements OutputProcessor
          totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
 
    private final StepprAnkleAngleCalculator ankleInterpolator = new StepprAnkleInterpolator();
+   private final StepprFourbarCalculator leftFourbar;
+   private final StepprFourbarCalculator rightFourbar;
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
    public StepprOutputProcessor(FullRobotModel controllerFullRobotModel)
@@ -34,6 +38,8 @@ public class StepprOutputProcessor implements OutputProcessor
       {
          predictedMotorPower.put(actuator, new DoubleYoVariable(actuator.getName() + "PredictedMotorPower", registry));
       }
+      leftFourbar = new StepprFourbarCalculator("leftOutputProcessor", RobotSide.LEFT, registry);
+      rightFourbar = new StepprFourbarCalculator("rightOutputProcessor", RobotSide.RIGHT, registry);
    }
 
    @Override
@@ -65,19 +71,22 @@ public class StepprOutputProcessor implements OutputProcessor
    {
       for (StepprJoint joint : StepprJoint.values)
       {
-         double actuatorTau = 0, actuatorQd = 0;
+         double actuatorTau = 0;//, actuatorQd = 0;
          OneDoFJoint oneDoFJoint = wholeBodyControlJoints.get(joint);
-         if (joint.isLinear() || joint == StepprJoint.LEFT_KNEE_Y || joint == StepprJoint.RIGHT_KNEE_Y)
+         if (joint.isLinear())
          {
             actuatorTau = oneDoFJoint.getTau() / joint.getRatio();
-            actuatorQd = oneDoFJoint.getQd() * joint.getRatio();
+            //actuatorQd = oneDoFJoint.getQd() * joint.getRatio();
             StepprActuator actuator = joint.getActuators()[0];
-            predictedMotorPower.get(actuator).set(calcPower(actuatorTau, actuatorQd, actuator.getKm()));
+            //predictedMotorPower.get(actuator).set(calcPower(actuatorTau, actuatorQd, actuator.getKm()));
+            predictedMotorPower.get(actuator).set(calcPower(actuatorTau, actuator.getKm()));
          }
       }
 
+      updateKnees(StepprJoint.LEFT_KNEE_Y, StepprActuator.LEFT_KNEE, StepprJoint.RIGHT_KNEE_Y, StepprActuator.RIGHT_KNEE);
       updateAnkle(StepprJoint.LEFT_ANKLE_X, StepprJoint.LEFT_ANKLE_Y, StepprActuator.LEFT_ANKLE_LEFT, StepprActuator.LEFT_ANKLE_RIGHT);
       updateAnkle(StepprJoint.RIGHT_ANKLE_X, StepprJoint.RIGHT_ANKLE_Y, StepprActuator.RIGHT_ANKLE_LEFT, StepprActuator.RIGHT_ANKLE_RIGHT);
+      
 
       double sumTotalMotorPower = 0;
       for (StepprActuator actuator : StepprActuator.values)
@@ -87,7 +96,24 @@ public class StepprOutputProcessor implements OutputProcessor
       totalPredictedRobotPower.set(sumTotalMotorPower);
       totalPredictedRobotPowerAverage.update();
    }
+   
+   private void updateKnees(StepprJoint leftJoint, StepprActuator leftActuator,StepprJoint rightJoint, StepprActuator rightActuator)
+   {
 
+      OneDoFJoint oneDofLeftKnee = wholeBodyControlJoints.get(leftJoint);
+      OneDoFJoint oneDofRightKnee = wholeBodyControlJoints.get(rightJoint);
+      
+      leftFourbar.update(oneDofLeftKnee);
+      rightFourbar.update(oneDofRightKnee);
+
+      predictedMotorPower.get(leftActuator).set(
+            calcPower(oneDofLeftKnee.getTau() / leftFourbar.getFourbarRatio() / leftJoint.getRatio(), leftActuator.getKm()));
+
+      predictedMotorPower.get(rightActuator).set(
+              calcPower(oneDofRightKnee.getTau() / rightFourbar.getFourbarRatio() / rightJoint.getRatio(), rightActuator.getKm()));
+
+   }
+   
    private void updateAnkle(StepprJoint ankleX, StepprJoint ankleY, StepprActuator ankleLeftActuator, StepprActuator ankleRightActuator)
    {
 
@@ -101,15 +127,28 @@ public class StepprOutputProcessor implements OutputProcessor
       //ankleInterpolator.calculateDesiredTau(qRightMotor, qLeftMotor, oneDofAnkleX.getTau(), oneDofAnkleY.getTau());
       //ankleInterpolator.calculateActuatordQd(qRightMotor, qLeftMotor, oneDofAnkleX.getQd(), oneDofAnkleY.getQd());
 
-      predictedMotorPower.get(ankleRightActuator).set(
+/*      predictedMotorPower.get(ankleRightActuator).set(
             calcPower(ankleInterpolator.getComputedTauRightActuator(), ankleInterpolator.getComputedMotorVelocityRight(), ankleRightActuator.getKm()));
 
       predictedMotorPower.get(ankleLeftActuator).set(
             calcPower(ankleInterpolator.getComputedTauLeftActuator(), ankleInterpolator.getComputedMotorVelocityLeft(), ankleLeftActuator.getKm()));
+*/
+      predictedMotorPower.get(ankleRightActuator).set(
+              calcPower(ankleInterpolator.getComputedTauRightActuator(), ankleRightActuator.getKm()));
+
+        predictedMotorPower.get(ankleLeftActuator).set(
+              calcPower(ankleInterpolator.getComputedTauLeftActuator(), ankleLeftActuator.getKm()));
 
    }
 
+/*   @Deprecated //qd is unnecessary
    private double calcPower(double tau, double qd, double km)
+   {
+      return square(tau / km);
+   }
+*/
+   
+   private double calcPower(double tau, double km)
    {
       return square(tau / km);
    }

@@ -33,9 +33,9 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
-   boolean USE_LEFT_HIP_X_SPRING = true;
-   boolean USE_LEFT_ANKLE_SPRING = true;
+   boolean USE_LEFT_HIP_X_SPRING = false;
    boolean USE_RIGHT_HIP_X_SPRING = true;
+   boolean USE_LEFT_ANKLE_SPRING = true;
    boolean USE_RIGHT_ANKLE_SPRING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("StepprOutputWriter");
@@ -62,6 +62,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauInertiaViz = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoMotorDamping = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> desiredQddFeedForwardGain = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
+   private final EnumMap<StepprJoint, DoubleYoVariable> desiredJointQ = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumYoVariable<WalkingState>  yoWalkingState = new EnumYoVariable<WalkingState>("sow_walkingState", registry, WalkingState.class);
    
    private final DoubleYoVariable masterMotorDamping = new DoubleYoVariable("masterMotorDamping", registry);
@@ -103,7 +104,8 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
          inertia.set(joint.getActuators()[0].getMotorInertia()*joint.getRatio()*joint.getRatio()); //hacky
          yoReflectedMotorInertia.put(joint, inertia);  
          yoTauInertiaViz.put(joint, new DoubleYoVariable(joint.getSdfName()+"TauInertia", registry));
-         desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));         
+         desiredQddFeedForwardGain.put(joint, new DoubleYoVariable(joint.getSdfName()+"QddFeedForwardGain", registry));
+         desiredJointQ.put(joint, new DoubleYoVariable(joint.getSdfName()+"_Q_desired",registry));
       }
 
       yoTauSpringCorrection.put(StepprJoint.LEFT_HIP_X, new DoubleYoVariable(StepprJoint.LEFT_HIP_X.getSdfName() + "_tauSpringCorrection", registry));
@@ -233,7 +235,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
 
             StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
 
-
+            desiredJointQ.get(joint).set(wholeBodyControlJoint.getqDesired());
 
             tauControllerOutput.get(joint).set(tau);
             double tauSpring = 0;

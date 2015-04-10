@@ -37,6 +37,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    private final DoubleYoVariable selectedJoint_kd = new DoubleYoVariable("selectedJoint_kd", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_damping = new DoubleYoVariable("selectedJoint_damping", sliderBoardRegistry);
    private final DoubleYoVariable selectedJoint_positionerror = new DoubleYoVariable("selectedJoint_positionerror", sliderBoardRegistry);
+   //private final DoubleYoVariable maxDesiredVelocityX = new DoubleYoVariable("maxDesiredVelocityX", sliderBoardRegistry);
 
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
 
@@ -158,6 +159,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       double desiredVelocityX_Bias = 0.0;
       double desiredVelocityY_Bias = 0.0;
       double desiredHeadingDot_Bias = 0.0;
+      final double maxDesiredVelocityX = 0.25;
       final double minVelocityX = -0.10;
       
       
@@ -167,7 +169,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 
       desiredVelocityX.set(desiredVelocityX_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
-    		  -0.35+desiredVelocityX_Bias, 0.35+desiredVelocityX_Bias, deadZone, true));
+    		  -maxDesiredVelocityX+desiredVelocityX_Bias, maxDesiredVelocityX+desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
