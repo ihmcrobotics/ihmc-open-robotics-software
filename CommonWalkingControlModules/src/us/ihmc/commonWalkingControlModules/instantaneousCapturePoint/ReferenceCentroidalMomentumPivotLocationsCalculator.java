@@ -51,8 +51,10 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final ArrayList<YoFramePoint> exitCMPsInWorldFrameReadOnly = new ArrayList<YoFramePoint>();
    
    private final BooleanYoVariable isDoneWalking = new BooleanYoVariable("isDoneWalking", registry);
-   private final DoubleYoVariable maxForwardCMPOffset = new DoubleYoVariable("maxForwardConstantCMPOffset", registry);
-   private final DoubleYoVariable minForwardCMPOffset = new DoubleYoVariable("minForwardConstantCMPOffset", registry);
+   private final DoubleYoVariable maxForwardEntryCMPOffset = new DoubleYoVariable("maxForwardEntryCMPOffset", registry);
+   private final DoubleYoVariable minForwardEntryCMPOffset = new DoubleYoVariable("minForwardEntryCMPOffset", registry);
+   private final DoubleYoVariable maxForwardExitCMPOffset = new DoubleYoVariable("maxForwardExitCMPOffset", registry);
+   private final DoubleYoVariable minForwardExitCMPOffset = new DoubleYoVariable("minForwardExitCMPOffset", registry);
 
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -134,10 +136,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       safeMarginDistanceForFootPolygon.set(distance);
    }
 
-   public void setMinMaxForwardCMPLocationFromFootCenter(double minX, double maxX)
+   public void setMinMaxForwardEntryCMPLocationFromFootCenter(double minX, double maxX)
    {
-      maxForwardCMPOffset.set(maxX);
-      minForwardCMPOffset.set(minX);
+      maxForwardEntryCMPOffset.set(maxX);
+      minForwardEntryCMPOffset.set(minX);
+   }
+
+   public void setMinMaxForwardExitCMPLocationFromFootCenter(double minX, double maxX)
+   {
+      maxForwardExitCMPOffset.set(maxX);
+      minForwardExitCMPOffset.set(minX);
    }
 
    public void createVisualizerForConstantCMPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
@@ -365,7 +373,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
                cmp2d.set(previousExitCMP2d);
          }
 
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, entryCMPUserOffsets.get(robotSide));
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, entryCMPUserOffsets.get(robotSide), minForwardEntryCMPOffset.getDoubleValue(), maxForwardEntryCMPOffset.getDoubleValue());
       }
       else
       {
@@ -423,16 +431,16 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          cmp2d.setToZero(soleFrame);
       cmp2d.changeFrameAndProjectToXYPlane(soleFrame);
 
-      constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide));
+      constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide), minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
 
       exitCMPToPack.setXYIncludingFrame(cmp2d);
       exitCMPToPack.changeFrame(worldFrame);
    }
 
-   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(RobotSide robotSide, YoFrameVector2d cmpOffset)
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(RobotSide robotSide, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
-      cmp2d.setX(MathTools.clipToMinMax(cmp2d.getX() + cmpOffset.getX(), minForwardCMPOffset.getDoubleValue(), maxForwardCMPOffset.getDoubleValue()));
+      cmp2d.setX(MathTools.clipToMinMax(cmp2d.getX() + cmpOffset.getX(), minForwardCMPOffset, maxForwardCMPOffset));
       cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region

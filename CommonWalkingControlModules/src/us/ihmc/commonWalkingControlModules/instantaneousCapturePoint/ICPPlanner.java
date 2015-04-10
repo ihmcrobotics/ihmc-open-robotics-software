@@ -119,7 +119,8 @@ public class ICPPlanner
       referenceCMPsCalculator.setSymmetricEntryCMPConstantOffsets(entryCMPForwardOffset, entryCMPInsideOffset);
       referenceCMPsCalculator.setSymmetricExitCMPConstantOffsets(exitCMPForwardOffset, exitCMPInsideOffset);
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      referenceCMPsCalculator.setMinMaxForwardCMPLocationFromFootCenter(icpPlannerParameters.getMinReferenceCMPForwardOffset(), icpPlannerParameters.getMaxReferenceCMPForwardOffset());
+      referenceCMPsCalculator.setMinMaxForwardEntryCMPLocationFromFootCenter(icpPlannerParameters.getMinEntryCMPForwardOffset(), icpPlannerParameters.getMaxEntryCMPForwardOffset());
+      referenceCMPsCalculator.setMinMaxForwardExitCMPLocationFromFootCenter(icpPlannerParameters.getMinExitCMPForwardOffset(), icpPlannerParameters.getMaxExitCMPForwardOffset());
       referenceCMPsCalculator.setSafeDistanceFromSupportEdges(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());
 
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();

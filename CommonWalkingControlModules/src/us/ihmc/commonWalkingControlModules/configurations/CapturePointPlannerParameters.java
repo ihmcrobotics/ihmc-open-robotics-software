@@ -58,9 +58,13 @@ public interface CapturePointPlannerParameters
    /** Only used when using the new ICP planner with two CMPs per support. */
    public abstract double getTimeSpentOnExitCMPInPercentOfStepTime();
 
-   public abstract double getMaxReferenceCMPForwardOffset();
+   public abstract double getMaxEntryCMPForwardOffset();
 
-   public abstract double getMinReferenceCMPForwardOffset();
+   public abstract double getMinEntryCMPForwardOffset();
+
+   public abstract double getMaxExitCMPForwardOffset();
+
+   public abstract double getMinExitCMPForwardOffset();
 
    public abstract double getCMPSafeDistanceAwayFromSupportEdges();
 

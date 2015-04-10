@@ -217,13 +217,25 @@ public class NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompen
 	   }
 
 	   @Override
-	   public double getMaxReferenceCMPForwardOffset()
+	   public double getMaxEntryCMPForwardOffset()
 	   {
 	      return 0.05;
 	   }
 
 	   @Override
-	   public double getMinReferenceCMPForwardOffset()
+	   public double getMinEntryCMPForwardOffset()
+	   {
+	      return -0.02;
+	   }
+
+	   @Override
+	   public double getMaxExitCMPForwardOffset()
+	   {
+	      return 0.05;
+	   }
+
+	   @Override
+	   public double getMinExitCMPForwardOffset()
 	   {
 	      return -0.02;
 	   }
