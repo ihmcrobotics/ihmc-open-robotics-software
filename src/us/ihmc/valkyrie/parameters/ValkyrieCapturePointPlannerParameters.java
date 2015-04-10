@@ -5,10 +5,13 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 public class ValkyrieCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
    private boolean runningOnRealRobot;
+   private boolean useNewICPPlanner;
 
    public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      useNewICPPlanner = false;
+
    }
 
    @Override
@@ -44,7 +47,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
    {
-      return 5;
+      return useNewICPPlanner ? 4 : 5;
    }
 
    @Override
@@ -74,7 +77,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.035;
+      return 0.025;
    }
 
    @Override
@@ -98,19 +101,19 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getEntryCMPInsideOffset()
    {
-      return runningOnRealRobot ? 0.026 : 0.006;
+      return runningOnRealRobot ? 0.015 : 0.006;
    }
 
    @Override
    public double getExitCMPInsideOffset()
    {
-      return runningOnRealRobot ? 0.026 : 0.006;
+      return 0.025;
    }
 
    @Override
    public double getEntryCMPForwardOffset()
    {
-      return 0.0;
+      return runningOnRealRobot ? 0.01 : 0.0;
    }
 
    @Override
@@ -134,13 +137,13 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public boolean useNewICPPlanner()
    {
-      return true;
+      return useNewICPPlanner;
    }
 
    @Override
    public boolean useTwoCMPsPerSupport()
    {
-      return true;
+      return useNewICPPlanner;
    }
 
    @Override
@@ -152,30 +155,30 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getMaxEntryCMPForwardOffset()
    {
-      return 0.05;
+      return 0.03;
    }
 
    @Override
    public double getMinEntryCMPForwardOffset()
    {
-      return -0.02;
+      return 0;
    }
 
    @Override
    public double getMaxExitCMPForwardOffset()
    {
-      return 0.05;
+      return 0.06;
    }
 
    @Override
    public double getMinExitCMPForwardOffset()
    {
-      return -0.02;
+      return -0.04;
    }
 
    @Override
    public double getCMPSafeDistanceAwayFromSupportEdges()
    {
-      return 0.03;
+      return 0.01;
    }
 }
