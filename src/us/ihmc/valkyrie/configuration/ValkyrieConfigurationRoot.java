@@ -8,7 +8,7 @@ public class ValkyrieConfigurationRoot
          "WristAPI_DRCv1.xml", "TurbodriverAPI_DRCv4_bench.xml"};
 
 
-   public static final SideDependentList<String> FOOT_SENSOR_FILES_BASENAMES = new SideDependentList<>("FT14020", "FT14175");
+   public static final SideDependentList<String> FOOT_SENSOR_FILES_BASENAMES = new SideDependentList<>("FT14020", "FT16592");
 
    public static final boolean VALKYRIE_WITH_ARMS = true;
 
