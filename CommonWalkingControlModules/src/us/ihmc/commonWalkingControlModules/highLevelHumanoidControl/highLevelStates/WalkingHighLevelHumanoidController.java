@@ -80,6 +80,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
    private static final boolean CHECK_FOR_OVEREXTENSION_ON_TOE_OFF_LEG = false;
+   private static final boolean USE_ICPPLANNER_HACK_N13 = true;
+   
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
@@ -1705,98 +1707,101 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTime, double swingTimeRemaining,
          FramePoint2d desiredICPToMove)
    {
-      ReferenceFrame supportAnkleFrame = referenceFrames.getAnkleZUpFrame(supportSide);
-
-      momentumBasedController.getCenterOfFootContactPoints(supportSide, stanceContactCentroid2d);
-      if (stanceContactCentroid2d.containsNaN())
+      if (USE_ICPPLANNER_HACK_N13)
       {
-         stanceContactCentroid2d.setToZero(momentumBasedController.getContactableFeet().get(supportSide).getSoleFrame());
-      }
+         ReferenceFrame supportAnkleFrame = referenceFrames.getAnkleZUpFrame(supportSide);
 
-      stanceContactCentroid.setToZero(stanceContactCentroid2d.getReferenceFrame());
-      stanceContactCentroid.setXY(stanceContactCentroid2d);
+         momentumBasedController.getCenterOfFootContactPoints(supportSide, stanceContactCentroid2d);
+         if (stanceContactCentroid2d.containsNaN())
+         {
+            stanceContactCentroid2d.setToZero(momentumBasedController.getContactableFeet().get(supportSide).getSoleFrame());
+         }
 
-      stanceContactCentroid.changeFrame(supportAnkleFrame);
+         stanceContactCentroid.setToZero(stanceContactCentroid2d.getReferenceFrame());
+         stanceContactCentroid.setXY(stanceContactCentroid2d);
 
-      stanceContactCentroid2d.setIncludingFrame(supportAnkleFrame, stanceContactCentroid.getX(), stanceContactCentroid.getY());
+         stanceContactCentroid.changeFrame(supportAnkleFrame);
 
-      swingTimeRemainingForICPMoveViz.set(swingTimeRemaining);
+         stanceContactCentroid2d.setIncludingFrame(supportAnkleFrame, stanceContactCentroid.getX(), stanceContactCentroid.getY());
 
-      desiredICPToMove.changeFrame(supportAnkleFrame);
+         swingTimeRemainingForICPMoveViz.set(swingTimeRemaining);
 
-      stanceToOriginalICPVector.setIncludingFrame(desiredICPToMove);
-      stanceToOriginalICPVector.sub(stanceContactCentroid2d);
+         desiredICPToMove.changeFrame(supportAnkleFrame);
 
-      stanceToSwingPoint.setIncludingFrame(upcomingFootstepLocation);
-      stanceToSwingPoint.changeFrame(supportAnkleFrame);
+         stanceToOriginalICPVector.setIncludingFrame(desiredICPToMove);
+         stanceToOriginalICPVector.sub(stanceContactCentroid2d);
 
-      stanceToSwingVector.setIncludingFrame(stanceToSwingPoint);
-      stanceToSwingVector.sub(stanceContactCentroid2d);
+         stanceToSwingPoint.setIncludingFrame(upcomingFootstepLocation);
+         stanceToSwingPoint.changeFrame(supportAnkleFrame);
 
-      double stanceToSwingDistance = stanceToSwingVector.length();
-      if (stanceToSwingDistance < 0.001)
-      {
-         desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
+         stanceToSwingVector.setIncludingFrame(stanceToSwingPoint);
+         stanceToSwingVector.sub(stanceContactCentroid2d);
 
-         return;
-      }
+         double stanceToSwingDistance = stanceToSwingVector.length();
+         if (stanceToSwingDistance < 0.001)
+         {
+            desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
 
-      stanceToSwingVector.normalize();
+            return;
+         }
 
-      distanceFromLineToOriginalICP.set(stanceToSwingVector.dot(stanceToOriginalICPVector));
-      double timeToUseBeforeShift = singleSupportTimeLeftBeforeShift.getDoubleValue();
-      if (timeToUseBeforeShift < 0.01)
-         timeToUseBeforeShift = 0.01;
+         stanceToSwingVector.normalize();
 
-      double deltaTime = swingTime - timeToUseBeforeShift;
-      double percent;
-      if (deltaTime <= 1e-7)
-         percent = 1.0;
-      else
-      {
-         percent = (swingTime - swingTimeRemaining) / (deltaTime);
-      }
+         distanceFromLineToOriginalICP.set(stanceToSwingVector.dot(stanceToOriginalICPVector));
+         double timeToUseBeforeShift = singleSupportTimeLeftBeforeShift.getDoubleValue();
+         if (timeToUseBeforeShift < 0.01)
+            timeToUseBeforeShift = 0.01;
 
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
-      percentOfSwingTimeRemainingForICPMove.set(percent);
+         double deltaTime = swingTime - timeToUseBeforeShift;
+         double percent;
+         if (deltaTime <= 1e-7)
+            percent = 1.0;
+         else
+         {
+            percent = (swingTime - swingTimeRemaining) / (deltaTime);
+         }
 
-      double maxDistanceToMove = moveICPAwayDuringSwingDistance.getDoubleValue();
-      maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
-      double duringSwingDistance = (percent * maxDistanceToMove);
-
-      if (swingTimeRemaining > timeToUseBeforeShift)
-      {
-         amountToMoveICPAway.set(duringSwingDistance);
-      }
-      else
-      {
-         percent = (1.0 - swingTimeRemaining / timeToUseBeforeShift);
          percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+         percentOfSwingTimeRemainingForICPMove.set(percent);
 
-         maxDistanceToMove = moveICPAwayAtEndOfSwingDistance.getDoubleValue();
+         double maxDistanceToMove = moveICPAwayDuringSwingDistance.getDoubleValue();
          maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
+         double duringSwingDistance = (percent * maxDistanceToMove);
 
-         maxDistanceToMove -= moveICPAwayDuringSwingDistance.getDoubleValue();
-         if (maxDistanceToMove < 0.0)
-            maxDistanceToMove = 0.0;
+         if (swingTimeRemaining > timeToUseBeforeShift)
+         {
+            amountToMoveICPAway.set(duringSwingDistance);
+         }
+         else
+         {
+            percent = (1.0 - swingTimeRemaining / timeToUseBeforeShift);
+            percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
 
-         amountToMoveICPAway.set(duringSwingDistance + (percent * maxDistanceToMove));
-      }
+            maxDistanceToMove = moveICPAwayAtEndOfSwingDistance.getDoubleValue();
+            maxDistanceToMove = MathTools.clipToMinMax(maxDistanceToMove, 0.0, stanceToSwingDistance / 2.0);
 
-      // If already moved a long distance, then no need to move any more.
-      if (distanceFromLineToOriginalICP.getDoubleValue() > amountToMoveICPAway.getDoubleValue())
-      {
+            maxDistanceToMove -= moveICPAwayDuringSwingDistance.getDoubleValue();
+            if (maxDistanceToMove < 0.0)
+               maxDistanceToMove = 0.0;
+
+            amountToMoveICPAway.set(duringSwingDistance + (percent * maxDistanceToMove));
+         }
+
+         // If already moved a long distance, then no need to move any more.
+         if (distanceFromLineToOriginalICP.getDoubleValue() > amountToMoveICPAway.getDoubleValue())
+         {
+            desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
+
+            return;
+         }
+
+         double additionalDistance = amountToMoveICPAway.getDoubleValue() - distanceFromLineToOriginalICP.getDoubleValue();
+
+         stanceToSwingVector.scale(additionalDistance);
+         icpAdjustment.set(stanceToSwingVector.getX(), stanceToSwingVector.getY());
+
+         desiredICPToMove.add(stanceToSwingVector);
          desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
-
-         return;
       }
-
-      double additionalDistance = amountToMoveICPAway.getDoubleValue() - distanceFromLineToOriginalICP.getDoubleValue();
-
-      stanceToSwingVector.scale(additionalDistance);
-      icpAdjustment.set(stanceToSwingVector.getX(), stanceToSwingVector.getY());
-
-      desiredICPToMove.add(stanceToSwingVector);
-      desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
    }
 }
