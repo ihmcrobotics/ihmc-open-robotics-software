@@ -22,7 +22,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
 
    public ICPPlannerTrajectoryGenerator(String namePrefix, int numberOfCoefficients, YoVariableRegistry registry)
    {
-      doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix + "DoubleSupportTrajectory", numberOfCoefficients, worldFrame, registry);
+      doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, numberOfCoefficients, worldFrame, registry);
    }
 
    public void setTrajectoryTime(double duration)
