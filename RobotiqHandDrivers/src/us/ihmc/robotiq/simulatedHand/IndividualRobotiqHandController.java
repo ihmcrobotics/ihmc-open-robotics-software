@@ -21,9 +21,15 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
+import us.ihmc.yoUtilities.stateMachines.StateMachine;
 
 public class IndividualRobotiqHandController implements RobotController
 {
+   enum GraspState
+   {
+      BASIC_OPEN, BASIC_CLOSED, PINCH_OPEN, PINCH_CLOSED
+   }
+   
    private final boolean DEBUG = false;
    
    private final String name = getClass().getSimpleName();
@@ -50,6 +56,8 @@ public class IndividualRobotiqHandController implements RobotController
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
    
    private final EnumYoVariable<RobotiqGraspMode> graspMode;
+   
+   private StateMachine<GraspState> stateMachine;
 
    public IndividualRobotiqHandController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFRobot simulatedRobot,
          YoVariableRegistry parentRegistry)
@@ -118,11 +126,21 @@ public class IndividualRobotiqHandController implements RobotController
       
       graspMode = new EnumYoVariable<>(sidePrefix + "RobotiqGraspMode", registry, RobotiqGraspMode.class);
       graspMode.set(RobotiqGraspMode.BASIC_MODE);
+      
+      setupStateMachine();
+   }
+   
+   private void setupStateMachine()
+   {
+      stateMachine = new StateMachine<>("RobotiqGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
+      //TODO
    }
    
    @Override
    public void doControl()
    {
+//      stateMachine.checkTransitionConditions();
+//      stateMachine.doAction();
       computeDesiredJointAngles();
    }
 
