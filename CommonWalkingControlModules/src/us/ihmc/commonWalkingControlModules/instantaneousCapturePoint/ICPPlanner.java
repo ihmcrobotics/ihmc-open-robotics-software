@@ -206,14 +206,26 @@ public class ICPPlanner
 
    public void setDesiredCapturePointState(FramePoint2d currentDesiredCapturePointPosition, FrameVector2d currentDesiredCapturePointVelocity)
    {
-      desiredCapturePointPosition.setXY(currentDesiredCapturePointPosition);
-      desiredCapturePointVelocity.setXY(currentDesiredCapturePointVelocity);
+      // Do not set the Z to zero!
+      desiredCapturePointPosition.checkReferenceFrameMatch(currentDesiredCapturePointPosition);
+      desiredCapturePointPosition.setX(currentDesiredCapturePointPosition.getX());
+      desiredCapturePointPosition.setY(currentDesiredCapturePointPosition.getY());
+
+      desiredCapturePointVelocity.checkReferenceFrameMatch(currentDesiredCapturePointVelocity);
+      desiredCapturePointVelocity.setX(currentDesiredCapturePointVelocity.getX());
+      desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
    }
 
    public void setDesiredCapturePointState(YoFramePoint2d currentDesiredCapturePointPosition, YoFrameVector2d currentDesiredCapturePointVelocity)
    {
-      desiredCapturePointPosition.setXY(currentDesiredCapturePointPosition);
-      desiredCapturePointVelocity.setXY(currentDesiredCapturePointVelocity);
+      // Do not set the Z to zero!
+      desiredCapturePointPosition.checkReferenceFrameMatch(currentDesiredCapturePointPosition);
+      desiredCapturePointPosition.setX(currentDesiredCapturePointPosition.getX());
+      desiredCapturePointPosition.setY(currentDesiredCapturePointPosition.getY());
+
+      desiredCapturePointVelocity.checkReferenceFrameMatch(currentDesiredCapturePointVelocity);
+      desiredCapturePointVelocity.setX(currentDesiredCapturePointVelocity.getX());
+      desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
    }
 
    public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
