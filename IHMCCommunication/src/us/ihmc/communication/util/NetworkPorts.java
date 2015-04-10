@@ -31,6 +31,9 @@ public class NetworkPorts
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
    public static final NetworkPorts GFE_COMMUNICATOR = new NetworkPorts(6007);
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
+
+   // Mission Control ports
+   public static final NetworkPorts MISSION_CONTROL_MASTER_BACKEND_PORT = new NetworkPorts(7010);
    
    public static final NetworkPorts createRandomTestPort()
    {
