@@ -11,13 +11,14 @@ public class RobotiqHandsDesiredConfigurations
    private static final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, Double>> closedHandsBasicGripDesiredConfigurations = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
    private static final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, Double>> openHandsBasicGripDesiredConfigurations = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
    private static final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, Double>> openHandsPinchGripDesiredConfigurations = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
+   private static final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, Double>> closedHandsPinchGripDesiredConfigurations = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
    
    static
    {
       createCloseHandBasicGripConfiguration();
       createOpenHandBasicGripConfiguration();
       createOpenHandPinchGripConfiguration();
-      
+      createClosedHandPinchGripConfiguration();
    }
 
    private static void createCloseHandBasicGripConfiguration()
@@ -62,7 +63,27 @@ public class RobotiqHandsDesiredConfigurations
    
    private static void createOpenHandPinchGripConfiguration()
    {
-      for (RobotSide robotSide: RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = closedHandsPinchGripDesiredConfigurations.get(robotSide);
+         
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, -0.2);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, 0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, 0.2);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, 0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, 0.5);
+      }
+   }
+   
+   private static void createClosedHandPinchGripConfiguration()
+   {
+      for (RobotSide robotSide : RobotSide.values)
       {
          EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = openHandsPinchGripDesiredConfigurations.get(robotSide);
          
@@ -93,5 +114,10 @@ public class RobotiqHandsDesiredConfigurations
    public static EnumMap<RobotiqHandJointNameMinimal, Double> getOpenPinchGripDesiredConfiguration(RobotSide robotSide)
    {
       return openHandsPinchGripDesiredConfigurations.get(robotSide);
+   }
+   
+   public static EnumMap<RobotiqHandJointNameMinimal, Double> getClosedPinchGripDesiredConfiguration(RobotSide robotiSide)
+   {
+      return closedHandsPinchGripDesiredConfigurations.get(robotiSide);
    }
 }
