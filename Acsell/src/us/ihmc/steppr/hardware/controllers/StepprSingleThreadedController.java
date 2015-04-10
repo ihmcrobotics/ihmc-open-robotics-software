@@ -22,6 +22,8 @@ import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.steppr.hardware.state.StepprXSensState;
 import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
+import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
@@ -37,7 +39,8 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       YoVariableRegistry registry = new YoVariableRegistry("steppr");
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
-      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
+      PeriodicThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(45);
+      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
 
       StepprSetup stepprSetup = new StepprSetup(variableServer);
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
