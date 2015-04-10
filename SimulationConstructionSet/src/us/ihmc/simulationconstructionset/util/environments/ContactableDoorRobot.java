@@ -194,10 +194,11 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       return isPointOnOrInside(pointInWorldToCheck);
    }
    
+   private final FramePoint pointToCheck = new FramePoint();
    @Override
    public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      pointToCheck.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(doorFrame);
       pointToCheck.add(-0.5*widthX, -0.5*depthY, -0.5*heightZ); // since FrameBox3d.isInsideOrOnSurface assumes center of box is origin
 
@@ -221,7 +222,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    private boolean isInsideHandles(FramePoint pointInDoorFrame)
    {
-      for(RobotSide robotSide : RobotSide.values())
+      for(RobotSide robotSide : RobotSide.values)
       {
          pointInDoorFrame.changeFrame(handlePoses.get(robotSide));
          
