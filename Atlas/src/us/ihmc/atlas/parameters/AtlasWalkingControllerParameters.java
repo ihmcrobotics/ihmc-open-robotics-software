@@ -414,7 +414,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean getCoMHeightDriftCompensation()
    {
-      return false;
+      return true;
    }
 
    @Override
