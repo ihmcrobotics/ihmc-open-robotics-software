@@ -21,7 +21,6 @@ import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
@@ -291,10 +290,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    public void doTransitionIntoAction()
    {
       for (OneDoFJoint joint : jointsBeenControlled)
-      {
-         double previousDesired = joint.getqDesired();
-         trajectoryGenerator.get(joint).setFinalPosition(previousDesired);
-         trajectoryGenerator.get(joint).initialize(previousDesired, 0.0);
+      {         
+         double finalPosition = Double.isNaN(joint.getqDesired()) ? joint.getQ() : joint.getqDesired();
+                  
+         trajectoryGenerator.get(joint).setFinalPosition(finalPosition);
+         trajectoryGenerator.get(joint).initialize(finalPosition, 0.0);
       }
       trajectoryTimeProvider.set(0.1);
    }
