@@ -25,7 +25,7 @@ import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerat
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class JointPositionHighLevelController extends HighLevelBehavior implements Stoppable
-{
+{   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HashSet<OneDoFJoint> jointsBeenControlled = new HashSet<OneDoFJoint>();
@@ -50,6 +50,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private double[] spineJointAngles;
    private double neckJointAngle;
    
+   private final static double MAX_DELTA_TO_BELIEVE_DESIRED = 0.05;
 
    public JointPositionHighLevelController(MomentumBasedController momentumBasedController, DesiredJointsPositionProvider desiredJointsProvider)
    {
@@ -291,7 +292,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    {
       for (OneDoFJoint joint : jointsBeenControlled)
       {         
-         double finalPosition = Double.isNaN(joint.getqDesired()) ? joint.getQ() : joint.getqDesired();
+         double finalPosition = (Math.abs(joint.getQ() - joint.getqDesired()) < MAX_DELTA_TO_BELIEVE_DESIRED) ? joint.getqDesired() : joint.getQ();
                   
          trajectoryGenerator.get(joint).setFinalPosition(finalPosition);
          trajectoryGenerator.get(joint).initialize(finalPosition, 0.0);
