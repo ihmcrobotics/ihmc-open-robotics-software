@@ -34,6 +34,8 @@ import us.ihmc.steppr.hardware.StepprAffinity;
 import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
+import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -63,7 +65,7 @@ public class StepprControllerFactory
       StepprAffinity stepprAffinity = new StepprAffinity();
       PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
       PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
-
+      PriorityParameters loggerPriority = new PriorityParameters(45);
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
@@ -71,7 +73,8 @@ public class StepprControllerFactory
        * Create network servers/clients
        */
       PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
+      PeriodicThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(loggerPriority);
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
