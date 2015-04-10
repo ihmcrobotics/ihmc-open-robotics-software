@@ -15,6 +15,7 @@ import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.jointState.JointHolder;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.screwTheory.RigidBody;
@@ -51,7 +52,7 @@ public class YoVariableServer implements RobotVisualizer
    // State
    private boolean started = false;
 
-   
+   private final PeriodicThreadScheduler scheduler;
    
    // Servers
    private LogSessionBroadcaster sessionBroadcaster;
@@ -63,10 +64,11 @@ public class YoVariableServer implements RobotVisualizer
    private long uid = 0; 
    
    
-   public YoVariableServer(Class<?> mainClazz, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
+   public YoVariableServer(Class<?> mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
       this.mainClazz = mainClazz;
+      this.scheduler = scheduler;
       this.bindAddress = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
       this.logModelProvider = logModelProvider;
       this.logSettings = logSettings;
@@ -85,7 +87,7 @@ public class YoVariableServer implements RobotVisualizer
       
       InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
       sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
-      producer = new YoVariableProducer(sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
+      producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
             buffers.values());
             
       sessionBroadcaster.requestPort();

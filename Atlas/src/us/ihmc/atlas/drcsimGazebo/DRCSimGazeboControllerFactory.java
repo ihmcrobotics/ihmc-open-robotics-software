@@ -37,6 +37,8 @@ import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
@@ -69,7 +71,8 @@ public class DRCSimGazeboControllerFactory
       
 
       //      KryoLocalPacketCommunicator packetCommunicator = new KryoLocalPacketCommunicator(new IHMCCommunicationKryoNetClassList(), PacketDestination.CONTROLLER.ordinal(), "GazeboPluginController");
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
+      PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer");
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
 
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);

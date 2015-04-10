@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.SensorReaderFactory.DRCPerfectSensorReader.SensorProcessing.timestamp</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.estimatorTime</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -31,9 +31,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>13.822164212867266</Camera X>
+ <Camera Y>2.755611069547569</Camera Y>
+ <Camera Z>1.8858689250810816</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
