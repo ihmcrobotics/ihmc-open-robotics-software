@@ -41,6 +41,8 @@ import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotCo
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -98,7 +100,8 @@ public class DRCSimulationFactory
 
       if(drcRobotModel.getLogSettings().isLog())
       {
-         yoVariableServer = new YoVariableServer(getClass(), drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
+         PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("DRCSimulationYoVariableServer");
+         yoVariableServer = new YoVariableServer(getClass(), scheduler, drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
       }
       else
       {

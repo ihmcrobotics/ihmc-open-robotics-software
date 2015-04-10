@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -31,7 +32,7 @@ public class YoVariableConnectionBurstTest
       
 
 	  //start server
-      final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, 0.001);
+      final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("YoVariableConnectionBurstTest"), null, LogSettings.SIMULATION, 0.001);
       server.setMainRegistry(registry, null, null);
       server.start();
 

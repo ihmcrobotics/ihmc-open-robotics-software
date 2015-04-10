@@ -35,6 +35,8 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -79,7 +81,8 @@ public class IHMCHumanoidBehaviorManager
 
       if (startYoVariableServer)
       {
-         yoVariableServer = new YoVariableServer(getClass(), modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
+         PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("BehaviorScheduler");
+         yoVariableServer = new YoVariableServer(getClass(), scheduler, modelProvider, LogSettings.BEHAVIOR, BEHAVIOR_YO_VARIABLE_SERVER_DT);
       }
 
       SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();

@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
 import java.util.Collection;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
@@ -14,13 +11,13 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.utilities.ThreadTools;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer implements Runnable
 {
-   private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("GUICaptureBroadcast"));
-
+   private final PeriodicThreadScheduler scheduler;
+   
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
    private final ConcurrentRingBuffer<RegistryBuffer>[] buffers;
 
@@ -36,16 +33,16 @@ public class YoVariableProducer implements Runnable
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LogModelProvider logModelProvider;
 
-   private ScheduledFuture<?> future;
    private SingleThreadMultiClientStreamingDataTCPServer server;
    
    private final LogDataHeader logDataHeader = new LogDataHeader();
    private final CRC32 crc32 = new CRC32();
 
    @SuppressWarnings("unchecked")
-   public YoVariableProducer(LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
+   public YoVariableProducer(PeriodicThreadScheduler scheduler, LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
          ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers)
    {
+      this.scheduler = scheduler;
       this.mainBuffer = mainBuffer;
       this.handshakeBuilder = handshakeBuilder;
       this.logModelProvider = logModelProvider;
@@ -95,7 +92,7 @@ public class YoVariableProducer implements Runnable
          throw new RuntimeException(e);
       }
 
-      future = scheduler.scheduleAtFixedRate(this, 0, 1, TimeUnit.MILLISECONDS);
+      scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
 
    public void run()
@@ -147,7 +144,7 @@ public class YoVariableProducer implements Runnable
 
    public void close()
    {
-      future.cancel(false);
+      scheduler.shutdown();
       server.close();
       
    }

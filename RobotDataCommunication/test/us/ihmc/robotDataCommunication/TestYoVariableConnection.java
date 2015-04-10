@@ -1,6 +1,7 @@
 package us.ihmc.robotDataCommunication;
 
 import us.ihmc.robotDataCommunication.logger.LogSettings;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -24,7 +25,7 @@ public class TestYoVariableConnection
    private final IntegerYoVariable echoIn = new IntegerYoVariable("echoIn", registry);
    private final IntegerYoVariable echoOut = new IntegerYoVariable("echoOut", registry);
    
-   private final YoVariableServer server = new YoVariableServer(getClass(), null, LogSettings.SIMULATION, 0.001);
+   private final YoVariableServer server = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("TestYoVariableConnection"), null, LogSettings.SIMULATION, 0.001);
    
    
    private volatile long timestamp = 0;
