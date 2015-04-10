@@ -277,7 +277,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   individualRobotiqHandController.stop();
                   
                case PINCH_GRIP:
-                  // TODO
+                  individualRobotiqHandController.pinch();
                   break;
                   
                case BASIC_GRIP:

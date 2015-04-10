@@ -18,15 +18,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public final class RobotiqHandInterface
 {
-   enum RobotiqGraspMode
-   {
-      BASIC_MODE,
-      PINCH_MODE,
-      WIDE_MODE,
-      SCISSOR_MODE
-   }
-   
-	/*---LOCATION DATA---*/
+   /*---LOCATION DATA---*/
 	private final int REGISTER_START = 0x0000;
 	
 	
