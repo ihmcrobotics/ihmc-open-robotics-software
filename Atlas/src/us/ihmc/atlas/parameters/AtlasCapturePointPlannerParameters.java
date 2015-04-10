@@ -5,12 +5,14 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 public class AtlasCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
    private boolean runningOnRealRobot;
-   private final boolean useTwoCMPsPerSupport = false;
-   private final boolean useNewICPPlanner = false;
+   private final boolean useTwoCMPsPerSupport;
+   private final boolean useNewICPPlanner;
 
    public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      useTwoCMPsPerSupport = runningOnRealRobot;
+      useNewICPPlanner = runningOnRealRobot;
    }
 
    @Override
@@ -107,7 +109,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getExitCMPInsideOffset()
    {
-      return 0.01;
+      return 0.025;
    }
 
    @Override
@@ -155,7 +157,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getMaxEntryCMPForwardOffset()
    {
-      return 0.05;
+      return 0.03;
    }
 
    @Override
@@ -167,13 +169,13 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getMaxExitCMPForwardOffset()
    {
-      return 0.08;
+      return 0.06;
    }
 
    @Override
    public double getMinExitCMPForwardOffset()
    {
-      return -0.02;
+      return -0.04;
    }
 
    @Override
