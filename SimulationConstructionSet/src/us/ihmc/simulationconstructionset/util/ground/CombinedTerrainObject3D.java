@@ -166,8 +166,9 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       intersectionToPack.set(x, y, 0.0);
       normalToPack.set(0.0, 0.0, 1.0);
 
-      for (TerrainObject3D terrainObject : terrainObjects)
+      for(int i = 0; i < terrainObjects.size(); i++)
       {
+         TerrainObject3D terrainObject = terrainObjects.get(i);
          if (terrainObject.isClose(x, y, z))
          {
             boolean localIsInside = terrainObject.checkIfInside(x, y, z, localIntersection, localNormal);

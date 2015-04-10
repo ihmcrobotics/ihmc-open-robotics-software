@@ -203,10 +203,11 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       super.updateAllGroundContactPointVelocities();
    }
 
+   private final FramePoint pointToCheck = new FramePoint();
    @Override
    public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
+      pointToCheck.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
 
       if (valveTorus.isInsideOrOnSurface(pointToCheck))
