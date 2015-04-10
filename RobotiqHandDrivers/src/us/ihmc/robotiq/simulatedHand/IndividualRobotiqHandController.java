@@ -6,8 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
@@ -16,10 +18,11 @@ import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
 
-public class IndividualRobotiqHandController
+public class IndividualRobotiqHandController implements RobotController
 {
    private final boolean DEBUG = false;
    
@@ -45,6 +48,8 @@ public class IndividualRobotiqHandController
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> initialDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> finalDesiredAngles = new LinkedHashMap<>();
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
+   
+   private final EnumYoVariable<RobotiqGraspMode> graspMode;
 
    public IndividualRobotiqHandController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFRobot simulatedRobot,
          YoVariableRegistry parentRegistry)
@@ -110,18 +115,41 @@ public class IndividualRobotiqHandController
       });
       yoPolynomial = new YoPolynomial(sidePrefix + name, 4, registry);
       yoPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
+      
+      graspMode = new EnumYoVariable<>(sidePrefix + "RobotiqGraspMode", registry, RobotiqGraspMode.class);
+      graspMode.set(RobotiqGraspMode.BASIC_MODE);
+   }
+   
+   @Override
+   public void doControl()
+   {
+      computeDesiredJointAngles();
    }
 
    public void open()
    {
       open(1.0);
    }
-   // TODO add switch on grip mode
+   
    public void open(double percent)
    {
       isStopped.set(false);
-      EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide);
-      computeAllFinalDesiredAngles(percent, openHandDesiredConfiguration);
+      
+      switch(graspMode.getEnumValue())
+      {
+      case BASIC_MODE:
+         computeAllFinalDesiredAngles(percent, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
+         break;
+      case PINCH_MODE:
+         computeAllFinalDesiredAngles(percent, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
+         break;
+      case SCISSOR_MODE:
+         break;
+      case WIDE_MODE:
+         break;
+      default:
+         break;
+      }
    }
 
    public void open(FingerName fingerName)
@@ -141,13 +169,26 @@ public class IndividualRobotiqHandController
    {
       close(1.0);
    }
-   // TODO add switch on grip mode
+   
    public void close(double percent)
    {
       isStopped.set(false);
-      EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
-            .getClosedBasicGripDesiredConfiguration(robotSide);
-      computeAllFinalDesiredAngles(percent, closedHandDesiredConfiguration);
+
+      switch(graspMode.getEnumValue())
+      {
+      case BASIC_MODE:
+         computeAllFinalDesiredAngles(percent, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
+         break;
+      case PINCH_MODE:
+         computeAllFinalDesiredAngles(percent, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
+         break;
+      case SCISSOR_MODE:
+         break;
+      case WIDE_MODE:
+         break;
+      default:
+         break;
+      }
    }
 
    public void close(FingerName fingerName)
@@ -185,11 +226,14 @@ public class IndividualRobotiqHandController
       close(fingerName);
    }
    
+   public void basicGrip()
+   {
+      graspMode.set(RobotiqGraspMode.BASIC_MODE);
+   }
+   
    public void pinch()
    {
-      isStopped.set(false);
-      EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide);
-      computeAllFinalDesiredAngles(1.0, handDesiredConfiguration);
+      graspMode.set(RobotiqGraspMode.PINCH_MODE);
    }
 
    public void stop()
@@ -304,7 +348,7 @@ public class IndividualRobotiqHandController
       }
    }
 
-   public void computeDesiredJointAngles()
+   private void computeDesiredJointAngles()
    {
       if (!isStopped.getBooleanValue())
       {
@@ -326,5 +370,28 @@ public class IndividualRobotiqHandController
          if (DEBUG && alpha > 0.0 && alpha < 1.0)
             PrintTools.debug(this, fingerJoint.getName() + "Desired q : " + q_d);
       }
+   }
+
+   @Override
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   @Override
+   public void initialize()
+   {
+   }
+
+   @Override
+   public String getName()
+   {
+      return robotSide.getCamelCaseNameForStartOfExpression() + getClass().getSimpleName();
+   }
+
+   @Override
+   public String getDescription()
+   {
+      return "Simulated controller for the " + robotSide.getLowerCaseName() + " Robotiq hands.";
    }
 }

@@ -198,7 +198,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       for (RobotSide robotSide : RobotSide.values)
       {
          if (hasRobotiqHand.get(robotSide))
-            individualHandControllers.get(robotSide).computeDesiredJointAngles();
+            individualHandControllers.get(robotSide).doControl();
       }
    }
 
