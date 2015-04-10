@@ -115,12 +115,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       for (int i = 0; i < numberFootstepsToConsider; i++)
       {
-         YoFramePointInMultipleFrames entryConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "EntryConstantCMP" + i, parentRegistry, framesToRegister);
+         YoFramePointInMultipleFrames entryConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "EntryCMP" + i, parentRegistry, framesToRegister);
          entryConstantCMP.setToNaN();
          entryCMPs.add(entryConstantCMP);
          entryCMPsInWorldFrameReadOnly.add(entryConstantCMP.buildUpdatedYoFramePointForVisualizationOnly());
 
-         YoFramePointInMultipleFrames exitConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "ExitConstantCMP" + i, parentRegistry, framesToRegister);
+         YoFramePointInMultipleFrames exitConstantCMP = new YoFramePointInMultipleFrames(namePrefix + "ExitCMP" + i, parentRegistry, framesToRegister);
          exitConstantCMP.setToNaN();
          exitCMPs.add(exitConstantCMP);
          exitCMPsInWorldFrameReadOnly.add(exitConstantCMP.buildUpdatedYoFramePointForVisualizationOnly());
