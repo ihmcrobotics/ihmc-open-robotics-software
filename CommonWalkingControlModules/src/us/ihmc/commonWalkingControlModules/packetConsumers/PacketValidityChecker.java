@@ -53,47 +53,50 @@ public abstract class PacketValidityChecker
       if (packetToCheck == null)
          return null;
 
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getDataType());
-      if (packetFieldErrorType != null)
+      if (!packetToCheck.isToHomePosition())
       {
-         String errorMessage = "dataType field" + packetFieldErrorType.getMessage();
-         return errorMessage;
+         ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getDataType());
+         if (packetFieldErrorType != null)
+         {
+            String errorMessage = "dataType field" + packetFieldErrorType.getMessage();
+            return errorMessage;
+         }
+
+         if (packetToCheck.getDataType() == DataType.HAND_POSE)
+         {
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getPosition());
+            if (packetFieldErrorType != null)
+            {
+               String errorMessage = "position field " + packetFieldErrorType.getMessage();
+               return errorMessage;
+            }
+
+            packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
+            if (packetFieldErrorType != null)
+            {
+               String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
+               return errorMessage;
+            }
+
+            packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getReferenceFrame());
+            if (packetFieldErrorType != null)
+            {
+               String errorMessage = "frame field" + packetFieldErrorType.getMessage();
+               return errorMessage;
+            }
+         }
+         else
+         {
+            packetFieldErrorType = ObjectValidityChecker.validateArrayOfDouble(packetToCheck.getJointAngles(), numberOfArmJoints);
+            if (packetFieldErrorType != null)
+            {
+               String errorMessage = "jointAngles field " + packetFieldErrorType.getMessage();
+               return errorMessage;
+            }
+         }
       }
 
-      if (packetToCheck.getDataType() == DataType.HAND_POSE)
-      {
-         packetFieldErrorType = ObjectValidityChecker.validateTuple3d(packetToCheck.getPosition());
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "position field " + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-
-         packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-
-         packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getReferenceFrame());
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "frame field" + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-      }
-      else
-      {
-         packetFieldErrorType = ObjectValidityChecker.validateArrayOfDouble(packetToCheck.getJointAngles(), numberOfArmJoints);
-         if (packetFieldErrorType != null)
-         {
-            String errorMessage = "jointAngles field " + packetFieldErrorType.getMessage();
-            return errorMessage;
-         }
-      }
-
-      packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
       if (packetFieldErrorType != null)
       {
          String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
@@ -289,14 +292,18 @@ public abstract class PacketValidityChecker
     */
    public static String validateChestOrientationPacket(ChestOrientationPacket packetToCheck)
    {
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
-      if (packetFieldErrorType != null)
+      // In this case the controller doesn't read the orientation
+      if (!packetToCheck.isToHomeOrientation())
       {
-         String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
-         return errorMessage;
+         ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple4d(packetToCheck.getOrientation());
+         if (packetFieldErrorType != null)
+         {
+            String errorMessage = "orientation field " + packetFieldErrorType.getMessage();
+            return errorMessage;
+         }
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTrajectoryTime(packetToCheck.getTrajectoryTime());
       if (packetFieldErrorType != null)
       {
          String errorMessage = "trajectoryTime field " + packetFieldErrorType.getMessage();
