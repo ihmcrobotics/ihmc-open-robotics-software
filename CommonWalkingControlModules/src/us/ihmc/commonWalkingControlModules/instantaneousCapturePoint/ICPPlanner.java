@@ -96,7 +96,7 @@ public class ICPPlanner
       hasBeenWokenUp.set(false);
 
       int numberOfCoefficients = icpPlannerParameters.getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
-      icpTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "Trajectory", numberOfCoefficients, registry);
+      icpTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix, numberOfCoefficients, registry);
       doubleSupportInitialTransferDuration.set(icpPlannerParameters.getDoubleSupportInitialTransferDuration());
       numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       footstepsToStop.set(icpPlannerParameters.getNumberOfFootstepsToStop());
