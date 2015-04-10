@@ -3,7 +3,7 @@
   <pose>0 0 0.94 0 0 0</pose>
     <link name='pelvis'>
       <pose>0 0 0 0 0 0</pose>
-<!-- No Hip X Springs -->
+<!-- No Hip X Springs
       <inertial>
 		<pose>-0.05039 -0.00002 0.11723 0 0 0</pose>
         <mass>12.547</mass>
@@ -16,8 +16,8 @@
           <izz>0.16107</izz>
         </inertia>
       </inertial>
-
-<!-- Includes Hip X Springs
+ -->
+<!-- Includes Hip X Springs  -->
       <inertial>
         <pose>-0.05257 -0.00002 0.11366 0 0 0</pose>
         <mass>12.866</mass>
@@ -30,7 +30,7 @@
           <izz> 0.16461</izz>
         </inertia>
       </inertial>
- -->
+
       <collision name='pelvis_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -401,6 +401,7 @@
     </joint>
     <link name='l_uleg'>
       <pose>0.0 0.146158 -0.085547 0 0 0</pose>
+<!-- Original Upper Leg
       <inertial>
         <pose>-0.02 0.0525 -0.218 0 -0 0</pose>
         <mass>7.76096</mass>
@@ -413,6 +414,21 @@
           <izz>0.04658</izz>
         </inertia>
       </inertial>
+-->
+<!-- Four bar Upper Leg -->
+      <inertial>
+        <pose>-0.00347 0.03300 -0.16049 0 -0 0</pose>
+        <mass>9.20765</mass>
+        <inertia>
+          <ixx> 0.16930</ixx>
+          <ixy>-0.00601</ixy>
+          <ixz>-0.00367</ixz>
+          <iyy>0.13914</iyy>
+          <iyz>0.03211</iyz>
+          <izz>0.08115</izz>
+        </inertia>
+      </inertial>
+      
       <collision name='l_uleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -1173,6 +1189,7 @@
     </joint>
     <link name='r_uleg'>
       <pose>0.0 -0.146158 -0.085547 0 0 0</pose>
+<!-- Original Upper Leg
       <inertial>
         <pose>-0.02 -0.0525 -0.218 0 -0 0</pose>
         <mass>7.76243</mass>
@@ -1185,6 +1202,21 @@
           <izz>0.04665</izz>
         </inertia>
       </inertial>
+-->
+<!-- Four bar Upper Leg -->
+      <inertial>
+        <pose>-0.00347 -0.03300 -0.16049 0 -0 0</pose>
+        <mass>9.20765</mass>
+        <inertia>
+          <ixx> 0.16930</ixx>
+          <ixy> 0.00601</ixy>
+          <ixz>-0.00367</ixz>
+          <iyy> 0.13914</iyy>
+          <iyz>-0.03211</iyz>
+          <izz> 0.08115</izz>
+        </inertia>
+      </inertial>
+
       <collision name='r_uleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
