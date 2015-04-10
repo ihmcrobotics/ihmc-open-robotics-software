@@ -116,11 +116,11 @@ public class IndividualRobotiqHandController
    {
       open(1.0);
    }
-
+   // TODO add switch on grip mode
    public void open(double percent)
    {
       isStopped.set(false);
-      EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide);
       computeAllFinalDesiredAngles(percent, openHandDesiredConfiguration);
    }
 
@@ -133,7 +133,7 @@ public class IndividualRobotiqHandController
    {
       isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> openFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
-            .getOpenHandDesiredConfiguration(robotSide);
+            .getOpenBasicGripDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, openFingerDesiredConfiguration, fingerName);
    }
 
@@ -141,12 +141,12 @@ public class IndividualRobotiqHandController
    {
       close(1.0);
    }
-
+   // TODO add switch on grip mode
    public void close(double percent)
    {
       isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
-            .getClosedHandDesiredConfiguration(robotSide);
+            .getClosedBasicGripDesiredConfiguration(robotSide);
       computeAllFinalDesiredAngles(percent, closedHandDesiredConfiguration);
    }
 
@@ -159,7 +159,7 @@ public class IndividualRobotiqHandController
    {
       isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedFingerDesiredConfiguration = RobotiqHandsDesiredConfigurations
-            .getClosedHandDesiredConfiguration(robotSide);
+            .getClosedBasicGripDesiredConfiguration(robotSide);
       computeOneFingerDesiredAngles(percent, closedFingerDesiredConfiguration, fingerName);
    }
 
@@ -167,8 +167,8 @@ public class IndividualRobotiqHandController
    {
       isStopped.set(false);
       EnumMap<RobotiqHandJointNameMinimal, Double> closedHandDesiredConfiguration = RobotiqHandsDesiredConfigurations
-            .getClosedHandDesiredConfiguration(robotSide);
-      EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenHandDesiredConfiguration(robotSide);
+            .getClosedBasicGripDesiredConfiguration(robotSide);
+      EnumMap<RobotiqHandJointNameMinimal, Double> openHandDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide);
 
       computeIndexFinalDesiredAngles(1.0, openHandDesiredConfiguration);
       computeMiddleFinalDesiredAngles(1.0, closedHandDesiredConfiguration);
@@ -183,6 +183,13 @@ public class IndividualRobotiqHandController
    public void crush(FingerName fingerName)
    {
       close(fingerName);
+   }
+   
+   public void pinch()
+   {
+      isStopped.set(false);
+      EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfiguration = RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide);
+      computeAllFinalDesiredAngles(1.0, handDesiredConfiguration);
    }
 
    public void stop()
