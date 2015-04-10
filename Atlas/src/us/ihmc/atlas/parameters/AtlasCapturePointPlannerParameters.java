@@ -107,7 +107,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getExitCMPInsideOffset()
    {
-      return -0.005; //0.006;
+      return 0.01;
    }
 
    @Override
@@ -153,15 +153,27 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    }
 
    @Override
-   public double getMaxReferenceCMPForwardOffset()
+   public double getMaxEntryCMPForwardOffset()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinEntryCMPForwardOffset()
+   {
+      return 0.0;
+   }
+
+   @Override
+   public double getMaxExitCMPForwardOffset()
    {
       return 0.08;
    }
 
    @Override
-   public double getMinReferenceCMPForwardOffset()
+   public double getMinExitCMPForwardOffset()
    {
-      return 0.0;
+      return -0.02;
    }
 
    @Override
