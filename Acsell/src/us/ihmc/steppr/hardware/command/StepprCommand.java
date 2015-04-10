@@ -21,7 +21,7 @@ public class StepprCommand
          StepprJointCommand jointCommand = new StepprJointCommand(joint.getSdfName(), joint.getActuators().length, registry);
          jointCommands.put(joint, jointCommand);
 
-         if (joint.isLinear() || joint == StepprJoint.LEFT_KNEE_Y || joint == StepprJoint.RIGHT_KNEE_Y)
+         if (joint.isLinear() )
          {
             StepprActuator actuator = joint.getActuators()[0];
             StepprLinearTransmissionActuatorCommand actuatorCommand = new StepprLinearTransmissionActuatorCommand(actuator.getName(),
@@ -30,6 +30,11 @@ public class StepprCommand
          }
       }
 
+      StepprKneeActuatorCommand leftKnee = new StepprKneeActuatorCommand("leftKneeActuator", jointCommands.get(StepprJoint.LEFT_KNEE_Y), StepprActuator.LEFT_KNEE, StepprJoint.LEFT_KNEE_Y.getRatio(), registry);
+      StepprKneeActuatorCommand rightKnee = new StepprKneeActuatorCommand("rightKneeActuator", jointCommands.get(StepprJoint.RIGHT_KNEE_Y), StepprActuator.RIGHT_KNEE, StepprJoint.RIGHT_KNEE_Y.getRatio(), registry);
+      actuatorCommands.put(StepprActuator.LEFT_KNEE, leftKnee);
+      actuatorCommands.put(StepprActuator.RIGHT_KNEE, rightKnee);
+      
       StepprAnkleActuatorCommand leftAnkle = new StepprAnkleActuatorCommand("leftAnkleCommand", jointCommands.get(StepprJoint.LEFT_ANKLE_Y),
             jointCommands.get(StepprJoint.LEFT_ANKLE_X), StepprActuator.LEFT_ANKLE_RIGHT, StepprActuator.LEFT_ANKLE_LEFT, registry);
       actuatorCommands.put(StepprActuator.LEFT_ANKLE_LEFT, leftAnkle.leftActuatorCommand());

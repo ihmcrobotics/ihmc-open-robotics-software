@@ -52,7 +52,7 @@ public enum StepprJoint
    }
    
    public double getRatio()
-   {
+   {	   
       return ratio;
    }
    

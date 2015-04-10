@@ -15,7 +15,7 @@ public class StepprKneeJointState implements StepprJointState
    private final StrainSensor strainSensor;
    
 
-   private final double ratio;
+   private double ratio;
 
    private double motorAngle;
    
@@ -24,14 +24,14 @@ public class StepprKneeJointState implements StepprJointState
    private final DoubleYoVariable tau_current;
    private final DoubleYoVariable tau_strain;
 
-   public StepprKneeJointState(StepprJoint joint, StepprActuatorState actuator, StepprActuatorState ankle, StrainSensor strainSesnor, YoVariableRegistry parentRegistry)
+   public StepprKneeJointState(StepprJoint joint, StepprActuatorState actuator, StepprActuatorState ankle, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
    {
       String name = joint.getSdfName();
       this.registry = new YoVariableRegistry(name);
       this.ratio = joint.getRatio();
       this.actuator = actuator;
       this.ankle = ankle;
-      this.strainSensor = strainSesnor;
+      this.strainSensor = strainSensor;
       
       
       this.q = new DoubleYoVariable(name + "_q", registry);
