@@ -364,10 +364,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       ICPControlGains gains = new ICPControlGains();
 
-      double kp = runningOnRealRobot ? 1.5 : 1.4;
+      double kp = runningOnRealRobot ? 1.5 : 1.5;
       double ki = runningOnRealRobot ? 4.0 : 0.0;
       double kiBleedOff = 0.9;
-      boolean useRawCMP = false;
+      boolean useRawCMP = true;
       double cmpFilterBreakFrequencyInHertz = 16.0;
       double cmpRateLimit = runningOnRealRobot ? 6.0 : 60.0;
       double cmpAccelerationLimit = runningOnRealRobot ? 200.0 : 2000.0;
@@ -640,13 +640,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDefaultTransferTime()
    {
-      return runningOnRealRobot ? 1.4 : 0.25;
+      return runningOnRealRobot ? 1.5 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return runningOnRealRobot ? 1.4 : 0.60;
+      return runningOnRealRobot ? 1.5 : 0.60;
    }
 
    /** @inheritDoc */
@@ -781,9 +781,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.0, 1.0, 10.0, 10.0);
+      momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.12);    // 0.06);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);    // 0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 
