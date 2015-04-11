@@ -418,6 +418,18 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
+   {
+      YoPDGains gains = new YoPDGains("PelvisXY", registry);
+      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+
+      gains.setKp(4.0);
+      gains.setKd(realRobot ? 0.5 : 1.2);
+
+      return gains;
+   }
+
+   @Override
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("PelvisOrientation", registry);
