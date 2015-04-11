@@ -573,7 +573,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
             centerOfMass.changeFrame(footFrame);
             tempPoint.setToZero(footFrame);
             
-            comDistanceFromFeet.get(robotSide).setValue(centerOfMass.getXYplaneDistance(tempPoint));
+            comDistanceFromFeet.get(robotSide).setValue(centerOfMass.getXYPlaneDistance(tempPoint));
          }
          
          for (RobotSide robotSide : RobotSide.values)
