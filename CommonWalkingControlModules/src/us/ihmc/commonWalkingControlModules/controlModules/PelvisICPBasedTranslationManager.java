@@ -11,9 +11,6 @@ import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.Twist;
-import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -51,14 +48,15 @@ public class PelvisICPBasedTranslationManager
    private final MultipleWaypointsPositionTrajectoryGenerator pelvisWaypointsPositionTrajectoryGenerator;
 
    private final YoFrameVector2d pelvisPositionError = new YoFrameVector2d("pelvisPositionError", worldFrame, registry);
-   private final DoubleYoVariable proportionalGain;
+   private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisPositionProportionalGain", registry);
    private final YoFrameVector2d proportionalTerm = new YoFrameVector2d("pelvisPositionProportionalTerm", worldFrame, registry);
 
-   private final DoubleYoVariable dampingGain;
-   private final YoFrameVector2d dampingTerm = new YoFrameVector2d("pelvisPositionDampingTerm", worldFrame, registry);
+   private final YoFrameVector2d pelvisPositionCumulatedError = new YoFrameVector2d("pelvisPositionCumulatedError", worldFrame, registry);
+   private final DoubleYoVariable integralGain = new DoubleYoVariable("pelvisPositionIntegralGain", registry);
+   private final YoFrameVector2d integralTerm = new YoFrameVector2d("pelvisPositionIntegralTerm", worldFrame, registry);
+   private final DoubleYoVariable maximumIntegralError = new DoubleYoVariable("maximumPelvisPositionIntegralError", registry);
 
    private final YoFrameVector2d desiredICPOffset = new YoFrameVector2d("desiredICPOffset", worldFrame, registry);
-   private final YoFramePoint2d yoDesiredICPForPelvisXYPositionControl = new YoFramePoint2d("desiredICPForPelvisXYPositionControl", worldFrame, registry);
 
    private final BooleanYoVariable isEnabled = new BooleanYoVariable("isPelvisTranslationManagerEnabled", registry);
    private final BooleanYoVariable isRunning = new BooleanYoVariable("isPelvisTranslationManagerRunning", registry);
@@ -66,45 +64,31 @@ public class PelvisICPBasedTranslationManager
    private final BooleanYoVariable manualMode = new BooleanYoVariable("manualModeICPOffset", registry);
 
    private final DoubleYoVariable yoTime;
+   private final double controlDT;
 
    private final PelvisPoseProvider desiredPelvisPoseProvider;
 
    private ReferenceFrame supportFrame;
    private final ReferenceFrame pelvisZUpFrame;
-   private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame midFeetZUpFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    private final FramePoint tempPosition = new FramePoint();
    private final FrameVector tempVelocity = new FrameVector();
-   private final FrameVector tempAcceleration = new FrameVector();
+   private final FramePoint2d tempPosition2d = new FramePoint2d();
+   private final FrameVector2d tempError2d = new FrameVector2d();
    private final FrameVector2d tempICPOffset = new FrameVector2d();
-   private final Twist tempPelvisTwist = new Twist();
 
-   private final FramePoint2d pelvisPosition2d = new FramePoint2d();
-   private final FrameVector pelvisVelocity = new FrameVector();
-   private final FrameVector2d pelvisVelocity2d = new FrameVector2d();
-   private final FrameVector desiredPelvisVelocity = new FrameVector();
-   private final FrameVector2d desiredPelvisVelocity2d = new FrameVector2d();
-   
-   private final FramePoint2d desiredICPForPelvisXYPositionControl = new FramePoint2d();
-
-   private final RigidBody pelvis;
-
-   private final TwistCalculator twistCalculator;
-
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider, YoPDGains gains,
-         YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider,
+         YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
+      controlDT = momentumBasedController.getControlDT();
       pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
       midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
       ankleZUpFrames = momentumBasedController.getReferenceFrames().getAnkleZUpReferenceFrames();
-      pelvisFrame = momentumBasedController.getFullRobotModel().getRootJoint().getFrameAfterJoint();
 
       this.desiredPelvisPoseProvider = desiredPelvisPoseProvider;
-      this.twistCalculator = momentumBasedController.getTwistCalculator();
-      this.pelvis = momentumBasedController.getFullRobotModel().getPelvis();
 
       isUsingWaypointTrajectory = new BooleanYoVariable(getClass().getSimpleName() + "IsUsingWaypointTrajectory", registry);
       isUsingWaypointTrajectory.set(false);
@@ -119,8 +103,9 @@ public class PelvisICPBasedTranslationManager
 
       pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", worldFrame, initialPositionProvider, registry);
 
-      proportionalGain = gains.getYoKp();
-      dampingGain = gains.getYoKd();
+      proportionalGain.set(0.5);
+      integralGain.set(1.5);
+      maximumIntegralError.set(0.15);
 
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
@@ -149,7 +134,6 @@ public class PelvisICPBasedTranslationManager
       if (!isEnabled.getBooleanValue())
       {
          desiredICPOffset.setToZero();
-         yoDesiredICPForPelvisXYPositionControl.setToZero();
          return;
       }
 
@@ -161,11 +145,10 @@ public class PelvisICPBasedTranslationManager
       if (!isRunning.getBooleanValue())
       {
          desiredICPOffset.setToZero();
-         yoDesiredICPForPelvisXYPositionControl.setToZero();
          return;
       }
 
-      computeDesiredICPForPelvisXYPositionControl(actualICP);
+      computeDesiredICPOffset();
    }
 
    private void updateDesireds()
@@ -218,41 +201,36 @@ public class PelvisICPBasedTranslationManager
          double deltaTime = yoTime.getDoubleValue() - initialPelvisPositionTime.getDoubleValue();
          activeTrajectoryGenerator.compute(deltaTime);
          activeTrajectoryGenerator.get(tempPosition);
-         activeTrajectoryGenerator.packVelocity(desiredPelvisVelocity);
-         activeTrajectoryGenerator.packAcceleration(tempAcceleration);
-
+         //System.out.println(tempPosition);
          desiredPelvisPosition.setByProjectionOntoXYPlane(tempPosition);
       }
    }
 
-   public void computeDesiredICPForPelvisXYPositionControl(FramePoint2d actualICP)
+   private void computeDesiredICPOffset()
    {
-      desiredICPForPelvisXYPositionControl.setIncludingFrame(actualICP);
-
       pelvisPositionError.set(desiredPelvisPosition);
-      pelvisPosition2d.setToZero(pelvisZUpFrame);
-      pelvisPosition2d.changeFrame(worldFrame);
-      pelvisPositionError.sub(pelvisPosition2d);
+      tempPosition2d.setToZero(pelvisZUpFrame);
+      tempPosition2d.changeFrame(worldFrame);
+      pelvisPositionError.sub(tempPosition2d);
+
+      pelvisPositionError.getFrameTuple2dIncludingFrame(tempError2d);
+      tempError2d.scale(controlDT);
+      pelvisPositionCumulatedError.add(tempError2d);
+
+      double cumulativeErrorMagnitude = pelvisPositionCumulatedError.length();
+      if (cumulativeErrorMagnitude > maximumIntegralError.getDoubleValue())
+      {
+         pelvisPositionCumulatedError.scale(maximumIntegralError.getDoubleValue() / cumulativeErrorMagnitude);
+      }
 
       proportionalTerm.set(pelvisPositionError);
       proportionalTerm.scale(proportionalGain.getDoubleValue());
-      proportionalTerm.getFrameTuple2dIncludingFrame(tempICPOffset);
-      desiredICPForPelvisXYPositionControl.add(tempICPOffset);
 
-      twistCalculator.packTwistOfBody(tempPelvisTwist, pelvis);
-      tempPelvisTwist.changeFrame(pelvisFrame);
-      tempPelvisTwist.packLinearPart(pelvisVelocity);
-      pelvisVelocity.changeFrame(worldFrame);
-      pelvisVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(pelvisVelocity);
+      integralTerm.set(pelvisPositionCumulatedError);
+      integralTerm.scale(integralGain.getDoubleValue());
 
-      dampingTerm.set(pelvisVelocity2d);
-      dampingTerm.scale(- dampingGain.getDoubleValue());
-      dampingTerm.getFrameTuple2d(tempICPOffset);
-      desiredICPForPelvisXYPositionControl.add(tempICPOffset);
-
-      desiredPelvisVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(desiredPelvisVelocity);
-      desiredICPForPelvisXYPositionControl.add(desiredPelvisVelocity2d);
-      yoDesiredICPForPelvisXYPositionControl.setAndMatchFrame(desiredICPForPelvisXYPositionControl);
+      desiredICPOffset.set(proportionalTerm);
+      desiredICPOffset.add(integralTerm);
    }
 
    public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
@@ -260,7 +238,6 @@ public class PelvisICPBasedTranslationManager
       if (!isEnabled.getBooleanValue())
       {
          desiredICPOffset.setToZero();
-         yoDesiredICPForPelvisXYPositionControl.setToZero();
          return;
       }
 
@@ -268,24 +245,18 @@ public class PelvisICPBasedTranslationManager
       {
          // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
          tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
-         desiredICPToModify.add(tempICPOffset);
-         return;
       }
       else if (!isRunning.getBooleanValue())
       {
          desiredICPOffset.setToZero();
-         yoDesiredICPForPelvisXYPositionControl.setToZero();
          return;
       }
       else
       {
-         desiredICPForPelvisXYPositionControl.changeFrame(supportFrame);
-         desiredICPToModify.set(desiredICPForPelvisXYPositionControl);
-
-         desiredPelvisVelocity.changeFrame(supportFrame);
-         desiredPelvisVelocity2d.setByProjectionOntoXYPlaneIncludingFrame(desiredPelvisVelocity);
-         desiredICPVelocityToModify.set(desiredPelvisVelocity2d);
+         desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
+         tempICPOffset.changeFrame(supportFrame);
       }
+      desiredICPToModify.add(tempICPOffset);
    }
 
    public void disable()
@@ -294,12 +265,12 @@ public class PelvisICPBasedTranslationManager
       isRunning.set(false);
 
       pelvisPositionError.setToZero();
+      pelvisPositionCumulatedError.setToZero();
 
       proportionalTerm.setToZero();
-      dampingTerm.setToZero();
+      integralTerm.setToZero();
 
       desiredICPOffset.setToZero();
-      yoDesiredICPForPelvisXYPositionControl.setToZero();
    }
 
    public void enable()
