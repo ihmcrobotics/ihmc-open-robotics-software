@@ -407,4 +407,9 @@ public class FootControlModule
    {
       legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
    }
+
+   public void requestSwingSpeedUp(double speedUpFactor)
+   {
+      swingState.requestSwingSpeedUp(speedUpFactor);
+   }
 }

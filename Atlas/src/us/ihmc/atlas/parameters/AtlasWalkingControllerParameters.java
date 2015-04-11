@@ -153,6 +153,24 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return target == AtlasTarget.REAL_ROBOT;
    }
 
+   @Override
+   public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
+   {
+      return false;
+   }
+
+   @Override
+   public double getICPErrorThresholdToSpeedUpSwing()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public double getMaximumSwingSpeedUpFactor()
+   {
+      return 1.0;
+   }
+
    public boolean isNeckPositionControlled()
    {
       if (target == AtlasTarget.REAL_ROBOT)

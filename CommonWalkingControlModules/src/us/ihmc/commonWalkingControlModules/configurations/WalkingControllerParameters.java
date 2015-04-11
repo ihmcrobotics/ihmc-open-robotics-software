@@ -63,6 +63,12 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean allowShrinkingSingleSupportFootPolygon();
 
+   public abstract boolean allowDisturbanceRecoveryBySpeedingUpSwing();
+
+   public abstract double getMaximumSwingSpeedUpFactor();
+
+   public abstract double getICPErrorThresholdToSpeedUpSwing();
+
    public abstract ICPControlGains getICPControlGains();
 
    public abstract YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry);
