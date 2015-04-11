@@ -14,6 +14,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
+import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -50,10 +51,10 @@ public class PelvisICPBasedTranslationManager
    private final MultipleWaypointsPositionTrajectoryGenerator pelvisWaypointsPositionTrajectoryGenerator;
 
    private final YoFrameVector2d pelvisPositionError = new YoFrameVector2d("pelvisPositionError", worldFrame, registry);
-   private final DoubleYoVariable proportionalGain = new DoubleYoVariable("pelvisPositionProportionalGain", registry);
+   private final DoubleYoVariable proportionalGain;
    private final YoFrameVector2d proportionalTerm = new YoFrameVector2d("pelvisPositionProportionalTerm", worldFrame, registry);
 
-   private final DoubleYoVariable dampingGain = new DoubleYoVariable("pelvisPositionDampingGain", registry);
+   private final DoubleYoVariable dampingGain;
    private final YoFrameVector2d dampingTerm = new YoFrameVector2d("pelvisPositionDampingTerm", worldFrame, registry);
 
    private final YoFrameVector2d desiredICPOffset = new YoFrameVector2d("desiredICPOffset", worldFrame, registry);
@@ -92,7 +93,7 @@ public class PelvisICPBasedTranslationManager
 
    private final TwistCalculator twistCalculator;
 
-   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider,
+   public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider, YoPDGains gains,
          YoVariableRegistry parentRegistry)
    {
       yoTime = momentumBasedController.getYoTime();
@@ -118,8 +119,8 @@ public class PelvisICPBasedTranslationManager
 
       pelvisWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("pelvisWaypoints", worldFrame, initialPositionProvider, registry);
 
-      proportionalGain.set(4.0);
-      dampingGain.set(1.2);
+      proportionalGain = gains.getYoKp();
+      dampingGain = gains.getYoKd();
 
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
