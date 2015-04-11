@@ -17,6 +17,7 @@ import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.behaviors.DrillPickUpBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.LocalizationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.LocalizeDrillBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.ReceiveImageBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
@@ -199,6 +200,8 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(outgoingCommunicationBridge, referenceFrames));
+      
       
       if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
