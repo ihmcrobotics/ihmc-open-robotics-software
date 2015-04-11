@@ -808,7 +808,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getMaxICPErrorBeforeSingleSupport()
+   public double getMaxICPErrorBeforeSingleSupportX()
+   {
+      return 0.025;
+   }
+   
+   @Override
+   public double getMaxICPErrorBeforeSingleSupportY()
    {
       return 0.025;
    }
