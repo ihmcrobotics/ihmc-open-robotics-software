@@ -141,6 +141,24 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
+   {
+      return false;
+   }
+
+   @Override
+   public double getICPErrorThresholdToSpeedUpSwing()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
+   public double getMaximumSwingSpeedUpFactor()
+   {
+      return 1.0;
+   }
+
+  @Override
    public boolean isNeckPositionControlled()
    {
       return runningOnRealRobot;
