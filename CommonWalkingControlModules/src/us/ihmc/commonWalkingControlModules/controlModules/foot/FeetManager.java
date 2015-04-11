@@ -389,4 +389,9 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          footControlModules.get(robotSide).resetHeightCorrectionParametersForSingularityAvoidance();
    }
+
+   public void requestSwingSpeedUp(RobotSide robotSide, double speedUpFactor)
+   {
+      footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
+   }
 }

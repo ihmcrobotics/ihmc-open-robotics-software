@@ -227,4 +227,11 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    {
       // TODO Auto-generated method stub
    }
+
+   @Override
+   public void requestSwingSpeedUp(double speedUpFactor)
+   {
+      // TODO Auto-generated method stub
+      
+   }
 }

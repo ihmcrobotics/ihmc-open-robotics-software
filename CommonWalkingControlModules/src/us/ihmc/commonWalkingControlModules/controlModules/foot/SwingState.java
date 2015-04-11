@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTra
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGenerator;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -54,6 +55,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new TrajectoryParameters());
 
+   private final DoubleYoVariable swingSpeedUpInitialTime;
+   private final DoubleYoVariable swingTimeSpeedUpFactor;
+   private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
+   private final BooleanYoVariable isSwingSpeedUpEnabled;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameVector initialAngularVelocity = new FrameVector();
@@ -115,6 +120,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       orientationTrajectoryGenerator = new VelocityConstrainedOrientationTrajectoryGenerator(namePrefix + "Swing", worldFrame, swingTimeProvider,
             initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
       hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
+
+      swingSpeedUpInitialTime = new DoubleYoVariable(namePrefix + "SwingSpeedUpInitialTime", registry);
+      swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
+      maxSwingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
+      maxSwingTimeSpeedUpFactor.set(walkingControllerParameters.getMaximumSwingSpeedUpFactor());
+      isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
+      isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
    }
 
    private PositionTrajectoryGenerator setupPushRecoveryTrajectoryGenerator(DoubleProvider swingTimeProvider, YoVariableRegistry registry, String namePrefix,
@@ -162,21 +174,33 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          trajectoryWasReplanned = true;
       }
 
+      double time;
+      if (!isSwingSpeedUpEnabled.getBooleanValue() || swingSpeedUpInitialTime.isNaN())
+         time = getTimeInCurrentState();
+      else
+         time = swingSpeedUpInitialTime.getDoubleValue() + swingTimeSpeedUpFactor.getDoubleValue() * (getTimeInCurrentState() - swingSpeedUpInitialTime.getDoubleValue());
+
       if (!trajectoryWasReplanned)
       {
-         positionTrajectoryGenerator.compute(getTimeInCurrentState());
+         positionTrajectoryGenerator.compute(time);
 
          positionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
       else
       {
-         pushRecoveryPositionTrajectoryGenerator.compute(getTimeInCurrentState());
+         pushRecoveryPositionTrajectoryGenerator.compute(time);
 
          pushRecoveryPositionTrajectoryGenerator.packLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       }
 
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
+      if (isSwingSpeedUpEnabled.getBooleanValue() && !swingSpeedUpInitialTime.isNaN())
+      {
+         desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+         desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
+      }
    }
 
    private final FramePose newFootstepPose = new FramePose();
@@ -219,9 +243,34 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    }
 
    @Override
+   public void requestSwingSpeedUp(double speedUpFactor)
+   {
+      if (isSwingSpeedUpEnabled.getBooleanValue() && swingSpeedUpInitialTime.isNaN())
+      {
+         if (speedUpFactor <= 1.1)
+            return;
+         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
+         swingTimeSpeedUpFactor.set(speedUpFactor);
+         swingSpeedUpInitialTime.set(getTimeInCurrentState());
+      }
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      super.doTransitionIntoAction();
+
+      swingSpeedUpInitialTime.set(Double.NaN);
+      swingTimeSpeedUpFactor.set(1.0);
+   }
+
+   @Override
    public void doTransitionOutOfAction()
    {
-      hasInitialAngularConfigurationBeenProvided.set(false);
       super.doTransitionOutOfAction();
+
+      hasInitialAngularConfigurationBeenProvided.set(false);
+      swingSpeedUpInitialTime.set(Double.NaN);
+      swingTimeSpeedUpFactor.set(1.0);
    }
 }
