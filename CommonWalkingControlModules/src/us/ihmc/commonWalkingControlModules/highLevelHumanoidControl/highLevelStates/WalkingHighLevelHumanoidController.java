@@ -139,7 +139,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final DoubleYoVariable maxICPErrorBeforeSingleSupport = new DoubleYoVariable("maxICPErrorBeforeSingleSupport", registry);
+   private final DoubleYoVariable maxICPErrorBeforeSingleSupportX = new DoubleYoVariable("maxICPErrorBeforeSingleSupportX", registry);
+   private final DoubleYoVariable maxICPErrorBeforeSingleSupportY = new DoubleYoVariable("maxICPErrorBeforeSingleSupportY", registry);
 
    private final SwingTimeCalculationProvider swingTimeCalculationProvider;
    private final TransferTimeCalculationProvider transferTimeCalculationProvider;
@@ -309,7 +310,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       dwellInSingleSupportDuration.set(0.0); //0.2);
 
-      maxICPErrorBeforeSingleSupport.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupport());
+      maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
+      maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
       transferTimeCalculationProvider.updateTransferTime();
 
@@ -1184,6 +1186,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final RobotSide robotSide;
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private final FramePoint2d desiredICP2d = new FramePoint2d();
+      private final FramePoint2d icpError2d = new FramePoint2d();
 
       public DoneWithTransferCondition(RobotSide robotSide)
       {
@@ -1213,9 +1216,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
          desiredICP.getFrameTuple2dIncludingFrame(desiredICP2d);
+         
+         capturePoint2d.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
+         desiredICP2d.changeFrame(referenceFrames.getAnkleZUpFrame(robotSide));
+         
+         icpError2d.setIncludingFrame(desiredICP2d);
+         icpError2d.sub(capturePoint2d);
 
-         double distanceFromDesiredToActual = capturePoint2d.distance(desiredICP2d);
-         boolean closeEnough = distanceFromDesiredToActual < maxICPErrorBeforeSingleSupport.getDoubleValue();
+         double ellipticErrorSquared = (icpError2d.getX()/maxICPErrorBeforeSingleSupportX.getDoubleValue()) * (icpError2d.getX()/maxICPErrorBeforeSingleSupportX.getDoubleValue()) + (icpError2d.getY()/maxICPErrorBeforeSingleSupportY.getDoubleValue()) * (icpError2d.getY()/maxICPErrorBeforeSingleSupportY.getDoubleValue());
+         boolean closeEnough = ellipticErrorSquared < 1.0;
+
+         
+//         double distanceFromDesiredToActual = capturePoint2d.distance(desiredICP2d);
+//         boolean closeEnough = distanceFromDesiredToActual < maxICPErrorBeforeSingleSupport.getDoubleValue();
 
          return closeEnough;
       }

@@ -147,7 +147,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double getContactThresholdHeight();
 
-   public abstract double getMaxICPErrorBeforeSingleSupport();
+   public abstract double getMaxICPErrorBeforeSingleSupportX();
+   public abstract double getMaxICPErrorBeforeSingleSupportY();
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
