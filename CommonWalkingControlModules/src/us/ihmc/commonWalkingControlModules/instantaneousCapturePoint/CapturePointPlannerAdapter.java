@@ -326,6 +326,14 @@ public class CapturePointPlannerAdapter
          return capturePointPlanner.computeAndReturnTimeRemaining(time);
    }
 
+   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualICP)
+   {
+      if (useNewICPPlanner)
+         return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(time, actualICP);
+      else
+         return capturePointPlanner.computeAndReturnTimeRemaining(time);
+   }
+
    public boolean isPerformingICPDoubleSupport()
    {
       if (useNewICPPlanner)

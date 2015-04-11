@@ -389,9 +389,9 @@ public class ICPPlanner
    {
       initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue());
 
-      YoFramePoint constantCMP = referenceCMPsCalculator.getNextEntryCMP();
-      double actualDistanceDueToDisturbance = constantCMP.distance(actualCapturePointPosition);
-      double expectedDistanceAccordingToPlan = constantCMP.distance(singleSupportInitialICP);
+      computeDesiredCentroidalMomentumPivot();
+      double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualCapturePointPosition);
+      double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
 
       double correctedTimeInCurrentState = Math.log(actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan) / omega0.getDoubleValue();
 
@@ -405,6 +405,21 @@ public class ICPPlanner
          
          initialTime.sub(deltaTimeToBeAccounted);
       }
+   }
+
+   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualCapturePointPosition)
+   {
+      computeDesiredCentroidalMomentumPivot();
+      double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualCapturePointPosition);
+      double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
+
+      computeTimeInCurrentState(time);
+      double deltaTimeToBeAccounted = Math.log(actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan) / omega0.getDoubleValue();
+
+      double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
+      estimatedTimeRemaining = MathTools.clipToMinMax(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+
+      return estimatedTimeRemaining;
    }
 
    private void computeDesiredCapturePoint(double time)
