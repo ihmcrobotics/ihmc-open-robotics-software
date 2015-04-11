@@ -410,6 +410,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public YoPDGains createPelvisICPBasedXYControlGains(YoVariableRegistry registry)
+   {
+      YoPDGains gains = new YoPDGains("PelvisXY", registry);
+
+      gains.setKp(4.0);
+      gains.setKd(runningOnRealRobot ? 0.5 : 1.2);
+
+      return gains;
+   }
+
+   @Override
    public YoOrientationPIDGains createPelvisOrientationControlGains(YoVariableRegistry registry)
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
