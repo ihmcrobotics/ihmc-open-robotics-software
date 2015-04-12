@@ -1472,8 +1472,8 @@ public class ClassicCameraController implements TrackingDollyCameraController, K
       }
    }
    
-   private double rotateGain = 0.35;
-   private double translateGain = 0.1;
+   private double rotateGain = 0.15;
+   private double translateGain = 0.05;
 
    @Override
    public void mouseDragged(double dx, double dy, double dz, double drx, double dry, double drz)
