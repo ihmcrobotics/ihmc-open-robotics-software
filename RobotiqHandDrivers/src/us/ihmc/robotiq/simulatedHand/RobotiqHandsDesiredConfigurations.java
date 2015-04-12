@@ -116,8 +116,8 @@ public class RobotiqHandsDesiredConfigurations
       return openHandsPinchGripDesiredConfigurations.get(robotSide);
    }
    
-   public static EnumMap<RobotiqHandJointNameMinimal, Double> getClosedPinchGripDesiredConfiguration(RobotSide robotiSide)
+   public static EnumMap<RobotiqHandJointNameMinimal, Double> getClosedPinchGripDesiredConfiguration(RobotSide robotSide)
    {
-      return closedHandsPinchGripDesiredConfigurations.get(robotiSide);
+      return closedHandsPinchGripDesiredConfigurations.get(robotSide);
    }
 }

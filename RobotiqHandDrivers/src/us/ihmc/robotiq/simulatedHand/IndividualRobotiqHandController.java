@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -21,13 +22,16 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
+import us.ihmc.yoUtilities.stateMachines.State;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
+import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 
 public class IndividualRobotiqHandController implements RobotController
 {
    enum GraspState
    {
-      BASIC_OPEN, BASIC_CLOSED, PINCH_OPEN, PINCH_CLOSED
+      BASIC_OPEN, BASIC_CLOSED,
+      PINCH_OPEN, PINCH_CLOSED
    }
    
    private final boolean DEBUG = false;
@@ -56,6 +60,9 @@ public class IndividualRobotiqHandController implements RobotController
    private final LinkedHashMap<OneDegreeOfFreedomJoint, DoubleYoVariable> desiredAngles = new LinkedHashMap<>();
    
    private final EnumYoVariable<RobotiqGraspMode> graspMode;
+   private final EnumYoVariable<RobotiqGraspMode> desiredGraspMode;
+   private final EnumYoVariable<FingerState> fingerState;
+   private final EnumYoVariable<FingerState> desiredFingerState;
    
    private StateMachine<GraspState> stateMachine;
 
@@ -126,14 +133,161 @@ public class IndividualRobotiqHandController implements RobotController
       
       graspMode = new EnumYoVariable<>(sidePrefix + "RobotiqGraspMode", registry, RobotiqGraspMode.class);
       graspMode.set(RobotiqGraspMode.BASIC_MODE);
+      desiredGraspMode = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredGraspMode", registry, RobotiqGraspMode.class);
+      fingerState = new EnumYoVariable<>(sidePrefix + "RobotiqFingerState", registry, FingerState.class);
+      fingerState.set(FingerState.OPEN);
+      desiredFingerState = new EnumYoVariable<>(sidePrefix + "RobotiqDesiredFingerState", registry, FingerState.class);
       
-      setupStateMachine();
+//      setupStateMachine();
    }
    
    private void setupStateMachine()
    {
       stateMachine = new StateMachine<>("RobotiqGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
-      //TODO
+
+      State<GraspState> stateOpenBasicGrip = new OpenBasicGrip();
+      State<GraspState> stateClosedBasicGrip = new ClosedBasicGrip();
+      State<GraspState> stateOpenPinchGrip = new OpenPinchGrip();
+      State<GraspState> stateClosedPinchGrip = new ClosedPinchGrip();
+      
+      stateMachine.addState(stateOpenBasicGrip);
+      stateMachine.addState(stateClosedBasicGrip);
+      stateMachine.addState(stateOpenPinchGrip);
+      stateMachine.addState(stateClosedPinchGrip);
+      stateMachine.setCurrentState(GraspState.BASIC_OPEN);
+      
+      StateTransitionCondition openBasicGripCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+         }
+      };
+      
+      StateTransitionCondition closedBasicGripCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+         }
+      };
+      
+      StateTransitionCondition openPinchGripCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+         }
+      };
+      
+      StateTransitionCondition closedPinchGripConfition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+         }
+      };
+      
+   }
+   
+   private class OpenBasicGrip extends State<GraspState>
+   {
+      public OpenBasicGrip()
+      {
+         super(GraspState.BASIC_OPEN);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenBasicGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+   
+   private class ClosedBasicGrip extends State<GraspState>
+   {
+      public ClosedBasicGrip()
+      {
+         super(GraspState.BASIC_CLOSED);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedBasicGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+   
+   private class OpenPinchGrip extends State<GraspState>
+   {
+      public OpenPinchGrip()
+      {
+         super(GraspState.PINCH_OPEN);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenPinchGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+   
+   private class ClosedPinchGrip extends State<GraspState>
+   {
+      public ClosedPinchGrip()
+      {
+         super(GraspState.PINCH_CLOSED);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedPinchGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
    }
    
    @Override
@@ -143,7 +297,8 @@ public class IndividualRobotiqHandController implements RobotController
 //      stateMachine.doAction();
       computeDesiredJointAngles();
    }
-
+   
+   //TODO start
    public void open()
    {
       open(1.0);
@@ -243,14 +398,17 @@ public class IndividualRobotiqHandController implements RobotController
    {
       close(fingerName);
    }
+   //TODO end
    
    public void basicGrip()
    {
+//      desiredGraspMode.set(RobotiqGraspMode.BASIC_MODE);
       graspMode.set(RobotiqGraspMode.BASIC_MODE);
    }
    
    public void pinch()
    {
+//      desiredGraspMode.set(RobotiqGraspMode.PINCH_MODE);
       graspMode.set(RobotiqGraspMode.PINCH_MODE);
    }
 
