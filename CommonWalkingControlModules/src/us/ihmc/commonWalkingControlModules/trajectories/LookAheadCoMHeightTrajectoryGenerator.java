@@ -692,11 +692,11 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
-      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
-
       // Happens when the robot gets stuck in double support but the ICP is still being dragged in the front support foot.
-      if (isInDoubleSupport && splineQuery > dF.getX())
-         splineOutput[0] = Math.min(splineOutput[0], dFMax.getY());
+      if (isInDoubleSupport)
+         splineQuery = Math.min(splineQuery, dF.getX());
+
+      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
 
       if (initializeToCurrent.getBooleanValue())
       {
