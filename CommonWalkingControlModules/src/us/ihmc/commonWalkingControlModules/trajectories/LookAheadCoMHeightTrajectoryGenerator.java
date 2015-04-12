@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.List;
 
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
@@ -535,7 +534,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
             tempFramePointForViz1.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
             Point2d queryPoint = new Point2d(tempFramePointForViz1.getX(), tempFramePointForViz1.getY());
-            this.solve(coMHeightPartialDerivativesData, queryPoint);
+            this.solve(coMHeightPartialDerivativesData, queryPoint, false);
             coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());
             tempFramePointForViz2.setY(tempFramePointForViz1.getY());
@@ -677,7 +676,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    {
       getCenterOfMass2d(queryPoint, centerOfMassHeightInputData.getCenterOfMassFrame());
       solutionPoint.set(queryPoint);
-      solve(coMHeightPartialDerivativesDataToPack, solutionPoint);
+      boolean isInDoubleSupport = centerOfMassHeightInputData.getSupportLeg() == null;
+      solve(coMHeightPartialDerivativesDataToPack, solutionPoint, isInDoubleSupport);
 
       coMHeightPartialDerivativesDataToPack.getCoMHeight(tempFramePoint);
       desiredCoMPosition.set(queryPoint.getX(), queryPoint.getY(), tempFramePoint.getZ());
@@ -687,12 +687,16 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final FramePoint desiredPosition = new FramePoint();
    private final double[] splineOutput = new double[3];
 
-   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint)
+   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
       spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
+
+      // Happens when the robot gets stuck in double support but the ICP is still being dragged in the front support foot.
+      if (isInDoubleSupport && splineQuery > dF.getX())
+         splineOutput[0] = Math.min(splineOutput[0], dFMax.getY());
 
       if (initializeToCurrent.getBooleanValue())
       {
