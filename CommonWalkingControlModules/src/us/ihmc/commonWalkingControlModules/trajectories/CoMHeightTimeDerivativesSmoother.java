@@ -48,18 +48,25 @@ public class CoMHeightTimeDerivativesSmoother
    private final DoubleYoVariable eigenValueThreeReal = new DoubleYoVariable("eigenValueThreeReal", registry);
    private final DoubleYoVariable eigenValueThreeImag = new DoubleYoVariable("eigenValueThreeImag", registry);
 
+   private final DoubleYoVariable maximumVelocity;
    private final DoubleYoVariable maximumAcceleration;
    private final DoubleYoVariable maximumJerk;
 
    public CoMHeightTimeDerivativesSmoother(double dt, YoVariableRegistry parentRegistry)
    {
-      this(null, null, dt, parentRegistry);
+      this(null, null, null, dt, parentRegistry);
    }
 
-   public CoMHeightTimeDerivativesSmoother(DoubleYoVariable maximumAcceleration, DoubleYoVariable maximumJerk, double dt, YoVariableRegistry parentRegistry)
+   public CoMHeightTimeDerivativesSmoother(DoubleYoVariable maximumVelocity, DoubleYoVariable maximumAcceleration, DoubleYoVariable maximumJerk, double dt, YoVariableRegistry parentRegistry)
    {
       this.dt = dt;
       
+      if (maximumVelocity == null)
+      {
+         maximumVelocity = new DoubleYoVariable("comHeightMaxVelocity", registry);
+         maximumVelocity.set(0.25); // Tried 0.25 on the real robot, looked good but need to be well tested.
+      }
+
       if (maximumAcceleration == null)
       {
          maximumAcceleration = new DoubleYoVariable("comHeightMaxAcceleration", registry);
@@ -72,6 +79,7 @@ public class CoMHeightTimeDerivativesSmoother
          maximumJerk.set(0.5 * 9.81 / 0.05);
       }
       
+      this.maximumVelocity = maximumVelocity;
       this.maximumAcceleration = maximumAcceleration;
       this.maximumJerk = maximumJerk;
 
@@ -158,17 +166,16 @@ public class CoMHeightTimeDerivativesSmoother
       smoothComHeightJerk.set(jerk);
       
       smoothComHeightAcceleration.add(jerk * dt);
+      smoothComHeightAcceleration.set(MathTools.clipToMinMax(smoothComHeightAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue()));
       
-      if (smoothComHeightAcceleration.getDoubleValue() > maximumAcceleration.getDoubleValue())
-      {
-         smoothComHeightAcceleration.set(maximumAcceleration.getDoubleValue());
-      }
-      if (smoothComHeightAcceleration.getDoubleValue() < -maximumAcceleration.getDoubleValue())
-      {
-         smoothComHeightAcceleration.set(-maximumAcceleration.getDoubleValue());
-      }
-      
-      smoothComHeightVelocity.add(smoothComHeightAcceleration.getDoubleValue() * dt);
+      double newSmoothComHeightVelocity = smoothComHeightVelocity.getDoubleValue();
+      newSmoothComHeightVelocity += smoothComHeightAcceleration.getDoubleValue() * dt;
+      newSmoothComHeightVelocity = MathTools.clipToMinMax(newSmoothComHeightVelocity, maximumVelocity.getDoubleValue());
+
+      smoothComHeightAcceleration.set(newSmoothComHeightVelocity - smoothComHeightVelocity.getDoubleValue());
+      smoothComHeightAcceleration.mul(1.0 / dt);
+
+      smoothComHeightVelocity.set(newSmoothComHeightVelocity);
       smoothComHeight.add(smoothComHeightVelocity.getDoubleValue() * dt);
       
       heightZDataOutputToPack.setComHeight(centerOfMassHeightPoint.getReferenceFrame(), smoothComHeight.getDoubleValue());
