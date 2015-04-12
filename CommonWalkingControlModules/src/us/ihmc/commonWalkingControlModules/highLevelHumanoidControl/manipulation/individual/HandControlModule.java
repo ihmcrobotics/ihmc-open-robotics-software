@@ -590,6 +590,30 @@ public class HandControlModule
       if (handPoseStatusProducer != null)
          handPoseStatusProducer.sendStartedStatus(robotSide);
    }
+   
+   public void initializeDesiredToCurrent()
+   {
+      trajectoryTimeProvider.set( 1.0 );
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         // check if the desired is in the limits
+         OneDoFJoint oneDoFJoint = oneDoFJoints[i];
+         double desiredPosition = oneDoFJoint.getqDesired();
+
+         jointCurrentPositionMap.put( oneDoFJoint, oneDoFJoint.getQ() );
+
+         quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).setFinalPosition(desiredPosition);
+         quinticPolynomialTrajectoryGenerators.get(oneDoFJoint).initialize();
+      }
+
+      jointSpaceHandControlState.setTrajectories(quinticPolynomialTrajectoryGenerators);
+      requestedState.set(jointSpaceHandControlState.getStateEnum());
+      stateMachine.checkTransitionConditions();
+
+      if (handPoseStatusProducer != null)
+         handPoseStatusProducer.sendStartedStatus(robotSide);
+   }
 
    public void moveUsingCubicTrajectory(ArmJointTrajectoryPacket trajectoryPacket)
    {

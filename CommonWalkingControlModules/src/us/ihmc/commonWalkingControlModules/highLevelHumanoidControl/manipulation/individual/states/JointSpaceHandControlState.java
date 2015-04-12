@@ -33,9 +33,6 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
    private final DoubleYoVariable maxAcceleration;
 
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredPositions = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> desiredVelocities = new LinkedHashMap<OneDoFJoint, DoubleYoVariable>();
-
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
    private final BooleanYoVariable initialized;
@@ -77,12 +74,6 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
          RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "Acceleration", registry, gains.getYoMaximumJerk(), dt);
          rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
-
-         DoubleYoVariable desiredPosition = new DoubleYoVariable(suffix + "QDesired", registry);
-         DoubleYoVariable desiredVelocity = new DoubleYoVariable(suffix + "QdDesired", registry);
-
-         desiredPositions.put(joint, desiredPosition);
-         desiredVelocities.put(joint, desiredVelocity);
       }
 
       this.doPositionControl = new BooleanYoVariable("doPositionControlForArmJointspaceController", registry);
@@ -107,8 +98,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         DoubleYoVariable desiredPosition = desiredPositions.get(joint);
-         DoubleYoVariable desiredVelocity = desiredVelocities.get(joint);
+
          DoubleTrajectoryGenerator trajectoryGenerator = trajectories.get(joint);
          trajectoryGenerator.compute(getTimeInCurrentState());
 
@@ -123,20 +113,20 @@ public class JointSpaceHandControlState extends State<HandControlState>
          // The joint uncontrollable so just all the desired position to the actual, and the rest to zero.
          if (hasJointBeenDisabledAtLeastOnce[i])
          {
-            desiredPosition.set(currentPosition);
-            desiredVelocity.set(0.0);
+            joint.setqDesired(currentPosition);
+            joint.setQdDesired(0.0);
             rateLimitedAcceleration.set(0.0);
             momentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
          }
          else
          {
-            desiredPosition.set(trajectoryGenerator.getValue());
-            desiredVelocity.set(trajectoryGenerator.getVelocity());
+            joint.setqDesired(trajectoryGenerator.getValue());
+            joint.setQdDesired(trajectoryGenerator.getVelocity());
             double feedforwardAcceleration = trajectoryGenerator.getAcceleration();
 
             PIDController pidController = pidControllers.get(joint);
             double desiredAcceleration = feedforwardAcceleration
-                  + pidController.computeForAngles(currentPosition, desiredPosition.getDoubleValue(), currentVelocity, desiredVelocity.getDoubleValue(), dt);
+                  + pidController.computeForAngles(currentPosition, joint.getqDesired(), currentVelocity, joint.getQdDesired(), dt);
 
             desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
 
@@ -144,9 +134,6 @@ public class JointSpaceHandControlState extends State<HandControlState>
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
-
-            joint.setqDesired(desiredPosition.getDoubleValue());
-            joint.setQdDesired(desiredVelocity.getDoubleValue());
          }
       }
    }
@@ -159,7 +146,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint joint = oneDoFJoints[i];
-            trajectories.get(joint).initialize(desiredPositions.get(joint).getDoubleValue(), desiredVelocities.get(joint).getDoubleValue());
+            trajectories.get(joint).initialize( joint.getqDesired(), joint.getQdDesired());
          }
       }
       else

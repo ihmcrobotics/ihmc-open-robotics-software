@@ -278,17 +278,12 @@ public class ManipulationControlModule
    private final Map<OneDoFJoint, Double> temporaryDesiredAngles = new HashMap<OneDoFJoint, Double>();
    
    public void initializeDesiredToCurrent()
-   {    
-      for (int joint = 0; joint < fullRobotModel.getOneDoFJoints().length; joint++)
-      {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJoints()[ joint];
-         temporaryDesiredAngles.put( oneDoFJoint, oneDoFJoint.getqDesired() );  
-      }
-      
+   {  
+      hasBeenInitialized.set(true);
       for (RobotSide side: RobotSide.values)
       {
-         handControlModules.get(side).moveUsingQuinticSplines( temporaryDesiredAngles, 1.0);
-      }
+         handControlModules.get(side).initializeDesiredToCurrent( );
+      }  
    }
 
    public void prepareForLocomotion()
