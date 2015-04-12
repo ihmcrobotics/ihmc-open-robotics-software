@@ -283,7 +283,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumAcceleration();
       DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumJerk();
 
-      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
+      // TODO Need to extract the maximum velocity parameter.
+      coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(null, maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
       this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
 
       String namePrefix = "walking";
@@ -1227,7 +1228,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          icpError2d.setIncludingFrame(desiredICP2d);
          icpError2d.sub(capturePoint2d);
 
-         double ellipticErrorSquared = (icpError2d.getX()/maxICPErrorBeforeSingleSupportX.getDoubleValue()) * (icpError2d.getX()/maxICPErrorBeforeSingleSupportX.getDoubleValue()) + (icpError2d.getY()/maxICPErrorBeforeSingleSupportY.getDoubleValue()) * (icpError2d.getY()/maxICPErrorBeforeSingleSupportY.getDoubleValue());
+         double ellipticErrorSquared = MathTools.square(icpError2d.getX()/maxICPErrorBeforeSingleSupportX.getDoubleValue())
+               + MathTools.square(icpError2d.getY()/maxICPErrorBeforeSingleSupportY.getDoubleValue());
          boolean closeEnough = ellipticErrorSquared < 1.0;
 
          
