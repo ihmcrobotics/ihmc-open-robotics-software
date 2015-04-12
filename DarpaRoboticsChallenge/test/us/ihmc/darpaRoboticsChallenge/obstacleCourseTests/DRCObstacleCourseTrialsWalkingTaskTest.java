@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
@@ -21,6 +22,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
@@ -53,6 +55,7 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 
 
+
 	@EstimatedDuration(duration = 38.2)
 	@Test(timeout = 191223)
    public void testStepOnCinderBlocks() throws SimulationExceededMaximumTimeException
@@ -73,6 +76,48 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.5);
+
+      drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3d center = new Point3d(13.10268850797296, 14.090724695197087, 1.146368436759061);
+      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage();
+   }
+	
+   
+	@Ignore
+	@EstimatedDuration(duration = 38.2)
+   @Test(timeout = 191223)
+   public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      String scriptName = "scripts/ExerciseAndJUnitScripts/TwoCinderBlocksStepOn_LeftFootTest.xml";
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.IN_FRONT_OF_TWO_HIGH_CINDERBLOCKS;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
+
+      ThreadTools.sleep(0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
+
+      DoubleYoVariable swingTime = (DoubleYoVariable) simulationConstructionSet.getVariable("swingTime");
+      DoubleYoVariable transferTime = (DoubleYoVariable) simulationConstructionSet.getVariable("transferTime");
+      
+      swingTime.set(2.0);
+      transferTime.set(2.0);
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
