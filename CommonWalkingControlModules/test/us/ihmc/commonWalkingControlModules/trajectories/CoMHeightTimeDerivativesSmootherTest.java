@@ -122,7 +122,7 @@ public class CoMHeightTimeDerivativesSmootherTest
          scs.updateAndTick();
       }
       
-      for (int i=0; i<(1.25/dt); i++)
+      for (int i=0; i<(1.5/dt); i++)
       {
          testTime.add(dt);
          smoother.smooth(comHeightDataOut, comHeightDataIn);
