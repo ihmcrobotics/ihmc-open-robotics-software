@@ -318,9 +318,13 @@ public class MomentumBasedControllerFactory
    public void reinitializeWalking(boolean keepPosition)
    {
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.WALKING);
-      if( keepPosition && walkingBehavior!= null )
+      if( keepPosition )
       {
-         walkingBehavior.initializeDesiredHeightToCurrent();
+         if ( walkingBehavior!= null )
+            walkingBehavior.initializeDesiredHeightToCurrent();
+         
+         if( variousWalkingManagers != null)
+            variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent();
       }
    }
    
