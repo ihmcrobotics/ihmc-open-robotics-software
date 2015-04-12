@@ -2,11 +2,15 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.Stoppable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -34,14 +38,15 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
 
    private final HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> trajectoryGenerator;
-   private final HashMap<OneDoFJoint, PIDController >   alternativeController;
-   private final HashMap<OneDoFJoint, BooleanYoVariable >   useAlternativeController;
+   private final HashMap<OneDoFJoint, PIDController >     alternativeController;
+   private final HashMap<OneDoFJoint, BooleanYoVariable > useAlternativeController;
    
    private final YoVariableDoubleProvider trajectoryTimeProvider;
    private final DoubleYoVariable timeProvider;
 
    private double initialTrajectoryTime;
    private final DesiredJointsPositionProvider desiredJointsProvider;
+   private final HandPoseProvider handPoseProvider;
    private boolean firstPacket = true;
 
    private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
@@ -52,7 +57,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private final static double MAX_DELTA_TO_BELIEVE_DESIRED = 0.05;
 
-   public JointPositionHighLevelController(MomentumBasedController momentumBasedController, DesiredJointsPositionProvider desiredJointsProvider)
+   public JointPositionHighLevelController(final MomentumBasedController momentumBasedController, final DesiredJointsPositionProvider desiredJointsProvider, final HandPoseProvider handPoseProvider)
    {
       super(controllerState);
 
@@ -65,6 +70,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
+      
+      this.handPoseProvider = handPoseProvider;
       
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
@@ -88,14 +95,42 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          useAlternativeController.put(joint, useAlternative ); 
       }
    }
+   
+   private void initializeFromJointMap(Map<OneDoFJoint, Double> jointTarget, double trajectoryTime)
+   {
+      initialTrajectoryTime = timeProvider.getDoubleValue();
+      trajectoryTimeProvider.set( trajectoryTime );
+      
+      for (Entry<OneDoFJoint, Double> entry: jointTarget.entrySet())
+      {
+         OneDoFJoint oneDoFJoint = entry.getKey();
+         double  desiredPosition = entry.getValue();
+         trajectoryGenerator.get(oneDoFJoint).setFinalPosition(desiredPosition);
+      }
+      
+      if (firstPacket)
+      {
+         firstPacket = false;
+
+         for (OneDoFJoint joint : jointsBeenControlled)
+         {
+            trajectoryGenerator.get(joint).initialize();
+            previousPosition.put(joint, joint.getQ());
+         }
+      }
+      else
+      {
+         for (OneDoFJoint joint : jointsBeenControlled)
+         {
+            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+         }
+      }
+   }
 
    private void initializeFromPacket(JointAnglesPacket packet)
    {
       initialTrajectoryTime = timeProvider.getDoubleValue();
-      System.out.println("initialTrajectoryTime " + initialTrajectoryTime);
       trajectoryTimeProvider.set(packet.getTrajectoryTime());
-
-      System.out.println(" packet.trajectoryTime " + packet.getTrajectoryTime());
 
       if (armJointAngles == null)
       {
@@ -257,7 +292,22 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       {
          initializeFromPacket(desiredJointsProvider.getNewPacket());
       }
-
+      
+      
+      for( RobotSide side: RobotSide.values)
+      {
+         if (handPoseProvider.checkForNewPose(side))
+         {
+            if (handPoseProvider.checkHandPosePacketDataType(side) == HandPosePacket.DataType.HAND_POSE)
+            {
+               // I am not planning to implement this for the time being 
+            }
+            else{            
+               initializeFromJointMap( handPoseProvider.getFinalDesiredJointAngleMaps(side), handPoseProvider.getTrajectoryTime()  );
+            }
+         }
+      }
+       
       double time = timeProvider.getDoubleValue() - initialTrajectoryTime;
 
       for (OneDoFJoint joint : jointsBeenControlled)

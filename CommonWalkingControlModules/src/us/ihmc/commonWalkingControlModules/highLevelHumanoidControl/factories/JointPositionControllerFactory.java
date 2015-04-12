@@ -18,7 +18,7 @@ public class JointPositionControllerFactory implements HighLevelBehaviorFactory
    public HighLevelBehavior createHighLevelBehavior(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          MomentumBasedController momentumBasedController, ICPAndMomentumBasedController icpAndMomentumBasedController)
    {
-      return new JointPositionHighLevelController(momentumBasedController, variousWalkingProviders.getDesiredJointsPositionProvider() );
+      return new JointPositionHighLevelController(momentumBasedController, variousWalkingProviders.getDesiredJointsPositionProvider(), variousWalkingProviders.getDesiredHandPoseProvider() );
    }
 
    @Override
