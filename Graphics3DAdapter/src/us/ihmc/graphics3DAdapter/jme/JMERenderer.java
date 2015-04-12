@@ -615,7 +615,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             gpuLidar.updateViewPortScenes();
          }
 
-         PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.now(), 2) + " s");
+         PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
       }
    }
 
