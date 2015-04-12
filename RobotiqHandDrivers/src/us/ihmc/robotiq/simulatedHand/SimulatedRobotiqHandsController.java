@@ -16,7 +16,6 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.utilities.humanoidRobot.partNames.FingerName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -225,15 +224,15 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case OPEN_INDEX:
-                  individualRobotiqHandController.open(FingerName.INDEX);
+                  //TODO
                   break;
 
                case OPEN_MIDDLE:
-                  individualRobotiqHandController.open(FingerName.MIDDLE);
+                //TODO
                   break;
 
                case OPEN_THUMB:
-                  individualRobotiqHandController.open(FingerName.THUMB);
+                //TODO
                   break;
 
                case CLOSE:
@@ -241,12 +240,11 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case CLOSE_FINGERS:
-                  individualRobotiqHandController.close(FingerName.INDEX);
-                  individualRobotiqHandController.close(FingerName.MIDDLE);
+                //TODO
                   break;
 
                case CLOSE_THUMB:
-                  individualRobotiqHandController.close(FingerName.THUMB);
+                //TODO
                   break;
 
                case RESET:
@@ -262,26 +260,26 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case CRUSH_INDEX:
-                  individualRobotiqHandController.crush(FingerName.INDEX);
+                //TODO
                   break;
 
                case CRUSH_MIDDLE:
-                  individualRobotiqHandController.crush(FingerName.MIDDLE);
+                //TODO
                   break;
 
                case CRUSH_THUMB:
-                  individualRobotiqHandController.crush(FingerName.THUMB);
+                //TODO
                   break;
                   
                case STOP:
                   individualRobotiqHandController.stop();
                   
                case PINCH_GRIP:
-                  individualRobotiqHandController.pinch();
+                  individualRobotiqHandController.pinchGrip();
                   break;
                   
                case BASIC_GRIP:
-                  //TODO
+                  individualRobotiqHandController.basicGrip();
                   break;
                   
                case WIDE_GRIP:
