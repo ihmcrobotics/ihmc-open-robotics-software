@@ -564,9 +564,10 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
       twistCalculator.packTwistOfBody(pelvisTwist, pelvis);
-      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvisTwist.packLinearPart(pelvisLinearVelocity);
-      if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() > -1e-10))
+      pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
+
+      if (checkVelocityForSwingSingularityAvoidance.getBooleanValue() && (desiredFootLinearVelocity.getZ() - pelvisLinearVelocity.getZ() > -1e-10))
          return;
          
       checkVelocityForSwingSingularityAvoidance.set(false);
