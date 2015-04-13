@@ -12,11 +12,14 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -42,12 +45,13 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final HashMap<RosJointStatePublisher, JointStatePublisherHelper> additionalJointStatePublisherMap = new HashMap<RosJointStatePublisher, JointStatePublisherHelper>();
    private RosJointStatePublisher[] additionalJointStatePublishers = new RosJointStatePublisher[0];
    private final RosJointStatePublisher jointStatePublisher;
-   private final RosImuPublisher pelvisImuPublisher;
-   private final RosCachedRawIMUDataPublisher batchImuPublisher;
+   private final RosImuPublisher[] imuPublishers;
+   private final RosCachedRawIMUDataPublisher[] batchImuPublishers;
    private final RosOdometryPublisher pelvisOdometryPublisher;
    private final RosStringPublisher robotMotionStatusPublisher;
    private final RosInt32Publisher robotBehaviorPublisher;
    private final ForceSensorDefinition[] forceSensorDefinitions;
+   private final IMUDefinition[] imuDefinitions;
    private final ArrayList<String> nameList = new ArrayList<String>();
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
@@ -69,18 +73,32 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    {
       SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
+      this.imuDefinitions = fullRobotModel.getIMUDefinitions();
       this.rosMainNode = rosMainNode;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.tfPublisher = tfPublisher;
 
       boolean latched = false;
       this.jointStatePublisher = new RosJointStatePublisher(latched);
-      this.pelvisImuPublisher = new RosImuPublisher(latched);
       this.bothFeetForceSensorPublisher = new RosTrooperFootSensorPublisher(latched);
-      this.batchImuPublisher = new RosCachedRawIMUDataPublisher(latched);
       this.pelvisOdometryPublisher = new RosOdometryPublisher(latched);
       this.robotMotionStatusPublisher = new RosStringPublisher(latched);
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
+      
+      this.batchImuPublishers = new RosCachedRawIMUDataPublisher[imuDefinitions.length];
+      this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
+      for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
+      {
+         String imuName = imuDefinitions[sensorNumber].getName();
+         
+         RosImuPublisher rosImuPublisher = new RosImuPublisher(latched);
+         this.imuPublishers[sensorNumber] = rosImuPublisher;
+         rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
+         
+         RosCachedRawIMUDataPublisher batchImuPublisher = new RosCachedRawIMUDataPublisher(latched);
+         this.batchImuPublishers[sensorNumber] = batchImuPublisher;
+         rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName + "_" + "batch", batchImuPublisher);
+      }
       
       SideDependentList<String> feetForceSensorNames =  sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> handForceSensorNames =  sensorInformation.getWristForceSensorNames();
@@ -99,11 +117,9 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          nameList.add(joints[i].getName());
       }
 
-      jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, fullRobotModel.getForceSensorDefinitions());
+      jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
 
       rosMainNode.attachPublisher(rosNameSpace + IHMCRosApiMessageMap.PACKET_TO_TOPIC_MAP.get(RobotConfigurationData.class), jointStatePublisher);
-      rosMainNode.attachPublisher(rosNameSpace + "/output/pelvisImu", pelvisImuPublisher);
-      rosMainNode.attachPublisher(rosNameSpace + "/output/batch_raw_imu", batchImuPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_pose", pelvisOdometryPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_motion_status", robotMotionStatusPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
@@ -207,10 +223,17 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
             bothFeetForceSensorPublisher.publish(timeStamp, footForceSensorWrenches.get(RobotSide.LEFT), footForceSensorWrenches.get(RobotSide.RIGHT));
 
-            pelvisImuPublisher.publish(timeStamp, robotConfigurationData.getPelvisLinearAcceleration(), robotConfigurationData.getRawImuOrientation(),
-                  robotConfigurationData.getRawImuAngularVelocity());//TODO: XXX: FIXME: this has both pelvis and imu frame data in it! fix this!
+            for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
+            {
+               RosImuPublisher rosImuPublisher = this.imuPublishers[sensorNumber];
+               IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
+               ReferenceFrame imuFrame = imuDefinitions[sensorNumber].getIMUFrame();
+               rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
+               
+               RosCachedRawIMUDataPublisher batchImuPublisher = batchImuPublishers[sensorNumber];
+               batchImuPublisher.appendRawImuData(timeStamp, imuPacket);
+            }
             
-            batchImuPublisher.appendRawImuData(timeStamp, robotConfigurationData.getRawImuOrientation(), robotConfigurationData.getRawImuLinearAcceleration());
             
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
                   robotConfigurationData.getPelvisAngularVelocity(), "/pelvis");
