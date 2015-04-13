@@ -23,7 +23,7 @@ public class ContactableSteeringWheelRobot extends ContactableValveRobot
    
    public ContactableSteeringWheelRobot(String name, ValveType valveType, double valveNumberOfPossibleTurns, FramePose valvePoseInWorld)
    {
-      this(name, valveType.getValveRadius(), valveType.getValveOffsetFromWall(), valveType.getValveThickness(), valveType.getNumberOfSpokes(), valveType
+      this(name, 7.0 * 0.0254, valveType.getValveOffsetFromWall(), valveType.getValveThickness(), valveType.getNumberOfSpokes(), valveType
             .getSpokesThickness(), valvePoseInWorld, valveNumberOfPossibleTurns, valveType.getValveMass());
    }
 
