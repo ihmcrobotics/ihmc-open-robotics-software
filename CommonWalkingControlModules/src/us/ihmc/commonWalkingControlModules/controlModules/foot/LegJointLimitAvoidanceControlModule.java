@@ -1,8 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.*;
@@ -28,7 +33,8 @@ public class LegJointLimitAvoidanceControlModule
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;
    private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
-   GeometricJacobian jacobian;
+   private GeometricJacobian jacobian;
+   private int numJoints;
 
    private DoubleYoVariable[] originalDesiredPositions;
    private DoubleYoVariable[] alphas;
@@ -36,6 +42,17 @@ public class LegJointLimitAvoidanceControlModule
    private YoFramePose originalDesiredPose;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
+
+   private final LinearSolver<DenseMatrix64F> solver;
+   private final DenseMatrix64F jacobianMatrix;
+   private final DenseMatrix64F jacobianMatrixTransposed;
+   private final DenseMatrix64F jacobianTimesJaconianTransposedMatrix;
+   private final DenseMatrix64F lamdaSquaredMatrix;
+   private final DenseMatrix64F jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix;
+   private final DenseMatrix64F originalDesiredVelocity;
+   private final DenseMatrix64F intermediateResult;
+   private final DenseMatrix64F jointVelocities;
+   private final DenseMatrix64F adjustedDesiredVelocity;
 
    public LegJointLimitAvoidanceControlModule(YoVariableRegistry registry, MomentumBasedController momentumBasedController, RobotSide robotSide){
       percentJointRangeForThreshold = new DoubleYoVariable("percentJointRangeForThreshold", registry);
@@ -48,12 +65,12 @@ public class LegJointLimitAvoidanceControlModule
       jacobian = new GeometricJacobian(ikJoints, cloneOfFootFrame);
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
 
-      int size = ikJoints.length;
+      numJoints = ikJoints.length;
       {
-         originalDesiredPositions = new DoubleYoVariable[size];
-         alphas = new DoubleYoVariable[size];
-         adjustedDesiredPositions = new DoubleYoVariable[size];
-         for (int i = 0; i < size; i++){
+         originalDesiredPositions = new DoubleYoVariable[numJoints];
+         alphas = new DoubleYoVariable[numJoints];
+         adjustedDesiredPositions = new DoubleYoVariable[numJoints];
+         for (int i = 0; i < numJoints; i++){
             originalDesiredPositions[i] = new DoubleYoVariable("originalDesiredPositions" + i, registry);
             alphas[i] = new DoubleYoVariable("alpha" + i, registry);
             adjustedDesiredPositions[i] = new DoubleYoVariable("adjustedDesiredPositions" + i, registry);
@@ -64,6 +81,21 @@ public class LegJointLimitAvoidanceControlModule
       }
 
       percentJointRangeForThreshold.set(0.05);
+
+
+      jacobianMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numJoints);
+      jacobianMatrixTransposed = new DenseMatrix64F(numJoints, SpatialMotionVector.SIZE);
+      jacobianTimesJaconianTransposedMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+
+      lamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
+      jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
+
+      solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      originalDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+      intermediateResult = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+
+      jointVelocities = new DenseMatrix64F(numJoints, 1);
+      adjustedDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    }
 
    public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
@@ -77,10 +109,21 @@ public class LegJointLimitAvoidanceControlModule
       // adjust joints based on joint angle limits
       adjustJointPositions();
 
-      //TODO calcualte the new desired position and orientation
+      //calcualte the new desired position and orientation
+      ikJoints[0].updateFramesRecursively();
+      ReferenceFrame adjustedFootFrame = jacobian.getEndEffectorFrame();
+      desiredPosition.setToZero(adjustedFootFrame);
+      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredOrientation.setToZero(adjustedFootFrame);
+      desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
-      //TODO calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
-
+      //calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
+      MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredAngularVelocity.getVector(), 0, 0);
+      MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredLinearVelocityOfOrigin.getVector(), 3, 0);
+      calculateAdjustedVelocities();
+      double[] adjustedVelocities = adjustedDesiredVelocity.getData();
+      desiredAngularVelocity.set(adjustedVelocities[0], adjustedVelocities[1], adjustedVelocities[2]);
+      desiredLinearVelocityOfOrigin.set(adjustedVelocities[3], adjustedVelocities[4], adjustedVelocities[5]);
    }
 
    private void adjustJointPositions()
@@ -112,5 +155,42 @@ public class LegJointLimitAvoidanceControlModule
          adjustedDesiredPositions[i].set(adjustedPosition);
          ikJoints[i].setqDesired(adjustedPosition);
       }
+   }
+
+   private void calculateAdjustedVelocities(){
+
+      int numberOfConstraints = SpatialMotionVector.SIZE;
+
+      // J
+      jacobianMatrix.set(jacobian.getJacobianMatrix());
+
+      // J^T
+      CommonOps.transpose(jacobianMatrix, jacobianMatrixTransposed);
+
+      // J J^T
+      CommonOps.multOuter(jacobianMatrix, jacobianTimesJaconianTransposedMatrix);
+
+
+      intermediateResult.reshape(numberOfConstraints, 1);
+
+      lamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
+      CommonOps.setIdentity(lamdaSquaredMatrix);
+      CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
+
+      jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
+      jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJaconianTransposedMatrix);
+      CommonOps.add(jacobianTimesJaconianTransposedMatrix, lamdaSquaredMatrix, jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix);
+
+      boolean success = solver.setA(jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix);
+
+      // Solve J*J^T deltaX = f
+      solver.solve(originalDesiredVelocity, intermediateResult);
+      CommonOps.mult(jacobianMatrixTransposed, intermediateResult, jointVelocities);
+
+      for (int i = 0; i < numJoints; i++){
+         jointVelocities.times(i, alphas[i].getDoubleValue());
+      }
+
+      CommonOps.mult(jacobianMatrix, jointVelocities, adjustedDesiredVelocity);
    }
 }
