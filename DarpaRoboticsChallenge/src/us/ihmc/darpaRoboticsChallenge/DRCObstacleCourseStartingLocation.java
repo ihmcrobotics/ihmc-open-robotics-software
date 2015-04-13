@@ -23,6 +23,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
    EASY_STEPPING_STONES,
    STEPPING_STONES,
    STAIRS,
+   TOP_OF_STAIRS,
    ROCKS,
    LADDER,
    IN_FRONT_OF_ZIGZAG_BLOCKS,
@@ -63,6 +64,7 @@ public enum DRCObstacleCourseStartingLocation implements DRCStartingLocation
       addMapping(DRCObstacleCourseStartingLocation.SMALL_WALL, SquaredUpDRCDemo01RobotAtPlatformsInitialSetup.createInitialSetupAtNthWall(2));
       addMapping(DRCObstacleCourseStartingLocation.SMALL_PLATFORM_TURNED, new OffsetAndYawRobotInitialSetup(-3.1, -4.73, 0.0, 3.0/4.0 * Math.PI));
       addMapping(DRCObstacleCourseStartingLocation.STAIRS, new SquaredUpDRCDemo01Robot(0.0, 1.9818, Math.toRadians(135.0), 0.0));
+      addMapping(DRCObstacleCourseStartingLocation.TOP_OF_STAIRS, new SquaredUpDRCDemo01Robot(0.60, 5.16, Math.toRadians(135.0), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.STEPPING_STONES, new SquaredUpDRCDemo01Robot(0.3, 7.2588, Math.toRadians(174.0695), Math.toRadians(5.0)));
       addMapping(DRCObstacleCourseStartingLocation.MID_LADDER, new SquaredUpDRCDemo01Robot(0.3, 7.1, Math.toRadians(45 * 3 / 2), 0.0));
       addMapping(DRCObstacleCourseStartingLocation.LADDER, new SquaredUpDRCDemo01Robot(0.0, 6.5, Math.toRadians(45 * 3 / 2), 0.0));
