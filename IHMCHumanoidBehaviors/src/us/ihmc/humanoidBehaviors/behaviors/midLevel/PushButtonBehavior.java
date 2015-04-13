@@ -32,7 +32,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class PushButtonBehavior extends BehaviorInterface
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final boolean OVERRIDE = true;
    private static final boolean FORCE_CONTROL = true;
