@@ -21,8 +21,10 @@ import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.utilities.inputDevices.keyboard.Key;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.utilities.math.geometry.FrameCylinder3d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicVector;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -33,6 +35,8 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    private static final double DEFAULT_MASS = 1000000.0;
 
    private final FrameCylinder3d cylinder;
+   
+   private final RigidBodyTransform cylinderCenterTransformToWorld = new RigidBodyTransform();
    
    private final NullJoint nullJoint;
    private final Link cylinderLink;
@@ -58,11 +62,14 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       cylinderTransform.get(offset);
       cylinderTransform.get(rotation);
       
+      FramePoint cylinderCenter = new FramePoint(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
+      cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
+      cylinderCenterTransformToWorld.set(rotation, cylinderCenter.getVectorCopy());
+      
       Vector3d axis = new Vector3d(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       rotationTransform.setRotation(rotation);
       rotationTransform.transform(axis);
-      
       
       nullJoint = new NullJoint(name + "NullJoint", offset, this);
 
@@ -118,6 +125,12 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    public NullJoint getNullJoint()
    {
       return nullJoint;
+   }
+   
+   @Override
+   public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
+   {
+      transformToWorld.set(cylinderCenterTransformToWorld);
    }
 
    public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
