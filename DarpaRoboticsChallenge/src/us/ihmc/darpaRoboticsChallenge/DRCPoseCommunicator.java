@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -9,6 +10,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -20,6 +22,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
@@ -59,9 +62,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+      
       setupForceSensorMassCompensators(estimatorModel);
 
-      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(jointConfigurationGathererAndProducer.getJoints(), jointConfigurationGathererAndProducer.getForceSensorDefinitions(), sensorReader), 16);
+      IMUDefinition[] imuDefinitions = estimatorModel.getIMUDefinitions();
+      ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
+      OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
+      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions, sensorReader), 16);
       startWriterThread();
    }
 
@@ -144,10 +151,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
 
    // puts the state data into the ring buffer for the output thread
-   Vector3d rawImuLinearAccelerationToPack = new Vector3d();
+   Vector3d imuLinearAcceleration = new Vector3d();
    Vector3d rawImuAngularVelocityToPack = new Vector3d();
-   Matrix3d orientationToPack = new Matrix3d();
-   Quat4d orientationQuat= new Quat4d();
+   Matrix3d imuOrientationAsMatrix = new Matrix3d();
+   Quat4d imuOrientationAsQuat= new Quat4d();
 
    @Override
    public void write()
@@ -163,12 +170,19 @@ public class DRCPoseCommunicator implements RawOutputWriter
       long pps = sensorOutputMapReadOnly.getSensorHeadPPSTimestamp();
       jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
       
-      IMUSensorReadOnly rawImu =  sensorRawOutputMapReadOnly.getIMURawOutputs().get(0);
-      rawImu.getLinearAccelerationMeasurement(rawImuLinearAccelerationToPack);
-      rawImu.getOrientationMeasurement(orientationToPack);
-      RotationFunctions.setQuaternionBasedOnMatrix3d(orientationQuat, orientationToPack);
-      rawImu.getAngularVelocityMeasurement(rawImuAngularVelocityToPack);
-      state.setRawImuData(rawImuLinearAccelerationToPack, orientationQuat, rawImuAngularVelocityToPack);
+      List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
+      for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
+      {
+         IMUSensorReadOnly imuSensor =  imuRawOutputs.get(sensorNumber);
+         IMUPacket imuPacketToPack = state.getImuPacketForSensor(sensorNumber);
+         
+         imuSensor.getLinearAccelerationMeasurement(imuLinearAcceleration);
+         imuSensor.getOrientationMeasurement(imuOrientationAsMatrix);
+         RotationFunctions.setQuaternionBasedOnMatrix3d(imuOrientationAsQuat, imuOrientationAsMatrix);
+         imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocityToPack);
+         
+         imuPacketToPack.set(imuLinearAcceleration, imuOrientationAsQuat, rawImuAngularVelocityToPack);
+      }
       
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
 
@@ -181,19 +195,21 @@ public class DRCPoseCommunicator implements RawOutputWriter
    {
       private final OneDoFJoint[] joints;
       private final ForceSensorDefinition[] forceSensorDefinitions;
+      private final IMUDefinition[] imuDefinitions;
       private final SensorReader sensorReader;
 
-      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, SensorReader sensorReader)
+      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions, SensorReader sensorReader)
       {
          this.joints = joints;
          this.forceSensorDefinitions = forceSensorDefinitions;
+         this.imuDefinitions = imuDefinitions;
          this.sensorReader = sensorReader;
       }
 
       @Override
       public RobotConfigurationData newInstance()
       {
-         return new RobotConfigurationData(joints, forceSensorDefinitions, sensorReader.newAuxiliaryRobotDataInstance());
+         return new RobotConfigurationData(joints, forceSensorDefinitions, sensorReader.newAuxiliaryRobotDataInstance(), imuDefinitions);
       }
 
    }

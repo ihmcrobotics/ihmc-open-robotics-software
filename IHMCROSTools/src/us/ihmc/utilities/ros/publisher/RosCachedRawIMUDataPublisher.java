@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
 import std_msgs.Header;
 import trooper_mlc_msgs.RawIMUData;
+import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
@@ -48,22 +49,21 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
    /**
     * @param timestampInNanoSeconds
     * @param rawImuAngularVelocity
-    * @param rawImuLinearAcceleration
+    * @param linearAccele
     */
-   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4f rawImuOrientation, Vector3f rawImuLinearAcceleration)
+   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4d orientation, Vector3d linearAcceleration)
    {
       RawIMUData rawImuData = newMessageFromType(trooper_mlc_msgs.RawIMUData._TYPE);
-      RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, rawImuOrientation);
-      
+      RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);
       rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
       //delta angle (radians) in the frame of the IMU
       rawImuData.setDax(currentImuOrientation[2] - previousImuOrientation[2]);
       rawImuData.setDay(currentImuOrientation[1] - previousImuOrientation[1]);
       rawImuData.setDaz(currentImuOrientation[0] - previousImuOrientation[0]);
       //linear acceleration (m/s^2) in the frame of the IM
-      rawImuData.setDdx(rawImuLinearAcceleration.getX());
-      rawImuData.setDdy(rawImuLinearAcceleration.getY());
-      rawImuData.setDdz(rawImuLinearAcceleration.getZ());
+      rawImuData.setDdx(linearAcceleration.getX());
+      rawImuData.setDdy(linearAcceleration.getY());
+      rawImuData.setDdz(linearAcceleration.getZ());
       rawImuData.setPacketCount(rawImuCounter);
       rawImuCounter++;
       availableImuData.add(rawImuData);
@@ -83,6 +83,11 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
          previousImuOrientation[i] = currentImuOrientation[i];
       }
    }
+   
+   public void appendRawImuData(long timeStamp, IMUPacket imuPacket)
+   {
+      appendRawImuData(timeStamp, imuPacket.getOrientation(), imuPacket.getLinearAcceleration());
+   } 
    
    public ArrayList<trooper_mlc_msgs.RawIMUData> createRandomRawImuData(Random random, int size)
    {
@@ -105,5 +110,5 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
          imuBatch.add(rawImuData);
       }
       return imuBatch;
-   } 
+   }
 }

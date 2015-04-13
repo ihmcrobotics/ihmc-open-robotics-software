@@ -81,7 +81,7 @@ public class ThePeoplesGloriousNetworkProcessor
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
-      setupRosLocalization();
+//      setupRosLocalization();
       setupErrorTopics();
 
       rosMainNode.execute();
