@@ -827,6 +827,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private Footstep previousDesiredFootstep;
    private class SingleSupportState extends State<WalkingState>
    {
       private final RobotSide swingSide;
@@ -837,7 +838,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private final FramePoint2d desiredCMP = new FramePoint2d();
 
-      private Footstep transferFromDesiredFootstep;
       private Footstep nextFootstep;
       private Footstep squareUpFootstepForPushRecovery;
       private double captureTime;
@@ -991,8 +991,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          capturePointPlannerAdapter.clear();
 
          footSwitches.get(swingSide).reset();
-
-         transferFromDesiredFootstep = nextFootstep;
          
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
@@ -1071,7 +1069,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          //double comHeight = centerOfMass.getZ() - footHeight;
 
          TransferToAndNextFootstepsData transferToAndNextFootstepsData = createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
-         transferToAndNextFootstepsData.setTransferFromDesiredFootstep(transferFromDesiredFootstep);
+         transferToAndNextFootstepsData.setTransferFromDesiredFootstep(previousDesiredFootstep);
          //FramePoint2d finalDesiredICP = getSingleSupportFinalDesiredICPForWalking(transferToAndNextFootstepsData, swingSide);
 
          supportLeg.set(supportSide);
@@ -1119,8 +1117,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
 
          previousSupportSide.set(swingSide.getOppositeSide());
-
          resetLoadedLegIntegrators(swingSide);
+         
+         previousDesiredFootstep = nextFootstep;
       }
    }
 
