@@ -213,7 +213,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             batchImuPublisher.appendRawImuData(timeStamp, robotConfigurationData.getRawImuOrientation(), robotConfigurationData.getRawImuLinearAcceleration());
             
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                  robotConfigurationData.getPelvisAngularVelocity(), "/pelvis_imu");
+                  robotConfigurationData.getPelvisAngularVelocity(), "/pelvis");
 
             robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
             robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
