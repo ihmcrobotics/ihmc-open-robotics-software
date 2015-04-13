@@ -131,7 +131,7 @@ public final class RobotiqHandInterface
 	private final byte INDIVIDUAL_FINGER_CONTROL = 	0b00000100;
 	//bit 3
 	private final byte CONCURRENT_SCISSOR_CONTROL = 	0b00000000;
-//	private final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
+	private final byte INDIVIDUAL_SCISSOR_CONTROL = 	0b00001000;
 	//bits 4 to 7 reserved
 	
 	//byte 2 (gripper options 2)
@@ -329,8 +329,8 @@ public final class RobotiqHandInterface
 	private byte initializedStatus;
 	private byte operationMode;
 	private byte commandedStatus;
-//	private byte fingerControl;
-//	private byte scissorControl;
+	private byte fingerControl;
+	private byte scissorControl;
 	private byte[] dataFromHand = new byte[32]; //buffer extracted for efficiency
 	private byte[] dataToSend = new byte[32]; //buffer extracted for efficiency
 	private byte[] status;
@@ -414,13 +414,13 @@ public final class RobotiqHandInterface
 		initializedStatus = INITIALIZED;
 		operationMode = BASIC_MODE;
 		commandedStatus = STANDBY;
-//		fingerControl = CONCURRENT_FINGER_CONTROL;
-//		scissorControl = CONCURRENT_SCISSOR_CONTROL;
+		fingerControl = INDIVIDUAL_FINGER_CONTROL;
+		scissorControl = INDIVIDUAL_SCISSOR_CONTROL;//CONCURRENT_SCISSOR_CONTROL;
 		
 		sendRequest(SET_REGISTERS,
 				REGISTER_START,
 				(byte)(initializedStatus | operationMode | commandedStatus),
-				(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL),
+				(byte)(fingerControl | scissorControl),
 				(byte)0x00,	//reserved byte
 				(byte)position[FINGER_A],
 				(byte)speed[FINGER_A],
@@ -449,7 +449,7 @@ public final class RobotiqHandInterface
 			sendRequest(SET_REGISTERS,
 						REGISTER_START,
 						(byte)(initializedStatus | operationMode | commandedStatus),
-						(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL));
+						(byte)(fingerControl | scissorControl));
 		
 			ThreadTools.sleep(200);
 			try
@@ -471,7 +471,7 @@ public final class RobotiqHandInterface
 		sendRequest(SET_REGISTERS,
 				REGISTER_START,
 				(byte)(initializedStatus | operationMode | commandedStatus),
-				(byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL));
+				(byte)(fingerControl | scissorControl));
 	}
 	
 	public void shutdown()
@@ -747,7 +747,7 @@ public final class RobotiqHandInterface
 		
 		for(int finger : fingers)
 		{
-			desiredPosition[finger] = 0x00 + desiredPosition[finger] * 0xFF;
+//			desiredPosition[finger] = 0x00 + desiredPosition[finger] * 0xFF;
 			
 			position[finger] = (byte)((int)desiredPosition[finger] & 0xFF);
 			force[finger] = MAX_FORCE;
@@ -958,7 +958,7 @@ public final class RobotiqHandInterface
 		commandedStatus = GO_TO_REQUESTED;
 		
 		dataToSend[0] = (byte)(initializedStatus | operationMode | commandedStatus); //Whenever sending a motion request, the command hand positions bit (GO_TO_REQUESTED) must be sent
-		dataToSend[1] = (byte)(INDIVIDUAL_FINGER_CONTROL | CONCURRENT_SCISSOR_CONTROL);
+		dataToSend[1] = (byte)(fingerControl | scissorControl);
 		dataToSend[2] = 0x00; //reserved byte
 		//update finger a/all fingers
 		dataToSend[3] = position[FINGER_A];
@@ -986,6 +986,7 @@ public final class RobotiqHandInterface
 //		System.out.println(position[FINGER_A]);
 //		System.out.println(position[FINGER_B]);
 //		System.out.println(position[FINGER_C]);
+//		System.out.println(position[SCISSOR]);
 
 		byte[] dataToSendCopy = new byte[dataLength];
 		for(int i = 0; i < dataLength; i++)

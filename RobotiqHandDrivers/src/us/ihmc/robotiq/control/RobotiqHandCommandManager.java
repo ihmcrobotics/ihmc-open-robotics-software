@@ -1,6 +1,8 @@
 package us.ihmc.robotiq.control;
 
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -9,6 +11,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.PacketConsumer;
@@ -67,10 +71,14 @@ public class RobotiqHandCommandManager extends HandCommandManager
       JFrame frame = new JFrame();
       FlowLayout layout = new FlowLayout();
       frame.setLayout(layout);
+      GridBagConstraints gc = new GridBagConstraints();
       frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       for (final RobotSide robotSide : RobotSide.values)
       {
+         gc.gridx = 0;
+         gc.gridy = 0;
+
          NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
          final PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port,
                new IHMCCommunicationKryoNetClassList());
@@ -98,11 +106,62 @@ public class RobotiqHandCommandManager extends HandCommandManager
                handModuleCommunicator.send(new FingerStatePacket(robotSide, (FingerState) (stateToSend.getSelectedItem())));
             }
          });
-         frame.getContentPane().add(new JLabel(robotSide.name()));
-         frame.getContentPane().add(stateToSend);
-         frame.getContentPane().add(button);
-      }
+         
+         JPanel panel = new JPanel(new GridBagLayout());
+         panel.add(new JLabel(robotSide.name()), gc);
+         
+         gc.gridx++;
+         panel.add(stateToSend, gc);
 
+         gc.gridx++;
+         panel.add(button, gc);
+
+         //sliders
+         final JSlider indexSlider = new JSlider(JSlider.HORIZONTAL, 1, 250, 1);
+         final JSlider middleSlider = new JSlider(JSlider.HORIZONTAL, 1, 250, 1);
+         final JSlider thumbSlider = new JSlider(JSlider.HORIZONTAL, 1, 250, 1);
+         final JSlider spreadSlider = new JSlider(JSlider.HORIZONTAL, 1, 250, 0x8C);
+         
+         gc.gridx = 0;
+         gc.gridy++;
+         panel.add(new JLabel("Index"), gc);
+         gc.gridx++;
+         panel.add(indexSlider, gc);
+         
+         gc.gridx = 0;
+         gc.gridy++;
+         panel.add(new JLabel("Middle"), gc);
+         gc.gridx++;
+         panel.add(middleSlider, gc);
+         
+         gc.gridx = 0;
+         gc.gridy++;
+         panel.add(new JLabel("Thumb"), gc);
+         gc.gridx++;
+         panel.add(thumbSlider, gc);
+         
+         gc.gridx = 0;
+         gc.gridy++;
+         panel.add(new JLabel("Spread"), gc);
+         gc.gridx++;
+         panel.add(spreadSlider, gc);
+         
+         gc.gridx++;
+         JButton sendSliderPositions = new JButton("Send");
+         sendSliderPositions.addActionListener(new ActionListener()
+         {
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+               handModuleCommunicator.send(new ManualHandControlPacket(robotSide, indexSlider.getValue(), middleSlider.getValue(), thumbSlider.getValue(), spreadSlider.getValue(), 1));
+            }
+         });
+         panel.add(sendSliderPositions, gc);
+         
+         frame.add(panel);
+      }
+      
+      
       frame.pack();
       frame.setVisible(true);
    }
