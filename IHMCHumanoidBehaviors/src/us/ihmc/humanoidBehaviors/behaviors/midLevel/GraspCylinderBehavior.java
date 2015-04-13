@@ -1,11 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.communication.packets.behaviors.GraspCylinderPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FingerStateTask;
@@ -33,6 +35,8 @@ public class GraspCylinderBehavior extends BehaviorInterface
    private final BooleanYoVariable haveInputsBeenSet;
    private final DoubleYoVariable yoTime;
 
+   private final ConcurrentListeningQueue<GraspCylinderPacket> graspCylinderPacketListener;
+
    private RobotSide robotSide = null;
 
    private final boolean DEBUG = false;
@@ -50,9 +54,22 @@ public class GraspCylinderBehavior extends BehaviorInterface
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
+
+      graspCylinderPacketListener = new ConcurrentListeningQueue<GraspCylinderPacket>();
+      super.attachNetworkProcessorListeningQueue(graspCylinderPacketListener, GraspCylinderPacket.class);
+
    }
 
-   public void setGraspPose(RobotSide robotSide, FramePoint graspPoint, FrameVector graspedCylinderLongAxis, boolean stopHandIfCollision)
+   public void setInput(GraspCylinderPacket graspCylinderPacket)
+   {
+      FramePoint graspPoint = new FramePoint(worldFrame, graspCylinderPacket.graspPointInWorld);
+      FrameVector graspCylinderLongAxis = new FrameVector(worldFrame, graspCylinderPacket.getCylinderLongAxisInWorld());
+      double palmOffsetFromWrist = graspCylinderPacket.getPalmOffsetFromWrist();
+      
+      setGraspPose(graspCylinderPacket.getRobotSide(), graspPoint, graspCylinderLongAxis, palmOffsetFromWrist, false);
+   }
+
+   public void setGraspPose(RobotSide robotSide, FramePoint graspPoint, FrameVector graspedCylinderLongAxis, double palmOffsetFromWrist, boolean stopHandIfCollision)
    {
       this.robotSide = robotSide;
 
@@ -63,10 +80,10 @@ public class GraspCylinderBehavior extends BehaviorInterface
 
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
             fullRobotModel, yoTime, handPoseBehavior, 1.0);
-      
-      GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
-            fullRobotModel, yoTime, handPoseBehavior, 1.0);
-      
+
+      GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, palmOffsetFromWrist, fullRobotModel, yoTime,
+            handPoseBehavior, 1.0);
+
       FingerStateTask closeHandTask = new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior, yoTime);
 
       pipeLine.clearAll();
@@ -82,6 +99,11 @@ public class GraspCylinderBehavior extends BehaviorInterface
    @Override
    public void doControl()
    {
+      if (graspCylinderPacketListener.isNewPacketAvailable() && !haveInputsBeenSet.getBooleanValue())
+      {
+         setInput(graspCylinderPacketListener.getNewestPacket());
+      }
+      
       pipeLine.doControl();
    }
 

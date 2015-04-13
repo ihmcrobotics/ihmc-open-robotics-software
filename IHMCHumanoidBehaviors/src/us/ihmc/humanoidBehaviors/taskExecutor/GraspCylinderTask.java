@@ -15,11 +15,12 @@ public class GraspCylinderTask extends BehaviorTask
 
    private final FramePoint graspTarget;
    private final FrameVector graspCylinderLongAxis;
+   private final double palmOffsetFromWrist;
 
    private final FullRobotModel fullRobotModel;
    private final double trajectoryTime;
 
-   public GraspCylinderTask(RobotSide robotSide, FramePoint graspTarget, FrameVector graspCylinderLongAxis, FullRobotModel fullRobotModel,
+   public GraspCylinderTask(RobotSide robotSide, FramePoint graspTarget, FrameVector graspCylinderLongAxis, double palmOffsetFromWrist, FullRobotModel fullRobotModel,
          DoubleYoVariable yoTime, HandPoseBehavior handPoseBehavior, double trajectoryTime)
    {
       super(handPoseBehavior, yoTime);
@@ -29,12 +30,13 @@ public class GraspCylinderTask extends BehaviorTask
       this.fullRobotModel = fullRobotModel;
       this.graspTarget = graspTarget;
       this.graspCylinderLongAxis = graspCylinderLongAxis;
+      this.palmOffsetFromWrist = palmOffsetFromWrist;
       this.trajectoryTime = trajectoryTime;
    }
 
    @Override
    protected void setBehaviorInput()
    {
-      handPoseBehavior.graspCylinder(robotSide, graspCylinderLongAxis, graspTarget, fullRobotModel, trajectoryTime);
+      handPoseBehavior.orientAndMoveHandToGraspCylinder(robotSide, graspCylinderLongAxis, graspTarget, palmOffsetFromWrist, fullRobotModel, trajectoryTime);
    }
 }
