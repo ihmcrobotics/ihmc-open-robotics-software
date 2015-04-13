@@ -206,7 +206,9 @@ public class ManipulationControlModule
       }
       else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
       {
-         handControlModules.get(robotSide).moveInCircle(handPoseProvider.getRotationAxisOriginInWorld(robotSide), handPoseProvider.getRotationAxisInWorld(robotSide), handPoseProvider.getRotationAngleRightHandRule(robotSide), handPoseProvider.getTrajectoryTime());
+         handControlModules.get(robotSide).moveInCircle(handPoseProvider.getRotationAxisOriginInWorld(robotSide),
+               handPoseProvider.getRotationAxisInWorld(robotSide), handPoseProvider.getRotationAngleRightHandRule(robotSide),
+               handPoseProvider.controlHandAngleAboutAxis(robotSide), handPoseProvider.getTrajectoryTime());
       }
       else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
       {

@@ -34,6 +34,8 @@ public interface HandPoseProvider
    
    public abstract double getRotationAngleRightHandRule(RobotSide robotSide);
 
+   boolean controlHandAngleAboutAxis(RobotSide robotSide);
+   
    public abstract boolean checkForNewPauseCommand(RobotSide robotSide);
 
    public abstract boolean checkForHomePosition(RobotSide robotSide);

@@ -436,7 +436,7 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
-   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, double time)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double time)
    {
       // Limit arm joint motor speed based on Boston Dynamics Limit
       // of 700 rad/s input to the transmission.
@@ -449,6 +449,7 @@ public class HandControlModule
 
       circularPoseTrajectoryGenerator.setRotationAxis(rotationAxisOriginInWorld, rotationAxisInWorld);
       circularPoseTrajectoryGenerator.setInitialPose(new FramePose(fullRobotModel.getHandControlFrame(robotSide)));
+      circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator);
    }

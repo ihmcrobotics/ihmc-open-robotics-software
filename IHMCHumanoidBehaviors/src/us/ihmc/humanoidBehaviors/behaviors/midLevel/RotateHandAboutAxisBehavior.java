@@ -27,18 +27,18 @@ public class RotateHandAboutAxisBehavior extends HandPoseBehavior
       this.fullRobotModel = fullRobotModel;
    }
 
-   public void setInput(RobotSide robotSide, Axis axisOrientationInRotationAxisFrame, RigidBodyTransform rotationAxisFrameTransformToWorld,
+   public void setInput(RobotSide robotSide, boolean lockCurrentHandOrientation, Axis axisOrientationInRotationAxisFrame, RigidBodyTransform rotationAxisFrameTransformToWorld,
          double totalRotationInRadians, double rotationRateRadPerSec, boolean stopHandIfCollision)
    {
       FramePose currentHandPoseInWorld = new FramePose();
       currentHandPoseInWorld.setToZero(fullRobotModel.getHandControlFrame(robotSide));
       currentHandPoseInWorld.changeFrame(world);
 
-      setInput(robotSide, currentHandPoseInWorld, axisOrientationInRotationAxisFrame, rotationAxisFrameTransformToWorld, totalRotationInRadians,
+      setInput(robotSide, currentHandPoseInWorld, lockCurrentHandOrientation, axisOrientationInRotationAxisFrame, rotationAxisFrameTransformToWorld, totalRotationInRadians,
             rotationRateRadPerSec, stopHandIfCollision);
    }
 
-   public void setInput(RobotSide robotSide, FramePose currentHandPoseInWorld, Axis axisOrientationInRotationAxisFrame,
+   public void setInput(RobotSide robotSide, FramePose currentHandPoseInWorld, boolean controlHandOrientationAboutAxis, Axis axisOrientationInRotationAxisFrame,
          RigidBodyTransform rotationAxisFrameTransformToWorld, double totalRotationInRadians, double rotationRateRadPerSec, boolean stopHandIfCollision)
    {
       if (totalRotationInRadians == 0.0)
@@ -73,7 +73,7 @@ public class RotateHandAboutAxisBehavior extends HandPoseBehavior
       rotationAxis.changeFrame(world);
 
       HandRotateAboutAxisPacket handRotateAboutAxisPacket = new HandRotateAboutAxisPacket(robotSide, rotationAxisOrigin.getPointCopy(), rotationAxis.getVectorCopy(),
-            totalRotationInRadians, totalTrajectoryTime);
+            totalRotationInRadians, totalTrajectoryTime, controlHandOrientationAboutAxis);
       
       this.robotSide = robotSide;
       this.stopHandIfCollision.set(stopHandIfCollision);

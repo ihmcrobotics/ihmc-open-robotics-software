@@ -238,4 +238,11 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return null;
    }
 
+   @Override
+   public boolean controlHandAngleAboutAxis(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
+
 }
