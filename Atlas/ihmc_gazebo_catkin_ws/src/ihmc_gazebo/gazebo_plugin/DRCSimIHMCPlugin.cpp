@@ -25,12 +25,10 @@
 
 const uint32_t BUFFER_SIZE = 1460;  //MTU = 1500, TCP overhead = 40
 
-// pid to freeze robot before controller connects
-const double PRE_CONTROLLER_P = 4000.0;
-const double PRE_CONTROLLER_I = 5.0;
-const double PRE_CONTROLLER_D = 15.0;
-const double PRE_CONTROLLER_I_MAX = 50.0;
-const double PRE_CONTROLLER_CMD_MAX = 300.0;
+// depending on controller architecture (e.g. ticks per sim tick)
+// a number of messages might need to be sent prior initializing after the handshake
+// until receiving a certain number of updates
+const int NUM_MSGS_TO_CONTROLLER_AFTER_HANDSHAKE = 25;
 
 namespace gazebo {
 class DRCSimIHMCPlugin: public ModelPlugin {
@@ -52,13 +50,14 @@ private:
     TCPServer tcpCommandListener;
 
     bool initialized;
+    bool receivedHandshake;
     bool receivedControlMessage;
     int cyclesRemainingTillControlMessage;
     int64_t lastReceivedTimestamp;
 
     int simulationCyclesPerControlCycle;
     std::vector<double> desiredPositionsOrTorques;
-    std::vector<bool> jointsUnderPositionControl;
+    std::vector<std::string> jointControlModes;
 
     ros::NodeHandle* rosNode;
 
@@ -72,6 +71,7 @@ public:
         tcpDataServer(1234, BUFFER_SIZE),
         tcpCommandListener(1235, BUFFER_SIZE),
 		initialized(false),
+		receivedHandshake(false),
         receivedControlMessage(false),
         cyclesRemainingTillControlMessage(0),
         simulationCyclesPerControlCycle(-1),
@@ -127,12 +127,11 @@ public:
             data.put(wrench.body2Force.z);
         }
 
-        tcpDataServer.send(data);
-//        if(this->modulusCounter >= this->tcpSendModulus)
-//        {
-//        	tcpDataServer.send(data);
-//        	this->modulusCounter = 0;
-//        }
+        if(this->modulusCounter >= this->tcpSendModulus)
+        {
+        	tcpDataServer.send(data);
+        	this->modulusCounter = 0;
+        }
 
         this->modulusCounter++;
     }
@@ -145,7 +144,6 @@ public:
         this->model = _parent;
 
         this->gzPhysicsTimeStep = model->GetWorld()->GetPhysicsEngine()->GetMaxStepSize();
-        this->tcpSendModulus = (int)((1.0 / (this->gzPhysicsTimeStep * 1e3)) + 0.5); // TODO replace 1 with Estimator DT in milliseconds
         this->modulusCounter = 3;
 
         joints = this->model->GetJoints();
@@ -158,7 +156,6 @@ public:
         for (unsigned int i = 0; i < sensors.size(); i++) {
             gazebo::sensors::ImuSensorPtr imu = boost::dynamic_pointer_cast<gazebo::sensors::ImuSensor>(sensors.at(i));
             if (imu) {
-                std::cout << imu->GetParentName() << std::endl;
                 if (imu->GetParentName() == "atlas::pelvis") {
                     imus.push_back(imu);
                 }
@@ -175,21 +172,37 @@ public:
         this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&DRCSimIHMCPlugin::OnUpdate, this, _1));
 
         desiredPositionsOrTorques.resize(joints.size(), 0.0);
-        jointsUnderPositionControl.resize(joints.size(), 0.0);
+        jointControlModes.resize(joints.size(), "");
 
         std::map< std::string, physics::JointPtr > jointsByName = jointController->GetJoints();
         int i = 0;
         for (std::map< std::string, physics::JointPtr>::iterator J = jointsByName.begin(); J != jointsByName.end(); J++)
         {
-            jointController->SetPositionPID(J->first, common::PID(PRE_CONTROLLER_P, PRE_CONTROLLER_I, PRE_CONTROLLER_D, PRE_CONTROLLER_I_MAX, -PRE_CONTROLLER_I_MAX, PRE_CONTROLLER_CMD_MAX, -PRE_CONTROLLER_CMD_MAX));
-
+        	std::string keyRoot = "atlas/" + joints.at(i)->GetName();
             double initialAngle;
-            std::string key = "atlas/" + joints.at(i)->GetName() + "/initial_angle";
-            this->rosNode->getParam(key, initialAngle);
+            std::string initAngleKey = keyRoot + "/initial_angle";
+            this->rosNode->getParam(initAngleKey, initialAngle);
+
+            std::string controlMode;
+            std::string ctrlModeKey = keyRoot + "/control_mode";
+            this->rosNode->getParam(ctrlModeKey, controlMode);
+            this->jointControlModes[i] = controlMode;
+
+            if(controlMode == "pid") {
+            	double p, i, d, imax, imin, cmdMax, cmdMin;
+            	this->rosNode->getParam(keyRoot + "/pid/p", p);
+            	this->rosNode->getParam(keyRoot + "/pid/i", i);
+            	this->rosNode->getParam(keyRoot + "/pid/d", d);
+            	this->rosNode->getParam(keyRoot + "/pid/imax", imax);
+            	this->rosNode->getParam(keyRoot + "/pid/imin", imin);
+            	this->rosNode->getParam(keyRoot + "/pid/cmdMax", cmdMax);
+            	this->rosNode->getParam(keyRoot + "/pid/cmdMin", cmdMin);
+                jointController->SetPositionPID(J->first, common::PID(p, i, d, imax, imin, cmdMax, cmdMin));
+            }
 
             joints.at(i)->SetPosition(0, initialAngle);
-            joints.at(i)->SetUpperLimit(0, initialAngle + 3.14);
-            joints.at(i)->SetLowerLimit(0, initialAngle - 3.14);
+            joints.at(i)->SetUpperLimit(0, initialAngle - 3.14);
+            joints.at(i)->SetLowerLimit(0, initialAngle + 3.14);
 
             jointController->SetPositionTarget(J->first, initialAngle);
 
@@ -203,10 +216,29 @@ public:
         boost::unique_lock<boost::mutex> lock(robotControlLock);
         {
         	if(!initialized) {
-        		if(!receivedControlMessage) {
-        			jointController->Update();
+        		if(!receivedHandshake) {
+        			// wait for controller to connect
         		} else {
         			std::cout << "Unlocking joints. Starting control." << std::endl;
+
+        			for(int j = 0; j < NUM_MSGS_TO_CONTROLLER_AFTER_HANDSHAKE; j++) {
+            			DRCSimIHMCPlugin::SendDataToController(0);
+        			}
+
+        			while(!receivedControlMessage) {
+        				condition.wait(lock);
+        			}
+
+                    for (unsigned int i = 0; i < joints.size(); i++) {
+                        if(jointControlModes[i] == "torque")
+                        {
+                            joints.at(i)->SetLowerLimit(0, -3.14);
+                            joints.at(i)->SetUpperLimit(0, 3.14);
+                            joints.at(i)->SetEffortLimit(0, -1);
+                            joints.at(i)->SetDamping(0, 0.1);	// TODO do we need to set damping?
+                        }
+                    }
+
                     initialized = true;
         		}
     			lock.unlock();
@@ -225,7 +257,11 @@ public:
             int i = 0;
             std::map< std::string, physics::JointPtr > jointsByName = jointController->GetJoints();
             for (std::map< std::string, physics::JointPtr>::iterator J = jointsByName.begin(); J != jointsByName.end(); J++) {
-            	jointController->SetPositionTarget(J->first, desiredPositionsOrTorques[i++]);
+            	if(jointControlModes[i] == "pid")
+            		jointController->SetPositionTarget(J->first, desiredPositionsOrTorques[i]);
+            	else if(jointControlModes[i] == "torque")
+                    joints.at(i)->SetForce(0, desiredPositionsOrTorques[i]);
+            	i++;
             }
 
             jointController->Update();
@@ -240,32 +276,32 @@ public:
 
     void readControlMessage(char* buffer, std::size_t bytes_transffered)
     {
-        boost::unique_lock<boost::mutex> lock(robotControlLock);
-        {
-            int64_t* longBuffer = ((int64_t*) (buffer));
+    	if(!receivedHandshake) {
+    		receivedHandshake = true;
+    	} else {
+            boost::unique_lock<boost::mutex> lock(robotControlLock);
+            {
+                int64_t* longBuffer = ((int64_t*) (buffer));
 
-            int estimatorTicksPerControlTick = longBuffer[0];
-            lastReceivedTimestamp = longBuffer[1];
-            estimatorFrequencyInHz = longBuffer[2];
+                int estimatorTicksPerControlTick = longBuffer[0];
+                lastReceivedTimestamp = longBuffer[1];
+                estimatorFrequencyInHz = longBuffer[2];
 
-            int simCyclesFromEstimatorFreq = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * estimatorFrequencyInHz);
-            int simCyclesAssuming1kHz = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * 1e3);
+                simulationCyclesPerControlCycle = estimatorTicksPerControlTick / (this->gzPhysicsTimeStep * estimatorFrequencyInHz);
 
-            simulationCyclesPerControlCycle = simCyclesAssuming1kHz;
+                double* jointPositionsOrTorques = (double*) (buffer + 24);
 
-            // Pointer arithmetic is evil
-            double* jointPositionsOrTorques = (double*) (buffer + 24);
+                for (unsigned int i = 0; i < joints.size(); i++) {
+                    desiredPositionsOrTorques[i] = jointPositionsOrTorques[i];
+                }
 
-            for (unsigned int i = 0; i < joints.size(); i++) {
-                desiredPositionsOrTorques[i] = jointPositionsOrTorques[i];
+                receivedControlMessage = true;
+
+                condition.notify_all();
             }
 
-            receivedControlMessage = true;
-
-            condition.notify_all();
-        }
-
-        lock.unlock();
+            lock.unlock();
+    	}
     }
 
 };
