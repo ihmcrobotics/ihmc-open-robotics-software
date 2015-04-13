@@ -81,7 +81,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
    private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace+"/filtered_cloud";
-   private static final String bodyIMUSensor = "pelvis_imu_sensor";
+   private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
    private static EnumMap<AtlasTarget, ReferenceFrame> headIMUFramesWhenLevel=new EnumMap<>(AtlasTarget.class);
 
