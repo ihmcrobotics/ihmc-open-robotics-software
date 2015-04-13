@@ -7,7 +7,6 @@ import us.ihmc.darpaRoboticsChallenge.DRCSimulationTools;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.humanoidOperatorInterface.driving.BasicDriverControllerHandler;
 
 import com.martiansoftware.jsap.JSAPException;
 
@@ -19,9 +18,9 @@ public class AtlasSteeringWorldDemo
       boolean useHighResolutionContactPointGrid = true;
       robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
       
-      Point3d steeringWheelCenterInChestFrame = BasicDriverControllerHandler.intersectionOfSteeringAxisWithGraspPlaneInPelvisZUpFrame;
+      Point3d steeringWheelCenterInPelvisFrame = new Point3d(0.254, 0.86, 0.0);
       
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInChestFrame.x, steeringWheelCenterInChestFrame.y, 0.85, 0.0, 57.0);
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInPelvisFrame.x, steeringWheelCenterInPelvisFrame.y, 0.85, 0.0, 57.0);
       
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setRunMultiThreaded(true);
