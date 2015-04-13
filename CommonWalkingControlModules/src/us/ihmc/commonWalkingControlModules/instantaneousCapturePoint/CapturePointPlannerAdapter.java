@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.lists.FrameTupleArrayList;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -350,5 +351,13 @@ public class CapturePointPlannerAdapter
          capturePointPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
       tmpFramePoint2d.set(tmpFramePoint.getX(), tmpFramePoint.getY());
       return tmpFramePoint2d;
+   }
+
+   public void holdCurrentICP(double initialTime, FramePoint actualICPToHold)
+   {
+      if (useNewICPPlanner)
+         icpPlanner.holdCurrentICP(initialTime, actualICPToHold);
+      else
+         PrintTools.error(this.getClass(), "Old planner cannot hold current ICP");
    }
 }

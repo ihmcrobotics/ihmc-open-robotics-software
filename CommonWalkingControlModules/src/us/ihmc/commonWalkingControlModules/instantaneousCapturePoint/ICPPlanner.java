@@ -71,6 +71,10 @@ public class ICPPlanner
    private final YoFrameVector desiredCapturePointAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
 
+   private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
+   private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
+   private final YoFramePoint actualICPToHold = new YoFramePoint(namePrefix + "ActualCapturePointToHold", worldFrame, registry);
+
    private final BooleanYoVariable useTwoConstantCMPsPerSupport = new BooleanYoVariable(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable(namePrefix + "TimeSpentOnExitCMPInPercentOfStepTime", registry);
 
@@ -94,6 +98,9 @@ public class ICPPlanner
    {
       isStanding.set(true);
       hasBeenWokenUp.set(false);
+
+      actualICPToHold.setToNaN();
+      isHoldingPosition.set(false);
 
       int numberOfCoefficients = icpPlannerParameters.getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
       icpTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix, numberOfCoefficients, registry);
@@ -228,6 +235,12 @@ public class ICPPlanner
       desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
    }
 
+   public void holdCurrentICP(double initialTime, FramePoint actualICPToHold)
+   {
+      this.actualICPToHold.set(actualICPToHold);
+      requestedHoldPosition.set(true);
+   }
+
    public void initializeDoubleSupport(double initialTime, RobotSide transferToSide)
    {
       this.transferToSide.set(transferToSide);
@@ -257,12 +270,25 @@ public class ICPPlanner
       ReferenceFrame initialFrame = isStanding.getBooleanValue() ? midFeetZUpFrame : transferFromSoleFrame;
       ReferenceFrame finalFrame = isDoneWalking ? midFeetZUpFrame : transferToSoleFrame;
 
-      if (isDoneWalking)
+      if (!actualICPToHold.containsNaN())
+      {
+         desiredCapturePointPosition.set(actualICPToHold);
+         desiredCapturePointVelocity.setToZero();
+         singleSupportInitialICP.setIncludingFrame(actualICPToHold);
+         singleSupportFinalICP.setIncludingFrame(actualICPToHold);
+         singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
+         setCornerPointsToNaN();
+         actualICPToHold.setToNaN();
+         isDoneWalking = true;
+         isHoldingPosition.set(true);
+      }
+      else if (isDoneWalking)
       {
          singleSupportInitialICP.setIncludingFrame(entryCMPs.get(0));
          singleSupportFinalICP.setIncludingFrame(singleSupportInitialICP);
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
          setCornerPointsToNaN();
+         isHoldingPosition.set(false);
       }
       else
       {
@@ -288,6 +314,7 @@ public class ICPPlanner
          entryCornerPoints.get(0).changeFrame(initialFrame);
          entryCornerPoints.get(1).changeFrame(finalFrame);
          changeFrameOfRemainingCornerPoints(2, worldFrame);
+         isHoldingPosition.set(false);
       }
 
       singleSupportInitialICP.changeFrame(finalFrame);
@@ -312,6 +339,7 @@ public class ICPPlanner
    {
       this.transferToSide.set(null);
       this.supportSide.set(supportSide);
+      isHoldingPosition.set(false);
 
 
       isInitialTransfer.set(false);

@@ -454,6 +454,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
+   public void requestICPPlannerToHoldCurrent()
+   {
+      capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
+      capturePointPlannerAdapter.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
+   }
+
    private void initializeContacts()
    {
       momentumBasedController.clearContacts();
