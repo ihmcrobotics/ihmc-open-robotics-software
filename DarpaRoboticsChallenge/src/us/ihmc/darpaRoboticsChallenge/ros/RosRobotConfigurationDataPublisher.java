@@ -262,7 +262,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             jointVelocitiesSubSet[i] = jointVelocities[jointIndices[i]];
             jointJointTorquesSubSet[i] = jointTorques[jointIndices[i]];
          }
-         jointStatePublisher.publish(nameList, jointAnglesSubSet, jointVelocitiesSubSet, jointJointTorquesSubSet, t);
+         jointStatePublisher.publish(jointNames, jointAnglesSubSet, jointVelocitiesSubSet, jointJointTorquesSubSet, t);
       }
    }
 }
