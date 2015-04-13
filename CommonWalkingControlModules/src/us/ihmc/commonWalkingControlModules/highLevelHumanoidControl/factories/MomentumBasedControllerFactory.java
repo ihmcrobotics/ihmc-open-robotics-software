@@ -244,7 +244,7 @@ public class MomentumBasedControllerFactory
       // the different controllers (walking, multi-contact, driving, etc.)
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(initialBehavior, highLevelBehaviors, momentumBasedController,
             variousWalkingProviders, centerOfPressureDataHolderForEstimator);
-      highLevelHumanoidControllerManager.setupControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
+      highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
 
       createRegisteredControllers();
@@ -380,6 +380,11 @@ public class MomentumBasedControllerFactory
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
    {
       momentumBasedController.attachRobotMotionStatusChangedListener(listener);
+   }
+
+   public void setFallbackControllerForFailure(HighLevelState fallbackController)
+   {
+      highLevelHumanoidControllerManager.setFallbackControllerForFailure(fallbackController);
    }
 
    public YoVariableRegistry getRegistry()
