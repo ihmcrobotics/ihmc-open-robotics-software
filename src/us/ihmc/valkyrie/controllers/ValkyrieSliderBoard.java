@@ -126,8 +126,8 @@ public class ValkyrieSliderBoard
          return;
 
       desiredVelocityX.set(desiredVelocityX_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.25
-            + desiredVelocityX_Bias, 0.25 + desiredVelocityX_Bias, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.2
+            + desiredVelocityX_Bias, 0.2 + desiredVelocityX_Bias, deadZone, true));
       desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -140,8 +140,8 @@ public class ValkyrieSliderBoard
 
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
-      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.2
-            + desiredVelocityY_Bias, 0.2 + desiredVelocityY_Bias, deadZone, true));
+      joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X), -0.1
+            + desiredVelocityY_Bias, 0.1 + desiredVelocityY_Bias, deadZone, true));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
