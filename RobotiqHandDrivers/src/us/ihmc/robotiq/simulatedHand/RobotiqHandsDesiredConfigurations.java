@@ -48,16 +48,16 @@ public class RobotiqHandsDesiredConfigurations
          EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = openHandsBasicGripDesiredConfigurations.get(robotSide);
          
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, -0.09);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, -0.95);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, -0.09);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, -0.95);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, -0.66);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, 0.0);
       }
    }
    
@@ -65,19 +65,19 @@ public class RobotiqHandsDesiredConfigurations
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = closedHandsPinchGripDesiredConfigurations.get(robotSide);
+         EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = openHandsPinchGripDesiredConfigurations.get(robotSide);
          
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, -0.2);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, 0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, 0.2);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, 0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, 0.0);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, 0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, 0.0);
       }
    }
    
@@ -85,19 +85,19 @@ public class RobotiqHandsDesiredConfigurations
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = openHandsPinchGripDesiredConfigurations.get(robotSide);
+         EnumMap<RobotiqHandJointNameMinimal, Double> handDesiredConfigurations = closedHandsPinchGripDesiredConfigurations.get(robotSide);
          
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_1_JOINT, -0.2);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, -0.09);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_1, 0.8);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, -0.95);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_1_JOINT_3, -0.5);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.PALM_FINGER_2_JOINT, 0.2);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, -0.09);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_1, 0.8);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, -0.95);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, 0.0);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_2_JOINT_3, -0.5);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_1, 0.8);
          handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2, 0.0);
-         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, -0.66);
+         handDesiredConfigurations.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, -0.5);
       }
    }
 
