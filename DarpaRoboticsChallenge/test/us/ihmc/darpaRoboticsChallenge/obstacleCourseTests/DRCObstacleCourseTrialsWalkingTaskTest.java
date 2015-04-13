@@ -7,12 +7,12 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
+import us.ihmc.simulationconstructionset.DataProcessingFunction;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -27,6 +27,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+
+   private static final boolean MOVE_ROBOT_FOR_VIZ = false;
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -53,7 +55,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-
 
 
 	@EstimatedDuration(duration = 38.2)
@@ -91,7 +92,6 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
    }
 	
    
-	@Ignore
 	@EstimatedDuration(duration = 38.2)
    @Test(timeout = 191223)
    public void testStepOnCinderBlocksSlowlyWithDisturbance() throws SimulationExceededMaximumTimeException
@@ -105,14 +105,14 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       drcSimulationTestHelper = new DRCSimulationTestHelper("DRCObstacleCourseTrialsCinderBlocksTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
 
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-
+      DoubleYoVariable swingTime = (DoubleYoVariable) simulationConstructionSet.getVariable("swingTime");
+      DoubleYoVariable transferTime = (DoubleYoVariable) simulationConstructionSet.getVariable("transferTime");
+      
       setupCameraForWalkingOverCinderBlocks(simulationConstructionSet);
 
       ThreadTools.sleep(0);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
 
-      DoubleYoVariable swingTime = (DoubleYoVariable) simulationConstructionSet.getVariable("swingTime");
-      DoubleYoVariable transferTime = (DoubleYoVariable) simulationConstructionSet.getVariable("transferTime");
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
       
       swingTime.set(2.0);
       transferTime.set(2.0);
@@ -129,7 +129,30 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      if (MOVE_ROBOT_FOR_VIZ) moveRobotOutOfWayForViz();
+      
       BambooTools.reportTestFinishedMessage();
+   }
+
+   private void moveRobotOutOfWayForViz()
+   {
+      final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+      {
+         private final DoubleYoVariable q_y = (DoubleYoVariable) scs.getVariable("q_y");
+         
+         @Override
+         public void initializeProcessing()
+         {   
+         }
+
+         @Override
+         public void processData()
+         {
+            q_y.sub(4.0);
+         }};
+      
+      scs.applyDataProcessingFunction(dataProcessingFunction);
    }
 
    // @Test(timeout=300000), we don't need step on/off two layer CinderBlocks anymore
