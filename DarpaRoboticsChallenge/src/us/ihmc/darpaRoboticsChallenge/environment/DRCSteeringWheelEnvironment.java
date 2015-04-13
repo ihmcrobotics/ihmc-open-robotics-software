@@ -69,7 +69,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(orientation, Math.toRadians(yaw_degrees), Math.toRadians(pitch_degrees), Math.toRadians(0));
       wheelPose.setPose(position, orientation);
 
-      ContactableSteeringWheelRobot wheel = new ContactableSteeringWheelRobot(wheelRobotName, valveType, 2.0, wheelPose);
+      ContactableSteeringWheelRobot wheel = new ContactableSteeringWheelRobot(wheelRobotName, valveType, 2.0, wheelPose);  // 3.25 turns from lock to lock on Polaris
 
       wheel.createValveRobot();
       wheel.createAvailableContactPoints(1, 30, forceVectorScale, true);
