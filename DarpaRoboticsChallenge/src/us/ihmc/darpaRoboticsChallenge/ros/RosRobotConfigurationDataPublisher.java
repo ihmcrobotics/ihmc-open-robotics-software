@@ -32,7 +32,6 @@ import us.ihmc.utilities.ros.publisher.RosInt32Publisher;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
-import us.ihmc.utilities.ros.publisher.RosTrooperFootSensorPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
@@ -65,7 +64,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final SideDependentList<RosWrenchPublisher> wristForceSensorPublishers = new SideDependentList<RosWrenchPublisher>();
    private final SideDependentList<DenseMatrix64F> footForceSensorWrenches = new SideDependentList<DenseMatrix64F>();
    private final SideDependentList<DenseMatrix64F> wristForceSensorWrenches = new SideDependentList<DenseMatrix64F>();
-   private final RosTrooperFootSensorPublisher bothFeetForceSensorPublisher;
 
    public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
@@ -80,7 +78,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
       boolean latched = false;
       this.jointStatePublisher = new RosJointStatePublisher(latched);
-      this.bothFeetForceSensorPublisher = new RosTrooperFootSensorPublisher(latched);
       this.pelvisOdometryPublisher = new RosOdometryPublisher(latched);
       this.robotMotionStatusPublisher = new RosStringPublisher(latched);
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
@@ -89,13 +86,15 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
       for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
       {
-         String imuName = imuDefinitions[sensorNumber].getName();
+         IMUDefinition imuDefinition = imuDefinitions[sensorNumber];
+         String imuName = imuDefinition.getName();
+         ReferenceFrame imuFrame = imuDefinition.getIMUFrame();
          
          RosImuPublisher rosImuPublisher = new RosImuPublisher(latched);
          this.imuPublishers[sensorNumber] = rosImuPublisher;
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
          
-         RosCachedRawIMUDataPublisher batchImuPublisher = new RosCachedRawIMUDataPublisher(latched);
+         RosCachedRawIMUDataPublisher batchImuPublisher = new RosCachedRawIMUDataPublisher(latched, imuFrame.getName());
          this.batchImuPublishers[sensorNumber] = batchImuPublisher;
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName + "_" + "batch", batchImuPublisher);
       }
@@ -123,7 +122,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_pose", pelvisOdometryPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/robot_motion_status", robotMotionStatusPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/behavior", robotBehaviorPublisher);
-      rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/both", bothFeetForceSensorPublisher);
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/left", footForceSensorPublishers.get(RobotSide.LEFT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/foot_force_sensor/right", footForceSensorPublishers.get(RobotSide.RIGHT));
       rosMainNode.attachPublisher(rosNameSpace + "/output/wrist_force_sensor/left", wristForceSensorPublishers.get(RobotSide.LEFT));
@@ -220,8 +218,6 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
                wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
             }
-
-            bothFeetForceSensorPublisher.publish(timeStamp, footForceSensorWrenches.get(RobotSide.LEFT), footForceSensorWrenches.get(RobotSide.RIGHT));
 
             for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
             {

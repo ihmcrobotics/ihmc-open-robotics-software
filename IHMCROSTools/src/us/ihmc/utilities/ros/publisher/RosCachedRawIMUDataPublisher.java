@@ -1,5 +1,8 @@
 package us.ihmc.utilities.ros.publisher;
 
+import ihmc_msgs.BatchRawImuData;
+import ihmc_msgs.RawImuData;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -10,32 +13,33 @@ import javax.vecmath.Vector3d;
 import org.ros.message.Time;
 
 import std_msgs.Header;
-import trooper_mlc_msgs.RawIMUData;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 
-public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_msgs.CachedRawIMUData>
+public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuData>
 {
-   int rosPacketSendCounter=0;
-   long rawImuCounter = 0;
-   double[] currentImuOrientation = new double[3];
-   double[] previousImuOrientation = new double[3];
+   private int rosPacketSendCounter=0;
+   private long rawImuCounter = 0;
+   private final double[] currentImuOrientation = new double[3];
+   private final double[] previousImuOrientation = new double[3];
+   private final String frameId;
    
-   private ArrayList<trooper_mlc_msgs.RawIMUData> availableImuData = new ArrayList<RawIMUData>();
+   private ArrayList<RawImuData> availableImuData = new ArrayList<RawImuData>();
    
    
-   public RosCachedRawIMUDataPublisher(boolean latched)
+   public RosCachedRawIMUDataPublisher(boolean latched, String frameId)
    {
-      super(trooper_mlc_msgs.CachedRawIMUData._TYPE,latched);
+      super(ihmc_msgs.BatchRawImuData._TYPE,latched);
+      this.frameId = frameId;
    }
    
-   public void publish(long timestamp, List<trooper_mlc_msgs.RawIMUData> imuData)
+   public void publish(long timestamp, List<RawImuData> imuData)
    {
-      trooper_mlc_msgs.CachedRawIMUData message = getMessage();
+      ihmc_msgs.BatchRawImuData message = getMessage();
 
       Header header = newMessageFromType(Header._TYPE);
-      header.setFrameId("pelvis_imu");
+      header.setFrameId(frameId);
       header.setStamp(Time.fromNano(timestamp));
       header.setSeq(rosPacketSendCounter);
       rosPacketSendCounter++;
@@ -53,7 +57,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
     */
    public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4d orientation, Vector3d linearAcceleration)
    {
-      RawIMUData rawImuData = newMessageFromType(trooper_mlc_msgs.RawIMUData._TYPE);
+      RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
       RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);
       rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
       //delta angle (radians) in the frame of the IMU
@@ -69,7 +73,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
       availableImuData.add(rawImuData);
       if(availableImuData.size() == 15)
       {
-         ArrayList<trooper_mlc_msgs.RawIMUData> imuBatch = new ArrayList<RawIMUData>();
+         ArrayList<RawImuData> imuBatch = new ArrayList<RawImuData>();
          for(int i = 0; i < 15; i++)
          {
             imuBatch.add(availableImuData.get(14 - i));
@@ -89,14 +93,14 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<trooper_mlc_
       appendRawImuData(timeStamp, imuPacket.getOrientation(), imuPacket.getLinearAcceleration());
    } 
    
-   public ArrayList<trooper_mlc_msgs.RawIMUData> createRandomRawImuData(Random random, int size)
+   public ArrayList<RawImuData> createRandomRawImuData(Random random, int size)
    {
       long timestampInNanoSeconds = random.nextLong();
-      ArrayList<trooper_mlc_msgs.RawIMUData> imuBatch = new ArrayList<RawIMUData>();
+      ArrayList<RawImuData> imuBatch = new ArrayList<RawImuData>();
       int randomImuCounter = random.nextInt();
       for(int i = 0; i < size; i++)
       {
-         RawIMUData rawImuData = newMessageFromType(trooper_mlc_msgs.RawIMUData._TYPE);
+         RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
          rawImuData.setImuTimestamp(TimeTools.nanoSecondsToMicroseconds(timestampInNanoSeconds));
          rawImuData.setPacketCount(randomImuCounter);
          rawImuData.setDax(random.nextInt());
