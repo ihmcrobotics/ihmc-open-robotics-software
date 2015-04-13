@@ -109,7 +109,7 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
               valvePinJointAxisInValveFrame, valveRadius, stopHandIfGraspCollision, yoTime);
 
       RotateHandAboutAxisTask rotateGraspedValveTask = new RotateHandAboutAxisTask(robotSideOfHandToUse, yoTime, rotateGraspedValveBehavior,
-              valveTransformToWorld, valvePinJointAxisInValveFrame, turnValveAngle, valveRotationRateRadPerSec, stopHandIfTurnCollision);
+              valveTransformToWorld, valvePinJointAxisInValveFrame, false, turnValveAngle, valveRotationRateRadPerSec, stopHandIfTurnCollision);
 
       FingerStateTask openHandTask = new FingerStateTask(robotSideOfHandToUse, FingerState.OPEN, fingerStateBehavior, yoTime);
 

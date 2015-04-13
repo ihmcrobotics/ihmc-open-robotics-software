@@ -45,6 +45,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<Point3d> rotationAxisOriginsInWorld = new SideDependentList<Point3d>();
    private final SideDependentList<Vector3d> rotationAxesInWorld = new SideDependentList<Vector3d>();
    private final SideDependentList<Double> rotationAnglesRightHandRules = new SideDependentList<>();
+   private final SideDependentList<Boolean> controlHandAngleAboutAxis = new SideDependentList<>();
+
    private double trajectoryTime = 1.0;
 
    private final ReferenceFrame chestFrame;
@@ -246,6 +248,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          rotationAxisOriginsInWorld.get(robotSide).set(object.getRotationAxisOriginInWorld());
          rotationAxesInWorld.get(robotSide).set(object.getRotationAxisInWorld());
          rotationAnglesRightHandRules.put(robotSide, object.getRotationAngleRightHandRule());
+         controlHandAngleAboutAxis.put(robotSide, object.controlHandAngleAboutAxis());
       }
    }
 
@@ -398,6 +401,13 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAnglesRightHandRules.get(robotSide);
+   }
+   
+   @Override
+   public boolean controlHandAngleAboutAxis(RobotSide robotSide)
+   {
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
+      return controlHandAngleAboutAxis.get(robotSide);
    }
 
    @Override

@@ -173,7 +173,7 @@ public abstract class DRCRotateHandAboutAxisBehaviorTest implements MultiRobotTe
 
       double rotationRate = Math.abs(rotationAngle) / trajectoryTime;
       boolean stopHandIfCollision = false;
-      rotateAboutAxisBehavior.setInput(robotSide, getCurrentHandPose(robotSide), rotationAxis, rotationAxisFrame.getTransformToWorldFrame(),
+      rotateAboutAxisBehavior.setInput(robotSide, getCurrentHandPose(robotSide), true, rotationAxis, rotationAxisFrame.getTransformToWorldFrame(),
             rotationAngle, rotationRate, stopHandIfCollision);
 
       PrintTools.debug(this,"Moving Hand Along Circular Trajectory");
