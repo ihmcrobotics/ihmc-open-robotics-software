@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
@@ -36,6 +37,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
+   private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
+
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
          MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
    {
@@ -56,18 +59,22 @@ public class HighLevelHumanoidControllerManager implements RobotController
       this.momentumBasedController = momentumBasedController;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.registry.addChild(momentumBasedController.getYoVariableRegistry());
-   }
 
-   public void setupControllerForFailure(final HighLevelState fallbackController)
-   {
       momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
          public void controllerFailed()
          {
-            requestedHighLevelState.set(fallbackController);
+            HighLevelState fallbackController = fallbackControllerForFailureReference.get();
+            if (fallbackController != null)
+               requestedHighLevelState.set(fallbackController);
          }
       });
+   }
+
+   public void setFallbackControllerForFailure(HighLevelState fallbackController)
+   {
+      fallbackControllerForFailureReference.set(fallbackController);
    }
 
    private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)
