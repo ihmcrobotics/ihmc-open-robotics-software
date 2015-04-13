@@ -134,7 +134,8 @@
       <gravity>1</gravity>
       <velocity_decay/>
       <self_collide>0</self_collide>
-      <sensor name='imu_sensor' type='imu'>
+      
+      <sensor name='imu_sensor_at_pelvis_frame' type='imu'>
         <always_on>1</always_on>
         <update_rate>1000</update_rate>
         <imu>
@@ -154,8 +155,33 @@
             </accel>
           </noise>
         </imu>
-        <pose>0.0599153 0 -0.01415 0 -0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
       </sensor>
+      
+      <sensor name='imu_sensor_at_imu_frame' type='imu'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <!--pose>0.0599153 0 -0.01415 0 -0 0</pose-->
+        <pose>-0.0905 -0.000004 -0.0125 0.0 3.14159265359 -0.78539816339 </pose>
+      </sensor>
+      
     </link>
     <link name='ltorso'>
       <pose>-0.0125 0 0 0 -0 0</pose>
