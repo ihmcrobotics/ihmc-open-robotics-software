@@ -107,7 +107,6 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          pelvisPoseInMocapFrame.getRotation(orientation);
          robotConfigurationData.setRootTranslation(translation);
          robotConfigurationData.setRootOrientation(orientation);
-         System.out.println("update");
       }
       
       packetCommunicator.send(robotConfigurationData);
