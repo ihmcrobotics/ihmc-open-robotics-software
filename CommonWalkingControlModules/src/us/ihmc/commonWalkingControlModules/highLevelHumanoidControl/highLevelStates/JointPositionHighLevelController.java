@@ -161,7 +161,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         setFinalPositionArmsAndLegs(robotSide, packet);
+         setFinalPositionArms(robotSide, packet);
+         setFinalPositionLegs(robotSide, packet);
       }
 
       setFinalPositionSpineJoints(packet);
@@ -188,9 +189,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)
    {
+      if( packet.spineJointAngle == null ) return;
+      
       packet.packSpineJointAngle(spineJointAngles);
 
       SpineJointName[] spineJointNames = fullRobotModel.getRobotSpecificJointNames().getSpineJointNames();
+      
       for(int i=0; i<spineJointNames.length; i++)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getSpineJoint(spineJointNames[i]);
@@ -204,7 +208,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    }
    
    private void setFinalPositionNeckJoint(JointAnglesPacket packet)
-   {
+   {     
       neckJointAngle = packet.getNeckJointAngle();
       
       OneDoFJoint neckJoint = fullRobotModel.getNeckJoint(NeckJointName.LOWER_NECK_PITCH);
@@ -221,8 +225,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    }
    
 
-   private void setFinalPositionArmsAndLegs(RobotSide robotSide, JointAnglesPacket packet)
+   private void setFinalPositionArms(RobotSide robotSide, JointAnglesPacket packet)
    {
+      if( packet.leftArmJointAngle  == null && robotSide == RobotSide.LEFT)  return;
+      if( packet.rightArmJointAngle == null && robotSide == RobotSide.RIGHT) return;
+      
       packet.packArmJointAngle(robotSide, armJointAngles.get(robotSide));
       
       ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
@@ -253,8 +260,15 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             alternativeController.get(oneDoFJoint).setMaximumOutputLimit( Double.POSITIVE_INFINITY );
          }
       }
+   }
+   
+   private void setFinalPositionLegs(RobotSide robotSide, JointAnglesPacket packet)
+   {   
+      if( packet.leftLegJointAngle  == null && robotSide == RobotSide.LEFT)  return;
+      if( packet.rightLegJointAngle == null && robotSide == RobotSide.RIGHT) return;
       
       packet.packLegJointAngle(robotSide, legJointAngles.get(robotSide));
+      
       LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       for(int i=0; i<legJointNames.length; i++)
       {

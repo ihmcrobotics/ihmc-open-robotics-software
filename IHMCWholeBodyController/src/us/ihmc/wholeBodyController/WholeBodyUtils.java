@@ -17,6 +17,12 @@ public class WholeBodyUtils
             fullRobotModel.getRobotSpecificJointNames().getLegJointNames().length,
             fullRobotModel.getRobotSpecificJointNames().getSpineJointNames().length );
       
+      if( !leftLeg  ) packet.leftLegJointAngle  = null;
+      if( !rightLeg ) packet.rightLegJointAngle = null;
+      if( !leftArm  ) packet.leftArmJointAngle  = null;
+      if( !rightArm ) packet.rightArmJointAngle = null;
+      if( !spine )    packet.spineJointAngle    = null;
+      
       int index = 0;
       
       packet.trajectoryTime = trajectoryTime;
@@ -29,7 +35,7 @@ public class WholeBodyUtils
             double angle =  fullRobotModel.getLegJoint( side,  legID).getQ();
 
             if( leftArm )  packet.leftArmJointAngle[index] = angle;
-            if(rightArm)   packet.rightArmJointAngle[index] = angle;
+            if( rightArm )   packet.rightArmJointAngle[index] = angle;
          }
          index++;
       }
@@ -54,8 +60,7 @@ public class WholeBodyUtils
       {
          double angle =  fullRobotModel.getSpineJoint( spineID ).getQ();
          
-         if( spine )   packet.spineJointAngle[index] = angle;
-         
+         if( spine )   packet.spineJointAngle[index] = angle;    
          index++;
       }
       
