@@ -34,8 +34,6 @@ public class DRCSteeringWheelDemo
             0.85, 0.0, 57.0);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
-//      simStarter.registerHighLevelController(new JointPDHighLevelHumanoidControllerFactory(10.0, 1.0, true));
-//      simStarter.registerHighLevelController(new InverseDynamicsJointControllerFactory(true));
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
 
       simStarter.setRunMultiThreaded(true);
