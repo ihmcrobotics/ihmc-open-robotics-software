@@ -97,7 +97,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.iterativeClosestPointInPelvisReferenceFramePoseX</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -261,19 +261,38 @@ wristX
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>0</Graph Array Window Size>
-
+<Graph Array Window Size>1</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>3</ScreenID>
+<WindowLocation>5758.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.AtlasOutputWriterWithAccelerationIntegration.DRCOutputWriterWithStateChangeSmoother.AtlasOutputWriter.AtlasAutomatedStandPrep.robotTime</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1>
 
 <Extra Panels>
 <Main Viewport>
-Plotter,Plotter,
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-12.695365635931067</Camera X>
- <Camera Y>21.176772392287923</Camera Y>
- <Camera Z>7.672389530350767</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
