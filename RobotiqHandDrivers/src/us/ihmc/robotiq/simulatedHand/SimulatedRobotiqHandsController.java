@@ -283,7 +283,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
                   
                case WIDE_GRIP:
-                  //TODO
+                  individualRobotiqHandController.wideGrip();
                   break;
 
                default:
