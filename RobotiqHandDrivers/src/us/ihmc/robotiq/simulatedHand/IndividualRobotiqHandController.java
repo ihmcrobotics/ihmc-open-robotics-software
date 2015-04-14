@@ -33,6 +33,7 @@ public class IndividualRobotiqHandController implements RobotController
    {
       BASIC_OPEN, BASIC_CLOSED,
       PINCH_OPEN, PINCH_CLOSED,
+      WIDE_OPEN, WIDE_CLOSED,
       HOOK
    }
    
@@ -153,12 +154,16 @@ public class IndividualRobotiqHandController implements RobotController
       State<GraspState> stateClosedBasicGrip = new ClosedBasicGrip();
       State<GraspState> stateOpenPinchGrip = new OpenPinchGrip();
       State<GraspState> stateClosedPinchGrip = new ClosedPinchGrip();
+      State<GraspState> stateOpenWideGrip = new OpenWideGrip();
+      State<GraspState> stateClosedWideGrip = new ClosedWideGrip();
       State<GraspState> stateHookGrip = new HookGrip();
       
       stateMachine.addState(stateOpenBasicGrip);
       stateMachine.addState(stateClosedBasicGrip);
       stateMachine.addState(stateOpenPinchGrip);
       stateMachine.addState(stateClosedPinchGrip);
+      stateMachine.addState(stateOpenWideGrip);
+      stateMachine.addState(stateClosedWideGrip);
       stateMachine.addState(stateHookGrip);
       stateMachine.setCurrentState(GraspState.BASIC_OPEN);
       
@@ -198,6 +203,24 @@ public class IndividualRobotiqHandController implements RobotController
          }
       };
       
+      StateTransitionCondition openWideGripCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.OPEN);
+         }
+      };
+      
+      StateTransitionCondition closedWideGripCondition = new StateTransitionCondition()
+      {
+         @Override
+         public boolean checkCondition()
+         {
+            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && desiredFingerState.getEnumValue().equals(FingerState.CLOSE);
+         }
+      };
+      
       StateTransitionCondition hookGripCondition = new StateTransitionCondition()
       {
          @Override
@@ -210,23 +233,40 @@ public class IndividualRobotiqHandController implements RobotController
       //BASIC_OPEN
       stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedBasicGripCondition));
       stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
       stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
       
       //BASIC_CLOSED
       stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
+      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
       
       //PINCH_OPEN
       stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedPinchGripCondition));
       stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
+      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
       stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
       
       //PINCH_CLOSED
       stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
       stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
+      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      
+      //WIDE_OPEN
+      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedWideGripCondition));
+      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
+      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      
+      //WIDE_CLOSED
+      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
+      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
       
       //HOOK
       stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
       stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
    }
    
    private class OpenBasicGrip extends State<GraspState>
@@ -337,6 +377,60 @@ public class IndividualRobotiqHandController implements RobotController
       }
    }
    
+   private class OpenWideGrip extends State<GraspState>
+   {
+      public OpenWideGrip()
+      {
+         super(GraspState.WIDE_OPEN);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         isStopped.set(false);
+         graspMode.set(RobotiqGraspMode.WIDE_MODE);
+         fingerState.set(FingerState.OPEN);
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getOpenWideGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+   
+   private class ClosedWideGrip extends State<GraspState>
+   {
+      public ClosedWideGrip()
+      {
+         super(GraspState.WIDE_CLOSED);
+      }
+
+      @Override
+      public void doAction()
+      {
+      }
+
+      @Override
+      public void doTransitionIntoAction()
+      {
+         isStopped.set(false);
+         graspMode.set(RobotiqGraspMode.WIDE_MODE);
+         fingerState.set(FingerState.CLOSE);
+         computeAllFinalDesiredAngles(1.0, RobotiqHandsDesiredConfigurations.getClosedWideGripDesiredConfiguration(robotSide));
+      }
+
+      @Override
+      public void doTransitionOutOfAction()
+      {
+      }
+   }
+   
    private class HookGrip extends State<GraspState>
    {
       public HookGrip()
@@ -403,6 +497,11 @@ public class IndividualRobotiqHandController implements RobotController
    public void pinchGrip()
    {
       desiredGraspMode.set(RobotiqGraspMode.PINCH_MODE);
+   }
+   
+   public void wideGrip()
+   {
+      desiredGraspMode.set(RobotiqGraspMode.WIDE_MODE);
    }
 
    public void stop()
