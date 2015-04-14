@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPDHighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment;
@@ -34,7 +34,10 @@ public class DRCSteeringWheelDemo
             0.85, 0.0, 57.0);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
-      simStarter.registerHighLevelController(new JointPDHighLevelHumanoidControllerFactory(100.0, 10.0, true));
+//      simStarter.registerHighLevelController(new JointPDHighLevelHumanoidControllerFactory(10.0, 1.0, true));
+//      simStarter.registerHighLevelController(new InverseDynamicsJointControllerFactory(true));
+      simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
+
       simStarter.setRunMultiThreaded(true);
       simStarter.setStartingLocationOffset(new Vector3d(0.0, 0.0, desiredPelvisHeight), 0.0);
       simStarter.setInitializeEstimatorToActual(true);
@@ -97,7 +100,7 @@ public class DRCSteeringWheelDemo
          }
 
          holdPelvisKp.set(5000.0);
-         holdPelvisKv.set(GainCalculator.computeDampingForSecondOrderSystem(robotMass, holdPelvisKp.getDoubleValue(), 1.0));
+         holdPelvisKv.set(GainCalculator.computeDampingForSecondOrderSystem(robotMass, holdPelvisKp.getDoubleValue(), 0.6));
 
          efp_offsetFromRootJoint.add(new Vector3d(dx, dy, dz));
          efp_offsetFromRootJoint.add(new Vector3d(dx, -dy, dz));
@@ -161,7 +164,7 @@ public class DRCSteeringWheelDemo
             pdControlOutput.add(proportionalTerm, derivativeTerm);
 
             efp.setForce(pdControlOutput);
-            //            efp.fz.add(robotWeight / efp_offsetFromRootJoint.size());
+            efp.getYoForce().getYoZ().add(robotWeight / efp_offsetFromRootJoint.size());
 
             efp_positionViz.get(i).update();
          }
