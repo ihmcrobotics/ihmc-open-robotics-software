@@ -12,13 +12,13 @@ dependencies {
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.1.0' //force svnkit dependency jna-3.5.2 to use jna-4.1.0
     
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.+'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.1'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.+'
-    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.+'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.+'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.+'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.+'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0'
+    compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-testdata', version: '3.1.0'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-terrain', version: '3.1.0'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-effects', version: '3.1.0'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-plugins', version: '3.1.0'
 	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.0'
 	compile group: 'com.vividsolutions', name: 'jts', version: '1.12'
 	compile group: 'com.google.guava', name: 'guava', version: '17.0'
