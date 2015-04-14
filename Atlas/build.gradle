@@ -84,7 +84,7 @@ task gfeDevCompile(dependsOn:distTar) << {
     java.nio.file.Path messagesLocation = Paths.get(project(':ROSJavaBootstrap').projectDir.absolutePath, "ROSMessagesAndServices", "ihmc_msgs", "msg")
     java.nio.file.Path ihmcRosPackageLocationPath = Paths.get("$ihmcRosPackageLocation")
     java.nio.file.Path ihmcMsgsLocation = ihmcRosPackageLocationPath.resolve("ihmc_msgs")
-    java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_sim")
+    java.nio.file.Path ihmcSimLocation = ihmcRosPackageLocationPath.resolve("ihmc_atlas")
     java.nio.file.Path archiveLocation = Paths.get(project.buildDir.absolutePath, "distributions", buildName + ".tar")
 
     if(!Files.exists(ihmcMsgsLocation))
