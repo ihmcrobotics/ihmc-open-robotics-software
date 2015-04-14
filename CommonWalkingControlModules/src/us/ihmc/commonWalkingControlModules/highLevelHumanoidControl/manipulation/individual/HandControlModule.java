@@ -332,7 +332,7 @@ public class HandControlModule
 
          areAllArmJointEnabled.set(false);
       }
-      else
+      else if (!isAtLeastOneJointDisabled)
       {
          areAllArmJointEnabled.set(true);
       }
