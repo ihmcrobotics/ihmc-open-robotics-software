@@ -18,7 +18,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
  */
 public class CapturePointTools
 {
-   private static final double EPSILON = 1.0e-05;
+   private static final double EPSILON = 1.0e-15;
 
    /**
     * Compute the constant CMP locations and store them in constantCMPsToPack.
@@ -194,6 +194,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FramePoint desiredCapturePointToPack)
    {
+      desiredCapturePointToPack.setToZero(initialCapturePoint.getReferenceFrame());
+
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointToPack.interpolate(initialCMP, initialCapturePoint, Math.exp(omega0 * time));
       else
@@ -248,6 +250,8 @@ public class CapturePointTools
     */
    public static void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint initialCapturePoint, FramePoint initialCMP, FrameVector desiredCapturePointVelocityToPack)
    {
+      desiredCapturePointVelocityToPack.setToZero(initialCapturePoint.getReferenceFrame());
+
       if (initialCapturePoint.distance(initialCMP) > EPSILON)
          desiredCapturePointVelocityToPack.subAndScale(omega0 * Math.exp(omega0 * time), initialCapturePoint, initialCMP);
       else
