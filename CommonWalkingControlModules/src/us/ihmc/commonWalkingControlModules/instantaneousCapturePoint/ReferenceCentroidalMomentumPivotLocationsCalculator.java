@@ -32,7 +32,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class ReferenceCentroidalMomentumPivotLocationsCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean PUT_EXIT_CMP_ON_TOES_FOR_STEPS_DOWN = false;
+   private static final boolean PUT_EXIT_CMP_ON_TOES_FOR_STEPS_DOWN = true;
    private static final double CMP_POINT_SIZE = 0.005;
 
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -531,6 +531,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    public void getNextEntryCMP(FramePoint entryCMPToPack)
    {
       entryCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
+   }
+
+   public void getNextExitCMP(FramePoint entryCMPToPack)
+   {
+      exitCMPsInWorldFrameReadOnly.get(0).getFrameTupleIncludingFrame(entryCMPToPack);
    }
 
    public boolean isDoneWalking()

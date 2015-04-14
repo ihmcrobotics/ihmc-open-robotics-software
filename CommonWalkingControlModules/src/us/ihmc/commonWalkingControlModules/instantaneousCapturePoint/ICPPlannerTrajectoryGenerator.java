@@ -11,8 +11,6 @@ import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPositionTrajecto
 
 public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final VelocityConstrainedPositionTrajectoryGenerator doubleSupportCapturePointTrajectory;
 
    private final FramePoint initialPositionInSpecificFrame = new FramePoint();
@@ -20,9 +18,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    private final FramePoint finalPositionInSpecificFrame = new FramePoint();
    private final FrameVector finalVelocityInSpecificFrame = new FrameVector();
 
-   public ICPPlannerTrajectoryGenerator(String namePrefix, int numberOfCoefficients, YoVariableRegistry registry)
+   public ICPPlannerTrajectoryGenerator(String namePrefix, ReferenceFrame trajectoryFrame, YoVariableRegistry registry)
    {
-      doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, numberOfCoefficients, worldFrame, registry);
+      doubleSupportCapturePointTrajectory = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, 4, trajectoryFrame, registry);
    }
 
    public void setTrajectoryTime(double duration)
@@ -72,8 +70,18 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.get(positionToPack);
    }
 
+   public void get(YoFramePoint positionToPack)
+   {
+      doubleSupportCapturePointTrajectory.get(positionToPack);
+   }
+
    @Override
    public void packVelocity(FrameVector velocityToPack)
+   {
+      doubleSupportCapturePointTrajectory.packVelocity(velocityToPack);
+   }
+
+   public void packVelocity(YoFrameVector velocityToPack)
    {
       doubleSupportCapturePointTrajectory.packVelocity(velocityToPack);
    }
