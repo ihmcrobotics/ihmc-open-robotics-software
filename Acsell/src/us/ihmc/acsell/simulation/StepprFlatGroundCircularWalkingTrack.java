@@ -41,7 +41,7 @@ public class StepprFlatGroundCircularWalkingTrack
       scs.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot").setValueFromDouble(0.1); 
       scs.getVariable("MomentumBasedControllerFactory","swingTime").setValueFromDouble(0.75); 
       scs.getVariable("MomentumBasedControllerFactory","transferTime").setValueFromDouble(0.25); 
-      YoVariable<?> desiredVelocityX =  scs.getVariable("SimpleDesiredVelocityControlModule", "desiredVelocityX");
+      YoVariable<?> desiredVelocityX =  scs.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       
 
       for(double v=0.0; v<0.6; v+=0.1)
