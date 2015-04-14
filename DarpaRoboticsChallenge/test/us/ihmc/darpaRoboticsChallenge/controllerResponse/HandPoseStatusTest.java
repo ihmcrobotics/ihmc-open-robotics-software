@@ -203,7 +203,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       
       PrintTools.debug(this, "statusStartedCounter: " + statusStartedCounter + " statusCompletedCounter: " + statusCompletedCounter);
       
-      assertTrue((statusStartedCounter == 2) && (statusCompletedCounter == 1));
+      assertTrue((statusStartedCounter == 3) && (statusCompletedCounter == 2));
       assertTrue(Math.abs(endTranslation.getX() - expectedTranslation.getX()) < 0.1);
       assertTrue(Math.abs(endTranslation.getY() - expectedTranslation.getY()) < 0.1);
       assertTrue(Math.abs(endTranslation.getZ() - expectedTranslation.getZ()) < 0.1);
