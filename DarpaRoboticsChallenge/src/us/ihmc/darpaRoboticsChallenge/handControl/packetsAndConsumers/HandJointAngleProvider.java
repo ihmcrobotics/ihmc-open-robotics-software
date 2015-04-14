@@ -17,8 +17,8 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePacket>
 {
    private final SideDependentList<HashMap<HandJointName, OneDoFJoint>> handJoints = new SideDependentList<HashMap<HandJointName, OneDoFJoint>>();
-   private final AtomicReference<HandJointAnglePacket> packet = new AtomicReference<HandJointAnglePacket>();
-   private final Object lock = new Object();
+
+   private final SideDependentList<AtomicReference<HandJointAnglePacket>> packets = new SideDependentList<AtomicReference<HandJointAnglePacket>>();
    private ArrayList<GraphicsUpdatable> graphicsToUpdate = new ArrayList<GraphicsUpdatable>();
    private HandModel handModel;
 
@@ -31,6 +31,7 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
          for (RobotSide side : RobotSide.values())
          {
             final HashMap<HandJointName, OneDoFJoint> joints = new HashMap<HandJointName, OneDoFJoint>();
+            packets.put(side, new AtomicReference<HandJointAnglePacket>());
 
             for (HandJointName jointName : handModel.getHandJointNames())
             {
@@ -46,43 +47,44 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    {
       graphicsToUpdate.add(updateable);
    }
-   
+
    public void updateHandModel()
    {
-	   HandJointAnglePacket handJointAngles = packet.getAndSet(null);
-	   
-	   if(handJointAngles == null)
-		   return;
-	   
-	   synchronized (lock)
-	   {
-		   HashMap<HandJointName, OneDoFJoint> joints = handJoints.get(handJointAngles.getRobotSide());
-		   if (joints != null)
-		   {
-			   for (HandJointName jointName : handModel.getHandJointNames())
-			   {
-				   if (jointName != null)
-				   {
-					   OneDoFJoint oneDoFJoint = joints.get(jointName);
-					   if (oneDoFJoint != null)
-					   {
-						   oneDoFJoint.setQ(handJointAngles.getJointAngle(jointName));
-					   }
-				   }
-			   }
-			   
-			   for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
-			   {
-				   if (graphicsUpdatable != null) graphicsUpdatable.update();
-			   }
-		   }
-	   }
+      if (handModel != null)
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            HandJointAnglePacket handJointAngles = packets.get(robotSide).getAndSet(null);
+            HashMap<HandJointName, OneDoFJoint> joints = handJoints.get(robotSide);
+
+            if (handJointAngles != null && joints != null)
+            {
+               for (HandJointName jointName : handModel.getHandJointNames())
+               {
+                  if (jointName != null)
+                  {
+                     OneDoFJoint oneDoFJoint = joints.get(jointName);
+                     if (oneDoFJoint != null)
+                     {
+                        oneDoFJoint.setQ(handJointAngles.getJointAngle(jointName));
+                     }
+                  }
+               }
+
+               for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)
+               {
+                  if (graphicsUpdatable != null)
+                     graphicsUpdatable.update();
+               }
+
+            }
+         }
+
+      }
    }
 
    public void receivedPacket(HandJointAnglePacket object)
    {
-	   packet.set(object);
-	   
-	   updateHandModel();
+      packets.get(object.robotSide).set(object);
    }
 }
