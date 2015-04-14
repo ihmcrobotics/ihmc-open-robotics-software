@@ -233,6 +233,12 @@ public class NewInstantaneousCapturePointPlannerTest
 	   {
 	      return 0.03;
 	   }
+
+      @Override
+      public double getMaxDurationForSmoothingEntryToExitCMPSwitch()
+      {
+         return 0.5;
+      }
 	};
 
 	private double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();

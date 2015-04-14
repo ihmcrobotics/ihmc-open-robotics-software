@@ -248,6 +248,12 @@ public class NewInstantaneousCapturePointPlannerDoubleSupportPushRecoveryVisuali
       {
          return 0.03;
       }
+
+      @Override
+      public double getMaxDurationForSmoothingEntryToExitCMPSwitch()
+      {
+         return 0.5;
+      }
    };
 
    private final double singleSupportDuration = testICPPlannerParams.getSingleSupportDuration();
