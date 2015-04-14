@@ -170,12 +170,6 @@ public class MomentumBasedController
    private final DoubleYoVariable gainCoPY = new DoubleYoVariable("gainCoPY", registry);
    private final SideDependentList<DoubleYoVariable> copControlScales;
 
-
-   // once we receive the data from the UI through a provider this variables souldn't be necessary
-   private final DoubleYoVariable frictionCompensationEffectiveness;
-   private final EnumYoVariable<FrictionModel> frictionModelForAllJoints;
-   private final BooleanYoVariable useBeforeTransmissionVelocityForFriction;
-
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final InverseDynamicsJoint[] controlledJoints;
@@ -422,14 +416,6 @@ public class MomentumBasedController
             handWrenches.put(robotSide, new Wrench());
          }
       }
-
-      // friction variables for all robot
-      frictionModelForAllJoints = new EnumYoVariable<>("frictionModelForAllJoints", registry, FrictionModel.class);
-      frictionCompensationEffectiveness = new DoubleYoVariable("frictionCompensationEffectiveness", registry);
-      useBeforeTransmissionVelocityForFriction = new BooleanYoVariable("usePreTransmissionVelocityForFriction", registry);
-      addVariableChangedListenerToFrictionCompensationVariables(frictionCompensationEffectiveness, frictionModelForAllJoints,
-              useBeforeTransmissionVelocityForFriction);
-      initializeFrictionCompensationToZero();
 
       feetCoPControlIsActive = new BooleanYoVariable("feetCoPControlIsActive", registry);
       footCoPOffsetX = new DoubleYoVariable("footCoPOffsetX", registry);
@@ -911,75 +897,6 @@ public class MomentumBasedController
          desiredTorqueYoVariables.get(joint).set(joint.getTau());
          desiredAccelerationYoVariables.get(joint).set(joint.getQddDesired());
       }
-   }
-
-   private void updateFrictionModel(FrictionModel model, FullRobotModel fullRobotModel)
-   {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      int numberOfJoint = joints.length;
-      for (int i = 0; i < numberOfJoint; i++)
-      {
-         joints[i].setFrictionModel(model);
-      }
-   }
-
-   private void updateFrictionCompensationEffectiveness(double effectiveness, FullRobotModel fullRobotModel)
-   {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      int numberOfJoint = joints.length;
-      for (int i = 0; i < numberOfJoint; i++)
-      {
-         joints[i].setFrictionCompensationEffectiveness(effectiveness);
-      }
-   }
-
-   private void updateUseBeforeTransmissionVelocityForFriction(boolean value, FullRobotModel fullRobotModel)
-   {
-      OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
-      int numberOfJoint = joints.length;
-      for (int i = 0; i < numberOfJoint; i++)
-      {
-         joints[i].setUseBeforeTransmissionVelocityForFriction(value);
-      }
-   }
-
-   private void addVariableChangedListenerToFrictionCompensationVariables(DoubleYoVariable effectiveness, EnumYoVariable<FrictionModel> model,
-           BooleanYoVariable selectedVelocity)
-   {
-      VariableChangedListener changedModel = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            updateFrictionModel(frictionModelForAllJoints.getEnumValue(), fullRobotModel);
-         }
-      };
-
-      VariableChangedListener changedEffectiveness = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            updateFrictionCompensationEffectiveness(frictionCompensationEffectiveness.getDoubleValue(), fullRobotModel);
-         }
-      };
-
-      VariableChangedListener changedVelocity = new VariableChangedListener()
-      {
-         public void variableChanged(YoVariable<?> v)
-         {
-            updateUseBeforeTransmissionVelocityForFriction(useBeforeTransmissionVelocityForFriction.getBooleanValue(), fullRobotModel);
-         }
-      };
-
-      effectiveness.addVariableChangedListener(changedEffectiveness);
-      model.addVariableChangedListener(changedModel);
-      selectedVelocity.addVariableChangedListener(changedVelocity);
-   }
-
-   private void initializeFrictionCompensationToZero()
-   {
-      frictionCompensationEffectiveness.set(0.0);
-      frictionModelForAllJoints.set(FrictionModel.OFF);
-      useBeforeTransmissionVelocityForFriction.set(false);
    }
 
    public void initialize()
