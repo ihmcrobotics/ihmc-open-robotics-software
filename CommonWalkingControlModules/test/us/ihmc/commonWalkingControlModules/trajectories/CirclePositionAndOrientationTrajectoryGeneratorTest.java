@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -70,11 +71,28 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
       trajectoryGenerator.setCircleReferenceFrame(frame);
       trajectoryGenerator.initialize();
    }
+   
+   @After
+   public void tearDown()
+   {
+      frame = null;
+      random = null;
+      registry = null;
+      initialRotationFromWorld = null;
+      initialRotationFromWorldMatrix = null;
+      initialOrientationProvider = null;
+      initialPositionProvider = null;
+      desiredRotationAngleProvider = null;
+      trajectoryTimeProvider = null;
+      trajectoryGenerator = null;
+   }
 
 	@EstimatedDuration(duration = 0.0)
 	@Test(timeout = 30000)
    public void testOrientation()
    {
+	   trajectoryGenerator.setControlHandAngleAboutAxis(true);
+	   
       // v = omega x r
       checkVEqualsOmegaCrossR(frame, trajectoryGenerator, random);
 
@@ -85,6 +103,7 @@ public class CirclePositionAndOrientationTrajectoryGeneratorTest
 	@Test(timeout = 30000)
    public void testCompute()
    {
+	   trajectoryGenerator.setControlHandAngleAboutAxis(true);
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() * 0.5);
 
       FrameVector velocityToPack = new FrameVector(frame, 1.1, 2.2, 3.3);
