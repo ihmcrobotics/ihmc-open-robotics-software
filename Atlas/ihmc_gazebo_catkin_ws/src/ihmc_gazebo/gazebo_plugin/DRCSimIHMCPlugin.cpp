@@ -144,6 +144,7 @@ public:
         this->model = _parent;
 
         this->gzPhysicsTimeStep = model->GetWorld()->GetPhysicsEngine()->GetMaxStepSize();
+        this->tcpSendModulus = (int)((1.0 / (this->gzPhysicsTimeStep * 1e3)) + 0.5);
         this->modulusCounter = 3;
 
         joints = this->model->GetJoints();
@@ -201,8 +202,8 @@ public:
             }
 
             joints.at(i)->SetPosition(0, initialAngle);
-            joints.at(i)->SetUpperLimit(0, initialAngle - 3.14);
-            joints.at(i)->SetLowerLimit(0, initialAngle + 3.14);
+            joints.at(i)->SetUpperLimit(0, initialAngle);
+            joints.at(i)->SetLowerLimit(0, initialAngle);
 
             jointController->SetPositionTarget(J->first, initialAngle);
 
