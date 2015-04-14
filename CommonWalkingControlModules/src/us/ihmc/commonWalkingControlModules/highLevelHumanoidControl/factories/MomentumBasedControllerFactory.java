@@ -297,6 +297,10 @@ public class MomentumBasedControllerFactory
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
+         if(wristSensorNames.get(robotSide) == null)
+         {
+            return null;
+         }
          ForceSensorDataReadOnly wristForceSensor = forceSensorDataHolder.getByName(wristSensorNames.get(robotSide));
          wristForceSensors.put(robotSide, wristForceSensor);
       }
