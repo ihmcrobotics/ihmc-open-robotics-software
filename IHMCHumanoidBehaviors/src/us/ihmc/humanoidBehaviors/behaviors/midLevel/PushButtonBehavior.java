@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.behaviors.HumanoidBehaviorButtonPacket;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FingerStateBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseBehavior;
@@ -33,11 +34,14 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 public class PushButtonBehavior extends BehaviorInterface
 {
    private static final boolean DEBUG = false;
+   
+   
+   
 
    private static final boolean OVERRIDE = true;
    private static final boolean FORCE_CONTROL = true;
    private static final double TRAJECTORY_TIME = 1.0;
-   
+
 
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
    private final ConcurrentListeningQueue<HumanoidBehaviorButtonPacket> inputListeningQueue = new ConcurrentListeningQueue<HumanoidBehaviorButtonPacket>();
@@ -65,12 +69,12 @@ public class PushButtonBehavior extends BehaviorInterface
    private Matrix3d poseZRotation =  new Matrix3d();
    private Matrix3d poseYRotation =  new Matrix3d();
    private Matrix3d poseRotation =  new Matrix3d();
-   
+
    private Point3d newHandPosition = new Point3d();
    private Point3d initialHandPosition = new Point3d();
    private Vector3d pushVector = new Vector3d();
    private final Vector3d wristOffset = new Vector3d();
-   
+
    private static final double HANDPOSE_ERROR = 0.001;
    private static final double RETRACT_HANDPOSE_ERROR = 0.01;
 
@@ -79,7 +83,9 @@ public class PushButtonBehavior extends BehaviorInterface
 
    // Force controller specifics
    private AlphaFilteredYoVariable forceMeasurement;
-   private static final double DESIRED_END_FORCE = 2.5;  // minimum force to switch button: 2.375
+   private final double ALPHA = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, IHMCHumanoidBehaviorManager.BEHAVIOR_YO_VARIABLE_SERVER_DT);
+
+   private static final double DESIRED_END_FORCE = 5.0;  // minimum force to switch button: 2.375, but main point is to make sure the robot does not tip over.
    private static final double END_FORCE_ERROR = 0.1;
    private double deltaF = DESIRED_END_FORCE;
    private double P = 1/200000.0;
@@ -94,15 +100,15 @@ public class PushButtonBehavior extends BehaviorInterface
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors)
    {
       super(outgoingCommunicationBridge);
-      
+
       robotSide = RobotSide.RIGHT;
-      
+
       this.wristSensors = new SideDependentList<WristForceSensorFilteredUpdatable>(wristSensors);
       this.yoTime = yoTime;
-      forceMeasurement =  new AlphaFilteredYoVariable("PushForce", registry, 0.5);
-      
+      forceMeasurement =  new AlphaFilteredYoVariable("PushForce", registry, ALPHA);
+
       buttonNumber = 0;
-      
+
       controllerState = ControllerStates.REQUEST_INPUTS;
 
       if(FORCE_CONTROL)
@@ -113,7 +119,7 @@ public class PushButtonBehavior extends BehaviorInterface
 
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       fingerStateBehavior = new FingerStateBehavior(outgoingCommunicationBridge, yoTime);
-      
+
       closeHandTask = new FingerStateTask(robotSide,FingerState.CLOSE, fingerStateBehavior, yoTime);
 
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
@@ -136,21 +142,24 @@ public class PushButtonBehavior extends BehaviorInterface
       case REQUEST_INPUTS:
          checkForNewInputs();
          break;
-   
+
       case INITIALIZE_HANDPOSE:
          setInitialHandPose();
-   
+         if(DEBUG)
+         {
+            System.out.println("Memory free [MB]/ Memory total [MB]: " + Runtime.getRuntime().freeMemory() / 1024 / 1024 + " / " + Runtime.getRuntime().totalMemory() / 1024 / 1024);
+         }
          break;
-   
+
       case WAIT_FOR_HANDPOSE:
          distanceVector.set(wristSensors.get(robotSide).getWristPositionInWorld().getPointCopy());
          distanceVector.add(wristOffset);
          distanceVector.sub(newHandPosition);
          if(DEBUG)
          {
-//            System.out.println("Distance to required pose:" + distanceVector.length());
+            System.out.println("Distance to required pose:" + distanceVector.length());
          }
-   
+
          if(distanceVector.length() < HANDPOSE_ERROR){
             controllerState = ControllerStates.DO_FORCECONTROL;
             controllerCounter = 0;
@@ -159,12 +168,12 @@ public class PushButtonBehavior extends BehaviorInterface
             }
          }
          break;
-   
+
       case WAIT_FOR_RETRACTION:
          distanceVector.set(wristSensors.get(robotSide).getWristPositionInWorld().getPointCopy());
          distanceVector.add(wristOffset);
          distanceVector.sub(initialHandPosition);
-   
+
          if(distanceVector.length() < RETRACT_HANDPOSE_ERROR){
             controllerState = ControllerStates.INITIALIZE_HANDPOSE;
             if(DEBUG){
@@ -172,22 +181,22 @@ public class PushButtonBehavior extends BehaviorInterface
             }
          }
          break;
-   
+
       case DO_FORCECONTROL:
-            forceController();
+         forceController();
          break;
-   
+
       case DO_POSITIONCONTROL:
          break;
-   
+
       case DONE:
          submitSingleTaskStageHandPose(initialHandPose,robotSide);
          behaviorDone = true;
-   
+
       default:
          break;
       }
-   
+
       pipeLine.doControl();
    }
 
@@ -220,120 +229,121 @@ public class PushButtonBehavior extends BehaviorInterface
 
    }
 
-         public void setInitialHandPose()
+   public void setInitialHandPose()
+   {
+      if (pushLocations.size() == buttonNumber)
+      {
+         controllerState = ControllerStates.DONE;
+
+         if(DEBUG)
          {
-            if (pushLocations.size() == buttonNumber)
-            {
-               controllerState = ControllerStates.DONE;
-      
-               if(DEBUG)
-               {
-                  System.out.println("No more buttons.");
-                  System.out.println("ControllerState: " + controllerState);
-               }
-               return;
-            }
-      
-            if(DEBUG)
-            {
-               System.out.println("ButtonNumber: " + buttonNumber);
-               System.out.println("ControllerState: " + controllerState);
-            }
-      
-            pushVector.set(pushDirections.get(buttonNumber));
-            pushVector.normalize();
-            newHandPosition =  new Point3d(pushLocations.get(buttonNumber));
-      
-            // Place hand 0.2 away from assumed button position to avoid early collision.
-            pushVector.scale(0.2);
-            newHandPosition.sub(pushVector);
-            pushVector.normalize();
-            if(DEBUG)
-            {
-               System.out.println("Initial Hand Pose for Button " + buttonNumber +" set: " + newHandPosition + "; Push direction: " + this.pushVector);
-            }
-           
-            double alpha = Math.atan(pushVector.getY() / pushVector.getX());
-            double beta = - Math.atan(pushVector.getZ() / Math.sqrt(Math.pow(pushVector.getX(), 2.0) + Math.pow(pushVector.getY(),2.0)));
-            poseZRotation.rotZ(alpha);
-            poseYRotation.rotY(beta);
-            poseRotation.mul(poseZRotation, poseYRotation);
-            
-            // Transform the wrist offset
-            wristOffset.set(0.1, 0.0, 0.0);
-            poseRotation.transform(wristOffset);
-            
-            initialHandPose.setOrientation(poseRotation);
-            initialHandPose.setPosition(newHandPosition);
-      
-            pipeLine.clearAll();
-            
-            // Form fist:
-            pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, closeHandTask);
-            
-            
-            // Set initial pose:
-            submitSingleTaskStageHandPose(initialHandPose,robotSide);
-      
-            newHandPose = new FramePose(initialHandPose);
-      
-            if (FORCE_CONTROL)
-            {
-               controllerState = ControllerStates.WAIT_FOR_HANDPOSE;
-      
-               oldHandPose = new FramePose(initialHandPose);
-               newHandPose = new FramePose(initialHandPose);
-            }
-            else 
-            {
-               controllerState = ControllerStates.DO_POSITIONCONTROL;
-               Point3d handPoseEndPosition = new Point3d(newHandPosition);
-               pushVector.scale(0.1);
-               handPoseEndPosition.add(pushVector);
-               pushVector.normalize();
-               newHandPose.setPosition(handPoseEndPosition);
-      
-               submitSingleTaskStageHandPose(newHandPose, robotSide);
-            }
-      
-            if(DEBUG)
-            {
-               System.out.println("ControllerState: " + controllerState);
-            }
+            System.out.println("No more buttons.");
+            System.out.println("ControllerState: " + controllerState);
          }
-   
-         
+         return;
+      }
+
+      if(DEBUG)
+      {
+         System.out.println("ButtonNumber: " + buttonNumber);
+         System.out.println("ControllerState: " + controllerState);
+      }
+
+      pushVector.set(pushDirections.get(buttonNumber));
+      pushVector.normalize();
+      newHandPosition =  new Point3d(pushLocations.get(buttonNumber));
+
+      // Place hand 0.2 away from assumed button position to avoid early collision.
+      pushVector.scale(0.2);
+      newHandPosition.sub(pushVector);
+      pushVector.normalize();
+      if(DEBUG)
+      {
+         System.out.println("Initial Hand Pose for Button " + buttonNumber +" set: " + newHandPosition + "; Push direction: " + this.pushVector);
+      }
+
+      double alpha = Math.atan(pushVector.getY() / pushVector.getX());
+      double beta = - Math.atan(pushVector.getZ() / Math.sqrt(Math.pow(pushVector.getX(), 2.0) + Math.pow(pushVector.getY(),2.0)));
+      poseZRotation.rotZ(alpha);
+      poseYRotation.rotY(beta);
+      poseRotation.mul(poseZRotation, poseYRotation);
+
+      // Transform the wrist offset
+      wristOffset.set(0.1, 0.0, 0.0);
+      poseRotation.transform(wristOffset);
+
+      initialHandPose.setOrientation(poseRotation);
+      initialHandPose.setPosition(newHandPosition);
+
+      pipeLine.clearAll();
+
+      // Form fist:
+      pipeLine.submitTaskForPallelPipesStage(fingerStateBehavior, closeHandTask);
+
+      // Set initial pose:
+      submitSingleTaskStageHandPose(initialHandPose,robotSide);
+
+      newHandPose = new FramePose(initialHandPose);
+
+      if (FORCE_CONTROL)
+      {
+         controllerState = ControllerStates.WAIT_FOR_HANDPOSE;
+
+         oldHandPose = new FramePose(initialHandPose);
+         newHandPose = new FramePose(initialHandPose);
+      }
+      else 
+      {
+         controllerState = ControllerStates.DO_POSITIONCONTROL;
+         Point3d handPoseEndPosition = new Point3d(newHandPosition);
+         pushVector.scale(0.1);
+         handPoseEndPosition.add(pushVector);
+         pushVector.normalize();
+         newHandPose.setPosition(handPoseEndPosition);
+
+         submitSingleTaskStageHandPose(newHandPose, robotSide);
+      }
+
+      if(DEBUG)
+      {
+         System.out.println("ControllerState: " + controllerState);
+      }
+   }
+
+
    private void forceController()
    {    
       // Take only the force component in push direction
       forceMeasurement.update(wristSensors.get(robotSide).getWristForceMassCompensatedInWorld().dot(pushVector));
-      
+
       deltaF = DESIRED_END_FORCE - forceMeasurement.getDoubleValue();
-      
-      System.out.println("Filtered deltaF: " + deltaF);
-      
+      if(DEBUG)
+      {
+         System.out.println("Filtered deltaF: " + deltaF);
+      }
+
       pushVector.scale(deltaF * P);
       oldHandPose.getPosition(newHandPosition);
       newHandPosition.add(pushVector);
-   
+
       newHandPose.setPosition(newHandPosition);
       newHandPose.getOrientation(orientation);
-   
+
       pushVector.normalize();
       controlCmds.position = newHandPosition;
       controlCmds.orientation = orientation;
       oldHandPose.setPose(newHandPose);
-   
+
       sendPacketToController(controlCmds);
-   
-      if(deltaF < END_FORCE_ERROR && deltaF > -END_FORCE_ERROR && controllerCounter > 50)
+
+      if(deltaF < END_FORCE_ERROR && controllerCounter > 50)
       {
          buttonNumber++;
-   
+
          submitSingleTaskStageHandPose(initialHandPose,robotSide);
          initialHandPose.getPosition(initialHandPosition);
          controllerState = ControllerStates.WAIT_FOR_RETRACTION;
-   
+
          if(DEBUG)
          {
             System.out.println("Desired Force reached: DeltaF = " +  deltaF);
