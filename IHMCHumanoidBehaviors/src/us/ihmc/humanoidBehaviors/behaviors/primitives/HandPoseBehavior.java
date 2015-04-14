@@ -7,7 +7,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus.Status;
-import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
+import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
@@ -277,9 +277,9 @@ public class HandPoseBehavior extends BehaviorInterface
 
 	private void stopArmMotion()
 	{
-		if (outgoingPacket != null && robotSide != null) 
+		if (outgoingPacket != null ) 
 		{
-			StopArmMotionPacket pausePacket = new StopArmMotionPacket(robotSide);
+			StopMotionPacket pausePacket = new StopMotionPacket();
 			pausePacket.setDestination(PacketDestination.CONTROLLER);
 			sendPacketToController(pausePacket);
 		}

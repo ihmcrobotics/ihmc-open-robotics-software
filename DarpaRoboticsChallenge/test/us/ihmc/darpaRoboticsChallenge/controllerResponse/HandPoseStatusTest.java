@@ -17,7 +17,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
-import us.ihmc.communication.packets.manipulation.StopArmMotionPacket;
+import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.FlatGroundEnvironment;
@@ -192,7 +192,7 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       testHelper.send(outgoingHandPosePacket);
       double timeToSimulateHandMotion = 1.0;
       testHelper.simulateAndBlockAndCatchExceptions(timeToSimulateHandMotion);
-      testHelper.send(new StopArmMotionPacket(RobotSide.LEFT));
+      testHelper.send(new StopMotionPacket());
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       Vector3d endTranslation = new Vector3d();
