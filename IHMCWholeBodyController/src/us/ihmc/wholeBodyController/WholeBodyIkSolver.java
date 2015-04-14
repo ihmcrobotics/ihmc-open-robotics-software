@@ -98,6 +98,7 @@ abstract public class WholeBodyIkSolver
          USE_WHOLE_BODY,           // can move the entire body
          LOCK_PELVIS_ORIENTATION,  // pelvis can move but not rotate
          CONTROL_MANUALLY,
+         CONTROL_MANUALLY_AND_LOCK_WAIST,
          LOCK_LEGS,                // will lock just the leg to the position given bu actualRobotModel. Note that COM position is NOT controlled.
          LOCK_LEGS_AND_WAIST_X_Y,  // lock waist and legs but keep wait yaw free to move.
          LOCK_LEGS_AND_WAIST       // lock waist and legs
@@ -672,37 +673,51 @@ abstract public class WholeBodyIkSolver
          boolean enableLeg   = true;
          boolean enableWaistZ  = true;
          boolean enableWaistXY = true;
-         boolean enablePelvisRotation = true;
+         boolean lockPelvisRotation = false;
+         boolean enableCOM = true;
 
          switch( lockLevel )
          {
          case USE_WHOLE_BODY: break;   
          
-         case CONTROL_MANUALLY:        
+         case CONTROL_MANUALLY_AND_LOCK_WAIST:
+            enableCOM = false;
+            enableWaistZ = false;
+            enableWaistXY = false;
+            lockPelvisRotation = true;
+            break;
+         
+         case CONTROL_MANUALLY:    
+            enableCOM = false;
+            lockPelvisRotation = true;
+            break;
+            
          case LOCK_PELVIS_ORIENTATION:
-            enablePelvisRotation = false;
+            lockPelvisRotation = true;
             break;
 
          case LOCK_LEGS:  
             enableLeg = false;
+            enableCOM = false;
             break;
 
          case LOCK_LEGS_AND_WAIST_X_Y:
             enableLeg = false;
+            enableCOM = false;
             enableWaistXY = false;
             break;
 
          case LOCK_LEGS_AND_WAIST:
             enableLeg = false;
+            enableCOM = false;
             enableWaistZ = false;
             enableWaistXY = false;
             break;
          }
          
-         taskPelvisPose.setEnabled( enableLeg && !enablePelvisRotation );
-         taskComPosition.setEnabled( enableLeg && lockLevel != LockLevel.CONTROL_MANUALLY  );
+         taskPelvisPose.setEnabled( enableLeg && lockPelvisRotation );
+         taskComPosition.setEnabled( enableLeg && enableCOM  );
          taskLegPose.setEnabled( enableLeg );
-
 
          for (RobotSide side: RobotSide.values)
          {
@@ -1103,10 +1118,6 @@ abstract public class WholeBodyIkSolver
          return  this.lockLevel;
       }
       
-      public void setFeetTarget(RobotSide side, FramePose footPose)
-      {
-         feetTarget.set(side, footPose);  
-      }
       
       public void setFootTarget(RobotSide side, FramePose footPose)
       {
