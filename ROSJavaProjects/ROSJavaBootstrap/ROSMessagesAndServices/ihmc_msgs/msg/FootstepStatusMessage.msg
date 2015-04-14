@@ -3,8 +3,8 @@
 # and orientation of the footstep in world cooredinates. 
 
 # Options for status
-# STARTED = 0 - execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state
-# COMPLETED = 1 - a footstep is completed
+uint8 STARTED=0 # execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state
+uint8 COMPLETED=1 # a footstep is completed
 uint8 status
 
 # footstepIndex starts at 0 and monotonically increases with each completed footstep in a given
@@ -12,8 +12,8 @@ uint8 status
 int32 footstep_index
 
 # Options for robotSide
-# LEFT = 0 - refers to the LEFT side of a robot
-# RIGHT = 1 - refers to the RIGHT side of a robot
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
 uint8 robot_side
 
 # actualFootPositionInWorld gives the position of where the foot actually landed as opposed

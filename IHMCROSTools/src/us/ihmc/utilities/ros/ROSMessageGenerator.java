@@ -197,11 +197,10 @@ public class ROSMessageGenerator
                
                for (int i = 0; i < documentedValues.size(); i++)
                {
-                  buffer += "# " + documentedValues.get(i);
-                  buffer += " = " + i;
+                  buffer += "uint8 " + documentedValues.get(i).toString() + "=" + i;
                   DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, documentedValues.get(i).toString());
                   String documentation = documentedEnum.getDocumentation(documentedValues.get(i));
-                  buffer += " - " + documentation;
+                  buffer += " # " + documentation;
                   buffer += System.lineSeparator();
                }
                
