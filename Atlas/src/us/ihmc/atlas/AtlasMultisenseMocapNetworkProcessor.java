@@ -24,6 +24,7 @@ public class AtlasMultisenseMocapNetworkProcessor
       
       DRCNetworkModuleParameters params = new DRCNetworkModuleParameters();
       params.setRosUri(rosUri);
+      params.setUseRosModule(true);
       params.setUseMocapModule(true);
       params.setUseSensorModule(true);
       params.setUseUiModule(true);
