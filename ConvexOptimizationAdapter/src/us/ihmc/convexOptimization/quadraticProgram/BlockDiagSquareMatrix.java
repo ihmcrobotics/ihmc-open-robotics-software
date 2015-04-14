@@ -7,6 +7,8 @@ import org.ejml.ops.CommonOps;
 
 public class BlockDiagSquareMatrix extends DenseMatrix64F
 {
+   private static final long serialVersionUID = 8813856249678942997L;
+   
    int[] blockSizes;
    int[] blockStarts;
    
