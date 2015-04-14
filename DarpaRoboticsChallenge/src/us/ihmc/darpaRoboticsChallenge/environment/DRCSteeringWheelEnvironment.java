@@ -102,7 +102,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
    @Override
    public void createAndSetContactControllerToARobot()
    {
-      ContactController contactController = new ContactController();
+      ContactController contactController = new ContactController("SteeringWheel");
       contactController.setContactParameters(1000.0, 100.0, 0.5, 0.3);
       contactController.addContactPoints(contactPoints);
       contactController.addContactables(wheelRobots);
