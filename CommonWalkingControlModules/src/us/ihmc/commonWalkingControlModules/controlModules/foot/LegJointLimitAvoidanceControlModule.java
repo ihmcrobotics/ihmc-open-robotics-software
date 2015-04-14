@@ -39,7 +39,8 @@ public class LegJointLimitAvoidanceControlModule
    private DoubleYoVariable[] originalDesiredPositions;
    private DoubleYoVariable[] alphas;
    private DoubleYoVariable[] adjustedDesiredPositions;
-   private YoFramePose originalDesiredPose;
+   private YoFramePose originalDesiredYoPose;
+   private FramePose originalDesiredPose;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
 
@@ -54,15 +55,14 @@ public class LegJointLimitAvoidanceControlModule
    private final DenseMatrix64F jointVelocities;
    private final DenseMatrix64F adjustedDesiredVelocity;
 
-   public LegJointLimitAvoidanceControlModule(YoVariableRegistry registry, MomentumBasedController momentumBasedController, RobotSide robotSide){
-      percentJointRangeForThreshold = new DoubleYoVariable("percentJointRangeForThreshold", registry);
+   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, MomentumBasedController momentumBasedController, RobotSide robotSide){
+      percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
       robotModel = momentumBasedController.getFullRobotModel();
       base = robotModel.getPelvis();
       RigidBody foot = robotModel.getFoot(robotSide);
       robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
       ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
-      ReferenceFrame cloneOfFootFrame = foot.getBodyFixedFrame();
-      jacobian = new GeometricJacobian(ikJoints, cloneOfFootFrame);
+      jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length-1].getSuccessor().getBodyFixedFrame());
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
 
       numJoints = ikJoints.length;
@@ -71,13 +71,15 @@ public class LegJointLimitAvoidanceControlModule
          alphas = new DoubleYoVariable[numJoints];
          adjustedDesiredPositions = new DoubleYoVariable[numJoints];
          for (int i = 0; i < numJoints; i++){
-            originalDesiredPositions[i] = new DoubleYoVariable("originalDesiredPositions" + i, registry);
-            alphas[i] = new DoubleYoVariable("alpha" + i, registry);
-            adjustedDesiredPositions[i] = new DoubleYoVariable("adjustedDesiredPositions" + i, registry);
+            originalDesiredPositions[i] = new DoubleYoVariable(prefix+ "originalDesiredPositions" +i, registry);
+            alphas[i] = new DoubleYoVariable(prefix + "alpha"+ i, registry);
+            adjustedDesiredPositions[i] = new DoubleYoVariable(prefix + "adjustedDesiredPositions" +i, registry);
          }
 
-         originalDesiredPose = new YoFramePose("originalDesiredPose", ReferenceFrame.getWorldFrame(), registry);
-         adjustedDesiredPose = new YoFramePose("adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
+         originalDesiredPose = new FramePose();
+         originalDesiredYoPose = new YoFramePose(prefix+"originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
+         adjustedDesiredPose = new YoFramePose(prefix+"adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
+         desiredTransform = new RigidBodyTransform();
       }
 
       percentJointRangeForThreshold.set(0.05);
@@ -99,23 +101,30 @@ public class LegJointLimitAvoidanceControlModule
    }
 
    public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
-                                          FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration, RigidBody base)
+                                          FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
+
    {
-      originalDesiredPose.setPosition(desiredPosition);
-      originalDesiredPose.setOrientation(desiredOrientation);
-      desiredTransform = originalDesiredPose.getReferenceFrame().getTransformToDesiredFrame(base.getBodyFixedFrame());
+      originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      originalDesiredPose.setPose(desiredPosition, desiredOrientation);
+      originalDesiredYoPose.set(originalDesiredPose);
+      originalDesiredPose.changeFrame(base.getBodyFixedFrame());
+      originalDesiredPose.getPose(desiredTransform);
+
       inverseKinematicsCalculator.solve(desiredTransform); //sets the qs of the one-dof ikJoints
 
       // adjust joints based on joint angle limits
-      adjustJointPositions();
+//      adjustJointPositions();
 
       //calcualte the new desired position and orientation
       ikJoints[0].updateFramesRecursively();
       ReferenceFrame adjustedFootFrame = jacobian.getEndEffectorFrame();
+
       desiredPosition.setToZero(adjustedFootFrame);
       desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
       desiredOrientation.setToZero(adjustedFootFrame);
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      adjustedDesiredPose.setPosition(desiredPosition);
+      adjustedDesiredPose.setOrientation(desiredOrientation);
 
       //calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredAngularVelocity.getVector(), 0, 0);
@@ -142,7 +151,7 @@ public class LegJointLimitAvoidanceControlModule
          midpointOfLimits = (lowerLimit + upperLimit) / 2;
          range = upperLimit - lowerLimit;
 
-         originalDesiredPositions[i].set(ikJoints[i].getqDesired());
+         originalDesiredPositions[i].set(ikJoints[i].getQ());
          double comparisonValue = Math.abs(2* (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range); //should range between -1 and 1, which are the limits
 
          double alpha = 0;
@@ -151,7 +160,7 @@ public class LegJointLimitAvoidanceControlModule
          }
          alphas[i].set(alpha);
 
-         double adjustedPosition = alpha * ikJoints[i].getQ() + (1-alpha) * ikJoints[i].getqDesired();
+         double adjustedPosition = alpha * robotJoints[i].getQ() + (1-alpha) * ikJoints[i].getqDesired();
          adjustedDesiredPositions[i].set(adjustedPosition);
          ikJoints[i].setqDesired(adjustedPosition);
       }
