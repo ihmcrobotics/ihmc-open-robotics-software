@@ -6,6 +6,8 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
+import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.*;
@@ -20,19 +22,22 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
  */
 public class LegJointLimitAvoidanceControlModule
 {
-   private static final int maxIterationsForIK = 5;
+   private static final int maxIterationsForIK = 20;
+   private static final boolean translationFixOnly = true;
+
    private static final double lambdaLeastSquares = 0.0009;
-   private static final double tolerance = 1e-12;
-   private static final double maxStepSize = 0.01;
-   private static final double minRandomSearchScalar = 1.0;
-   private static final double maxRandomSearchScalar = 1.0;
+   private static final double tolerance = 0.0025;
+   private static final double maxStepSize = 0.2;
+   private static final double minRandomSearchScalar = 0.01;
+   private static final double maxRandomSearchScalar = 0.8;
 
    private final DoubleYoVariable percentJointRangeForThreshold;
    private FullRobotModel robotModel;
    private RigidBody base;
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;
-   private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
+   private InverseKinematicsCalculator inverseKinematicsCalculator;
+   //private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private GeometricJacobian jacobian;
    private int numJoints;
 
@@ -50,20 +55,33 @@ public class LegJointLimitAvoidanceControlModule
    private final DenseMatrix64F jacobianTimesJaconianTransposedMatrix;
    private final DenseMatrix64F lamdaSquaredMatrix;
    private final DenseMatrix64F jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix;
+   private final DenseMatrix64F translationSelectionMatrix;
+   private final DenseMatrix64F allSelectionMatrix;
    private final DenseMatrix64F originalDesiredVelocity;
    private final DenseMatrix64F intermediateResult;
    private final DenseMatrix64F jointVelocities;
    private final DenseMatrix64F adjustedDesiredVelocity;
 
-   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, MomentumBasedController momentumBasedController, RobotSide robotSide){
-      percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
-      robotModel = momentumBasedController.getFullRobotModel();
+   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, FullRobotModel fullRobotModel, RobotSide robotSide){
+      robotModel = fullRobotModel;
       base = robotModel.getPelvis();
       RigidBody foot = robotModel.getFoot(robotSide);
       robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
       ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length-1].getSuccessor().getBodyFixedFrame());
-      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+
+//      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+      double orientationDiscount = 0.2;
+      boolean solveOrientation = true;
+      double convergeTolerance = 4.0e-6; //1e-12;
+      double acceptTolLoc = 0.005;
+      double acceptTolAngle = 0.02;
+      double parameterChangePenalty = 1.0e-4; //0.1;
+      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(jacobian, orientationDiscount, maxIterationsForIK, solveOrientation,
+            convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
+
+
+      inverseKinematicsCalculator.setLimitJointAngles(false);
 
       numJoints = ikJoints.length;
       {
@@ -82,6 +100,7 @@ public class LegJointLimitAvoidanceControlModule
          desiredTransform = new RigidBodyTransform();
       }
 
+      percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
       percentJointRangeForThreshold.set(0.05);
 
 
@@ -93,6 +112,14 @@ public class LegJointLimitAvoidanceControlModule
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
 
       solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      translationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
+      translationSelectionMatrix.set(0,3, 1.0);
+      translationSelectionMatrix.set(1,4, 1.0);
+      translationSelectionMatrix.set(2,5, 1.0);
+
+      allSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      allSelectionMatrix.set(5,5, 1.0);
+
       originalDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
       intermediateResult = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
@@ -104,19 +131,29 @@ public class LegJointLimitAvoidanceControlModule
                                           FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
 
    {
-      originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      //update joint positions in the ikJoints to the current positions
+      updateJointPositions();
+
+
       originalDesiredPose.setPose(desiredPosition, desiredOrientation);
       originalDesiredYoPose.set(originalDesiredPose);
-      originalDesiredPose.changeFrame(base.getBodyFixedFrame());
+      originalDesiredPose.changeFrame(jacobian.getBaseFrame());
       originalDesiredPose.getPose(desiredTransform);
+      originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
+//      if (translationFixOnly){
+//         inverseKinematicsCalculator.setSelectionMatrix(translationSelectionMatrix);
+//      }else{
+//         inverseKinematicsCalculator.setSelectionMatrix(allSelectionMatrix);
+//      }
       inverseKinematicsCalculator.solve(desiredTransform); //sets the qs of the one-dof ikJoints
-
-      // adjust joints based on joint angle limits
+//      adjust joints based on joint angle limits
 //      adjustJointPositions();
 
-      //calcualte the new desired position and orientation
+      //calculate the new desired position and orientation
       ikJoints[0].updateFramesRecursively();
+      RigidBodyTransform newFootTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(jacobian.getBaseFrame());
+      RigidBodyTransform footInWorldTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       ReferenceFrame adjustedFootFrame = jacobian.getEndEffectorFrame();
 
       desiredPosition.setToZero(adjustedFootFrame);
@@ -124,15 +161,27 @@ public class LegJointLimitAvoidanceControlModule
       desiredOrientation.setToZero(adjustedFootFrame);
       desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       adjustedDesiredPose.setPosition(desiredPosition);
-      adjustedDesiredPose.setOrientation(desiredOrientation);
+      if (!translationFixOnly)
+      {
+         adjustedDesiredPose.setOrientation(desiredOrientation);
+      }
 
       //calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredAngularVelocity.getVector(), 0, 0);
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredLinearVelocityOfOrigin.getVector(), 3, 0);
       calculateAdjustedVelocities();
       double[] adjustedVelocities = adjustedDesiredVelocity.getData();
-      desiredAngularVelocity.set(adjustedVelocities[0], adjustedVelocities[1], adjustedVelocities[2]);
+      if (!translationFixOnly)
+      {
+         desiredAngularVelocity.set(adjustedVelocities[0], adjustedVelocities[1], adjustedVelocities[2]);
+      }
       desiredLinearVelocityOfOrigin.set(adjustedVelocities[3], adjustedVelocities[4], adjustedVelocities[5]);
+   }
+
+   private void updateJointPositions(){
+      for (int i = 0; i < numJoints; i++){
+         ikJoints[i].setQ(robotJoints[i].getQ());
+      }
    }
 
    private void adjustJointPositions()
