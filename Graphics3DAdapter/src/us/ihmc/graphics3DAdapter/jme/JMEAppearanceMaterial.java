@@ -211,7 +211,8 @@ public class JMEAppearanceMaterial
          {
             String pathname = ogreShaderDir + appearanceDefinitionURL;
             File file = new File(pathname);
-            if (!file.exists())
+            // The Polaris is missing texture files, so this is to avoid excessive error messages
+            if (!file.exists() && !pathname.contains("polaris") && !pathname.contains("gazebo.material"))
             {
                System.err.println("createMaterialFromSDFAppearance(): Can't find material file " + pathname);
             }

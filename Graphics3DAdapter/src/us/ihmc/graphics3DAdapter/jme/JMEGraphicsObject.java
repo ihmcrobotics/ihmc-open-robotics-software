@@ -287,7 +287,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 	   {
 		   YoAppearanceRGBColor color = new YoAppearanceRGBColor(0.5, 0.5, 0.5, 0.5);
 		   jmeAppearance = JMEAppearanceMaterial.createMaterialFromYoAppearanceRGBColor(jmeAssetLocator, color);
-		   System.err.println("JMEGraphicsObject: Couldn't load appearance.");
+//		   System.err.println("JMEGraphicsObject: Couldn't load appearance.");
          if(DEBUG)
          {
             StringWriter writer = new StringWriter();
