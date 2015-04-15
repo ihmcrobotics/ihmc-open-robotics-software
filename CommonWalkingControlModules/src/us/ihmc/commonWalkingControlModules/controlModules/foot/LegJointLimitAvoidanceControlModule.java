@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -22,22 +24,22 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
  */
 public class LegJointLimitAvoidanceControlModule
 {
-   private static final int maxIterationsForIK = 20;
+   private static final int maxIterationsForIK = 100;
    private static final boolean translationFixOnly = true;
 
-   private static final double lambdaLeastSquares = 0.0009;
-   private static final double tolerance = 0.0025;
-   private static final double maxStepSize = 0.2;
-   private static final double minRandomSearchScalar = 0.01;
-   private static final double maxRandomSearchScalar = 0.8;
+   private static final double lambdaLeastSquares = 0.000001;
+   private static final double tolerance = 1.0e-8;
+   private static final double maxStepSize = 0.1;
+   private static final double minRandomSearchScalar = 1.0;
+   private static final double maxRandomSearchScalar = 1.0;
 
    private final DoubleYoVariable percentJointRangeForThreshold;
    private FullRobotModel robotModel;
    private RigidBody base;
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;
-   private InverseKinematicsCalculator inverseKinematicsCalculator;
-   //private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
+//   private InverseKinematicsCalculator inverseKinematicsCalculator;
+   private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private GeometricJacobian jacobian;
    private int numJoints;
 
@@ -70,15 +72,15 @@ public class LegJointLimitAvoidanceControlModule
       ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length-1].getSuccessor().getBodyFixedFrame());
 
-//      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
+      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
       double orientationDiscount = 0.2;
       boolean solveOrientation = true;
       double convergeTolerance = 4.0e-6; //1e-12;
       double acceptTolLoc = 0.005;
       double acceptTolAngle = 0.02;
       double parameterChangePenalty = 1.0e-4; //0.1;
-      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(jacobian, orientationDiscount, maxIterationsForIK, solveOrientation,
-            convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
+//      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(jacobian, orientationDiscount, maxIterationsForIK, solveOrientation,
+//            convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
 
 
       inverseKinematicsCalculator.setLimitJointAngles(false);
@@ -134,10 +136,17 @@ public class LegJointLimitAvoidanceControlModule
       //update joint positions in the ikJoints to the current positions
       updateJointPositions();
 
+      Twist rootJointTist = new Twist();
+      robotModel.getRootJoint().packJointTwist(rootJointTist);
+      FrameVector linearRootJointVelocity = new FrameVector();
+      rootJointTist.packLinearPart(linearRootJointVelocity);
+      
+      linearRootJointVelocity.scale(0.004);
 
       originalDesiredPose.setPose(desiredPosition, desiredOrientation);
       originalDesiredYoPose.set(originalDesiredPose);
       originalDesiredPose.changeFrame(jacobian.getBaseFrame());
+//      originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
       originalDesiredPose.getPose(desiredTransform);
       originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -233,7 +242,8 @@ public class LegJointLimitAvoidanceControlModule
 
       lamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       CommonOps.setIdentity(lamdaSquaredMatrix);
-      CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
+      lamdaSquaredMatrix.zero();
+//      CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
 
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJaconianTransposedMatrix);
