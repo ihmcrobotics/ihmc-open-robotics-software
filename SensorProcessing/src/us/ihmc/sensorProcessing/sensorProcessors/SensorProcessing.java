@@ -121,6 +121,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          processedJointTaus.put(oneDoFJoint, new ArrayList<ProcessingYoVariable>());
 
          BooleanYoVariable jointEnabledIndicator = new BooleanYoVariable("joint_enabled_" + jointName, registry);
+         jointEnabledIndicator.set(true);
          jointEnabledIndicators.put(oneDoFJoint, jointEnabledIndicator);
       }
 
