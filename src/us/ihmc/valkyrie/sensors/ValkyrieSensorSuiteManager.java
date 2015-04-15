@@ -46,7 +46,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
    }
 
    @Override
