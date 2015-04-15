@@ -7,7 +7,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasSteeringWorldDemo
 {
-   private static final double ROBOT_FLOATING_HEIGHT = 0.3;
+   private static final double ROBOT_FLOATING_HEIGHT = 0.0;
 
    
    public static void main(final String[] args) throws JSAPException
