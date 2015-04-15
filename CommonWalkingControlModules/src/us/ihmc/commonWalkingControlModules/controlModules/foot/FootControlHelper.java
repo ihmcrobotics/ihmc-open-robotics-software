@@ -1,5 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.List;
+
+import javax.vecmath.Point2d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -11,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.lists.FrameTuple2dArrayList;
@@ -21,7 +26,15 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.screwTheory.*;
+import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -75,7 +88,7 @@ public class FootControlHelper
    private final FrameMatrix3D angularSelectionMatrix = new FrameMatrix3D();
 
    // For hold position and fully constrained states.
-   private final FrameTuple2dArrayList<FramePoint2d> originalContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
+   private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> originalContactPointPositions = new SideDependentList<FrameTuple2dArrayList<FramePoint2d>>(FrameTuple2dArrayList.createFramePoint2dArrayList(4), FrameTuple2dArrayList.createFramePoint2dArrayList(4));
    private final FrameConvexPolygon2d originalSupportFootPolygon = new FrameConvexPolygon2d();
    private final BooleanYoVariable allowSupportFootShrink;
    private final BooleanYoVariable isSupportFootShrinkEnabled;
@@ -426,19 +439,31 @@ public class FootControlHelper
       for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         FramePoint2d originalContactPointPosition = originalContactPointPositions.get(i);
+         FramePoint2d originalContactPointPosition = originalContactPointPositions.get(robotSide).get(i);
          yoContactPoint.getPosition2d(originalContactPointPosition);
 
          if (originalContactPointPosition.getX() > contactPointMaxX.getDoubleValue())
             contactPointMaxX.set(originalContactPointPosition.getX());
       }
 
-      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions);
+      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions.get(robotSide));
 
       if (resetCurrentFootShrink)
       {
          footShrinkPercent.set(0.0);
       }
+   }
+
+   public void updateWithPredictedContactPoints(Footstep footstep)
+   {
+      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      if (predictedContactPoints == null || predictedContactPoints.isEmpty())
+         return;
+
+      originalContactPointPositions.get(robotSide).clear();
+
+      for (int i = 0; i < predictedContactPoints.size(); i++)
+         originalContactPointPositions.get(robotSide).copyFromPoint2dListAndTrimSize(predictedContactPoints);
    }
 
    public void restoreSupportFootContactPoints()
@@ -449,7 +474,7 @@ public class FootControlHelper
       for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         yoContactPoint.setPosition2d(originalContactPointPositions.get(i));
+         yoContactPoint.setPosition2d(originalContactPointPositions.get(robotSide).get(i));
       }
    }
 
@@ -484,7 +509,7 @@ public class FootControlHelper
       for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         double originalContactPointX = originalContactPointPositions.get(i).getX();
+         double originalContactPointX = originalContactPointPositions.get(robotSide).get(i).getX();
          yoContactPoint.getPosition2d(tempFramePoint);
          tempFramePoint.setX(alpha * contactPointMaxX.getDoubleValue() + (1.0 - alpha) * originalContactPointX);
 
