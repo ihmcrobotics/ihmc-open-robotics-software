@@ -22,6 +22,7 @@ import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.WaistRotator;
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.forcedSideDependentJointNames;
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,6 +41,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.hands.ValkyrieActuatableFingerJoints;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -72,6 +74,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
+   private final SideDependentList<ArrayList<String>> actuatableFingerJoints = new SideDependentList<ArrayList<String>>();
 
    public ValkyrieJointMap()
    {
@@ -105,6 +108,13 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
           limbNames.put(prefix + "Palm", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "UpperFoot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
+         
+         actuatableFingerJoints.put(robotSide, new ArrayList<String>());
+         
+         for(ValkyrieActuatableFingerJoints joint : ValkyrieActuatableFingerJoints.values())
+         {
+            actuatableFingerJoints.get(robotSide).add(robotSide.getCamelCaseNameForMiddleOfExpression() + joint.toString());
+         }
       }
 
       spineJointNames.put(jointNames[WaistRotator], SpineJointName.SPINE_YAW);
@@ -372,5 +382,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       };
       
       return ret;
+   }
+   
+   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   {
+      return actuatableFingerJoints;
    }
 }

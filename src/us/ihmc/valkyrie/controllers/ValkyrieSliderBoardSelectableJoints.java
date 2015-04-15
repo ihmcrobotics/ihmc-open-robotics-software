@@ -7,6 +7,4 @@ public enum ValkyrieSliderBoardSelectableJoints
    LeftShoulderSupinator, LeftElbowExtensor, LeftForearmSupinator, LeftWristExtensor, LeftWrist, LowerNeckExtensor, NeckRotator, UpperNeckExtensor,
    RightShoulderExtensor, RightShoulderAdductor, RightShoulderSupinator, RightElbowExtensor, RightForearmSupinator, RightWristExtensor,
    RightWrist
-//   , RightThumbMPYaw, RightThumbMPExtensor, RightThumbPIPExtensor, RightPrimaryMPExtensor, RightMiddleMPExtensor, RightLittleMPExtensor,
-//   LeftThumbMPYaw, LeftThumbMPExtensor, LeftThumbPIPExtensor, LeftPrimaryMPExtensor, LeftMiddleMPExtensor, LeftLittleMPExtensor
 }

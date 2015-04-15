@@ -74,7 +74,7 @@ public class ValkyrieSliderBoard
          break;
 
       case WALKING:
-         new WalkControllerSliderBoard(scs, registry);
+         new WalkControllerSliderBoard(scs, registry, drcRobotModel);
          setupJoyStick(registry);
          break;
 
