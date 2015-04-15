@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -172,6 +173,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCRobotJointMap getJointMap()
    {
       return jointMap;
+   }
+   
+   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   {
+      return jointMap.getActuatableFingerJointNames();
    }
 
    @Override
