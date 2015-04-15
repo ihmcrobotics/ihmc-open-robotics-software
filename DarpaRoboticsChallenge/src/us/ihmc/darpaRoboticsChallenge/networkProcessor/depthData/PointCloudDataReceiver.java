@@ -15,10 +15,13 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxNode;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
@@ -35,22 +38,35 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
+   private final CollisionBoxNode collisionBoxNode;
+   
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
    
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();   
    private final AtomicBoolean sendData = new AtomicBoolean(false);
    private volatile boolean running = true;
+   
+   private volatile boolean clearQuadTree = false;
+   private volatile boolean clearDecayingPointCloud = false;
 
-   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, DRCHandType handType, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
+   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, DRCHandType handType, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator sensorSuitePacketCommunicator)
    {
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.depthDataFilter = new RobotDepthDataFilter(handType, modelFactory, robotConfigurationDataBuffer, jointMap.getContactPointParameters().getFootContactPoints());
+      this.depthDataFilter = new RobotDepthDataFilter(handType, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(sensorSuitePacketCommunicator, readWriteLock.readLock(), depthDataFilter);
       
+      if(collisionBoxProvider != null)
+      {
+         collisionBoxNode = new CollisionBoxNode(this.fullRobotModel, collisionBoxProvider, null);
+      }
+      else
+      {
+         collisionBoxNode = null;
+      }
       setupListeners(sensorSuitePacketCommunicator);
       sensorSuitePacketCommunicator.attachStateListener(this);
 
@@ -78,11 +94,28 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       {
          try
          {
-            PointCloudData data = dataQueue.take();
+            PointCloudData data = dataQueue.take(); // Do this outside lock to avoid dead-locks
+
+            readWriteLock.writeLock().lock();
+            if(clearDecayingPointCloud)
+            {
+               if(robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
+               {
+                  depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
+                  clearDecayingPointCloud = false;
+               }
+            }
+            if (clearQuadTree)
+            {
+               if (robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
+               {
+                  depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
+                  clearQuadTree = false;
+               }
+            }
+            
             if (data != null && sendData.get())
             {
-               readWriteLock.writeLock().lock();
-               
                long prevTimestamp = -1;
                
                RigidBodyTransform scanFrameToWorld = new RigidBodyTransform();
@@ -95,6 +128,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                      {
                         continue;
                      }
+                     collisionBoxNode.simpleUpdate(0);
                      prevTimestamp = nextTimestamp;
                   }
                   
@@ -113,10 +147,13 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   
                   Point3d origin = new Point3d();
                   data.lidarFrame.getTransformToWorldFrame().transform(origin);
-                  depthDataFilter.addPoint(pointInWorld, origin);
+                  if(collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld))
+                  {
+                     depthDataFilter.addPoint(pointInWorld, origin);
+                  }
                }
-               readWriteLock.writeLock().unlock();
             }
+            readWriteLock.writeLock().unlock();
          }
          catch (InterruptedException e)
          {
@@ -157,8 +194,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       readWriteLock.writeLock().lock();
       {
          setLidarState(LidarState.DISABLE);
-         //depthDataFilter.clearLidarData(DepthDataTree.QUADTREE);
-         //depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
       }
       readWriteLock.writeLock().unlock();
    }
@@ -204,12 +239,15 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    public void clearLidar(DepthDataClearCommand object)
    {
-      readWriteLock.writeLock().lock();
+      switch(object.getDepthDataTree())
       {
-         depthDataFilter.clearLidarData(object.getDepthDataTree());
+      case DECAY_POINT_CLOUD:
+         clearDecayingPointCloud = true;
+         break;
+      case QUADTREE:
+         clearQuadTree = true;
+         break;
       }
-      readWriteLock.writeLock().unlock();
-
    }
 
    public void setFilterParameters(DepthDataFilterParameters parameters)
