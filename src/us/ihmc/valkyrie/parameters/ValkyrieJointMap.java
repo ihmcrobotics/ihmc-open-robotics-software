@@ -74,7 +74,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
-   private final SideDependentList<ArrayList<String>> actuatableFingerJoints = new SideDependentList<ArrayList<String>>();
+   private final SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = new SideDependentList<LinkedHashMap<String,Pair<Double,Double>>>();
 
    public ValkyrieJointMap()
    {
@@ -109,11 +109,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
           limbNames.put(prefix + "Palm", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "UpperFoot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
          
-         actuatableFingerJoints.put(robotSide, new ArrayList<String>());
+         actuatableFingerJoints.put(robotSide, new LinkedHashMap<String,Pair<Double,Double>>());
          
          for(ValkyrieActuatableFingerJoints joint : ValkyrieActuatableFingerJoints.values())
          {
-            actuatableFingerJoints.get(robotSide).add(robotSide.getCamelCaseNameForMiddleOfExpression() + joint.toString());
+            actuatableFingerJoints.get(robotSide).put(joint.toString(), new Pair<Double,Double>(ValkyrieActuatableFingerJoints.getMinPositionLimit(joint), ValkyrieActuatableFingerJoints.getMaxPositionLimit(joint)));
          }
       }
 
@@ -384,7 +384,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       return ret;
    }
    
-   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames()
    {
       return actuatableFingerJoints;
    }
