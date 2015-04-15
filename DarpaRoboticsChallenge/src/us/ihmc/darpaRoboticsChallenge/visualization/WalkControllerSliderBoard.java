@@ -1,8 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.visualization;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -11,7 +16,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 public class WalkControllerSliderBoard
 
 {
-   public WalkControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry)
+   public WalkControllerSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel)
    {
       final EnumYoVariable<SliderBoardMode> sliderBoardMode = new EnumYoVariable<SliderBoardMode>("sliderBoardMode", registry, SliderBoardMode.class);
       final SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
@@ -25,9 +30,6 @@ public class WalkControllerSliderBoard
       sliderBoardConfigurationManager.setSlider(3, "kpPelvisOrientation", registry, 0.0, 100.0);
       sliderBoardConfigurationManager.setKnob(3, "zetaPelvisOrientation", registry, 0.0, 1.0);
 
-//    sliderBoardConfigurationManager.setSlider(4, "walkingHeadOrientationKp", registry, 0.0, 40.0);
-//    sliderBoardConfigurationManager.setKnob  (4, "walkingHeadOrientationZeta", registry, 0.0, 1.0);
-
       sliderBoardConfigurationManager.setSlider(4, "kpUpperBody", registry, 0.0, 200.0);
       sliderBoardConfigurationManager.setKnob(4, "zetaUpperBody", registry, 0.0, 1.0);
 
@@ -39,18 +41,11 @@ public class WalkControllerSliderBoard
 
       sliderBoardConfigurationManager.setSlider(7, CommonNames.doIHMCControlRatio.toString(), registry, 0.0, 1.0);
 
-//    sliderBoardConfigurationManager.setSlider(7, CommonNames.doIHMCControlRatio.toString(), registry, 0.0, 1.0, 3.5, 0.0);
       sliderBoardConfigurationManager.setSlider(8, "offsetHeightAboveGround", registry, 0.0, 0.20);
 
-//    sliderBoardConfigurationManager.setKnob  (8, "sliderBoardMode", registry, 0.0, SliderBoardMode.values().length);
-//      sliderBoardConfigurationManager.setKnob(8, "gainScaleFactor", registry, 0.0, 1.0, 3.5, 0.0);
-
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.WalkingGains.toString());
-
+      
       sliderBoardConfigurationManager.clearControls();
-
-//      sliderBoardConfigurationManager.setSlider(1, "captureKpParallel", registry, 0.0, 2.0);
-//      sliderBoardConfigurationManager.setKnob(1, "captureKpOrthogonal", registry, 0.0, 2.0);
 
       sliderBoardConfigurationManager.setButton(1, registry.getVariable("PelvisICPBasedTranslationManager","manualModeICPOffset"));
       sliderBoardConfigurationManager.setSlider(1, "desiredICPOffsetX", registry, -0.3, 0.3);
@@ -98,6 +93,43 @@ public class WalkControllerSliderBoard
       
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.TerrainExploration.toString());
       sliderBoardConfigurationManager.clearControls();
+      
+      if(drcRobotModel != null)
+      {
+         final EnumYoVariable<RobotSide> graspHand = new EnumYoVariable<RobotSide>("graspHand", registry, RobotSide.class);
+         graspHand.set(RobotSide.LEFT);
+         sliderBoardConfigurationManager.setKnob(1, graspHand, 0, RobotSide.values().length-1);
+         
+         SideDependentList<ArrayList<String>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
+          //This currently assumes you don't have more than 8 actuatable finger joints per hand. Going to change this anyways.
+         
+         for(RobotSide side : RobotSide.values())
+         {
+            for(int i = 0; i<actuatableFingerJoints.get(side).size(); i++)
+            {
+               String actuatableFingerJointName = actuatableFingerJoints.get(side).get(i);  
+               
+               //TODO: Fix limits, get them from somewhere so each robot can have their own.
+               sliderBoardConfigurationManager.setSlider(i+1, side.getCamelCaseNameForMiddleOfExpression() + actuatableFingerJointName + "_q_d", registry, -1.0, 0.0);
+            }
+            
+            sliderBoardConfigurationManager.saveConfiguration(side.toString() + SliderBoardMode.Grasping.toString());
+            sliderBoardConfigurationManager.clearControls();
+         }
+         
+         graspHand.addVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void variableChanged(YoVariable<?> v)
+            {
+               System.out.println("Loading grasping configuration: " + graspHand.getEnumValue().toString());
+               if(sliderBoardMode.getEnumValue()==SliderBoardMode.Grasping)
+               {
+                  sliderBoardConfigurationManager.loadConfiguration(graspHand.toString() + SliderBoardMode.Grasping.toString());
+               }
+            }
+         });
+      }
        
       //default
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
@@ -116,5 +148,5 @@ public class WalkControllerSliderBoard
 
    }
 
-   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration};
+   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration, Grasping};
 }

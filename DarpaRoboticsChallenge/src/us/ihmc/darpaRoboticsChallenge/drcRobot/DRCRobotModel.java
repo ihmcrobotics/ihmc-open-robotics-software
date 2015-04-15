@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.drcRobot;
 
+import java.util.ArrayList;
+
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.HeightCalculatorParameters;
@@ -76,6 +78,8 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
            ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer);
 
    public abstract DRCHandType getDRCHandType();
+   
+   public abstract SideDependentList<ArrayList<String>> getActuatableFingerJointNames();
 
    public abstract LogSettings getLogSettings();
 
