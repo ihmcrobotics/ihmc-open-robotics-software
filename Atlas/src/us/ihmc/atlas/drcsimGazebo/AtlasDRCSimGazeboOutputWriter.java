@@ -148,6 +148,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
       jointCommand.clear();
       jointCommand.putLong(estimatorTicksPerControlTick * 3);
       jointCommand.putLong(0);
+      jointCommand.putLong(1000);
       for (int i = 0; i < joints.size(); i++)
       {
          jointCommand.putDouble(0.0);
