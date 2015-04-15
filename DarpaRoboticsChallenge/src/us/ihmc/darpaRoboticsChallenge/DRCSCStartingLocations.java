@@ -44,4 +44,14 @@ public enum DRCSCStartingLocations implements DRCStartingLocation
       return startingLocation;
    }
    
+   public static String optionsToString()
+   {
+      String ret = "[ ";
+      for (DRCSCStartingLocations location : DRCSCStartingLocations.values())
+      {
+         ret = ret + location.toString() + ", ";
+      }
+      ret = ret + "]";
+      return ret;
+   }
 }

@@ -32,12 +32,20 @@ startScripts {
     outputs.upToDateWhen { false }
 
     doLast {
-        def simUnixScript = file(outputDir.canonicalPath + "/${applicationName}Simulator")
-        simUnixScript.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
-        simUnixScript.setExecutable(true)
+        def simUnixScriptDemo01 = file(outputDir.canonicalPath + "/${applicationName}SimulatorDemo01")
+        simUnixScriptDemo01.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasDemo01ROSAPISimulator")
+        simUnixScriptDemo01.setExecutable(true)
 
-        def simWindowsScript = file(outputDir.canonicalPath + "/${applicationName}Simulator.bat")
-        simWindowsScript.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasROSAPISimulator")
+        def simWindowsScriptDemo01 = file(outputDir.canonicalPath + "/${applicationName}SimulatorDemo01.bat")
+        simWindowsScriptDemo01.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasDemo01ROSAPISimulator")
+    	
+    	def simUnixScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals")
+        simUnixScriptFinals.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
+        simUnixScriptFinals.setExecutable(true)
+
+        def simWindowsScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals.bat")
+        simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
+    	
     }
 }
 
