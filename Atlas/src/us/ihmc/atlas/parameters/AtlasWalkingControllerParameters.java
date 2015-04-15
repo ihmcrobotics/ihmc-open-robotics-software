@@ -166,9 +166,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
-   public double getMaximumSwingSpeedUpFactor()
+   public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return 2.0; // Already tried up to 2.0 with swing time of 1.0sec
+      if (target == AtlasTarget.REAL_ROBOT)
+         return 0.5;
+      else
+         return 0.3;
    }
 
    public boolean isNeckPositionControlled()
