@@ -1,15 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
 
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFModelVisual;
-import us.ihmc.SdfLoader.SDFWorldLoader;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCWorld;
 import us.ihmc.graveYard.commonWalkingControlModules.vrc.highLevelHumanoidControl.driving.VehicleModelObjectVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
@@ -24,16 +24,20 @@ public class DRCVehicleSDFLoader extends DRCWorld
    
    public DRCVehicleSDFLoader()
    {
-      super();
+      
    }
    
    public SDFModelVisual loadDRCVehicle(boolean loadCollisionModel)
    {
-      URL fileURL = DRCVehicleSDFLoader.class.getClassLoader().getResource("models/GFE/drc_vehicle.sdf");
+      ArrayList<String> resourceDirectories = new ArrayList<String>();
+      resourceDirectories.add("models/");
+      resourceDirectories.add("models/gazebo/");
+      
+      InputStream inputStream = DRCVehicleSDFLoader.class.getClassLoader().getResourceAsStream("models/polaris_ranger_xp900_no_roll_cage/model.sdf");
       try
       {
-         SDFWorldLoader sdfWorldLoader = new SDFWorldLoader(new File(fileURL.getFile()), resourceDirectories);
-         GeneralizedSDFRobotModel generalizedSDFRobotModel = sdfWorldLoader.getGeneralizedRobotModelAndRemoveFromWorld("drc_vehicle");
+         JaxbSDFLoader jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories);
+         GeneralizedSDFRobotModel generalizedSDFRobotModel = jaxbSDFLoader.getGeneralizedSDFRobotModel("polaris_ranger_xp900");
          return new SDFModelVisual(generalizedSDFRobotModel, loadCollisionModel);
       }
       catch (FileNotFoundException e)
@@ -52,7 +56,6 @@ public class DRCVehicleSDFLoader extends DRCWorld
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
-      scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(true));
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
 
       RigidBodyTransform vehicleToWorldTransform = new RigidBodyTransform();

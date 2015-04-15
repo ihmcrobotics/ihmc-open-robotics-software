@@ -122,7 +122,7 @@ public class SDFGraphics3DObject extends Graphics3DObject
                if(mesh.getSubmesh() != null)
                {
                   submesh = mesh.getSubmesh().getName().trim();
-                  centerSubmesh = mesh.getSubmesh().getCenter().trim().equals("1");
+                  centerSubmesh = mesh.getSubmesh().getCenter().trim().equals("1") || mesh.getSubmesh().getCenter().trim().equals("true");
                }
                addMesh(resourceUrl, submesh, centerSubmesh, visualPose, appearance, resourceDirectories);
             }
@@ -217,7 +217,6 @@ public class SDFGraphics3DObject extends Graphics3DObject
       {
          appearance = getDefaultAppearanceIfNull(appearance);
       }
-
       addModelFile(mesh, submesh, centerSubmesh, resourceDirectories, appearance);
    }
 

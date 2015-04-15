@@ -20,6 +20,18 @@ public abstract class DRCWorld
       resourceDirectories.add("models/GFE/gazebo");
       resourceDirectories.add("models/GFE/");
       resourceDirectories.add("models");
+      resourceDirectories.add("models/polaris_ranger_xp900_no_roll_cage/");
+      resourceDirectories.add("models/polaris_ranger_xp900_no_roll_cage/meshes/");
+      resourceDirectories.add("models/polaris_ranger_xp900_no_roll_cage/materials/");
+      resourceDirectories.add("models/polaris_ranger_xp900_no_roll_cage/scripts/");
+      resourceDirectories.add("models/polaris_ranger_xp900/");
+      resourceDirectories.add("models/polaris_ranger_xp900/meshes/");
+      resourceDirectories.add("models/polaris_ranger_xp900/materials/");
+      resourceDirectories.add("models/polaris_ranger_xp900/materials/scripts/");
+      resourceDirectories.add("models/polaris_ranger_ev/");
+      resourceDirectories.add("models/polaris_ranger_ev/meshes/");
+      resourceDirectories.add("models/polaris_ranger_ev/materials/");
+      resourceDirectories.add("models/polaris_ranger_ev/materials/scripts/");
 
       // Gazebo resources
       resourceDirectories.add("models/GFE/models");
