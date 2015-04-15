@@ -1,6 +1,7 @@
 package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -367,6 +368,12 @@ public class BonoRobotModel implements DRCRobotModel
    @Override public String getSimpleRobotName()
    {
       return "STEPPR";
+   }
+   
+   @Override
+   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   {
+      return new SideDependentList<ArrayList<String>>();
    }
    
 
