@@ -57,12 +57,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
    private final DoubleProvider swingTimeProvider;   
 
-   private final DoubleYoVariable swingSpeedUpInitialTime;
    private final DoubleYoVariable swingTimeSpeedUpFactor;
    private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
    private final DoubleYoVariable minSwingTimeForDisturbanceRecovery;
    private final BooleanYoVariable isSwingSpeedUpEnabled;
    private final DoubleYoVariable currentTime;
+   private final DoubleYoVariable currentTimeWithSwingSpeedUp;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameVector initialAngularVelocity = new FrameVector();
@@ -70,11 +70,14 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final BooleanYoVariable hasInitialAngularConfigurationBeenProvided;
 
    private final DoubleYoVariable finalSwingHeightOffset;
+   private final double controlDT;
 
    public SwingState(FootControlHelper footControlHelper, DoubleProvider swingTimeProvider, VectorProvider touchdownVelocityProvider,
                      VectorProvider touchdownAccelerationProvider, YoSE3PIDGains gains, YoVariableRegistry registry)
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
+
+      controlDT = footControlHelper.getMomentumBasedController().getControlDT();
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
 
@@ -126,12 +129,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
             initialConfigurationProvider, initialAngularVelocityProvider, finalConfigurationProvider, finalAngularVelocityProvider, registry);
       hasInitialAngularConfigurationBeenProvided = new BooleanYoVariable(namePrefix + "HasInitialAngularConfigurationBeenProvided", registry);
 
-      swingSpeedUpInitialTime = new DoubleYoVariable(namePrefix + "SwingSpeedUpInitialTime", registry);
       swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
       maxSwingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
       minSwingTimeForDisturbanceRecovery = new DoubleYoVariable(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
       minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
       currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
+      currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
    }
@@ -181,12 +184,16 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          trajectoryWasReplanned = true;
       }
 
+      currentTime.set(getTimeInCurrentState());
+
       double time;
-      if (!isSwingSpeedUpEnabled.getBooleanValue() || swingSpeedUpInitialTime.isNaN())
-         time = getTimeInCurrentState();
+      if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
+         time = currentTime.getDoubleValue();
       else
-         time = swingSpeedUpInitialTime.getDoubleValue() + swingTimeSpeedUpFactor.getDoubleValue() * (getTimeInCurrentState() - swingSpeedUpInitialTime.getDoubleValue());
-      currentTime.set(time);
+      {
+         currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
+         time = currentTimeWithSwingSpeedUp.getDoubleValue();
+      }
 
       if (!trajectoryWasReplanned)
       {
@@ -204,7 +211,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       orientationTrajectoryGenerator.compute(getTimeInCurrentState());
       orientationTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
-      if (isSwingSpeedUpEnabled.getBooleanValue() && !swingSpeedUpInitialTime.isNaN())
+      if (isSwingSpeedUpEnabled.getBooleanValue() && !currentTimeWithSwingSpeedUp.isNaN())
       {
          desiredLinearVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
          desiredAngularVelocity.scale(swingTimeSpeedUpFactor.getDoubleValue());
@@ -255,11 +262,12 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    {
       if (isSwingSpeedUpEnabled.getBooleanValue())
       {
-         if (speedUpFactor <= 1.1)
+         if (speedUpFactor <= 1.1 || speedUpFactor <= swingTimeSpeedUpFactor.getDoubleValue())
             return;
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
          swingTimeSpeedUpFactor.set(speedUpFactor);
-         swingSpeedUpInitialTime.set(currentTime.getDoubleValue());
+         if (currentTimeWithSwingSpeedUp.isNaN())
+            currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
    }
 
@@ -269,9 +277,8 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       super.doTransitionIntoAction();
 
       maxSwingTimeSpeedUpFactor.set(Math.max(swingTimeProvider.getValue() / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
-      swingSpeedUpInitialTime.set(Double.NaN);
       swingTimeSpeedUpFactor.set(1.0);
-      currentTime.set(0.0);
+      currentTimeWithSwingSpeedUp.set(Double.NaN);
    }
 
    @Override
@@ -280,7 +287,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       super.doTransitionOutOfAction();
 
       hasInitialAngularConfigurationBeenProvided.set(false);
-      swingSpeedUpInitialTime.set(Double.NaN);
-      currentTime.set(0.0);
+      currentTimeWithSwingSpeedUp.set(Double.NaN);
    }
 }
