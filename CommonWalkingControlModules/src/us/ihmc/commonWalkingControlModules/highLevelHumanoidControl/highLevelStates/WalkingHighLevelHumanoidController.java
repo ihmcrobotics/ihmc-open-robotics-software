@@ -1478,7 +1478,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpAndMomentumBasedController.update();
 
-      if (pushRecoveryModule != null)
+      if (pushRecoveryModule != null && pushRecoveryModule.isEnabled())
       {
          capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
          pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp(),
