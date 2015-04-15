@@ -29,16 +29,16 @@ public class DRCSteeringWheelDemo
 
    public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, double desiredPelvisHeight)
    {
-      Point3d steeringWheelCenterInPelvisFrame = new Point3d(0.254, 0.86, 0.0);
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInPelvisFrame.x, steeringWheelCenterInPelvisFrame.y,
-            0.85, 0.0, 57.0);
+      Point3d steeringWheelCenterInWorldFrame = new Point3d(0.42, 0.46, 1.2);
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInWorldFrame.x, steeringWheelCenterInWorldFrame.y,
+            steeringWheelCenterInWorldFrame.z, 0.0, 41.0);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
       
 
       simStarter.setRunMultiThreaded(true);
-      simStarter.setStartingLocationOffset(new Vector3d(0.0, 0.0, desiredPelvisHeight), 0.0);
+      simStarter.setStartingLocationOffset(new Vector3d(0.0, -0.6, desiredPelvisHeight), 0.0);
       simStarter.setInitializeEstimatorToActual(true);
 
 //      DRCSimulationTools.startSimulationWithGraphicSelector(simStarter);
@@ -52,7 +52,8 @@ public class DRCSteeringWheelDemo
             desiredPelvisHeight);
       robot.setController(controller);
       controller.initialize();
-
+      
+      // load polaris model into the sim
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
       simStarter.getSimulationConstructionSet().addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
    }
