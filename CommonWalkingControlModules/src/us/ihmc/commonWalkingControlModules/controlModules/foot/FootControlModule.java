@@ -362,6 +362,7 @@ public class FootControlModule
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
       swingState.setFootstep(footstep, false);
+      footControlHelper.updateWithPredictedContactPoints(footstep);
    }
 
    public boolean isLegDoingToeOffAndAtLimit()
