@@ -17,10 +17,10 @@ public class ValkyrieNetworkProcessor
    {
       DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
       
-      networkModuleParams.setUseLocalControllerCommunicator(false);
-      networkModuleParams.setUseUiModule(true);
-      networkModuleParams.setUseBehaviorModule(true);
-      networkModuleParams.setUseBehaviorVisualizer(true);
+      networkModuleParams.enableLocalControllerCommunicator(false);
+      networkModuleParams.enableUiModule(true);
+      networkModuleParams.enableBehaviorModule(true);
+      networkModuleParams.enableBehaviorVisualizer(true);
       
       new DRCNetworkProcessor(model, networkModuleParams);
    }
