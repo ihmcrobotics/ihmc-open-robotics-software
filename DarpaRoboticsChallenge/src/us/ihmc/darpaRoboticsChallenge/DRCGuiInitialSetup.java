@@ -117,7 +117,7 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       if (DRCConfigParameters.MAKE_SLIDER_BOARD)
       {
-         new WalkControllerSliderBoard(scs, scs.getRootRegistry());
+         new WalkControllerSliderBoard(scs, scs.getRootRegistry(), null);
       }
    }
 

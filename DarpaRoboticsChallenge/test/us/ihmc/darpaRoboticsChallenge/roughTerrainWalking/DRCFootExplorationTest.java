@@ -271,7 +271,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       scs.setGroundVisible(false);
       setupCameraForUnitTest(scs);
       
-      new WalkControllerSliderBoard(scs, scs.getRootRegistry());
+      new WalkControllerSliderBoard(scs, scs.getRootRegistry(), null);
 
       return drcFlatGroundWalkingTrack;
    }

@@ -45,7 +45,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       switch (defaultSliderBoardType)
       {
          case WALK_CONTROLLER :
-            new WalkControllerSliderBoard(scs, registry);
+            new WalkControllerSliderBoard(scs, registry, null);
 
             break;
 

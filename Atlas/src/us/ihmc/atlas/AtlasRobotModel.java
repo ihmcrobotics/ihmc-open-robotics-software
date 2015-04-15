@@ -1,5 +1,7 @@
 package us.ihmc.atlas;
 
+import java.util.ArrayList;
+
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -478,6 +480,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public String getSimpleRobotName()
    {
       return "Atlas";
+   }
+
+   @Override
+   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   {
+      return new SideDependentList<ArrayList<String>>();
    }
 
    @Override
