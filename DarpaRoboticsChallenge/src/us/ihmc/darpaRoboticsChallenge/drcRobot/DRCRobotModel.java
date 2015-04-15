@@ -9,6 +9,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -87,4 +88,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract HeightCalculatorParameters getHeightCalculatorParameters();
 
    public abstract String getSimpleRobotName();
+   
+   public abstract CollisionBoxProvider getCollisionBoxProvider();
 }
