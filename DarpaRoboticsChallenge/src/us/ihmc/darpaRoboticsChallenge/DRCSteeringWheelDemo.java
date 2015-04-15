@@ -35,20 +35,26 @@ public class DRCSteeringWheelDemo
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
+      
 
       simStarter.setRunMultiThreaded(true);
       simStarter.setStartingLocationOffset(new Vector3d(0.0, 0.0, desiredPelvisHeight), 0.0);
       simStarter.setInitializeEstimatorToActual(true);
 
-      DRCSimulationTools.startSimulationWithGraphicSelector(simStarter);
-
+//      DRCSimulationTools.startSimulationWithGraphicSelector(simStarter);
+      simStarter.startSimulation(networkParameters, true);
+      simStarter.startOpertorInterfaceUsingProcessSpawner();
+      
       drcSimulationFactory = simStarter.getDRCSimulationFactory();
-
+      
       SDFRobot robot = drcSimulationFactory.getRobot();
       LockPelvisController controller = new LockPelvisController(robot, drcSimulationFactory.getSimulationConstructionSet(), model.createFullRobotModel(),
             desiredPelvisHeight);
       robot.setController(controller);
       controller.initialize();
+
+      DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
+      simStarter.getSimulationConstructionSet().addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
@@ -62,7 +68,7 @@ public class DRCSteeringWheelDemo
 
       private final ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<>();
       private final ArrayList<Vector3d> efp_offsetFromRootJoint = new ArrayList<>();
-      private final double dx = 0.5, dy = 0.5, dz = 0.4 * 0.0;
+      private final double dx = 0.5, dy = 0.5, dz = 0.0*1.0;
 
       private final ArrayList<Vector3d> initialPositions = new ArrayList<>();
 
@@ -154,7 +160,7 @@ public class DRCSteeringWheelDemo
             efp.getYoPosition().get(proportionalTerm);
             proportionalTerm.sub(initialPositions.get(i));
             proportionalTerm.scale(-holdPelvisKp.getDoubleValue());
-            proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
+//            proportionalTerm.setZ(Math.max(proportionalTerm.getZ(), 0.0));
 
             efp.getYoVelocity().get(derivativeTerm);
             derivativeTerm.scale(-holdPelvisKv.getDoubleValue());
