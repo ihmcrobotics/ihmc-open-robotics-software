@@ -24,16 +24,16 @@ public interface CapturePointPlannerParameters
    /** Refers to the duration of the first transfer when starting to walk. */
    public abstract double getDoubleSupportInitialTransferDuration();
 
-   @Deprecated
    /** TODO Not the right place to get this value from and it is not really used. */
+   @Deprecated
    public abstract double getDoubleSupportDuration();
 
-   @Deprecated
    /** FIXME That's a hack which makes the planner slower than the swing foot. Need to get rid of it. */
+   @Deprecated
    public abstract double getAdditionalTimeForSingleSupport();
 
-   @Deprecated
    /** TODO Not the right place to get this value from and it is not really used. */
+   @Deprecated
    public abstract double getSingleSupportDuration();
 
    /**
@@ -43,16 +43,16 @@ public interface CapturePointPlannerParameters
     */
    public abstract int getNumberOfFootstepsToConsider();
 
-   @Deprecated
    /** TODO Dangerous parameter, should be set to 4. */
+   @Deprecated
    public abstract int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory();
 
-   @Deprecated
    /** TODO This is not a parameter, where it is used it is supposed to be equal to 2. */
+   @Deprecated
    public abstract int getNumberOfFootstepsToStop();
 
-   @Deprecated
    /** TODO That is not a user parameter, should be less than the control DT. */
+   @Deprecated
    public abstract double getIsDoneTimeThreshold();
 
    /**
@@ -181,5 +181,39 @@ public interface CapturePointPlannerParameters
     */
    public abstract double getMaxDurationForSmoothingEntryToExitCMPSwitch();
 
+   /** TODO Hack that reduces the desired ICP velocity only at the end of transfer. It is just terrible and makes the robot cry. */
+   @Deprecated
    public abstract boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer();
+
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * The forward offset of the CMPs is computed according to the upcoming step length times the returned factor
+    * One third seems to be a reasonable value.
+    */ 
+   public abstract double getStepLengthToCMPOffsetFactor();
+
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * If true, the ICP planner will put the exit CMP on the toes of the trailing foot when stepping down and forward.
+    */
+   public abstract boolean useExitCMPOnToesForSteppingDown();
+   
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * Threshold used to figure out if the exit CMP should be put on the toes.
+    */
+   public abstract double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown();
+
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * Threshold used to figure out if the exit CMP should be put on the toes.
+    * An absolute value is expected.
+    */
+   public abstract double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown();
+
+   /**
+    * Only used when using the new ICP planner with two CMPs per support.
+    * If set to zero, the exit CMP will be on the toes' edge when stepping, a positive value will pull back the exit CMP towards the foot center.
+    */
+   public abstract double getCMPSafeDistanceAwayFromToesWhenSteppingDown();
 }

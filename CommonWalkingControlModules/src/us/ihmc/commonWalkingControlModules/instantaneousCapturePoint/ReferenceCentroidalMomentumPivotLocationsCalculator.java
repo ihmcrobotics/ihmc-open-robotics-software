@@ -6,6 +6,7 @@ import java.util.List;
 import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -32,7 +33,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 public class ReferenceCentroidalMomentumPivotLocationsCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean PUT_EXIT_CMP_ON_TOES_FOR_STEPS_DOWN = true;
    private static final double CMP_POINT_SIZE = 0.005;
 
    private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -84,9 +84,11 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final SideDependentList<ConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
 
-   private final DoubleYoVariable safeMarginDistanceForFootPolygon = new DoubleYoVariable("safeMarginDistanceForFootPolygon", registry);
+   private final DoubleYoVariable safeDistanceFromCMPToSupportEdges;
+   private final DoubleYoVariable safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
 
    private boolean useTwoCMPsPerSupport = false;
+   private boolean useExitCMPOnToesForSteppingDown = false;
 
    public ReferenceCentroidalMomentumPivotLocationsCalculator(String namePrefix, BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          int numberFootstepsToConsider, YoVariableRegistry parentRegistry)
@@ -98,13 +100,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       minForwardEntryCMPOffset = new DoubleYoVariable(namePrefix + "MinForwardEntryCMPOffset", registry);
       maxForwardExitCMPOffset = new DoubleYoVariable(namePrefix + "MaxForwardExitCMPOffset", registry);
       minForwardExitCMPOffset = new DoubleYoVariable(namePrefix + "MinForwardExitCMPOffset", registry);
+      safeDistanceFromCMPToSupportEdges = new DoubleYoVariable(namePrefix + "SafeDistanceFromCMPToSupportEdges", registry);
       footstepHeightThresholdToPutExitCMPOnToes = new DoubleYoVariable(namePrefix + "FootstepHeightThresholdToPutExitCMPOnToes", registry);
-      footstepHeightThresholdToPutExitCMPOnToes.set(0.15); // TODO Magic number. Need to be tuned on the real robot and to be extracted.
       footstepLengthThresholdToPutExitCMPOnToes = new DoubleYoVariable(namePrefix + "FootstepLengthThresholdToPutExitCMPOnToes", registry);
-      footstepLengthThresholdToPutExitCMPOnToes.set(0.15); // TODO Magic number. Need to be tuned on the real robot and to be extracted.
+      safeDistanceFromCMPToSupportEdgesWhenSteppingDown = new DoubleYoVariable(namePrefix + "SafeDistanceFromCMPToSupportEdgesWhenSteppingDown", registry);
 
       stepLengthToCMPOffsetFactor = new DoubleYoVariable(namePrefix + "StepLengthToCMPOffsetFactor", registry);
-      stepLengthToCMPOffsetFactor.set(1.0 / 3.0); // TODO Magic number. Need to be tuned on the real robot and to be extracted.
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -148,6 +149,32 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          exitCMPs.get(i).notifyVariableChangedListeners();
    }
 
+   public void initializeParameters(CapturePointPlannerParameters icpPlannerParameters)
+   {
+      useTwoCMPsPerSupport = icpPlannerParameters.useTwoCMPsPerSupport();
+      safeDistanceFromCMPToSupportEdges.set(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());
+
+      maxForwardEntryCMPOffset.set(icpPlannerParameters.getMaxEntryCMPForwardOffset());
+      minForwardEntryCMPOffset.set(icpPlannerParameters.getMinEntryCMPForwardOffset());
+
+      maxForwardExitCMPOffset.set(icpPlannerParameters.getMaxExitCMPForwardOffset());
+      minForwardExitCMPOffset.set(icpPlannerParameters.getMinExitCMPForwardOffset());
+
+      stepLengthToCMPOffsetFactor.set(icpPlannerParameters.getStepLengthToCMPOffsetFactor());
+
+      double entryCMPForwardOffset = icpPlannerParameters.getEntryCMPForwardOffset();
+      double entryCMPInsideOffset = icpPlannerParameters.getEntryCMPInsideOffset();
+      double exitCMPForwardOffset = icpPlannerParameters.getExitCMPForwardOffset();
+      double exitCMPInsideOffset = icpPlannerParameters.getExitCMPInsideOffset();
+      setSymmetricEntryCMPConstantOffsets(entryCMPForwardOffset, entryCMPInsideOffset);
+      setSymmetricExitCMPConstantOffsets(exitCMPForwardOffset, exitCMPInsideOffset);
+
+      useExitCMPOnToesForSteppingDown = icpPlannerParameters.useExitCMPOnToesForSteppingDown();
+      footstepHeightThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepHeightThresholdForExitCMPOnToesWhenSteppingDown());
+      footstepLengthThresholdToPutExitCMPOnToes.set(icpPlannerParameters.getStepLengthThresholdForExitCMPOnToesWhenSteppingDown());
+      safeDistanceFromCMPToSupportEdgesWhenSteppingDown.set(icpPlannerParameters.getCMPSafeDistanceAwayFromToesWhenSteppingDown());
+   }
+
    public void setUseTwoCMPsPerSupport(boolean useTwoCMPsPerSupport)
    {
       this.useTwoCMPsPerSupport = useTwoCMPsPerSupport;
@@ -155,7 +182,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void setSafeDistanceFromSupportEdges(double distance)
    {
-      safeMarginDistanceForFootPolygon.set(distance);
+      safeDistanceFromCMPToSupportEdges.set(distance);
    }
 
    public void setMinMaxForwardEntryCMPLocationFromFootCenter(double minX, double maxX)
@@ -168,23 +195,6 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       maxForwardExitCMPOffset.set(maxX);
       minForwardExitCMPOffset.set(minX);
-   }
-
-   public void createVisualizerForConstantCMPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
-   {
-      for (int i = 0; i < entryCMPs.size(); i++)
-      {
-         YoGraphicPosition entryCMPViz = new YoGraphicPosition("Entry CMP" + i, entryCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
-         yoGraphicsList.add(entryCMPViz);
-         artifactList.add(entryCMPViz.createArtifact());
-      }
-
-      for (int i = 0; i < exitCMPs.size(); i++)
-      {
-         YoGraphicPosition exitCMPViz = new YoGraphicPosition("Exit CMP" + i, exitCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.BALL);
-         yoGraphicsList.add(exitCMPViz);
-         artifactList.add(exitCMPViz.createArtifact());
-      }
    }
 
    public void setSymmetricEntryCMPConstantOffsets(double entryCMPForwardOffset, double entryCMPInsideOffset)
@@ -204,6 +214,23 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          YoFrameVector2d exitCMPUserOffset = exitCMPUserOffsets.get(robotSide);
          exitCMPUserOffset.setX(exitCMPForwardOffset);
          exitCMPUserOffset.setY(robotSide.negateIfLeftSide(exitCMPInsideOffset));
+      }
+   }
+
+   public void createVisualizerForConstantCMPs(YoGraphicsList yoGraphicsList, ArtifactList artifactList)
+   {
+      for (int i = 0; i < entryCMPs.size(); i++)
+      {
+         YoGraphicPosition entryCMPViz = new YoGraphicPosition("Entry CMP" + i, entryCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.SOLID_BALL);
+         yoGraphicsList.add(entryCMPViz);
+         artifactList.add(entryCMPViz.createArtifact());
+      }
+
+      for (int i = 0; i < exitCMPs.size(); i++)
+      {
+         YoGraphicPosition exitCMPViz = new YoGraphicPosition("Exit CMP" + i, exitCMPsInWorldFrameReadOnly.get(i), CMP_POINT_SIZE, YoAppearance.Green(), GraphicType.BALL);
+         yoGraphicsList.add(exitCMPViz);
+         artifactList.add(exitCMPViz.createArtifact());
       }
    }
 
@@ -460,7 +487,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          cmp2d.setToZero(soleFrame);
       cmp2d.changeFrameAndProjectToXYPlane(soleFrame);
 
-      if (PUT_EXIT_CMP_ON_TOES_FOR_STEPS_DOWN)
+      if (useExitCMPOnToesForSteppingDown)
       {
          if (soleFrameOfUpcomingSupportFoot != null)
          {
@@ -492,12 +519,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private void putExitCMPOnToes(RobotSide robotSide)
    {
-      // Set x to a high value to make sure it will be projected on the toes.
-      cmp2d.setX(1.0);
+      // Set x to have the CMP slightly inside the support polygon
+      cmp2d.setX(tempSupportPolygon.getMaxX() - 1.0e-4);
       cmp2d.setY(tempSupportPolygon.getCentroid().getY());
 
       // Then constrain the computed CMP to be inside a safe support region
-//      tempSupportPolygon.shrink(safeMarginDistanceForFootPolygon.getDoubleValue());
+      tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue());
       tempSupportPolygon.orthogonalProjection(cmp2d);
    }
 
@@ -509,7 +536,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region
-      tempSupportPolygon.shrink(safeMarginDistanceForFootPolygon.getDoubleValue());
+      tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdges.getDoubleValue());
       tempSupportPolygon.orthogonalProjection(cmp2d);
    }
 

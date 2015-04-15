@@ -219,4 +219,39 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    {
       return 0.5;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStepLengthToCMPOffsetFactor()
+   {
+      return 1.0 / 3.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useExitCMPOnToesForSteppingDown()
+   {
+      return true;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.15;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getStepHeightThresholdForExitCMPOnToesWhenSteppingDown()
+   {
+      return 0.10;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getCMPSafeDistanceAwayFromToesWhenSteppingDown()
+   {
+      return 0.0;
+   }
 }

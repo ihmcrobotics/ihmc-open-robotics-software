@@ -116,16 +116,7 @@ public class ICPPlanner
       timeCorrectionFactor.set(0.5); // TODO Need to be extracted
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider.getIntegerValue(), registry);
-      double entryCMPForwardOffset = icpPlannerParameters.getEntryCMPForwardOffset();
-      double entryCMPInsideOffset = icpPlannerParameters.getEntryCMPInsideOffset();
-      double exitCMPForwardOffset = icpPlannerParameters.getExitCMPForwardOffset();
-      double exitCMPInsideOffset = icpPlannerParameters.getExitCMPInsideOffset();
-      referenceCMPsCalculator.setSymmetricEntryCMPConstantOffsets(entryCMPForwardOffset, entryCMPInsideOffset);
-      referenceCMPsCalculator.setSymmetricExitCMPConstantOffsets(exitCMPForwardOffset, exitCMPInsideOffset);
-      referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
-      referenceCMPsCalculator.setMinMaxForwardEntryCMPLocationFromFootCenter(icpPlannerParameters.getMinEntryCMPForwardOffset(), icpPlannerParameters.getMaxEntryCMPForwardOffset());
-      referenceCMPsCalculator.setMinMaxForwardExitCMPLocationFromFootCenter(icpPlannerParameters.getMinExitCMPForwardOffset(), icpPlannerParameters.getMaxExitCMPForwardOffset());
-      referenceCMPsCalculator.setSafeDistanceFromSupportEdges(icpPlannerParameters.getCMPSafeDistanceAwayFromSupportEdges());
+      referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
 
       midFeetZUpFrame = bipedSupportPolygons.getMidFeetZUpFrame();
       for (RobotSide robotSide : RobotSide.values)
