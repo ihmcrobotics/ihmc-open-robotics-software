@@ -112,12 +112,11 @@ public abstract class DRCObstacleCourseTrialsWalkingTaskTest implements MultiRob
 
       ThreadTools.sleep(0);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
-      
       swingTime.set(2.0);
       transferTime.set(2.0);
       
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(8.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.5);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(14.5);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
