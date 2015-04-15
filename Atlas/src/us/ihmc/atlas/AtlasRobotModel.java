@@ -1,6 +1,7 @@
 package us.ihmc.atlas;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -483,9 +484,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SideDependentList<ArrayList<String>> getActuatableFingerJointNames()
+   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames()
    {
-      return new SideDependentList<ArrayList<String>>();
+      return new SideDependentList<LinkedHashMap<String,Pair<Double,Double>>>();
    }
 
    @Override

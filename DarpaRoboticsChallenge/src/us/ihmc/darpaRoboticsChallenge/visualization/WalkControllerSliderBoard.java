@@ -1,11 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.visualization;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CommonNames;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
@@ -96,21 +98,19 @@ public class WalkControllerSliderBoard
       
       if(drcRobotModel != null)
       {
-         final EnumYoVariable<RobotSide> graspHand = new EnumYoVariable<RobotSide>("graspHand", registry, RobotSide.class);
-         graspHand.set(RobotSide.LEFT);
-         sliderBoardConfigurationManager.setKnob(1, graspHand, 0, RobotSide.values().length-1);
+         sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
+         int i = 0;
          
-         SideDependentList<ArrayList<String>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
+         SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
           //This currently assumes you don't have more than 8 actuatable finger joints per hand. Going to change this anyways.
          
          for(RobotSide side : RobotSide.values())
          {
-            for(int i = 0; i<actuatableFingerJoints.get(side).size(); i++)
+            for(String actuatableFingerJointName : actuatableFingerJoints.get(side).keySet())
             {
-               String actuatableFingerJointName = actuatableFingerJoints.get(side).get(i);  
-               
                //TODO: Fix limits, get them from somewhere so each robot can have their own.
-               sliderBoardConfigurationManager.setSlider(i+1,actuatableFingerJointName + "_q_d", registry, -1.0, 0.0);
+               sliderBoardConfigurationManager.setSlider(i++,actuatableFingerJointName + CommonNames.q_d.toString(), registry, 
+                     actuatableFingerJoints.get(side).get(actuatableFingerJointName).first(), actuatableFingerJoints.get(side).get(actuatableFingerJointName).second());
             }
             
             if(side==RobotSide.LEFT)
@@ -125,7 +125,7 @@ public class WalkControllerSliderBoard
             sliderBoardConfigurationManager.clearControls();
          }
       }
-       
+
       //default
       sliderBoardMode.set(SliderBoardMode.WalkingGains);
 
