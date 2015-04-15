@@ -28,6 +28,7 @@ import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
@@ -366,5 +367,12 @@ public class BonoRobotModel implements DRCRobotModel
    @Override public String getSimpleRobotName()
    {
       return "STEPPR";
+   }
+   
+
+   @Override
+   public CollisionBoxProvider getCollisionBoxProvider()
+   {
+      return null;
    }
 }
