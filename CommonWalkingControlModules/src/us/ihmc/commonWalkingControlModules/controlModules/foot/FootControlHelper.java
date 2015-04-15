@@ -87,6 +87,7 @@ public class FootControlHelper
    private final FrameMatrix3D angularSelectionMatrix = new FrameMatrix3D();
 
    // For hold position and fully constrained states.
+   private final FrameTuple2dArrayList<FramePoint2d> defaultContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
    private final FrameTuple2dArrayList<FramePoint2d> originalContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
    private final FrameConvexPolygon2d originalSupportFootPolygon = new FrameConvexPolygon2d();
    private final BooleanYoVariable allowSupportFootShrink;
@@ -107,6 +108,8 @@ public class FootControlHelper
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       twistCalculator = momentumBasedController.getTwistCalculator();
+
+      defaultContactPointPositions.copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
 
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
@@ -439,10 +442,9 @@ public class FootControlHelper
    {
       List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
       if (predictedContactPoints == null || predictedContactPoints.isEmpty())
-         return;
-
-      originalContactPointPositions.clear();
-      originalContactPointPositions.copyFromPoint2dListAndTrimSize(contactableFoot.getSoleFrame(), predictedContactPoints);
+         originalContactPointPositions.copyFromListAndTrimSize(defaultContactPointPositions);
+      else
+         originalContactPointPositions.copyFromPoint2dListAndTrimSize(contactableFoot.getSoleFrame(), predictedContactPoints);
    }
 
    public void initializeParametersForSupportFootShrink(boolean resetCurrentFootShrink)
