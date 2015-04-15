@@ -156,19 +156,19 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
-      return false;
+      return true; // TODO Seems to work well but still need to be heavily tested on the robot.
    }
 
    @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
-      return Double.POSITIVE_INFINITY;
+      return 0.05;
    }
 
    @Override
    public double getMaximumSwingSpeedUpFactor()
    {
-      return 1.0;
+      return 2.0; // Already tried up to 2.0 with swing time of 1.0sec
    }
 
    public boolean isNeckPositionControlled()
@@ -387,8 +387,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       ICPControlGains gains = new ICPControlGains();
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
-      double kp = 1.5;
-      double ki = realRobot ? 2.0 : 4.0;
+      double kpParallel = realRobot ? 2.5 : 1.5;
+      double kpOrthogonal = 1.5;
+      double ki = realRobot ? 0.0 : 4.0;
       double kiBleedOff = 0.9;
       boolean useRawCMP = true;
       boolean useHackToReduceFeedForward = false;
@@ -396,8 +397,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 //      double cmpRateLimit = 60.0;
 //      double cmpAccelerationLimit = 2000.0;
 
-      gains.setKpParallelToMotion(kp);
-      gains.setKpOrthogonalToMotion(kp);
+      gains.setKpParallelToMotion(kpParallel);
+      gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
       gains.setUseRawCMP(useRawCMP);
@@ -560,8 +561,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double zetaXYZ = realRobot ? 0.25 : 0.7;
       double kpOrientation = 200.0;
       double zetaOrientation = 0.7;
-      double maxPositionAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
+      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 450.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
@@ -856,7 +857,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       momentumOptimizationSettings.setDampedLeastSquaresFactor(0.05);
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
-      momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
+      momentumOptimizationSettings.setMomentumWeight(2.0, 1.4, 10.0, 10.0); //(1.0, 1.0, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
       momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);  //0.06 causes a little less oscillations possibly.  // 0.01 causes ankle to flip out when rotates on edge. 0.12 prevents this.
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
@@ -889,7 +890,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
-      return 0.035;
+      return 0.015;
    }
 
    @Override
