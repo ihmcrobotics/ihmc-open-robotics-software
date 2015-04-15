@@ -10,9 +10,10 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
 
 import com.martiansoftware.jsap.JSAPException;
 
-public class AtlasFinalsROSAPISimulator extends AtlasROSAPISimulator
+public class AtlasFinalsROSAPISimulator extends ROSAPISimulator
 {
    private static final String ROBOT_NAME = "atlas";
+   private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    
    private static final boolean CREATE_DOOR = true;
    private static final boolean CREATE_DRILL = true;
@@ -39,7 +40,14 @@ public class AtlasFinalsROSAPISimulator extends AtlasROSAPISimulator
       DRCRobotModel robotModel;
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, AtlasRobotModel.AtlasTarget.SIM, false);
+         if (opt.robotModel.equals(DEFAULT_STRING))
+         {
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(DEFAULT_ROBOT_MODEL, AtlasRobotModel.AtlasTarget.SIM, false);
+         }
+         else
+         {
+            robotModel = AtlasRobotModelFactory.createDRCRobotModel(opt.robotModel, AtlasRobotModel.AtlasTarget.SIM, false);
+         }
       }
       catch (IllegalArgumentException e)
       {
