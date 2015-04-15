@@ -43,7 +43,6 @@ public class DRCSteeringWheelDemo
 
 //      DRCSimulationTools.startSimulationWithGraphicSelector(simStarter);
       simStarter.startSimulation(networkParameters, true);
-      simStarter.startOpertorInterfaceUsingProcessSpawner();
       
       drcSimulationFactory = simStarter.getDRCSimulationFactory();
       
@@ -56,6 +55,8 @@ public class DRCSteeringWheelDemo
       // load polaris model into the sim
       DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
       simStarter.getSimulationConstructionSet().addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
+
+      simStarter.startOpertorInterfaceUsingProcessSpawner();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
