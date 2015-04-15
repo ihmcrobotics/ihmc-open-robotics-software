@@ -60,6 +60,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
+import com.jme3.material.TechniqueDef;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
@@ -407,6 +408,8 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       primaryLight3.setColor(ColorRGBA.White.mult(0.4f));
       primaryLight3.setDirection(new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
       rootNode.addLight(primaryLight3);
+      
+      renderManager.setPreferredLightMode(TechniqueDef.LightMode.SinglePass);
       
       rootNode.setShadowMode(ShadowMode.CastAndReceive);
       zUpNode.setShadowMode(ShadowMode.CastAndReceive);
