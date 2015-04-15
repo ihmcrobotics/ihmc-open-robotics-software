@@ -560,7 +560,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
       double cmpX = stepLengthToCMPOffsetFactor.getDoubleValue() * cmp2d.getX() + cmpOffset.getX();
-      cmp2d.setX(MathTools.clipToMinMax(cmpX, minForwardCMPOffset, maxForwardCMPOffset));
+      cmp2d.setX(tempSupportPolygon.getCentroid().getX() + MathTools.clipToMinMax(cmpX, minForwardCMPOffset, maxForwardCMPOffset));
       cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region
