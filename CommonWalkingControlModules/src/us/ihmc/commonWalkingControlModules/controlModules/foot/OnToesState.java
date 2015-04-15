@@ -64,7 +64,6 @@ public class OnToesState extends AbstractFootControlState
 
    private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
-   private final List<FramePoint> originalContactPointPositions;
 
    private final List<YoFrameVector> contactPointPositionErrors = new ArrayList<YoFrameVector>();
    private final List<YoFrameVector> contactPointDesiredAccelerations = new ArrayList<YoFrameVector>();
@@ -126,9 +125,6 @@ public class OnToesState extends AbstractFootControlState
 
       toeOffCurrentPitchAngle = new DoubleYoVariable(namePrefix + "ToeOffCurrentPitchAngle", registry);
       toeOffCurrentPitchVelocity = new DoubleYoVariable(namePrefix + "ToeOffCurrentPitchVelocity", registry);
-
-      originalContactPointPositions = new ArrayList<FramePoint>(contactPoints.size());
-      copyOriginalContactPointPositions();
 
       this.gains = gains;
       YoPositionPIDGains positionGains = gains.getPositionGains();
@@ -329,24 +325,6 @@ public class OnToesState extends AbstractFootControlState
       desiredAngularVelocityToPack.setIncludingFrame(desiredAngularVelocity);
    }
 
-   private void copyOriginalContactPointPositions()
-   {
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         FramePoint contactPoint = new FramePoint();
-         contactPoints.get(i).getPosition(contactPoint);
-         originalContactPointPositions.add(contactPoint);
-      }
-   }
-
-   private void resetContactPointPositions()
-   {
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).setPosition(originalContactPointPositions.get(i));
-      }
-   }
-
    private void setupMidToeContactPoint()
    {
       for (int i = 0; i < contactPoints.size(); i++)
@@ -387,6 +365,7 @@ public class OnToesState extends AbstractFootControlState
       }
 
       setOnToesFreeMotionGains();
+      footControlHelper.saveContactPointsFromContactState();
    }
 
    @Override
@@ -407,7 +386,7 @@ public class OnToesState extends AbstractFootControlState
 
       // TODO: kind of a hack
       footControlHelper.resetSelectionMatrix();
-      resetContactPointPositions();
+      footControlHelper.restoreFootContactPoints();
    }
 
    private void setOnToesFreeMotionGains()
