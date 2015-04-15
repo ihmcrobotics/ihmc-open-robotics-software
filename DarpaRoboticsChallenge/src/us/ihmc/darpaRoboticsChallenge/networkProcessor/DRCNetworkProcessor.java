@@ -50,7 +50,7 @@ public class DRCNetworkProcessor
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
-     if (params.useMocapModule())
+     if (params.isMocapModuleEnabled())
      {
         new MocapModule(robotModel, params.getRosUri());
 
@@ -65,7 +65,7 @@ public class DRCNetworkProcessor
 
    private void setupHandModules(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useHandModule())
+      if (params.isHandModuleEnabled())
       {
          SideDependentList<? extends HandCommandManager> handCommandModule = robotModel.createHandCommandManager();
          if (handCommandModule == null)
@@ -92,18 +92,18 @@ public class DRCNetworkProcessor
 
    private void setupBehaviorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useBehaviorModule())
+      if (params.isBehaviorModuleEnabled())
       {
          DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
          LogModelProvider logModelProvider = robotModel.getLogModelProvider();
 
-         if (params.isRunAutomaticDiagnostic())
+         if (params.isAutomaticDiagnosticEnabled())
          {
-            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
+            IHMCHumanoidBehaviorManager.createBehaviorModuleForAutomaticDiagnostic(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation, params.getTimeToWaitBeforeStartingDiagnostics());
          }
          else
          {
-            new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.useBehaviorVisualizer(), sensorInformation);
+            new IHMCHumanoidBehaviorManager(robotModel, logModelProvider, params.isBehaviorVisualizerEnabled(), sensorInformation);
          }
          
          PacketCommunicator behaviorModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
@@ -118,7 +118,7 @@ public class DRCNetworkProcessor
 
    private void setupRosModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useRosModule())
+      if (params.isRosModuleEnabled())
       {
          new RosModule(robotModel, params.getRosUri(), params.getSimulatedSensorCommunicator());
 
@@ -133,10 +133,10 @@ public class DRCNetworkProcessor
    
    private void setupSensorModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useSensorModule())
+      if (params.isSensorModuleEnabled())
       {
          DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
-         if (params.useSimulatedSensors())
+         if (params.isSimulatedSensorsEnabled())
          {
             sensorSuiteManager.initializeSimulatedSensors(params.getSimulatedSensorCommunicator());
          }
@@ -158,7 +158,7 @@ public class DRCNetworkProcessor
 
    private void setupUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useUiModule())
+      if (params.isUiModuleEnabled())
       {
          new UiConnectionModule();
          
@@ -172,7 +172,7 @@ public class DRCNetworkProcessor
 
    private void setupGFEModule(DRCNetworkModuleParameters params) throws IOException
    {
-      if(params.useGFECommunicator())
+      if(params.isGFECommunicatorEnabled())
       {
          PacketCommunicator gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          packetRouter.attachPacketCommunicator(PacketDestination.GFE, gfeCommunicator);
@@ -184,10 +184,10 @@ public class DRCNetworkProcessor
 
    private void setupControllerCommunicator(DRCNetworkModuleParameters params) throws IOException
    {
-      if (params.useController())
+      if (params.isControllerCommunicatorEnabled())
       {
          PacketCommunicator controllerPacketCommunicator;
-         if(params.useLocalControllerCommunicator())
+         if(params.isLocalControllerCommunicatorEnabled())
          {
             PrintTools.info(this, "Connecting to controller using intra process communication");
             controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());

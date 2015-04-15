@@ -48,13 +48,13 @@ public abstract class DRCSimulationTools
       if (modulesToStart.contains(Modules.NETWORK_PROCESSOR))
       {
          networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.setUseUiModule(true);
-         networkProcessorParameters.setUseBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-         networkProcessorParameters.setUseBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
-         networkProcessorParameters.setUseSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
-         networkProcessorParameters.setUsePerceptionModule(true);
-         networkProcessorParameters.setUseRosModule(modulesToStart.contains(Modules.ROS_MODULE));
-         networkProcessorParameters.setUseLocalControllerCommunicator(true);
+         networkProcessorParameters.enableUiModule(true);
+         networkProcessorParameters.enableBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+         networkProcessorParameters.enableBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
+         networkProcessorParameters.enableSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+         networkProcessorParameters.enablePerceptionModule(true);
+         networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
+         networkProcessorParameters.enableLocalControllerCommunicator(true);
       }
       else
       {

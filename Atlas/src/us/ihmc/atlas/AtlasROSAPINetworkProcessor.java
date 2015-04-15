@@ -42,10 +42,10 @@ public class AtlasROSAPINetworkProcessor
          gfeCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
          
          DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.setUseLocalControllerCommunicator(false);
-         networkProcessorParameters.setUseUiModule(true);
-         networkProcessorParameters.setUseGFECommunicator(true);
-         networkProcessorParameters.setUseControllerCommunicator(true);
+         networkProcessorParameters.enableLocalControllerCommunicator(false);
+         networkProcessorParameters.enableUiModule(true);
+         networkProcessorParameters.enableGFECommunicator(true);
+         networkProcessorParameters.enableControllerCommunicator(true);
          DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
          new UiPacketToRosMsgRedirector(robotModel, rosUri, gfeCommunicator, networkProcessor.getPacketRouter());
       }

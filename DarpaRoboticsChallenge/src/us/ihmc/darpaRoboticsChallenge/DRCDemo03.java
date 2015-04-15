@@ -56,7 +56,7 @@ public abstract class DRCDemo03
 
       boolean automaticallyStartSimulation = false;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
+      networkProcessorParameters.enableUiModule(automaticallyStartSimulation);
       
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
