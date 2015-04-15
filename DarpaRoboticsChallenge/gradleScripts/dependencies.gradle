@@ -9,7 +9,7 @@ dependencies {
 	
 	compile group: 'us.ihmc.thirdparty', name: 'joystick', version: 'x'
 	compile group: 'us.ihmc.thirdparty', name: 'hydra', version: 'x'
-	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.+'
+	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-jbullet', version: '3.1.2-internal'
 	compile group: 'io.netty', name: 'netty', version: '3.9.0.Final' //'3.5.8.Final'
 	compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
 	compile group: 'com.jroller.santhosh', name: 'JResizable', version: '1.0'
