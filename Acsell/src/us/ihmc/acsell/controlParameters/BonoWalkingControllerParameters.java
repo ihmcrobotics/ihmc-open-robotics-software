@@ -131,9 +131,9 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
-   public double getMaximumSwingSpeedUpFactor()
+   public double getMinimumSwingTimeForDisturbanceRecovery()
    {
-      return 1.0;
+      return getDefaultSwingTime();
    }
 
    @Override
