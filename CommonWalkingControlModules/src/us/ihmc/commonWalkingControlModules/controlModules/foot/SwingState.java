@@ -55,10 +55,14 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final YoSE3ConfigurationProvider finalConfigurationProvider;
    private final TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(new TrajectoryParameters());
 
+   private final DoubleProvider swingTimeProvider;   
+
    private final DoubleYoVariable swingSpeedUpInitialTime;
    private final DoubleYoVariable swingTimeSpeedUpFactor;
    private final DoubleYoVariable maxSwingTimeSpeedUpFactor;
+   private final DoubleYoVariable minSwingTimeForDisturbanceRecovery;
    private final BooleanYoVariable isSwingSpeedUpEnabled;
+   private final DoubleYoVariable currentTime;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameVector initialAngularVelocity = new FrameVector();
@@ -79,6 +83,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       finalSwingHeightOffset.set(footControlHelper.getWalkingControllerParameters().getDesiredTouchdownHeightOffset());
       replanTrajectory = new BooleanYoVariable(namePrefix + "SwingReplanTrajectory", registry);
       swingTimeRemaining = new YoVariableDoubleProvider(namePrefix + "SwingTimeRemaining", registry);
+      this.swingTimeProvider = swingTimeProvider;
 
       ArrayList<PositionTrajectoryGenerator> positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       ArrayList<PositionTrajectoryGenerator> pushRecoveryPositionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
@@ -124,7 +129,9 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
       swingSpeedUpInitialTime = new DoubleYoVariable(namePrefix + "SwingSpeedUpInitialTime", registry);
       swingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "SwingTimeSpeedUpFactor", registry);
       maxSwingTimeSpeedUpFactor = new DoubleYoVariable(namePrefix + "MaxSwingTimeSpeedUpFactor", registry);
-      maxSwingTimeSpeedUpFactor.set(walkingControllerParameters.getMaximumSwingSpeedUpFactor());
+      minSwingTimeForDisturbanceRecovery = new DoubleYoVariable(namePrefix + "MinSwingTimeForDisturbanceRecovery", registry);
+      minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
+      currentTime = new DoubleYoVariable(namePrefix + "CurrentTime", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
    }
@@ -179,6 +186,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
          time = getTimeInCurrentState();
       else
          time = swingSpeedUpInitialTime.getDoubleValue() + swingTimeSpeedUpFactor.getDoubleValue() * (getTimeInCurrentState() - swingSpeedUpInitialTime.getDoubleValue());
+      currentTime.set(time);
 
       if (!trajectoryWasReplanned)
       {
@@ -245,13 +253,13 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    @Override
    public void requestSwingSpeedUp(double speedUpFactor)
    {
-      if (isSwingSpeedUpEnabled.getBooleanValue() && swingSpeedUpInitialTime.isNaN())
+      if (isSwingSpeedUpEnabled.getBooleanValue())
       {
          if (speedUpFactor <= 1.1)
             return;
          speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
          swingTimeSpeedUpFactor.set(speedUpFactor);
-         swingSpeedUpInitialTime.set(getTimeInCurrentState());
+         swingSpeedUpInitialTime.set(currentTime.getDoubleValue());
       }
    }
 
@@ -260,8 +268,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    {
       super.doTransitionIntoAction();
 
+      maxSwingTimeSpeedUpFactor.set(Math.max(swingTimeProvider.getValue() / minSwingTimeForDisturbanceRecovery.getDoubleValue(), 1.0));
       swingSpeedUpInitialTime.set(Double.NaN);
       swingTimeSpeedUpFactor.set(1.0);
+      currentTime.set(0.0);
    }
 
    @Override
@@ -271,6 +281,6 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       hasInitialAngularConfigurationBeenProvided.set(false);
       swingSpeedUpInitialTime.set(Double.NaN);
-      swingTimeSpeedUpFactor.set(1.0);
+      currentTime.set(0.0);
    }
 }
