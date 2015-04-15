@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 
-import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -20,26 +19,16 @@ import us.ihmc.wholeBodyController.DRCHandType;
 public class RobotDepthDataFilter extends DepthDataFilter
 {
    private final FullRobotModel fullRobotModel;
-   private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final SideDependentList<ArrayList<Point2d>> contactPoints;
-   private final RobotBoundingBoxes boundingBoxes;
 
 
-   public RobotDepthDataFilter(DRCHandType drcHandType, SDFFullRobotModelFactory modelFactory, RobotConfigurationDataBuffer robotConfigurationDataBuffer, SideDependentList<ArrayList<Point2d>> contactPoints)
+   public RobotDepthDataFilter(DRCHandType drcHandType, SDFFullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super();
-      this.fullRobotModel = modelFactory.createFullRobotModel();
-      this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
+      this.fullRobotModel = fullRobotModel;
       this.contactPoints = contactPoints;
-      this.boundingBoxes = new RobotBoundingBoxes(drcHandType, fullRobotModel);
    }
 
-
-   @Override
-   public boolean addPoint(Point3d point, Point3d sensorOrigin)
-   {
-      return boundingBoxes.isValidPoint(sensorOrigin, point) && super.addPoint(point, sensorOrigin);
-   }
    
    @Override
    public boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
@@ -86,7 +75,6 @@ public class RobotDepthDataFilter extends DepthDataFilter
       Point3d left = new Point3d();
       Point3d avg = new Point3d();
 
-      updateFullRobotModel();
       fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame().getTransformToDesiredFrame(temp, ReferenceFrame.getWorldFrame());
       temp.transform(left);
       fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame().getTransformToDesiredFrame(temp, ReferenceFrame.getWorldFrame());
@@ -101,7 +89,6 @@ public class RobotDepthDataFilter extends DepthDataFilter
    private boolean isAheadOfPelvis(Point3d point)
    {
       RigidBodyTransform tf = new RigidBodyTransform();
-      updateFullRobotModel();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
@@ -112,24 +99,14 @@ public class RobotDepthDataFilter extends DepthDataFilter
    private double getAngleToPelvis(Point3d point, Point3d lidarOrigin)
    {
       RigidBodyTransform tf = new RigidBodyTransform();
-      updateFullRobotModel();
       ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(tf, fullRobotModel.getPelvis().getBodyFixedFrame());
       Point3d tfPoint = new Point3d(point);
       tf.transform(tfPoint);
 
       return Math.atan2(tfPoint.y, tfPoint.x);
    }
-   private boolean updateFullRobotModel()
-   {
-      if(robotConfigurationDataBuffer.updateFullRobotModel(false, Long.MAX_VALUE, fullRobotModel, null) == -1)
-      {
-         System.err.println("clearLidarFailed");
-         return false;
-      }
-      return true;
-   }
 
-   public synchronized void clearLidarData(DepthDataTree lidarTree)
+   public void clearLidarData(DepthDataTree lidarTree)
    {
       super.clearLidarData(lidarTree);
       getQuadTree().clearTree(getMidFootPoint().z);
@@ -139,7 +116,6 @@ public class RobotDepthDataFilter extends DepthDataFilter
    private void addPointsUnderFeet()
    {
       final double QuadTreePointUnderFeetScaling = 1.1;
-      updateFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
          ReferenceFrame soleFrame = fullRobotModel.getFoot(side).getBodyFixedFrame();

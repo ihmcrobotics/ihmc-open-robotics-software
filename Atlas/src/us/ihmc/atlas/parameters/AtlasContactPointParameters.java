@@ -23,6 +23,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -381,9 +382,12 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
          break;
 
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-         for (RobotSide robotSide : RobotSide.values)
+         if(DRCHandType.ROBOTIQ.isHandSimulated())
          {
-            createRobotiqHandContactPoints(robotSide, useHighResolutionPointGrid, false);
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               createRobotiqHandContactPoints(robotSide, useHighResolutionPointGrid, false);
+            }            
          }
          break;
       default:

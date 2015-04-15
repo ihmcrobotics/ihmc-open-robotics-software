@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataR
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLidarReceiver;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -40,14 +41,14 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final SDFFullRobotModelFactory modelFactory;
 
-   public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
+   public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters,
          DRCHandType handType, AtlasTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, handType, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, collisionBoxProvider, handType, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       this.modelFactory = modelFactory;
    }
 
