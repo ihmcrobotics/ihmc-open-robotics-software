@@ -88,6 +88,7 @@ public class ScriptBasedFootstepProvider implements FootstepProvider, Updatable
 
       ArrayList<ScriptObject> scriptObjectsList = scriptFileLoader.readIntoList(transformFromLeftFootPlaneFrameToWorldFrame);
       scriptObjects.addAll(scriptObjectsList);
+      setupTimesForNewScriptEvent(0.1);
 
       loadedScriptFile = true;
    }
