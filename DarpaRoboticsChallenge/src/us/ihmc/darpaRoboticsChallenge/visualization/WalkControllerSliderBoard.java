@@ -99,17 +99,17 @@ public class WalkControllerSliderBoard
       if(drcRobotModel != null)
       {
          sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
-         int i = 0;
          
          SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
           //This currently assumes you don't have more than 8 actuatable finger joints per hand. Going to change this anyways.
          
          for(RobotSide side : RobotSide.values())
-         {
+         { 
+            int i = 0;
             for(String actuatableFingerJointName : actuatableFingerJoints.get(side).keySet())
             {
                //TODO: Fix limits, get them from somewhere so each robot can have their own.
-               sliderBoardConfigurationManager.setSlider(i++,actuatableFingerJointName + CommonNames.q_d.toString(), registry, 
+               sliderBoardConfigurationManager.setSlider(++i,actuatableFingerJointName + CommonNames.q_d.toString(), registry, 
                      actuatableFingerJoints.get(side).get(actuatableFingerJointName).first(), actuatableFingerJoints.get(side).get(actuatableFingerJointName).second());
             }
             
