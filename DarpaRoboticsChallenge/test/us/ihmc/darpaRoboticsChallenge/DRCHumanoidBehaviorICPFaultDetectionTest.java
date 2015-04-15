@@ -266,8 +266,8 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(automaticallyStartSimulation);
-      networkProcessorParameters.setUseLocalControllerCommunicator(true);
+      networkProcessorParameters.enableUiModule(automaticallyStartSimulation);
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
       
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();

@@ -27,11 +27,11 @@ public class AtlasWallWorldDemo
 
       boolean automaticallyStartSimulation = true;
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(true);
-      networkProcessorParameters.setUseBehaviorModule(true);
-      networkProcessorParameters.setUsePerceptionModule(true);
-      networkProcessorParameters.setUseSensorModule(true);
-      networkProcessorParameters.setUseLocalControllerCommunicator(true);
+      networkProcessorParameters.enableUiModule(true);
+      networkProcessorParameters.enableBehaviorModule(true);
+      networkProcessorParameters.enablePerceptionModule(true);
+      networkProcessorParameters.enableSensorModule(true);
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
       simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
    }
 }

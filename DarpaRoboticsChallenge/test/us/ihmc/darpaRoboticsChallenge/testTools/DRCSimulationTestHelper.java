@@ -122,7 +122,7 @@ public class DRCSimulationTestHelper
       if (drcNetworkModuleParameters == null)
       {
          networkProcessorParameters = new DRCNetworkModuleParameters();
-         networkProcessorParameters.setUseNetworkProcessor(false);
+         networkProcessorParameters.enableNetworkProcessor(false);
       }
       else
       {

@@ -148,9 +148,9 @@ public class DRCSimGazeboControllerFactory
          DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
          URI rosURI = NetworkParameters.getROSURI();
          networkModuleParameters.setRosUri(rosURI);
-         networkModuleParameters.setUseUiModule(true);
-         networkModuleParameters.setUseRosModule(true);
-         networkModuleParameters.setUseLocalControllerCommunicator(true);
+         networkModuleParameters.enableUiModule(true);
+         networkModuleParameters.enableRosModule(true);
+         networkModuleParameters.enableLocalControllerCommunicator(true);
          new DRCNetworkProcessor(robotModel, networkModuleParameters);
       }
       try

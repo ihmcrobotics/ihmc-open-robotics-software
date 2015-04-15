@@ -17,11 +17,11 @@ public class AtlasSteeringWorldDemo
       robotModel.createHandContactPoints(useHighResolutionContactPointGrid);
 
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
-      networkProcessorParameters.setUseUiModule(true);
-      networkProcessorParameters.setUseBehaviorModule(true);
-      networkProcessorParameters.setUsePerceptionModule(true);
-      networkProcessorParameters.setUseSensorModule(true);
-      networkProcessorParameters.setUseLocalControllerCommunicator(true);
+      networkProcessorParameters.enableUiModule(true);
+      networkProcessorParameters.enableBehaviorModule(true);
+      networkProcessorParameters.enablePerceptionModule(true);
+      networkProcessorParameters.enableSensorModule(true);
+      networkProcessorParameters.enableLocalControllerCommunicator(true);
 
       new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, ROBOT_FLOATING_HEIGHT);
    }

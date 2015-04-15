@@ -7,6 +7,7 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 
 public class DRCNetworkModuleParameters
 {
+   private boolean useNetworkProcessor = true;
    private boolean useController;
    private boolean useSensorModule;
    private boolean useSimulatedSensors;
@@ -17,11 +18,8 @@ public class DRCNetworkModuleParameters
    private boolean usePerceptionModule;
    private boolean useRosModule;
    private boolean useGFECommunicator;
-   private boolean useNetworkProcessor = true;
    private boolean useMocapModule;
-   
    private boolean useLocalControllerCommunicator;
-   
    private boolean runAutomaticDiagnostic = false;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
@@ -29,98 +27,78 @@ public class DRCNetworkModuleParameters
 
    private double timeToWaitBeforeStartingDiagnostics = Double.NaN;
 
-   public boolean useSensorModule()
+   public boolean isSensorModuleEnabled()
    {
       return useSensorModule;
    }
 
-   public boolean usePerceptionModule()
+   public boolean isPerceptionModuleEnabled()
    {
       return usePerceptionModule;
    }
 
-   public boolean useRosModule()
-   {
-      return useRosModule;
-   }
-
-   public boolean useBehaviorModule()
+   public boolean isBehaviorModuleEnabled()
    {
       return useBehaviorModule;
    }
 
-   public boolean useBehaviorVisualizer()
+   public boolean isBehaviorVisualizerEnabled()
    {
       return useBehaviorVisualizer;
    }
 
-   public boolean useHandModule()
+   public boolean isHandModuleEnabled()
    {
       return useHandModule;
    }
 
-   public boolean useSimulatedSensors()
+   public boolean isSimulatedSensorsEnabled()
    {
       return useSimulatedSensors;
    }
 
-   public boolean useController()
-   {
-      return useController;
-   }
-
-   public boolean useUiModule()
+   public boolean isUiModuleEnabled()
    {
       return useUiModule;
    }
 
-   public LocalObjectCommunicator getSimulatedSensorCommunicator()
-   {
-      return simulatedSensorCommunicator;
-   }
-
-   public URI getRosUri()
-   {
-      return rosUri;
-   }
-
-   public void setUseSensorModule(boolean b)
+   public void enableSensorModule(boolean b)
    {
       useSensorModule = b;
       if (b)
          useController = true;
    }
 
-   public void setUseUiModule(boolean b)
+   public void enableUiModule(boolean b)
    {
       useUiModule = b;
    }
 
-   public void setUseBehaviorModule(boolean b)
+   public void enableBehaviorModule(boolean b)
    {
       useBehaviorModule = b;
       if (b)
          useController = true;
    }
 
-   public void setUseBehaviorVisualizer(boolean useBehaviorVisualizer)
+   public void enableBehaviorVisualizer(boolean useBehaviorVisualizer)
    {
       this.useBehaviorVisualizer = useBehaviorVisualizer;
    }
 
-   public void setUseHandModule(boolean b)
+   public void enableHandModule(boolean b)
    {
       useHandModule = b;
    }
 
-   public void setUsePerceptionModule(boolean b)
+   public void enablePerceptionModule(boolean b)
    {
       usePerceptionModule = b;
       if (b)
          useController = true;
    }
 
-   public void setUseRosModule(boolean b)
+   public void enableRosModule(boolean b)
    {
       useRosModule = b;
       if (useRosModule && rosUri == null)
@@ -133,32 +111,96 @@ public class DRCNetworkModuleParameters
             e.printStackTrace();
          }
    }
+   
+   public boolean isRosModuleEnabled()
+   {
+      return useRosModule;
+   }
+
+   public void enableAutomaticDiagnostic(boolean runAutomaticDiagnostic, double timeToWaitBeforeStartingDiagnostics)
+   {
+      this.runAutomaticDiagnostic = runAutomaticDiagnostic;
+      this.timeToWaitBeforeStartingDiagnostics = timeToWaitBeforeStartingDiagnostics;
+      if (runAutomaticDiagnostic)
+      {
+         enableBehaviorModule(true);
+      }
+   }
+   
+   public boolean isAutomaticDiagnosticEnabled()
+   {
+      return runAutomaticDiagnostic;
+   }
+
+   public void enableLocalControllerCommunicator(boolean useLocalControllerCommunicator)
+   {
+      this.useLocalControllerCommunicator = useLocalControllerCommunicator;
+      if(useLocalControllerCommunicator)
+      {
+         this.useController = true;
+      }
+   }
+   
+   public boolean isLocalControllerCommunicatorEnabled()
+   {
+      return useLocalControllerCommunicator;
+   }
+   
+   public void enableGFECommunicator(boolean useGFECommunicator)
+   {
+      this.useGFECommunicator = useGFECommunicator;
+   }
+   
+   public boolean isGFECommunicatorEnabled()
+   {
+      return useGFECommunicator;
+   }
+   
+   public void enableControllerCommunicator(boolean useControllerCommunicator)
+   {
+      this.useController = useControllerCommunicator;
+   }
+   
+   public boolean isControllerCommunicatorEnabled()
+   {
+      return useController;
+   }
+
+   public void enableNetworkProcessor(boolean useNetworkProcessor)
+   {
+      this.useNetworkProcessor = useNetworkProcessor;
+   }
+   
+   public boolean isNetworkProcessorEnabled()
+   {
+      return useNetworkProcessor;
+   }
+
+   public void enableMocapModule(boolean enableMocapModule)
+   {
+      this.useMocapModule = enableMocapModule;
+   }
+   
+   public boolean isMocapModuleEnabled()
+   {
+      return this.useMocapModule;
+   }
 
    public void setRosUri(URI rosURI)
    {
       rosUri = rosURI;
    }
 
-   public boolean isRunAutomaticDiagnostic()
+   public URI getRosUri()
    {
-      return runAutomaticDiagnostic;
+      return rosUri;
    }
-
-   public void setRunAutomaticDiagnostic(boolean runAutomaticDiagnostic, double timeToWaitBeforeStartingDiagnostics)
-   {
-      this.runAutomaticDiagnostic = runAutomaticDiagnostic;
-      this.timeToWaitBeforeStartingDiagnostics = timeToWaitBeforeStartingDiagnostics;
-      if (runAutomaticDiagnostic)
-      {
-         setUseBehaviorModule(true);
-      }
-   }
-
+   
    public double getTimeToWaitBeforeStartingDiagnostics()
    {
       return timeToWaitBeforeStartingDiagnostics;
    }
-
+   
    public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
@@ -167,6 +209,11 @@ public class DRCNetworkModuleParameters
       useController = true;
    }
 
+   public LocalObjectCommunicator getSimulatedSensorCommunicator()
+   {
+      return simulatedSensorCommunicator;
+   }
+   
    @Override
    public String toString()
    {
@@ -175,54 +222,5 @@ public class DRCNetworkModuleParameters
             + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
             + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
             + "]";
-   }
-
-   public boolean useLocalControllerCommunicator()
-   {
-      return useLocalControllerCommunicator;
-   }
-
-   public void setUseLocalControllerCommunicator(boolean useLocalControllerCommunicator)
-   {
-      this.useLocalControllerCommunicator = useLocalControllerCommunicator;
-      if(useLocalControllerCommunicator)
-      {
-         this.useController = true;
-      }
-   }
-
-   public boolean useGFECommunicator()
-   {
-      return useGFECommunicator;
-   }
-
-   public void setUseGFECommunicator(boolean useGFECommunicator)
-   {
-      this.useGFECommunicator = useGFECommunicator;
-   }
-   
-   public void setUseControllerCommunicator(boolean useControllerCommunicator)
-   {
-      this.useController = useControllerCommunicator;
-   }
-
-   public boolean useNetworkProcessor()
-   {
-      return useNetworkProcessor;
-   }
-
-   public void setUseNetworkProcessor(boolean useNetworkProcessor)
-   {
-      this.useNetworkProcessor = useNetworkProcessor;
-   }
-
-   public void setUseMocapModule(boolean enableMocapModule)
-   {
-      this.useMocapModule = enableMocapModule;
-   }
-   
-   public boolean useMocapModule()
-   {
-      return this.useMocapModule;
    }
 }

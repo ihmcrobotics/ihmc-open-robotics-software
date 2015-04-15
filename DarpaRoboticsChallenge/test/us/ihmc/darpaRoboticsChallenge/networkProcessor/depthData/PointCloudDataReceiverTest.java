@@ -87,16 +87,16 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       jmeLidarScanVisualizer = new JMELidarScanVisualizer();
       
       DRCNetworkModuleParameters drcNetworkModuleParameters = new DRCNetworkModuleParameters();
-      drcNetworkModuleParameters.setUseNetworkProcessor(true);
-      drcNetworkModuleParameters.setUseBehaviorModule(false);
-      drcNetworkModuleParameters.setUseBehaviorVisualizer(false);
-      drcNetworkModuleParameters.setUseGFECommunicator(true);
-      drcNetworkModuleParameters.setUseHandModule(true);
-      drcNetworkModuleParameters.setUseLocalControllerCommunicator(true);
-      drcNetworkModuleParameters.setUsePerceptionModule(true);
-      drcNetworkModuleParameters.setUseRosModule(false);
-      drcNetworkModuleParameters.setUseSensorModule(true);
-      drcNetworkModuleParameters.setUseUiModule(true);
+      drcNetworkModuleParameters.enableNetworkProcessor(true);
+      drcNetworkModuleParameters.enableBehaviorModule(false);
+      drcNetworkModuleParameters.enableBehaviorVisualizer(false);
+      drcNetworkModuleParameters.enableGFECommunicator(true);
+      drcNetworkModuleParameters.enableHandModule(true);
+      drcNetworkModuleParameters.enableLocalControllerCommunicator(true);
+      drcNetworkModuleParameters.enablePerceptionModule(true);
+      drcNetworkModuleParameters.enableRosModule(false);
+      drcNetworkModuleParameters.enableSensorModule(true);
+      drcNetworkModuleParameters.enableUiModule(true);
       
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCWallAtDistanceEnvironment(WALL_DISTANCE);

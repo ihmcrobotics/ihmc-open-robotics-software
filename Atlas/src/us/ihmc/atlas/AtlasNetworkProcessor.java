@@ -45,16 +45,16 @@ public class AtlasNetworkProcessor
     	  
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
-        networkModuleParams.setUseUiModule(true);
-        networkModuleParams.setUseBehaviorModule(true);
-        networkModuleParams.setUseSensorModule(true);
-        networkModuleParams.setUseBehaviorVisualizer(true);
+        networkModuleParams.enableUiModule(true);
+        networkModuleParams.enableBehaviorModule(true);
+        networkModuleParams.enableSensorModule(true);
+        networkModuleParams.enableBehaviorVisualizer(true);
 
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
         {
-           networkModuleParams.setUseRosModule(true);
+           networkModuleParams.enableRosModule(true);
            networkModuleParams.setRosUri(rosuri);
            System.out.println("ROS_MASTER_URI="+rosuri);
         }
@@ -75,7 +75,7 @@ public class AtlasNetworkProcessor
     	     }
     		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)
-              networkModuleParams.setUseHandModule(true);       
+              networkModuleParams.enableHandModule(true);       
     	  }
     	  catch (IllegalArgumentException e)
     	  {
@@ -91,7 +91,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.setRosUri(rosMasterURI);
         
     	  
-    	  networkModuleParams.setUseLocalControllerCommunicator(false);
+    	  networkModuleParams.enableLocalControllerCommunicator(false);
     	  
     	  new DRCNetworkProcessor(model, networkModuleParams);
       }

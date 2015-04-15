@@ -45,13 +45,13 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         
         DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
-        networkModuleParams.setUseBehaviorModule(true);
-        networkModuleParams.setRunAutomaticDiagnostic(true, 15.0);
+        networkModuleParams.enableBehaviorModule(true);
+        networkModuleParams.enableAutomaticDiagnostic(true, 15.0);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)
         {
-           networkModuleParams.setUseRosModule(true);
+           networkModuleParams.enableRosModule(true);
            networkModuleParams.setRosUri(rosuri);
            System.out.println("ROS_MASTER_URI="+rosuri);
         }
@@ -72,7 +72,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
            }
            model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)
-              networkModuleParams.setUseHandModule(true);       
+              networkModuleParams.enableHandModule(true);       
         }
         catch (IllegalArgumentException e)
         {
@@ -86,7 +86,7 @@ public class AtlasNetworkProcessorWithAutomaticDiagnosticRunner
         
         URI rosMasterURI = NetworkParameters.getROSURI();
         networkModuleParams.setRosUri(rosMasterURI);
-        networkModuleParams.setUseLocalControllerCommunicator(false);
+        networkModuleParams.enableLocalControllerCommunicator(false);
         
         new DRCNetworkProcessor(model, networkModuleParams);
       }
