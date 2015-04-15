@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -24,7 +22,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
  */
 public class LegJointLimitAvoidanceControlModule
 {
-   private static final int maxIterationsForIK = 100;
+   private static final int maxIterationsForIK = 8;
    private static final boolean translationFixOnly = true;
 
    private static final double lambdaLeastSquares = 0.000001;
@@ -38,7 +36,6 @@ public class LegJointLimitAvoidanceControlModule
    private RigidBody base;
    private OneDoFJoint[] robotJoints;
    private OneDoFJoint[] ikJoints;
-//   private InverseKinematicsCalculator inverseKinematicsCalculator;
    private NumericalInverseKinematicsCalculator inverseKinematicsCalculator;
    private GeometricJacobian jacobian;
    private int numJoints;
@@ -73,16 +70,6 @@ public class LegJointLimitAvoidanceControlModule
       jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length-1].getSuccessor().getBodyFixedFrame());
 
       inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      double orientationDiscount = 0.2;
-      boolean solveOrientation = true;
-      double convergeTolerance = 4.0e-6; //1e-12;
-      double acceptTolLoc = 0.005;
-      double acceptTolAngle = 0.02;
-      double parameterChangePenalty = 1.0e-4; //0.1;
-//      inverseKinematicsCalculator = new DdoglegInverseKinematicsCalculator(jacobian, orientationDiscount, maxIterationsForIK, solveOrientation,
-//            convergeTolerance, acceptTolLoc, acceptTolAngle, parameterChangePenalty);
-
-
       inverseKinematicsCalculator.setLimitJointAngles(false);
 
       numJoints = ikJoints.length;
@@ -157,7 +144,7 @@ public class LegJointLimitAvoidanceControlModule
 //      }
       inverseKinematicsCalculator.solve(desiredTransform); //sets the qs of the one-dof ikJoints
 //      adjust joints based on joint angle limits
-//      adjustJointPositions();
+      adjustJointPositions();
 
       //calculate the new desired position and orientation
       ikJoints[0].updateFramesRecursively();
@@ -211,14 +198,15 @@ public class LegJointLimitAvoidanceControlModule
 
          originalDesiredPositions[i].set(ikJoints[i].getQ());
          double comparisonValue = Math.abs(2* (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range); //should range between -1 and 1, which are the limits
+         comparisonValue = Math.min(comparisonValue, 1.0);
 
          double alpha = 0;
          if (comparisonValue > lambda){
-            alpha = (comparisonValue - lambda)/rangePercentageForThreshold;
+            alpha = Math.max(0.0, (comparisonValue - lambda)/rangePercentageForThreshold);
          }
          alphas[i].set(alpha);
 
-         double adjustedPosition = alpha * robotJoints[i].getQ() + (1-alpha) * ikJoints[i].getqDesired();
+         double adjustedPosition = (1.0 - alpha) * ikJoints[i].getQ() + alpha * robotJoints[i].getQ();
          adjustedDesiredPositions[i].set(adjustedPosition);
          ikJoints[i].setqDesired(adjustedPosition);
       }
@@ -227,6 +215,9 @@ public class LegJointLimitAvoidanceControlModule
    private void calculateAdjustedVelocities(){
 
       int numberOfConstraints = SpatialMotionVector.SIZE;
+
+      updateJointPositions();
+      jacobian.compute();
 
       // J
       jacobianMatrix.set(jacobian.getJacobianMatrix());
@@ -256,7 +247,7 @@ public class LegJointLimitAvoidanceControlModule
       CommonOps.mult(jacobianMatrixTransposed, intermediateResult, jointVelocities);
 
       for (int i = 0; i < numJoints; i++){
-         jointVelocities.times(i, alphas[i].getDoubleValue());
+         jointVelocities.times(i, (1 - alphas[i].getDoubleValue()));
       }
 
       CommonOps.mult(jacobianMatrix, jointVelocities, adjustedDesiredVelocity);
