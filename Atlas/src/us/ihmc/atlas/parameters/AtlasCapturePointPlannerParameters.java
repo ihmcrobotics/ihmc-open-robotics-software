@@ -12,8 +12,8 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    public AtlasCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      useTwoCMPsPerSupport = runningOnRealRobot;
-      useNewICPPlanner = runningOnRealRobot;
+      useTwoCMPsPerSupport = true;
+      useNewICPPlanner = true;
    }
 
    /** {@inheritDoc} */
