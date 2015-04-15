@@ -27,18 +27,17 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-abstract public class AtlasROSAPISimulator
+abstract public class ROSAPISimulator
 {
    private static final String DEFAULT_TF_PREFIX = null;
    private static final String DEFAULT_PREFIX = "/ihmc_ros";
-   private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
-   private static final String DEFAULT_STARTING_LOCATION = "DEFAULT";
    private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
    
+   protected static final String DEFAULT_STRING = "DEFAULT";
    protected abstract CommonAvatarEnvironmentInterface createEnvironment();
    
-   public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
+   public ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, createEnvironment());
       simulationStarter.setRunMultiThreaded(true);
@@ -99,11 +98,11 @@ abstract public class AtlasROSAPISimulator
       tfPrefix.setDefault(DEFAULT_TF_PREFIX);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      model.setDefault(DEFAULT_ROBOT_MODEL);
+      model.setDefault(DEFAULT_STRING);
       
       FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(
             JSAP.STRING_PARSER);
-      location.setDefault(DEFAULT_STARTING_LOCATION);
+      location.setDefault(DEFAULT_STRING);
 
       Switch visualizeSCSSwitch = new Switch("disable-visualize").setShortFlag('d').setLongFlag("disable-visualize");
       visualizeSCSSwitch.setHelp("Disable rendering/visualization of Simulation Construction Set");
