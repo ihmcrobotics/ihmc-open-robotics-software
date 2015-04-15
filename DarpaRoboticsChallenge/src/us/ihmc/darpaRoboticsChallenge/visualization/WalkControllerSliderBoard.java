@@ -110,25 +110,20 @@ public class WalkControllerSliderBoard
                String actuatableFingerJointName = actuatableFingerJoints.get(side).get(i);  
                
                //TODO: Fix limits, get them from somewhere so each robot can have their own.
-               sliderBoardConfigurationManager.setSlider(i+1, side.getCamelCaseNameForMiddleOfExpression() + actuatableFingerJointName + "_q_d", registry, -1.0, 0.0);
+               sliderBoardConfigurationManager.setSlider(i+1,actuatableFingerJointName + "_q_d", registry, -1.0, 0.0);
             }
             
-            sliderBoardConfigurationManager.saveConfiguration(side.toString() + SliderBoardMode.Grasping.toString());
+            if(side==RobotSide.LEFT)
+            {
+               sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.LeftHandGrasping.toString());
+            }
+            else
+            {
+               sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.RightHandGrasping.toString());
+            }
+            
             sliderBoardConfigurationManager.clearControls();
          }
-         
-         graspHand.addVariableChangedListener(new VariableChangedListener()
-         {
-            @Override
-            public void variableChanged(YoVariable<?> v)
-            {
-               System.out.println("Loading grasping configuration: " + graspHand.getEnumValue().toString());
-               if(sliderBoardMode.getEnumValue()==SliderBoardMode.Grasping)
-               {
-                  sliderBoardConfigurationManager.loadConfiguration(graspHand.toString() + SliderBoardMode.Grasping.toString());
-               }
-            }
-         });
       }
        
       //default
@@ -148,5 +143,5 @@ public class WalkControllerSliderBoard
 
    }
 
-   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration, Grasping};
+   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration, LeftHandGrasping, RightHandGrasping};
 }
