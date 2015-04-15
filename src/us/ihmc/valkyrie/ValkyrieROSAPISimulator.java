@@ -53,17 +53,17 @@ public class ValkyrieROSAPISimulator
 
       PacketCommunicator gfe_communicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.GFE_COMMUNICATOR, new IHMCCommunicationKryoNetClassList());
 
-      networkProcessorParameters.setUseGFECommunicator(true);
+      networkProcessorParameters.enableGFECommunicator(true);
       if (runAutomaticDiagnosticRoutine)
       {
-         networkProcessorParameters.setUseBehaviorModule(true);
-         networkProcessorParameters.setUseBehaviorVisualizer(true);
-         networkProcessorParameters.setRunAutomaticDiagnostic(true, 5);
+         networkProcessorParameters.enableBehaviorModule(true);
+         networkProcessorParameters.enableBehaviorVisualizer(true);
+         networkProcessorParameters.enableAutomaticDiagnostic(true, 5);
       }
 
       if (START_UI)
       {
-         networkProcessorParameters.setUseUiModule(true);
+         networkProcessorParameters.enableUiModule(true);
          simulationStarter.startOpertorInterfaceUsingProcessSpawner();
       }
 
