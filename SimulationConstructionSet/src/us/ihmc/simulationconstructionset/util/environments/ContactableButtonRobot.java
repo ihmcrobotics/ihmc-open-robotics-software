@@ -201,7 +201,9 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    public void updateAllGroundContactPointVelocities() {
       RigidBodyTransform sliderJointTransform = new RigidBodyTransform();
       RigidBodyTransform newButtonPose = new RigidBodyTransform();
-      sliderJointTransform.rotX(buttonSliderJoint.getQ().getDoubleValue());
+      buttonPushVector.scale(buttonSliderJoint.getQ().getDoubleValue());
+      sliderJointTransform.setTranslationAndIdentityRotation(buttonPushVector);
+      buttonPushVector.normalize();
       newButtonPose.multiply(originalButtonTransform, sliderJointTransform);
       buttonFrame.setPoseAndUpdate(newButtonPose);
 
