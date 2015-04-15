@@ -41,8 +41,6 @@ public class DepthDataStore
 
    public void clearLidarData(DepthDataTree lidarTree)
    {
-      nearScan.clear();
-
       switch (lidarTree)
       {
       case DECAY_POINT_CLOUD:
