@@ -113,7 +113,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          
          for(ValkyrieActuatableFingerJoints joint : ValkyrieActuatableFingerJoints.values())
          {
-            actuatableFingerJoints.get(robotSide).put(joint.toString(), new Pair<Double,Double>(ValkyrieActuatableFingerJoints.getMinPositionLimit(joint), ValkyrieActuatableFingerJoints.getMaxPositionLimit(joint)));
+            actuatableFingerJoints.get(robotSide).put(robotSide.getCamelCaseNameForMiddleOfExpression() + joint.toString(), new Pair<Double,Double>(ValkyrieActuatableFingerJoints.getMinPositionLimit(joint), ValkyrieActuatableFingerJoints.getMaxPositionLimit(joint)));
          }
       }
 
