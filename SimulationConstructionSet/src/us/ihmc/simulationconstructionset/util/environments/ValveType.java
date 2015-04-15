@@ -9,7 +9,7 @@ public enum ValveType
       switch (this)
       {
       case SMALL_VALVE:
-         return 0.13;
+         return 0.14;
       case BIG_VALVE:
          return 0.20;
       case CUSTOM:
