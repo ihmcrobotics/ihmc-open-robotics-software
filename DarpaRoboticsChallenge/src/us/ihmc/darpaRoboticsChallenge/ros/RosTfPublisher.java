@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf1Publisher;
@@ -16,7 +17,12 @@ public class RosTfPublisher implements RosTfPublisherInterface
       if(tfPrefix == null)
       {
          this.tfPrefix = "";
-      } 
+      }
+      else if (tfPrefix.equals("NONE"))
+      {
+         this.tfPrefix = "";
+         PrintTools.info("tfPrefix option set to NONE - using no prefix");
+      }
       else
       {
          if(tfPrefix.length() > 1 && !tfPrefix.endsWith("/"))
@@ -24,6 +30,7 @@ public class RosTfPublisher implements RosTfPublisherInterface
             tfPrefix = tfPrefix + "/";
          }
          this.tfPrefix = tfPrefix;
+         PrintTools.info("tfPrefix: " + this.tfPrefix);
       }
       
       if (rosMainNode.isUseTf2())
@@ -36,7 +43,6 @@ public class RosTfPublisher implements RosTfPublisherInterface
          tfPublisher = new RosTf1Publisher(false);
          rosMainNode.attachPublisher("/tf", (RosTf1Publisher) tfPublisher);
       }
-      System.out.println(tfPrefix);
    }
 
    @Override
