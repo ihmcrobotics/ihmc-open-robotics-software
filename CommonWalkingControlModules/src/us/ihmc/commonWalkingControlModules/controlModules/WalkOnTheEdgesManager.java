@@ -39,6 +39,7 @@ public class WalkOnTheEdgesManager
    // TODO it would be nice to use toe touchdown for side steps, but it requires too often an unreachable orientation of the foot resulting in unstable behaviors
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
+   private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
@@ -225,9 +226,12 @@ public class WalkOnTheEdgesManager
       if (isNextStepHighEnough)
          return true;
 
-      boolean isNextStepTooLow = stepHeight < -0.10;
-      if (isNextStepTooLow)
-         return false;
+      if (!ENABLE_TOE_OFF_FOR_STEP_DOWN)
+      {
+         boolean isNextStepTooLow = stepHeight < -0.10;
+         if (isNextStepTooLow)
+            return false;
+      }
 
       boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
       if (!isForwardOrSideStepping)
