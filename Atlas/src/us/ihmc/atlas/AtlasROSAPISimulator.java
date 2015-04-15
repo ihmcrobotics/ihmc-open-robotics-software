@@ -12,11 +12,10 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCGuiInitialSetup;
-import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;
 import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.gfe.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
@@ -28,18 +27,20 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-public class AtlasROSAPISimulator
+abstract public class AtlasROSAPISimulator
 {
    private static final String DEFAULT_TF_PREFIX = null;
-   private static final String DEFAULT_PREFIX = "/ihmc_ros/atlas";
+   private static final String DEFAULT_PREFIX = "/ihmc_ros";
    private static final String DEFAULT_ROBOT_MODEL = "ATLAS_UNPLUGGED_V5_NO_HANDS";
    private static final String DEFAULT_STARTING_LOCATION = "DEFAULT";
    private static final boolean START_UI = false;
    private static final boolean REDIRECT_UI_PACKETS_TO_ROS = false;
-
+   
+   protected abstract CommonAvatarEnvironmentInterface createEnvironment();
+   
    public AtlasROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix, boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
-      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DRCDemo01NavigationEnvironment());
+      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, createEnvironment());
       simulationStarter.setRunMultiThreaded(true);
 
       DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
@@ -85,7 +86,7 @@ public class AtlasROSAPISimulator
       new ThePeoplesGloriousNetworkProcessor(rosUri, gfe_communicator, sensorCommunicator, ppsOffsetProvider, robotModel, nameSpace, tfPrefix);
    }
 
-   public static void main(String[] args) throws JSAPException, IOException
+   protected static Options parseArguments(String[] args) throws JSAPException, IOException
    {
       JSAP jsap = new JSAP();
 
@@ -98,12 +99,10 @@ public class AtlasROSAPISimulator
       tfPrefix.setDefault(DEFAULT_TF_PREFIX);
 
       FlaggedOption model = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
-      model.setHelp("Robot models: " + AtlasRobotModelFactory.robotModelsToString());
       model.setDefault(DEFAULT_ROBOT_MODEL);
       
       FlaggedOption location = new FlaggedOption("startingLocation").setLongFlag("location").setShortFlag('s').setRequired(false).setStringParser(
             JSAP.STRING_PARSER);
-      location.setHelp("Starting locations: " + DRCObstacleCourseStartingLocation.optionsToString());
       location.setDefault(DEFAULT_STARTING_LOCATION);
 
       Switch visualizeSCSSwitch = new Switch("disable-visualize").setShortFlag('d').setLongFlag("disable-visualize");
@@ -119,36 +118,24 @@ public class AtlasROSAPISimulator
       jsap.registerParameter(requestAutomaticDiagnostic);
       jsap.registerParameter(visualizeSCSSwitch);
       JSAPResult config = jsap.parse(args);
-
-      DRCRobotModel robotModel;
-      try
-      {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
-      }
-      catch (IllegalArgumentException e)
-      {
-         System.err.println("Incorrect robot model " + config.getString("robotModel"));
-         System.out.println(jsap.getHelp());
-         return;
-      }
-
-      boolean disableViz = config.getBoolean(visualizeSCSSwitch.getID());
       
-      DRCStartingLocation startingLocation;
-      try
-      {
-         startingLocation = DRCObstacleCourseStartingLocation.valueOf(config.getString("startingLocation"));
-      }
-      catch (IllegalArgumentException e)
-      {
-         System.err.println("Incorrect starting location " + config.getString("startingLocation"));
-         System.out.println(jsap.getHelp());
-         return;
-      }
-
-      String tfPrefixArg = config.getString("tfPrefix");
-      String nodePrefix = config.getString("namespace");
-      boolean enableAutomaticDiagnostic = config.getBoolean(requestAutomaticDiagnostic.getID());
-      new AtlasROSAPISimulator(robotModel, startingLocation, nodePrefix, tfPrefixArg, enableAutomaticDiagnostic, disableViz);
+      Options options = new Options();
+      options.robotModel = config.getString(model.getID());
+      options.disableViz = config.getBoolean(visualizeSCSSwitch.getID());
+      options.startingLocation = config.getString(location.getID());
+      options.tfPrefix = config.getString(tfPrefix.getID());
+      options.nameSpace = config.getString(rosNameSpace.getID());
+      options.runAutomaticDiagnosticRoutine = config.getBoolean(requestAutomaticDiagnostic.getID());
+      return options;
+   }
+   
+   protected static class Options
+   {
+      public String robotModel;
+      public String startingLocation;
+      public String nameSpace;
+      public String tfPrefix;
+      public boolean runAutomaticDiagnosticRoutine;
+      public boolean disableViz;
    }
 }
