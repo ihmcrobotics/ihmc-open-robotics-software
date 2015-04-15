@@ -20,8 +20,8 @@ import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.ihmcPerception.depthData.CollisionBoxNode;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
@@ -38,7 +38,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
-   private final CollisionBoxNode collisionBoxNode;
+   private final CollisionShapeTester collisionBoxNode;
    
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
    
@@ -61,7 +61,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       
       if(collisionBoxProvider != null)
       {
-         collisionBoxNode = new CollisionBoxNode(this.fullRobotModel, collisionBoxProvider, null);
+         collisionBoxNode = new CollisionShapeTester(this.fullRobotModel, collisionBoxProvider);
       }
       else
       {
@@ -128,7 +128,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                      {
                         continue;
                      }
-                     collisionBoxNode.simpleUpdate(0);
+                     collisionBoxNode.update();
                      prevTimestamp = nextTimestamp;
                   }
                   
