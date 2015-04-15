@@ -1,7 +1,9 @@
 package us.ihmc.SdfLoader;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -25,12 +27,12 @@ public class SDFWorldLoader
 
    public SDFWorldLoader(File file, String resourceDirectory) throws FileNotFoundException, JAXBException
    {
-      this(file, Arrays.asList(resourceDirectory));
+      this(new FileInputStream(file), Arrays.asList(resourceDirectory));
    }
 
-   public SDFWorldLoader(File file, List<String> resourceDirectories) throws FileNotFoundException, JAXBException
+   public SDFWorldLoader(InputStream inputStream, List<String> resourceDirectories) throws FileNotFoundException, JAXBException
    {
-      jaxbSDFLoader = new JaxbSDFLoader(file, resourceDirectories);
+      jaxbSDFLoader = new JaxbSDFLoader(inputStream, resourceDirectories);
       for (GeneralizedSDFRobotModel generalizedSDFRobotModel : jaxbSDFLoader.getGeneralizedSDFRobotModels())
       {
          String name = generalizedSDFRobotModel.getName();

@@ -1,6 +1,7 @@
 package us.ihmc.SdfLoader;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -9,6 +10,8 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class SDFModelVisual extends Graphics3DObject
 {
    private final List<String> resourceDirectories;
+   
+   private final HashSet<SDFLinkHolder> addedLinks = new HashSet<>();
    
    public SDFModelVisual(GeneralizedSDFRobotModel generalizedSDFRobotModel)
    {
@@ -29,12 +32,17 @@ public class SDFModelVisual extends Graphics3DObject
    
    private void recursivelyAddLinks(SDFLinkHolder link, RigidBodyTransform modelTransform, boolean useCollisionMeshes)
    {
+      if(addedLinks.contains(link))
+      {
+         return;
+      }
+      addedLinks.add(link);
+      
       if(link.getVisuals() != null)
       {
          
          RigidBodyTransform transformToModel = new RigidBodyTransform(modelTransform);
          transformToModel.multiply(link.getTransformFromModelReferenceFrame());
-         
          
          SDFGraphics3DObject sdfGraphics3DObject;
          if(useCollisionMeshes)

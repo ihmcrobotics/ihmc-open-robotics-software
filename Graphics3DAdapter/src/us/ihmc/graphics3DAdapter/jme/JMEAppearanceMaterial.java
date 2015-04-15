@@ -271,7 +271,7 @@ public class JMEAppearanceMaterial
          {
             Path path = cacheDir.toPath();
             ClassLoaderTools.copyToFileSystem(path, "models/gazebo/media/materials");
-            GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials";
+            GAZEBO_MATERIAL_CACHE = cacheDir.getAbsolutePath() + File.separator + "models" + File.separator + "gazebo" + File.separator + "media" + File.separator + "materials" + File.separator;
          }
          catch (IOException e)
          {

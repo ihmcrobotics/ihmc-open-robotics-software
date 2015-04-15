@@ -90,6 +90,17 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
          if (submesh != null)
          {
             spatial = findSubmesh(spatial, submesh, centerSubmesh);
+            
+            // The Polaris Ranger had multiple subnodes, which shouldn't be displayed. Two stategies could be useful, taking only the first node or ignoring named nodes. Because terrible documentation, we don't know
+            // what Gazebo does. Therefore, we take the first node. Implement ignore named nodes if this breaks things.
+            if(spatial instanceof Node)
+            {
+               if(((Node) spatial).getChildren().size() > 1)
+               {
+                  spatial = ((Node) spatial).getChild(0); 
+               }
+            }
+            
             if (spatial == null)
             {
                System.err.println("Cannot find submesh " + submesh);
@@ -98,6 +109,11 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
             }
             else
             {
+               // Scale things. World scale is ignored when using center(). Therefore, we save the world scale, clone and set the local scale. this works for the Polaris. Might break things.
+               Vector3f worldScale = spatial.getWorldScale();
+               spatial = spatial.clone();
+//               spatial.scale(worldScale.x, worldScale.y, worldScale.z);
+               spatial.setLocalScale(worldScale);
                if (centerSubmesh)
                {
                   spatial.center();

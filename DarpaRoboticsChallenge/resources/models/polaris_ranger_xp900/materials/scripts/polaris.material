@@ -1,15 +1,15 @@
-material Polaris/Diffuse
+material PolarisXP900/Diffuse
 {
   receive_shadows off
   technique
   {
     pass
     {
-			ambient 1.0 1.0 1.0 1.000000
+      ambient 1.0 1.0 1.0 1.000000
 
       texture_unit
       {
-        texture Ranger_Diffuse.tga
+        texture RangerXP900_Diffuse.png
       }
 
       rtshader_system
