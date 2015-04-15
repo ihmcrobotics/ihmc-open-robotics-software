@@ -26,7 +26,6 @@ import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -88,7 +87,7 @@ public class FootControlHelper
    private final FrameMatrix3D angularSelectionMatrix = new FrameMatrix3D();
 
    // For hold position and fully constrained states.
-   private final SideDependentList<FrameTuple2dArrayList<FramePoint2d>> originalContactPointPositions = new SideDependentList<FrameTuple2dArrayList<FramePoint2d>>(FrameTuple2dArrayList.createFramePoint2dArrayList(4), FrameTuple2dArrayList.createFramePoint2dArrayList(4));
+   private final FrameTuple2dArrayList<FramePoint2d> originalContactPointPositions = FrameTuple2dArrayList.createFramePoint2dArrayList(4);
    private final FrameConvexPolygon2d originalSupportFootPolygon = new FrameConvexPolygon2d();
    private final BooleanYoVariable allowSupportFootShrink;
    private final BooleanYoVariable isSupportFootShrinkEnabled;
@@ -431,22 +430,43 @@ public class FootControlHelper
          footShrinkPercent.set(0.0);
    }
 
+   public void saveContactPointsFromContactState()
+   {
+      momentumBasedController.getContactState(contactableFoot).getAllContactPoints(originalContactPointPositions);
+   }
+
+   public void saveContactPointsFromFootstep(Footstep footstep)
+   {
+      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      if (predictedContactPoints == null || predictedContactPoints.isEmpty())
+         return;
+
+      originalContactPointPositions.clear();
+      originalContactPointPositions.copyFromPoint2dListAndTrimSize(contactableFoot.getSoleFrame(), predictedContactPoints);
+   }
+
    public void initializeParametersForSupportFootShrink(boolean resetCurrentFootShrink)
    {
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+      saveContactPointsFromContactState();
+      updateOriginalSupportPolygon(resetCurrentFootShrink);
+   }
 
+   public void updateWithPredictedContactPoints(Footstep footstep)
+   {
+      saveContactPointsFromFootstep(footstep);
+      updateOriginalSupportPolygon(false);
+   }
+
+   private void updateOriginalSupportPolygon(boolean resetCurrentFootShrink)
+   {
       contactPointMaxX.set(Double.NEGATIVE_INFINITY);
-      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
+      for (int i = 0; i < originalContactPointPositions.size(); i++)
       {
-         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         FramePoint2d originalContactPointPosition = originalContactPointPositions.get(robotSide).get(i);
-         yoContactPoint.getPosition2d(originalContactPointPosition);
-
-         if (originalContactPointPosition.getX() > contactPointMaxX.getDoubleValue())
-            contactPointMaxX.set(originalContactPointPosition.getX());
+         if (originalContactPointPositions.get(i).getX() > contactPointMaxX.getDoubleValue())
+            contactPointMaxX.set(originalContactPointPositions.get(i).getX());
       }
 
-      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions.get(robotSide));
+      originalSupportFootPolygon.setIncludingFrameAndUpdate(originalContactPointPositions);
 
       if (resetCurrentFootShrink)
       {
@@ -454,28 +474,9 @@ public class FootControlHelper
       }
    }
 
-   public void updateWithPredictedContactPoints(Footstep footstep)
+   public void restoreFootContactPoints()
    {
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
-      if (predictedContactPoints == null || predictedContactPoints.isEmpty())
-         return;
-
-      originalContactPointPositions.get(robotSide).clear();
-
-      for (int i = 0; i < predictedContactPoints.size(); i++)
-         originalContactPointPositions.get(robotSide).copyFromPoint2dListAndTrimSize(predictedContactPoints);
-   }
-
-   public void restoreSupportFootContactPoints()
-   {
-      contactPointMaxX.set(Double.NEGATIVE_INFINITY);
-
-      YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
-      for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
-      {
-         YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         yoContactPoint.setPosition2d(originalContactPointPositions.get(robotSide).get(i));
-      }
+      momentumBasedController.getContactState(contactableFoot).setContactFramePoints(originalContactPointPositions);
    }
 
    private void checkAnkleFlexionLimit()
@@ -509,7 +510,7 @@ public class FootControlHelper
       for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
       {
          YoContactPoint yoContactPoint = contactState.getContactPoints().get(i);
-         double originalContactPointX = originalContactPointPositions.get(robotSide).get(i).getX();
+         double originalContactPointX = originalContactPointPositions.get(i).getX();
          yoContactPoint.getPosition2d(tempFramePoint);
          tempFramePoint.setX(alpha * contactPointMaxX.getDoubleValue() + (1.0 - alpha) * originalContactPointX);
 

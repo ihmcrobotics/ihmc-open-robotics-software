@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Point2d;
 
+import us.ihmc.utilities.lists.FrameTuple2dArrayList;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -121,6 +122,26 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.contactPointCentroid.set(centroid);
    }
 
+   public void setContactFramePoints(FrameTuple2dArrayList<FramePoint2d> contactPointLocations)
+   {
+      int contactPointLocationsSize = contactPointLocations.size();
+
+      if (contactPointLocationsSize != totalNumberOfContactPoints)
+         throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints");
+
+      for (int i = 0; i < contactPointLocationsSize; i++)
+      {
+         FramePoint2d contactPointLocation = contactPointLocations.get(i);
+         YoContactPoint yoContactPoint = contactPoints.get(i);
+
+         yoContactPoint.setPosition(contactPointLocation);
+      }
+
+      FrameConvexPolygon2d convexPolygon = new FrameConvexPolygon2d(contactPointLocations);
+      FramePoint2d centroid = convexPolygon.getCentroid();
+      this.contactPointCentroid.set(centroid);
+   }
+
    public void getContactPointCentroid(FramePoint2d centroidToPack)
    {
       this.contactPointCentroid.getFrameTuple2dIncludingFrame(centroidToPack);
@@ -165,6 +186,19 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       for (int i = contactPointListToPack.size() - 1; i >= counter; i--)
       {
          contactPointListToPack.remove(i);
+      }
+   }
+
+   public void getAllContactPoints(FrameTuple2dArrayList<FramePoint2d> contactPointListToPack)
+   {
+      contactPointListToPack.clear();
+
+      for (int i = 0; i < totalNumberOfContactPoints; i++)
+      {
+         YoContactPoint contactPoint = contactPoints.get(i);
+
+         FramePoint2d contactPointLocation = contactPointListToPack.getAndGrowIfNeeded(i);
+         contactPoint.getPosition2d(contactPointLocation);
       }
    }
 

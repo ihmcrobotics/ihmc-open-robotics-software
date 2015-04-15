@@ -95,7 +95,7 @@ public class HoldPositionState extends AbstractFootControlState
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footControlHelper.restoreSupportFootContactPoints();
+      footControlHelper.restoreFootContactPoints();
    }
 
    @Override

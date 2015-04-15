@@ -43,7 +43,7 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void doTransitionOutOfAction()
    {
       super.doTransitionOutOfAction();
-      footControlHelper.restoreSupportFootContactPoints();
+      footControlHelper.restoreFootContactPoints();
    }
 
    @Override
