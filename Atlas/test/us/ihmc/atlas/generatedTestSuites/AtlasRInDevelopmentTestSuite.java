@@ -7,7 +7,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.roughTerrainWalking.AtlasFootExplorationTest.class
+   us.ihmc.atlas.behaviorTests.AtlasFingerStateBehaviorTest.class,
+   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class
 })
 
 public class AtlasRInDevelopmentTestSuite

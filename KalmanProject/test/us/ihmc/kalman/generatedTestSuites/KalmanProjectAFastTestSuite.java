@@ -7,9 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.kalman.imu.QuaternionToolsTest.class,
+   us.ihmc.kalman.YoKalmanFilterTest.class,
    us.ihmc.kalman.imu.testCases.KalmanFilterComparisonTest.class,
-   us.ihmc.kalman.YoKalmanFilterTest.class
+   us.ihmc.kalman.imu.QuaternionToolsTest.class
 })
 
 public class KalmanProjectAFastTestSuite
