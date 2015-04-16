@@ -14,7 +14,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '0.3.2-alpha'
+version = '0.3.2.1-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -61,6 +61,8 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
 
     from "${buildDir}/distributions"
     into "ihmc/api_releases"
+    
+    keepFiles true
 
     doFirst{
         if(!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey"))
