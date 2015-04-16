@@ -11,11 +11,11 @@ import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment
 
 import com.martiansoftware.jsap.JSAPException;
 
-public class ValkyrieDemo01ROSAPISimulator extends ROSAPISimulator
+public class ValkyrieROSAPISimulator extends ROSAPISimulator
 {
    private static final String ROBOT_NAME = "valkyrie";
    
-   public ValkyrieDemo01ROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
+   public ValkyrieROSAPISimulator(DRCRobotModel robotModel, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz) throws IOException
    {
       super(robotModel, startingLocation, nameSpace, tfPrefix, runAutomaticDiagnosticRoutine, disableViz);
@@ -46,6 +46,6 @@ public class ValkyrieDemo01ROSAPISimulator extends ROSAPISimulator
       }
       
       String nameSpace = opt.nameSpace + "/" + ROBOT_NAME;
-      new ValkyrieDemo01ROSAPISimulator(robotModel, startingLocation, nameSpace, opt.tfPrefix, opt.runAutomaticDiagnosticRoutine, opt.disableViz);
+      new ValkyrieROSAPISimulator(robotModel, startingLocation, nameSpace, opt.tfPrefix, opt.runAutomaticDiagnosticRoutine, opt.disableViz);
    }
 }
