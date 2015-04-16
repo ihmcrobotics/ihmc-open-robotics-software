@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Jo
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment;
+import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -27,7 +28,7 @@ public class DRCSteeringWheelDemo
 {
    private final DRCSimulationFactory drcSimulationFactory;
 
-   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, double desiredPelvisHeight)
+   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup)
    {
       Point3d steeringWheelCenterInWorldFrame = new Point3d(0.42, 0.46, 1.2);
       CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInWorldFrame.x, steeringWheelCenterInWorldFrame.y,
@@ -35,20 +36,16 @@ public class DRCSteeringWheelDemo
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
-      
 
-      simStarter.setRunMultiThreaded(true);
-      simStarter.setStartingLocationOffset(new Vector3d(0.0, -0.6, desiredPelvisHeight), 0.0);
+      simStarter.setRunMultiThreaded(true);      
+      simStarter.setRobotInitialSetup(initialSetup);
       simStarter.setInitializeEstimatorToActual(true);
-
-//      DRCSimulationTools.startSimulationWithGraphicSelector(simStarter);
       simStarter.startSimulation(networkParameters, true);
       
       drcSimulationFactory = simStarter.getDRCSimulationFactory();
-      
       SDFRobot robot = drcSimulationFactory.getRobot();
-      LockPelvisController controller = new LockPelvisController(robot, drcSimulationFactory.getSimulationConstructionSet(), model.createFullRobotModel(),
-            desiredPelvisHeight);
+      
+      LockPelvisController controller = new LockPelvisController(robot, drcSimulationFactory.getSimulationConstructionSet(), model.createFullRobotModel(), 0.0);
       robot.setController(controller);
       controller.initialize();
       

@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import us.ihmc.atlas.initialSetup.DrivingDRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.DRCSteeringWheelDemo;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 
@@ -7,8 +8,6 @@ import com.martiansoftware.jsap.JSAPException;
 
 public class AtlasSteeringWorldDemo
 {
-   private static final double ROBOT_FLOATING_HEIGHT = 0.0;
-
    
    public static void main(final String[] args) throws JSAPException
    {
@@ -22,7 +21,9 @@ public class AtlasSteeringWorldDemo
       networkProcessorParameters.enablePerceptionModule(true);
       networkProcessorParameters.enableSensorModule(true);
       networkProcessorParameters.enableLocalControllerCommunicator(true);
+      
+      DrivingDRCRobotInitialSetup initialSetup = new DrivingDRCRobotInitialSetup();
 
-      new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, ROBOT_FLOATING_HEIGHT);
+      new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, initialSetup);
    }
 }
