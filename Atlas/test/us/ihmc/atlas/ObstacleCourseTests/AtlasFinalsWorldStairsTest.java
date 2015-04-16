@@ -90,6 +90,7 @@ public class AtlasFinalsWorldStairsTest
       SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
+      setupCameraForWalkingUpStairs();
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
@@ -183,22 +184,22 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.45, startingLocation.z + 0.55), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.66, startingLocation.z + 0.8), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.66, startingLocation.z + 0.75), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.74, startingLocation.z + 0.83), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.74, startingLocation.z + 0.75), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.0, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.0, startingLocation.z + 1.0), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.05, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.05, startingLocation.z + 1.0), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.2, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.2, startingLocation.z + 1.0), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.2, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.2, startingLocation.z + 1.0), new Quat4d(orientation), footPoint2ds));
 
       return footstepDataList;
    }
@@ -206,5 +207,13 @@ public class AtlasFinalsWorldStairsTest
    public String getSimpleRobotName()
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
+   }
+
+   private void setupCameraForWalkingUpStairs()
+   {
+      Point3d cameraFix = new Point3d(1.8375, -15, 0.89);
+      Point3d cameraPosition = new Point3d(8.5, -15, 2.0);
+
+      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 }
