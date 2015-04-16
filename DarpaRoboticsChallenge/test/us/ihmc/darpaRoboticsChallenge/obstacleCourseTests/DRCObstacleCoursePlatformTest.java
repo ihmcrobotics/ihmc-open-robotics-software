@@ -399,7 +399,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
 	   FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(60.0), Math.toRadians(0.0));
+	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(30.0), Math.toRadians(0.0));
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       

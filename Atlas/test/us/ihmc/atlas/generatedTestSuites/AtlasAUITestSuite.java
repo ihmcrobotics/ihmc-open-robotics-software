@@ -7,9 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class,
    us.ihmc.atlas.AtlasObstacleCourseDemoGUITest.class,
-   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class
+   us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
+   us.ihmc.atlas.posePlayback.AtlasPlaybackPoseInterpolatorTest.class
 })
 
 public class AtlasAUITestSuite

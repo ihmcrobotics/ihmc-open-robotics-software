@@ -8,9 +8,9 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.communication.net.KryoObjectCommunicatorTest.class,
-   us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class,
    us.ihmc.communication.networkProcessor.NetworkProcessorTest.class,
-   us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class
+   us.ihmc.communication.remote.serialization.JointConfigurationDataSenderTest.class,
+   us.ihmc.communication.streamingData.StreamingDataTCPServerTest.class
 })
 
 public class IHMCCommunicationAFlakyTestSuite

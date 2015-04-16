@@ -7,8 +7,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.SdfLoader.SDFRobotTest.class,
-   us.ihmc.SdfLoader.SDFLinkHolderTest.class
+   us.ihmc.SdfLoader.SDFLinkHolderTest.class,
+   us.ihmc.SdfLoader.SDFRobotTest.class
 })
 
 public class SDFLoaderAFastTestSuite

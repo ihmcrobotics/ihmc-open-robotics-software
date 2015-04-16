@@ -7,9 +7,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampFootstepSnapperTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseSteppingStonesTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseTrialsWalkingTaskTest.class
+   us.ihmc.atlas.AtlasPushRecoveryTest.class,
+   us.ihmc.atlas.AtlasScriptingTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasObjectWeightBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasWalkToGoalBehaviorTest.class
 })
 
 public class AtlasBFastTestSuite
