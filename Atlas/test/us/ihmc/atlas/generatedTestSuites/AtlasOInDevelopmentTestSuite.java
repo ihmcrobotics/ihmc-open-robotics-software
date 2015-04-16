@@ -7,12 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.behaviorTests.AtlasWholeBodyIKTrajectoryBehaviorTest.class,
-   us.ihmc.atlas.behaviorTests.AtlasWholeBodyInverseKinematicBehaviorTest.class,
-   us.ihmc.atlas.hikSim.AtlasWholeBodyTrajectoryTest.class,
-   us.ihmc.atlas.HumanoidBehaviorsICPFaultDetectionTest.class,
-   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
-   us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class
+   us.ihmc.atlas.behaviorTests.AtlasRotateHandAboutAxisBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasHighLevelStateBehaviorTest.class,
+   us.ihmc.atlas.behaviorTests.AtlasDrillPickUpBehaviorTest.class
 })
 
 public class AtlasOInDevelopmentTestSuite
