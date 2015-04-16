@@ -13,6 +13,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -73,19 +74,28 @@ public class DRCSimulationTestHelper
    private final DRCNetworkModuleParameters networkProcessorParameters;
    private DRCSimulationStarter simulationStarter;
 
-   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation, SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(String name, String scriptFileName, DRCObstacleCourseStartingLocation selectedLocation,
+         SimulationTestingParameters simulationconstructionsetparameters, DRCRobotModel robotModel)
    {
       this(new DRCDemo01NavigationEnvironment(), name, scriptFileName, selectedLocation, simulationconstructionsetparameters, robotModel);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-         DRCRobotModel robotModel)
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel)
    {
-      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, null);
+      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, null, null);
    }
 
-   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName, DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters,
-         DRCRobotModel robotModel, DRCNetworkModuleParameters drcNetworkModuleParameters)
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+         DRCNetworkModuleParameters drcNetworkModuleParameters)
+   {
+      this(commonAvatarEnvironmentInterface, name, scriptFileName, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters, null);
+   }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, String scriptFileName,
+         DRCStartingLocation selectedLocation, SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+         DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd)
    {
       this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
@@ -113,7 +123,8 @@ public class DRCSimulationTestHelper
       simulationStarter = new DRCSimulationStarter(robotModel, commonAvatarEnvironmentInterface);
       simulationStarter.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
       simulationStarter.setUsePerfectSensors(simulationTestingParameters.getUsePefectSensors());
-
+      if (highLevelBehaviorFactoryToAdd != null)
+         simulationStarter.registerHighLevelController(highLevelBehaviorFactoryToAdd);
       simulationStarter.setScriptFile(scriptFileName);
       simulationStarter.setStartingLocation(selectedLocation);
       simulationStarter.setGuiInitialSetup(guiInitialSetup);
@@ -137,6 +148,8 @@ public class DRCSimulationTestHelper
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
       
+
+      
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
          nothingChangedVerifier = new NothingChangedVerifier(name, scs);
@@ -151,17 +164,17 @@ public class DRCSimulationTestHelper
    {
       return blockingSimulationRunner;
    }
-
+   
    public SimulationConstructionSet getSimulationConstructionSet()
    {
       return scs;
    }
-
+   
    public DRCSimulationFactory getDRCSimulationFactory()
    {
       return drcSimulationFactory;
    }
-
+   
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
       MomentumBasedControllerFactory controllerFactory = drcSimulationFactory.getControllerFactory();
