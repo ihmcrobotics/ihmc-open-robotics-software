@@ -8,8 +8,15 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.valkyrie.codeGenerators.APIBuilderTest.class,
-   us.ihmc.valkyrie.ValkyriePushRecoveryMultiStepTest.class,
-   us.ihmc.valkyrie.ValkyrieFlatGroundWalkingTest.class
+   us.ihmc.valkyrie.kinematics.ClosedFormJacobianTest.class,
+   us.ihmc.valkyrie.kinematics.PushrodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.ComparePushRodTransmissionsTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushrodTransmissionJacobianTest.class,
+   us.ihmc.valkyrie.kinematics.transmissions.InefficientPushRodTransmissionTest.class,
+   us.ihmc.valkyrie.kinematics.will.WillsPushrodTransmissionTest.class,
+   us.ihmc.valkyrie.simulation.ValkyrieFlatGroundWalkingWithIMUDriftTest.class,
+   us.ihmc.valkyrie.simulation.ValkyrieObstacleCourseRampFootstepSnapperTest.class,
+   us.ihmc.valkyrie.simulation.ValkyriePosePlaybackDemoTest.class
 })
 
 public class ValkyrieHardwareDriversAFastTestSuite
