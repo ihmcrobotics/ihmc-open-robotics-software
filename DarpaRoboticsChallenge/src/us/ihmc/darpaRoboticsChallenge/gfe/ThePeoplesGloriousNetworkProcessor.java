@@ -93,7 +93,7 @@ public class ThePeoplesGloriousNetworkProcessor
 
       gfe_communicator.connect();
       
-      System.out.println("IHMC ROS API node successfully connected to controller.");
+      System.out.println("IHMC ROS API node successfully started.");
    }
 
    public ThePeoplesGloriousNetworkProcessor(URI rosUri, PacketCommunicator controllerCommunicationBridge, DRCRobotModel robotModel, String namespace, String tfPrefix) throws
