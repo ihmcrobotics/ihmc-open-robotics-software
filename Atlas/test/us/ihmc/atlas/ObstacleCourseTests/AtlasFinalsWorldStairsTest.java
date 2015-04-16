@@ -19,6 +19,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.darpaRoboticsChallenge.*;
@@ -92,11 +93,15 @@ public class AtlasFinalsWorldStairsTest
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
+      ComHeightPacket heightPacket = new ComHeightPacket(0.1);
+      drcSimulationTestHelper.send(heightPacket);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);    // 2.0);
 
       FootstepDataList footstepDataList = createFootstepsWithHighSwing(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(30.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
 
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -169,7 +174,7 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.10, startingLocation.z + 0.30), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.2, startingLocation.z + 0.30), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.18, startingLocation.z + 0.30), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
       footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.35, startingLocation.z + 0.55), new Quat4d(orientation), footPoint2ds));
@@ -178,13 +183,13 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.45, startingLocation.z + 0.55), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.62, startingLocation.z + 0.83), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.66, startingLocation.z + 0.8), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.74, startingLocation.z + 0.83), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.LEFT, walkingControllerParameters);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.92, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.0, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
 
       footPoint2ds = createSupportPolygonForFoot(RobotSide.RIGHT, walkingControllerParameters);
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.05, startingLocation.z + 1.05), new Quat4d(orientation), footPoint2ds));
