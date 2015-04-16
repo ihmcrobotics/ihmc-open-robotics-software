@@ -17,6 +17,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -314,10 +315,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          {
             if (handPoseProvider.checkHandPosePacketDataType(side) == HandPosePacket.DataType.HAND_POSE)
             {
-               // I am not planning to implement this for the time being 
+               PrintTools.info("Got hand pose of data type " + HandPosePacket.DataType.HAND_POSE + " - skipping packet");
             }
-            else{            
-               initializeFromJointMap( handPoseProvider.getFinalDesiredJointAngleMaps(side), handPoseProvider.getTrajectoryTime()  );
+            else
+            {            
+               initializeFromJointMap(handPoseProvider.getFinalDesiredJointAngleMaps(side), handPoseProvider.getTrajectoryTime());
             }
          }
       }
