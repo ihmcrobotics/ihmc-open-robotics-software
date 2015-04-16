@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
@@ -40,11 +41,11 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final RigidBodyTransform interpolatedTransform_Translation = new RigidBodyTransform();
    
    private final FrameOrientation startRotation = new FrameOrientation(worldFrame);
-   private final Quat4d startRotation_quat = new Quat4d();
-   private final Quat4d interpolatedRotation = new Quat4d();
+   private final Quat4d startRotation_quat = new Quat4d(0.0,0.0,0.0,1.0);
+   private final Quat4d interpolatedRotation = new Quat4d(0.0,0.0,0.0,1.0);
    private final FrameOrientation interpolatedRotationFrameOrientation = new FrameOrientation(worldFrame);
    private final FrameOrientation goalRotation = new FrameOrientation(worldFrame);
-   private final Quat4d goalRotation_quat = new Quat4d();
+   private final Quat4d goalRotation_quat = new Quat4d(0.0,0.0,0.0,1.0);
    private final RigidBodyTransform interpolatedTransform_Rotation = new RigidBodyTransform();
    
    private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform(); 
@@ -78,7 +79,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    
    private final Vector3d referenceFrameToBeCorrected_Translation = new Vector3d();
    private final Vector3d correctionToBeApplied_Translation = new Vector3d();
-   private final Quat4d referenceFrameToBeCorrected_Rotation = new Quat4d();
+   private final Quat4d referenceFrameToBeCorrected_Rotation = new Quat4d(0.0,0.0,0.0,1.0);
    private final FrameOrientation correctionToBeAppliedFrameOrientation_Rotation = new FrameOrientation(worldFrame);
 
    private final Vector3d previousReferenceFrameToBeCorrected_Translation = new Vector3d(); 
@@ -86,6 +87,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final FrameOrientation referenceFrameToBeCorrectedFrameOrientation_Rotation = new FrameOrientation(worldFrame);
    private final FrameOrientation previousReferenceFrameToBeCorrectedFrameOrientation_Rotation = new FrameOrientation(worldFrame);
    private final FrameOrientation pelvisRotationBetweenTwoTicks = new FrameOrientation(worldFrame);
+   private final RigidBodyTransform pelvisRotationBetweenTwoTicksTransform = new RigidBodyTransform(); 
    
    private final AxisAngle4d axisAngletoTravel = new AxisAngle4d();
    
@@ -214,6 +216,20 @@ public class ClippedSpeedOffsetErrorInterpolator
       rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());
    }
 
+   public void initialize()
+   {
+      referenceFrameToBeCorrectedTransform.update();
+      referenceFrameToBeCorrectedTransform.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Translation, worldFrame);
+      referenceFrameToBeCorrectedTransform_Translation.setRotationToIdentity();
+      referenceFrameToBeCorrectedTransform.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Rotation, worldFrame);
+      referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
+      
+      referenceFrameToBeCorrectedTransform_Translation.getTranslation(previousReferenceFrameToBeCorrected_Translation);
+      Quat4d referenceFrameToBeCorrectedRotation = new Quat4d(0.0,0.0,0.0,1.0);
+      referenceFrameToBeCorrectedTransform_Rotation.getRotation(referenceFrameToBeCorrectedRotation);
+      previousReferenceFrameToBeCorrectedFrameOrientation_Rotation.set(referenceFrameToBeCorrectedRotation);
+   }
+   
    public void interpolateError(FramePose offsetPoseToPack)
    {
       if (!hasBeenCalled.getBooleanValue())
@@ -267,7 +283,6 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       pelvisTranslationBetweenTwoTicks.sub(referenceFrameToBeCorrected_Translation, previousReferenceFrameToBeCorrected_Translation);
       pelvisRotationBetweenTwoTicks.setOrientationFromOneToTwo(referenceFrameToBeCorrectedFrameOrientation_Rotation, previousReferenceFrameToBeCorrectedFrameOrientation_Rotation);
-      RigidBodyTransform pelvisRotationBetweenTwoTicksTransform = new RigidBodyTransform(); 
       pelvisRotationBetweenTwoTicks.getTransform3D(pelvisRotationBetweenTwoTicksTransform);
       
       startTranslation.add(pelvisTranslationBetweenTwoTicks);
