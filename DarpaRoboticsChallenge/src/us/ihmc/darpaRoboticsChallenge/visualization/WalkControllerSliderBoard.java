@@ -123,12 +123,13 @@ public class WalkControllerSliderBoard
    private void setupGraspingSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final EnumYoVariable<SliderBoardMode> sliderBoardMode, 
          final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
    {
-      sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
+      
       final DoubleYoVariable leftGraspPercentage = new DoubleYoVariable("LeftHandGraspPercentage", registry);
       final DoubleYoVariable rightGraspPercentage = new DoubleYoVariable("RightHandGraspPercentage", registry);
       
       final SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
       
+      sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
       sliderBoardConfigurationManager.setSlider(1, leftGraspPercentage, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(2, rightGraspPercentage, 0.0, 1.0);
       
@@ -162,6 +163,16 @@ public class WalkControllerSliderBoard
                DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(actuatableFingerJointName + CommonNames.q_d.toString());
                desiredAngle.set(rightGraspPercentage.getDoubleValue()*jointRange);
             }
+         }
+      });
+      
+      sliderBoardMode.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            System.out.println("SliderBoardMode: " + sliderBoardMode.getEnumValue().toString());
+            sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
          }
       });
    }
