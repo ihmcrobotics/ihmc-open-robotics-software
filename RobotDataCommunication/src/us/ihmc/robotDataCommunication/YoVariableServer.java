@@ -210,9 +210,10 @@ public class YoVariableServer implements RobotVisualizer
       FullStateBuffer buffer = mainBuffer.next();
       if(buffer != null)
       {
-         buffer.update(timestamp, ++uid);
+         buffer.update(timestamp, uid);
          mainBuffer.commit();
       }
+      uid++;
    }
    
    public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
