@@ -90,6 +90,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    private final FramePoint2d centroidOfUpcomingFootstep = new FramePoint2d();
    private final FramePoint2d centroidOfPreviousFootstep = new FramePoint2d();
+   private final FramePoint2d centroidOfFootstepToConsider = new FramePoint2d();
 
    private boolean useTwoCMPsPerSupport = false;
    private boolean useExitCMPOnToesForSteppingDown = false;
@@ -443,21 +444,21 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       if (useTwoCMPsPerSupport)
       {
          if (centroidInSoleFrameOfPreviousSupportFoot != null)
-            cmp2d.setIncludingFrame(centroidInSoleFrameOfPreviousSupportFoot);
+            centroidOfFootstepToConsider.setIncludingFrame(centroidInSoleFrameOfPreviousSupportFoot);
          else
-            cmp2d.setToZero(soleFrame);
-         cmp2d.changeFrameAndProjectToXYPlane(soleFrame);
+            centroidOfFootstepToConsider.setToZero(soleFrame);
+         centroidOfFootstepToConsider.changeFrameAndProjectToXYPlane(soleFrame);
 
          if (previousLateCMP != null)
          {
             previousLateCMP.getFrameTuple2dIncludingFrame(previousExitCMP2d);
             previousExitCMP2d.changeFrameAndProjectToXYPlane(soleFrame);
             // Choose the laziest option
-            if (Math.abs(previousExitCMP2d.getX()) < Math.abs(cmp2d.getX()))
-               cmp2d.set(previousExitCMP2d);
+            if (Math.abs(previousExitCMP2d.getX()) < Math.abs(centroidOfFootstepToConsider.getX()))
+               centroidOfFootstepToConsider.set(previousExitCMP2d);
          }
 
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, entryCMPUserOffsets.get(robotSide), minForwardEntryCMPOffset.getDoubleValue(), maxForwardEntryCMPOffset.getDoubleValue());
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfFootstepToConsider, entryCMPUserOffsets.get(robotSide), minForwardEntryCMPOffset.getDoubleValue(), maxForwardEntryCMPOffset.getDoubleValue());
       }
       else
       {
@@ -510,10 +511,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private void computeExitCMP(FramePoint exitCMPToPack, RobotSide robotSide, ReferenceFrame soleFrame, FramePoint2d centroidInSoleFrameOfUpcomingSupportFoot)
    {
       if (centroidInSoleFrameOfUpcomingSupportFoot != null)
-         cmp2d.setIncludingFrame(centroidInSoleFrameOfUpcomingSupportFoot);
+         centroidOfFootstepToConsider.setIncludingFrame(centroidInSoleFrameOfUpcomingSupportFoot);
       else
-         cmp2d.setToZero(soleFrame);
-      cmp2d.changeFrameAndProjectToXYPlane(soleFrame);
+         centroidOfFootstepToConsider.setToZero(soleFrame);
+      centroidOfFootstepToConsider.changeFrameAndProjectToXYPlane(soleFrame);
+
+      boolean putCMPOnToes = false;
 
       if (useExitCMPOnToesForSteppingDown)
       {
@@ -526,46 +529,43 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
             soleToSoleFrameVector.changeFrame(worldFrame);
             boolean isSteppingDownEnough = soleToSoleFrameVector.getZ() < - footstepHeightThresholdToPutExitCMPOnToes.getDoubleValue();
 
-            if (isSteppingForwardEnough && isSteppingDownEnough)
-               putExitCMPOnToes(robotSide);
-            else
-               constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide), minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
-         }
-         else
-         {
-            constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide), minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
+            putCMPOnToes = isSteppingForwardEnough && isSteppingDownEnough;
          }
       }
+
+      if (putCMPOnToes)
+         putExitCMPOnToes(cmp2d);
       else
-      {
-         constrainCMPAccordingToSupportPolygonAndUserOffsets(robotSide, exitCMPUserOffsets.get(robotSide), minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
-      }
+         constrainCMPAccordingToSupportPolygonAndUserOffsets(cmp2d, centroidOfFootstepToConsider, exitCMPUserOffsets.get(robotSide), minForwardExitCMPOffset.getDoubleValue(), maxForwardExitCMPOffset.getDoubleValue());
 
       exitCMPToPack.setXYIncludingFrame(cmp2d);
       exitCMPToPack.changeFrame(worldFrame);
    }
 
-   private void putExitCMPOnToes(RobotSide robotSide)
+   private void putExitCMPOnToes(FramePoint2d exitCMPToPack)
    {
       // Set x to have the CMP slightly inside the support polygon
-      cmp2d.setX(tempSupportPolygon.getMaxX() - 1.0e-4);
-      cmp2d.setY(tempSupportPolygon.getCentroid().getY());
+      exitCMPToPack.setToZero(tempSupportPolygon.getReferenceFrame());
+      exitCMPToPack.setX(tempSupportPolygon.getMaxX() - 1.0e-4);
+      exitCMPToPack.setY(tempSupportPolygon.getCentroid().getY());
 
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue());
-      tempSupportPolygon.orthogonalProjection(cmp2d);
+      tempSupportPolygon.orthogonalProjection(exitCMPToPack);
    }
 
-   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(RobotSide robotSide, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
+   private void constrainCMPAccordingToSupportPolygonAndUserOffsets(FramePoint2d cmpToPack, FramePoint2d centroidOfFootstepToConsider, YoFrameVector2d cmpOffset, double minForwardCMPOffset, double maxForwardCMPOffset)
    {
       // First constrain the computed CMP to the given min/max along the x-axis.
-      double cmpX = stepLengthToCMPOffsetFactor.getDoubleValue() * cmp2d.getX() + cmpOffset.getX();
-      cmp2d.setX(tempSupportPolygon.getCentroid().getX() + MathTools.clipToMinMax(cmpX, minForwardCMPOffset, maxForwardCMPOffset));
-      cmp2d.setY(tempSupportPolygon.getCentroid().getY() + cmpOffset.getY());
+      double cmpXOffsetFromCentroid = stepLengthToCMPOffsetFactor.getDoubleValue() * centroidOfFootstepToConsider.getX() + cmpOffset.getX();
+      cmpXOffsetFromCentroid = MathTools.clipToMinMax(cmpXOffsetFromCentroid, minForwardCMPOffset, maxForwardCMPOffset);
+
+      cmpToPack.setIncludingFrame(tempSupportPolygon.getCentroid());
+      cmpToPack.add(cmpXOffsetFromCentroid, cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region
       tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdges.getDoubleValue());
-      tempSupportPolygon.orthogonalProjection(cmp2d);
+      tempSupportPolygon.orthogonalProjection(cmpToPack);
    }
 
    public ArrayList<YoFramePoint> getEntryCMPs()
