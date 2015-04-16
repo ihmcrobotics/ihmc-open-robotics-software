@@ -12,6 +12,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
@@ -98,32 +99,7 @@ public class WalkControllerSliderBoard
       
       if(drcRobotModel != null)
       {
-         sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
-         
-         SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
-          //This currently assumes you don't have more than 8 actuatable finger joints per hand. Going to change this anyways.
-         
-         for(RobotSide side : RobotSide.values())
-         { 
-            int i = 0;
-            for(String actuatableFingerJointName : actuatableFingerJoints.get(side).keySet())
-            {
-               //TODO: Fix limits, get them from somewhere so each robot can have their own.
-               sliderBoardConfigurationManager.setSlider(++i,actuatableFingerJointName + CommonNames.q_d.toString(), registry, 
-                     actuatableFingerJoints.get(side).get(actuatableFingerJointName).first(), actuatableFingerJoints.get(side).get(actuatableFingerJointName).second());
-            }
-            
-            if(side==RobotSide.LEFT)
-            {
-               sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.LeftHandGrasping.toString());
-            }
-            else
-            {
-               sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.RightHandGrasping.toString());
-            }
-            
-            sliderBoardConfigurationManager.clearControls();
-         }
+         setupGraspingSliders(sliderBoardConfigurationManager, sliderBoardMode, drcRobotModel, registry);
       }
 
       //default
@@ -134,7 +110,8 @@ public class WalkControllerSliderBoard
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-               sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
+            System.out.println("SliderBoardMode: " + sliderBoardMode.getEnumValue().toString());
+            sliderBoardConfigurationManager.loadConfiguration(sliderBoardMode.getEnumValue().toString());
          }
       };
 
@@ -142,6 +119,52 @@ public class WalkControllerSliderBoard
       listener.variableChanged(null);
 
    }
+   
+   private void setupGraspingSliders(final SliderBoardConfigurationManager sliderBoardConfigurationManager, final EnumYoVariable<SliderBoardMode> sliderBoardMode, 
+         final DRCRobotModel drcRobotModel, final YoVariableRegistry registry)
+   {
+      sliderBoardConfigurationManager.setKnob(1, sliderBoardMode, 0, sliderBoardMode.getEnumValues().length-1);
+      final DoubleYoVariable leftGraspPercentage = new DoubleYoVariable("LeftHandGraspPercentage", registry);
+      final DoubleYoVariable rightGraspPercentage = new DoubleYoVariable("RightHandGraspPercentage", registry);
+      
+      final SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = drcRobotModel.getActuatableFingerJointNames();
+      
+      sliderBoardConfigurationManager.setSlider(1, leftGraspPercentage, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(2, rightGraspPercentage, 0.0, 1.0);
+      
+      sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.Grasping.toString());
+      sliderBoardConfigurationManager.clearControls();
+      
+      leftGraspPercentage.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            for(String actuatableFingerJointName : actuatableFingerJoints.get(RobotSide.LEFT).keySet())
+            {
+               double jointRange = actuatableFingerJoints.get(RobotSide.LEFT).get(actuatableFingerJointName).second()-
+                     actuatableFingerJoints.get(RobotSide.LEFT).get(actuatableFingerJointName).first();
+               DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(actuatableFingerJointName + CommonNames.q_d.toString());
+               desiredAngle.set(leftGraspPercentage.getDoubleValue()*jointRange);
+            }
+         }
+      });
+      
+      rightGraspPercentage.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            for(String actuatableFingerJointName : actuatableFingerJoints.get(RobotSide.RIGHT).keySet())
+            {
+               double jointRange = actuatableFingerJoints.get(RobotSide.RIGHT).get(actuatableFingerJointName).second()-
+                     actuatableFingerJoints.get(RobotSide.RIGHT).get(actuatableFingerJointName).first();
+               DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(actuatableFingerJointName + CommonNames.q_d.toString());
+               desiredAngle.set(rightGraspPercentage.getDoubleValue()*jointRange);
+            }
+         }
+      });
+   }
 
-   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration, LeftHandGrasping, RightHandGrasping};
+   private enum SliderBoardMode {WalkingGains, WalkingDesireds, TerrainExploration, Grasping};
 }
