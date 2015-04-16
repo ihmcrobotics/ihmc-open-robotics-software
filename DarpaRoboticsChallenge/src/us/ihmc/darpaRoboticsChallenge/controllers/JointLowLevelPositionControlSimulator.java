@@ -33,7 +33,7 @@ public class JointLowLevelPositionControlSimulator implements RobotController
          jointController.setProportionalGain(50.0 * subtreeMass);
          jointController.setIntegralGain(35.0 * subtreeMass);
          jointController.setMaxIntegralError(0.3);
-         jointController.setDerivativeGain(7.0 * subtreeMass);
+         jointController.setDerivativeGain(3.5 * subtreeMass);
       }
       else
       {
