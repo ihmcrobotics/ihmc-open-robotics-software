@@ -358,6 +358,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                   if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                   {
                      pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 100.0, 20.0);
+//                     pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), 1000.0, 200.0);
                   }
                   else
                   {

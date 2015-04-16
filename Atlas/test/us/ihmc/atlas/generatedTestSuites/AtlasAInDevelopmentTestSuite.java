@@ -7,7 +7,9 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.ToBeMovedOrDeletedWholeBodyIkSolverTest.class
+   us.ihmc.atlas.AtlasGFERosPacketTest.class,
+   us.ihmc.atlas.AtlasMultiContactTest.class,
+   us.ihmc.atlas.AtlasPushRecoveryMultiStepTest.class
 })
 
 public class AtlasAInDevelopmentTestSuite

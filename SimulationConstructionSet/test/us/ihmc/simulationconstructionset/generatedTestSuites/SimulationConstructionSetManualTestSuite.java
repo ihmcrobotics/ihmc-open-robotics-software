@@ -7,8 +7,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcherClientTest.class,
-   us.ihmc.simulationconstructionset.SimulationConstructionSetTest.class
+   us.ihmc.simulationconstructionset.SimulationConstructionSetTest.class,
+   us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcherClientTest.class
 })
 
 public class SimulationConstructionSetManualTestSuite

@@ -7,8 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.atlas.packets.wholebody.AtlasWholeBodyTrajectoryPacketTest.class,
-   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class
+   us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseRampsTest.class
 })
 
 public class AtlasHFastTestSuite
