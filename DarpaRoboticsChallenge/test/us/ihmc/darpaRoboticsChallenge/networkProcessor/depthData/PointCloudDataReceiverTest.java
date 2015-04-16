@@ -100,7 +100,7 @@ public abstract class PointCloudDataReceiverTest implements MultiRobotTestInterf
       
       DRCObstacleCourseStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface = new DRCWallAtDistanceEnvironment(WALL_DISTANCE);
-      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel(), drcNetworkModuleParameters);
+      testHelper = new DRCSimulationTestHelper(commonAvatarEnvironmentInterface, getClass().getSimpleName(), null, startingLocation, simulationTestingParameters, getRobotModel(), drcNetworkModuleParameters, null);
       testHelper.setupCameraForUnitTest(new Point3d(1.8375, -0.16, 0.89), new Point3d(1.10, 8.30, 1.37));
 
       testHelper.simulateAndBlockAndCatchExceptions(1.1); // Wait for sim to initialize
