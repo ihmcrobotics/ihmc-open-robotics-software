@@ -76,7 +76,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    public static final double POSITION_THRESHOLD = 0.01;
    public static final double ORIENTATION_THRESHOLD = 0.03;
    public static final double JOINT_POSITION_THRESHOLD = 0.05;
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -98,8 +98,10 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
          armJointIndices.put(armJointNames[i], i);
       }
       
-      SDFRobot robot = drcSimulationTestHelper.getRobot();      
-      LockPelvisController controller = new LockPelvisController(robot, drcSimulationTestHelper.getSimulationConstructionSet(), getRobotModel().createFullRobotModel(), 0.0);
+      SDFRobot robot = drcSimulationTestHelper.getRobot();
+      
+      double robotFloatingHeight = 0.1;
+      LockPelvisController controller = new LockPelvisController(robot, drcSimulationTestHelper.getSimulationConstructionSet(), drcSimulationTestHelper.getSDFFullRobotModel(), robotFloatingHeight);
       robot.setController(controller);
       controller.initialize();
    }
@@ -130,13 +132,13 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    }
 	
    private double[] getCurrentArmPose(RobotSide robotSide)
-   {
+   {      
       double[] armPose = new double[numberOfArmJoints];
 
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
          ArmJointName jointName = armJointNames[jointNum];
-         double currentAngle = drcSimulationTestHelper.getSDFFullRobotModel().getArmJoint(robotSide, jointName).getQ();
+         double currentAngle = drcSimulationTestHelper.getControllerFullRobotModel().getArmJoint(robotSide, jointName).getQ();
          armPose[jointNum] = currentAngle;
       }
 
