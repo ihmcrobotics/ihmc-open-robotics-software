@@ -56,6 +56,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
    protected final OneDoFJoint[] positionControlJoints;
+   protected final OneDoFJoint[] allOneDoFjoints;
 
    protected final FullRobotModel fullRobotModel;
    protected final MomentumBasedController momentumBasedController;
@@ -97,6 +98,8 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       feet = momentumBasedController.getContactableFeet();
       handPalms = momentumBasedController.getContactableHands();
+
+      allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
       this.pelvisOrientationManager = variousWalkingManagers.getPelvisOrientationManager();
       this.pelvisICPBasedTranslationManager = variousWalkingManagers.getPelvisICPBasedTranslationManager();

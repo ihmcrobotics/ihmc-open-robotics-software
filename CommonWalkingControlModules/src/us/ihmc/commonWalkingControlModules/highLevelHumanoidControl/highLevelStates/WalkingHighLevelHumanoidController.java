@@ -448,6 +448,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredICP.setByProjectionOntoXYPlane(capturePoint);
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
+
+      for (int i = 0; i < allOneDoFjoints.length; i++)
+         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
    }
 
    public void initializeDesiredHeightToCurrent()
