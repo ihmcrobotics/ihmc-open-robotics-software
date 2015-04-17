@@ -161,4 +161,12 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
+   /**
+    * Whether or not to use the hack n13.
+    * This hack consists in forcing the desired ICP to move inside the foot at the end of swing.
+    * It is terrible because it is done outside the ICP planner, the parameters are not robot agnostic, and it is buggy.
+    * Best thing to do is to switch to the new ICP planner that also provides the option to move the ICP towards the inside of the foot at the end of the swing but according to the ICP dynamics, much better. 
+    */
+   @Deprecated
+   public abstract boolean useICPPlannerHackN13();
 }

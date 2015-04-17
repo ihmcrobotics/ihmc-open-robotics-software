@@ -80,8 +80,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private static final boolean DESIREDICP_FROM_POLYGON_COORDINATE = false;
    private static final boolean CHECK_FOR_OVEREXTENSION_ON_TOE_OFF_LEG = false;
-   private static final boolean USE_ICPPLANNER_HACK_N13 = true;
-   
 
    private final static HighLevelState controllerState = HighLevelState.WALKING;
    private final static MomentumControlModuleType MOMENTUM_CONTROL_MODULE_TO_USE = MomentumControlModuleType.OPT_NULLSPACE;
@@ -149,10 +147,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final EnumYoVariable<RobotSide> previousSupportSide = new EnumYoVariable<RobotSide>("previousSupportSide", registry, RobotSide.class);
 
-   private final DoubleYoVariable moveICPAwayDuringSwingDistance = new DoubleYoVariable("moveICPAwayDuringSwingDistance", registry);
-   private final DoubleYoVariable moveICPAwayAtEndOfSwingDistance = new DoubleYoVariable("moveICPAwayAtEndOfSwingDistance", registry);
-   private final DoubleYoVariable singleSupportTimeLeftBeforeShift = new DoubleYoVariable("singleSupportTimeLeftBeforeShift", registry);
-
    private final YoFrameVector2d icpAdjustment = new YoFrameVector2d("icpAdjustment", null, registry);
 
    private final CapturePointPlannerAdapter capturePointPlannerAdapter;
@@ -173,10 +167,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final FramePoint tmpFramePoint = new FramePoint(worldFrame);
 
-   private final DoubleYoVariable swingTimeRemainingForICPMoveViz = new DoubleYoVariable("swingTimeRemainingForICPMoveViz", registry);
-   private final DoubleYoVariable amountToMoveICPAway = new DoubleYoVariable("amountToMoveICPAway", registry);
-   private final DoubleYoVariable distanceFromLineToOriginalICP = new DoubleYoVariable("distanceFromLineToOriginalICP", registry);
-   private final DoubleYoVariable percentOfSwingTimeRemainingForICPMove = new DoubleYoVariable("percentOfSwingTimeRemainingForICPMove", registry);
 
    private final DoubleYoVariable controlledCoMHeightAcceleration;
 
@@ -210,6 +200,23 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
+
+   @Deprecated
+   private final BooleanYoVariable useICPPlannerHackN13 = new BooleanYoVariable("useICPPlannerHackN13", registry);
+   @Deprecated
+   private final DoubleYoVariable amountToMoveICPAway = new DoubleYoVariable("amountToMoveICPAway", registry);
+   @Deprecated
+   private final DoubleYoVariable percentOfSwingTimeRemainingForICPMove = new DoubleYoVariable("percentOfSwingTimeRemainingForICPMove", registry);
+   @Deprecated
+   private final DoubleYoVariable distanceFromLineToOriginalICP = new DoubleYoVariable("distanceFromLineToOriginalICP", registry);
+   @Deprecated
+   private final DoubleYoVariable swingTimeRemainingForICPMoveViz = new DoubleYoVariable("swingTimeRemainingForICPMoveViz", registry);
+   @Deprecated
+   private final DoubleYoVariable moveICPAwayDuringSwingDistance = new DoubleYoVariable("moveICPAwayDuringSwingDistance", registry);
+   @Deprecated
+   private final DoubleYoVariable moveICPAwayAtEndOfSwingDistance = new DoubleYoVariable("moveICPAwayAtEndOfSwingDistance", registry);
+   @Deprecated
+   private final DoubleYoVariable singleSupportTimeLeftBeforeShift = new DoubleYoVariable("singleSupportTimeLeftBeforeShift", registry);
 
    private final DoubleYoVariable timeICPPlannerFinishedAt;
    private final DoubleYoVariable desiredICPVelocityReductionDuration;
@@ -282,6 +289,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredICPVelocityReductionDuration.set(walkingControllerParameters.getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer());
       this.desiredICPVelocityRedutionFactor = new DoubleYoVariable("desiredICPVelocityRedutionFactor", registry);
 
+      // TODO The following is the hack N13, switch to the new planner instead of using that hack.
+      useICPPlannerHackN13.set(walkingControllerParameters.useICPPlannerHackN13());
+      moveICPAwayDuringSwingDistance.set(0.012); // 0.03);
+      moveICPAwayAtEndOfSwingDistance.set(0.04); // 0.08);
+      singleSupportTimeLeftBeforeShift.set(0.26);
+
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
@@ -333,10 +346,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
-
-      moveICPAwayDuringSwingDistance.set(0.012); // 0.03);
-      moveICPAwayAtEndOfSwingDistance.set(0.04); // 0.08);
-      singleSupportTimeLeftBeforeShift.set(0.26);
 
       if (DESIREDICP_FROM_POLYGON_COORDINATE)
       {
@@ -1782,13 +1791,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FramePoint stanceContactCentroid = new FramePoint();
 
    /**
-    * Terrible hack that needs to be reassessed
+    * Terrible hack that needs to be gone by switching to the new ICP planner and let it do its job.
     */
    @Deprecated
    private void moveICPToInsideOfFootAtEndOfSwing(RobotSide supportSide, FramePoint2d upcomingFootstepLocation, double swingTime, double swingTimeRemaining,
          FramePoint2d desiredICPToMove)
    {
-      if (USE_ICPPLANNER_HACK_N13)
+      if (useICPPlannerHackN13.getBooleanValue())
       {
          ReferenceFrame supportAnkleFrame = referenceFrames.getAnkleZUpFrame(supportSide);
 
