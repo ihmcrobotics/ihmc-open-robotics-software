@@ -35,6 +35,7 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -177,9 +178,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
    
    @Override
-   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames()
+   public LinkedHashMap<NeckJointName,Pair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
-      return jointMap.getActuatableFingerJointNames();
+      return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
+   }
+   
+   @Override
+   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   {
+      return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
 
    @Override

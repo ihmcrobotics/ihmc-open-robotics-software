@@ -19,7 +19,6 @@ import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.UpperNeckExten
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.WaistExtensor;
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.WaistLateralExtensor;
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.WaistRotator;
-import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.forcedSideDependentJointNames;
 import static us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap.jointNames;
 
 import java.util.ArrayList;
@@ -41,7 +40,6 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
-import us.ihmc.valkyrie.hands.ValkyrieActuatableFingerJoints;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -74,7 +72,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
-   private final SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> actuatableFingerJoints = new SideDependentList<LinkedHashMap<String,Pair<Double,Double>>>();
 
    public ValkyrieJointMap()
    {
@@ -85,7 +82,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       
       for (RobotSide robotSide : RobotSide.values)
       {
-         String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
+         String[] forcedSideJointNames = ValkyrieOrderedJointMap.forcedSideDependentJointNames.get(robotSide);
          legJointNames.put(forcedSideJointNames[LeftHipRotator], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
          legJointNames.put(forcedSideJointNames[LeftHipAdductor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
          legJointNames.put(forcedSideJointNames[LeftHipExtensor], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
@@ -108,13 +105,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
           limbNames.put(prefix + "Palm", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          limbNames.put(prefix + "UpperFoot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
-         
-         actuatableFingerJoints.put(robotSide, new LinkedHashMap<String,Pair<Double,Double>>());
-         
-         for(ValkyrieActuatableFingerJoints joint : ValkyrieActuatableFingerJoints.values())
-         {
-            actuatableFingerJoints.get(robotSide).put(robotSide.getCamelCaseNameForMiddleOfExpression() + joint.toString(), new Pair<Double,Double>(ValkyrieActuatableFingerJoints.getUnBentPositionLimit(joint), ValkyrieActuatableFingerJoints.getFullyBentPositionLimit(joint)));
-         }
       }
 
       spineJointNames.put(jointNames[WaistRotator], SpineJointName.SPINE_YAW);
@@ -382,10 +372,5 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       };
       
       return ret;
-   }
-   
-   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames()
-   {
-      return actuatableFingerJoints;
    }
 }
