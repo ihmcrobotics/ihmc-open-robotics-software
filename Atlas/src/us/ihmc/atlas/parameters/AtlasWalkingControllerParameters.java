@@ -1,5 +1,7 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.LinkedHashMap;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -11,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -931,6 +934,24 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double pelvisToAnkleThresholdForWalking()
    {
       return 0.623;
+   }
+   
+   @Override
+   public boolean controlHeadAndHandsWithSliders()
+   {
+      return false;
+   }
+
+   @Override
+   public SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   {
+      return new SideDependentList<LinkedHashMap<String, Pair<Double,Double>>>();
+   }
+
+   @Override
+   public LinkedHashMap<NeckJointName, Pair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
+   {
+      return new LinkedHashMap<NeckJointName, Pair<Double,Double>>();
    }
 
    /** {@inheritDoc} */
