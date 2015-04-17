@@ -38,8 +38,8 @@ dependencies {
     compile project(':DarpaRoboticsChallenge')
     testCompile project(':DarpaRoboticsChallenge').sourceSets.test.output
     testCompile project(':CommonWalkingControlModules').sourceSets.test.output
-    runtime project(':IHMCHumanoidOperatorInterface')
     testCompile project(':IHMCHumanoidOperatorInterface').sourceSets.test.output
+    compile project(':IHMCHumanoidOperatorInterface')
     testCompile project(':IHMCWholeBodyController').sourceSets.test.output
     compile project(':IHMCCommunication')
     testCompile project(':IHMCCommunication').sourceSets.test.output
