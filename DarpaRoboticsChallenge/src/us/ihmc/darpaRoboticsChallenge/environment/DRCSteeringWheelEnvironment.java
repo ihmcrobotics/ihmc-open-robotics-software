@@ -48,6 +48,11 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
          i++;
       }
    }
+   
+   public DRCSteeringWheelEnvironment(Point3d wheelLocation, double valveYaw_degrees, double valvePitch_degrees)
+   {
+      this(wheelLocation.x, wheelLocation.y, wheelLocation.z, valveYaw_degrees, valvePitch_degrees);
+   }
 
    public DRCSteeringWheelEnvironment(double valveX, double valveY, double valveZ, double valveYaw_degrees, double valvePitch_degrees)
    {
