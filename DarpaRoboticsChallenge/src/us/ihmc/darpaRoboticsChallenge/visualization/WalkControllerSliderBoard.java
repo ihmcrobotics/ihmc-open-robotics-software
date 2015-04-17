@@ -165,7 +165,7 @@ public class WalkControllerSliderBoard
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).second() - 
                      sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first();
                DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch));
-               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange);
+               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first());
             }
          });
       }
@@ -181,7 +181,7 @@ public class WalkControllerSliderBoard
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).second() - 
                      sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first();
                DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch));
-               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange);
+               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first());
             }
          });
       }
@@ -197,7 +197,7 @@ public class WalkControllerSliderBoard
                double jointRange = sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).second() - 
                      sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first();
                DoubleYoVariable desiredAngle = (DoubleYoVariable) registry.getVariable(drcRobotModel.getJointMap().getNeckJointName(upperHeadPitch));
-               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange);
+               desiredAngle.set(upperHeadPitchPercentage.getDoubleValue()*jointRange - sliderBoardControlledNeckJointsWithLimits.get(upperHeadPitch).first());
             }
          });
       }
