@@ -314,7 +314,7 @@ public abstract class WholeBodyTrajectoryTest
 
       scs.applyDataProcessingFunction(robotAllJointsDataChecker);
 
-      assertFalse(robotAllJointsDataChecker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasDerivativeComparisonErrorOccurredAnyJoint());
       assertFalse(robotAllJointsDataChecker.hasMaxDerivativeExeededAnyJoint());
      // assertFalse(robotAllJointsDataChecker.hasMaxSecondDerivativeExeededAnyJoint());
       assertFalse(robotAllJointsDataChecker.hasMaxValueExeededAnyJoint());
@@ -429,7 +429,7 @@ public abstract class WholeBodyTrajectoryTest
 
       scs.applyDataProcessingFunction(robotAllJointsDataChecker);
 
-      assertFalse(robotAllJointsDataChecker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(robotAllJointsDataChecker.hasDerivativeComparisonErrorOccurredAnyJoint());
       assertFalse(robotAllJointsDataChecker.hasMaxDerivativeExeededAnyJoint());
     //  assertFalse(robotAllJointsDataChecker.hasMaxSecondDerivativeExeededAnyJoint());
       assertFalse(robotAllJointsDataChecker.hasMaxValueExeededAnyJoint());

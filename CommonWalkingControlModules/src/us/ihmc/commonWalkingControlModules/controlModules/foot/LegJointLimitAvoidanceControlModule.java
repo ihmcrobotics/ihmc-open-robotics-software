@@ -5,6 +5,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.kinematics.DdoglegInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.InverseKinematicsCalculator;
@@ -15,7 +16,12 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.*;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicPosition;
+import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
+import us.ihmc.yoUtilities.graphics.YoGraphicVector;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
+import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 /**
  * Created by agrabertilton on 4/13/15.
@@ -24,6 +30,8 @@ public class LegJointLimitAvoidanceControlModule
 {
    private static final int maxIterationsForIK = 8;
    private static final boolean translationFixOnly = true;
+   private boolean visualize = true;
+   private boolean enableCorrection = false;
 
    private static final double lambdaLeastSquares = 0.000001;
    private static final double tolerance = 1.0e-8;
@@ -43,10 +51,17 @@ public class LegJointLimitAvoidanceControlModule
    private DoubleYoVariable[] originalDesiredPositions;
    private DoubleYoVariable[] alphas;
    private DoubleYoVariable[] adjustedDesiredPositions;
+   private DoubleYoVariable[] lowerLimits;
+   private DoubleYoVariable[] upperLimits;
    private YoFramePose originalDesiredYoPose;
    private FramePose originalDesiredPose;
+   private FramePoint adjustedDesiredPosition;
+   private FrameOrientation adjustedDesiredOrientation;
    private YoFramePose adjustedDesiredPose;
    private RigidBodyTransform desiredTransform;
+   private YoFrameVector originalDesiredLinearVelocity;
+   private YoFrameVector adjustedDesiredLinearVelocity;
+
 
    private final LinearSolver<DenseMatrix64F> solver;
    private final DenseMatrix64F jacobianMatrix;
@@ -61,32 +76,44 @@ public class LegJointLimitAvoidanceControlModule
    private final DenseMatrix64F jointVelocities;
    private final DenseMatrix64F adjustedDesiredVelocity;
 
-   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, FullRobotModel fullRobotModel, RobotSide robotSide){
-      robotModel = fullRobotModel;
+   private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
+
+   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, MomentumBasedController momentumBasedController, RobotSide robotSide)
+   {
+      robotModel = momentumBasedController.getFullRobotModel();
       base = robotModel.getPelvis();
       RigidBody foot = robotModel.getFoot(robotSide);
       robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
       ikJoints = ScrewTools.filterJoints(ScrewTools.cloneJointPath(robotJoints), OneDoFJoint.class);
-      jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length-1].getSuccessor().getBodyFixedFrame());
+      jacobian = new GeometricJacobian(ikJoints, ikJoints[ikJoints.length - 1].getSuccessor().getBodyFixedFrame());
 
-      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize, minRandomSearchScalar, maxRandomSearchScalar);
-      inverseKinematicsCalculator.setLimitJointAngles(false);
+      inverseKinematicsCalculator = new NumericalInverseKinematicsCalculator(jacobian, lambdaLeastSquares, tolerance, maxIterationsForIK, maxStepSize,
+              minRandomSearchScalar, maxRandomSearchScalar);
+      inverseKinematicsCalculator.setLimitJointAngles(true);
 
       numJoints = ikJoints.length;
       {
          originalDesiredPositions = new DoubleYoVariable[numJoints];
          alphas = new DoubleYoVariable[numJoints];
          adjustedDesiredPositions = new DoubleYoVariable[numJoints];
-         for (int i = 0; i < numJoints; i++){
-            originalDesiredPositions[i] = new DoubleYoVariable(prefix+ "originalDesiredPositions" +i, registry);
-            alphas[i] = new DoubleYoVariable(prefix + "alpha"+ i, registry);
-            adjustedDesiredPositions[i] = new DoubleYoVariable(prefix + "adjustedDesiredPositions" +i, registry);
+         lowerLimits = new DoubleYoVariable[numJoints];
+         upperLimits = new DoubleYoVariable[numJoints];
+
+         for (int i = 0; i < numJoints; i++)
+         {
+            originalDesiredPositions[i] = new DoubleYoVariable(prefix + "originalDesiredPositions" + i, registry);
+            alphas[i] = new DoubleYoVariable(prefix + "alpha" + i, registry);
+            adjustedDesiredPositions[i] = new DoubleYoVariable(prefix + "adjustedDesiredPositions" + i, registry);
+            lowerLimits[i] = new DoubleYoVariable(prefix + "lowerLimits" + i, registry);
+            upperLimits[i] = new DoubleYoVariable(prefix + "upperLimits" + i, registry);
          }
 
          originalDesiredPose = new FramePose();
-         originalDesiredYoPose = new YoFramePose(prefix+"originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
-         adjustedDesiredPose = new YoFramePose(prefix+"adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
+         originalDesiredYoPose = new YoFramePose(prefix + "originalDesiredYoPose", ReferenceFrame.getWorldFrame(), registry);
+         adjustedDesiredPose = new YoFramePose(prefix + "adjustedDesiredPose", ReferenceFrame.getWorldFrame(), registry);
          desiredTransform = new RigidBodyTransform();
+         adjustedDesiredPosition = new FramePoint(ReferenceFrame.getWorldFrame());
+         adjustedDesiredOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
       }
 
       percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
@@ -102,80 +129,124 @@ public class LegJointLimitAvoidanceControlModule
 
       solver = LinearSolverFactory.leastSquares(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       translationSelectionMatrix = new DenseMatrix64F(3, SpatialMotionVector.SIZE);
-      translationSelectionMatrix.set(0,3, 1.0);
-      translationSelectionMatrix.set(1,4, 1.0);
-      translationSelectionMatrix.set(2,5, 1.0);
+      translationSelectionMatrix.set(0, 3, 1.0);
+      translationSelectionMatrix.set(1, 4, 1.0);
+      translationSelectionMatrix.set(2, 5, 1.0);
 
       allSelectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      allSelectionMatrix.set(5,5, 1.0);
+      allSelectionMatrix.set(5, 5, 1.0);
 
       originalDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
       intermediateResult = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
       jointVelocities = new DenseMatrix64F(numJoints, 1);
       adjustedDesiredVelocity = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+
+      originalDesiredLinearVelocity = new YoFrameVector(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+      adjustedDesiredLinearVelocity = new YoFrameVector(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      if (visualize)
+      {
+         yoDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "DesiredFootPosition", originalDesiredYoPose.getPosition(), 0.025,
+                 YoAppearance.Yellow(), YoGraphicPosition.GraphicType.BALL);
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoDesiredFootPositionGraphic);
+         yoCorrectedDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "CorrectedDesiredFootPosition", adjustedDesiredPose.getPosition(), 0.025,
+                 YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL);
+         yoGraphicsListRegistry.registerYoGraphic("SingularityCollapseAvoidance", yoCorrectedDesiredFootPositionGraphic);
+      }
+      else
+      {
+         yoDesiredFootPositionGraphic = null;
+         yoCorrectedDesiredFootPositionGraphic = null;
+      }
    }
 
    public void correctSwingFootTrajectory(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocityOfOrigin,
-                                          FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
+           FrameVector desiredAngularVelocity, FrameVector desiredLinearAccelerationOfOrigin, FrameVector desiredAngularAcceleration)
 
    {
-      //update joint positions in the ikJoints to the current positions
+      // update joint positions in the ikJoints to the current positions
       updateJointPositions();
 
       Twist rootJointTist = new Twist();
       robotModel.getRootJoint().packJointTwist(rootJointTist);
       FrameVector linearRootJointVelocity = new FrameVector();
       rootJointTist.packLinearPart(linearRootJointVelocity);
-      
+
       linearRootJointVelocity.scale(0.004);
 
       originalDesiredPose.setPose(desiredPosition, desiredOrientation);
       originalDesiredYoPose.set(originalDesiredPose);
       originalDesiredPose.changeFrame(jacobian.getBaseFrame());
-//      originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
+
+//    originalDesiredPose.translate(linearRootJointVelocity.getX(), linearRootJointVelocity.getY(), linearRootJointVelocity.getZ());
       originalDesiredPose.getPose(desiredTransform);
       originalDesiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-//      if (translationFixOnly){
-//         inverseKinematicsCalculator.setSelectionMatrix(translationSelectionMatrix);
-//      }else{
-//         inverseKinematicsCalculator.setSelectionMatrix(allSelectionMatrix);
-//      }
-      inverseKinematicsCalculator.solve(desiredTransform); //sets the qs of the one-dof ikJoints
-//      adjust joints based on joint angle limits
+//    if (translationFixOnly){
+//       inverseKinematicsCalculator.setSelectionMatrix(translationSelectionMatrix);
+//    }else{
+//       inverseKinematicsCalculator.setSelectionMatrix(allSelectionMatrix);
+//    }
+      inverseKinematicsCalculator.solve(desiredTransform);    // sets the qs of the one-dof ikJoints
+
+//    adjust joints based on joint angle limits
       adjustJointPositions();
 
-      //calculate the new desired position and orientation
+      // calculate the new desired position and orientation
       ikJoints[0].updateFramesRecursively();
       RigidBodyTransform newFootTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(jacobian.getBaseFrame());
       RigidBodyTransform footInWorldTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
       ReferenceFrame adjustedFootFrame = jacobian.getEndEffectorFrame();
 
-      desiredPosition.setToZero(adjustedFootFrame);
-      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredOrientation.setToZero(adjustedFootFrame);
-      desiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      adjustedDesiredPose.setPosition(desiredPosition);
+      adjustedDesiredPosition.setToZero(adjustedFootFrame);
+      adjustedDesiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      adjustedDesiredOrientation.setToZero(adjustedFootFrame);
+      adjustedDesiredOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      adjustedDesiredPose.setPosition(adjustedDesiredPosition);
+
       if (!translationFixOnly)
       {
-         adjustedDesiredPose.setOrientation(desiredOrientation);
+         adjustedDesiredPose.setOrientation(adjustedDesiredOrientation);
       }
 
-      //calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
+      if (enableCorrection)
+      {
+         desiredPosition.set(adjustedDesiredPosition);
+
+         if (!translationFixOnly)
+         {
+            desiredOrientation.set(adjustedDesiredOrientation);
+         }
+      }
+
+      // calculate the adjusted joint velocities using the alphas, then calculate the adjusted velocities
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredAngularVelocity.getVector(), 0, 0);
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredLinearVelocityOfOrigin.getVector(), 3, 0);
       calculateAdjustedVelocities();
       double[] adjustedVelocities = adjustedDesiredVelocity.getData();
-      if (!translationFixOnly)
+      if (enableCorrection)
       {
-         desiredAngularVelocity.set(adjustedVelocities[0], adjustedVelocities[1], adjustedVelocities[2]);
+         if (!translationFixOnly)
+         {
+            desiredAngularVelocity.set(adjustedVelocities[0], adjustedVelocities[1], adjustedVelocities[2]);
+         }
+
+         desiredLinearVelocityOfOrigin.set(adjustedVelocities[3], adjustedVelocities[4], adjustedVelocities[5]);
       }
-      desiredLinearVelocityOfOrigin.set(adjustedVelocities[3], adjustedVelocities[4], adjustedVelocities[5]);
+
+      if (visualize)
+      {
+         yoDesiredFootPositionGraphic.showGraphicObject();
+         yoCorrectedDesiredFootPositionGraphic.showGraphicObject();
+      }
    }
 
-   private void updateJointPositions(){
-      for (int i = 0; i < numJoints; i++){
+   private void updateJointPositions()
+   {
+      for (int i = 0; i < numJoints; i++)
+      {
          ikJoints[i].setQ(robotJoints[i].getQ());
       }
    }
@@ -188,32 +259,39 @@ public class LegJointLimitAvoidanceControlModule
       double midpointOfLimits;
       double range;
       double rangePercentageForThreshold = percentJointRangeForThreshold.getDoubleValue();
-      double lambda = 1- rangePercentageForThreshold;
+      double lambda = 1 - rangePercentageForThreshold;
 
-      for (int i = 0; i < size; i++){
+      for (int i = 0; i < size; i++)
+      {
          lowerLimit = ikJoints[i].getJointLimitLower();
          upperLimit = ikJoints[i].getJointLimitUpper();
+         lowerLimits[i].set(lowerLimit);
+         upperLimits[i].set(upperLimit);
          midpointOfLimits = (lowerLimit + upperLimit) / 2;
          range = upperLimit - lowerLimit;
 
          originalDesiredPositions[i].set(ikJoints[i].getQ());
-         double comparisonValue = Math.abs(2* (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range); //should range between -1 and 1, which are the limits
+         double comparisonValue = Math.abs(2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range);    // should range between -1 and 1, which are the limits
          comparisonValue = Math.min(comparisonValue, 1.0);
 
          double alpha = 0;
-         if (comparisonValue > lambda){
-            alpha = Math.max(0.0, (comparisonValue - lambda)/rangePercentageForThreshold);
+         if (comparisonValue > lambda)
+         {
+            alpha = Math.max(0.0, (comparisonValue - lambda) / rangePercentageForThreshold);
          }
+
          alphas[i].set(alpha);
 
          double adjustedPosition = (1.0 - alpha) * ikJoints[i].getQ() + alpha * robotJoints[i].getQ();
+         adjustedPosition = Math.max(lowerLimit, adjustedPosition);
+         adjustedPosition = Math.min(upperLimit, adjustedPosition);
          adjustedDesiredPositions[i].set(adjustedPosition);
-         ikJoints[i].setqDesired(adjustedPosition);
+         ikJoints[i].setQ(adjustedPosition);
       }
    }
 
-   private void calculateAdjustedVelocities(){
-
+   private void calculateAdjustedVelocities()
+   {
       int numberOfConstraints = SpatialMotionVector.SIZE;
 
       updateJointPositions();
@@ -234,7 +312,8 @@ public class LegJointLimitAvoidanceControlModule
       lamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       CommonOps.setIdentity(lamdaSquaredMatrix);
       lamdaSquaredMatrix.zero();
-//      CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
+
+//    CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
 
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJaconianTransposedMatrix);
@@ -246,7 +325,8 @@ public class LegJointLimitAvoidanceControlModule
       solver.solve(originalDesiredVelocity, intermediateResult);
       CommonOps.mult(jacobianMatrixTransposed, intermediateResult, jointVelocities);
 
-      for (int i = 0; i < numJoints; i++){
+      for (int i = 0; i < numJoints; i++)
+      {
          jointVelocities.times(i, (1 - alphas[i].getDoubleValue()));
       }
 

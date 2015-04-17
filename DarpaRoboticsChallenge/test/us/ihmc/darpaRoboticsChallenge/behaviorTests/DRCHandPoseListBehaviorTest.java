@@ -584,7 +584,7 @@ public abstract class DRCHandPoseListBehaviorTest implements MultiRobotTestInter
 
       scs.applyDataProcessingFunction(checker);
       
-      assertFalse(checker.getDerivativeCompError(), checker.hasDerivativeCompErrorOccurredAnyJoint());
+      assertFalse(checker.getDerivativeCompError(), checker.hasDerivativeComparisonErrorOccurredAnyJoint());
       assertFalse(checker.getMaxDerivativeExceededError(), checker.hasMaxDerivativeExeededAnyJoint());
 //      assertFalse(checker.getMaxSecondDerivativeExceededError(), checker.hasMaxSecondDerivativeExeededAnyJoint());
       assertFalse(checker.getMaxValueExceededError(), checker.hasMaxValueExeededAnyJoint());
