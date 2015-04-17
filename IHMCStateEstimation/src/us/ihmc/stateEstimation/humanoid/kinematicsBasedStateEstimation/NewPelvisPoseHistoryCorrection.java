@@ -220,12 +220,12 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame.update();
       iterativeClosestPointInWorldFramePose.setToZero(iterativeClosestPointReferenceFrame);
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
-      ////for SCS feedback
-      yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
-      
+
+      //for feedback in the UI
       outdatedPoseUpdater.getTotalErrorTransform(totalErrorBetweenPelvisAndLocalizationTransform);
       
       ////for SCS feedback
+      yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
       totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(totalErrorTranslation);
       totalErrorTranslation_X.set(totalErrorTranslation.getX());
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
