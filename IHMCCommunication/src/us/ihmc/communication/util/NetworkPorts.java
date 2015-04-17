@@ -41,7 +41,7 @@ public class NetworkPorts
    public static final NetworkPorts MISSION_CONTROL_FIELD_SHAPER_TEST_PORT = new NetworkPorts(7043);
    public static final NetworkPorts MISSION_CONTROL_OCU_SHAPER_TEST_PORT = new NetworkPorts(7044);
 
-   public static final NetworkPorts createRandomTestPort()
+   public static NetworkPorts createRandomTestPort()
    {
       return new NetworkPorts(new Random().nextInt(65535 - 1025) + 1025);
    }
