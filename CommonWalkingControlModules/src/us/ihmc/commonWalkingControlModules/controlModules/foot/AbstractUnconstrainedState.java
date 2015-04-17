@@ -29,7 +29,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    protected final YoSE3PIDGains gains;
 
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-//   protected LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
+   protected LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
 
    private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
 
@@ -62,7 +62,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
-//      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController.getFullRobotModel(), robotSide);
+      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController.getFullRobotModel(), robotSide);
    }
 
    /**
@@ -102,10 +102,10 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       computeAndPackTrajectory();
 
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
+      {
          correctInputsAccordingToJointLimits();
-
-//      this doesn't work'
-//      legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration);
+//         legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration);
+      }
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
