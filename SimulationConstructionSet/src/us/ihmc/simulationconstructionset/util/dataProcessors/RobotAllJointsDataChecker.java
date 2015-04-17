@@ -86,7 +86,7 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       listOfCheckers.get(joint).setMaximumSecondDerivate(maximumSecondDerivative);
    }
    
-   public boolean isDerivativeCompErrorOccurred(OneDegreeOfFreedomJoint joint)
+   public boolean isDerivativeComparisonErrorOccurred(OneDegreeOfFreedomJoint joint)
    {
       return listOfCheckers.get(joint).isDerivativeCompErrorOccurred();
    }
@@ -111,11 +111,11 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       return listOfCheckers.get(joint).isMinValueExeeded();
    }
    
-   public boolean hasDerivativeCompErrorOccurredAnyJoint()
+   public boolean hasDerivativeComparisonErrorOccurredAnyJoint()
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (isDerivativeCompErrorOccurred(joint))
+         if (isDerivativeComparisonErrorOccurred(joint))
             return true;
       }
       return false;
@@ -161,11 +161,11 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
       return false;
    }
    
-   public OneDegreeOfFreedomJoint getJointWhichHasDerivativeCompError()
+   public OneDegreeOfFreedomJoint getJointWhichHasDerivativeComparisonError()
    {
       for(OneDegreeOfFreedomJoint joint : listOfCheckers.keySet())
       {
-         if (isDerivativeCompErrorOccurred(joint))
+         if (isDerivativeComparisonErrorOccurred(joint))
             return joint;
       }
       return null;
@@ -258,9 +258,9 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
    
    public String getDerivativeCompError()
    {
-      if (hasDerivativeCompErrorOccurredAnyJoint())
+      if (hasDerivativeComparisonErrorOccurredAnyJoint())
       {
-         OneDegreeOfFreedomJoint failedJoint = getJointWhichHasDerivativeCompError();
+         OneDegreeOfFreedomJoint failedJoint = getJointWhichHasDerivativeComparisonError();
          return failedJoint.getName() + " experienced a derivative computation error / discontinuity at t = " + getSimTimeDeriveCompErrorOfJoint(failedJoint) +  " seconds.";
       }
       return "";

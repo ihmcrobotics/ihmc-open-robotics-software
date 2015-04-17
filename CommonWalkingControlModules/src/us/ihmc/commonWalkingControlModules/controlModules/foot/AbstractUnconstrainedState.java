@@ -21,7 +21,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
  */
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
-   private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = false;
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
    private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
@@ -63,8 +62,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
-      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController.getFullRobotModel(),
-              robotSide);
+      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
    }
 
    /**
@@ -103,17 +101,10 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       computeAndPackTrajectory();
 
-      if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
+      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
       {
-         if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-         {
-            legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-                    desiredLinearAcceleration, desiredAngularAcceleration);
-         }
-         else
-         {
-            correctInputsAccordingToJointLimits();
-         }
+         legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+                 desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);

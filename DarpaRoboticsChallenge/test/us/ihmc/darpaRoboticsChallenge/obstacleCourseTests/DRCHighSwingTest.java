@@ -26,6 +26,8 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
+import us.ihmc.simulationconstructionset.util.dataProcessors.ValueDataCheckerParameters;
+import us.ihmc.simulationconstructionset.util.dataProcessors.YoVariableValueDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
@@ -39,6 +41,8 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 /**
  * Created by agrabertilton on 4/15/15.
@@ -95,7 +99,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       FootstepDataList footstepDataList = createFootstepsWithHighSwing();
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(25.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -108,6 +112,16 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       RobotAllJointsDataChecker checker = new RobotAllJointsDataChecker(simulationConstructionSet, drcSimulationTestHelper.getRobot());
+      ArrayList<YoVariable<?>> poseVariables = simulationConstructionSet.getVariablesThatContain("adjustedDesiredPose");
+
+      ValueDataCheckerParameters checkerParameters = new ValueDataCheckerParameters();
+      checkerParameters.setMaximumDerivative(0.1);
+      ArrayList<YoVariableValueDataChecker> dataCheckers = new ArrayList<>();
+//      for (YoVariable poseVariable: poseVariables){
+//         dataCheckers.add(new YoVariableValueDataChecker(simulationConstructionSet, poseVariable,));
+//      }
+//
+//      YoVariableValueDataChecker translationCheckerX = new YoVariableValueDataChecker()
       simulationConstructionSet.applyDataProcessingFunction(checker);
 
       assertFalse(checker.hasMaxValueExeededAnyJoint());
@@ -118,18 +132,21 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
 
    private FootstepDataList createFootstepsWithHighSwing()
    {
+      double swingHeight = 0.5;
+      double swingTime = 1.5;
+      double transferTime = 1.0;
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      FootstepDataList footstepDataList = new FootstepDataList();
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
       RotationFunctions.getQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.4, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.8, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(1.2, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(1.6, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(2.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(2.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, 0.30));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.4, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.8, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(1.2, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(1.6, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(2.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(2.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
 
 
       return footstepDataList;
