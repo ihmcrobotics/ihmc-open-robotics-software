@@ -43,6 +43,7 @@ import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -370,17 +371,22 @@ public class BonoRobotModel implements DRCRobotModel
    {
       return "STEPPR";
    }
-   
-   @Override
-   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames()
-   {
-      return new SideDependentList<LinkedHashMap<String,Pair<Double,Double>>>();
-   }
-   
 
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return null;
+   }
+   
+   @Override
+   public LinkedHashMap<NeckJointName, Pair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
+   {
+      return walkingControllerParameters.getSliderBoardControlledNeckJointsWithLimits();
+   }
+   
+   @Override
+   public SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   {
+      return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
 }
