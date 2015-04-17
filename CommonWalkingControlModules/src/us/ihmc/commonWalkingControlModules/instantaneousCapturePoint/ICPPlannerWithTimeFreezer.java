@@ -16,6 +16,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class ICPPlannerWithTimeFreezer extends ICPPlanner
 {
+   private final String namePrefix = "icpPlanner";
+
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BooleanYoVariable doTimeFreezing;
    private final BooleanYoVariable isTimeBeingFrozen;
@@ -26,7 +28,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final DoubleYoVariable freezeTimeFactor;
    private final DoubleYoVariable maxCapturePointErrorAllowedToBeginSwingPhase;
    private final DoubleYoVariable maxAllowedCapturePointErrorWithoutPartialTimeFreeze;
-   
+
    private final FramePoint tmpCapturePointPosition;
    private final FrameVector tmpCapturePointVelocity;
    
@@ -35,15 +37,15 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
-      this.timeDelay = new DoubleYoVariable("icpPlannerTimeDelayFromeFreezer", registry);
-      this.capturePointPositionError = new DoubleYoVariable("icpPlannerCapturePointPositionError", registry);
-      this.distanceToFreezeLine = new DoubleYoVariable("icpPlannerDistanceToFreezeLine", registry);
-      this.freezeTimeFactor = new DoubleYoVariable("icpPlannerFreezeTimeFactor", registry);
-      this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable("icpPlannerMaxCapturePointErrorAllowedToBeginSwingPhase", registry);
-      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable("icpPlannerMaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
-      this.previousTime = new DoubleYoVariable("icpPlannerPreviousTime", registry);
-      this.doTimeFreezing = new BooleanYoVariable("icpPlannerDoTimeFreezing", registry);
-      this.isTimeBeingFrozen = new BooleanYoVariable("icpPlannerIsTimeBeingFrozen", registry);
+      this.timeDelay = new DoubleYoVariable(namePrefix + "TimeDelayFromFreezer", registry);
+      this.capturePointPositionError = new DoubleYoVariable(namePrefix + "CapturePointPositionError", registry);
+      this.distanceToFreezeLine = new DoubleYoVariable(namePrefix + "DistanceToFreezeLine", registry);
+      this.freezeTimeFactor = new DoubleYoVariable(namePrefix + "FreezeTimeFactor", registry);
+      this.maxCapturePointErrorAllowedToBeginSwingPhase = new DoubleYoVariable(namePrefix + "MaxCapturePointErrorAllowedToBeginSwingPhase", registry);
+      this.maxAllowedCapturePointErrorWithoutPartialTimeFreeze = new DoubleYoVariable(namePrefix + "MaxAllowedCapturePointErrorWithoutTimeFreeze", registry);
+      this.previousTime = new DoubleYoVariable(namePrefix + "PreviousTime", registry);
+      this.doTimeFreezing = new BooleanYoVariable(namePrefix + "DoTimeFreezing", registry);
+      this.isTimeBeingFrozen = new BooleanYoVariable(namePrefix + "IsTimeBeingFrozen", registry);
       this.tmpCapturePointPosition = new FramePoint(worldFrame);
       this.tmpCapturePointVelocity = new FrameVector(worldFrame);
       
@@ -61,7 +63,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    public void packDesiredCapturePointPositionAndVelocity(FramePoint desiredCapturePointPositionToPack, FrameVector desiredCapturePointVelocityToPack, FramePoint currentCapturePointPosition,
          double time)
    {
-      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, time);
+      super.packDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
 
       if (doTimeFreezing.getBooleanValue())
       {
@@ -143,6 +145,12 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    public boolean getIsTimeBeingFrozen()
    {
       return isTimeBeingFrozen.getBooleanValue();
+   }
+
+   @Override
+   public boolean isDone(double time)
+   {
+      return super.isDone(getTimeWithDelay(time));
    }
 
    private double getTimeWithDelay(double time)
