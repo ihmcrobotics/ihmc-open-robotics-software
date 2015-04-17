@@ -1,5 +1,9 @@
 package us.ihmc.valkyrie.parameters;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
+import us.ihmc.utilities.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
@@ -11,6 +15,8 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
+import us.ihmc.valkyrie.hands.ValkyrieSliderBoardControlledFingerJoints;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
@@ -28,8 +34,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final double upperNeckExtensorLowerLimit = -0.0872665;
    private final double lowerNeckExtensorUpperLimit = 0.0;
    private final double lowerNeckExtensorLowerLimit = -1.5708;
+   private final double neckYawLowerLimit = -Math.PI / 3 + 0.03;
 
    private final DRCRobotJointMap jointMap;
+
+   private final LinkedHashMap<NeckJointName, Pair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, Pair<Double, Double>>();
+   private final SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, Pair<Double, Double>>>();
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -42,20 +52,38 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       this.runningOnRealRobot = runningOnRealRobot;
 
       // Genreated using ValkyrieFullRobotModelVisualizer
-      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[]
-      {
-         0.8772111323383822, -0.47056204413925823, 0.09524700476706424, 0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275,
-         0.3166524835978034, -0.48010478444326166, -0.8597095955922112, 0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0
-      });
+      RigidBodyTransform leftHandLocation = new RigidBodyTransform(new double[] { 0.8772111323383822, -0.47056204413925823, 0.09524700476706424,
+            0.11738015536007923, 1.5892231999088989E-4, 0.1986725292086453, 0.980065916600275, 0.3166524835978034, -0.48010478444326166, -0.8597095955922112,
+            0.1743525371234003, -0.13686311108389013, 0.0, 0.0, 0.0, 1.0 });
 
-      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[]
-      {
-         0.8772107606751612, -0.47056267784177724, -0.09524729695945025, 0.11738015535642271, -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021,
-         -0.3166524835989298, -0.48010546476828164, -0.8597107556492186, -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0
-      });
+      RigidBodyTransform rightHandLocation = new RigidBodyTransform(new double[] { 0.8772107606751612, -0.47056267784177724, -0.09524729695945025,
+            0.11738015535642271, -1.5509783447718197E-4, -0.19866600827375044, 0.9800672390715021, -0.3166524835989298, -0.48010546476828164,
+            -0.8597107556492186, -0.17434494349043353, -0.13686311108617974, 0.0, 0.0, 0.0, 1.0 });
 
       handPosesWithRespectToChestFrame.put(RobotSide.LEFT, leftHandLocation);
       handPosesWithRespectToChestFrame.put(RobotSide.RIGHT, rightHandLocation);
+      
+      for(RobotSide side : RobotSide.values())
+      {
+         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, Pair<Double,Double>>());
+         for(ValkyrieSliderBoardControlledFingerJoints fingerJoint : ValkyrieSliderBoardControlledFingerJoints.values())
+         {
+            sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForMiddleOfExpression() + fingerJoint.toString(), 
+                  new Pair<Double,Double>(ValkyrieSliderBoardControlledFingerJoints.getFullyExtensonPositionLimit(fingerJoint),ValkyrieSliderBoardControlledFingerJoints.getFullyFlexedPositionLimit(fingerJoint)));
+         }
+      }
+      
+      NeckJointName[] sliderBoardControlledNeckJointNames = ValkyrieSliderBoardControlledNeckJoints.getNeckJointsControlledBySliderBoard();
+      
+      for (int i = 0; i < sliderBoardControlledNeckJointNames.length; i++)
+      {
+         NeckJointName joint = sliderBoardControlledNeckJointNames[i];
+         
+         sliderBoardControlledNeckJointNamesWithLimits.put(
+               joint,
+               new Pair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
+                     .getFullyFlexedPositionLimit(joint)));
+      }
    }
 
    @Override
@@ -65,7 +93,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return runningOnRealRobot ? 3.4 : 3.3; // 3.3 seems more appropriate.
    }
 
-  @Override
+   @Override
    public SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame()
    {
       return handPosesWithRespectToChestFrame;
@@ -158,29 +186,44 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return getDefaultSwingTime();
    }
 
-  @Override
+   @Override
    public boolean isNeckPositionControlled()
    {
       return runningOnRealRobot;
    }
 
    @Override
+   public LinkedHashMap<NeckJointName, Pair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
+   {
+      return sliderBoardControlledNeckJointNamesWithLimits;
+   }
+   
+   @Override
+   public SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   {
+      return sliderBoardControlledFingerJointNamesWithLimits;
+   }
+
+   @Override
    public String[] getDefaultHeadOrientationControlJointNames()
    {
-      String[] defaultHeadOrientationControlJointNames = new String[]
+      if (!controlHeadAndHandsWithSliders())
       {
-            jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
-            jointMap.getNeckJointName(NeckJointName.NECK_YAW)
-      };
-
-      return defaultHeadOrientationControlJointNames;
+         String[] defaultHeadOrientationControlJointNames = new String[] { jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
+               jointMap.getNeckJointName(NeckJointName.NECK_YAW) };
+         return defaultHeadOrientationControlJointNames;
+      }
+      else
+      {
+         return new String[] {};
+      }
    }
 
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      String[] defaultChestOrientationControlJointNames = new String[] {jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-              jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)};
+      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
 
       return defaultChestOrientationControlJointNames;
    }
@@ -188,13 +231,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getNeckPitchUpperLimit()
    {
-      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit;    // 1.14494;
+      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit; // 1.14494;
    }
 
    @Override
    public double getNeckPitchLowerLimit()
    {
-      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit;    // -0.602139;
+      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit; // -0.602139;
    }
 
    @Override
@@ -207,6 +250,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public double getHeadRollLimit()
    {
       return Math.PI / 4.0;
+   }
+
+   @Override
+   public boolean controlHeadAndHandsWithSliders()
+   {
+      return runningOnRealRobot;
    }
 
    // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
@@ -299,14 +348,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDesiredStepForward()
    {
-      return 0.5;    // 0.35;
+      return 0.5; // 0.35;
    }
 
    @Override
    public double getMaxStepLength()
    {
       if (!runningOnRealRobot)
-         return 0.6;    // 0.5; //0.35;
+         return 0.6; // 0.5; //0.35;
 
       return 0.4;
    }
@@ -326,7 +375,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6;    // 0.4;
+      return 0.6; // 0.4;
    }
 
    @Override
@@ -443,10 +492,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("PelvisOrientation", registry);
 
-      double kpXY = runningOnRealRobot ? 160.0 : 100.0;    // 120.0
-      double kpZ = runningOnRealRobot ? 120.0 : 100.0;    // 120.0
-      double zetaXY = runningOnRealRobot ? 0.5 : 0.8;    // 0.7
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;    // 0.7
+      double kpXY = runningOnRealRobot ? 160.0 : 100.0; // 120.0
+      double kpZ = runningOnRealRobot ? 120.0 : 100.0; // 120.0
+      double zetaXY = runningOnRealRobot ? 0.5 : 0.8; // 0.7
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.7
       double maxAccel = runningOnRealRobot ? 18.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 270.0 : 270.0;
 
@@ -491,7 +540,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[] {0.0, 0.67, 0.0};
+      return new double[] { 0.0, 0.67, 0.0 };
    }
 
    @Override
@@ -518,10 +567,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootOrientationGains gains = new YoFootOrientationGains("ChestOrientation", registry);
 
-      double kpXY = runningOnRealRobot ? 80.0 : 100.0;    // 60.0
-      double kpZ = runningOnRealRobot ? 40.0 : 100.0;    // 60.0
-      double zetaXY = runningOnRealRobot ? 0.7 : 0.8;    // 0.4
-      double zetaZ = runningOnRealRobot ? 0.5 : 0.8;    // 0.4
+      double kpXY = runningOnRealRobot ? 80.0 : 100.0; // 60.0
+      double kpZ = runningOnRealRobot ? 40.0 : 100.0; // 60.0
+      double zetaXY = runningOnRealRobot ? 0.7 : 0.8; // 0.4
+      double zetaZ = runningOnRealRobot ? 0.5 : 0.8; // 0.4
       double maxAccel = runningOnRealRobot ? 12.0 : 18.0;
       double maxJerk = runningOnRealRobot ? 180.0 : 270.0;
 
@@ -539,11 +588,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-      double kpXY = 100.0;    // 150.0
+      double kpXY = 100.0; // 150.0
       double kpZ = runningOnRealRobot ? 200.0 : 200.0;
       double zetaXYZ = runningOnRealRobot ? 0.5 : 0.7;
       double kpXYOrientation = runningOnRealRobot ? 200.0 : 300.0;
-      double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0;    // 160
+      double kpZOrientation = runningOnRealRobot ? 150.0 : 200.0; // 160
       double zetaOrientationXY = runningOnRealRobot ? 0.7 : 0.7;
       double zetaOrientationZ = runningOnRealRobot ? 0.5 : 0.7;
       double maxLinearAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
@@ -651,13 +700,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSupportSingularityEscapeMultiplier()
    {
-      return -30;    // negative as knee axis are -y direction
+      return -30; // negative as knee axis are -y direction
    }
 
    @Override
    public double getSwingSingularityEscapeMultiplier()
    {
-      return -(runningOnRealRobot ? 30.0 : 200.0);    // negative as knee axis are -y direction
+      return -(runningOnRealRobot ? 30.0 : 200.0); // negative as knee axis are -y direction
    }
 
    @Override
@@ -798,9 +847,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      String[] jointsToIgnore = new String[]
-      {
-      };
+      String[] jointsToIgnore = new String[] {};
 
       return jointsToIgnore;
    }
@@ -812,7 +859,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       momentumOptimizationSettings.setRhoPlaneContactRegularization(0.001);
       momentumOptimizationSettings.setMomentumWeight(1.4, 1.4, 10.0, 10.0);
       momentumOptimizationSettings.setRhoMin(4.0);
-      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16);    // 0.06);
+      momentumOptimizationSettings.setRateOfChangeOfRhoPlaneContactRegularization(0.16); // 0.06);
       momentumOptimizationSettings.setRhoPenalizerPlaneContactRegularization(0.01);
    }
 
@@ -832,7 +879,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
-//      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
+      //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
    }
 
    @Override
@@ -840,7 +887,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return 0.035;
    }
-   
+
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
