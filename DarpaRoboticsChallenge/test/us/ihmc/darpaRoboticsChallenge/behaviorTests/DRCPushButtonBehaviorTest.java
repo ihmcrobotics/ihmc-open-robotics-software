@@ -38,7 +38,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
 
-public class DRCPushButtonBehaviorTest implements MultiRobotTestInterface
+public abstract class DRCPushButtonBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private static ArrayList<ButtonData> buttonData = new ArrayList<ButtonData>();
@@ -177,20 +177,6 @@ public class DRCPushButtonBehaviorTest implements MultiRobotTestInterface
       final PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(communicationBridge, referenceFrames, yoTime, wristSensors);
 
       return pushButtonBehavior;
-   }
-
-   @Override
-   public DRCRobotModel getRobotModel()
-   {
-      // TODO Auto-generated method stub
-      return null;
-   }
-
-   @Override
-   public String getSimpleRobotName()
-   {
-      // TODO Auto-generated method stub
-      return null;
    }
 
 }
