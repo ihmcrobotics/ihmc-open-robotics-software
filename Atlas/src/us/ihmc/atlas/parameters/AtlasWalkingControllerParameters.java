@@ -932,4 +932,11 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    {
       return 0.623;
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useICPPlannerHackN13()
+   {
+      return false;
+   }
 }
