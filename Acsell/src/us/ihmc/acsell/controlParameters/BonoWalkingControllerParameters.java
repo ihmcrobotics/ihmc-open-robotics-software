@@ -161,7 +161,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595;
-   private double nominalHeightAboveGround = 0.670+0.020;//+0.010;//+0.020;
+   private double nominalHeightAboveGround = 0.670 + 0.020;//+0.010;//+0.020;
    private final double maximumHeightAboveGround = 0.79;//Hip height fully upright//0.735;
    //private final double additionalOffsetHeightBono = 0.15;
    private final double additionalOffsetHeightBono = 0.16; //Spring Ankle
@@ -313,7 +313,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMaxAngleTurnOutwards()
    {
-      return Math.PI/4.0;
+      return Math.PI / 4.0;
    }
 
    @Override
@@ -591,7 +591,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double maxLinearJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = runningOnRealRobot ? 1500.0 : Double.POSITIVE_INFINITY;
-      
+
       gains.setPositionProportionalGains(kp, kp);
       gains.setPositionDampingRatio(zetaXYZ);
       gains.setPositionMaxAccelerationAndJerk(maxLinearAcceleration, maxLinearJerk);
@@ -812,7 +812,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       return 0.025;
    }
-   
+
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
@@ -835,32 +835,31 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment()
    {
-      
-      
       return 0;
    }
 
    @Override
    public double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment()
    {
-      
-      
       return 0;
    }
 
    @Override
    public double maximumHeightBetweenAnkleAndPelvisForHeightAdjustment()
    {
-      
-      
       return 0;
    }
 
    @Override
    public double pelvisToAnkleThresholdForWalking()
    {
-      
-      
       return 0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useICPPlannerHackN13()
+   {
+      return true;
    }
 }
