@@ -7,7 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
-   us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCPushButtonBehaviorTest.class,
+//   us.ihmc.darpaRoboticsChallenge.behaviorTests.DRCPushButtonBehaviorTest.class,
    us.ihmc.darpaRoboticsChallenge.calib.DRCArmKinematicsCalibrationTest.class,
    us.ihmc.darpaRoboticsChallenge.DRCConfigParametersTest.class,
    us.ihmc.darpaRoboticsChallenge.frictionCompensation.JointFrictionModelsHolderTest.class,
