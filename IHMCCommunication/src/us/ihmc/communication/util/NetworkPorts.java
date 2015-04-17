@@ -35,6 +35,11 @@ public class NetworkPorts
    // Mission Control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7010);
    public static final NetworkPorts MISSION_CONTROL_INTRAPROCESS_PORT = new NetworkPorts(7030);
+   public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(7040);
+   public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(7041);
+   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(7042);
+   public static final NetworkPorts MISSION_CONTROL_FIELD_SHAPER_TEST_PORT = new NetworkPorts(7043);
+   public static final NetworkPorts MISSION_CONTROL_OCU_SHAPER_TEST_PORT = new NetworkPorts(7044);
 
    public static final NetworkPorts createRandomTestPort()
    {
