@@ -896,6 +896,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return 0.015;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer()
+   {
+      return 0.5;
+   }
+
    @Override
    public boolean finishSingleSupportWhenICPPlannerIsDone()
    {
