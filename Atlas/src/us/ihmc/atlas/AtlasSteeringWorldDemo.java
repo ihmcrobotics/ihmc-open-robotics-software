@@ -22,7 +22,7 @@ public class AtlasSteeringWorldDemo
       networkProcessorParameters.enableSensorModule(true);
       networkProcessorParameters.enableLocalControllerCommunicator(true);
       
-      AtlasDrivingInitialSetup initialSetup = new AtlasDrivingInitialSetup(robotModel.getJointMap());
+      AtlasDrivingInitialSetup initialSetup = new AtlasDrivingInitialSetup();
 
       new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, initialSetup);
    }

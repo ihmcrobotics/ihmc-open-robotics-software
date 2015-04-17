@@ -9,7 +9,6 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -21,8 +20,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
-   private static final String INITIAL_CONDITIONS_FILE = "initialDrivingSetup";
-   private final AtlasJointMap atlasJointMap;
+   public static final String INITIAL_CONDITIONS_FILE = "initialDrivingSetup";
    
    private static final double PELVIS_TO_GROUND = 1.1;
    private static final double X_OFFSET = 0.1;
@@ -33,9 +31,8 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    private final Quat4d rotation = new Quat4d();
    private boolean robotInitialized = false;
 
-   public AtlasDrivingInitialSetup(AtlasJointMap atlasJointMap)
+   public AtlasDrivingInitialSetup()
    {
-      this.atlasJointMap = atlasJointMap;
    }
 
    @Override
@@ -61,7 +58,7 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
             {
                for (LegJointName jointName : LegJointName.values())
                {
-                  String key = atlasJointMap.getLegJointName(robotSide, jointName);
+                  String key = jointMap.getLegJointName(robotSide, jointName);
                   if (key == null)
                   {
                      continue;
@@ -79,7 +76,7 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
                
                for (ArmJointName jointName : ArmJointName.values())
                {
-                  String key = atlasJointMap.getArmJointName(robotSide, jointName);
+                  String key = jointMap.getArmJointName(robotSide, jointName);
                   if (key == null)
                   {
                      continue;
@@ -94,11 +91,11 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
                      PrintTools.info("Did not find initial angle for " + key);
                   }
                }
-            }
+           }
             
             for (SpineJointName jointName : SpineJointName.values())
             {
-               String key = atlasJointMap.getSpineJointName(jointName);
+               String key = jointMap.getSpineJointName(jointName);
                if (key == null)
                {
                   continue;
@@ -127,7 +124,7 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       }
       else
       {
-         System.out.println("File not found or invalid.");
+         PrintTools.info("File not found or invalid.");
       }
       
       robot.getOneDoFJoints()[1].getName();
@@ -152,27 +149,32 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    @Override
    public void setOffset(Vector3d offset)
    {
+      PrintTools.info("not implemented");
    }
 
    @Override
    public void setInitialYaw(double yaw)
    {
+      PrintTools.info("not implemented");
    }
 
    @Override
    public void setInitialGroundHeight(double groundHeight)
    {
+      PrintTools.info("not implemented");
    }
 
    @Override
    public double getInitialYaw()
    {
+      PrintTools.info("not implemented");
       return 0.0;
    }
 
    @Override
    public double getInitialGroundHeight()
    {
+      PrintTools.info("not implemented");
       return 0.0;
    }
 }
