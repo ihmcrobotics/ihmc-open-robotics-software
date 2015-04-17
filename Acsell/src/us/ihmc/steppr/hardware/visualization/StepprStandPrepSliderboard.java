@@ -4,6 +4,8 @@ import java.util.EnumMap;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.SDFRobot;
+import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
+import us.ihmc.acsell.treadmill.TreadmillSerialManager;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.IndexChangedListener;
@@ -28,6 +30,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexChangedListener
 {
+   private final boolean CONTROL_TREADMILL_WITH_JOYSTICK = true;  
    private final YoVariableRegistry sliderBoardRegistry = new YoVariableRegistry("StepprStandPrepSliderBoard");
    private final EnumYoVariable<StepprStandPrepSetpoints> selectedJointPair = new EnumYoVariable<>("selectedJointPair", sliderBoardRegistry,
          StepprStandPrepSetpoints.class);
@@ -40,10 +43,16 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    //private final DoubleYoVariable maxDesiredVelocityX = new DoubleYoVariable("maxDesiredVelocityX", sliderBoardRegistry);
 
    private final EnumMap<StepprStandPrepSetpoints, StandPrepVariables> allSetpoints = new EnumMap<>(StepprStandPrepSetpoints.class);
+   
+   private final TreadmillSerialManager treadmillManager;
 
    public StepprStandPrepSliderboard(int bufferSize)
    {
       super(bufferSize);
+      if (CONTROL_TREADMILL_WITH_JOYSTICK)
+    	  treadmillManager = new TreadmillSerialManager("/dev/ttyS0");
+      else
+    	  treadmillManager = null;
    }
 
    @Override
@@ -138,7 +147,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       setupJoyStick(registry);
    }
    
-  public static void setupJoyStick(YoVariableHolder registry)
+  public void setupJoyStick(YoVariableHolder registry)
    {
 	  
 	  final JoystickUpdater joystickUpdater;
@@ -148,7 +157,8 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
 	  }
       catch (JoyStickNotFoundException ex)
       {
-    		  System.err.println("Joystick not found. Proceeding without joystick");
+    		  System.err.println("Joystick not found.");
+    		  System.exit(-1);
     		  return;
       }
       Thread thread = new Thread(joystickUpdater);
@@ -195,6 +205,8 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
       
+      if (treadmillManager!=null)
+    	  joystickUpdater.addListener(new TreadmillJoystickEventListener(treadmillManager.getSerialOutputStream()));
    }
 
    private class StandPrepVariables

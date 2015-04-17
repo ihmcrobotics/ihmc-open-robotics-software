@@ -33,7 +33,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
-   boolean USE_LEFT_HIP_X_SPRING = false;
+   boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
    boolean USE_LEFT_ANKLE_SPRING = true;
    boolean USE_RIGHT_ANKLE_SPRING = true;

@@ -8,7 +8,7 @@ public enum StepprActuator
    LEFT_KNEE("leftKneeActuator", 1.31e-03, 0.893, 0.744, 0, 3, -1),
    LEFT_HIP_Y("leftHipYActuator", 1.32e-3, 0.893, 0.744, 0, 4, 1),
    LEFT_HIP_Z("leftHipZActuator", 3.53e-4, 0.702, 0.299, 0, 5, 1),
-   LEFT_HIP_X("leftHipXActuator", 1.32e-03, 2.286*0.90, 0.749, 0, 6, 1),
+   LEFT_HIP_X("leftHipXActuator", 1.32e-03, 2.286, 0.749, 0, 6, 1),
    
    RIGHT_ANKLE_RIGHT("rightAnkleRightActuator",1.01e-3, 1.152, .587, 1, 1, -1),
    RIGHT_ANKLE_LEFT("rightAnkleLeftActuator", 1.01e-3, 1.152, .587, 1, 2, 1),
