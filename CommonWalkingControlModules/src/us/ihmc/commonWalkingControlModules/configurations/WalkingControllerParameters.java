@@ -1,8 +1,12 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.LinkedHashMap;
+
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
@@ -100,6 +104,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getSwingSingularityEscapeMultiplier();
 
    public abstract boolean doPrepareManipulationForLocomotion();
+   
+   public abstract boolean controlHeadAndHandsWithSliders();
 
    public abstract double getDefaultTransferTime();
 
@@ -134,6 +140,11 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getDesiredTouchdownAcceleration();
 
    public abstract double getContactThresholdForce();
+   
+   /** Returns a map of neck joint names and associated min/max value joint limits. */
+   public abstract LinkedHashMap<NeckJointName,Pair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
+   
+   public abstract SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract double getCoPThresholdFraction();
 

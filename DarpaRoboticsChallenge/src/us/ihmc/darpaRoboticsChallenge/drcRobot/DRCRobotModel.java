@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -80,7 +81,9 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
 
    public abstract DRCHandType getDRCHandType();
    
-   public abstract SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getActuatableFingerJointNames();
+   public abstract LinkedHashMap<NeckJointName,Pair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
+   
+   public abstract SideDependentList<LinkedHashMap<String,Pair<Double,Double>>> getSliderBoardControlledFingerJointsWithLimits();
 
    public abstract LogSettings getLogSettings();
 
