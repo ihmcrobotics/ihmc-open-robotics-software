@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -24,6 +25,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
@@ -93,7 +95,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       FootstepDataList footstepDataList = createFootstepsWithHighSwing();
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(20.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(11.0);
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
@@ -105,6 +107,11 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
+      RobotAllJointsDataChecker checker = new RobotAllJointsDataChecker(simulationConstructionSet, drcSimulationTestHelper.getRobot());
+      simulationConstructionSet.applyDataProcessingFunction(checker);
+
+      assertFalse(checker.hasMaxValueExeededAnyJoint());
+      assertFalse(checker.hasMinValueExeededAnyJoint());
 
       BambooTools.reportTestFinishedMessage();
    }
