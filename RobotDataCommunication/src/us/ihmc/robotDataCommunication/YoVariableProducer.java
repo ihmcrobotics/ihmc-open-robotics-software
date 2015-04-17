@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
+import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -16,6 +16,8 @@ import us.ihmc.utilities.compression.SnappyUtils;
 
 public class YoVariableProducer implements Runnable
 {
+   private static final int SEND_BUFFER_LENGTH = 1024;
+   
    private final PeriodicThreadScheduler scheduler;
    
    private final ConcurrentRingBuffer<FullStateBuffer> mainBuffer;
@@ -33,7 +35,7 @@ public class YoVariableProducer implements Runnable
    private final YoVariableHandShakeBuilder handshakeBuilder;
    private final LogModelProvider logModelProvider;
 
-   private SingleThreadMultiClientStreamingDataTCPServer server;
+   private MultiClientStreamingDataTCPServer server;
    
    private final LogDataHeader logDataHeader = new LogDataHeader();
    private final CRC32 crc32 = new CRC32();
@@ -84,7 +86,7 @@ public class YoVariableProducer implements Runnable
       try
       {
          // Make server here, so it is open before the logger connects
-         server = new SingleThreadMultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider);
+         server = new MultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider, compressedBackingArray.length, SEND_BUFFER_LENGTH);
          server.start();
       }
       catch (IOException e)

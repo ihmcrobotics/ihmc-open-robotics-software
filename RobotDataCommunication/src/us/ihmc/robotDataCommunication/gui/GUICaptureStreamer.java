@@ -21,13 +21,14 @@ import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.SingleThreadMultiClientStreamingDataTCPServer;
+import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.TimeTools;
 
 public class GUICaptureStreamer
 {
+   private final int MAXIMUM_IMAGE_DATA_SIZE= 1024*1024;
    private final JFrame window;
    private final int fps;
 
@@ -37,7 +38,7 @@ public class GUICaptureStreamer
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
-   private final SingleThreadMultiClientStreamingDataTCPServer server;
+   private final MultiClientStreamingDataTCPServer server;
    private final GUICaptureBroadcast broadcast;
    private JPEGEncoder encoder = new JPEGEncoder();
    
@@ -50,7 +51,7 @@ public class GUICaptureStreamer
       this.fps = fps;
       try
       {
-         server = new SingleThreadMultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT);
+         server = new MultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT, MAXIMUM_IMAGE_DATA_SIZE, 10);
          System.out.println("Connecting to host " + hostToBindTo);
          broadcast = new GUICaptureBroadcast(LogUtils.getMyIP(hostToBindTo), group.getAddress());
       }
@@ -108,6 +109,7 @@ public class GUICaptureStreamer
          Rectangle screen = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
          Rectangle captureRectangle = windowBounds.intersection(screen);
          Dimension windowSize = captureRectangle.getSize();
+         
          if (!windowSize.equals(size))
          {
             size.setSize(windowSize);
@@ -132,7 +134,14 @@ public class GUICaptureStreamer
                sendBuffer.position(LogDataHeader.length());
                sendBuffer.put(buffer);
                sendBuffer.flip();
-               server.send(sendBuffer);
+               if(sendBuffer.remaining() <= MAXIMUM_IMAGE_DATA_SIZE)
+               {
+                  server.send(sendBuffer);
+               }
+               else
+               {
+                  System.err.println("Not sending screen capture, image size exceeds " + MAXIMUM_IMAGE_DATA_SIZE);
+               }
                yuv.delete();
                img.delete();
             }

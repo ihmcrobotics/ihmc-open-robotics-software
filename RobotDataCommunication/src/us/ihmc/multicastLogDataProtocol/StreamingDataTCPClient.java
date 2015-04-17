@@ -58,8 +58,8 @@ public class StreamingDataTCPClient extends Thread
       {
          connection = SocketChannel.open();
          connection.connect(address);
+         connection.socket().setReceiveBufferSize(1000000);
 
-         //         connection.socket().setReceiveBufferSize(1000000);
          //         connection.socket().setKeepAlive(true);
          //         connection.socket().setTcpNoDelay(true);
 
