@@ -271,6 +271,8 @@ public class LegJointLimitAvoidanceControlModule
          range = upperLimit - lowerLimit;
 
          originalDesiredPositions[i].set(ikJoints[i].getQ());
+         double adjustedPosition = originalDesiredPositions[i].getDoubleValue();
+
          double comparisonValue = Math.abs(2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range);    // should range between -1 and 1, which are the limits
          comparisonValue = Math.min(comparisonValue, 1.0);
 
@@ -282,7 +284,8 @@ public class LegJointLimitAvoidanceControlModule
 
          alphas[i].set(alpha);
 
-         double adjustedPosition = (1.0 - alpha) * ikJoints[i].getQ() + alpha * robotJoints[i].getQ();
+         adjustedPosition = (1.0 - alpha) * ikJoints[i].getQ() + alpha * robotJoints[i].getQ();
+
          adjustedPosition = Math.max(lowerLimit, adjustedPosition);
          adjustedPosition = Math.min(upperLimit, adjustedPosition);
          adjustedDesiredPositions[i].set(adjustedPosition);
