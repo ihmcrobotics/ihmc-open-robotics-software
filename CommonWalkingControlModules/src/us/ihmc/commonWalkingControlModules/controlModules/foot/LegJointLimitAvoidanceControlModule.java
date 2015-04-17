@@ -50,6 +50,7 @@ public class LegJointLimitAvoidanceControlModule
 
    private DoubleYoVariable[] originalDesiredPositions;
    private DoubleYoVariable[] alphas;
+   private DoubleYoVariable[] comparisonValues;
    private DoubleYoVariable[] adjustedDesiredPositions;
    private DoubleYoVariable[] lowerLimits;
    private DoubleYoVariable[] upperLimits;
@@ -95,6 +96,7 @@ public class LegJointLimitAvoidanceControlModule
       {
          originalDesiredPositions = new DoubleYoVariable[numJoints];
          alphas = new DoubleYoVariable[numJoints];
+         comparisonValues = new DoubleYoVariable[numJoints];
          adjustedDesiredPositions = new DoubleYoVariable[numJoints];
          lowerLimits = new DoubleYoVariable[numJoints];
          upperLimits = new DoubleYoVariable[numJoints];
@@ -103,6 +105,7 @@ public class LegJointLimitAvoidanceControlModule
          {
             originalDesiredPositions[i] = new DoubleYoVariable(prefix + "originalDesiredPositions" + i, registry);
             alphas[i] = new DoubleYoVariable(prefix + "alpha" + i, registry);
+            comparisonValues[i] = new DoubleYoVariable(prefix + "comparisonValues" + i, registry);
             adjustedDesiredPositions[i] = new DoubleYoVariable(prefix + "adjustedDesiredPositions" + i, registry);
             lowerLimits[i] = new DoubleYoVariable(prefix + "lowerLimits" + i, registry);
             upperLimits[i] = new DoubleYoVariable(prefix + "upperLimits" + i, registry);
@@ -117,7 +120,7 @@ public class LegJointLimitAvoidanceControlModule
       }
 
       percentJointRangeForThreshold = new DoubleYoVariable(prefix + "percentJointRangeForThreshold", registry);
-      percentJointRangeForThreshold.set(0.05);
+      percentJointRangeForThreshold.set(0.5);
 
 
       jacobianMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, numJoints);
@@ -226,7 +229,8 @@ public class LegJointLimitAvoidanceControlModule
       MatrixTools.setDenseMatrixFromTuple3d(originalDesiredVelocity, desiredLinearVelocityOfOrigin.getVector(), 3, 0);
       calculateAdjustedVelocities();
       double[] adjustedVelocities = adjustedDesiredVelocity.getData();
-      if (enableCorrection)
+
+//    if (enableCorrection)
       {
          if (!translationFixOnly)
          {
@@ -273,13 +277,14 @@ public class LegJointLimitAvoidanceControlModule
          originalDesiredPositions[i].set(ikJoints[i].getQ());
          double adjustedPosition = originalDesiredPositions[i].getDoubleValue();
 
-         double comparisonValue = Math.abs(2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range);    // should range between -1 and 1, which are the limits
+         double comparisonValue = (2 * (originalDesiredPositions[i].getDoubleValue() - midpointOfLimits) / range);    // should range between -1 and 1, which are the limits
          comparisonValue = Math.min(comparisonValue, 1.0);
+         comparisonValue = Math.max(comparisonValue, -1.0);
 
          double alpha = 0;
-         if (comparisonValue > lambda)
+         if ((comparisonValue > lambda) || (comparisonValue < -lambda))
          {
-            alpha = Math.max(0.0, (comparisonValue - lambda) / rangePercentageForThreshold);
+            alpha = Math.max(0.0, (Math.abs(comparisonValue) - lambda) / rangePercentageForThreshold);
          }
 
          alphas[i].set(alpha);
@@ -330,7 +335,10 @@ public class LegJointLimitAvoidanceControlModule
 
       for (int i = 0; i < numJoints; i++)
       {
-         jointVelocities.times(i, (1 - alphas[i].getDoubleValue()));
+         if (comparisonValues[i].getDoubleValue() * jointVelocities.get(i) > 0)
+         {
+            jointVelocities.times(i, (1 - alphas[i].getDoubleValue()));
+         }
       }
 
       CommonOps.mult(jacobianMatrix, jointVelocities, adjustedDesiredVelocity);
