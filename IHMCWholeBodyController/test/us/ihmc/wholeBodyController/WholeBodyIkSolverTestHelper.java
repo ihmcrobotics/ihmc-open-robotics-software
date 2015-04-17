@@ -135,7 +135,7 @@ public class WholeBodyIkSolverTestHelper
 
          for (RobotSide robotSide : RobotSide.values())
          {
-            hikSolver.setNumberOfControlledDoF(robotSide, dofToControl.get(robotSide));
+            hikSolver.getConfiguration().setNumberOfControlledDoF(robotSide, dofToControl.get(robotSide));
 
             if (endEffectorTarget.get(robotSide) != null)
             {

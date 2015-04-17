@@ -8,6 +8,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -20,11 +21,13 @@ import us.ihmc.yoUtilities.math.trajectories.WaypointPositionTrajectoryData;
  * User: Matt
  * Date: 2/18/13
  */
-public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacket>, PelvisPoseProvider
+public class DesiredPelvisPoseProvider implements PelvisPoseProvider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryPacketConsumer;
+   private final PacketConsumer<WholeBodyTrajectoryPacket> wholeBodyTrajectoryConsumer;
+   private final PacketConsumer<StopMotionPacket>    stopMotionConsumer;
+   private final PacketConsumer<PelvisPosePacket>    pelvisPoseConsumer;
 
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
@@ -32,12 +35,31 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
    private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation());
    private final AtomicReference<WaypointPositionTrajectoryData> desiredPelvisPositionWithWaypoints = new AtomicReference<>(null);
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredPelvisOrientationWithWaypoints = new AtomicReference<>(null);
+   private final AtomicReference<StopMotionPacket> stopMotion = new  AtomicReference<>(null);
    private double trajectoryTime = Double.NaN;
 
    public DesiredPelvisPoseProvider()
    {
-      wholeBodyTrajectoryPacketConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
-            {
+      pelvisPoseConsumer = new PacketConsumer<PelvisPosePacket>()
+      {
+         @Override
+         public void receivedPacket(PelvisPosePacket packet)
+         {
+            receivedPacketImpl(packet);
+         }
+      };
+      
+      stopMotionConsumer = new PacketConsumer<StopMotionPacket>()
+      {
+         @Override
+         public void receivedPacket(StopMotionPacket packet)
+         {
+            receivedPacketImpl(packet);
+         }
+      };
+      
+      wholeBodyTrajectoryConsumer = new PacketConsumer<WholeBodyTrajectoryPacket>()
+      {
          @Override
          public void receivedPacket(WholeBodyTrajectoryPacket packet)
          {
@@ -71,12 +93,22 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
                }
             }
          }
-            };
+      };
    }
 
    public PacketConsumer<WholeBodyTrajectoryPacket> getWholeBodyTrajectoryPacketConsumer()
    {
-      return wholeBodyTrajectoryPacketConsumer;
+      return wholeBodyTrajectoryConsumer;
+   }
+   
+   public PacketConsumer<StopMotionPacket> getStopMotionPacketConsumer()
+   {
+      return stopMotionConsumer;
+   }
+   
+   public PacketConsumer<PelvisPosePacket> getPelvisPosePacketConsumer()
+   {
+      return pelvisPoseConsumer;
    }
 
    @Override
@@ -150,8 +182,8 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
       return trajectoryTime;
    }
 
-   @Override
-   public void receivedPacket(PelvisPosePacket object)
+
+   private void receivedPacketImpl(PelvisPosePacket object)
    {
       if (object == null)
          return;
@@ -175,5 +207,20 @@ public class DesiredPelvisPoseProvider implements PacketConsumer<PelvisPosePacke
          desiredPelvisOrientation.set(new FrameOrientation(worldFrame, object.getOrientation()));
       else
          desiredPelvisOrientation.set(null);
+   }
+   
+   private void receivedPacketImpl(StopMotionPacket object)
+   {
+      if (object == null)
+         return;
+
+      trajectoryTime = 0.1;
+      stopMotion.set( object );
+   }
+
+   @Override
+   public boolean checkAndResetStopCommand()
+   {
+      return stopMotion.getAndSet( null ) != null;
    }
 }

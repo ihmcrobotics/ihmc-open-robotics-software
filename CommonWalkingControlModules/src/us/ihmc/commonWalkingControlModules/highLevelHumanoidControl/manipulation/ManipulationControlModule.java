@@ -222,13 +222,12 @@ public class ManipulationControlModule
 
    private void handleHandPauses(RobotSide robotSide)
    {
-      if (handPoseProvider == null)
-         return;
-
-      if (handPoseProvider.checkForNewPauseCommand(robotSide))
+      if (handPoseProvider != null)
       {
-         handPoseProvider.getPauseCommand(robotSide);
-         handControlModules.get(robotSide).holdPositionInJointSpace();
+         if (handPoseProvider.checkAndResetStopCommand(robotSide))
+         {
+            handControlModules.get(robotSide).holdPositionInJointSpace();
+         }
       }
    }
 

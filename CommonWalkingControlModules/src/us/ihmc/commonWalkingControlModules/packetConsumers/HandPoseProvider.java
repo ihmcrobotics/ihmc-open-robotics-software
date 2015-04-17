@@ -36,7 +36,7 @@ public interface HandPoseProvider
 
    boolean controlHandAngleAboutAxis(RobotSide robotSide);
    
-   public abstract boolean checkForNewPauseCommand(RobotSide robotSide);
+   public abstract boolean checkAndResetStopCommand(RobotSide robotSide);
 
    public abstract boolean checkForHomePosition(RobotSide robotSide);
 
@@ -47,8 +47,6 @@ public interface HandPoseProvider
    public abstract Map<OneDoFJoint, Double> getFinalDesiredJointAngleMaps(RobotSide robotSide);
 
    public abstract Map<OneDoFJoint, double[]> getDesiredJointAngleForWaypointTrajectory(RobotSide robotSide);
-
-   public abstract void getPauseCommand(RobotSide robotSide);
 
    public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
 

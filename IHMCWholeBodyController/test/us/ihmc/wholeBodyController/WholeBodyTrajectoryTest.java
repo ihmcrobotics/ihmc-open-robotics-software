@@ -105,8 +105,8 @@ public abstract class WholeBodyTrajectoryTest
 
       wbSolver.setVerbosityLevel((scs != null) ? 1 : 0);
 
-      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
-      wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_NONE);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
 
       // ReferenceFrame soleFrame = actualRobotModel.getSoleFrame(RobotSide.RIGHT);
 
@@ -227,12 +227,12 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
-      wbSolver.setNumberOfMaximumAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
+      wbSolver.getConfiguration().setMaxNumberOfAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
 
       RobotSide robotSide = RobotSide.RIGHT;
 
-      wbSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
-      wbSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
 
       ArrayList<Point3d> targetList = new ArrayList<Point3d>();
 
@@ -343,12 +343,12 @@ public abstract class WholeBodyTrajectoryTest
       modelVisualizer.update(0);
 
       wbSolver.setVerbosityLevel(0);
-      wbSolver.setNumberOfMaximumAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
+      wbSolver.getConfiguration().setMaxNumberOfAutomaticReseeds(MAX_NUMBER_OF_RESEEDS);
 
       RobotSide robotSide = RobotSide.LEFT;
       
-      wbSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
-      wbSolver.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_3P);
 
       ArrayList<Point3d> targetList = new ArrayList<Point3d>();
 

@@ -85,8 +85,8 @@ public class AtlasWholeBodyIKIngressEgressCtrlSim
       
       
       this.wholeBodyIKSolver = robotModel.createWholeBodyIkSolver();
-      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
-      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.RIGHT, WholeBodyIkSolver.ControlledDoF.DOF_3P);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.LEFT, WholeBodyIkSolver.ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getHierarchicalSolver().setVerbosityLevel(0);
 
       this.wholeBodyIKPacketCreator = new WholeBodyIKPacketCreator(robotModel);

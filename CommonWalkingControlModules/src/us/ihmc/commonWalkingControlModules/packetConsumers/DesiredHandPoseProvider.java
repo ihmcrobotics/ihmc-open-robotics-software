@@ -260,9 +260,9 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    }
 
    @Override
-   public boolean checkForNewPauseCommand(RobotSide robotSide)
+   public boolean checkAndResetStopCommand(RobotSide robotSide)
    {
-      return pausePackets.get(robotSide).get() != null;
+      return pausePackets.get(robotSide).getAndSet(null) != null;
    }
 
    @Override
@@ -321,11 +321,6 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       return packet;
    }
    
-   @Override
-   public void getPauseCommand(RobotSide robotSide)
-   {
-      pausePackets.get(robotSide).getAndSet(null);
-   }
 
    @Override
    public HandPosePacket.DataType checkHandPosePacketDataType(RobotSide robotSide)

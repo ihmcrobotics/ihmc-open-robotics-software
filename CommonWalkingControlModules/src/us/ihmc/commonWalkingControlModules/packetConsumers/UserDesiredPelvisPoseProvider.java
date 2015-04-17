@@ -171,4 +171,11 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    {
       return null;
    }
+
+   @Override
+   public boolean checkAndResetStopCommand()
+   {
+      // TODO Auto-generated method stub
+      return false;
+   }
 }
