@@ -121,10 +121,10 @@ public class AtlasFinalsWorldStairsTest
       BambooTools.reportTestFinishedMessage();
    }
 
-   @Ignore
+//   @Ignore
    @BambooAnnotations.EstimatedDuration(duration = 30.4)
    @Test(timeout = 151825)
-   public void tesFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
 
@@ -152,7 +152,7 @@ public class AtlasFinalsWorldStairsTest
       FootstepDataList footstepDataList = createFastFootstepsForStairs(robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.send(footstepDataList);
 
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(24.0);
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(22.0);
 
 
       drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
@@ -266,10 +266,14 @@ public class AtlasFinalsWorldStairsTest
 
    private FootstepDataList createFastFootstepsForStairs(WalkingControllerParameters walkingControllerParameters)
    {
-      double swingHeight = 0.10;
       Quat4d orientation = new Quat4d();
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
-      FootstepDataList footstepDataList = new FootstepDataList();
+      double swingTime = 0.8; //(0.6 is default sim time)
+      double transferTime = 0.25; //(0.25 is default sim time)
+
+//      swingTime = 0.6; //default sim time
+//      transferTime = 0.25; //default sim time
+      FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
 
       Point3d startingLocation = new Point3d(1.0, -13.5, 0);
       double directionYaw = -90.0;
@@ -289,29 +293,30 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 0.55, startingLocation.z + 0.0),
             new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 0.83, startingLocation.z + 0.0),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 0.90, startingLocation.z + 0.0),
             new Quat4d(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 0.83, startingLocation.z + 0.0),
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 0.90, startingLocation.z + 0.0),
             new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.10, startingLocation.z + 0.30),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.08, startingLocation.z + 0.32),
             new Quat4d(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.35, startingLocation.z + 0.55),
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.38, startingLocation.z + 0.55),
             new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.66, startingLocation.z + 0.75),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.67, startingLocation.z + 0.78),
             new Quat4d(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.0, startingLocation.z + 1.0),
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.0, startingLocation.z + 1.01),
             new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.2, startingLocation.z + 1.0),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 2.2, startingLocation.z + 1.01),
             new Quat4d(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.2, startingLocation.z + 1.0),
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 2.2, startingLocation.z + 1.01),
             new Quat4d(orientation), rightFootPoint2ds));
+
 
       return footstepDataList;
    }
