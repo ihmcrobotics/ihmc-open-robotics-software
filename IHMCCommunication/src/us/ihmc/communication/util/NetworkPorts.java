@@ -33,8 +33,9 @@ public class NetworkPorts
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
 
    // Mission Control ports
-   public static final NetworkPorts MISSION_CONTROL_MASTER_BACKEND_PORT = new NetworkPorts(7010);
-   
+   public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7010);
+   public static final NetworkPorts MISSION_CONTROL_INTRAPROCESS_PORT = new NetworkPorts(7030);
+
    public static final NetworkPorts createRandomTestPort()
    {
       return new NetworkPorts(new Random().nextInt(65535 - 1025) + 1025);
