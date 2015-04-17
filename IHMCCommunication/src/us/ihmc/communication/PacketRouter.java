@@ -11,7 +11,8 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private boolean DEBUG = false;
+   private final Class<T> destinationType;
+   private boolean DEBUG = true;
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
@@ -27,6 +28,7 @@ public class PacketRouter<T extends Enum<T>>
    
    public PacketRouter(Class<T> destinationType)
    {
+      this.destinationType = destinationType;
       destinationConstants = destinationType.getEnumConstants();
       communicators = new EnumMap<>(destinationType);
       consumers = new EnumMap<>(destinationType);
@@ -79,7 +81,8 @@ public class PacketRouter<T extends Enum<T>>
    {
       if(shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + PacketDestination.fromOrdinal(packet.getDestination()) + " from " + communicatorDestinations.get(source));
+
+         PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source));
       }
       
       T destination = getPacketDestination(source, packet);
