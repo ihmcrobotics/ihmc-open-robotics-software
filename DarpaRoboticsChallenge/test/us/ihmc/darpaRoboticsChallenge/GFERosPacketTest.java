@@ -153,7 +153,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
       robotController.doControl();
       controllerCommunicatorServer.send(new HighLevelStatePacket(HighLevelState.WALKING));
       
-      new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator_server, packetRouter);
+      new UiPacketToRosMsgRedirector(robotModel, rosUri, gfe_communicator_server, packetRouter, "/ihmc_ros/atlas");
       
       try
       {

@@ -22,7 +22,7 @@ import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
 {
    private static final Map<String, Class> PACKETS_TO_REDIRECT_TO_ROS = IHMCRosApiMessageMap.INPUT_PACKET_MESSAGE_NAME_MAP;
-   private static final String ROS_NAMESPACE = "/ihmc_ros/atlas";
+   private final String ROS_NAMESPACE;
    
    private final RosMainNode rosMainNode;
    private final NodeConfiguration nodeConfiguration;
@@ -30,8 +30,9 @@ public class UiPacketToRosMsgRedirector implements GlobalPacketConsumer
    private final ArrayList<RosTopicPublisher<?>> publishers;
 
 
-   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator gfe_communicator, PacketRouter<PacketDestination> packetRouter)
+   public UiPacketToRosMsgRedirector(DRCRobotModel robotModel, URI rosCoreURI, PacketCommunicator gfe_communicator, PacketRouter<PacketDestination> packetRouter, String namespace)
    {
+      ROS_NAMESPACE = namespace;
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NAMESPACE, true);
       this.nodeConfiguration = NodeConfiguration.newPrivate();
       this.messageFactory = nodeConfiguration.getTopicMessageFactory();

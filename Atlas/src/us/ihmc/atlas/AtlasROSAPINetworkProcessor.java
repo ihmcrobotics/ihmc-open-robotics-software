@@ -47,7 +47,7 @@ public class AtlasROSAPINetworkProcessor
          networkProcessorParameters.enableGFECommunicator(true);
          networkProcessorParameters.enableControllerCommunicator(true);
          DRCNetworkProcessor networkProcessor = new DRCNetworkProcessor(robotModel, networkProcessorParameters);
-         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfeCommunicator, networkProcessor.getPacketRouter());
+         new UiPacketToRosMsgRedirector(robotModel, rosUri, gfeCommunicator, networkProcessor.getPacketRouter(), defaultRosNameSpace);
       }
       else 
       {
