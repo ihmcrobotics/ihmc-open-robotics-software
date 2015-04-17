@@ -26,6 +26,7 @@ import us.ihmc.utilities.trajectory.TrajectoryND.WaypointND;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ComputeResult;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.ControlledDoF;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver.LockLevel;
+import us.ihmc.wholeBodyController.WholeBodyIkSolver.WholeBodyConfiguration;
 
 
 public class WholeBodyTrajectory
@@ -58,6 +59,8 @@ public class WholeBodyTrajectory
          ) throws Exception
    {
       int N = wbSolver.getNumberOfJoints();
+      
+      WholeBodyConfiguration savedParameters =  wbSolver.cloneConfiguration( );
 
       worldToFoot = initialRobotState.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
 
@@ -74,15 +77,12 @@ public class WholeBodyTrajectory
       currentRobotModel.updateFrames();
       
 
-      int oldMaxReseed = wbSolver.maxNumberOfAutomaticReseeds;
-      wbSolver.maxNumberOfAutomaticReseeds = 0;
+      wbSolver.getConfiguration().setMaxNumberOfAutomaticReseeds(0);  
 
-      SideDependentList<ControlledDoF> previousOption = new SideDependentList<ControlledDoF>();
       SideDependentList<RigidBodyTransform> initialTransform  = new SideDependentList<RigidBodyTransform>();
       SideDependentList<RigidBodyTransform> finalTransform    = new SideDependentList<RigidBodyTransform>();
-      LockLevel previousLockLimit = wbSolver.getLockLevel();
 
-      wbSolver.setLockLevel( LockLevel.LOCK_LEGS_AND_WAIST );
+      wbSolver.getConfiguration().setLockLevel( LockLevel.LOCK_LEGS_AND_WAIST );
 
       for (RobotSide side: RobotSide.values)
       {
@@ -93,8 +93,6 @@ public class WholeBodyTrajectory
          ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, worldFrame );
          RigidBodyTransform attachmentToPalm = palm.getTransformToDesiredFrame( attachment );
 
-         previousOption.set( side, wbSolver.getNumberOfControlledDoF(side) );
-
          RigidBodyTransform transform =  initialTargetFrame.getTransformToWorldFrame();
          transform.multiply( attachmentToPalm );
          initialTransform.set( side, transform );
@@ -103,9 +101,9 @@ public class WholeBodyTrajectory
          transform.multiply( attachmentToPalm );
          finalTransform.set( side, transform );
 
-         if( previousOption.get(side) != ControlledDoF.DOF_NONE)
+         if( wbSolver.getConfiguration().getNumberOfControlledDoF(side) != ControlledDoF.DOF_NONE)
          {
-            wbSolver.setNumberOfControlledDoF(side, ControlledDoF.DOF_3P2R ); 
+            wbSolver.getConfiguration().setNumberOfControlledDoF(side, ControlledDoF.DOF_3P2R ); 
          }
       }
 
@@ -240,16 +238,11 @@ public class WholeBodyTrajectory
          }
       }
 
-      for (RobotSide side: RobotSide.values)
-      {
-         wbSolver.setNumberOfControlledDoF(side, previousOption.get(side) ); 
-      }
 
       wb_trajectory.buildTrajectory();
 
-      wbSolver.maxNumberOfAutomaticReseeds = oldMaxReseed;
 
-      wbSolver.setLockLevel( previousLockLimit );
+      wbSolver.setConfiguration( savedParameters );
 
       // cleanup currentRobotModel
       copier.copy();

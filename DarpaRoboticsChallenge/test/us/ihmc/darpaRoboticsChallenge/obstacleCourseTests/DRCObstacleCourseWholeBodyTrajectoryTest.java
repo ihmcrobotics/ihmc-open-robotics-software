@@ -345,8 +345,8 @@ public abstract class DRCObstacleCourseWholeBodyTrajectoryTest implements MultiR
       
       WholeBodyTrajectory wholeBodyTrajectoryGenerator = new WholeBodyTrajectory(drcSimulationTestHelper.getSDFFullRobotModel(), 0.5, 5, 0.2);
       WholeBodyIkSolver wbSolver = createRobotSpecificWholeBodyIKSolver();         
-      wbSolver.setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
-      wbSolver.setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.RIGHT, ControlledDoF.DOF_3P);
+      wbSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.LEFT, ControlledDoF.DOF_3P);
       SDFFullRobotModel actualRobot = new SDFFullRobotModel(drcSimulationTestHelper.getSDFFullRobotModel());
       SDFFullRobotModel finalRobotState = new SDFFullRobotModel(actualRobot);
       

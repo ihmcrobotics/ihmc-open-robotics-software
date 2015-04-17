@@ -61,9 +61,9 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
 
    public void setInputs(RobotSide robotSide, FramePose endEffectorPose, double trajectoryDuration, int numberOfReseeds, ControlledDoF controlledDofs, boolean setPalmTarget)
    {
-      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, controlledDofs);
-      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
-      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds( numberOfReseeds );
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide, controlledDofs);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wholeBodyIKSolver.getConfiguration().setMaxNumberOfAutomaticReseeds( numberOfReseeds );
       trajectoryTime.set(trajectoryDuration);
       if (setPalmTarget)
       {

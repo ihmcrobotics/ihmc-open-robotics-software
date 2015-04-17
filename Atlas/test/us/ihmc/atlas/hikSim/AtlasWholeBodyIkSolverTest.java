@@ -49,7 +49,7 @@ public class AtlasWholeBodyIkSolverTest extends WholeBodyIkSolverTest
 
       initializeFullRobotModelJointAngles(actualRobotModel, atlasRobotModel);
 
-      wholeBodySolver.setNumberOfMaximumAutomaticReseeds(15);    // "I am NOT Feeling Lucky" ( Davide Faconti)
+      wholeBodySolver.getConfiguration().setMaxNumberOfAutomaticReseeds(15);    // "I am NOT Feeling Lucky" ( Davide Faconti)
 
       Robot robot = atlasRobotModel.createSdfRobot(false);
 

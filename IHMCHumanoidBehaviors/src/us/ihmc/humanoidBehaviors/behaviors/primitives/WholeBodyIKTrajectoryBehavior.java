@@ -40,7 +40,7 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
       super(outgoingCommunicationBridge);
       wholeBodyIKSolver = wholeBodyControllerParameters.createWholeBodyIkSolver();
       
-      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds(6);
+      wholeBodyIKSolver.getConfiguration().setMaxNumberOfAutomaticReseeds(6);
       double positionErrorTolerance = 0.02;
       double orientationErrorTolerance = 0.2;
       wholeBodyIKSolver.taskEndEffectorPosition.get(RobotSide.RIGHT).setErrorTolerance(positionErrorTolerance, orientationErrorTolerance);
@@ -60,12 +60,12 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
    
    public void setLockLevel(LockLevel lockLevel)
    {
-      wholeBodyIKSolver.setLockLevel(lockLevel);
+      wholeBodyIKSolver.getConfiguration().setLockLevel(lockLevel);
    }
    
    public void setMaxReseeds(int maxReseeds)
    {
-      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds(maxReseeds);
+      wholeBodyIKSolver.getConfiguration().setMaxNumberOfAutomaticReseeds(maxReseeds);
    }
    
    /**
@@ -78,14 +78,14 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
     */
    public void setInput(ControlledDoF controlledDoFLeft, FramePose palmTargetLeft, ControlledDoF controlledDoFRight, FramePose palmTargetRight)
    {
-      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.LEFT, controlledDoFLeft);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.LEFT, controlledDoFLeft);
       if (palmTargetLeft != null)
       {
          wholeBodyIKSolver.setGripperPalmTarget( RobotSide.LEFT, palmTargetLeft);
          hasInputBeenSet.set(true);
       }
       
-      wholeBodyIKSolver.setNumberOfControlledDoF(RobotSide.RIGHT, controlledDoFRight);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(RobotSide.RIGHT, controlledDoFRight);
       if (palmTargetRight != null)
       {
          wholeBodyIKSolver.setGripperPalmTarget( RobotSide.RIGHT, palmTargetRight);

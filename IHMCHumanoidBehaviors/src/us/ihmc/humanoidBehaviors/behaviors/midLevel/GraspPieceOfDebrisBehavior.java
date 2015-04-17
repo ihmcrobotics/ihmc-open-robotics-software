@@ -205,9 +205,9 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    public void computeWholeBodyIK(SDFFullRobotModel actualRobotModel, SDFFullRobotModel desiredRobotModelToPack, int numberOfReseeds,
          FramePose endEffectorPose, double positionTolerance, double orientationTolerance, ControlledDoF controlledDofs)
    {
-      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide, controlledDofs);
-      wholeBodyIKSolver.setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
-      wholeBodyIKSolver.setNumberOfMaximumAutomaticReseeds( numberOfReseeds );
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide, controlledDofs);
+      wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
+      wholeBodyIKSolver.getConfiguration().setMaxNumberOfAutomaticReseeds( numberOfReseeds );
       wholeBodyIKSolver.setGripperAttachmentTarget( robotSide, endEffectorPose);
       setPositionAndOrientationErrorTolerance(positionTolerance, orientationTolerance);
 

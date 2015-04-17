@@ -92,7 +92,7 @@ abstract public class WholeBodyIkSolver
       // ------------- Parameters that change the overall behavior ----------------------
 
       protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
-      private final SideDependentList<ControlledDoF>  controlledDoF = new SideDependentList<ControlledDoF>();
+     
 
       static public enum LockLevel{
          USE_WHOLE_BODY,           // can move the entire body
@@ -104,9 +104,55 @@ abstract public class WholeBodyIkSolver
          LOCK_LEGS_AND_WAIST       // lock waist and legs
       }
 
-      private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
       private boolean suggestKneeAngle = true;
 
+      public class WholeBodyConfiguration
+      {
+         private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
+         private final SideDependentList<ControlledDoF> controlledDoF;
+         private int maxNumberOfAutomaticReseeds = 3;
+         
+         public WholeBodyConfiguration()
+         {
+            controlledDoF = new SideDependentList<ControlledDoF>();
+         }
+         public WholeBodyConfiguration(WholeBodyConfiguration other )
+         {
+            lockLevel = other.lockLevel;
+            controlledDoF = new SideDependentList<ControlledDoF>( other.controlledDoF);
+            maxNumberOfAutomaticReseeds = other.maxNumberOfAutomaticReseeds;
+         }
+         
+         public LockLevel getLockLevel()
+         {
+            return lockLevel;
+         }
+         public void setLockLevel(LockLevel lockLevel)
+         {
+            this.lockLevel = lockLevel;
+         }
+         public int getMaxNumberOfAutomaticReseeds()
+         {
+            return maxNumberOfAutomaticReseeds;
+         }
+         public void setMaxNumberOfAutomaticReseeds(int maxNumberOfAutomaticReseeds)
+         {
+            if( maxNumberOfAutomaticReseeds <0) maxNumberOfAutomaticReseeds = 0;
+            this.maxNumberOfAutomaticReseeds = maxNumberOfAutomaticReseeds;
+         }
+         public ControlledDoF getNumberOfControlledDoF(RobotSide side)
+         {
+            return controlledDoF.get(side);
+         }
+         
+         public void setNumberOfControlledDoF(RobotSide side, ControlledDoF controlled_dof)
+         {
+            controlledDoF.set(side, controlled_dof);
+         }
+      }
+      
+      protected final WholeBodyConfiguration parameters = new WholeBodyConfiguration();
+      
       // --------------------- Miscellaneous -------------------------------------
       protected final HashMap<String, Integer> jointNamesToIndex = new HashMap<String, Integer>();
       protected final OneDoFJoint[] workingJointsInUrdfOrder;
@@ -123,8 +169,6 @@ abstract public class WholeBodyIkSolver
 
       final private int numOfJoints;
       private HashSet<String> listOfVisibleAndEnableColliders;
-
-      protected int maxNumberOfAutomaticReseeds = 3;
       
       protected final SideDependentList<FramePose> handTarget = new SideDependentList<FramePose>();
       protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
@@ -145,7 +189,7 @@ abstract public class WholeBodyIkSolver
 
       public ReferenceFrame  getRootFrame( SDFFullRobotModel actualSdfModel)
       {
-         if( feetTarget.get(getSideOfTheFootRoot()) != null && lockLevel == LockLevel.CONTROL_MANUALLY )
+         if( feetTarget.get(getSideOfTheFootRoot()) != null && parameters.getLockLevel() == LockLevel.CONTROL_MANUALLY )
          {
             return new PoseReferenceFrame("rootFootFrame", feetTarget.get(getSideOfTheFootRoot()) );
          }
@@ -194,16 +238,6 @@ abstract public class WholeBodyIkSolver
       public void activateAutomaticPreferredHipHeight(boolean enable)
       {
          suggestKneeAngle = enable;
-      }
-
-      /*
-       * Sometimes the solver gets stacked in a local minimum and fails.
-       * Setting the maximum number of reseed > 0 you can automatically try to find a solution.
-       */
-      public void setNumberOfMaximumAutomaticReseeds(int maxReseeds )
-      {
-         if( maxReseeds < 0 ) maxReseeds = 0;
-         maxNumberOfAutomaticReseeds = maxReseeds;
       }
 
       public ReferenceFrame getRootFrameOfWorkingModel(){
@@ -314,7 +348,7 @@ abstract public class WholeBodyIkSolver
             workingSoleFrames.set(robotSide, workingFrames.getSoleFrame(robotSide));
             armJointIds.set(robotSide, new HashSet<Integer>());
             legJointIds.set(robotSide, new HashSet<Integer>());
-            controlledDoF.set(robotSide, ControlledDoF.DOF_NONE );
+            parameters.setNumberOfControlledDoF(robotSide, ControlledDoF.DOF_NONE );
             keepArmQuiet.set(robotSide, new MutableBoolean(true));
          }
 
@@ -435,7 +469,7 @@ abstract public class WholeBodyIkSolver
                   
          Vector64F weightForRotationOnly; 
          
-            if( lockLevel == LockLevel.LOCK_PELVIS_ORIENTATION)
+            if( parameters.getLockLevel() == LockLevel.LOCK_PELVIS_ORIENTATION)
             {
                weightForRotationOnly = new Vector64F(6, 0,0,0,  1,1,1 );
                
@@ -517,7 +551,7 @@ abstract public class WholeBodyIkSolver
          RigidBodyTransform ee_transform;
          ReferenceFrame targetFrame;
          
-         if( feetTarget.get(RobotSide.LEFT) == null || lockLevel != LockLevel.CONTROL_MANUALLY )
+         if( feetTarget.get(RobotSide.LEFT) == null || parameters.getLockLevel() != LockLevel.CONTROL_MANUALLY )
          {
             targetFrame = actualRobotModel.getOneDoFJointByName("l_leg_akx").getFrameAfterJoint() ;
          }
@@ -562,7 +596,7 @@ abstract public class WholeBodyIkSolver
          {
             //  HierarchicalTask_BodyPose handTask = taskEndEffectorPose.get(side);
 
-            switch( controlledDoF.get(side) )
+            switch( parameters.getNumberOfControlledDoF(side) )
             {
             case DOF_NONE:
                taskEndEffectorPosition.get(side).setEnabled(false);
@@ -642,7 +676,7 @@ abstract public class WholeBodyIkSolver
       {
          for( RobotSide side: RobotSide.values())
          {         
-            boolean enable =  controlledDoF.get(side) != ControlledDoF.DOF_NONE;
+            boolean enable =  parameters.getNumberOfControlledDoF(side) != ControlledDoF.DOF_NONE;
 
             for (int jointId: armJointIds.get(side))
             {
@@ -676,7 +710,7 @@ abstract public class WholeBodyIkSolver
          boolean lockPelvisRotation = false;
          boolean enableCOM = true;
 
-         switch( lockLevel )
+         switch( parameters.getLockLevel() )
          {
          case USE_WHOLE_BODY: break;   
          
@@ -790,18 +824,18 @@ abstract public class WholeBodyIkSolver
             {
                if(  armJointIds.get(robotSide).contains(i) )
                {
-                  if( keepArmQuiet.get(robotSide).isTrue() || controlledDoF.get(robotSide) == ControlledDoF.DOF_NONE )
+                  if( keepArmQuiet.get(robotSide).isTrue() || parameters.getNumberOfControlledDoF(robotSide) == ControlledDoF.DOF_NONE )
                   {
                      partOfQuietArm = true;
                   }
                }        
             }
 
-            if( lockLevel == LockLevel.LOCK_LEGS_AND_WAIST &&  waistJointId[0] == i )  
+            if( parameters.getLockLevel() == LockLevel.LOCK_LEGS_AND_WAIST &&  waistJointId[0] == i )  
             {
                partOfQuietWaist = true;
             }
-            if( lockLevel != LockLevel.LOCK_LEGS_AND_WAIST || lockLevel != LockLevel.LOCK_LEGS_AND_WAIST_X_Y ) 
+            if( parameters.getLockLevel() != LockLevel.LOCK_LEGS_AND_WAIST || parameters.getLockLevel() != LockLevel.LOCK_LEGS_AND_WAIST_X_Y ) 
             {
                if( waistJointId[1] == i || waistJointId[2] == i )
                   partOfQuietWaist = true;
@@ -866,7 +900,7 @@ abstract public class WholeBodyIkSolver
 
          ComputeResult ret = computeImpl(actualSdfModel, desiredRobotModelToPack, true );
 
-         int reseedLeft = maxNumberOfAutomaticReseeds;
+         int reseedLeft = parameters.getMaxNumberOfAutomaticReseeds();
 
          
          Vector64F savedCacheQ = new Vector64F(cachedAnglesQ);
@@ -1096,33 +1130,28 @@ abstract public class WholeBodyIkSolver
 
          return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name, parentFrame, parentToBody);
       }
-
-
-      public ControlledDoF getNumberOfControlledDoF(RobotSide side)
-      {
-         return controlledDoF.get(side);
-      }
-
-      public void setNumberOfControlledDoF(RobotSide side, ControlledDoF dof)
-      {
-         controlledDoF.set(side, dof );
-      }
-
-
-      public void setLockLevel(LockLevel lockLevel)
-      {
-         this.lockLevel = lockLevel;
-      }
-      public LockLevel getLockLevel()
-      {
-         return  this.lockLevel;
-      }
-      
-      
+    
       public void setFootTarget(RobotSide side, FramePose footPose)
       {
          feetTarget.set(side, footPose);  
       }
 
+      public WholeBodyConfiguration cloneConfiguration()
+      {
+         return new WholeBodyConfiguration(parameters);
+      }
+      
+      public WholeBodyConfiguration getConfiguration()
+      {
+         return parameters;
+      }
+      
+      public void setConfiguration(WholeBodyConfiguration other)
+      {
+         parameters.lockLevel = other.lockLevel;
+         parameters.setNumberOfControlledDoF(LEFT, other.controlledDoF.get(LEFT) );
+         parameters.setNumberOfControlledDoF(RIGHT, other.controlledDoF.get(RIGHT) );
+         parameters.maxNumberOfAutomaticReseeds = other.maxNumberOfAutomaticReseeds;
+      }
 
 }

@@ -171,8 +171,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       taskJointsPose.setClampingValueForTaskSpaceError(0.6);
 
-      this.setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
-      this.setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_3P);
+      this.getConfiguration().setNumberOfControlledDoF(RIGHT, ControlledDoF.DOF_3P);
+      this.getConfiguration().setNumberOfControlledDoF(LEFT, ControlledDoF.DOF_3P);
 
       //--------------------------------------------------
       // Important: you can't activate a joint in higher priorities and disable it later

@@ -157,17 +157,10 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    }
 
    @Override
-   public boolean checkForNewPauseCommand(RobotSide robotSide)
+   public boolean checkAndResetStopCommand(RobotSide robotSide)
    {
       // TODO Auto-generated method stub
       return false;
-   }
-
-   @Override
-   public void getPauseCommand(RobotSide robotSide)
-   {
-      // TODO Auto-generated method stub
-      
    }
 
    @Override
