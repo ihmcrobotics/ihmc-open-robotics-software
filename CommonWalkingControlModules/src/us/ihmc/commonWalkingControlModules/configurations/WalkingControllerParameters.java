@@ -150,6 +150,15 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getMaxICPErrorBeforeSingleSupportX();
    public abstract double getMaxICPErrorBeforeSingleSupportY();
 
+   /**
+    * Sometimes the robot can get stuck in transfer state because the ICP error is too large to to switch to swing.
+    * Even in that state, the ICP planner is still giving a desired ICP velocity preventing the ICP convergence to a certain extent.
+    * This parameter allows to cancel out this desired velocity when stuck in the transfer state helping the convergence of the ICP and will help to get the robot to switch to swing.
+    * Set it to {@link Double#POSITIVE_INFINITY} so the ICP velocity won't be cancelled out.
+    * A value around 0.5sec to 1.0sec seems reasonable.
+    */
+   public abstract double getDurationToCancelOutDesiredICPVelocityWhenStuckInTransfer();
+
    public abstract boolean finishSingleSupportWhenICPPlannerIsDone();
 
 }

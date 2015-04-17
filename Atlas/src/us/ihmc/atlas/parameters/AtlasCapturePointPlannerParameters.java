@@ -84,28 +84,28 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getFreezeTimeFactor()
    {
-      return 0.9;
+      return 0.0; //0.9;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMaxInstantaneousCapturePointErrorForStartingSwing()
    {
-      return 0.025; //0.035;
+      return 0.0; // 0.025; // 0.035;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean getDoTimeFreezing()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean getDoFootSlipCompensation()
    {
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */
