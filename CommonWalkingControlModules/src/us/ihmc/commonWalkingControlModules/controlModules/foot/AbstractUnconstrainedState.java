@@ -16,12 +16,13 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 /**
  * The unconstrained state is used if the foot is moved free in space without constrains. Depending on the type of trajectory
  * this can either be a movement along a straight line or (in case of walking) a swing motion.
- * 
+ *
  * E.g. the MoveStraightState and the SwingState extend this class and implement the trajectory related methods.
  */
 public abstract class AbstractUnconstrainedState extends AbstractFootControlState
 {
    private static final boolean CORRECT_SWING_CONSIDERING_JOINT_LIMITS = false;
+   private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
    private static final boolean CONTROL_WITH_RESPECT_TO_PELVIS = false;
 
    protected boolean trajectoryWasReplanned;
@@ -62,7 +63,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
-      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController.getFullRobotModel(), robotSide);
+      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController.getFullRobotModel(),
+              robotSide);
    }
 
    /**
@@ -103,8 +105,15 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       if (CORRECT_SWING_CONSIDERING_JOINT_LIMITS)
       {
-         correctInputsAccordingToJointLimits();
-//         legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, desiredLinearAcceleration, desiredAngularAcceleration);
+         if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
+         {
+            legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+                    desiredLinearAcceleration, desiredAngularAcceleration);
+         }
+         else
+         {
+            correctInputsAccordingToJointLimits();
+         }
       }
 
       legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
@@ -122,7 +131,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       RigidBody baseForControl = CONTROL_WITH_RESPECT_TO_PELVIS ? pelvis : rootBody;
       RigidBodySpatialAccelerationControlModule accelerationControlModule = footControlHelper.getAccelerationControlModule();
       accelerationControlModule.doPositionControl(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
-            desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
+              desiredLinearAcceleration, desiredAngularAcceleration, baseForControl);
       accelerationControlModule.packAcceleration(footAcceleration);
 
       footControlHelper.updateSelectionMatrixToHandleAnkleRollAndHipYawAlignment();
@@ -137,12 +146,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final double[] desiredYawPitchRoll = new double[3];
    private final double epsilon = 1e-3;
 
-   // TODO Pretty much hackish... 
+   // TODO Pretty much hackish...
    private void correctInputsAccordingToJointLimits()
    {
       ReferenceFrame frameBeforeHipYawJoint = hipYawJoint.getFrameBeforeJoint();
       desiredOrientation.changeFrame(frameBeforeHipYawJoint);
       desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+
       if (desiredYawPitchRoll[0] > hipYawJoint.getJointLimitUpper() - epsilon)
       {
          desiredYawPitchRoll[0] = hipYawJoint.getJointLimitUpper();
@@ -159,11 +169,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          desiredAngularAcceleration.changeFrame(frameBeforeHipYawJoint);
          desiredAngularAcceleration.setZ(Math.max(0.0, desiredAngularVelocity.getZ()));
       }
+
       desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
 
       ReferenceFrame frameBeforeAnklePitchJoint = anklePitchJoint.getFrameBeforeJoint();
       desiredOrientation.changeFrame(frameBeforeAnklePitchJoint);
       desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+
       if (desiredYawPitchRoll[1] > anklePitchJoint.getJointLimitUpper() - epsilon)
       {
          desiredYawPitchRoll[1] = anklePitchJoint.getJointLimitUpper();
@@ -180,11 +192,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          desiredAngularAcceleration.changeFrame(frameBeforeAnklePitchJoint);
          desiredAngularAcceleration.setY(Math.max(0.0, desiredAngularVelocity.getY()));
       }
+
       desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
 
       ReferenceFrame frameBeforeAnkleRollJoint = ankleRollJoint.getFrameBeforeJoint();
       desiredOrientation.changeFrame(frameBeforeAnkleRollJoint);
       desiredOrientation.getYawPitchRoll(desiredYawPitchRoll);
+
       if (desiredYawPitchRoll[2] > ankleRollJoint.getJointLimitUpper() - epsilon)
       {
          desiredYawPitchRoll[2] = ankleRollJoint.getJointLimitUpper();
@@ -201,6 +215,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
          desiredAngularAcceleration.changeFrame(frameBeforeAnkleRollJoint);
          desiredAngularAcceleration.setX(Math.max(0.0, desiredAngularVelocity.getX()));
       }
+
       desiredOrientation.setYawPitchRoll(desiredYawPitchRoll);
 
       desiredOrientation.changeFrame(worldFrame);
