@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.math.DampedLeastSquaresSolver;
+import us.ihmc.utilities.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -28,7 +28,6 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.trajectories.OrientationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PositionTrajectoryGenerator;
 
-
 public class TrajectoryBasedNumericalInverseKinematicsCalculator
 {
 
@@ -39,7 +38,6 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBody base;
    private final GeometricJacobian ikJacobian;
-   private final DampedLeastSquaresSolver solver;
    private final TwistCalculator twistCalculator;
    private final FramePoint endEffectorPositionInFrameToControlPoseOf;
    private final FrameOrientation endEffectorOrientationInFrameToControlPoseOf;
@@ -105,6 +103,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    // Visualization
    private final YoFramePose yoDesiredTrajectoryPose = new YoFramePose("desiredTrajectoryPose", "", worldFrame, registry);
 
+   private final InverseJacobianSolver inverseJacobianSolver;
+
    public TrajectoryBasedNumericalInverseKinematicsCalculator(RigidBody base, RigidBody endEffector, double controlDT, TwistCalculator twistCalculator,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -117,8 +117,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       baseFrame = base.getBodyFixedFrame();
       endEffectorFrame = endEffector.getBodyFixedFrame();
-      baseFrameForIK = baseFrame; // TODO: Check if correct
       RigidBody endEffectorForIK = revoluteJointsCopyForIK[revoluteJointsCopyForIK.length - 1].getSuccessor();
+      baseFrameForIK = endEffectorForIK.getBodyFixedFrame(); // TODO: Check if correct
       ReferenceFrame endEffectorFrameForIK = endEffectorForIK.getBodyFixedFrame();
       frameToControlPoseOfForIk = new ReferenceFrame(base.getName() + "ControlFrame", endEffectorFrameForIK)
       {
@@ -132,7 +132,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       };
 
       ikJacobian = new GeometricJacobian(revoluteJointsCopyForIK[0].getPredecessor(), endEffectorForIK, baseFrameForIK);
-      solver = new DampedLeastSquaresSolver(ikJacobian.getNumberOfColumns());
+      double lambdaLeastSquares = 0.0009;
+      inverseJacobianSolver = new InverseJacobianSolver(ikJacobian, lambdaLeastSquares);
 
       desiredAngles = new DenseMatrix64F(ikJacobian.getNumberOfColumns(), 1);
       desiredAngularVelocities = new DenseMatrix64F(ikJacobian.getNumberOfColumns(), 1);
@@ -192,14 +193,14 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       desiredVelocityVector.add(linearError);
       desiredAngularVelocityVector.add(angularError);
 
-      desiredTwist.set(frameToControlPoseOf, trajectoryFrame, baseFrame, desiredVelocityVector, desiredAngularVelocityVector);
+      desiredTwist.set(frameToControlPoseOf, trajectoryFrame, baseFrameForIK, desiredVelocityVector, desiredAngularVelocityVector);
 
       transformTwistToEndEffectorFrame();
 
       // Calculate desired joint velocities
-      initializeSolver();
       desiredTwist.packMatrix(twistMatrix, 0);
-      solver.solve(twistMatrix, inverseKinematicsStep);
+      inverseJacobianSolver.solveUsingDampedLeastSquares(twistMatrix);
+      inverseKinematicsStep.set(inverseJacobianSolver.getSolution());
 
       CommonOps.addEquals(desiredAngles, dt, inverseKinematicsStep);
 
@@ -245,23 +246,17 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       }
       else
       {
-         desiredTwist.changeBaseFrameNoRelativeTwist(baseFrame);
+         desiredTwist.changeBaseFrameNoRelativeTwist(baseFrameForIK);
       }
-   }
-
-   private void initializeSolver()
-   {
-      solver.setAlpha(ikAlpha.getDoubleValue());
-      solver.setA(ikJacobian.getJacobianMatrix());
    }
 
    private void updateDesiredVelocities()
    {
-      desiredTwist.set(frameToControlPoseOf, trajectoryFrame, baseFrame, desiredVelocity.getVector(), desiredAngularVelocity.getVector());
+      desiredTwist.set(frameToControlPoseOf, trajectoryFrame, baseFrameForIK, desiredVelocity.getVector(), desiredAngularVelocity.getVector());
       transformTwistToEndEffectorFrame();
-      initializeSolver();
       desiredTwist.packMatrix(twistMatrix, 0);
-      solver.solve(twistMatrix, desiredAngularVelocities);
+      inverseJacobianSolver.solveUsingDampedLeastSquares(twistMatrix);
+      desiredAngularVelocities.set(inverseJacobianSolver.getSolution());
    }
 
    private void updateTrajectories(double time)
@@ -277,10 +272,10 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
       trajectoryFrame = desiredPosition.getReferenceFrame();
 
-      desiredPosition.changeFrame(baseFrame);
-      desiredVelocity.changeFrame(baseFrame);
-      desiredOrientation.changeFrame(baseFrame);
-      desiredAngularVelocity.changeFrame(baseFrame);
+      desiredPosition.changeFrame(baseFrameForIK);
+      desiredVelocity.changeFrame(baseFrameForIK);
+      desiredOrientation.changeFrame(baseFrameForIK);
+      desiredAngularVelocity.changeFrame(baseFrameForIK);
 
    }
 

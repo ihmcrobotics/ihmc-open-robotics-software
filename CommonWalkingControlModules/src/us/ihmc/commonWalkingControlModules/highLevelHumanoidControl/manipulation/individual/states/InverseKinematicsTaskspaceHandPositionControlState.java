@@ -154,19 +154,20 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
          double desiredVelocity = desiredJointVelocities.get(i, 0);
 
          double desiredAcceleration = 0;
-         if (lowLevelVersion){
+         if (lowLevelVersion)
+         {
             joint.setqDesired(desiredPosition);
             joint.setQdDesired(desiredVelocity);
-         }else{
-            PIDController pidController = pidControllers.get(joint);
-            desiredAcceleration = pidController.computeForAngles(currentPosition, desiredPosition, currentVelocity, desiredVelocity, controlDT);
-            desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJointspace.getDoubleValue());
-
-            RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
-            rateLimitedAcceleration.update(desiredAcceleration);
-            desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
-
          }
+
+         PIDController pidController = pidControllers.get(joint);
+         desiredAcceleration = pidController.computeForAngles(currentPosition, desiredPosition, currentVelocity, desiredVelocity, controlDT);
+         desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAccelerationArmJointspace.getDoubleValue());
+
+         RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
+         rateLimitedAcceleration.update(desiredAcceleration);
+         desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
+
          momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
       }
    }
