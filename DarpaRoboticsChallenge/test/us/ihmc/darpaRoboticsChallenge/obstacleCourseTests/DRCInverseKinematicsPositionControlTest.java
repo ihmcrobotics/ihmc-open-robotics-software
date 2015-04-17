@@ -88,7 +88,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    public void setUp()
    { 
       drcSimulationTestHelper = new DRCSimulationTestHelper(new DRCDemo01NavigationEnvironment(), "PositionControlTest", "", DRCObstacleCourseStartingLocation.DEFAULT,
-            simulationTestingParameters, getRobotModel(), null, new JointPositionControllerFactory(true));
+            simulationTestingParameters, getRobotModel(), null, new JointPositionControllerFactory(true), null);
 
       armJointNames = drcSimulationTestHelper.getSDFFullRobotModel().getRobotSpecificJointNames().getArmJointNames();
       numberOfArmJoints = armJointNames.length;
