@@ -27,9 +27,7 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.trajectories.providers.CurrentOrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.CurrentPositionProvider;
-import us.ihmc.utilities.math.trajectories.providers.OrientationProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -44,7 +42,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.yoUtilities.math.trajectories.CirclePositionAndOrientationTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.ConstantPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.FinalApproachPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.InitialClearancePoseTrajectoryGenerator;
@@ -84,15 +82,13 @@ public class HandControlModule
 
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
-   private final CirclePositionAndOrientationTrajectoryGenerator circularPoseTrajectoryGenerator;
+   private final CirclePoseTrajectoryGenerator circularPoseTrajectoryGenerator;
    private final FinalApproachPoseTrajectoryGenerator finalApproachPoseTrajectoryGenerator;
    private final InitialClearancePoseTrajectoryGenerator initialClearancePoseTrajectoryGenerator;
    private final LeadInOutPoseTrajectoryGenerator leadInOutPoseTrajectoryGenerator;
 
    private final PositionProvider currentHandPosition;
-   private final OrientationProvider currentHandOrientation;
    private final YoVariableDoubleProvider trajectoryTimeProvider;
-   private final YoVariableDoubleProvider desiredRotationAngleProvider;
    private final MultipleWaypointsPositionTrajectoryGenerator waypointPositionTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
    private final WrapperForPositionAndOrientationTrajectoryGenerators wayPointPositionAndOrientationTrajectoryGenerator;
@@ -186,8 +182,6 @@ public class HandControlModule
 
       trajectoryTimeProvider = new YoVariableDoubleProvider(name + "TrajectoryTime", registry);
       currentHandPosition = new CurrentPositionProvider(handFrame);
-      currentHandOrientation = new CurrentOrientationProvider(handFrame);
-      desiredRotationAngleProvider = new YoVariableDoubleProvider(name + "DesiredRotationAngle", registry);
 
       quinticPolynomialTrajectoryGenerators = new LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
 
@@ -231,13 +225,12 @@ public class HandControlModule
               yoGraphicsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
-      circularPoseTrajectoryGenerator = new CirclePositionAndOrientationTrajectoryGenerator(name + "Circular", trajectoryTimeProvider, currentHandOrientation,
-              currentHandPosition, registry, desiredRotationAngleProvider, yoGraphicsListRegistry);
+      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
+            yoGraphicsListRegistry);
 
       boolean doVelocityAtWaypoints = false;
       waypointPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("handWayPointPosition", worldFrame, currentHandPosition, registry);
-      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, doVelocityAtWaypoints, true,
-              worldFrame, registry);
+      waypointOrientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("handWayPointOrientation", 15, doVelocityAtWaypoints, true, worldFrame, registry);
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
               waypointOrientationTrajectoryGenerator);
 
@@ -436,7 +429,7 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
-   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double time)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean rotateHandAngleAboutAxis, double time)
    {
       // Limit arm joint motor speed based on Boston Dynamics Limit
       // of 700 rad/s input to the transmission.
@@ -444,12 +437,12 @@ public class HandControlModule
       if (time < 2.0)
          time = 2.0;
 
-      desiredRotationAngleProvider.set(rotationAngle);
       trajectoryTimeProvider.set(time);
 
-      circularPoseTrajectoryGenerator.setRotationAxis(rotationAxisOriginInWorld, rotationAxisInWorld);
-      circularPoseTrajectoryGenerator.setInitialPose(new FramePose(fullRobotModel.getHandControlFrame(robotSide)));
-      circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
+      circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
+      circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
+      circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
+      circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(rotateHandAngleAboutAxis);
 
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator);
    }
