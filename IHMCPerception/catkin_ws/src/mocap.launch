@@ -1,0 +1,16 @@
+<launch>
+        <arg name="atlas_urdf" default="$(find ihmc_models)/urdf/atlas_unplugged_v5_no_hands.urdf" />
+        <arg name="robot_namespace" default="atlas" />
+        <param name="/atlas/robot_description" textfile="$(arg atlas_urdf)" />
+
+        <include file="$(find multisense_bringup)/multisense.launch" />
+        <node name="set_motor_speed" pkg="dynamic_reconfigure" type="dynparam"  args="set --timeout=10 /multisense motor_speed 2.5" />
+        <node name="set_resolution" pkg="dynamic_reconfigure" type="dynparam"  args="set --timeout=10 /multisense resolution 2048x1088x256" />
+        <node name="transform_provider" pkg="transform_provider" type="transform_provider_node" />
+        <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" output="log">
+              <remap from="joint_states" to="/$(arg robot_namespace)/output/joint_states" />
+              <remap from="robot_description" to="/$(arg robot_namespace)/robot_description" />
+        </node>
+        <!--include file="$(find lidar_to_point_cloud_transformer)/launch/atlas_lidar_to_point_cloud_transformer.launch" /-->
+        <include file="$(find scan_to_cloud)/launch/filter_scan.launch" />
+</launch>
