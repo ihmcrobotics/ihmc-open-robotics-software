@@ -195,8 +195,8 @@ public class ManipulationControlModule
       {
          if (handPoseProvider.checkHandPoseListPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-             handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
-                     handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide));
+            handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
+                  handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide));
          }
          else
          {
