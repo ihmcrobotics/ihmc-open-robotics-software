@@ -89,12 +89,12 @@ public class TurnValveBehavior extends BehaviorInterface
 
    public TurnValveBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport, BooleanYoVariable tippingDetectedBoolean,
-         WholeBodyControllerParameters wholeBodyControllerParameters, WalkingControllerParameters walkingControllerParameters)
+         WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       childBehaviors = new ArrayList<BehaviorInterface>();
       moveHandToHomeBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);

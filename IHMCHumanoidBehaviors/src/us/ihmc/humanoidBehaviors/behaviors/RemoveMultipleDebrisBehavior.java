@@ -49,12 +49,12 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
 
    public RemoveMultipleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrame, SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, DoubleYoVariable yoTime,
-         WholeBodyControllerParameters wholeBodyControllerParameters, WalkingControllerParameters walkingControllerParameters)
+         WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
       handPoseBehavior = new HandPoseBehavior(outgoingCommunicationBridge, yoTime);
       removePieceOfDebrisBehavior = new RemoveSingleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrame, yoTime,
-            wholeBodyControllerParameters, walkingControllerParameters);
+            wholeBodyControllerParameters);
       isDone = new BooleanYoVariable("isDone", registry);
       haveInputsBeenSet = new BooleanYoVariable("haveInputsBeenSet", registry);
 
