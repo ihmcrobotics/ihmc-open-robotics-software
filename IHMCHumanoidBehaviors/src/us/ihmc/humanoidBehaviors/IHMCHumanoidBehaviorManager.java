@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.DrillTaskSimulatorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.PushButtonBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -204,6 +205,9 @@ public class IHMCHumanoidBehaviorManager
       
       PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
+      
+      DrillTaskSimulatorBehavior drillTaskSimulatorBehavior = new DrillTaskSimulatorBehavior(outgoingCommunicationBridge, yoTime, wristSensors);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK_SIMULATOR, drillTaskSimulatorBehavior);
       
       if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
