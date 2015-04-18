@@ -343,7 +343,7 @@ public class InverseDynamicsJointController extends HighLevelBehavior
 
             ConstantPoseTrajectoryGenerator constantPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(desiredFootPosition, desiredFootQuaternion);
             
-            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(pelvis, foot, momentumBasedController.getControlDT(),
+            TrajectoryBasedNumericalInverseKinematicsCalculator footIKCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", pelvis, foot, momentumBasedController.getControlDT(),
                   twistCalculator, new YoVariableRegistry("dummy"), null);
             footIKCalculator.setTrajectory(constantPoseTrajectoryGenerator, constantPoseTrajectoryGenerator, foot.getBodyFixedFrame());
 
