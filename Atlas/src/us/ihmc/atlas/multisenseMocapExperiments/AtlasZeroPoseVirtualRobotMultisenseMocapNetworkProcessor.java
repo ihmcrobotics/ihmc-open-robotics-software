@@ -1,8 +1,11 @@
-package us.ihmc.atlas;
+package us.ihmc.atlas.multisenseMocapExperiments;
 
 import java.io.IOException;
 import java.net.URI;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotModelFactory;
+import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
@@ -13,12 +16,12 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class AtlasMultisenseMocapNetworkProcessor
+public class AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor
 {
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
-   public AtlasMultisenseMocapNetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
+   public AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       URI rosUri = NetworkParameters.getROSURI();
       
@@ -52,7 +55,7 @@ public class AtlasMultisenseMocapNetworkProcessor
 
       try
       {
-         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.SIM, false);
+         robotModel = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), AtlasRobotModel.AtlasTarget.HEAD_ON_A_STICK, false);
       }
       catch (IllegalArgumentException e)
       {
@@ -61,6 +64,6 @@ public class AtlasMultisenseMocapNetworkProcessor
          return;
       }
 
-      new AtlasMultisenseMocapNetworkProcessor(robotModel, config.getString("namespace"));
+      new AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor(robotModel, config.getString("namespace"));
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 
 import java.net.URI;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
@@ -18,10 +19,14 @@ import org.ros.node.topic.Subscriber;
 import sensor_msgs.JointState;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.RandomTools;
+import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
@@ -43,6 +48,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private final ReferenceFrame headFrame;
    private final SixDoFJoint rootJoint;
    private final AtomicReference<RigidBodyTransform> atomicPelvisPoseInMocapFrame = new AtomicReference<RigidBodyTransform>(null);
+   private Random random = new Random();
    
    public RosConnectedZeroPoseRobotConfigurationDataProducer(URI rosMasterURI, PacketCommunicator objectCommunicator, final DRCRobotModel robotModel)
    {
@@ -96,8 +102,17 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    {
       RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.get();
       fullRobotModel.updateFrames();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, fullRobotModel.getIMUDefinitions());
+      IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, imuDefinitions);
 
+      for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
+      {
+         IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
+         imuPacket.set(RandomTools.generateRandomVector(random), RandomTools.generateRandomQuaternion(random), RandomTools.generateRandomVector(random));
+      }
+      
+      robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
+      
       robotConfigurationData.setTimestamp(totalNsecs);
       if(pelvisPoseInMocapFrame != null)
       {
