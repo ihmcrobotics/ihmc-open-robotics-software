@@ -13,6 +13,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HumanoidArmPose;
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.behaviors.GraspCylinderPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
@@ -26,6 +27,7 @@ import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.RotateHandAboutAxisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
@@ -35,6 +37,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.HandPoseListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisPoseBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.taskExecutor.BehaviorTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.ChestOrientationTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.CoMHeightTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootPoseTask;
@@ -45,12 +48,12 @@ import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
@@ -66,6 +69,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.math.geometry.TransformReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -116,6 +120,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final WalkToLocationBehavior walkToLocationBehavior;
    private final ComHeightBehavior comHeightBehavior;
    private final TurnInPlaceBehavior turnInPlaceBehavior;
+   private final GraspCylinderBehavior graspCylinerBehavior;
+   private final RotateHandAboutAxisBehavior rotateHandAboutAxisBehavior;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable trajectoryTime, flyingTrajectoryTime;
@@ -151,7 +157,6 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
 
    private final WalkingControllerParameters walkingControllerParameters;
-   private final WholeBodyControllerParameters wholeBodyControllerParameters;
 
    private enum DiagnosticTask
    {
@@ -232,7 +237,6 @@ public class DiagnosticBehavior extends BehaviorInterface
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;
-      this.wholeBodyControllerParameters = wholeBodyControllerParameters;
       this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       diagnosticBehaviorEnabled = new BooleanYoVariable("diagnosticBehaviorEnabled", registry);
@@ -334,6 +338,12 @@ public class DiagnosticBehavior extends BehaviorInterface
          registry.addChild(handPoseListBehavior.getYoVariableRegistry());
          handPoseListBehaviors.put(robotSide, handPoseListBehavior);
       }
+      
+      graspCylinerBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
+      registry.addChild(graspCylinerBehavior.getYoVariableRegistry());
+
+      rotateHandAboutAxisBehavior = new RotateHandAboutAxisBehavior("diagnostic_", outgoingCommunicationBridge, fullRobotModel, yoTime);
+      registry.addChild(rotateHandAboutAxisBehavior.getYoVariableRegistry());
 
       requestedDiagnostic = new EnumYoVariable<>("requestedDiagnostic", registry, DiagnosticTask.class, true);
       requestedDiagnostic.set(null);
@@ -2168,12 +2178,60 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
+   private static final double wheelRadius = 0.2;
+   private static final RobotSide graspingSide = RobotSide.LEFT;
+   
    private void sequenceTurnWheel()
    {
-      // TODO Auto-generated method stub
-      PrintTools.info("Implement me!");
-      GraspCylinderBehavior graspCylinerBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
-//      pipeLine.submitSingleTaskStage(graspCylinerTask);
+      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      Vector3d translation = new Vector3d(0.53, 0.6, -0.06);
+      AxisAngle4d rotation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), 1.0);
+      RigidBodyTransform wheelTransformToPelvis = new RigidBodyTransform(rotation, translation);
+      ReferenceFrame steeringWheelFrame = new TransformReferenceFrame("steeringWheel", pelvisFrame, wheelTransformToPelvis);
+      
+      FramePoint graspPoint = new FramePoint(steeringWheelFrame, 0.0, 0.0, wheelRadius);
+      FrameVector steeringWheelAxis = new FrameVector(steeringWheelFrame, 1.0, 0.0, 0.0);
+      
+      graspPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      steeringWheelAxis.changeFrame(ReferenceFrame.getWorldFrame());
+      
+      final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(graspingSide, graspPoint.getPointCopy(), steeringWheelAxis.getVectorCopy(), 0.0);
+      pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinerBehavior, yoTime)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            graspCylinerBehavior.setInput(graspCylinderPacket);
+         }
+      });
+      
+      final RigidBodyTransform wheelTransformToWorld = steeringWheelFrame.getTransformToDesiredFrame(worldFrame);
+      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(90.0), 1.0, false);
+         }
+      });
+      
+      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(-180.0), 1.0, false);
+         }
+      });
+      
+      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(90.0), 1.0, false);
+         }
+      });
    }
 
    private void sequenceTurnInPlace()
@@ -2362,6 +2420,8 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepListBehavior.consumeObjectFromNetworkProcessor(object);
          walkToLocationBehavior.consumeObjectFromNetworkProcessor(object);
          turnInPlaceBehavior.consumeObjectFromNetworkProcessor(object);
+         graspCylinerBehavior.consumeObjectFromNetworkProcessor(object);
+         rotateHandAboutAxisBehavior.consumeObjectFromNetworkProcessor(object);
       }
    }
 
@@ -2375,6 +2435,8 @@ public class DiagnosticBehavior extends BehaviorInterface
          footstepListBehavior.consumeObjectFromController(object);
          walkToLocationBehavior.consumeObjectFromController(object);
          turnInPlaceBehavior.consumeObjectFromController(object);
+         graspCylinerBehavior.consumeObjectFromController(object);
+         rotateHandAboutAxisBehavior.consumeObjectFromController(object);
       }
    }
 

@@ -77,7 +77,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       FingerStateTask openHandTask = new FingerStateTask(robotSide, FingerState.OPEN, fingerStateBehavior, yoTime);
 
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
-            fullRobotModel, yoTime, handPoseBehavior, 1.0);
+            fullRobotModel, yoTime, handPoseBehavior, 3.0);
 
       GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, palmOffsetFromWrist, fullRobotModel, yoTime,
             handPoseBehavior, 1.0);
