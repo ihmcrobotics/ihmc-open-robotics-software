@@ -1601,7 +1601,8 @@
       </physics>
     </joint>
     <link name='head'>
-      <pose>0.2821 0 0.7885 0 -0 0</pose>
+      <!--pose>0.2821 0 0.7885 0 -0 0</pose-->
+      <pose>0.2421 0 0.8335 0 -0 0</pose>
       <inertial>
         <pose>-0.0754942 3.38765e-05 0.0277411 0 -0 0</pose>
         <mass>1.41991</mass>
