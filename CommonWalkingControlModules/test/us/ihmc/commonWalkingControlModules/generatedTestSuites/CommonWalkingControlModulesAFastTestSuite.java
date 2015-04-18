@@ -47,7 +47,7 @@ import org.junit.runners.Suite;
    us.ihmc.commonWalkingControlModules.simulationComparison.AllYoVariablesSimulationComparerTest.class,
    us.ihmc.commonWalkingControlModules.simulationComparison.ReflectionSimulationComparerTest.class,
    us.ihmc.commonWalkingControlModules.terrain.VaryingStairGroundProfileTest.class,
-   us.ihmc.commonWalkingControlModules.trajectories.CirclePositionAndOrientationTrajectoryGeneratorTest.class,
+   us.ihmc.commonWalkingControlModules.trajectories.CirclePoseTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CirclePositionTrajectoryGeneratorTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmootherTest.class,
    us.ihmc.commonWalkingControlModules.trajectories.Constrained5thOrderPolyForSwingTrajectoryTest.class,
