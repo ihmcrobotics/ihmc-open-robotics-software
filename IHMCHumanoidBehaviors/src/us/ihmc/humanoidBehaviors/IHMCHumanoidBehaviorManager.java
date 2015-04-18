@@ -88,8 +88,6 @@ public class IHMCHumanoidBehaviorManager
       }
 
       SDFFullRobotModel fullRobotModel = wholeBodyControllerParameters.createFullRobotModel();
-      WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
-
       BehaviorCommunicationBridge communicationBridge = new BehaviorCommunicationBridge(behaviorPacketCommunicator, registry);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -131,12 +129,12 @@ public class IHMCHumanoidBehaviorManager
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
-               walkingControllerParameters, runAutomaticDiagnosticTimeToWait);
+               wholeBodyControllerParameters, runAutomaticDiagnosticTimeToWait);
       }
       else
       {
          createAndRegisterBehaviors(dispatcher, fullRobotModel, wristSensorUpdatables, referenceFrames, yoTime, communicationBridge, yoGraphicsListRegistry,
-               capturePointUpdatable, wholeBodyControllerParameters, walkingControllerParameters);
+               capturePointUpdatable, wholeBodyControllerParameters);
       }
 
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorControlModePacket.class, desiredBehaviorControlSubscriber);
@@ -168,8 +166,7 @@ public class IHMCHumanoidBehaviorManager
    private void createAndRegisterBehaviors(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
          SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, YoGraphicsListRegistry yoGraphicsListRegistry,
-         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters,
-         WalkingControllerParameters walkingControllerParameters)
+         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       BooleanYoVariable tippingDetectedBoolean = capturePointUpdatable.getTippingDetectedBoolean();
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -178,26 +175,28 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DO_NOTHING, new SimpleDoNothingBehavior(outgoingCommunicationBridge));
 
-      ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
+      ScriptBehavior scriptBehavior = new ScriptBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
+            wholeBodyControllerParameters.getWalkingControllerParameters());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
+            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
-      LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport, walkingControllerParameters);
+      LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
+            wholeBodyControllerParameters.getWalkingControllerParameters());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZATION, localizationBehavior);
 
       TurnValveBehavior walkAndTurnValveBehavior = new TurnValveBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames, yoTime,
-            tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters, walkingControllerParameters);
+            tippingDetectedBoolean, yoDoubleSupport, wholeBodyControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_N_TURN_VALVE, walkAndTurnValveBehavior);
 
       RemoveMultipleDebrisBehavior removeDebrisBehavior = new RemoveMultipleDebrisBehavior(outgoingCommunicationBridge, fullRobotModel, referenceFrames,
-            wristSensors, yoTime, wholeBodyControllerParameters, walkingControllerParameters);
+            wristSensors, yoTime, wholeBodyControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
 
       WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime,
-            walkingControllerParameters.getAnkleHeight());
+            wholeBodyControllerParameters.getWalkingControllerParameters().getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
@@ -216,14 +215,14 @@ public class IHMCHumanoidBehaviorManager
 
    private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
          ReferenceFrames referenceFrames, DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         CapturePointUpdatable capturePointUpdatable, WalkingControllerParameters walkingControllerParameters, double timeToWait)
+         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait)
     {
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, walkingControllerParameters, yoSupportPolygon);
+            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);

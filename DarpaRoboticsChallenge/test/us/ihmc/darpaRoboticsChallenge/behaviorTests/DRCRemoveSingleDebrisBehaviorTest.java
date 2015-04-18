@@ -277,7 +277,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       putArmsAtCompactHomePositionAndPrepareSimulation();
       
       final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel);
 
       removeSingleDebrisBehavior.initialize();
 
@@ -320,7 +320,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       putArmsAtCompactHomePositionAndPrepareSimulation();
       
       final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel);
       
       removeSingleDebrisBehavior.initialize();
       
@@ -363,7 +363,7 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
       putArmsAtCompactHomePositionAndPrepareSimulation();
       
       final RemoveSingleDebrisBehavior removeSingleDebrisBehavior = new RemoveSingleDebrisBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel, drcRobotModel.getWalkingControllerParameters());
+            fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), yoTime, drcRobotModel);
       
       removeSingleDebrisBehavior.initialize();
       

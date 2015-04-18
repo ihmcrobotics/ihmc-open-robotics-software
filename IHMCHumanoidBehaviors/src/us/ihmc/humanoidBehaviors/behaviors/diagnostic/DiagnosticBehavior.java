@@ -25,6 +25,7 @@ import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.humanoidBehaviors.behaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.behaviors.TurnInPlaceBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToLocationBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.GraspCylinderBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestOrientationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ComHeightBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootPoseBehavior;
@@ -49,6 +50,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
@@ -75,6 +77,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJointReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.taskExecutor.NullTask;
 import us.ihmc.utilities.taskExecutor.PipeLine;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -148,6 +151,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final SideDependentList<Double> elbowJointSign = new SideDependentList<>();
 
    private final WalkingControllerParameters walkingControllerParameters;
+   private final WholeBodyControllerParameters wholeBodyControllerParameters;
 
    private enum DiagnosticTask
    {
@@ -180,6 +184,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FEET_SQUARE_UP,
       GO_HOME,
       REDO_LAST_TASK,
+      TURN_WHEEL
    };
 
    private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
@@ -220,14 +225,15 @@ public class DiagnosticBehavior extends BehaviorInterface
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         WalkingControllerParameters walkingControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon)
+         WholeBodyControllerParameters wholeBodyControllerParameters, YoFrameConvexPolygon2d yoSupportPolygon)
    {
       super(outgoingCommunicationBridge);
 
       this.supportLeg = supportLeg;
       this.fullRobotModel = fullRobotModel;
       this.yoSupportPolygon = yoSupportPolygon;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.wholeBodyControllerParameters = wholeBodyControllerParameters;
+      this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       diagnosticBehaviorEnabled = new BooleanYoVariable("diagnosticBehaviorEnabled", registry);
       hasControllerWakenUp = new BooleanYoVariable("diagnostBehaviorHasControllerWakenUp", registry);
@@ -2151,11 +2157,23 @@ public class DiagnosticBehavior extends BehaviorInterface
                handleRequestedDiagnostic();
             }
             break;
+         case TURN_WHEEL:
+            lastDiagnosticTask.set(DiagnosticTask.TURN_WHEEL);
+            sequenceTurnWheel();
+            break;
          default:
             break;
          }
          requestedDiagnostic.set(null);
       }
+   }
+
+   private void sequenceTurnWheel()
+   {
+      // TODO Auto-generated method stub
+      PrintTools.info("Implement me!");
+      GraspCylinderBehavior graspCylinerBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
+//      pipeLine.submitSingleTaskStage(graspCylinerTask);
    }
 
    private void sequenceTurnInPlace()

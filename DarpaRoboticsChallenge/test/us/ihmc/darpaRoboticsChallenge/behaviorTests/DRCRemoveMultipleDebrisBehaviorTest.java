@@ -137,8 +137,7 @@ public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotT
 
       //TODO: pass in the wrist sensor when it will be used in the behaviors
       final RemoveMultipleDebrisBehavior removeMultipleDebrisBehavior = new RemoveMultipleDebrisBehavior(
-            drcBehaviorTestHelper.getBehaviorCommunicationBridge(), fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), null, yoTime, drcRobotModel,
-            drcRobotModel.getWalkingControllerParameters());
+            drcBehaviorTestHelper.getBehaviorCommunicationBridge(), fullRobotModel, drcBehaviorTestHelper.getReferenceFrames(), null, yoTime, drcRobotModel);
 
       generateDebrisData();
       removeMultipleDebrisBehavior.initialize();

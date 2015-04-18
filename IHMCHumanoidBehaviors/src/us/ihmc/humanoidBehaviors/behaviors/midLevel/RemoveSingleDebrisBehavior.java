@@ -52,13 +52,12 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    private FramePoint graspPosition;
 
    public RemoveSingleDebrisBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters,
-         WalkingControllerParameters walkingControllerParameters)
+         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
 
       this.fullRobotModel = fullRobotModel;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
       this.yoTime = yoTime;
       this.midZupFrame = referenceFrames.getMidFeetZUpFrame();
 

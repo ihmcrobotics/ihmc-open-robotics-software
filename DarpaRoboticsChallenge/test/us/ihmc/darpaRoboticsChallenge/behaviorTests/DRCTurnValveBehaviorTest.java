@@ -407,7 +407,7 @@ public abstract class DRCTurnValveBehaviorTest implements MultiRobotTestInterfac
       WalkingControllerParameters walkingControllerParams = getRobotModel().getWalkingControllerParameters();
 
       final TurnValveBehavior turnValveBehavior = new TurnValveBehavior(communicationBridge, fullRobotModel, referenceFrames, yoTime, yoDoubleSupport,
-            yoTippingDetected, wholeBodyControllerParameters, walkingControllerParams);
+            yoTippingDetected, wholeBodyControllerParameters);
       return turnValveBehavior;
    }
 
