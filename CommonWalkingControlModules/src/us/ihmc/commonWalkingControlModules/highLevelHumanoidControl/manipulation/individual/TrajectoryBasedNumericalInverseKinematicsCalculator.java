@@ -105,8 +105,8 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
 
    private final InverseJacobianSolver inverseJacobianSolver;
 
-   public TrajectoryBasedNumericalInverseKinematicsCalculator(RigidBody base, RigidBody endEffector, double controlDT, TwistCalculator twistCalculator,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TrajectoryBasedNumericalInverseKinematicsCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT,
+         TwistCalculator twistCalculator, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.base = base;
       this.dt = controlDT;
@@ -242,6 +242,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       if (trajectoryFrame == worldFrame && twistCalculator != null)
       {
          twistCalculator.packTwistOfBody(baseTwist, base);
+         baseTwist.changeFrame(desiredTwist.getExpressedInFrame());
          desiredTwist.sub(baseTwist);
       }
       else
@@ -276,7 +277,6 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       desiredVelocity.changeFrame(baseFrameForIK);
       desiredOrientation.changeFrame(baseFrameForIK);
       desiredAngularVelocity.changeFrame(baseFrameForIK);
-
    }
 
    private boolean updateError()

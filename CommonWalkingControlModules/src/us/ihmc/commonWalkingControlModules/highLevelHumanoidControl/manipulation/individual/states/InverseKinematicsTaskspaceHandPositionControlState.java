@@ -26,7 +26,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
-
 public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
 {
    private final boolean lowLevelVersion;
@@ -44,17 +43,16 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    private final HashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations = new HashMap<OneDoFJoint, RateLimitedYoVariable>();
    private final DoubleYoVariable maxAccelerationArmJointspace;
 
-
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
-           MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector,
-           YoGraphicsListRegistry yoGraphicsListRegistry, ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer,
-           YoPIDGains gains, double controlDT, YoVariableRegistry parentRegistry)
+         MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry,
+         ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, YoPIDGains gains, double controlDT,
+         YoVariableRegistry parentRegistry)
    {
       super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, yoGraphicsListRegistry, parentRegistry);
       this.controlStatusProducer = controlStatusProducer;
       this.robotSide = robotSide;
-      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(base, endEffector, controlDT,
-              momentumBasedController.getTwistCalculator(), parentRegistry, yoGraphicsListRegistry);
+      inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(namePrefix, base, endEffector, controlDT, momentumBasedController.getTwistCalculator(),
+            parentRegistry, yoGraphicsListRegistry);
 
       inverseKinematicsSolutionIsValid = new BooleanYoVariable("inverseKinematicsSolutionIsValid", registry);
 
@@ -71,7 +69,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
          pidControllers.put(joint, pidController);
 
          RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(joint.getName() + "Acceleration" + robotSide, registry,
-                                                            gains.getYoMaximumJerk(), controlDT);
+               gains.getYoMaximumJerk(), controlDT);
          rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
       }
 
@@ -90,9 +88,13 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      inverseKinematicsCalculator.initialize();
+//      if (getPreviousState() == this || getPreviousState() instanceof JointSpaceHandControlState)
+//         inverseKinematicsCalculator.initializeFromDesiredJointAngles();
+//      else
+         inverseKinematicsCalculator.initialize();
       inverseKinematicsSolutionIsValid.set(true);
-      if (lowLevelVersion){
+      if (lowLevelVersion)
+      {
          enableLowLevelPositionControl();
       }
    }
@@ -100,7 +102,8 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    @Override
    public void doTransitionOutOfAction()
    {
-      if (lowLevelVersion){
+      if (lowLevelVersion)
+      {
          disableLowLevelPositionControl();
       }
    }
@@ -175,12 +178,12 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    @Override
    public boolean isDone()
    {
-      return super.isDone() ||!inverseKinematicsSolutionIsValid.getBooleanValue();
+      return super.isDone() || !inverseKinematicsSolutionIsValid.getBooleanValue();
    }
 
    @Override
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator,
-                             RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+         RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
    {
       super.setTrajectory(poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule);
       inverseKinematicsCalculator.setTrajectory(poseTrajectoryGenerator, poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
