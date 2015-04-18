@@ -60,6 +60,9 @@ public class AtlasMinimalMultisenseMocapNetworkProcessor  extends RosPointCloudS
    
    /**
     * received a point cloud from the multisense
+    * rotate the points to zUp from left camera optical frame
+    * offset the points to account for mocap rig problems
+    * transform the points using the mocap data
     */
    @Override
    public void onNewMessage(PointCloud2 pointCloud)
@@ -83,6 +86,7 @@ public class AtlasMinimalMultisenseMocapNetworkProcessor  extends RosPointCloudS
    
    /**
     * received an update from mocap
+    * gets the head pose in mocap zUp
     */
    @Override
    public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
