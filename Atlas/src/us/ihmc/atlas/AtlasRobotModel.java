@@ -72,7 +72,7 @@ public class AtlasRobotModel implements DRCRobotModel
 {
    private final double HARDSTOP_RESTRICTION_ANGLE = Math.toRadians(5.0);
 
-   public enum AtlasTarget {SIM, GAZEBO, REAL_ROBOT}
+   public enum AtlasTarget {SIM, GAZEBO, REAL_ROBOT, HEAD_ON_A_STICK}
 
    private final AtlasRobotVersion selectedVersion;
    private final AtlasTarget target;

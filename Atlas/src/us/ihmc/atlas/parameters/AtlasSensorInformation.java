@@ -80,6 +80,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String lidarSensorName = "head_hokuyo_sensor";
    private static final String lidarJointTopic = multisense_namespace + "/joint_states";
    private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
+   private static final String multisense_laser_topic__as_string = multisense_namespace+"/lidar_points2";
    private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace+"/filtered_cloud";
    private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
    private static final String[] imuSensorsToUseInStateEstimator = { bodyIMUSensor };
@@ -109,6 +110,13 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
          lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_filtered_laser_as_point_cloud_topic_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
+         pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
+      }
+      if(target == AtlasTarget.HEAD_ON_A_STICK)
+      {
+         cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(left_camera_name, left_camera_topic, left_info_camera_topic, multisenseHandoffFrame, baseTfName, left_frame_name, MULTISENSE_SL_LEFT_CAMERA_ID);
+         cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_camera_name, right_camera_topic, right_info_camera_topic, multisenseHandoffFrame, baseTfName, right_frame_name, MULTISENSE_SL_RIGHT_CAMERA_ID);
+         lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(true, lidarSensorName, multisense_laser_topic__as_string, lidarJointName, lidarJointTopic, multisenseHandoffFrame, lidarBaseFrame, lidarEndFrame, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
          pointCloudParamaters[MULTISENSE_STEREO_ID] = new DRCRobotPointCloudParameters(stereoSensorName, stereoColorTopic, multisenseHandoffFrame, stereoBaseFrame, stereoEndFrame, MULTISENSE_STEREO_ID);
       }
       else if (target == AtlasTarget.GAZEBO)
