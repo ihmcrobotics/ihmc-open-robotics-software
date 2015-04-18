@@ -10,7 +10,6 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -31,7 +30,6 @@ import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -81,7 +79,7 @@ public class ThePeoplesGloriousNetworkProcessor
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
-//      setupRosLocalization();
+      setupRosLocalization();
       setupErrorTopics();
 
       rosMainNode.execute();
