@@ -46,6 +46,7 @@ import us.ihmc.humanoidBehaviors.taskExecutor.FootstepTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseListTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandPoseTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.PelvisPoseTask;
+import us.ihmc.humanoidBehaviors.taskExecutor.RotateHandAboutAxisTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.TurnInPlaceTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.WalkToLocationTask;
 import us.ihmc.utilities.Axis;
@@ -54,6 +55,7 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.math.MathTools;
@@ -2178,13 +2180,17 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
    }
 
-   private static final double wheelRadius = 0.2;
-   private static final RobotSide graspingSide = RobotSide.LEFT;
-   
+   private static final double wheelRadius = 0.15;
    private void sequenceTurnWheel()
    {
+      if (activeSideForHandControl.getEnumValue() == null)
+      {
+         PrintTools.info("Select hand to perform diagnostic.");
+         return;
+      }
+      
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
-      Vector3d translation = new Vector3d(0.53, 0.6, -0.06);
+      Vector3d translation = new Vector3d(0.53, activeSideForHandControl.getEnumValue().negateIfRightSide(0.6), -0.06);
       AxisAngle4d rotation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), 1.0);
       RigidBodyTransform wheelTransformToPelvis = new RigidBodyTransform(rotation, translation);
       ReferenceFrame steeringWheelFrame = new TransformReferenceFrame("steeringWheel", pelvisFrame, wheelTransformToPelvis);
@@ -2195,7 +2201,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       graspPoint.changeFrame(ReferenceFrame.getWorldFrame());
       steeringWheelAxis.changeFrame(ReferenceFrame.getWorldFrame());
       
-      final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(graspingSide, graspPoint.getPointCopy(), steeringWheelAxis.getVectorCopy(), 0.0);
+      final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(), steeringWheelAxis.getVectorCopy(), 0.0);
       pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinerBehavior, yoTime)
       {
          @Override
@@ -2206,32 +2212,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       });
       
       final RigidBodyTransform wheelTransformToWorld = steeringWheelFrame.getTransformToDesiredFrame(worldFrame);
-      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(90.0), 1.0, false);
-         }
-      });
-      
-      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(-180.0), 1.0, false);
-         }
-      });
-      
-      pipeLine.submitSingleTaskStage(new BehaviorTask(rotateHandAboutAxisBehavior, yoTime)
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            rotateHandAboutAxisBehavior.setInput(graspingSide, true, Axis.X, wheelTransformToWorld, Math.toRadians(90.0), 1.0, false);
-         }
-      });
+      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior, wheelTransformToWorld, Axis.X, true, Math.toRadians(90.0), 1.0, false));
+      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior, wheelTransformToWorld, Axis.X, true, Math.toRadians(-180.0), 1.0, false));
+      pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior, wheelTransformToWorld, Axis.X, true, Math.toRadians(90.0), 1.0, false));
    }
 
    private void sequenceTurnInPlace()
