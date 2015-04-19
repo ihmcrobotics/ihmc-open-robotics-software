@@ -1676,7 +1676,7 @@ public class DRCDemo01NavigationEnvironment implements CommonAvatarEnvironmentIn
       setUpSlopedCinderBlock(combinedTerrainObject, xCenter + xyRotated2[0], yCenter + xyRotated2[1], numberFlatSupports, yawDegrees);
    }
 
-   private static CombinedTerrainObject3D setUpGround(String name)
+   public static CombinedTerrainObject3D setUpGround(String name)
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
