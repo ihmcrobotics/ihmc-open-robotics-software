@@ -18,7 +18,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.taskExecutor.PipeLine;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -40,7 +39,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    private RobotSide robotSide = null;
 
    public GraspCylinderBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, FullRobotModel fullRobotModel,
-         WholeBodyControllerParameters wholeBodyControllerParameters, DoubleYoVariable yoTime)
+         DoubleYoVariable yoTime)
    {
       super(outgoingCommunicationBridge);
 

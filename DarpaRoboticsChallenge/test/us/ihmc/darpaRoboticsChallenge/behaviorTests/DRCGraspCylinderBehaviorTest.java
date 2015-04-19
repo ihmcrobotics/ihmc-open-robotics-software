@@ -124,7 +124,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       assertTrue(success);
 
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
 
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
       
@@ -162,7 +162,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       assertTrue(success);
 
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
 
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
       
@@ -200,7 +200,7 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       assertTrue(success);
 
       final GraspCylinderBehavior graspBehavior = new GraspCylinderBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-            drcBehaviorTestHelper.getSDFFullRobotModel(), getRobotModel(), drcBehaviorTestHelper.getYoTime());
+            drcBehaviorTestHelper.getSDFFullRobotModel(), drcBehaviorTestHelper.getYoTime());
 
       RobotSide robotSideOfGraspingHand = RobotSide.LEFT;
       
