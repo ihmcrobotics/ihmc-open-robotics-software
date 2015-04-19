@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket;
@@ -59,15 +58,16 @@ public class IHMCHumanoidBehaviorManager
 
    private static double runAutomaticDiagnosticTimeToWait = Double.NaN;
 
-   private final PacketCommunicator behaviorPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+   private final PacketCommunicator behaviorPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT,
+         new IHMCCommunicationKryoNetClassList());
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable yoTime = new DoubleYoVariable("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
 
-   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo) throws IOException
+   public IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
+         boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo) throws IOException
    {
       this(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, false);
    }
@@ -77,8 +77,8 @@ public class IHMCHumanoidBehaviorManager
       runAutomaticDiagnosticTimeToWait = timeToWait;
    }
 
-   private IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic) throws IOException
+   private IHMCHumanoidBehaviorManager(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider,
+         boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo, boolean runAutomaticDiagnostic) throws IOException
    {
       System.out.println(PrintTools.INFO + getClass().getSimpleName() + ": Initializing");
 
@@ -130,7 +130,7 @@ public class IHMCHumanoidBehaviorManager
       if (runAutomaticDiagnostic && !Double.isNaN(runAutomaticDiagnosticTimeToWait) && !Double.isInfinite(runAutomaticDiagnosticTimeToWait))
       {
          createAndRegisterAutomaticDiagnostic(dispatcher, fullRobotModel, referenceFrames, yoTime, communicationBridge, capturePointUpdatable,
-               wholeBodyControllerParameters, runAutomaticDiagnosticTimeToWait);
+               wholeBodyControllerParameters, runAutomaticDiagnosticTimeToWait, yoGraphicsListRegistry);
       }
       else
       {
@@ -142,7 +142,7 @@ public class IHMCHumanoidBehaviorManager
       behaviorPacketCommunicator.attachListener(HumanoidBehaviorTypePacket.class, desiredBehaviorSubscriber);
 
       behaviorPacketCommunicator.connect();
-      
+
       if (startYoVariableServer)
       {
          yoVariableServer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
@@ -181,7 +181,7 @@ public class IHMCHumanoidBehaviorManager
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.SCRIPT, scriptBehavior);
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon);
+            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
 
       LocalizationBehavior localizationBehavior = new LocalizationBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, yoDoubleSupport,
@@ -196,48 +196,48 @@ public class IHMCHumanoidBehaviorManager
             wristSensors, yoTime, wholeBodyControllerParameters);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DEBRIS_TASK, removeDebrisBehavior);
 
-      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime,
-            wholeBodyControllerParameters.getWalkingControllerParameters().getAnkleHeight());
+      WalkToGoalBehavior walkToGoalBehavior = new WalkToGoalBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime, wholeBodyControllerParameters
+            .getWalkingControllerParameters().getAnkleHeight());
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.WALK_TO_GOAL, walkToGoalBehavior);
 
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.RECEIVE_IMAGE, new ReceiveImageBehavior(outgoingCommunicationBridge));
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.LOCALIZE_DRILL, new LocalizeDrillBehavior(outgoingCommunicationBridge, referenceFrames));
-      
+
       PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
-      
+
       DrillTaskSimulatorBehavior drillTaskSimulatorBehavior = new DrillTaskSimulatorBehavior(outgoingCommunicationBridge, yoTime, wristSensors);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_TASK_SIMULATOR, drillTaskSimulatorBehavior);
-      
-      if(wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
+
+      if (wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
-            DrillPickUpBehavior drillPickUpBehavior = new DrillPickUpBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
+         DrillPickUpBehavior drillPickUpBehavior = new DrillPickUpBehavior(outgoingCommunicationBridge, yoTime, fullRobotModel, referenceFrames,
                wholeBodyControllerParameters);
          dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DRILL_PICK_UP, drillPickUpBehavior);
       }
    }
 
-   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel,
-         ReferenceFrames referenceFrames, DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
-         CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait)
-    {
+   private void createAndRegisterAutomaticDiagnostic(BehaviorDisptacher dispatcher, SDFFullRobotModel fullRobotModel, ReferenceFrames referenceFrames,
+         DoubleYoVariable yoTime, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, CapturePointUpdatable capturePointUpdatable,
+         WholeBodyControllerParameters wholeBodyControllerParameters, double timeToWait, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       BooleanYoVariable yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
       EnumYoVariable<RobotSide> yoSupportLeg = capturePointUpdatable.getYoSupportLeg();
       YoFrameConvexPolygon2d yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       DiagnosticBehavior diagnosticBehavior = new DiagnosticBehavior(fullRobotModel, yoSupportLeg, referenceFrames, yoTime, yoDoubleSupport,
-            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon);
+            outgoingCommunicationBridge, wholeBodyControllerParameters, yoSupportPolygon, yoGraphicsListRegistry);
       diagnosticBehavior.setupForAutomaticDiagnostic(timeToWait);
       dispatcher.addHumanoidBehavior(HumanoidBehaviorType.DIAGNOSTIC, diagnosticBehavior);
       dispatcher.requestBehavior(HumanoidBehaviorType.DIAGNOSTIC);
-    }
+   }
 
-
-   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(WholeBodyControllerParameters wholeBodyControllerParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-         DRCRobotSensorInformation sensorInfo, double timeToWait) throws IOException
+   public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(WholeBodyControllerParameters wholeBodyControllerParameters,
+         LogModelProvider modelProvider, boolean startYoVariableServer, DRCRobotSensorInformation sensorInfo, double timeToWait) throws IOException
    {
       IHMCHumanoidBehaviorManager.setAutomaticDiagnosticTimeToWait(timeToWait);
-      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(wholeBodyControllerParameters, modelProvider, startYoVariableServer, sensorInfo, true);
+      IHMCHumanoidBehaviorManager ihmcHumanoidBehaviorManager = new IHMCHumanoidBehaviorManager(wholeBodyControllerParameters, modelProvider,
+            startYoVariableServer, sensorInfo, true);
       return ihmcHumanoidBehaviorManager;
    }
 }
