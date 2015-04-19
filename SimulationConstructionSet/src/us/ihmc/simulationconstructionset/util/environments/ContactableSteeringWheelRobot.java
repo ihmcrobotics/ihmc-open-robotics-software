@@ -309,6 +309,11 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       return new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
    }
 
+   public FramePoint getSteeringWheelCenter()
+   {
+      return new FramePoint(steeringWheelFrame, 0.0, 0.0, 0.0);
+   }
+
    public double getNumberOfPossibleTurns()
    {
       return totalNumberOfPossibleTurns;

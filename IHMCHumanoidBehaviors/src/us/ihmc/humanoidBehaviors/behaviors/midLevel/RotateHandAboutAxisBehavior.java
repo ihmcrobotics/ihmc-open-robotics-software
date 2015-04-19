@@ -84,4 +84,34 @@ public class RotateHandAboutAxisBehavior extends HandPoseBehavior
 
       hasInputBeenSet.set(true);
    }
+
+   public void setInput(RobotSide robotSide, boolean controlHandOrientationAboutAxis, FrameVector rotationAxis, FramePoint rotationAxisOrigin,
+         double totalRotationInRadians, double rotationRateRadPerSec, boolean stopHandIfCollision)
+   {
+      if (totalRotationInRadians == 0.0)
+      {
+         PrintTools.debug(this, "Desired angle of rotation, " + totalRotationInRadians + ", is not valid (must be non-zero).");
+         hasInputBeenSet.set(false);
+         return;
+      }
+      
+      double totalTrajectoryTime = Math.abs(totalRotationInRadians / rotationRateRadPerSec);
+
+      rotationAxisOrigin = new FramePoint(rotationAxisOrigin);
+      rotationAxisOrigin.changeFrame(world);
+      rotationAxis = new FrameVector(rotationAxis);
+      rotationAxis.changeFrame(world);
+
+      HandRotateAboutAxisPacket handRotateAboutAxisPacket = new HandRotateAboutAxisPacket(robotSide, rotationAxisOrigin.getPointCopy(), rotationAxis.getVectorCopy(),
+            totalRotationInRadians, totalTrajectoryTime, controlHandOrientationAboutAxis);
+      
+      this.robotSide = robotSide;
+      this.stopHandIfCollision.set(stopHandIfCollision);
+
+      startTime.set(yoTime.getDoubleValue());
+      trajectoryTime.set(handRotateAboutAxisPacket.getTrajectoryTime());
+      outgoingPacket = handRotateAboutAxisPacket;
+
+      hasInputBeenSet.set(true);
+   }
 }
