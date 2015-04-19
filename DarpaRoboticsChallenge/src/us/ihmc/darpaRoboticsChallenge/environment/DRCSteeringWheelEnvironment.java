@@ -65,6 +65,11 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       return wheelRobot.getSteeringWheelAxis();
    }
 
+   public FramePoint getSteeringWheelCenter()
+   {
+      return wheelRobot.getSteeringWheelCenter();
+   }
+
    public double getSteeringWheelAngleAsAbsolutePercentageOfRangeOfMotion()
    {
       return wheelRobot.getSteeringWheelAngleAsAbsolutePercentageOfRangeOfMotion();
