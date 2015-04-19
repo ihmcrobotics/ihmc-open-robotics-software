@@ -341,7 +341,7 @@ public class DiagnosticBehavior extends BehaviorInterface
          handPoseListBehaviors.put(robotSide, handPoseListBehavior);
       }
       
-      graspCylinerBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, wholeBodyControllerParameters, yoTime);
+      graspCylinerBehavior = new GraspCylinderBehavior(outgoingCommunicationBridge, fullRobotModel, yoTime);
       registry.addChild(graspCylinerBehavior.getYoVariableRegistry());
 
       rotateHandAboutAxisBehavior = new RotateHandAboutAxisBehavior("diagnostic_", outgoingCommunicationBridge, fullRobotModel, yoTime);
