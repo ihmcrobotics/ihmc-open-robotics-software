@@ -86,10 +86,6 @@ public abstract class DRCRemoveSingleDebrisBehaviorTest implements MultiRobotTes
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 

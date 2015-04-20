@@ -81,11 +81,6 @@ public abstract class DRCHandLoadBearingBehaviorTest implements MultiRobotTestIn
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-
       double wallMaxY = 3.5;
       DRCWallWorldEnvironment testEnvironment = new DRCWallWorldEnvironment(-1.0, wallMaxY);
 

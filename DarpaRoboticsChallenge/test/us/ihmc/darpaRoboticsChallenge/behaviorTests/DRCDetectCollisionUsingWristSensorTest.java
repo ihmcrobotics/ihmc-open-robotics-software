@@ -102,11 +102,6 @@ public abstract class DRCDetectCollisionUsingWristSensorTest implements MultiRob
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-      
       DRCWallWorldEnvironment testEnvironment = new DRCWallWorldEnvironment(-0.5, 2.5);
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(testEnvironment, getSimpleRobotName(), null,

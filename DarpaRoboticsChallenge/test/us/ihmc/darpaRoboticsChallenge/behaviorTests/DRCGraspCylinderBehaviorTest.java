@@ -77,11 +77,6 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(createTestEnvironment(), getSimpleRobotName(), null, DRCObstacleCourseStartingLocation.DEFAULT,
             simulationTestingParameters, getRobotModel());
    }

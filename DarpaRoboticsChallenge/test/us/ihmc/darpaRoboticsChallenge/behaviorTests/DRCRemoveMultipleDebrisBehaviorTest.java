@@ -89,11 +89,6 @@ public abstract class DRCRemoveMultipleDebrisBehaviorTest implements MultiRobotT
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-
       showMemoryUsageBeforeTest();
 
       DRCStartingLocation startingLocation = new DRCStartingLocation()

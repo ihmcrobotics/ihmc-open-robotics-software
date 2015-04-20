@@ -142,11 +142,6 @@ public abstract class BehaviorDispatcherTest implements MultiRobotTestInterface
    @Before
    public void setUp()
    {
-      if (NetworkPorts.USE_BEHAVIORS_MODULE)
-      {
-         throw new RuntimeException("Must set NetworkConfigParameters.USE_BEHAVIORS_MODULE = false in order to perform this test!");
-      }
-
       PacketRouter<PacketDestination> networkProcessor = new PacketRouter<>(PacketDestination.class);
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       this.yoTime = new DoubleYoVariable("yoTime", registry);
