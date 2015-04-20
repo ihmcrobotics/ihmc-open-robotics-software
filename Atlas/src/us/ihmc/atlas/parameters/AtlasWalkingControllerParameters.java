@@ -847,6 +847,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public double getSecondContactThresholdForceIgnoringCoP()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
    public double getCoPThresholdFraction()
    {
       return 0.02;

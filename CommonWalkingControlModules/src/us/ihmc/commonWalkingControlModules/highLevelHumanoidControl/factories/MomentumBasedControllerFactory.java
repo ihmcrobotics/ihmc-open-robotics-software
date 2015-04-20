@@ -273,8 +273,10 @@ public class MomentumBasedControllerFactory
             break;
 
          case WrenchBased:
-            footSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide),
-                  yoGraphicsListRegistry, contactThresholdForce, registry);
+            WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(footName, footForceSensor, footSwitchCoPThresholdFraction, totalRobotWeight, bipedFeet.get(robotSide),
+                     yoGraphicsListRegistry, contactThresholdForce, registry);
+            wrenchBasedFootSwitch.setSecondContactThresholdForce(walkingControllerParameters.getSecondContactThresholdForceIgnoringCoP());
+            footSwitch = wrenchBasedFootSwitch;
             break;
             
          case WrenchAndContactSensorFused:
