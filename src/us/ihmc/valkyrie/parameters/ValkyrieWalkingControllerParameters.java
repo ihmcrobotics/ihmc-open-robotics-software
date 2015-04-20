@@ -1,15 +1,14 @@
 package us.ihmc.valkyrie.parameters;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.utilities.Pair;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -837,6 +836,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       return runningOnRealRobot ? 50.0 : 5.0;
    }
+
+   @Override
+   public double getSecondContactThresholdForceIgnoringCoP()
+   {
+      return Double.POSITIVE_INFINITY;
+   }   
 
    @Override
    public double getCoPThresholdFraction()
