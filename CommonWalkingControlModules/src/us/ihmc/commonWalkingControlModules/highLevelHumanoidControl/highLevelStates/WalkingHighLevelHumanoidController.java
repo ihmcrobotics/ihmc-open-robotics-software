@@ -455,7 +455,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       pelvisICPBasedTranslationManager.disable();
-      pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
       if(manipulationControlModule != null)
       {
          manipulationControlModule.holdCurrentArmConfiguration();

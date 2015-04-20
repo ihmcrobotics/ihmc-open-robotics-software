@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -39,12 +40,16 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
 
+   private final VariousWalkingManagers variousWalkingManagers;
+
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
+         MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
       this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry);
       requestedHighLevelState.set(initialBehavior);
+      this.variousWalkingManagers = variousWalkingManagers;
 
       if (variousWalkingProviders != null)
          this.highLevelStateProvider = variousWalkingProviders.getDesiredHighLevelStateProvider();
@@ -116,6 +121,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public void initialize()
    {
       momentumBasedController.initialize();
+      variousWalkingManagers.getPelvisOrientationManager().setToZeroInMidFeetZUp();
       stateMachine.setCurrentState(initialBehavior);
    }
 
