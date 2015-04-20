@@ -33,7 +33,6 @@ import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosTools;
-import us.ihmc.utilities.screwTheory.SixDoFJoint;
 
 public class RosConnectedZeroPoseRobotConfigurationDataProducer extends AbstractNodeMain
 {
@@ -46,9 +45,8 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private final ReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame headFrame;
-   private final SixDoFJoint rootJoint;
    private final AtomicReference<RigidBodyTransform> atomicPelvisPoseInMocapFrame = new AtomicReference<RigidBodyTransform>(null);
-   private Random random = new Random();
+   private final Random random = new Random();
    
    public RosConnectedZeroPoseRobotConfigurationDataProducer(URI rosMasterURI, PacketCommunicator objectCommunicator, final DRCRobotModel robotModel)
    {
@@ -56,7 +54,6 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       this.packetCommunicator = objectCommunicator;
       fullRobotModel = robotModel.createFullRobotModel();
       referenceFrames = new ReferenceFrames(fullRobotModel);
-      rootJoint = fullRobotModel.getRootJoint();
       
       pelvisFrame = referenceFrames.getPelvisFrame();
       headFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
