@@ -18,8 +18,8 @@ public class DRCSteeringWheelDemo
 
    public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup)
    {
-      Point3d steeringWheelCenterInWorldFrame = new Point3d(0.42, 0.46, 1.2);
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInWorldFrame, 0.0, 41.0);
+      Point3d steeringWheelCenterInWorldFrame = new Point3d(0.39, 0.39, 1.27);
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInWorldFrame, 0.0, -32.0);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
@@ -36,10 +36,6 @@ public class DRCSteeringWheelDemo
       robot.setController(controller);
       controller.initialize();
       
-      // load polaris model into the sim
-      DRCVehicleSDFLoader drcVehicleSDFLoader = new DRCVehicleSDFLoader();
-      simStarter.getSimulationConstructionSet().addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
-
       simStarter.startOpertorInterfaceUsingProcessSpawner();
    }
 
