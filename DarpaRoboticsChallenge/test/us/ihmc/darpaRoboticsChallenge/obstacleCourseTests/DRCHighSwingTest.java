@@ -139,14 +139,14 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       Vector3d verticalVector = new Vector3d(0.0, 0.0, 1.0);
       FootstepDataList footstepDataList = new FootstepDataList(swingTime, transferTime);
       RotationFunctions.getQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.4, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.8, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(1.2, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(1.6, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(2.0, .15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(2.0, -.15, 0.0), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.0, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.0, -.15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(0.4, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(0.8, -.15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(1.2, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(1.6, -.15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(2.0, .15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(2.0, -.15, 0.08), new Quat4d(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
 
 
       return footstepDataList;
