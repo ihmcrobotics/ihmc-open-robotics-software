@@ -2,7 +2,9 @@ package us.ihmc.valkyrie;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -48,6 +50,7 @@ import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.roboNet.schedule.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
@@ -75,6 +78,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
    private final boolean runningOnRealRobot;
+   private final Map<String, Double> standPrepAngles = (Map<String, Double>) YamlWithIncludesLoader.load(ValkyrieConfigurationRoot.class, "standPrep", "setpoints.yaml");
    
    @Override
    public WholeBodyIkSolver createWholeBodyIkSolver()  
@@ -175,6 +179,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public DRCRobotJointMap getJointMap()
    {
       return jointMap;
+   }
+   
+   public double getStandPrepAngle(String jointName)
+   {
+      return standPrepAngles.get(jointName);
    }
    
    @Override
