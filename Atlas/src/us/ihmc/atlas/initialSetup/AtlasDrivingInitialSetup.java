@@ -22,9 +22,9 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
 {
    public static final String INITIAL_CONDITIONS_FILE = "initialDrivingSetup";
    
-   private static final double PELVIS_TO_GROUND = 1.1;
-   private static final double X_OFFSET = 0.1;
-   private static final double Y_OFFSET = -0.6;
+   private static final double PELVIS_TO_GROUND = 1.05;
+   private static final double X_OFFSET = -0.07;
+   private static final double Y_OFFSET = -0.55;
    
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
    private final Vector3d positionInWorld = new Vector3d();
