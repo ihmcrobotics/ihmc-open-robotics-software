@@ -10,11 +10,11 @@ public abstract class ValkyrieSliderBoardControlledNeckJoints
       //strings.
       if(joint == NeckJointName.LOWER_NECK_PITCH)
       {
-         return -1.5708;
+         return -0.0074;
       }
       else if(joint==NeckJointName.UPPER_NECK_PITCH)
       {
-         return -0.0872665;
+         return -0.03;
       }
       else if(joint==NeckJointName.NECK_YAW)
       {
@@ -34,11 +34,11 @@ public abstract class ValkyrieSliderBoardControlledNeckJoints
       }
       else if(joint==NeckJointName.UPPER_NECK_PITCH)
       {
-         return 0.785398;
+         return 0.66;
       }
       else if(joint==NeckJointName.LOWER_NECK_PITCH)
       {
-         return 0.0;
+         return -1.5708;
       }
       else
       {
