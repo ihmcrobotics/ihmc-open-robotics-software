@@ -765,6 +765,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public double getSecondContactThresholdForceIgnoringCoP()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
+
+   @Override
    public double getCoPThresholdFraction()
    {
       return Double.NaN;
