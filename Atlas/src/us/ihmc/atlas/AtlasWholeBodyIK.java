@@ -156,8 +156,9 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       String[] jointsToMinimize = new String[]{
           //  "l_arm_shx", "r_arm_shx",
-            "l_arm_elx", "r_arm_elx",
-            "l_arm_wrx", "r_arm_wrx"  };
+         // //  "l_arm_elx", "r_arm_elx",
+          ////  "l_arm_wrx", "r_arm_wrx"  
+            };
 
       taskEndEffectorPosition.get(RIGHT).setClampingValueForTaskSpaceError(0.2);
       taskEndEffectorPosition.get(LEFT).setClampingValueForTaskSpaceError(0.2);
@@ -273,23 +274,15 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
          coupledJointWeights.set(jointId, jointId, 1);
       }
       
+      
       //-------------------------------------------------
       RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
-      for ( int index = 0; index< weights_jointpose.getNumElements(); index++ )
-      {
-         if( Math.abs( weights_jointpose.get(index)) < 0.0001 )
-         {
-             weights_jointpose.set(index, 0.02 );
-             preferedJointPose.set( index,  0.5*(model.q_min(index)+ model.q_max(index)) );
-         }
-      }
 
       taskJointsPose.setWeightsTaskSpace(weights_jointpose);
       taskJointsPose.setWeightsJointSpace(joint_weights);
       taskJointsPose.setCoupledJointWeights(coupledJointWeights);
 
       taskJointsPose.setErrorTolerance( 0.9 );
-      taskJointsPose.setTarget(preferedJointPose);
    }
    
    private HashMap<String,Double> suggestedAnglesForReseed = new HashMap<String,Double>();
