@@ -69,6 +69,8 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract double getSimulateDT();
 
    public abstract double getEstimatorDT();
+   
+   public abstract double getStandPrepAngle(String jointName);
 
    public abstract PPSTimestampOffsetProvider getPPSTimestampOffsetProvider();
 
