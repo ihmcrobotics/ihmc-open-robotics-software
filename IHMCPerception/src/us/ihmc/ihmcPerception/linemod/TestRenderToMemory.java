@@ -52,7 +52,7 @@ public class TestRenderToMemory extends SimpleApplication implements SceneProces
     private Camera offCamera;
     private ImageDisplay display;
 
-    private static final int width = 800, height = 600;
+    private static final int width = 1600, height = 800;
 
     private final ByteBuffer cpuBuf = BufferUtils.createByteBuffer(width * height * 4);
     private final byte[] cpuArray = new byte[width * height * 4];
@@ -198,7 +198,7 @@ public class TestRenderToMemory extends SimpleApplication implements SceneProces
         offBuffer = new FrameBuffer(width, height, 1);
 
         //setup framebuffer's cam
-        offCamera.setFrustumPerspective(45f, 1f, 1f, 1000f);
+        offCamera.setFrustumPerspective(45f, (float)width/(float)height, 1f, 1000f);
         offCamera.setLocation(new Vector3f(0f, 0f, -5f));
         offCamera.lookAt(new Vector3f(0f, 0f, 0f), Vector3f.UNIT_Y);
 
