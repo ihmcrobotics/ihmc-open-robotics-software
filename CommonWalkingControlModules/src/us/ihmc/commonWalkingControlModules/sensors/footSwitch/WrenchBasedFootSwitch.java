@@ -29,6 +29,7 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 {
    private final DoubleYoVariable contactThresholdForce;
+   private final DoubleYoVariable secondContactThresholdForce;
 
    private final YoVariableRegistry registry;
 
@@ -36,6 +37,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final DoubleYoVariable footSwitchCoPThresholdFraction;
 
    private final GlitchFilteredBooleanYoVariable isForceMagnitudePastThreshold;
+   private final BooleanYoVariable isForceMagnitudePastSecondThreshold;
    private final BooleanYoVariable hasFootHitGround, isCoPPastThreshold;
    private final GlitchFilteredBooleanYoVariable filteredHasFootHitGround;
 
@@ -88,6 +90,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       this.contactThresholdForce = new DoubleYoVariable(namePrefix + "ContactThresholdForce", registry);
       this.contactThresholdForce.set(contactThresholdForce); 
+      this.secondContactThresholdForce = new DoubleYoVariable(namePrefix + "SecondContactThresholdForce", registry);
+      this.secondContactThresholdForce.set(Double.POSITIVE_INFINITY);
 
       yoFootForce = new YoFrameVector(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
       yoFootTorque = new YoFrameVector(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
@@ -116,6 +120,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
       filteredHasFootHitGround = new GlitchFilteredBooleanYoVariable(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 1); 
       isForceMagnitudePastThreshold = new GlitchFilteredBooleanYoVariable(namePrefix + "ForcePastThresh", registry, 2);
+      isForceMagnitudePastSecondThreshold = new BooleanYoVariable(namePrefix + "ForcePastSecondThresh", registry);
       isCoPPastThreshold = new BooleanYoVariable(namePrefix + "CoPPastThresh", registry);
 
       this.robotTotalWeight = robotTotalWeight;
@@ -157,12 +162,18 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       parentRegistry.addChild(registry);
    }
 
+   public void setSecondContactThresholdForce(double secondContactThresholdForce)
+   {
+      this.secondContactThresholdForce.set(secondContactThresholdForce);
+   }
+
    public boolean hasFootHitGround()
    {      
       isForceMagnitudePastThreshold.set(isForceMagnitudePastThreshold());
+      isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getDoubleValue());
       isCoPPastThreshold.set(isCoPPastThreshold());
 
-      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue());
+      hasFootHitGround.set((isForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue()) || isForceMagnitudePastSecondThreshold.getBooleanValue());
 //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
       filteredHasFootHitGround.update();
       

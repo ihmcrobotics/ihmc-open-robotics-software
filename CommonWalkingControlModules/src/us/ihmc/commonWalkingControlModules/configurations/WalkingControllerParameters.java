@@ -140,6 +140,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
    public abstract double getDesiredTouchdownAcceleration();
 
    public abstract double getContactThresholdForce();
+
+   public abstract double getSecondContactThresholdForceIgnoringCoP();
    
    /** Returns a map of neck joint names and associated min/max value joint limits. */
    public abstract LinkedHashMap<NeckJointName,Pair<Double,Double>> getSliderBoardControlledNeckJointsWithLimits();
