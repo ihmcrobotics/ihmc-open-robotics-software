@@ -77,9 +77,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, sensorSuitePacketCommunicator, null);
       sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);
 
-      //TODO: Fixme
-      //      new IbeoPointCloudDataReceiver(rosMainNode, robotPoseBuffer, sensorSuitePacketCommunicator, sdfFullRobotModel, sensorInformation.getPointCloudParameters(ValkyrieSensorInformation.IBEO_ID), lidarDataFilter);
-      new RosPointCloudReceiver(sensorInformation.getLidarParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
       
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
