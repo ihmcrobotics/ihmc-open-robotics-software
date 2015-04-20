@@ -501,4 +501,11 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return walkingControllerParameters.getSliderBoardControlledFingerJointsWithLimits();
    }
+
+   @Override
+   public double getStandPrepAngle(String jointName)
+   {
+      System.err.println("Need to add access to stand prep joint angles.");
+      return 0;
+   }
 }

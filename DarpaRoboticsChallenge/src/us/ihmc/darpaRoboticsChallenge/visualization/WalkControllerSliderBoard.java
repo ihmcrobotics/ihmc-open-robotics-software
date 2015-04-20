@@ -140,18 +140,30 @@ public class WalkControllerSliderBoard
       
       if(Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.NECK_YAW))
       {
+         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.NECK_YAW));
+         double neckYawJointRange = Math.abs(sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.NECK_YAW).second() - 
+               sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.NECK_YAW).first());
+         double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.NECK_YAW).first())/neckYawJointRange;
          sliderBoardConfigurationManager.setKnob(1, headYawPercentage,0.0,1.0);
-         headYawPercentage.set(0.5);
+         headYawPercentage.set(standPrepPercentage);
       }
       if(Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.UPPER_NECK_PITCH))
       {
+         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.UPPER_NECK_PITCH));
+         double upperNeckPitchJointRange = Math.abs(sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.UPPER_NECK_PITCH).second() - 
+               sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.UPPER_NECK_PITCH).first());
+         double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.UPPER_NECK_PITCH).first())/upperNeckPitchJointRange;
          sliderBoardConfigurationManager.setSlider(3, upperHeadPitchPercentage,0.0,1.0);
-         upperHeadPitchPercentage.set(0.0);
+         upperHeadPitchPercentage.set(standPrepPercentage);
       }
       if(Arrays.asList(drcRobotModel.getJointMap().getNeckJointNames()).contains(NeckJointName.LOWER_NECK_PITCH))
       {
+         double standPrepAngle = drcRobotModel.getStandPrepAngle(drcRobotModel.getJointMap().getNeckJointName(NeckJointName.LOWER_NECK_PITCH));
+         double lowerNeckPitchJointRange = sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.LOWER_NECK_PITCH).second() - 
+               sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.LOWER_NECK_PITCH).first();
+         double standPrepPercentage = Math.abs(standPrepAngle - sliderBoardControlledNeckJointsWithLimits.get(NeckJointName.LOWER_NECK_PITCH).first())/lowerNeckPitchJointRange;
          sliderBoardConfigurationManager.setSlider(4, lowerHeadPitchPercentage,0.0,1.0);
-         lowerHeadPitchPercentage.set(0.0);
+         lowerHeadPitchPercentage.set(standPrepPercentage);
       }
          
       sliderBoardConfigurationManager.saveConfiguration(SliderBoardMode.HeadAndGraspControl.toString());
