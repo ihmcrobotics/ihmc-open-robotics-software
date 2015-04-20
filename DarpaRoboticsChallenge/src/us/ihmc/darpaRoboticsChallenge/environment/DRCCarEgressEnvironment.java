@@ -1,27 +1,21 @@
 package us.ihmc.darpaRoboticsChallenge.environment;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
+import us.ihmc.darpaRoboticsChallenge.PolarisRobot;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearanceTexture;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.RotatableCinderBlockTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.Box3d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -93,34 +87,5 @@ public class DRCCarEgressEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(newBox);
 
       return combinedTerrainObject;
-   }
-
-   private class PolarisRobot extends Robot
-   {   
-      private final URL url = DRCCarEgressEnvironment.class.getClassLoader().getResource("models/polarisModel.obj");
-      private final FloatingJoint floatingJoint;
-      private final Link link;
-      private final Graphics3DObject linkGraphics;
-
-      public PolarisRobot(String name, RigidBodyTransform rootJointTransform)
-      {
-         super(name);
-         
-         link = new Link(name + "Link");
-         linkGraphics = new Graphics3DObject();
-         linkGraphics.addModelFile(url);
-         link.setLinkGraphics(linkGraphics);
-         
-         link.setMass(1.0);
-         link.setComOffset(new Vector3d());
-         Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
-         link.setMomentOfInertia(inertia);
-         
-         floatingJoint = new FloatingJoint(name + "Base", name, new Vector3d(), this);
-         floatingJoint.setRotationAndTranslation(rootJointTransform);
-         floatingJoint.setLink(link);
-         floatingJoint.setDynamic(false);
-         this.addRootJoint(floatingJoint);
-      }
    }
 }
