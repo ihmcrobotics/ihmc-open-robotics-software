@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.Stoppable;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
@@ -48,6 +50,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private double initialTrajectoryTime;
    private final DesiredJointsPositionProvider desiredJointsProvider;
    private final HandPoseProvider handPoseProvider;
+   private final SingleJointPositionProvider singleJointPositionProvider;
    private boolean firstPacket = true;
 
    private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
@@ -58,12 +61,14 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private final static double MAX_DELTA_TO_BELIEVE_DESIRED = 0.05;
 
-   public JointPositionHighLevelController(final MomentumBasedController momentumBasedController, final DesiredJointsPositionProvider desiredJointsProvider, final HandPoseProvider handPoseProvider)
+   public JointPositionHighLevelController(final MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders)
    {
       super(controllerState);
 
       timeProvider = momentumBasedController.getYoTime();
-      this.desiredJointsProvider = desiredJointsProvider;
+      this.desiredJointsProvider = variousWalkingProviders.getDesiredJointsPositionProvider();
+      this.handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
+      this.singleJointPositionProvider = variousWalkingProviders.getSingleJointPositionProvider();
 
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
@@ -71,8 +76,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
-      
-      this.handPoseProvider = handPoseProvider;
       
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
@@ -308,6 +311,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          initializeFromPacket(desiredJointsProvider.getNewPacket());
       }
       
+      if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
+      {
+         
+      }
       
       for( RobotSide side: RobotSide.values)
       {

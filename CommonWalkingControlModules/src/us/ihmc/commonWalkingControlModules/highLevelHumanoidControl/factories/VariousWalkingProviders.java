@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -55,6 +56,7 @@ public class VariousWalkingProviders
    
    private final ObjectWeightProvider objectWeightProvider;
    private final DesiredJointsPositionProvider desiredJointsPositionProvider;
+   private final SingleJointPositionProvider singleJointPositionProvider;
    
    public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider, 
          HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
@@ -65,7 +67,7 @@ public class VariousWalkingProviders
          DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
          ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
          HandPoseStatusProducer handPoseStatusProducer, ObjectWeightProvider objectWeightProvider,
-         DesiredJointsPositionProvider desiredJointsPositionProvider )
+         DesiredJointsPositionProvider desiredJointsPositionProvider, SingleJointPositionProvider singleJointPositionProvider)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -87,6 +89,7 @@ public class VariousWalkingProviders
 
       this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
       this.desiredJointsPositionProvider = desiredJointsPositionProvider;
+      this.singleJointPositionProvider = singleJointPositionProvider;
       
       this.handPoseStatusProducer = handPoseStatusProducer;
       
@@ -142,6 +145,11 @@ public class VariousWalkingProviders
    public DesiredJointsPositionProvider getDesiredJointsPositionProvider()
    {
       return desiredJointsPositionProvider;
+   }
+   
+   public SingleJointPositionProvider getSingleJointPositionProvider()
+   {
+      return singleJointPositionProvider;
    }
 
    public PelvisPoseProvider getDesiredPelvisPoseProvider()

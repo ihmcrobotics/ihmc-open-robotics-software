@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.UserDesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -98,12 +99,14 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       ObjectWeightProvider objectWeightProvider = null;
       
       DesiredJointsPositionProvider desiredJointsPositionProvider = null;
+      SingleJointPositionProvider singleJointPositionProvider = null;
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
                                                            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
-                                                           controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider);
+                                                           controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider,
+                                                           desiredJointsPositionProvider, singleJointPositionProvider);
 
       return variousWalkingProviders;
    }

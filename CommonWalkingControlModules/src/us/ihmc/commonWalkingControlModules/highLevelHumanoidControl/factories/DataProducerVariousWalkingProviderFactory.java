@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -54,6 +55,7 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -113,7 +115,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredFootPoseProvider footPoseProvider = new DesiredFootPoseProvider(walkingControllerParameters.getDefaultSwingTime(), objectCommunicator);
    
       DesiredJointsPositionProvider desiredJointsPositionProvider = new DesiredJointsPositionProvider();
-      
+      SingleJointPositionProvider singleJointPositionProvider = new SingleJointPositionProvider();
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
@@ -157,7 +159,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(ObjectWeightPacket.class, objectWeightProvider);
      
       objectCommunicator.attachListener( JointAnglesPacket.class , desiredJointsPositionProvider.getPacketConsumer() );
-      
+      objectCommunicator.attachListener(SingleJointAnglePacket.class, singleJointPositionProvider.getPacketConsumer());
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
@@ -166,7 +168,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
                                                            pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
                                                            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
-                                                           objectWeightProvider,desiredJointsPositionProvider );
+                                                           objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider);
 
       return variousWalkingProviders;
    }
