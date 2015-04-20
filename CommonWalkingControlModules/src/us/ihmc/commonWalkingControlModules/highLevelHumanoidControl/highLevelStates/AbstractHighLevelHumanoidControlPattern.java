@@ -185,6 +185,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
    public void initialize()
    {
+      momentumBasedController.initialize();
       variousWalkingManagers.initializeManagers();
       variousWalkingProviders.clearPoseProviders();
       callUpdatables();
