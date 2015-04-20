@@ -57,7 +57,4 @@ public class NetworkPorts
    {
       return port;
    }
-   
-   public static final boolean USE_BEHAVIORS_MODULE = false;
-
 }
