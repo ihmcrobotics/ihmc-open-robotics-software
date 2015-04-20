@@ -5,7 +5,9 @@ import java.util.List;
 
 import javax.vecmath.Point3d;
 
+import us.ihmc.darpaRoboticsChallenge.PolarisRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.environments.ContactableSteeringWheelRobot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -14,10 +16,13 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInterface
 {
+   private final List<Robot> robots = new ArrayList<Robot>();
    private final ContactableSteeringWheelRobot wheelRobot;
+   
    private final CombinedTerrainObject3D combinedTerrainObject;
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -43,6 +48,10 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       wheelRobot.createSteeringWheelRobot();
       wheelRobot.createAvailableContactPoints(1, 30, forceVectorScale, true);
       wheelRobot.addSpinnerHandle();
+      robots.add(wheelRobot);
+      
+      RigidBodyTransform polarisTransform = new RigidBodyTransform();
+      robots.add(new PolarisRobot("polaris", polarisTransform));
    }
 
    public ReferenceFrame getSteeringWheelFrame()
@@ -82,11 +91,9 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
    }
 
    @Override
-   public List<ContactableSteeringWheelRobot> getEnvironmentRobots()
+   public List<? extends Robot> getEnvironmentRobots()
    {
-      ArrayList<ContactableSteeringWheelRobot> ret = new ArrayList<>();
-      ret.add(wheelRobot);
-      return ret;
+      return robots;
    }
 
    @Override
