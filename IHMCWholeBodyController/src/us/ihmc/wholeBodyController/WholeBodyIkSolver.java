@@ -1,9 +1,13 @@
 package us.ihmc.wholeBodyController;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
@@ -78,7 +82,7 @@ abstract public class WholeBodyIkSolver
 
       //---------- robot models in different contexts and different formats ----------
       private final RobotModel        urdfModel;
-      private final SDFFullRobotModel workingSdfModel;
+      private final SDFFullRobotModel cachedModel;
       protected final HierarchicalKinematicSolver hierarchicalSolver;
 
       //---------------  tasks assigned to this solver --------------------------------
@@ -111,16 +115,19 @@ abstract public class WholeBodyIkSolver
          private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
          private final SideDependentList<ControlledDoF> controlledDoF;
          private int maxNumberOfAutomaticReseeds = 3;
+         private final HashMap<String,Double> jointPreferedAngle;
          
          public WholeBodyConfiguration()
          {
             controlledDoF = new SideDependentList<ControlledDoF>();
+            jointPreferedAngle = new HashMap<String,Double> ();
          }
          public WholeBodyConfiguration(WholeBodyConfiguration other )
          {
             lockLevel = other.lockLevel;
             controlledDoF = new SideDependentList<ControlledDoF>( other.controlledDoF);
             maxNumberOfAutomaticReseeds = other.maxNumberOfAutomaticReseeds;
+            jointPreferedAngle = (HashMap<String, Double>) other.jointPreferedAngle.clone();
          }
          
          public LockLevel getLockLevel()
@@ -149,6 +156,16 @@ abstract public class WholeBodyIkSolver
          {
             controlledDoF.set(side, controlled_dof);
          }
+         
+         public void setPreferedJointAngle(String joint_name, double preferedQ)
+         {
+            jointPreferedAngle.put(joint_name, preferedQ);
+         }
+         
+         public HashMap<String,Double> getPreferedJointAngle()
+         {
+            return jointPreferedAngle;
+         }
       }
       
       protected final WholeBodyConfiguration parameters = new WholeBodyConfiguration();
@@ -162,7 +179,7 @@ abstract public class WholeBodyIkSolver
       protected final int[] waistJointId;
 
       protected final DenseMatrix64F coupledJointWeights;
-      protected final Vector64F      preferedJointPose;
+     // protected final Vector64F      preferedJointPose;
 
       // this is used to store the initial position that is sent to the Hierarchical solver
       protected final Vector64F cachedAnglesQ;
@@ -174,6 +191,8 @@ abstract public class WholeBodyIkSolver
       protected final SideDependentList<FramePose> feetTarget = new SideDependentList<FramePose>();
       protected final FramePose pelvisTarget = new FramePose();
 
+      protected final ArrayList<ActionListener> subscribers = new ArrayList<ActionListener>();
+      
       //------- Abstract method that provide robot-specific information and configuration  -------------
 
       abstract public String getGripperAttachmentLinkName(RobotSide side);
@@ -203,6 +222,10 @@ abstract public class WholeBodyIkSolver
 
       //---------------------------------------------------------------------------------
 
+      public void addActionistener( ActionListener listener)
+      {
+         subscribers.add( listener );
+      }
 
       // helper function to check if a certain robot state is self-colliding or not.
       public boolean checkCollisions(SDFFullRobotModel modelToCheck)
@@ -241,7 +264,7 @@ abstract public class WholeBodyIkSolver
       }
 
       public ReferenceFrame getRootFrameOfWorkingModel(){
-         return getRootFrame(workingSdfModel);
+         return getRootFrame(cachedModel);
       }
 
       public boolean hasJoint(String jointName)
@@ -291,7 +314,7 @@ abstract public class WholeBodyIkSolver
       {
          RigidBodyTransform localTransform = getLocalBodyTransform( bodyId );
          ReferenceFrame bodyFrame =  ReferenceFrame.constructFrameWithUnchangingTransformToParent("", 
-               getRootFrame(workingSdfModel), localTransform);
+               getRootFrame(cachedModel), localTransform);
          return bodyFrame;
       }   
 
@@ -315,8 +338,8 @@ abstract public class WholeBodyIkSolver
       public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
       {
          // load external library
-         workingSdfModel  = robotControllerParameters.createFullRobotModel();
-         workingFrames = new ReferenceFrames(workingSdfModel);
+         cachedModel  = robotControllerParameters.createFullRobotModel();
+         workingFrames = new ReferenceFrames(cachedModel);
 
          //----------- STEP A: find, copy and load the urdf file -------------------------------- 
 
@@ -356,7 +379,7 @@ abstract public class WholeBodyIkSolver
          {
             String joint_name_in_urdf = urdfModel.getActiveJointName(i);
             jointNamesToIndex.put(joint_name_in_urdf, i);
-            OneDoFJoint joint = workingSdfModel.getOneDoFJointByName(joint_name_in_urdf);
+            OneDoFJoint joint = cachedModel.getOneDoFJointByName(joint_name_in_urdf);
             if (joint != null)
             {
                workingJointsInUrdfOrder[i] = joint;
@@ -437,8 +460,6 @@ abstract public class WholeBodyIkSolver
 
          hierarchicalSolver.addTask(taskJointsPose);
 
-         preferedJointPose = new Vector64F(numOfJoints);
-         preferedJointPose.zero();
          coupledJointWeights = new DenseMatrix64F(numOfJoints, numOfJoints);
 
          waistJointId = getWaistJointId();
@@ -515,9 +536,9 @@ abstract public class WholeBodyIkSolver
 
          if( preferedKneeAngle < 0.6) preferedKneeAngle = 0.6;
 
-         preferedJointPose.set(jointNamesToIndex.get("l_leg_kny"), preferedKneeAngle);
-         preferedJointPose.set(jointNamesToIndex.get("r_leg_kny"), preferedKneeAngle);
-         taskJointsPose.setTarget(preferedJointPose);
+         parameters.setPreferedJointAngle("l_leg_kny", preferedKneeAngle);
+         parameters.setPreferedJointAngle("r_leg_kny", preferedKneeAngle);
+
       }
 
       /*
@@ -665,11 +686,17 @@ abstract public class WholeBodyIkSolver
       }
 
 
+      public void setPreferedJointPose(String joint_name, double preferedQ, double weight)
+      {
+         getConfiguration().setPreferedJointAngle(joint_name, preferedQ);
+
+         int index = jointNamesToIndex.get(joint_name);
+         taskJointsPose.getWeightMatrixTaskSpace().set(index, index, weight);
+      }
+      
       public void setPreferedJointPose(String joint_name, double q)
       {
-         int index = jointNamesToIndex.get(joint_name);
-         preferedJointPose.set(index, q);
-         taskJointsPose.setTarget(preferedJointPose );
+         getConfiguration().setPreferedJointAngle(joint_name, q);
       }
 
       private void checkIfArmShallStayQuiet(SDFFullRobotModel actualSdfModel)
@@ -985,11 +1012,23 @@ abstract public class WholeBodyIkSolver
          followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
          followerModel.updateFrames();
       }
+      
+      private void adjustPreferedJointAngles()
+      {
+         Vector64F preferedJointPose = new Vector64F(numOfJoints);
+         preferedJointPose.zero();
+         for (Entry<String, Double> entry: parameters.getPreferedJointAngle().entrySet()  )
+         {
+            int index = jointNamesToIndex.get( entry.getKey() );
+            preferedJointPose.set(index,  entry.getValue() );
+         }
+         taskJointsPose.setTarget(preferedJointPose);
+      }
 
 
       synchronized private ComputeResult computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
       {    
-         movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
+         movePelvisToHaveOverlappingFeet( actualSdfModel, cachedModel );
 
          int ret = -1;
          Vector64F q_out = new Vector64F(numOfJoints);
@@ -1000,7 +1039,8 @@ abstract public class WholeBodyIkSolver
             controlPelvis( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
-            checkIfArmShallStayQuiet(actualSdfModel);
+            checkIfArmShallStayQuiet(actualSdfModel);   
+            adjustPreferedJointAngles();
 
             q_out.set(cachedAnglesQ);
             ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
@@ -1022,7 +1062,7 @@ abstract public class WholeBodyIkSolver
             result = ComputeResult.SUCCEEDED;
 
          //------------------------------------------
-         if (result !=ComputeResult.FAILED_INVALID )
+         if (result != ComputeResult.FAILED_INVALID )
          {
             cachedAnglesQ.set(q_out);
 
@@ -1039,12 +1079,12 @@ abstract public class WholeBodyIkSolver
                }
             }
 
-            movePelvisToHaveOverlappingFeet( actualSdfModel, workingSdfModel );
+            movePelvisToHaveOverlappingFeet( actualSdfModel, cachedModel );
 
             if(desiredRobotModelToPack != null)
             {
                InverseDynamicsJointStateCopier desiredModelJointCopier = new InverseDynamicsJointStateCopier(
-                     workingSdfModel.getElevator(), 
+                     cachedModel.getElevator(), 
                      desiredRobotModelToPack.getElevator());
 
                desiredModelJointCopier.copy();
@@ -1055,6 +1095,12 @@ abstract public class WholeBodyIkSolver
          if(desiredRobotModelToPack != null)
          {
             movePelvisToHaveOverlappingFeet( actualSdfModel, desiredRobotModelToPack );
+         }
+         
+         ActionEvent event = new ActionEvent(this, ret, result.toString() );
+         for (int s=0; s< subscribers.size(); s++)
+         {
+            subscribers.get(s).actionPerformed( event );
          }
 
          return result;
@@ -1090,8 +1136,8 @@ abstract public class WholeBodyIkSolver
       {
          workingFrames.updateFrames();
 
-         ReferenceFrame workingJointFrame = workingSdfModel.getOneDoFJointByName(jointName).getFrameAfterJoint();
-         ReferenceFrame workingRootFrame  = getRootFrame( workingSdfModel );
+         ReferenceFrame workingJointFrame = cachedModel.getOneDoFJointByName(jointName).getFrameAfterJoint();
+         ReferenceFrame workingRootFrame  = getRootFrame( cachedModel );
 
          RigidBodyTransform rootToJoint  = workingJointFrame.getTransformToDesiredFrame( workingRootFrame );
          RigidBodyTransform parentToRoot = workingRootFrame.getTransformToDesiredFrame( parentFrame );
@@ -1102,10 +1148,15 @@ abstract public class WholeBodyIkSolver
          return ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(jointName, parentFrame, parentToBody);
       }
 
-      public void updateWorkingModel( SDFFullRobotModel sdfModel)
+      public void updateCachedModelModel( SDFFullRobotModel sdfModel)
       {
-         workingSdfModel.copyAllJointsButKeepOneFootFixed(sdfModel.getOneDoFJoints(), getSideOfTheFootRoot());
-         movePelvisToHaveOverlappingFeet( sdfModel, workingSdfModel );
+         cachedModel.copyAllJointsButKeepOneFootFixed(sdfModel.getOneDoFJoints(), getSideOfTheFootRoot());
+         movePelvisToHaveOverlappingFeet( sdfModel, cachedModel );
+      }
+      
+      public SDFFullRobotModel getCachedModel()
+      {
+         return cachedModel;
       }
 
       public ReferenceFrame getDesiredGripperAttachmentFrame(RobotSide handSide, ReferenceFrame parentFrame)
@@ -1123,7 +1174,7 @@ abstract public class WholeBodyIkSolver
          workingFrames.updateFrames();
 
          RigidBodyTransform rootToBody   = getLocalBodyTransform(name);
-         RigidBodyTransform parentToRoot =  getRootFrame( workingSdfModel ).getTransformToDesiredFrame(parentFrame);
+         RigidBodyTransform parentToRoot =  getRootFrame( cachedModel ).getTransformToDesiredFrame(parentFrame);
 
          RigidBodyTransform parentToBody = new RigidBodyTransform();
          parentToBody.multiply(parentToRoot, rootToBody);
@@ -1152,6 +1203,12 @@ abstract public class WholeBodyIkSolver
          parameters.setNumberOfControlledDoF(LEFT, other.controlledDoF.get(LEFT) );
          parameters.setNumberOfControlledDoF(RIGHT, other.controlledDoF.get(RIGHT) );
          parameters.maxNumberOfAutomaticReseeds = other.maxNumberOfAutomaticReseeds;
+         
+         parameters.jointPreferedAngle.clear();
+         for (Entry<String,Double> entry: other.jointPreferedAngle.entrySet() )
+         {
+            parameters.jointPreferedAngle.put( entry.getKey(), entry.getValue() );
+         }
       }
 
 }
