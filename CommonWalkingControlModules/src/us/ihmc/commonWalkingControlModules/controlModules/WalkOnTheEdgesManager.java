@@ -40,6 +40,7 @@ public class WalkOnTheEdgesManager
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
+   private static final boolean CHECK_REAR_LEG_JACOBIAN_DETERMINANT = true;
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
@@ -199,8 +200,11 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
-      doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
+      if(CHECK_REAR_LEG_JACOBIAN_DETERMINANT)
+      {
+         FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
+         doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
+      }
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
@@ -226,7 +230,13 @@ public class WalkOnTheEdgesManager
       if (isNextStepHighEnough)
          return true;
 
-      if (!ENABLE_TOE_OFF_FOR_STEP_DOWN)
+      if (ENABLE_TOE_OFF_FOR_STEP_DOWN)
+      {
+          boolean isNextStepLowEnough = stepHeight < -minStepHeightForToeOff.getDoubleValue();
+          if (isNextStepLowEnough)
+             return true;
+      }
+      else
       {
          boolean isNextStepTooLow = stepHeight < -0.10;
          if (isNextStepTooLow)
