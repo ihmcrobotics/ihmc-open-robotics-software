@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.communication.net.KryoStreamSerializerTest.class,
    us.ihmc.communication.net.local.InterprocessObjectCommunicatorTest.class,
+   us.ihmc.communication.packets.dataobjects.CapturabilityBasedStatusTest.class,
    us.ihmc.communication.packets.wholebody.JointAnglesPacketTest.class,
    us.ihmc.communication.serializers.driving.OverheadMapPacketSerializerTest.class,
    us.ihmc.communication.serializers.driving.VehiclePosePacketSerializerTest.class,
@@ -33,7 +34,7 @@ import org.junit.runners.Suite;
    us.ihmc.communication.streamingData.PersistentTCPClientTest.class,
    us.ihmc.communication.streamingData.PersistentTCPServerTest.class,
    us.ihmc.communication.streamingData.StreamingDataProducerConsumerTest.class,
-   us.ihmc.communication.subscribers.TimeStampedTransformBufferTest.class,
+   us.ihmc.communication.subscribers.TimeStampedTransformBufferTest.class
 })
 
 public class IHMCCommunicationAFastTestSuite
