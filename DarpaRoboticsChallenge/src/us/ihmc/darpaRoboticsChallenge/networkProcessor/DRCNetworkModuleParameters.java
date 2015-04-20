@@ -21,6 +21,7 @@ public class DRCNetworkModuleParameters
    private boolean useMocapModule;
    private boolean useLocalControllerCommunicator;
    private boolean runAutomaticDiagnostic = false;
+   private boolean useMultisenseManualTestModule;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    private URI rosUri;
@@ -60,6 +61,16 @@ public class DRCNetworkModuleParameters
    public boolean isUiModuleEnabled()
    {
       return useUiModule;
+   }
+   
+   public boolean isMultisenseManualTestModuleEnabled()
+   {
+      return useMultisenseManualTestModule;
+   }
+   
+   public void enableMultisenseManualTestModule(boolean b)
+   {
+      useMultisenseManualTestModule = b;
    }
 
    public void enableSensorModule(boolean b)

@@ -5,7 +5,6 @@ import java.net.URI;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
@@ -16,19 +15,22 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor
+/**
+ * Network Processor to run large scale multisense manual testing
+ */
+public class MultisenseHeadOnAStickManualTestNetworkProcessor
 {
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    private static String defaultRobotModel = "ATLAS_UNPLUGGED_V5_NO_HANDS";
 
-   public AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
+   public MultisenseHeadOnAStickManualTestNetworkProcessor(DRCRobotModel robotModel, String nameSpace) throws IOException
    {
       URI rosUri = NetworkParameters.getROSURI();
       
       DRCNetworkModuleParameters params = new DRCNetworkModuleParameters();
       params.setRosUri(rosUri);
       params.enableRosModule(true);
-      params.enableMocapModule(true);
+      params.enableMultisenseManualTestModule(true);
       params.enableSensorModule(true);
       params.enableUiModule(true);
       
@@ -64,6 +66,6 @@ public class AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor
          return;
       }
 
-      new AtlasZeroPoseVirtualRobotMultisenseMocapNetworkProcessor(robotModel, config.getString("namespace"));
+      new MultisenseHeadOnAStickManualTestNetworkProcessor(robotModel, config.getString("namespace"));
    }
 }

@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
@@ -41,12 +42,35 @@ public class DRCNetworkProcessor
          setupRosModule(robotModel, params);
          setupGFEModule(params);
          setupMocapModule(robotModel, params);
+         setupMultisenseManualTestModule(robotModel, params);
       }
       catch (IOException e)
       {
          throw new RuntimeException(e);
       }
  }
+
+   private void setupMultisenseManualTestModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      if (params.isMultisenseManualTestModuleEnabled())
+      {
+         new MultisenseMocapManualCalibrationTestModule(robotModel, params.getRosUri());
+
+         PacketCommunicator multisenseModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, new IHMCCommunicationKryoNetClassList());
+         packetRouter.attachPacketCommunicator(PacketDestination.MULTISENSE_TEST_MODULE, multisenseModuleCommunicator);
+         try
+         {
+            multisenseModuleCommunicator.connect();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+         
+         String methodName = "setupMultisenseManualTestModule";
+         printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
+      }
+   }
 
    private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {

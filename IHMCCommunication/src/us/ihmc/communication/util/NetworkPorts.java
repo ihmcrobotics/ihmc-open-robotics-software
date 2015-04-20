@@ -31,6 +31,7 @@ public class NetworkPorts
    public static final NetworkPorts ROS_MODULE = new NetworkPorts(6006);
    public static final NetworkPorts GFE_COMMUNICATOR = new NetworkPorts(6007);
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
+   public static final NetworkPorts MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE = new NetworkPorts(6009);
 
    // Mission Control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7010);
@@ -58,4 +59,5 @@ public class NetworkPorts
    }
    
    public static final boolean USE_BEHAVIORS_MODULE = false;
+
 }

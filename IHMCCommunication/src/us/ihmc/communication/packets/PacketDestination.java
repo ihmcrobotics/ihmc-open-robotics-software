@@ -16,6 +16,7 @@ public enum PacketDestination
    MOCAP_MODULE,
    SCRIPTED_FOOTSTEP_DATA_LIST,
    TRAFFIC_SHAPER,
+   MULTISENSE_TEST_MODULE,
    GFE;
 
    public static final PacketDestination[] values = values();
