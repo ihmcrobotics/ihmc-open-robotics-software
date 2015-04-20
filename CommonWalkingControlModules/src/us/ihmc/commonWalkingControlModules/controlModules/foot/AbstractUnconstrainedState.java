@@ -94,10 +94,13 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       footControlHelper.setGains(gains);
 
-      if (footControlHelper.isDoingSingularityEscape())
-      {
-         initializeTrajectory();
-      }
+      //TODO: If we reinitialize after singularity escape, we 
+      // need to do it smartly. The stuff below causes really
+      // bad swing tracking due to a huge discontinuity in the desireds.
+//      if (footControlHelper.isDoingSingularityEscape())
+//      {
+//         initializeTrajectory();
+//      }
 
       computeAndPackTrajectory();
 
