@@ -467,9 +467,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
-      for (int i = 0; i < allOneDoFjoints.length; i++)
-         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
-
       capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, 0.1, null);
    }
 

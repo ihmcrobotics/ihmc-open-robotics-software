@@ -268,12 +268,25 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    @Override
    public void doTransitionIntoAction()
    {
+      for (int i = 0; i < allOneDoFjoints.length; i++)
+      {
+         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
+         allOneDoFjoints[i].setQddDesired(0.0);
+         allOneDoFjoints[i].setTau(0.0);
+      }
+
       initialize();
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
+      for (int i = 0; i < allOneDoFjoints.length; i++)
+      {
+         allOneDoFjoints[i].resetDesiredAccelerationIntegrator();
+         allOneDoFjoints[i].setQddDesired(0.0);
+         allOneDoFjoints[i].setTau(0.0);
+      }
    }
 
    public YoVariableRegistry getYoVariableRegistry()
