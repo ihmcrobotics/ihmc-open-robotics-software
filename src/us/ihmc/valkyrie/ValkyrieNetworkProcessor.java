@@ -22,6 +22,10 @@ public class ValkyrieNetworkProcessor
       networkModuleParams.enableBehaviorModule(true);
       networkModuleParams.enableBehaviorVisualizer(true);
       
+//      uncomment these for the sensors
+//      networkModuleParams.enableRosModule(true);
+//      networkModuleParams.enableSensorModule(true);
+      
       new DRCNetworkProcessor(model, networkModuleParams);
    }
 }
