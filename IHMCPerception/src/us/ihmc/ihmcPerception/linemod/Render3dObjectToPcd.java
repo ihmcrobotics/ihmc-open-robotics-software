@@ -48,7 +48,7 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
 {
 
    static final boolean DEBUG = true;
-   private static double fovY = Math.PI/4;
+   private static double fovY = Math.PI / 4;
    private Spatial offObject;
    private float angle = 0;
 
@@ -58,7 +58,7 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
    private Camera offCamera;
    private ImageDisplay display;
 
-   private static final int width = 800, height = 600;
+   private static final int width = 1024, height = 544;
 
    private final ByteBuffer cpuBuf = BufferUtils.createByteBuffer(width * height * 4);
    private final byte[] cpuArray = new byte[width * height * 4];
@@ -151,7 +151,7 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
 
       synchronized (image)
       {
-//         Screenshots.convertScreenShot(cpuBuf, image);
+         //         Screenshots.convertScreenShot(cpuBuf, image);
          TestRenderToMemory.convertScreenShot(cpuBuf, image);
       }
 
@@ -176,8 +176,9 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
       offBuffer = new FrameBuffer(width, height, 1);
 
       //setup framebuffer's cam
-      offCamera.setFrustumPerspective((float) (fovY*180/Math.PI), 1f, 0.5f, 1000f); 
-      offCamera.setLocation(new Vector3f(0f, 0f, -1f));
+      offCamera.setFrustumPerspective((float) (fovY * 180 / Math.PI), (float) width / (float) height, 1f, 1000f);
+
+      offCamera.setLocation(new Vector3f(0f, 0f, -1.2f));
       offCamera.lookAt(new Vector3f(0f, 0f, 0f), Vector3f.UNIT_Y);
 
       //setup framebuffer's texture
@@ -243,36 +244,35 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
             }
             else
             {
-//               depthImage[h][w] = 1 / (1 - depthImage[h][w]);
-               depthImage[h][w] = zDeviceToZEye(depthImage[h][w]);
-//               System.out.println("w" + w + "h" + h + " " + depthImage[h][w]);
+               depthImage[h][w] = (float) (1 / (2 - 2.0 * depthImage[h][w]));
+               //               depthImage[h][w] = 1 / (1 - depthImage[h][w]);
+               //               depthImage[h][w] = zDeviceToZEye(depthImage[h][w]);
+               //               System.out.println("w" + w + "h" + h + " " + depthImage[h][w]);
             }
          }
 
-   }
-   
-   private float zDeviceToZEye(float zB)
-   {
-      float zNear = offCamera.getFrustumNear();
-      float zFar = offCamera.getFrustumFar();
-            
-      double zN = 2.0*zB-1.0;
-      double ze = 2.0*zNear*zFar / (zFar+zNear-zN*(zFar-zNear));
-      return (float)ze;
    }
 
    private static void writePcd(BufferedImage image, float[][] depthImage, Camera camera)
    {
 
-      float f = (float) (height / 2.0 / Math.tan(fovY/2.0));
+      float f = (float) (height / 2.0 / Math.tan(fovY / 2.0));
+      if (DEBUG)
+      {
+         System.out.println("view matrix");
+         System.out.println(camera.getViewMatrix());
+         System.out.println("proj matrix");
+         System.out.println(camera.getProjectionMatrix());
+         System.out.println("focalLength=" + f);
+      }
       try
       {
          PrintWriter writer = new PrintWriter(new File("object.pcd"));
          writer.println("# .PCD v0.7 - Point Cloud Data file format");
          writer.println("VERSION 0.7");
-         writer.println("FIELDS x y z rgb");
+         writer.println("FIELDS x y z rgba");
          writer.println("SIZE 4 4 4 4");
-         writer.println("TYPE F F F I");
+         writer.println("TYPE F F F U");
          writer.println("COUNT 1 1 1 1");
          writer.println("WIDTH " + width);
          writer.println("HEIGHT " + height);
@@ -282,24 +282,24 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
          for (int h = 0; h < height; h++)
             for (int w = 0; w < width; w++)
             {
-               float x=0, y=0 ,z=0;
+               float x = 0, y = 0, z = 0;
                if (Float.isNaN(depthImage[h][w]))
                {
-                  z = 5;
-                  x = (float)((w - width / 2) * z / f);
-                  y=  (float)((h - height / 2) * z / f);
-                  //writer.print("nan nan nan ");
+                  z = 2;//Float.NaN;
+                  x = (float) ((w - width / 2) * z / f);
+                  y = (float) ((h - height / 2) * z / f);
                }
                else
                {
                   z = depthImage[h][w];
-                  x = (float)((w - width / 2) * z / f);
-                  y=  (float)((h - height / 2) * z / f);
+                  x = (float) ((w - width / 2) * z / f);
+                  y = (float) ((h - height / 2) * z / f);
                }
-               writer.print(x + " " + y  + " " +  (z-1) + " ");
-               
-               int c=image.getRGB(w, h);
-               writer.println(c);
+               writer.print((x + " " + y + " " + (z) + " ").toLowerCase());
+
+               int c = image.getRGB(w, h);
+               writer.println(Integer.toUnsignedLong(c));
+               //               writer.println(c);
             }
 
          writer.close();
@@ -423,7 +423,5 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
    public void cleanup()
    {
    }
-   
-   
 
 }
