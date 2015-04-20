@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionPr
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -313,7 +314,17 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       
       if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
       {
-         
+         SingleJointAnglePacket packet = singleJointPositionProvider.getNewPacket();
+         for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+         {
+            if (packet.jointName.equals(joint.getName()))
+            {
+               double desiredPostion = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+               trajectoryGenerator.get(joint).setFinalPosition(desiredPostion);
+               alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+               trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+            }
+         }
       }
       
       for( RobotSide side: RobotSide.values)
