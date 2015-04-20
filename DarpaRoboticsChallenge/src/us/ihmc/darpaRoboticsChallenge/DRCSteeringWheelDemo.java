@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
@@ -18,8 +16,7 @@ public class DRCSteeringWheelDemo
 
    public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup)
    {
-      Point3d steeringWheelCenterInWorldFrame = new Point3d(0.39, 0.39, 1.27);
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(steeringWheelCenterInWorldFrame, 0.0, -32.0);
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment();
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));

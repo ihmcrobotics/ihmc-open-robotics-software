@@ -29,7 +29,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
 
    public DRCSteeringWheelEnvironment()
    {
-      this(0.5, 0.0, 1.0, 0.0, -33.0);
+      this(0.39, 0.39, 1.27, 0.0, -32.0);
    }
 
    public DRCSteeringWheelEnvironment(Point3d wheelLocation, double valveYawInDegrees, double valvePitchInDegrees)
