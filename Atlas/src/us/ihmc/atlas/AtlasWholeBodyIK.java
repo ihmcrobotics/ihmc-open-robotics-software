@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.math.Vector64F;
@@ -273,7 +274,21 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       
       //-------------------------------------------------
       RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
-
+      
+      for (Entry<String,Integer> entry: jointNamesToIndex.entrySet())
+      {
+         String jointName = entry.getKey();
+         int index = entry.getValue();
+         if( Math.abs( weights_jointpose.get(index)) < 0.0001 )
+         {
+            weights_jointpose.set(index, 0.01);
+            parameters.setPreferedJointAngle( jointName,  0.5*(model.q_min(index)+ model.q_max(index)) );
+         }
+         else{
+            parameters.setPreferedJointAngle( jointName,  0.0 );
+         }
+      }
+      
       taskJointsPose.setWeightsTaskSpace(weights_jointpose);
       taskJointsPose.setWeightsJointSpace(joint_weights);
       taskJointsPose.setCoupledJointWeights(coupledJointWeights);
