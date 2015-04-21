@@ -6,18 +6,20 @@ import us.ihmc.darpaRoboticsChallenge.controllers.LockPelvisController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCSteeringWheelEnvironment.SteeringWheelAttachment;
 import us.ihmc.darpaRoboticsChallenge.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCSteeringWheelDemo
 {
+   private static final SteeringWheelAttachment wheelAttachment = SteeringWheelAttachment.SPINNER;
    private final DRCSimulationFactory drcSimulationFactory;
 
    public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup, double
          percentOfSteeringWheelRadius)
    {
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(percentOfSteeringWheelRadius);
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(percentOfSteeringWheelRadius, wheelAttachment);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
