@@ -15,8 +15,10 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
@@ -379,7 +381,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    }
 
 
-	@Ignore
 	@EstimatedDuration(duration = 30.0)
 	@Test(timeout = 149768)
 	public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
@@ -399,22 +400,30 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
 	   FrameOrientation desiredChestFrameOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(30.0), Math.toRadians(0.0));
+	   double leanAngle = 30.0;
+	   desiredChestFrameOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), -2.36, Math.toRadians(leanAngle), Math.toRadians(0.0));
       Quat4d desiredChestQuat = new Quat4d();
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 0.5;
       ChestOrientationPacket pitchForward = new ChestOrientationPacket(desiredChestQuat, false, trajectoryTime);
       drcSimulationTestHelper.send(pitchForward);
+      
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
+      double heightOffset = 0.12;
+      double heightTrajectoryTime = 0.5;
+      ComHeightPacket comHeightPacket = new ComHeightPacket(heightOffset, heightTrajectoryTime);
+      drcSimulationTestHelper.send(comHeightPacket);
 
 	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
 	   double swingTime = 1.0;
-      double transferTime = 0.05; //0.4;
+      double transferTime = 0.6;
       FootstepDataList footstepDataList = createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(scriptedFootstepGenerator, swingTime, transferTime);
 	   drcSimulationTestHelper.send(footstepDataList);
 
-	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+	   success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
 
 	   drcSimulationTestHelper.createMovie(getSimpleRobotName(), 1);
 	   drcSimulationTestHelper.checkNothingChanged();
@@ -552,11 +561,12 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
    private FootstepDataList createFootstepsForSteppingOffOfMediumPlatformNarrowFootSpacing(ScriptedFootstepGenerator scriptedFootstepGenerator, double swingTime, double transferTime)
    {
       double[][][] footstepLocationsAndOrientations = new double[][][]
-            {{{-4.34, -6.0, 0.08716704456087025}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
-            {{-4.4394706079327255, -5.9465856725464565, 0.08586305720146342}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
+            {{{-4.27, -5.67, 0.28}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
+            {{-4.34, -6.0, 0.08716704456087025}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
+            {{-4.5, -5.9465856725464565, 0.08586305720146342}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
             };
       
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
       return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations, swingTime, transferTime);
    }
    
