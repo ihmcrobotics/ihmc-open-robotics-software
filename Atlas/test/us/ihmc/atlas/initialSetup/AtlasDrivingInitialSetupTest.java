@@ -32,7 +32,7 @@ public class AtlasDrivingInitialSetupTest
       SDFRobot robot = robotModel.createSdfRobot(false);
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
       
-      AtlasDrivingInitialSetup initialSetup = new AtlasDrivingInitialSetup();
+      AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");
       initialSetup.initializeRobot(robot, jointMap);
    }
    
@@ -43,7 +43,7 @@ public class AtlasDrivingInitialSetupTest
       boolean containsAllJoints = true;
       
       DRCRobotJointMap jointMap = new AtlasJointMap(version);
-      File file = new File(AtlasDrivingInitialSetup.INITIAL_CONDITIONS_FILE);
+      File file = new File("initialDrivingSetup");
       try
       {
          Properties properties = new Properties();

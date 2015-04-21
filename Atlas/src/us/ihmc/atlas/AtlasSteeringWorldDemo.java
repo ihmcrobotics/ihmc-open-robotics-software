@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetup;
+import us.ihmc.atlas.initialSetup.AtlasInitialSetupFromFile;
 import us.ihmc.darpaRoboticsChallenge.DRCSteeringWheelDemo;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 
@@ -22,7 +22,7 @@ public class AtlasSteeringWorldDemo
       networkProcessorParameters.enableSensorModule(true);
       networkProcessorParameters.enableLocalControllerCommunicator(true);
       
-      AtlasDrivingInitialSetup initialSetup = new AtlasDrivingInitialSetup();
+      AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");
 
       double percentOfSteeringWheelRadius = 1.0;
       new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, initialSetup, percentOfSteeringWheelRadius);
