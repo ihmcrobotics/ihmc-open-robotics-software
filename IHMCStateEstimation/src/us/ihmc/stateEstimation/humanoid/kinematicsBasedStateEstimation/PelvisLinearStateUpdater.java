@@ -525,6 +525,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doTransitionIntoAction()
       {
+         imuDriftCompensator.resetFootAngularVelocitiesFiltered();
          requestedState.set(null);
       }
 
@@ -556,6 +557,7 @@ public class PelvisLinearStateUpdater
       @Override
       public void doTransitionIntoAction()
       {
+         imuDriftCompensator.resetFootAngularVelocitiesFiltered();
          requestedState.set(null);
       }
 
