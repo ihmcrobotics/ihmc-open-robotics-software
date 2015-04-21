@@ -539,9 +539,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
             scaleFactor = scaleFactor - 1.0;
          planarWaypointOffset.scale(scaleFactor);
          double offsetLength = planarWaypointOffset.length();
-         if (offsetLength > TwoWaypointTrajectoryGeneratorParameters.getMaxHorizontalOffsetForWaypoints()){
-            planarWaypointOffset.scale(TwoWaypointTrajectoryGeneratorParameters.getMaxHorizontalOffsetForWaypoints()/ offsetLength);
-         }
+//         if (offsetLength > TwoWaypointTrajectoryGeneratorParameters.getMaxHorizontalOffsetForWaypoints()){
+//            planarWaypointOffset.scale(TwoWaypointTrajectoryGeneratorParameters.getMaxHorizontalOffsetForWaypoints()/ offsetLength);
+//         }
 
          waypoint.add(planarWaypointOffset);
       }
