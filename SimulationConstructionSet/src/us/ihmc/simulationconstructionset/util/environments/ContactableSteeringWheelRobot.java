@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -131,6 +132,25 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       steeringWheelLink.setLinkGraphics(steeringWheelLinkGraphics);
 
       spinnerHandleCenter = new FramePoint(steeringWheelFrame, xHandle, yHandle, handleLength / 2.0);
+   }
+   
+   public void addCrossBar()
+   {
+      double height = 2.0 * steeringWheelRadius;
+      double radius = spokesThickness / 2.0;
+      
+      Vector3d translation = new Vector3d(-height/2.0, 0.0, 0.1);
+      AxisAngle4d rotation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), Math.PI/2.0);
+      RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
+      
+      FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, height, radius);
+      spokesCylinders.add(spinnerHandleCylinder);
+      
+      steeringWheelLinkGraphics.transform(transform);
+      steeringWheelLinkGraphics.addCylinder(height, radius, YoAppearance.IndianRed());
+      transform.invert();
+      steeringWheelLinkGraphics.transform(transform);
+      steeringWheelLink.setLinkGraphics(steeringWheelLinkGraphics);
    }
 
    public void createSteeringWheelRobot()
