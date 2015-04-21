@@ -155,13 +155,13 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public String[] getDefaultChestOrientationControlJointNames()
    {
-      if (runningOnRealRobot)
+//      if (runningOnRealRobot)
          return new String[] {};
 
-      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
-            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
-
-      return defaultChestOrientationControlJointNames;
+//      String[] defaultChestOrientationControlJointNames = new String[] { jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+//            jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), jointMap.getSpineJointName(SpineJointName.SPINE_ROLL) };
+//
+//      return defaultChestOrientationControlJointNames;
    }
 
    private final double minimumHeightAboveGround = 0.595;
@@ -462,7 +462,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       YoPDGains gains = new YoPDGains("UnconstrainedJoints", registry);
 
-      double kp = runningOnRealRobot ? 80.0 : 100.0;
+      double kp = runningOnRealRobot ? 80.0 : 500.0;
       double zeta = runningOnRealRobot ? 0.25 : 0.8;
       double maxAcceleration = runningOnRealRobot ? 6.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 60.0 : Double.POSITIVE_INFINITY;
