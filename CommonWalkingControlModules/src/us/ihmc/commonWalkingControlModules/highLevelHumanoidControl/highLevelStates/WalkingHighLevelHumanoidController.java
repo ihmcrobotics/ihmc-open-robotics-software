@@ -1578,11 +1578,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    @Override
    protected void doUnconstrainedJointControl()
    {
-      super.doUnconstrainedJointControl();
       for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
       {
          unconstrainedJoints[i].setqDesired(unconstrainedDesiredPositions[i].getDoubleValue());
       }
+      super.doUnconstrainedJointControl();
    }
 
    // Temporary objects to reduce garbage collection.
