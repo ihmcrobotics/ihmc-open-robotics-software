@@ -20,7 +20,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class PolarisRobot extends Robot
 {   
-   private final URL url = DRCCarEgressEnvironment.class.getClassLoader().getResource("models/polarisModel.obj");
+   private final String modelFile = "models/polarisModel.obj";
    private final FloatingJoint floatingJoint;
    private final Link link;
    private final Graphics3DObject linkGraphics;
@@ -28,10 +28,10 @@ public class PolarisRobot extends Robot
    public PolarisRobot(String name, RigidBodyTransform rootJointTransform)
    {
       super(name);
-      
+
       link = new Link(name + "Link");
       linkGraphics = new Graphics3DObject();
-      linkGraphics.addModelFile(url);
+      linkGraphics.addModelFile(modelFile);
       link.setLinkGraphics(linkGraphics);
       
       link.setMass(1.0);
