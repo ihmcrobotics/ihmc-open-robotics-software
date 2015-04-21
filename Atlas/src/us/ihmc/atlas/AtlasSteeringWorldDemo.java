@@ -24,6 +24,7 @@ public class AtlasSteeringWorldDemo
       
       AtlasDrivingInitialSetup initialSetup = new AtlasDrivingInitialSetup();
 
-      new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, initialSetup);
+      double percentOfSteeringWheelRadius = 1.0;
+      new DRCSteeringWheelDemo(robotModel, networkProcessorParameters, initialSetup, percentOfSteeringWheelRadius);
    }
 }

@@ -105,9 +105,9 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    private FramePoint spinnerHandleCenter = null;
 
-   public void addSpinnerHandle()
+   public void addSpinnerHandle(double percentOfSteeringWheelRadius)
    {
-      addSpinnerHandle(0.0, 1.0, 0.15, spokesThickness / 2.0);
+      addSpinnerHandle(0.0, percentOfSteeringWheelRadius, 0.15, spokesThickness / 2.0);
    }
 
    public void addSpinnerHandle(double angleOnSteeringWheelingInDegrees, double percentOfSteeringWheelRadius, double handleLength, double handleRadius)
