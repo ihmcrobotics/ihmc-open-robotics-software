@@ -1,7 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog.ModalExclusionType;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -11,17 +13,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.utilities.FormattingTools;
+import us.ihmc.utilities.ThreadTools;
 
 public abstract class DRCSimulationTools
 {
@@ -78,7 +85,7 @@ public abstract class DRCSimulationTools
          simulationStarter.startSpectatorInterface();
    }
 
-   @SuppressWarnings({ "hiding", "unchecked", "rawtypes" })
+   @SuppressWarnings({ "hiding", "unchecked", "rawtypes", "serial" })
    private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
          T... possibleStartingLocations)
    {
@@ -173,12 +180,50 @@ public abstract class DRCSimulationTools
       userPromptPanel.add(userMessageLabel, BorderLayout.CENTER);
       userPromptPanel.add(checkBoxesPanel, BorderLayout.SOUTH);
 
-      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
-            null, null);
-      if (selectedOption != JOptionPane.OK_OPTION)
+      final JFrame frame = new JFrame("Launch");
+      frame.setIconImage(new ImageIcon(DRCSimulationTools.class.getClassLoader().getResource("running-man-32x32-Launch.png")).getImage());
+      frame.setLayout(new BorderLayout());
+      frame.add(userPromptPanel, BorderLayout.CENTER);
+      JPanel optionPanel = new JPanel();
+      optionPanel.add(new JButton(new AbstractAction("Okay")
       {
-         System.exit(-1);
-      }
+         @Override
+         public void actionPerformed(ActionEvent arg0)
+         {
+            frame.dispose();
+            frame.setEnabled(false);
+         }
+      }));
+      optionPanel.add(new JButton(new AbstractAction("Cancel")
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            System.exit(-1);
+         }
+      }));
+      frame.add(optionPanel, BorderLayout.SOUTH);
+      frame.pack();
+      frame.setModalExclusionType(ModalExclusionType.APPLICATION_EXCLUDE);
+      frame.setLocationRelativeTo(null);
+      SwingUtilities.invokeLater(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            frame.setVisible(true);
+         }
+      });
+      
+      while (frame.isEnabled())
+         ThreadTools.sleep(50);
+      
+//      int selectedOption = JOptionPane.showOptionDialog(null, userPromptPanel, "Select", JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+//            null, null);
+//      if (selectedOption != JOptionPane.OK_OPTION)
+//      {
+//         System.exit(-1);
+//      }
 
       properties = new Properties();
       for (Modules module : Modules.values())
