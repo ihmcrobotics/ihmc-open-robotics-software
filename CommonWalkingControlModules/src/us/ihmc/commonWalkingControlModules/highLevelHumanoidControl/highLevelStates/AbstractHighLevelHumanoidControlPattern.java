@@ -165,7 +165,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
 
       // Head joints
       unconstrainedJointList.removeAll(Arrays.asList(headOrientationControlJoints));
-
+ 
       // Chest joints
       unconstrainedJointList.removeAll(Arrays.asList(chestOrientationControlJoints));
 
@@ -176,9 +176,6 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       ScrewTools.filterJoints(unconstrainedJointsArray, unconstrainedJointArray, OneDoFJoint.class);
 
       unconstrainedJointList.removeAll(Arrays.asList(unconstrainedJointArray));
-
-      if (unconstrainedJointList.size() > 0)
-         throw new RuntimeException("Joints unconstrained: " + unconstrainedJointList);
 
       return unconstrainedJointArray;
    }
