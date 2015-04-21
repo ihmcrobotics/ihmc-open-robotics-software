@@ -36,7 +36,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 {   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final HashSet<OneDoFJoint> jointsBeenControlled = new HashSet<OneDoFJoint>();
+   private final HashSet<OneDoFJoint> jointsBeingControlled = new HashSet<OneDoFJoint>();
    private final FullRobotModel fullRobotModel;
 
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
@@ -86,7 +86,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          if (joinName.contains("finger"))
             continue;
 
-         jointsBeenControlled.add(joint);
+         jointsBeingControlled.add(joint);
 
          OneDoFJointQuinticTrajectoryGenerator generator = new OneDoFJointQuinticTrajectoryGenerator("jointControl_" + joint.getName(), joint,
                                                               trajectoryTimeProvider, registry);
@@ -117,7 +117,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       {
          firstPacket = false;
 
-         for (OneDoFJoint joint : jointsBeenControlled)
+         for (OneDoFJoint joint : jointsBeingControlled)
          {
             trajectoryGenerator.get(joint).initialize();
             previousPosition.put(joint, joint.getQ());
@@ -125,7 +125,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }
       else
       {
-         for (OneDoFJoint joint : jointsBeenControlled)
+         for (OneDoFJoint joint : jointsBeingControlled)
          {
             trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
          }
@@ -177,7 +177,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       {
          firstPacket = false;
 
-         for (OneDoFJoint joint : jointsBeenControlled)
+         for (OneDoFJoint joint : jointsBeingControlled)
          {
             trajectoryGenerator.get(joint).initialize();
             previousPosition.put(joint, joint.getQ());
@@ -185,7 +185,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }
       else
       {
-         for (OneDoFJoint joint : jointsBeenControlled)
+         for (OneDoFJoint joint : jointsBeingControlled)
          {
             trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
          }
@@ -344,7 +344,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
        
       double time = timeProvider.getDoubleValue() - initialTrajectoryTime;
 
-      for (OneDoFJoint joint : jointsBeenControlled)
+      for (OneDoFJoint joint : jointsBeingControlled)
       {
          OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
 
@@ -374,13 +374,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    @Override
    public void doTransitionIntoAction()
    {
-      for (OneDoFJoint joint : jointsBeenControlled)
-      {         
-         double finalPosition = (Math.abs(joint.getQ() - joint.getqDesired()) < MAX_DELTA_TO_BELIEVE_DESIRED) ? joint.getqDesired() : joint.getQ();
-                  
-         trajectoryGenerator.get(joint).setFinalPosition(finalPosition);
-         trajectoryGenerator.get(joint).initialize(finalPosition, 0.0);
-      }
+      setJointTrajectoriesToCurrent();
       trajectoryTimeProvider.set(0.1);
    }
 
@@ -388,8 +382,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    public void doTransitionOutOfAction()
    {
    }
-
-
+   
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -398,9 +391,17 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    @Override
    public void stopExecution()
    {
-      //@DAVIDE FREEZEME
-      System.out.println( this.getClass().getSimpleName() + " stopExecution. TODO" );
+      setJointTrajectoriesToCurrent();
    }
 
-
+   private void setJointTrajectoriesToCurrent()
+   {
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {         
+         double finalPosition = (Math.abs(joint.getQ() - joint.getqDesired()) < MAX_DELTA_TO_BELIEVE_DESIRED) ? joint.getqDesired() : joint.getQ();
+                  
+         trajectoryGenerator.get(joint).setFinalPosition(finalPosition);
+         trajectoryGenerator.get(joint).initialize(finalPosition, 0.0);
+      }      
+   }
 }
