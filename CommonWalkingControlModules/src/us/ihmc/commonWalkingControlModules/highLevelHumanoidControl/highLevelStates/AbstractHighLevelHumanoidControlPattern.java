@@ -55,7 +55,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
    protected final FeetManager feetManager;
 
    private final List<OneDoFJoint> torqueControlJoints = new ArrayList<OneDoFJoint>();
-   protected final OneDoFJoint[] positionControlJoints;
+   protected final OneDoFJoint[] unconstrainedJoints;
    protected final OneDoFJoint[] allOneDoFjoints;
 
    protected final FullRobotModel fullRobotModel;
@@ -121,10 +121,10 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       // Setup the RootJointAngularAccelerationControlModule for PelvisOrientation control ////////
 
       // Setup joint constraints
-      positionControlJoints = setupJointConstraints();
+      unconstrainedJoints = findUnconstrainedJoints();
    }
 
-   protected OneDoFJoint[] setupJointConstraints()
+   protected OneDoFJoint[] findUnconstrainedJoints()
    {
       RigidBody pelvis = fullRobotModel.getPelvis();
       RigidBody chest = fullRobotModel.getChest();
@@ -136,51 +136,51 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       InverseDynamicsJoint[] headOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, headOrientationControlJointNames);
       InverseDynamicsJoint[] chestOrientationControlJoints = ScrewTools.findJointsWithNames(allJoints, chestOrientationControlJointNames);
 
-      List<InverseDynamicsJoint> unconstrainedJoints = new ArrayList<InverseDynamicsJoint>(Arrays.asList(momentumBasedController.getControlledJoints()));
+      List<InverseDynamicsJoint> unconstrainedJointList = new ArrayList<InverseDynamicsJoint>(Arrays.asList(momentumBasedController.getControlledJoints()));
 
       for (RobotSide robotSide : RobotSide.values)
       {
          // Leg joints
          RigidBody foot = fullRobotModel.getFoot(robotSide);
          InverseDynamicsJoint[] legJoints = ScrewTools.createJointPath(pelvis, foot);
-         unconstrainedJoints.removeAll(Arrays.asList(legJoints));
+         unconstrainedJointList.removeAll(Arrays.asList(legJoints));
 
          // Arm joints
          if (fullRobotModel.getHand(robotSide) != null)
          {
             RigidBody hand = fullRobotModel.getHand(robotSide);
             InverseDynamicsJoint[] armJoints = ScrewTools.createJointPath(chest, hand);
-            unconstrainedJoints.removeAll(Arrays.asList(armJoints));
+            unconstrainedJointList.removeAll(Arrays.asList(armJoints));
 
             // Hand joints
             InverseDynamicsJoint[] handJoints = ScrewTools.computeSubtreeJoints(hand);
             OneDoFJoint[] handJointsArray = new OneDoFJoint[ScrewTools.computeNumberOfJointsOfType(OneDoFJoint.class, handJoints)];
             ScrewTools.filterJoints(handJoints, handJointsArray, OneDoFJoint.class);
             List<OneDoFJoint> handJointsList = Arrays.asList(handJointsArray);
-            unconstrainedJoints.removeAll(handJointsList);
+            unconstrainedJointList.removeAll(handJointsList);
             torqueControlJoints.addAll(handJointsList);
          }
 
       }
 
       // Head joints
-      unconstrainedJoints.removeAll(Arrays.asList(headOrientationControlJoints));
+      unconstrainedJointList.removeAll(Arrays.asList(headOrientationControlJoints));
 
       // Chest joints
-      unconstrainedJoints.removeAll(Arrays.asList(chestOrientationControlJoints));
+      unconstrainedJointList.removeAll(Arrays.asList(chestOrientationControlJoints));
 
-      unconstrainedJoints.remove(fullRobotModel.getRootJoint());
-      InverseDynamicsJoint[] unconstrainedJointsArray = new InverseDynamicsJoint[unconstrainedJoints.size()];
-      unconstrainedJoints.toArray(unconstrainedJointsArray);
-      OneDoFJoint[] positionControlJoints = new OneDoFJoint[unconstrainedJointsArray.length];
-      ScrewTools.filterJoints(unconstrainedJointsArray, positionControlJoints, OneDoFJoint.class);
+      unconstrainedJointList.remove(fullRobotModel.getRootJoint());
+      InverseDynamicsJoint[] unconstrainedJointsArray = new InverseDynamicsJoint[unconstrainedJointList.size()];
+      unconstrainedJointList.toArray(unconstrainedJointsArray);
+      OneDoFJoint[] unconstrainedJointArray = new OneDoFJoint[unconstrainedJointsArray.length];
+      ScrewTools.filterJoints(unconstrainedJointsArray, unconstrainedJointArray, OneDoFJoint.class);
 
-      unconstrainedJoints.removeAll(Arrays.asList(positionControlJoints));
+      unconstrainedJointList.removeAll(Arrays.asList(unconstrainedJointArray));
 
-      if (unconstrainedJoints.size() > 0)
-         throw new RuntimeException("Joints unconstrained: " + unconstrainedJoints);
+      if (unconstrainedJointList.size() > 0)
+         throw new RuntimeException("Joints unconstrained: " + unconstrainedJointList);
 
-      return positionControlJoints;
+      return unconstrainedJointArray;
    }
 
    public void initialize()
@@ -211,7 +211,7 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       doChestControl();
       doCoMControl();
       doPelvisControl();
-      doJointPositionControl();
+      doUnconstrainedJointControl();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
@@ -254,9 +254,9 @@ public abstract class AbstractHighLevelHumanoidControlPattern extends HighLevelB
       pelvisOrientationManager.compute();
    }
 
-   protected void doJointPositionControl()
+   protected void doUnconstrainedJointControl()
    {
-      momentumBasedController.doPDControl(positionControlJoints, unconstrainedJointsControlGains);
+      momentumBasedController.doPDControl(unconstrainedJoints, unconstrainedJointsControlGains);
    }
 
    // TODO: New methods coming from extending State class

@@ -191,6 +191,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable isInFlamingoStance = new BooleanYoVariable("isInFlamingoStance", registry);
 
+   private final DoubleYoVariable[] unconstrainedDesiredPositions;
+
    private final FootExplorationControlModule footExplorationControlModule;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -231,6 +233,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       super(variousWalkingProviders, variousWalkingManagers, momentumBasedController, walkingControllerParameters, controllerState);
 
       setupManagers(variousWalkingManagers);
+
+
+      unconstrainedDesiredPositions = new DoubleYoVariable[unconstrainedJoints.length];
+
+      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
+      {
+         unconstrainedDesiredPositions[i] = new DoubleYoVariable(unconstrainedJoints[i].getName() + "_unconstrained_q_d", registry);
+      }
 
       timeToGetPreparedForLocomotion.set(walkingControllerParameters.getTimeToGetPreparedForLocomotion());
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
@@ -443,6 +453,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    public void initialize()
    {
       super.initialize();
+
+      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
+      {
+         unconstrainedDesiredPositions[i].set(unconstrainedJoints[i].getQ());
+      }
 
       momentumBasedController.setMomentumControlModuleToUse(MOMENTUM_CONTROL_MODULE_TO_USE);
 
@@ -1538,7 +1553,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       doChestControl();
       doCapturePointBasedControl();
       doPelvisControl();
-      doJointPositionControl();
+      doUnconstrainedJointControl();
 
       setTorqueControlJointsToZeroDersiredAcceleration();
 
@@ -1558,6 +1573,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       finalDesiredICPInWorld.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
       icpAndMomentumBasedController.computeAndSubmitDesiredRateOfChangeOfMomentum(finalDesiredCapturePoint2d, keepCMPInsideSupportPolygon);
+   }
+
+   @Override
+   protected void doUnconstrainedJointControl()
+   {
+      super.doUnconstrainedJointControl();
+      for (int i = 0; i < unconstrainedDesiredPositions.length; i++)
+      {
+         unconstrainedJoints[i].setqDesired(unconstrainedDesiredPositions[i].getDoubleValue());
+      }
    }
 
    // Temporary objects to reduce garbage collection.
