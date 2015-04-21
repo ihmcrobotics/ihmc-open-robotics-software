@@ -3,7 +3,6 @@ package us.ihmc.communication;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.utilities.io.printing.PrintTools;
 
 import java.util.EnumMap;
@@ -11,8 +10,8 @@ import java.util.HashMap;
 
 public class PacketRouter<T extends Enum<T>> 
 {
-   private final Class<T> destinationType;
    private boolean DEBUG = false;
+
    private final T[] destinationConstants;
    private int sourceCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all sources
    private int destinationCommunicatorIdToDebug = Integer.MIN_VALUE; //set to Integer.MIN_VALUE to debug all destinations
@@ -28,7 +27,6 @@ public class PacketRouter<T extends Enum<T>>
    
    public PacketRouter(Class<T> destinationType)
    {
-      this.destinationType = destinationType;
       destinationConstants = destinationType.getEnumConstants();
       communicators = new EnumMap<>(destinationType);
       consumers = new EnumMap<>(destinationType);
@@ -42,10 +40,21 @@ public class PacketRouter<T extends Enum<T>>
    public void attachPacketCommunicator(T destination, final PacketCommunicator packetCommunicator)
    {
       checkCommunicatorId(destination);
-            
-      GlobalPacketConsumer packetRoutingAction = new PacketRoutingAction(packetCommunicator);
-      packetCommunicator.attachGlobalListener(packetRoutingAction);
-      
+
+      // check if this communicator already points to the other destination
+      GlobalPacketConsumer packetRoutingAction = null;
+      T otherDestination = communicatorDestinations.get(packetCommunicator);
+
+      if (otherDestination != null)
+      {
+         packetRoutingAction = consumers.get(otherDestination);
+         // this listener is already attached to that communicator
+      }
+      else
+      {
+         packetRoutingAction = new PacketRoutingAction(packetCommunicator);
+         packetCommunicator.attachGlobalListener(packetRoutingAction);
+      }
       
       consumers.put(destination, packetRoutingAction);
       communicators.put(destination, packetCommunicator);
@@ -57,7 +66,6 @@ public class PacketRouter<T extends Enum<T>>
    
    private void checkCommunicatorId(final T destination)
    {
-      
       if(isBroadcast(destination))
       {
          throw new IllegalArgumentException("packetCommunicator cannot have an id of zero, it's reserved for broadcast!!");
@@ -79,9 +87,8 @@ public class PacketRouter<T extends Enum<T>>
     */
    private void processPacketRouting(PacketCommunicator source, Packet<?> packet)
    {
-      if(shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
+      if (shouldPrintDebugStatement(source, packet.getDestination(), packet.getClass()))
       {
-
          PrintTools.debug(this, "NP received " + packet.getClass().getSimpleName() + " heading for " + destinationConstants[packet.destination] + " from " + communicatorDestinations.get(source));
       }
       
@@ -263,7 +270,6 @@ public class PacketRouter<T extends Enum<T>>
    {
       this.packetTypesToDebug = packetTypesToDebug;
    }
-
    
    private class PacketRoutingAction implements GlobalPacketConsumer
    {
