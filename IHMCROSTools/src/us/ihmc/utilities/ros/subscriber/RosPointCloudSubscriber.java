@@ -175,10 +175,10 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
             a = 0;
             try
             {
-               b = Byte.toUnsignedInt(byteBuffer.get());
-               g = Byte.toUnsignedInt(byteBuffer.get());
-               r = Byte.toUnsignedInt(byteBuffer.get());
-               a = Byte.toUnsignedInt(byteBuffer.get());
+               b = byteToUnsignedInt(byteBuffer.get());
+               g = byteToUnsignedInt(byteBuffer.get());
+               r = byteToUnsignedInt(byteBuffer.get());
+               a = byteToUnsignedInt(byteBuffer.get());
                packet.pointColors[i] = new Color(r, g, b);
 //               System.out.println(r + " " + g + " " + b + " " + a);
             }
@@ -190,6 +190,11 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       }
       
       return packet;
+   }
+   
+   private int byteToUnsignedInt(byte b)
+   {
+      return ((int) b) & 0xff;
    }
 
    @Override
