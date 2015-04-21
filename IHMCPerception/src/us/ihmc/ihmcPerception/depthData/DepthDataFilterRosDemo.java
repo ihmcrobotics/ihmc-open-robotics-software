@@ -1,11 +1,10 @@
 package us.ihmc.ihmcPerception.depthData;
 
+import java.awt.Color;
 import java.net.URISyntaxException;
 
-import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.ros.apps.RosPointCloudFilterRepublisher;
 
 /*
@@ -25,9 +24,9 @@ public class DepthDataFilterRosDemo extends RosPointCloudFilterRepublisher
 
 
    @Override
-   protected boolean includePoint(Point3d point, Color3f color)
+   protected boolean includePoint(Point3d point, Color color)
    {
-      return includePoint(point, (color.x + color.y + color.z) / 3.0f);
+      return includePoint(point, (color.getRed() + color.getGreen() + color.getBlue()) / 3.0f);
    }
 
    @Override
