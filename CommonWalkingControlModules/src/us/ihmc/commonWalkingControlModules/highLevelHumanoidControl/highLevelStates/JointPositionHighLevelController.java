@@ -319,6 +319,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          {
             if (packet.jointName.equals(joint.getName()))
             {
+               trajectoryTimeProvider.set(packet.trajcetoryTime);
                double desiredPostion = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
                trajectoryGenerator.get(joint).setFinalPosition(desiredPostion);
                alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
