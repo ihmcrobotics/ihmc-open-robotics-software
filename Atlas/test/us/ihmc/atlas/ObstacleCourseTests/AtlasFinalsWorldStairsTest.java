@@ -224,7 +224,7 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.18, startingLocation.z + 0.30),
               new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.35, startingLocation.z + 0.55),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.36, startingLocation.z + 0.55),
               new Quat4d(orientation), leftFootPoint2ds));
 
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.45, startingLocation.z + 0.55),
