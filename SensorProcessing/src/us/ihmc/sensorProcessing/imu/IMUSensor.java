@@ -1,7 +1,9 @@
 package us.ihmc.sensorProcessing.imu;
 
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -87,6 +89,21 @@ public class IMUSensor implements IMUSensorReadOnly
    public void setLinearAccelerationMeasurement(Vector3d newLinearAcceleration)
    {
       linearAccelerationMeasurement.set(newLinearAcceleration);
+   }
+
+   @Override public void getOrientationMeasurement(Matrix3f orientationToPack)
+   {
+      orientationToPack.set(orientationMeasurement);
+   }
+
+   @Override public void getAngularVelocityMeasurement(Vector3f angularVelocityToPack)
+   {
+      angularVelocityToPack.set(angularVelocityMeasurement);
+   }
+
+   @Override public void getLinearAccelerationMeasurement(Vector3f linearAccelerationToPack)
+   {
+      linearAccelerationToPack.set(linearAccelerationMeasurement);
    }
 
    public void getOrientationMeasurement(Matrix3d orientationToPack)

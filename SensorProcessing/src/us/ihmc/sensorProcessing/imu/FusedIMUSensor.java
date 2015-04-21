@@ -1,8 +1,6 @@
 package us.ihmc.sensorProcessing.imu;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -316,6 +314,21 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    public void getLinearAccelerationMeasurement(Vector3d linearAccelerationToPack)
+   {
+      linearAcceleration.get(linearAccelerationToPack);
+   }
+
+   @Override public void getOrientationMeasurement(Matrix3f orientationToPack)
+   {
+      quaternion.get(orientationToPack);
+   }
+
+   @Override public void getAngularVelocityMeasurement(Vector3f angularVelocityToPack)
+   {
+      angularVelocity.get(angularVelocityToPack);
+   }
+
+   @Override public void getLinearAccelerationMeasurement(Vector3f linearAccelerationToPack)
    {
       linearAcceleration.get(linearAccelerationToPack);
    }

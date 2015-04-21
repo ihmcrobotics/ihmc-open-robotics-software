@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import org.ros.message.MessageListener;
 import org.ros.namespace.GraphName;
@@ -105,7 +106,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
          IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
-         imuPacket.set(RandomTools.generateRandomVector(random), RandomTools.generateRandomQuaternion(random), RandomTools.generateRandomVector(random));
+         imuPacket.set(RandomTools.generateRandomVector3f(random), RandomTools.generateRandomQuaternion4f(random), RandomTools.generateRandomVector3f(random));
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
