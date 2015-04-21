@@ -23,6 +23,7 @@ public enum PointType
             return XYZI;
 
          case "rgb" :
+         case "rgba" :
             return XYZRGB;
       }
       throw new RuntimeException("unknown PointType: " + thirdFieldName);

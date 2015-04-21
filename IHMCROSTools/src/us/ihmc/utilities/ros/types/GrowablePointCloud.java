@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros.types;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.vecmath.Color3f;
@@ -11,7 +12,7 @@ public class GrowablePointCloud
 {
    ArrayList<Point3d> points = new ArrayList<>();
    ArrayList<Float> intensities = new ArrayList<>();
-   ArrayList<Color3f> colors = new ArrayList<>();
+   ArrayList<Color> colors = new ArrayList<>();
 
    public void clear()
    {
@@ -20,16 +21,16 @@ public class GrowablePointCloud
       colors.clear();
    }
 
-   public void addPoint(Point3d p, Color3f color)
+   public void addPoint(Point3d p, Color color)
    {
-      addPoint(p, (color.x+color.y+color.z)/3.0f, color);
+      addPoint(p, (color.getRed()+color.getGreen()+color.getBlue())/3.0f, color);
    }
    public void addPoint(Point3d p, float intensity)
    {
-      addPoint(p, intensity, new Color3f(255*intensity/6000, 255*intensity/6000,255*intensity/6000));
+      addPoint(p, intensity, new Color(255*intensity/6000, 255*intensity/6000,255*intensity/6000));
       
    }
-   public synchronized void addPoint(Point3d p, float intensity, Color3f color)
+   public synchronized void addPoint(Point3d p, float intensity, Color color)
    {
       points.add(p);
       intensities.add(intensity);

@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros.subscriber;
 
+import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -94,7 +95,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
    {
 		  Point3d[] points = null;
 		  float[] intensities = null;
-		  Color3f[] pointColors = null;
+		  Color[] pointColors = null;
 		  PointType pointType = null;
 		  
 		  public Point3d[] getPoints()
@@ -107,7 +108,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 			  return intensities;
 		  }
 		  
-		  public Color3f[] getPointColors()
+		  public Color[] getPointColors()
 		  {
 			  return pointColors;
 		  }
@@ -135,7 +136,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
             break;
 
          case XYZRGB :
-        	 packet.pointColors = new Color3f[numberOfPoints];
+        	 packet.pointColors = new Color[numberOfPoints];
 
             break;
       }
@@ -153,7 +154,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       
       for (int i = 0; i < numberOfPoints; i++)
       {
-    	 byteBuffer.position(i*pointStep+offset); 
+         byteBuffer.position(i * pointStep + offset);
          float x = byteBuffer.getFloat();
          float y = byteBuffer.getFloat();
          float z = byteBuffer.getFloat();
@@ -161,17 +162,30 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
          switch (packet.pointType)
          {
-            case XYZI :
-            	packet.intensities[i] = byteBuffer.getFloat();;
+         case XYZI:
+            packet.intensities[i] = byteBuffer.getFloat();
+            ;
 
-               break;
+            break;
 
-            case XYZRGB :
-               int b = (int) byteBuffer.get();
-               int g = (int) byteBuffer.get();
-               int r = (int) byteBuffer.get();
-               byte dummy = byteBuffer.get();
-               packet.pointColors[i] = new Color3f(r, g, b);
+         case XYZRGB:
+            int r = 0,
+            g = 0,
+            b = 0,
+            a = 0;
+            try
+            {
+               b = Byte.toUnsignedInt(byteBuffer.get());
+               g = Byte.toUnsignedInt(byteBuffer.get());
+               r = Byte.toUnsignedInt(byteBuffer.get());
+               a = Byte.toUnsignedInt(byteBuffer.get());
+               packet.pointColors[i] = new Color(r, g, b);
+//               System.out.println(r + " " + g + " " + b + " " + a);
+            }
+            catch (RuntimeException e)
+            {
+               System.out.println(g);
+            }
          }
       }
       

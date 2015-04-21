@@ -87,9 +87,9 @@ public class RosPointCloudFilterRepublisher implements Runnable
    float[] hsbvals = new float[3];
    float pinkHue = 0.9893f;
 
-   protected boolean includePoint(Point3d point, Color3f color)
+   protected boolean includePoint(Point3d point, Color color)
    {
-      Color.RGBtoHSB((int) color.x, (int) color.y, (int) color.z, hsbvals);
+      Color.RGBtoHSB(color.getRed(),  color.getGreen(), color.getBlue(), hsbvals);
 
       return point.distance(origin) < 1.0;
 
