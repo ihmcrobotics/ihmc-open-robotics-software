@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Random;
 
 import javax.vecmath.Quat4d;
+import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
 
@@ -55,7 +57,7 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuD
     * @param rawImuAngularVelocity
     * @param linearAccele
     */
-   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4d orientation, Vector3d linearAcceleration)
+   public synchronized void appendRawImuData(long timestampInNanoSeconds, Quat4f orientation, Vector3f linearAcceleration)
    {
       RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
       RotationFunctions.setYawPitchRollBasedOnQuaternion(currentImuOrientation, orientation);

@@ -5,9 +5,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import javax.vecmath.*;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
@@ -151,10 +149,10 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
 
    // puts the state data into the ring buffer for the output thread
-   Vector3d imuLinearAcceleration = new Vector3d();
-   Vector3d rawImuAngularVelocityToPack = new Vector3d();
+   Vector3f imuLinearAcceleration = new Vector3f();
+   Vector3f rawImuAngularVelocityToPack = new Vector3f();
    Matrix3d imuOrientationAsMatrix = new Matrix3d();
-   Quat4d imuOrientationAsQuat= new Quat4d();
+   Quat4f imuOrientationAsQuat= new Quat4f();
 
    @Override
    public void write()
