@@ -2,6 +2,7 @@ package us.ihmc.atlas.operatorInterfaceDebugging;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -16,6 +17,7 @@ import us.ihmc.utilities.DateTools;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.UnitConversions;
+import us.ihmc.utilities.time.Timer;
 
 public class AtlasUIPacketRecorder
 {
@@ -24,6 +26,7 @@ public class AtlasUIPacketRecorder
    public AtlasUIPacketRecorder() throws IOException
    {
       final DataOutputStream fileDataOutputStream = FileTools.getFileDataOutputStream(getPacketRecordingFilePath());
+      final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath());
       
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       
@@ -41,6 +44,9 @@ public class AtlasUIPacketRecorder
             {
                fileDataOutputStream.flush();
                fileDataOutputStream.close();
+               
+               timeWriter.flush();
+               timeWriter.close();
             }
             catch (IOException e)
             {
@@ -57,12 +63,26 @@ public class AtlasUIPacketRecorder
       packetClient.connect();
       packetClient.attachGlobalListener(new GlobalPacketConsumer()
       {
+         Timer timer = new Timer();
+         boolean firstPacketReceived = false;
+         
          @Override
          public void receivedPacket(Packet<?> packet)
          {
             try
             {
+               if (!firstPacketReceived)
+               {
+                  firstPacketReceived = true;
+                  timer.start();
+               }
+               else
+               {
+                  timeWriter.println(timer.lap());
+               }
+               
                PrintTools.info("Receiving packet: " + packet);
+               
                kryoStreamSerializer.write(fileDataOutputStream, packet);
             }
             catch (IOException e)
@@ -80,11 +100,21 @@ public class AtlasUIPacketRecorder
    public static Path getPacketRecordingFilePath()
    {
       FileTools.ensureDirectoryExists(PACKET_RECORDINGS_PATH);
-      return PACKET_RECORDINGS_PATH.resolve("PacketRecording_" + DateTools.getDateString() + "1");
+      return PACKET_RECORDINGS_PATH.resolve(getPrefixFileName() + ".ibag");
+   }
+   
+   public static Path getPacketTimingPath()
+   {
+      return getPacketRecordingFilePath().getParent().resolve(getPrefixFileName() + ".tbag");
+   }
+   
+   public static String getPrefixFileName()
+   {
+      return "PacketRecording_" + DateTools.getDateString() + "_2";
    }
    
    public static void main(String[] args) throws IOException
    {
-      new AtlasUIPacketRecorder();
+//      new AtlasUIPacketRecorder();
    }
 }

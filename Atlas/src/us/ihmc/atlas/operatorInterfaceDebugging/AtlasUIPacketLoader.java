@@ -1,5 +1,6 @@
 package us.ihmc.atlas.operatorInterfaceDebugging;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
 
@@ -16,6 +17,8 @@ import us.ihmc.utilities.math.UnitConversions;
 
 public class AtlasUIPacketLoader
 {
+   private static final double PLAYBACK_SPEED = 2.0;
+   
    public AtlasUIPacketLoader() throws IOException
    {
       
@@ -28,11 +31,13 @@ public class AtlasUIPacketLoader
       packetCommunicator.connect();
       packetCommunicator.attachStateListener(new NetStateListener()
       {
-         DataInputStream fileDataInputStream;
+         private DataInputStream fileDataInputStream;
+         private BufferedReader timingReader;
          
-         public void openFileDataStream()
+         public void openFileDataStream() throws IOException
          {
             fileDataInputStream = FileTools.getFileDataInputStream(AtlasUIPacketRecorder.getPacketRecordingFilePath(), UnitConversions.megabytesToBytes(500));
+            timingReader = FileTools.newBufferedReader(AtlasUIPacketRecorder.getPacketTimingPath());
          }
          
          @Override
@@ -54,20 +59,16 @@ public class AtlasUIPacketLoader
                Packet<?> packet = null;
                do
                {
-                  try
-                  {
-                     packet = (Packet<?>) kryoStreamDeSerializer.read(fileDataInputStream);
-                  }
-                  catch (IndexOutOfBoundsException e)
-                  {
-                     openFileDataStream();
-                     continue;
-                  }
+                  packet = (Packet<?>) kryoStreamDeSerializer.read(fileDataInputStream);
                   PrintTools.info("Sending: " + packet);
 
                   packetCommunicator.send(packet);
                   
-                  ThreadTools.sleepSeconds(0.005);
+                  double timeToWait = 0.01;
+                  if (timingReader.ready())
+                     timeToWait = Double.valueOf(timingReader.readLine()) / PLAYBACK_SPEED;
+                  
+                  ThreadTools.sleepSeconds(timeToWait);
                   
                   if (fileDataInputStream.available() < 1)
                   {
