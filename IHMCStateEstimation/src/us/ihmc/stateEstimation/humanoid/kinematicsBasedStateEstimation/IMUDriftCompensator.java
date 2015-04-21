@@ -341,14 +341,15 @@ public class IMUDriftCompensator
       footAngularVelocityAverageFiltered.update();
    }
    
-   private void resetFootAngularVelocitiesFiltered()
+   public void resetFootAngularVelocitiesFiltered()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         footAngularVelocitiesInWorldFilteredX.get(robotSide).reset();
-         footAngularVelocitiesInWorldFilteredY.get(robotSide).reset();
-         footAngularVelocitiesInWorldFilteredZ.get(robotSide).reset();
+         footAngularVelocitiesInWorldFilteredX.get(robotSide).set(0.0);
+         footAngularVelocitiesInWorldFilteredY.get(robotSide).set(0.0);
+         footAngularVelocitiesInWorldFilteredZ.get(robotSide).set(0.0);
       }
-      footAngularVelocityAverageFiltered.reset();
+      footAngularVelocityAverageFiltered.setToZero();
    }
+
 }
