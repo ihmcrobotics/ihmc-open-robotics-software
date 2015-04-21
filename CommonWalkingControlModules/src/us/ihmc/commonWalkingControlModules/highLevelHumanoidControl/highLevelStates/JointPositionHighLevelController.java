@@ -250,10 +250,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          
          int jointTorqueLimit = 0;
          if( robotSide == RobotSide.LEFT ) {
-            jointTorqueLimit = packet.leftArmJointTorqueLimit[i] ;
+            jointTorqueLimit = packet.leftArmTorqueLimit[i] ;
          }
          else{
-            jointTorqueLimit = packet.rightArmJointTorqueLimit[i] ;
+            jointTorqueLimit = packet.rightArmTorqueLimit[i] ;
          }
          if( jointTorqueLimit > 0 )
          {
@@ -287,10 +287,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          
          int jointTorqueLimit = 0;
          if( robotSide == RobotSide.LEFT ) {
-            jointTorqueLimit = packet.leftLegJointTorqueLimit[i] ;
+            jointTorqueLimit = packet.leftLegTorqueLimit[i] ;
          }
          else{
-            jointTorqueLimit = packet.rightLegJointTorqueLimit[i] ;
+            jointTorqueLimit = packet.rightLegTorqueLimit[i] ;
          }
          if( jointTorqueLimit > 0 )
          {
