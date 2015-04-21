@@ -10,11 +10,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.math.Vector64F;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -156,9 +153,8 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
 
       String[] jointsToMinimize = new String[]{
           //  "l_arm_shx", "r_arm_shx",
-         // //  "l_arm_elx", "r_arm_elx",
-          ////  "l_arm_wrx", "r_arm_wrx"  
-            };
+            "l_arm_elx", "r_arm_elx",
+            "l_arm_wrx", "r_arm_wrx"  };
 
       taskEndEffectorPosition.get(RIGHT).setClampingValueForTaskSpaceError(0.2);
       taskEndEffectorPosition.get(LEFT).setClampingValueForTaskSpaceError(0.2);
