@@ -361,7 +361,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getMaxSwingHeightFromStanceFoot()
    {
-      return 0.25;
+      return 0.30;
    }
 
    @Override
