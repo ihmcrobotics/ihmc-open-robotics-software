@@ -27,17 +27,17 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
 
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   public DRCSteeringWheelEnvironment()
+   public DRCSteeringWheelEnvironment(double percentOfSteeringWheelRadius)
    {
-      this(0.39, 0.39, 1.27, 0.0, -32.0);
+      this(0.39, 0.39, 1.27, 0.0, -32.0, percentOfSteeringWheelRadius);
    }
 
-   public DRCSteeringWheelEnvironment(Point3d wheelLocation, double valveYawInDegrees, double valvePitchInDegrees)
+   public DRCSteeringWheelEnvironment(Point3d wheelLocation, double valveYawInDegrees, double valvePitchInDegrees, double percentOfSteeringWheelRadius)
    {
-      this(wheelLocation.x, wheelLocation.y, wheelLocation.z, valveYawInDegrees, valvePitchInDegrees);
+      this(wheelLocation.x, wheelLocation.y, wheelLocation.z, valveYawInDegrees, valvePitchInDegrees, percentOfSteeringWheelRadius);
    }
 
-   public DRCSteeringWheelEnvironment(double x, double y, double z, double yawInDegrees, double pitchInDegrees)
+   public DRCSteeringWheelEnvironment(double x, double y, double z, double yawInDegrees, double pitchInDegrees, double percentOfSteeringWheelRadius)
    {
       double forceVectorScale = 1.0 / 50.0;
 
@@ -47,12 +47,14 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       wheelRobot = ContactableSteeringWheelRobot.createPolarisSteeringWheel(x, y, z, Math.toRadians(yawInDegrees), Math.toRadians(pitchInDegrees));
       wheelRobot.createSteeringWheelRobot();
       wheelRobot.createAvailableContactPoints(1, 30, forceVectorScale, true);
-      wheelRobot.addSpinnerHandle();
+      wheelRobot.addSpinnerHandle(percentOfSteeringWheelRadius);
       robots.add(wheelRobot);
       
       RigidBodyTransform polarisTransform = new RigidBodyTransform();
       robots.add(new PolarisRobot("polaris", polarisTransform));
    }
+
+
 
    public ReferenceFrame getSteeringWheelFrame()
    {

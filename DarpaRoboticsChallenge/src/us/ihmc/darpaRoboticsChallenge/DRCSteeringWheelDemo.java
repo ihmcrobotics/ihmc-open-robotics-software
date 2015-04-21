@@ -14,9 +14,10 @@ public class DRCSteeringWheelDemo
 {
    private final DRCSimulationFactory drcSimulationFactory;
 
-   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup)
+   public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup, double
+         percentOfSteeringWheelRadius)
    {
-      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment();
+      CommonAvatarEnvironmentInterface environment = new DRCSteeringWheelEnvironment(percentOfSteeringWheelRadius);
 
       DRCSimulationStarter simStarter = new DRCSimulationStarter(model, environment);
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
