@@ -64,6 +64,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
    
    private static final boolean SHOW_CONTACT_POINTS = true;
    private static final boolean SHOW_COM_REFERENCE_FRAMES = false;
+   private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
    private static final boolean SHOW_SENSOR_REFERENCE_FRAMES = false;
    private static final boolean DEBUG = false;
 
@@ -695,6 +696,10 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
       if (SHOW_COM_REFERENCE_FRAMES)
       {
          scsLink.addCoordinateSystemToCOM(0.1);
+      }
+      if (SHOW_INERTIA_ELLIPSOIDS)
+      {
+         scsLink.addEllipsoidFromMassProperties(YoAppearance.Orange());
       }
 
       return scsLink;
