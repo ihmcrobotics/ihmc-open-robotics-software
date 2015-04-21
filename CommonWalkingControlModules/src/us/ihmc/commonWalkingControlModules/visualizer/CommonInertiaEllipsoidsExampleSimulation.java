@@ -5,6 +5,7 @@ import javax.vecmath.Matrix3d;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -24,20 +25,30 @@ public class CommonInertiaEllipsoidsExampleSimulation
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
       Matrix3d momentOfInertia = new Matrix3d();
 
-      double mass = 1.0;
+      double mass = 0.7854;
       double a = 0.1;
-      double b = 1;
-      double c = 0.1;
+      double b = 0.1;
+      double c = 1.0;
       double ixx = 1.0 / 5.0 * mass * (b * b + c * c);
       double iyy = 1.0 / 5.0 * mass * (c * c + a * a);
       double izz = 1.0 / 5.0 * mass * (a * a + b * b);
+      //      double R = 0.025;
+      //      double h = 0.4;
+      //
+      //      double ixx = 1.0 / 12.0 * mass * h * h + 1.0 / 4.0 * mass * R * R;
+      //      double iyy = 1.0 / 12.0 * mass * h * h + 1.0 / 4.0 * mass * R * R;
+      //      double izz = 1.0 / 2.0 * mass * R * R;
+
       momentOfInertia.setM00(ixx);
       momentOfInertia.setM11(iyy);
       momentOfInertia.setM22(izz);
-      
+
+      System.out.println(momentOfInertia);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.rotX(3.0*Math.PI/4.0);
+      transform.rotX(-Math.PI / 2.0);
+      System.out.println(transform);
       momentOfInertia = InertiaTools.rotate(transform, momentOfInertia);
+      System.out.println(momentOfInertia);
       RigidBody aBody = ScrewTools.addRigidBody("test", rootJoint, momentOfInertia, mass, inertiaPose);
       rootJoint.updateFramesRecursively();
 
@@ -50,11 +61,14 @@ public class CommonInertiaEllipsoidsExampleSimulation
       SimulationConstructionSet scs = new SimulationConstructionSet();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoGraphic(coordinateSystem);
-     
+
       Graphics3DObject obj = new Graphics3DObject();
       obj.addEllipsoid(a, b, c, YoAppearance.Orange());
+      obj.rotate(-Math.PI / 4.0, Axis.X);
+      //      obj.translate(0, 0, -h/2.0);
+      //      obj.addCylinder(h, R, YoAppearance.Orange());
       scs.addStaticLinkGraphics(obj);
-      
+
       scs.setGroundVisible(false);
       scs.startOnAThread();
 
