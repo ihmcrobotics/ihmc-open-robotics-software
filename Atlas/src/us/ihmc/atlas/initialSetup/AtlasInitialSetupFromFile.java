@@ -18,21 +18,18 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
+public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
 {
-   public static final String INITIAL_CONDITIONS_FILE = "initialDrivingSetup";
+   private String initialConditionsFileName;
    
-   private static final double PELVIS_TO_GROUND = 1.05;
-   private static final double X_OFFSET = -0.07;
-   private static final double Y_OFFSET = -0.55;
+   private static final String POSITION_KEY = "pelvisPos", ORIENTATION_KEY = "pelvisRot";
    
-   private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d positionInWorld = new Vector3d();
-   private final Quat4d rotation = new Quat4d();
+   private final RigidBodyTransform pelvisPoseInWorld = new RigidBodyTransform();
    private boolean robotInitialized = false;
 
-   public AtlasDrivingInitialSetup()
+   public AtlasInitialSetupFromFile(String initialConditionsFile)
    {
+      this.initialConditionsFileName = initialConditionsFile;
    }
 
    @Override
@@ -43,7 +40,7 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
          return;
       }
       
-      File file = new File(INITIAL_CONDITIONS_FILE);
+      File file = new File(initialConditionsFileName);
       PrintTools.info("Loading initial joint configuration for driving simulation from " + file.getAbsolutePath());
       
       if (file.exists() && file.isFile())
@@ -59,56 +56,39 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
                for (LegJointName jointName : LegJointName.values())
                {
                   String key = jointMap.getLegJointName(robotSide, jointName);
-                  if (key == null)
-                  {
-                     continue;
-                  }
-                  if (properties.containsKey(key))
-                  {
-                     String jointAngle = properties.getProperty(key);
-                     robot.getOneDegreeOfFreedomJoint(jointMap.getLegJointName(robotSide, jointName)).setQ(Double.parseDouble(jointAngle) / 100.0);
-                  }
-                  else
-                  {
-                     PrintTools.info("Did not find initial angle for " + key);
-                  }
+                  setRobotAngle(key, properties, robot);
                }
                
                for (ArmJointName jointName : ArmJointName.values())
                {
                   String key = jointMap.getArmJointName(robotSide, jointName);
-                  if (key == null)
-                  {
-                     continue;
-                  }
-                  if (properties.containsKey(key))
-                  {
-                     String jointAngle = properties.getProperty(key);
-                     robot.getOneDegreeOfFreedomJoint(jointMap.getArmJointName(robotSide, jointName)).setQ(Double.parseDouble(jointAngle) / 100.0);
-                  }
-                  else
-                  {
-                     PrintTools.info("Did not find initial angle for " + key);
-                  }
+                  setRobotAngle(key, properties, robot);
                }
            }
             
             for (SpineJointName jointName : SpineJointName.values())
             {
                String key = jointMap.getSpineJointName(jointName);
-               if (key == null)
-               {
-                  continue;
-               }
-               if (properties.containsKey(key))
-               {
-                  String jointAngle = properties.getProperty(key);
-                  robot.getOneDegreeOfFreedomJoint(jointMap.getSpineJointName(jointName)).setQ(Double.parseDouble(jointAngle) / 100.0);
-               }
-               else
-               {
-                  PrintTools.info("Did not find initial angle for " + key);
-               }
+               setRobotAngle(key, properties, robot);
+            }
+            
+            if(properties.containsKey(POSITION_KEY))
+            {
+               String position[] = properties.getProperty(POSITION_KEY).split(" ");
+               pelvisPoseInWorld.setTranslation(new Vector3d(
+                     Double.parseDouble(position[0]), 
+                     Double.parseDouble(position[1]), 
+                     Double.parseDouble(position[2])));
+            }
+            
+            if(properties.containsKey(ORIENTATION_KEY))
+            {
+               String quat[] = properties.getProperty(ORIENTATION_KEY).split(" ");
+               pelvisPoseInWorld.setRotation(new Quat4d(
+                     Double.parseDouble(quat[0]), 
+                     Double.parseDouble(quat[1]), 
+                     Double.parseDouble(quat[2]),
+                     1.0));
             }
             
             stream.close();
@@ -119,7 +99,7 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
          }
          catch (NumberFormatException e)
          {
-            throw new RuntimeException("Make sure all fields ar doubles in " + file.getAbsolutePath(), e);
+            throw new RuntimeException("Make sure all fields are doubles in " + file.getAbsolutePath(), e);
          }
       }
       else
@@ -130,26 +110,37 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
       robot.getOneDoFJoints()[1].getName();
       
       robot.update();
-      robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.get(rotation, positionInWorld);
-      
-      positionInWorld.set(X_OFFSET, Y_OFFSET, PELVIS_TO_GROUND);
-      
-      robot.setPositionInWorld(positionInWorld);
+      robot.getRootJoint().setRotationAndTranslation(pelvisPoseInWorld);
       robot.update();
+      
       robotInitialized = true;
+   }
+   
+   private void setRobotAngle(String jointName, Properties properties, SDFRobot robot)
+   {
+      if(jointName == null) return;
+      
+      if (properties.containsKey(jointName))
+      {
+         String jointAngle = properties.getProperty(jointName);
+         robot.getOneDegreeOfFreedomJoint(jointName).setQ(Double.parseDouble(jointAngle) / 100.0);
+      }
+      else
+      {
+         PrintTools.info("Did not find initial angle for " + jointName);
+      }
    }
 
    @Override
    public void getOffset(Vector3d offsetToPack)
    {
-      offsetToPack.set(X_OFFSET, Y_OFFSET, PELVIS_TO_GROUND);
+      pelvisPoseInWorld.getTranslation(offsetToPack);
    }
 
    @Override
    public void setOffset(Vector3d offset)
    {
-      PrintTools.info("not implemented");
+      pelvisPoseInWorld.setTranslation(offset);
    }
 
    @Override
@@ -176,5 +167,10 @@ public class AtlasDrivingInitialSetup implements DRCRobotInitialSetup<SDFRobot>
    {
       PrintTools.info("not implemented");
       return 0.0;
+   }
+   
+   public String getFileName()
+   {
+      return initialConditionsFileName;
    }
 }
