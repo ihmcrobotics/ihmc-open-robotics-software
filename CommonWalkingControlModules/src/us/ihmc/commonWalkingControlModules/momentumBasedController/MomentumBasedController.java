@@ -756,7 +756,7 @@ public class MomentumBasedController
    {
       for (OneDoFJoint joint : joints)
       {
-         doPDControl(joint, kp, kd, 0.0, 0.0, maxAcceleration, maxJerk);
+         doPDControl(joint, kp, kd, joint.getqDesired(), 0.0, maxAcceleration, maxJerk);
       }
    }
 
