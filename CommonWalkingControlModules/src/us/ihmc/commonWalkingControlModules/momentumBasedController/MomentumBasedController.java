@@ -83,7 +83,6 @@ import us.ihmc.yoUtilities.math.frames.YoFrameVector2d;
 
 public class MomentumBasedController
 {
-   public static final boolean DO_NECK_PD_CONTROL = true;
    private static final boolean DO_PASSIVE_KNEE_CONTROL = true;
    private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
 
@@ -773,14 +772,6 @@ public class MomentumBasedController
    public void doPDControl(OneDoFJoint joint, double kp, double kd, double desiredPosition, double desiredVelocity, double maxAcceleration, double maxJerk)
    {
       double desiredAcceleration = computeDesiredAcceleration(kp, kd, desiredPosition, desiredVelocity, joint);
-
-      if (!DO_NECK_PD_CONTROL)
-      {
-         if (joint.getName().contains("Neck"))
-         {
-            desiredAcceleration = 0.0;
-         }
-      }
 
       desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration);
       preRateLimitedDesiredAccelerations.get(joint).set(desiredAcceleration);
