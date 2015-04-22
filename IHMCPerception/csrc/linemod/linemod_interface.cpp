@@ -198,8 +198,8 @@ extern "C"
 		{
 			SparseQuantizedMultiModTemplate sqmmt;
 			sqmmt.deserialize(ss);
-			std::cout << "Loaded Template " << i << " #features x y w h " << sqmmt.features.size() << " " 
-				<< sqmmt.region.x << " " << sqmmt.region.y << " " << sqmmt.region.width << " " << sqmmt.region.height << std::endl;
+			//std::cout << "Loaded Template " << i << " #features x y w h " << sqmmt.features.size() << " " 
+			//	<< sqmmt.region.x << " " << sqmmt.region.y << " " << sqmmt.region.width << " " << sqmmt.region.height << std::endl;
 			linemod.addTemplate(sqmmt);
 		}
 
