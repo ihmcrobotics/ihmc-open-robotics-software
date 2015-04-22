@@ -12,6 +12,8 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class SDFJointHolder
 {
+   public static final boolean DEBUG = false;
+   
    // Data from SDF
    private final String name;
    private final JointType type;

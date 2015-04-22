@@ -219,8 +219,6 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             }
          }
       }
-
-      PrintTools.debug(this, "Creating new viewport! Main: " + isMainViewport);
       
       JMEViewportAdapter newViewport = new JMEViewportAdapter(this, rootNode, isMainViewport, isOffScreen ? ViewportType.OFFSCREEN : ViewportType.CANVAS, false, Color.LIGHT_GRAY);
       

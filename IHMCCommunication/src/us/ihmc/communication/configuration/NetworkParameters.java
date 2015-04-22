@@ -8,6 +8,8 @@ import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Properties;
 
+import us.ihmc.utilities.io.printing.PrintTools;
+
 public class NetworkParameters
 {
    private static final String helpText = "Please use NetworkParametersCreator to create one and place it in the working directory, or pass in -DnetworkParameterFile=[path].";
@@ -29,7 +31,7 @@ public class NetworkParameters
    private NetworkParameters()
    {
       File file = new File(System.getProperty("networkParameterFile", defaultParameterFile));
-      System.out.println("Loading network parameters from " + file.getAbsolutePath());
+      PrintTools.info("Loading network parameters from " + file.getAbsolutePath());
       if (file.exists() && file.isFile())
       {
          try
