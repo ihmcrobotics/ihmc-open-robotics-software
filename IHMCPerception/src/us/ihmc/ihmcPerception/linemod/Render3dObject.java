@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.imageio.ImageIO;
 
@@ -20,6 +21,7 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
 import com.jme3.renderer.Camera;
@@ -35,37 +37,101 @@ import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
 import com.jme3.util.BufferUtils;
 
-public class Render3dObjectToPcd extends SimpleApplication implements SceneProcessor
+public class Render3dObject extends SimpleApplication implements SceneProcessor
 {
 
    static final boolean DEBUG = false;
    private static double fovY = Math.PI / 4;
    private Spatial offObject;
-   private float angle = 0;
 
    private FrameBuffer offBuffer;
    private ViewPort offView;
-//   private Texture2D offTex;
    private Camera offCamera;
 
    private static final int width = 1024, height = 544;
 
    private final ByteBuffer cpuBuf = BufferUtils.createByteBuffer(width * height * 4);
-//   private final byte[] cpuArray = new byte[width * height * 4];
+
    private final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
    private final float[][] depthImage = new float[height][];
+   private Object syncObj = new Object();
+
+   private Transform objectTransform = new Transform();
+   private AtomicBoolean objectTransformUpdated = new AtomicBoolean();
+   private AtomicBoolean imageRendered = new AtomicBoolean();
+
+   private final File model;
 
    public static void main(String[] args)
    {
-      Render3dObjectToPcd app = new Render3dObjectToPcd();
-      app.setPauseOnLostFocus(false);
-      AppSettings settings = new AppSettings(true);
-      settings.setResolution(1, 1);
-      app.setSettings(settings);
-      app.start(Type.OffscreenSurface);
+      Render3dObject app = new Render3dObject(new File("/examples/drill/drill.obj"));
+
+      //rotation in camera frame - Xright Ydown Zforward
+      final Quaternion qX = new Quaternion();
+      qX.fromAngles(FastMath.PI / 2, 0.0f, 0.0f);
+      final Quaternion qTilt = new Quaternion();
+      qTilt.fromAngles(FastMath.PI / 4, 0.0f, 0.0f);
+      Quaternion q = new Quaternion();
+
+      float angle = 0;
+      for (int i = 0; i < 20; i++)
+      {
+         angle = (angle + FastMath.TWO_PI / 8) % FastMath.TWO_PI;
+         q.fromAngles(0, angle, 0);
+         app.renderImage(new Transform(qTilt.mult(q.mult(qX))));
+         Render3dObject.writeDepthImage(app.getDepthImage(), "test_depth" + i + ".png");
+         Render3dObject.writeImage(app.getRGBImage(), "test_rgb" + i + ".png");
+         Render3dObject.writePcd(app.getRGBImage(), app.getDepthImage(), app.getCamera(), "test_cloud" + i + ".pcd");
+      }
+
    }
 
- 
+   public BufferedImage getRGBImage()
+   {
+      return image;
+   }
+
+   public float[][] getDepthImage()
+   {
+      return depthImage;
+   }
+
+   public Camera getCamera()
+   {
+      return offCamera;
+   }
+
+   public Render3dObject(File model)
+   {
+      this.model = model;
+      setPauseOnLostFocus(false);
+      AppSettings settings = new AppSettings(true);
+      settings.setResolution(1, 1);
+      setSettings(settings);
+//      start(Type.OffscreenSurface);
+   }
+
+   public void renderImage(Transform transform)
+   {
+      start(Type.OffscreenSurface);
+      this.objectTransform.set(transform);
+      objectTransformUpdated.set(false);
+      imageRendered.set(false);
+      synchronized (syncObj)
+      {
+         try
+         {
+            syncObj.wait();
+         }
+         catch (InterruptedException e)
+         {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+         }
+      }
+      stop();
+   }
+
    public void setupOffscreenView()
    {
       offCamera = new Camera(width, height);
@@ -110,8 +176,8 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
       }
       else
       {
-         assetManager.registerLocator("/examples/drill", ClasspathLocator.class);
-         offObject = assetManager.loadModel("drill.obj");
+         assetManager.registerLocator(model.getParent(), ClasspathLocator.class);
+         offObject = assetManager.loadModel(model.getName());
          AmbientLight al = new AmbientLight();
          al.setColor(ColorRGBA.White.mult(1.0f));
          offObject.addLight(al);
@@ -128,46 +194,48 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
       setupOffscreenView();
    }
 
-
    @Override
    public void simpleUpdate(float tpf)
    {
-      //rotation in camera frame - Xright Ydown Zforward
-      final Quaternion qX = new Quaternion();
-      qX.fromAngles(FastMath.PI / 2, 0.0f, 0.0f);
-      final Quaternion qTilt = new Quaternion();
-      qTilt.fromAngles(FastMath.PI/4, 0.0f, 0.0f); //tile
-      Quaternion q = new Quaternion();
-
-      angle = (angle+FastMath.TWO_PI/8) % FastMath.TWO_PI;
-      q.fromAngles(0, angle, 0);
-
-      offObject.setLocalRotation(qTilt.mult(q.mult(qX)));
+      offObject.setLocalTransform(objectTransform);
       offObject.updateLogicalState(tpf);
       offObject.updateGeometricState();
-      
+      objectTransformUpdated.set(true);
    }
 
    // Called after FrameBuffer is rendered
    @Override
    public void postFrame(FrameBuffer out)
    {
+      if (!objectTransformUpdated.get() || imageRendered.get())
+      {
+         return;
+      }
+      imageRendered.set(true);
       cpuBuf.clear();
       renderer.readFrameBuffer(offBuffer, cpuBuf);
-//         Screenshots.convertScreenShot(cpuBuf, image);
-      TestRenderToMemory.convertScreenShot(cpuBuf, image);
-      
-      String prefix = "object" + String.format("%.2f", angle);
-      writeImage(image, prefix+ "_image.png");
-      
+      //         Screenshots.convertScreenShot(cpuBuf, image);
       readDepthBuffer(depthImage);
-      writeDepthImage(depthImage, prefix+"_depth.png");
+      TestRenderToMemory.convertScreenShot(cpuBuf, image);
 
-      writePcd(image, depthImage, offCamera, prefix+"_cloud.pcd");
-      System.out.println("prefix="+prefix);
+      synchronized (syncObj)
+      {
+         syncObj.notifyAll();
+      }
+
+      if (DEBUG)
+      {
+         String prefix = "renderDebug";
+         writeImage(image, prefix + "_image.png");
+
+         writeDepthImage(depthImage, prefix + "_depth.png");
+
+         writePcd(image, depthImage, offCamera, prefix + "_cloud.pcd");
+         System.out.println("prefix=" + prefix);
+      }
+
    }
-   
-   
+
    //Static Methods
    static private void readDepthBuffer(float[][] outDepthImage)
    {
@@ -197,6 +265,37 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
                //               System.out.println("w" + w + "h" + h + " " + depthImage[h][w]);
             }
          }
+   }
+
+   public OrganizedPointCloud getPointcloud()
+   {
+      float xyzrgb[] = new float[width * height * 4];
+      int ptr = 0;
+      float f = (float) (height / 2.0 / Math.tan(fovY / 2.0));
+      for (int h = 0; h < height; h++)
+         for (int w = 0; w < width; w++)
+         {
+            float x = 0, y = 0, z = 0;
+            if (Float.isNaN(depthImage[h][w]))
+            {
+               z = 2;//Float.NaN;
+               x = (float) ((w - width / 2) * z / f);
+               y = (float) ((h - height / 2) * z / f);
+            }
+            else
+            {
+               z = depthImage[h][w];
+               x = (float) ((w - width / 2) * z / f);
+               y = (float) ((h - height / 2) * z / f);
+            }
+
+            xyzrgb[ptr++] = x;
+            xyzrgb[ptr++] = y;
+            xyzrgb[ptr++] = z;
+            xyzrgb[ptr++] = Float.intBitsToFloat(image.getRGB(w, h));
+         }
+
+      return new OrganizedPointCloud(width, height, xyzrgb);
    }
 
    private static void writePcd(BufferedImage image, float[][] depthImage, Camera camera, String fileName)
@@ -256,7 +355,7 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
          e.printStackTrace();
       }
    }
-   
+
    private static long integerToUnsignedLong(int x)
    {
       return x & 0x00000000ffffffffL;
@@ -313,7 +412,7 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
          e.printStackTrace();
       }
    }
-   
+
    private static void writeImage(BufferedImage image, String fileName)
    {
 
@@ -354,10 +453,10 @@ public class Render3dObjectToPcd extends SimpleApplication implements SceneProce
    {
    }
 
-
    @Override
    public void cleanup()
    {
    }
+   
 
 }
