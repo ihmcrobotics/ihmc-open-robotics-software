@@ -114,6 +114,7 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    @Override
    public double getCoPFilterFreqInHertz()
    {
+      // TODO Try to crank up that one, might be a bit sluggish with 4Hz. If the change is not evident, leave it to 4Hz then.
       return 4.0;
    }
 
