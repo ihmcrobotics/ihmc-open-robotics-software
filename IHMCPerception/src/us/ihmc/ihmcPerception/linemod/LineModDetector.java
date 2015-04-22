@@ -2,23 +2,15 @@ package us.ihmc.ihmcPerception.linemod;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 
-import javax.vecmath.Vector3d;
+import org.jfree.util.UnitType;
 
-import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.UnitConversions;
-import us.ihmc.utilities.math.geometry.AngleTools;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 
 public class LineModDetector
 {
@@ -26,6 +18,12 @@ public class LineModDetector
    ArrayList<byte[]>  byteFeatures = new ArrayList<>();
    ArrayList<Float> poses = new ArrayList<>();
    String modelPathInResource;
+   
+   
+   public float getPose(int i)
+   {
+      return poses.get(i);
+   }
 
    public LineModDetector(String modelPathInResource)
    {
@@ -64,6 +62,7 @@ public class LineModDetector
    
    public void trainModelFromRenderedImages(int numberTemplates)
    {
+      System.out.println("Initializing " + numberTemplates + " templates");
       byteFeatures.clear();
       long millitimeStartTraining=System.currentTimeMillis();
       for(int i=0;i<numberTemplates;i++)
@@ -74,26 +73,37 @@ public class LineModDetector
          byte[] data=LineModInterface.trainTemplateBytes(pointCloud, mask);
          poses.add(angle);
          byteFeatures.add(data);
+         System.out.print(i+"..");
       }
-      System.out.println("training time :" + (System.currentTimeMillis()-millitimeStartTraining)+ " millisecond for " + numberTemplates + " images");
+      System.out.println("\ntraining time :" + (System.currentTimeMillis()-millitimeStartTraining)+ " millisecond for " + numberTemplates + " images");
    }
    
-   public float detectObjectAndEstimatePose(OrganizedPointCloud testCloud) 
+   public int detectObjectAndEstimatePose(OrganizedPointCloud testCloud, ArrayList<LineModDetection> detectionsToPack) 
    {
 
       long millitimeStartDetection=System.currentTimeMillis();
-      ArrayList<LineModDetection> detections = LineModInterface.matchTemplatesBytes(testCloud, byteFeatures);
+      detectionsToPack.addAll(LineModInterface.matchTemplatesBytes(testCloud, byteFeatures));
       System.out.println("detection time :" + (System.currentTimeMillis()-millitimeStartDetection) + " millisecond");
       
       int maxi = 0;
-      for(int i=0;i<detections.size();i++)
+      for(int i=0;i<detectionsToPack.size();i++)
       {
-         LineModDetection currentDetection = detections.get(i);
-         if(detections.get(maxi).score < currentDetection.score)
+         LineModDetection currentDetection = detectionsToPack.get(i);
+         currentDetection.yaw = poses.get(i);
+         if(detectionsToPack.get(maxi).score < currentDetection.score)
             maxi=i;
-         System.out.println(currentDetection);
       }
-      return poses.get(maxi).floatValue();
+      
+      //debug msg
+      for(int i=0;i<detectionsToPack.size();i++)
+      {
+         if(i==maxi)
+                 System.out.print("*");
+         System.out.print(String.format("%d(%2.0f) ", (int)(poses.get(i)/UnitConversions.DEG_TO_RAD),detectionsToPack.get(i).score*100));
+      }
+      System.out.println("");
+
+      return maxi;
    }
 
    
@@ -109,7 +119,9 @@ public class LineModDetector
          float groundTruthAngle = (float)(Math.PI*2*Math.random());
          Vector3f perturbation = new Vector3f((float)Math.random()*0.2f, (float)Math.random()*0.2f, (float)Math.random()*0.2f);
          OrganizedPointCloud testCloud = detector.renderCloud(groundTruthAngle,perturbation);
-         float estimatedAngle = detector.detectObjectAndEstimatePose(testCloud);
+         ArrayList<LineModDetection> detections=new ArrayList<>();
+         int bestDetectionIndex= detector.detectObjectAndEstimatePose(testCloud, detections);
+         float estimatedAngle = detections.get(bestDetectionIndex).yaw;
          System.out.println(
                   " groundTruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD + 
                   " estimated " + estimatedAngle/UnitConversions.DEG_TO_RAD + 

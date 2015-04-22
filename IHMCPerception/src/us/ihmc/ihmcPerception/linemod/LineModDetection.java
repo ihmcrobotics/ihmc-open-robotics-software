@@ -13,6 +13,8 @@ public class LineModDetection
      /** \brief scale at which the template was detected. */
      float scale;
      
+     float yaw=0;
+     
      public String toString()
      {
         return "x " + x + " y " + y + " template id " + template_id + " score " + score + " scale " + scale;
