@@ -15,6 +15,6 @@ public class LineModDetection
      
      public String toString()
      {
-        return "x " + x + " y " + y + " template id " + template_id + " score " + " scale " + scale;
+        return "x " + x + " y " + y + " template id " + template_id + " score " + score + " scale " + scale;
      }
 }
