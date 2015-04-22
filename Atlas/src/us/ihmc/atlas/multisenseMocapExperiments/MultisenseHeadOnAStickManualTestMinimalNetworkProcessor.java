@@ -108,7 +108,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
                points[markerIndex] = new Point3d(mocapMarker.getPosition());
             }
             RigidBodyTransform pose = new RigidBodyTransform();
-            mocapObject.getPoseInZUp(pose);
+            mocapObject.getPose(pose);
             headPoseInZUp.set(pose);
          }
       }
