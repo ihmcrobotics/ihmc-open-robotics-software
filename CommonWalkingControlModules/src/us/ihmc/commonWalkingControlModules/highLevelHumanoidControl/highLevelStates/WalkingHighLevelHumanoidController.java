@@ -199,6 +199,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
    private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
 
+   private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
+
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
@@ -234,6 +236,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       setupManagers(variousWalkingManagers);
 
+      hasWalkingControllerBeenInitialized.set(false);
 
       unconstrainedDesiredPositions = new DoubleYoVariable[unconstrainedJoints.length];
 
@@ -470,6 +473,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
 
       pelvisICPBasedTranslationManager.disable();
+
+      if (!hasWalkingControllerBeenInitialized.getBooleanValue())
+      {
+         pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
+      }
+
       if(manipulationControlModule != null)
       {
          manipulationControlModule.holdCurrentArmConfiguration();
@@ -482,6 +491,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
       capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, 0.1, null);
+
+      hasWalkingControllerBeenInitialized.set(true);
    }
 
    public void initializeDesiredHeightToCurrent()
