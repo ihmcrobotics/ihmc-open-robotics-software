@@ -31,7 +31,6 @@ class LineModInterface
       Native.register(NativeLibraryLoader.extractLibrary("us.ihmc.ihmcPerception.linemod", "linemod_interface"));
    }
    
-   public static native int test(int a);
 
    public static native Pointer loadTemplates(String templates_filename, int[] nr_templates);
    public static native Pointer loadTemplate(String templates_filename);
@@ -165,7 +164,6 @@ class LineModInterface
 
 	public static void main(String[] arg)
 	{
-	   System.out.println("test:"+test(1));
 	   testDetection();
 	   liveDetection();
 	}
