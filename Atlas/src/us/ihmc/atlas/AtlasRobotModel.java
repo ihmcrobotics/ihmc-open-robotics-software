@@ -43,6 +43,8 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
+import us.ihmc.pathGeneration.footstepSnapper.AtlasFootstepSnappingParameters;
+import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
@@ -96,6 +98,7 @@ public class AtlasRobotModel implements DRCRobotModel
    private final AtlasDrivingControllerParameters drivingControllerParameters;
    private final AtlasDefaultArmConfigurations defaultArmConfigurations;
    private final AtlasHeightCalculatorParameters heightCalculatorParameters;
+   private final AtlasFootstepSnappingParameters snappingParameters;
 
    private boolean enableJointDamping = true;
 
@@ -137,6 +140,7 @@ public class AtlasRobotModel implements DRCRobotModel
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
       heightCalculatorParameters = new AtlasHeightCalculatorParameters();
+      snappingParameters = new AtlasFootstepSnappingParameters();
    }
 
    @Override
@@ -488,6 +492,12 @@ public class AtlasRobotModel implements DRCRobotModel
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new AtlasCollisionBoxProvider(loader, getJointMap());
+   }
+
+   @Override
+   public FootstepSnappingParameters getSnappingParameters()
+   {
+      return snappingParameters;
    }
 
    @Override

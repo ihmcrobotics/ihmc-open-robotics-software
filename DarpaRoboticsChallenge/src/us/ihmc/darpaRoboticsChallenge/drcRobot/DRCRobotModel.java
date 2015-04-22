@@ -14,6 +14,7 @@ import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -100,4 +101,6 @@ public interface DRCRobotModel extends WholeBodyControllerParameters
    public abstract String getSimpleRobotName();
    
    public abstract CollisionBoxProvider getCollisionBoxProvider();
+
+   public abstract FootstepSnappingParameters getSnappingParameters();
 }
