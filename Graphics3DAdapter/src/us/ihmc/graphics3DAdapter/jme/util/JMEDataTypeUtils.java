@@ -96,6 +96,12 @@ public class JMEDataTypeUtils
    public static void packJMEQuaterionInVecMathQuat4d(Quaternion original, Quat4d target)
    {
       target.set(original.getX(), original.getY(), original.getZ(), original.getW());
+      
+      // do not remove the normalization. 
+      // The conversion from float to double generates very tiny differences which make the 
+      // quaternion SLIGHTLY not normal.
+      
+      target.normalize();
    }
 
    public static void packVecMathTuple3dInJMEVector3f(Tuple3d original, Vector3f target)
