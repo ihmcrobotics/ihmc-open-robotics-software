@@ -122,7 +122,7 @@ public class AtlasUIPacketRecorder
    
    public static String getPrefixFileName()
    {
-      return "PacketRecording_" + DateTools.getDateString() + "_3";
+      return "PacketRecording_" + DateTools.getDateString() + "_real3";
    }
    
    public static void main(String[] args) throws IOException
