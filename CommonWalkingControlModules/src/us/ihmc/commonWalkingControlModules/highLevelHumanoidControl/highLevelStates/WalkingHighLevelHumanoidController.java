@@ -86,7 +86,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final PushRecoveryControlModule pushRecoveryModule;
 
-   private final static boolean DEBUG = false;
+   public final static boolean DEBUG = false;
 
    private final StateMachine<WalkingState> stateMachine;
    private final CenterOfMassJacobian centerOfMassJacobian;
@@ -522,6 +522,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private class DoubleSupportState extends State<WalkingState>
    {
+      public static final boolean DEBUG = false;
+      
       private final RobotSide transferToSide;
       private final FramePoint2d desiredICPLocal = new FramePoint2d();
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
