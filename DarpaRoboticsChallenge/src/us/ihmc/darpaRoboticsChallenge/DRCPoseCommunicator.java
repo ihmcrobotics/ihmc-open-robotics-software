@@ -5,7 +5,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.*;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4f;
+import javax.vecmath.Vector3f;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packets.dataobjects.IMUPacket;
@@ -45,6 +47,12 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
    private final SideDependentList<String> wristForceSensorNames;
    private final RobotMotionStatusHolder robotMotionStatusFromController;
+   
+   // puts the state data into the ring buffer for the output thread
+    private final Vector3f[] imuLinearAccelerations;
+    private final Vector3f[] rawImuAngularVelocities;
+    private final Matrix3d[] imuOrientationsAsMatrix;
+    private final Quat4f[] imuOrientations;
 
    private final SideDependentList<ReferenceFrame> wristForceSensorFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
@@ -64,6 +72,20 @@ public class DRCPoseCommunicator implements RawOutputWriter
       setupForceSensorMassCompensators(estimatorModel);
 
       IMUDefinition[] imuDefinitions = estimatorModel.getIMUDefinitions();
+      
+      int numberOfImuSensors = imuDefinitions.length;
+      imuLinearAccelerations = new Vector3f[numberOfImuSensors];
+      rawImuAngularVelocities = new Vector3f[numberOfImuSensors];
+      imuOrientationsAsMatrix = new Matrix3d[numberOfImuSensors];
+      imuOrientations = new Quat4f[numberOfImuSensors];
+      
+      for (int imuSensorIndex = 0; imuSensorIndex < numberOfImuSensors; imuSensorIndex++)
+      {
+         imuLinearAccelerations[imuSensorIndex] = new Vector3f();
+         rawImuAngularVelocities[imuSensorIndex] = new Vector3f();
+         imuOrientationsAsMatrix[imuSensorIndex] = new Matrix3d();
+         imuOrientations[imuSensorIndex] = new Quat4f();
+      }
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
       OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
       robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions, sensorReader), 16);
@@ -149,11 +171,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
 
    // puts the state data into the ring buffer for the output thread
-   Vector3f imuLinearAcceleration = new Vector3f();
-   Vector3f rawImuAngularVelocityToPack = new Vector3f();
-   Matrix3d imuOrientationAsMatrix = new Matrix3d();
-   Quat4f imuOrientationAsQuat= new Quat4f();
-
    @Override
    public void write()
    {
@@ -174,12 +191,12 @@ public class DRCPoseCommunicator implements RawOutputWriter
          IMUSensorReadOnly imuSensor =  imuRawOutputs.get(sensorNumber);
          IMUPacket imuPacketToPack = state.getImuPacketForSensor(sensorNumber);
          
-         imuSensor.getLinearAccelerationMeasurement(imuLinearAcceleration);
-         imuSensor.getOrientationMeasurement(imuOrientationAsMatrix);
-         RotationFunctions.setQuaternionBasedOnMatrix3d(imuOrientationAsQuat, imuOrientationAsMatrix);
-         imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocityToPack);
+         imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
+         imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
+         RotationFunctions.setQuaternionBasedOnMatrix3d(imuOrientations[sensorNumber], imuOrientationsAsMatrix[sensorNumber]);
+         imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
          
-         imuPacketToPack.set(imuLinearAcceleration, imuOrientationAsQuat, rawImuAngularVelocityToPack);
+         imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);
       }
       
       state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
