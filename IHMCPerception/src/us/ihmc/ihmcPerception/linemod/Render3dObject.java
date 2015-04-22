@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -103,6 +105,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
 
    public Render3dObject(File model)
    {
+      Logger.getLogger("com.jme3").setLevel(Level.SEVERE);
       this.model = model;
       setPauseOnLostFocus(false);
       AppSettings settings = new AppSettings(true);
