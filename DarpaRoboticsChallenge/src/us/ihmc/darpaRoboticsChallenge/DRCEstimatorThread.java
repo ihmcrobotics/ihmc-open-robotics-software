@@ -122,7 +122,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          drcStateEstimator = null;
       }
 
-      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints());
+      RobotJointLimitWatcher robotJointLimitWatcher = new RobotJointLimitWatcher(estimatorFullRobotModel.getOneDoFJoints(), sensorRawOutputMapReadOnly);
       estimatorController.addRobotController(robotJointLimitWatcher);
 
       if (USE_FORCE_SENSOR_TO_JOINT_TORQUE_PROJECTOR)
