@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Scanner;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamSerializer;
@@ -22,9 +23,14 @@ import us.ihmc.utilities.time.Timer;
 public class AtlasUIPacketRecorder
 {
    private static final Path PACKET_RECORDINGS_PATH = Paths.get("./packetRecordings");
+   private Object streamConch = new Object();
 
    public AtlasUIPacketRecorder() throws IOException
    {
+      Scanner scanner = new Scanner(System.in);
+      PrintTools.info("Press Enter to record...");
+      scanner.nextLine();
+      
       final DataOutputStream fileDataOutputStream = FileTools.getFileDataOutputStream(getPacketRecordingFilePath());
       final PrintWriter timeWriter = FileTools.newPrintWriter(getPacketTimingPath());
       
@@ -42,11 +48,14 @@ public class AtlasUIPacketRecorder
             PrintTools.info("Disconnected");
             try
             {
-               fileDataOutputStream.flush();
-               fileDataOutputStream.close();
-               
-               timeWriter.flush();
-               timeWriter.close();
+               synchronized (streamConch)
+               {
+                  fileDataOutputStream.flush();
+                  fileDataOutputStream.close();
+                  
+                  timeWriter.flush();
+                  timeWriter.close();
+               }
             }
             catch (IOException e)
             {
@@ -71,19 +80,21 @@ public class AtlasUIPacketRecorder
          {
             try
             {
-               if (!firstPacketReceived)
+               synchronized (streamConch)
                {
-                  firstPacketReceived = true;
-                  timer.start();
+                  if (!firstPacketReceived)
+                  {
+                     firstPacketReceived = true;
+                     timer.start();
+                  }
+                  else
+                  {
+                     timeWriter.println(timer.lap());
+                  }
+
+                  PrintTools.info("Receiving packet: " + packet);
+                  kryoStreamSerializer.write(fileDataOutputStream, packet);
                }
-               else
-               {
-                  timeWriter.println(timer.lap());
-               }
-               
-               PrintTools.info("Receiving packet: " + packet);
-               
-               kryoStreamSerializer.write(fileDataOutputStream, packet);
             }
             catch (IOException e)
             {
@@ -92,7 +103,8 @@ public class AtlasUIPacketRecorder
          }
       });
       
-      System.in.read();
+      scanner.nextLine();
+      scanner.close();
       
       packetClient.close();
    }
@@ -110,11 +122,11 @@ public class AtlasUIPacketRecorder
    
    public static String getPrefixFileName()
    {
-      return "PacketRecording_" + DateTools.getDateString() + "_2";
+      return "PacketRecording_" + DateTools.getDateString() + "_3";
    }
    
    public static void main(String[] args) throws IOException
    {
-//      new AtlasUIPacketRecorder();
+      new AtlasUIPacketRecorder();
    }
 }

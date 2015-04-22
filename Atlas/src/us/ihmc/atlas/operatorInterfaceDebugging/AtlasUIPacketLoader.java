@@ -3,6 +3,7 @@ package us.ihmc.atlas.operatorInterfaceDebugging;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Scanner;
 
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
@@ -17,72 +18,89 @@ import us.ihmc.utilities.math.UnitConversions;
 
 public class AtlasUIPacketLoader
 {
-   private static final double PLAYBACK_SPEED = 2.0;
-   
+   private static final boolean PRESS_ENTER = false;
+   private static final double PLAYBACK_SPEED = 8.0;
+
    public AtlasUIPacketLoader() throws IOException
    {
-      
+
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
-      
+
       final KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(UnitConversions.megabytesToBytes(500));
       kryoStreamDeSerializer.registerClasses(netClassList);
-      
+
       final PacketCommunicator packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, UnitConversions.megabytesToBytes(500), UnitConversions.megabytesToBytes(500), netClassList);
       packetCommunicator.connect();
       packetCommunicator.attachStateListener(new NetStateListener()
       {
          private DataInputStream fileDataInputStream;
          private BufferedReader timingReader;
-         
+
          public void openFileDataStream() throws IOException
          {
             fileDataInputStream = FileTools.getFileDataInputStream(AtlasUIPacketRecorder.getPacketRecordingFilePath(), UnitConversions.megabytesToBytes(500));
             timingReader = FileTools.newBufferedReader(AtlasUIPacketRecorder.getPacketTimingPath());
          }
-         
+
          @Override
          public void disconnected()
          {
          }
-         
+
          @Override
          public void connected()
          {
-            PrintTools.info("Connected. Press Enter to send...");
-            
+            if (PRESS_ENTER)
+               PrintTools.info("Connected. Press Enter to send...");
+            else
+               PrintTools.info("Connected");
+
             try
             {
-//               System.in.read();
-               
+               if (PRESS_ENTER)
+               {
+                  Scanner scanner = new Scanner(System.in);
+                  scanner.nextLine();
+                  scanner.close();
+               }
+
                openFileDataStream();
-               
+
                Packet<?> packet = null;
+
                do
                {
-                  packet = (Packet<?>) kryoStreamDeSerializer.read(fileDataInputStream);
-                  PrintTools.info("Sending: " + packet);
+                  try
+                  {
+                     packet = (Packet<?>) kryoStreamDeSerializer.read(fileDataInputStream);
+                     PrintTools.info("Sending: " + packet);
 
-                  packetCommunicator.send(packet);
-                  
-                  double timeToWait = 0.01;
-                  if (timingReader.ready())
-                     timeToWait = Double.valueOf(timingReader.readLine()) / PLAYBACK_SPEED;
-                  
-                  ThreadTools.sleepSeconds(timeToWait);
-                  
+                     packetCommunicator.send(packet);
+
+                     double timeToWait = 0.01;
+                     if (timingReader.ready())
+                        timeToWait = Double.valueOf(timingReader.readLine()) / PLAYBACK_SPEED;
+
+                     ThreadTools.sleepSeconds(timeToWait);
+                  }
+                  catch (IOException e)
+                  {
+                     PrintTools.error(e.getMessage());
+                  }
+
                   if (fileDataInputStream.available() < 1)
                   {
                      fileDataInputStream.close();
-                     
+
                      ThreadTools.sleepSeconds(0.5);
-                     
+
                      openFileDataStream();
                   }
                }
                while (packet != null && fileDataInputStream.available() > 1);
 
                fileDataInputStream.close();
-               
+
                packetCommunicator.close();
             }
             catch (IOException e)
@@ -92,7 +110,7 @@ public class AtlasUIPacketLoader
          }
       });
    }
-   
+
    public static void main(String[] args) throws IOException
    {
       new AtlasUIPacketLoader();
