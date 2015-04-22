@@ -35,10 +35,8 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
    @Override
    public void initializeRobot(SDFRobot robot, DRCRobotJointMap jointMap)
    {
-      if (robotInitialized)
-      {
+      if (robotInitialized) 
          return;
-      }
       
       File file = new File(initialConditionsFileName);
       PrintTools.info("Loading initial joint configuration for driving simulation from " + file.getAbsolutePath());
@@ -107,9 +105,6 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
          PrintTools.info("File not found or invalid.");
       }
       
-      robot.getOneDoFJoints()[1].getName();
-      
-      robot.update();
       robot.getRootJoint().setRotationAndTranslation(pelvisPoseInWorld);
       robot.update();
       
