@@ -1,6 +1,7 @@
 #include<jni.h>
 #include<iostream>
 #include<sstream>
+#include<string>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -141,12 +142,33 @@ const std::vector<bool> &foreground_mask, pcl::LINEMOD & linemod)
 
 extern "C"
 {
-	const SparseQuantizedMultiModTemplate* trainTemplate (int w, int h, float* xyzrgb, char* mask)
+	int trainTemplatBytes (int w, int h, float* xyzrgb, int* mask, char*outbuf, int outlen)
 	{ 
 		PointCloudXYZRGBA::ConstPtr input = xyzrgb2cloud(w,h, xyzrgb);
 
 		std::vector<bool> foreground_mask;
 		foreground_mask.reserve(w*h);
+
+		for(int i=0;i<w*h;i++)
+			foreground_mask.push_back(mask[i]==1);
+
+		pcl::LINEMOD linemod;
+		trainTemplate(input, foreground_mask, linemod);
+			
+		std::stringstream ss;
+		linemod.getTemplate(0).serialize(ss);
+		int readlen = std::min<int>(outlen, ss.tellp());
+		ss.read(outbuf, readlen);
+		return readlen;
+		
+	}
+	SparseQuantizedMultiModTemplate* trainTemplate (int w, int h, float* xyzrgb, int* mask)
+	{ 
+		PointCloudXYZRGBA::ConstPtr input = xyzrgb2cloud(w,h, xyzrgb);
+
+		std::vector<bool> foreground_mask;
+		foreground_mask.reserve(w*h);
+
 		for(int i=0;i<w*h;i++)
 			foreground_mask.push_back(mask[i]==1);
 
@@ -162,6 +184,47 @@ extern "C"
 		
 	}
 
+	SparseQuantizedMultiModTemplate** trainTemplates (int w, int h, float* xyzrgb, int* mask)
+	{
+		SparseQuantizedMultiModTemplate** templates = new SparseQuantizedMultiModTemplate*[1];
+		templates[0] = trainTemplate(w,h,xyzrgb,mask);
+		return templates;
+	}
+
+	int matchTemplatesBytes(int w, int h, float* xyzrgb, int nr_templates, char*buf, int buflen)
+	{
+
+		pcl::LINEMOD linemod;
+
+		// Load the templates
+		std::stringstream ss(std::string(buf,buf+buflen));
+		for(int i=0;i<nr_templates;i++)
+		{
+			SparseQuantizedMultiModTemplate sqmmt;
+			sqmmt.deserialize(ss);
+			std::cout << "Loaded Template " << i << " #features x y w h " << sqmmt.features.size() << " " 
+				<< sqmmt.region.x << " " << sqmmt.region.y << " " << sqmmt.region.width << " " << sqmmt.region.height << std::endl;
+			linemod.addTemplate(sqmmt);
+		}
+
+		// Match the templates to the provided image
+		const PointCloudXYZRGBA::Ptr input = xyzrgb2cloud(w,h, xyzrgb);
+		std::vector<pcl::LINEMODDetection> detections = matchTemplates (input, linemod);
+
+		
+		//out of return space;
+		if(sizeof(pcl::LINEMODDetection)*detections.size() > buflen)
+			return -1;
+
+		char* ptr = buf;
+		for(int i=0;i<detections.size();i++)
+		{
+			memcpy(ptr, &detections[i], sizeof(pcl::LINEMODDetection));
+			ptr += sizeof(pcl::LINEMODDetection);
+			
+		}
+		return detections.size();
+	}
 
 
 	int matchTemplates(int w, int h, float* xyzrgb, int nr_templates, SparseQuantizedMultiModTemplate** templates, int debug)
@@ -169,7 +232,7 @@ extern "C"
 		const PointCloudXYZRGBA::Ptr input = xyzrgb2cloud(w,h, xyzrgb);
 		pcl::LINEMOD linemod;
 
-		// Load the templates from disk
+		// Load the templates
 		for(int i=0;i<nr_templates;i++)
 			linemod.addTemplate(*templates[i]);
 
@@ -275,7 +338,7 @@ int main(int argc, char**argv)
 #else
 	nr_templates=1;
 	templates = new SparseQuantizedMultiModTemplate*[nr_templates];;
-	char mask[cloud->width*cloud->height];
+	int mask[cloud->width*cloud->height];
 	for(int i=0;i<cloud->width*cloud->height;i++)	
 	{
 		mask[i] = !isnan(xyzrgb[i*4]);
