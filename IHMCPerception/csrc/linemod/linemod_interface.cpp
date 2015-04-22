@@ -1,4 +1,3 @@
-#include<jni.h>
 #include<iostream>
 #include<sstream>
 #include<string>
@@ -11,8 +10,9 @@
 #include <pcl/recognition/color_gradient_modality.h>
 #include <pcl/recognition/surface_normal_modality.h>
 
+#ifdef WITH_PNG
 #include <png++/png.hpp>
-#include <boost/timer/timer.hpp>
+#endif
 
 using namespace pcl;
 using namespace pcl::io;
@@ -58,7 +58,7 @@ matchTemplates (const PointCloudXYZRGBA::ConstPtr & input, const pcl::LINEMOD & 
 
 extern "C"
 {
-	JNIEXPORT SparseQuantizedMultiModTemplate** loadTemplates(char* templates_filename, int* nr_templates)
+	SparseQuantizedMultiModTemplate** loadTemplates(char* templates_filename, int* nr_templates)
 	{
 
 		std::ifstream file_stream;
@@ -74,10 +74,6 @@ extern "C"
 		return templates;
 	}
 	
-	JNIEXPORT jint test(jint a)
-	{
-		return a+1;
-	}
 
 	SparseQuantizedMultiModTemplate* loadTemplate(char* templates_filename)
 	{
@@ -248,6 +244,7 @@ extern "C"
 				printf ("%lu: %d %d %d %f\n", i, d.x, d.y, d.template_id, d.score);
 			}
 
+#ifdef WITH_PNG
 			// Visualization code for testing purposes (requires libpng++)
 			int i = 0;
 			png::image<png::rgb_pixel> image (input->width, input->height);
@@ -279,6 +276,7 @@ extern "C"
 				}
 			}
 			image.write("output.png");
+#endif
 		}
 
 		return detections.size();
@@ -316,10 +314,8 @@ int main(int argc, char**argv)
 	int debug=1;
 	int nr_templates=0;
 	SparseQuantizedMultiModTemplate **templates;
-#if 0
+#if 1
 	{
-		boost::timer::auto_cpu_timer t;
-
 		int nr_templates1;
 		SparseQuantizedMultiModTemplate** templates1 = loadTemplates(argv[2], &nr_templates1);
 
@@ -346,7 +342,6 @@ int main(int argc, char**argv)
 	templates[0]= const_cast<SparseQuantizedMultiModTemplate*>(trainTemplate(cloud->width, cloud->height, xyzrgb, mask));
 #endif
 	{
-		boost::timer::auto_cpu_timer t;
 		int nr_detection = matchTemplates(cloud->width, cloud->height, xyzrgb, nr_templates, templates, debug);
 		std::cout << nr_detection << " detections\n";
 	}
