@@ -19,7 +19,7 @@ import us.ihmc.utilities.math.UnitConversions;
 public class AtlasUIPacketLoader
 {
    private static final boolean PRESS_ENTER = false;
-   private static final double PLAYBACK_SPEED = 8.0;
+   private static final double PLAYBACK_SPEED = 0.5;
 
    public AtlasUIPacketLoader() throws IOException
    {
@@ -88,14 +88,14 @@ public class AtlasUIPacketLoader
                      PrintTools.error(e.getMessage());
                   }
 
-                  if (fileDataInputStream.available() < 1)
-                  {
-                     fileDataInputStream.close();
-
-                     ThreadTools.sleepSeconds(0.5);
-
-                     openFileDataStream();
-                  }
+//                  if (fileDataInputStream.available() < 1)
+//                  {
+//                     fileDataInputStream.close();
+//
+//                     ThreadTools.sleepSeconds(0.5);
+//
+//                     openFileDataStream();
+//                  }
                }
                while (packet != null && fileDataInputStream.available() > 1);
 
