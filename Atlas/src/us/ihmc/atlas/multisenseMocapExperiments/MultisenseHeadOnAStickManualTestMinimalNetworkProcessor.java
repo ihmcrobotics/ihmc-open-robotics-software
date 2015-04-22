@@ -7,8 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
 
-import optitrack.MocapDataClient;
-import optitrack.MocapMarker;
+import optitrack.IHMCMocapDataClient;
 import optitrack.MocapRigidBody;
 import optitrack.MocapRigidbodiesListener;
 import sensor_msgs.PointCloud2;
@@ -32,6 +31,10 @@ import com.martiansoftware.jsap.JSAPException;
  * Pulls lidar from the multisense over the /multisense/lidar_points2 ros topic
  * Puts it in mocap head frame
  * sends it to the LidarMocapViewerBasic UI.
+ * 
+ * 	  //head 39 calibrated by Daniel and Brandon April 22 2015
+ *    //head 39: setEuler(Math.toRadians(-1.4), Math.toRadians(0.5), Math.toRadians(2.0)
+      //head 39: setTranslation(-0.005,-0.003,-0.003)
  *
  */
 public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends RosPointCloudSubscriber implements MocapRigidbodiesListener
@@ -42,7 +45,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
 
    private final PacketCommunicator uiPacketServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, NETCLASSLIST);
    private final RigidBodyTransform orientationTransformFromLeftOpticalFrameToZUp = new RigidBodyTransform();
-   private final MocapDataClient mocapDataClient;
+   private final IHMCMocapDataClient mocapDataClient;
    private final AtomicReference<RigidBodyTransform> headPoseInZUp = new  AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
    
    public MultisenseHeadOnAStickManualTestMinimalNetworkProcessor(DRCRobotModel robotModel) throws IOException
@@ -53,7 +56,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
       rosMainNode.execute();
       uiPacketServer.connect();
       
-      mocapDataClient = new MocapDataClient();
+      mocapDataClient = new IHMCMocapDataClient();
       mocapDataClient.registerRigidBodiesListener(this);
       System.out.println("running minimal experiment");
    }
@@ -72,7 +75,9 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
       UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
       Point3d[] points = pointCloudData.getPoints();
       orientationTransformFromLeftOpticalFrameToZUp.setEuler(-Math.PI/2, 0.0, -Math.PI/2);
-      rpyCalibrationOffset.setEuler(Math.toRadians(1.2), Math.toRadians(0.5), Math.toRadians(2));
+      
+      rpyCalibrationOffset.setEuler(Math.toRadians(-1.4), Math.toRadians(0.5), Math.toRadians(2.0));
+      rpyCalibrationOffset.setTranslation(-0.005,-0.003,-0.003);
       
       for(int i = 0; i < points.length; i++)
       {
@@ -100,13 +105,6 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
 
          if (id == MULTISENSE_MOCAP_ID)
          {
-            Point3d[] points = new Point3d[3];
-            ArrayList<MocapMarker> listOfAssociatedMarkers = mocapObject.getListOfAssociatedMarkers();
-            for (int markerIndex = 0; markerIndex < listOfAssociatedMarkers.size(); markerIndex++)
-            {
-               MocapMarker mocapMarker = listOfAssociatedMarkers.get(markerIndex);
-               points[markerIndex] = new Point3d(mocapMarker.getPosition());
-            }
             RigidBodyTransform pose = new RigidBodyTransform();
             mocapObject.getPose(pose);
             headPoseInZUp.set(pose);
