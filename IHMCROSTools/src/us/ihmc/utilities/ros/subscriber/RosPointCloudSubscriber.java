@@ -91,7 +91,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
     *
     */
 
-   protected static class UnpackedPointCloud
+   public static class UnpackedPointCloud
    {
 		  Point3d[] points = null;
 		  float[] intensities = null;
