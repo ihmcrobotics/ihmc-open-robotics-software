@@ -5,12 +5,16 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 /** {@inheritDoc} */
 public class BonoCapturePointPlannerParameters implements CapturePointPlannerParameters
 {
-
    private boolean runningOnRealRobot;
+   // TODO Try using new ICP planner with two CMPs.
+   private final boolean useTwoCMPsPerSupport;
+   private final boolean useNewICPPlanner;
 
    public BonoCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
+      useTwoCMPsPerSupport = false;
+      useNewICPPlanner = false;
    }
 
    /** {@inheritDoc} */
@@ -52,7 +56,8 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public int getNumberOfCoefficientsForDoubleSupportPolynomialTrajectory()
    {
-      return 5;
+      // Using higher order for the trajectory degrade the pseudo CMP trajectory (going a lot outside the support polygon) when using two CMPs per support.
+      return useTwoCMPsPerSupport ? 4 : 5;
    }
 
    /** {@inheritDoc} */
@@ -129,7 +134,7 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public double getExitCMPInsideOffset()
    {
-      return 0.005;
+      return 0.025;
    }
 
    /** {@inheritDoc} */
@@ -150,6 +155,7 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
    {
+      // TODO Try to deactivate that one.
       return true;
    }
 
@@ -157,14 +163,14 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public boolean useNewICPPlanner()
    {
-      return false;
+      return useNewICPPlanner;
    }
 
    /** {@inheritDoc} */
    @Override
    public boolean useTwoCMPsPerSupport()
    {
-      return false;
+      return useTwoCMPsPerSupport;
    }
 
    /** {@inheritDoc} */
@@ -178,28 +184,28 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public double getMaxEntryCMPForwardOffset()
    {
-      return 0.05;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMaxExitCMPForwardOffset()
-   {
-      return 0.05;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinExitCMPForwardOffset()
-   {
-      return -0.02;
+      return 0.03;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getMinEntryCMPForwardOffset()
    {
-      return -0.02;
+      return 0.0;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMaxExitCMPForwardOffset()
+   {
+      return 0.08;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getMinExitCMPForwardOffset()
+   {
+      return -0.04;
    }
 
    /** {@inheritDoc} */

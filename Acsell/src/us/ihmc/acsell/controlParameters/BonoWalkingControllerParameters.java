@@ -43,7 +43,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getOmega0()
    {
-      // TODO probably need to be tuned.
       return 3.4;
    }
 
@@ -281,6 +280,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getMinStepWidth()
    {
+      // TODO The smallest the best in terms of control.
       return 0.375;//0.35;
    }
 
@@ -359,6 +359,21 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
       gains.setCMPRateLimit(cmpRateLimit);
       gains.setCMPAccelerationLimit(cmpAccelerationLimit);
+
+      // TODO Try using similar parameters to Atlas:
+//      double kpParallel = 2.5;
+//      double kpOrthogonal = 1.5;
+//      double ki = 0.0;
+//      double kiBleedOff = 0.9;
+//      boolean useRawCMP = true;
+//      boolean useHackToReduceFeedForward = false;
+//
+//      gains.setKpParallelToMotion(kpParallel);
+//      gains.setKpOrthogonalToMotion(kpOrthogonal);
+//      gains.setKi(ki);
+//      gains.setKiBleedOff(kiBleedOff);
+//      gains.setUseRawCMP(useRawCMP);
+//      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }
@@ -658,7 +673,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getSpinePitchUpperLimit()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
@@ -666,7 +680,6 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getSpinePitchLowerLimit()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
@@ -723,14 +736,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public double getFoot_start_toetaper_from_back()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public double getSideLengthOfBoundingBoxForFootstepHeight()
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
@@ -888,6 +899,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    @Override
    public boolean useICPPlannerHackN13()
    {
+      // TODO When using new ICP planner, set that one to false.
       return true;
    }
 }
