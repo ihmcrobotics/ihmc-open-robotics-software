@@ -10,7 +10,7 @@ include_directories(${EIGEN_INCLUDE_DIR})
 
 #Boost
 set(Boost_USE_STATIC_LIBS   ON)
-find_package(Boost COMPONENTS filesystem system timer REQUIRED)
+find_package(Boost COMPONENTS filesystem system thread date_time chrono iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 #minipcl headers
