@@ -1,12 +1,11 @@
 package us.ihmc.communication.net.local;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.utilities.ThreadTools;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import us.ihmc.utilities.ThreadTools;
 
 /* package-private */class IntraprocessCommunicationNetwork
 {
@@ -18,7 +17,7 @@ import us.ihmc.utilities.ThreadTools;
 
    }
 
-   /* package-private */static int sendObject(IntraprocessObjectCommunicator sender, int port, Object object)
+   /* package-private */ static int sendObject(IntraprocessObjectCommunicator sender, int port, Object object)
    {
       IntraprocessCommunicator communicator;
       synchronized (IntraprocessCommunicationNetwork.class)
@@ -135,6 +134,8 @@ import us.ihmc.utilities.ThreadTools;
       {
          clients.remove(client);
          client.disconnected();
+
+         callBackExecutor.shutdownNow();
       }
 
       private synchronized boolean isConnected(IntraprocessObjectCommunicator client)
@@ -152,8 +153,6 @@ import us.ihmc.utilities.ThreadTools;
 
       private synchronized void send(IntraprocessObjectCommunicator sender, final Object object)
       {
-
-
          if (isConnected(sender))
          {
             for (int i = 0; i < clients.size(); i++)
@@ -164,7 +163,6 @@ import us.ihmc.utilities.ThreadTools;
                   final Object copy = sender.copyPacket(object);
                   callBackExecutor.execute(new Runnable()
                   {
-
                      @Override
                      public void run()
                      {
@@ -179,7 +177,6 @@ import us.ihmc.utilities.ThreadTools;
             throwNotConnectedException(port);
          }
       }
-
    }
 
    // Helpers for test classes

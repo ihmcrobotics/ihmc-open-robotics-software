@@ -21,7 +21,6 @@ public class NetworkPorts
    public static final NetworkPorts LEFT_HAND_PORT = new NetworkPorts(5003);
    public static final NetworkPorts RIGHT_HAND_PORT = new NetworkPorts(5004);
    
-   
    // Network manager ports
    public static final NetworkPorts BEHAVIOUR_MODULE_PORT = new NetworkPorts(6001); 
    public static final NetworkPorts UI_MODULE = new NetworkPorts(6002);
@@ -33,14 +32,19 @@ public class NetworkPorts
    public static final NetworkPorts MOCAP_MODULE = new NetworkPorts(6008);
    public static final NetworkPorts MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE = new NetworkPorts(6009);
 
-   // Mission Control ports
-   public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7010);
-   public static final NetworkPorts MISSION_CONTROL_INTRAPROCESS_PORT = new NetworkPorts(7030);
-   public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(7040);
-   public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(7041);
-   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(7042);
-   public static final NetworkPorts MISSION_CONTROL_FIELD_SHAPER_TEST_PORT = new NetworkPorts(7043);
-   public static final NetworkPorts MISSION_CONTROL_OCU_SHAPER_TEST_PORT = new NetworkPorts(7044);
+   // Mission control ports
+   public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7001);
+   public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(7101);
+   public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(7102);
+   public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(7103);
+   public static final NetworkPorts MISSION_CONTROL_FIELD_SHAPER_TEST_PORT = new NetworkPorts(7104);
+   public static final NetworkPorts MISSION_CONTROL_OCU_SHAPER_TEST_PORT = new NetworkPorts(7105);
+
+   // Dynamic ports for testing purposes
+   public static NetworkPorts createMissionControlIntraprocessPort(NetworkPorts port)
+   {
+      return new NetworkPorts(port.getPort() + 100);
+   }
 
    public static NetworkPorts createRandomTestPort()
    {
@@ -56,5 +60,11 @@ public class NetworkPorts
    public int getPort()
    {
       return port;
+   }
+
+   @Override
+   public String toString()
+   {
+      return Integer.toString(port);
    }
 }
