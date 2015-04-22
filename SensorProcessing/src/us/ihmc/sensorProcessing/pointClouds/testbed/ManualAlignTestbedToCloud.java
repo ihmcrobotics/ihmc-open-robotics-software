@@ -162,6 +162,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
             mat.setTexture("NormalMap",
                     assetManager.loadTexture("Textures/Terrain/Pond/Pond_normal.png"));
             mat.setBoolean("UseMaterialColors", true);
+
             mat.setColor("Diffuse", ColorRGBA.White);  // minimum material color
             mat.setColor("Specular", ColorRGBA.White); // for shininess
             mat.setFloat("Shininess", 64f); // [1,128] for shininess
