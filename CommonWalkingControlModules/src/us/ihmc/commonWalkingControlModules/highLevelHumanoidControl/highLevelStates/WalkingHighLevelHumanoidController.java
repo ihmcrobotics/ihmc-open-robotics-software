@@ -1400,7 +1400,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                return true;
          }
 
-         if (walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone())
+         if (walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone() && !isInFlamingoStance.getBooleanValue())
          {
             if (!footExplorationControlModule.isControllingSwingFoot())
             {
