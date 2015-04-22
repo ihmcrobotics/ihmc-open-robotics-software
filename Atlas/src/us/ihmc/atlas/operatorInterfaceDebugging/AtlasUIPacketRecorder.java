@@ -23,6 +23,7 @@ import us.ihmc.utilities.time.Timer;
 public class AtlasUIPacketRecorder
 {
    private static final Path PACKET_RECORDINGS_PATH = Paths.get("./packetRecordings");
+   private static final String PACKET_RECORDING_FILENAME = "PacketRecording_" + DateTools.getDateString() + "_real3";
    private Object streamConch = new Object();
 
    public AtlasUIPacketRecorder() throws IOException
@@ -122,7 +123,7 @@ public class AtlasUIPacketRecorder
    
    public static String getPrefixFileName()
    {
-      return "PacketRecording_" + DateTools.getDateString() + "_real3";
+      return PACKET_RECORDING_FILENAME;
    }
    
    public static void main(String[] args) throws IOException
