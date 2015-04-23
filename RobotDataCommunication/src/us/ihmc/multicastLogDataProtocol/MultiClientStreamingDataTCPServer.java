@@ -5,8 +5,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -176,10 +174,9 @@ public class MultiClientStreamingDataTCPServer extends Thread
 
       private final ConcurrentRingBuffer<ByteBuffer> data;
 
-      private final ReentrantLock dataLock = new ReentrantLock();
-      private final Condition clientOnlineCondition = dataLock.newCondition();
-      private final Condition dataAvailableCondition = dataLock.newCondition();
 
+      private final Object dataLock = new Object();
+      
       private volatile boolean active = false;
 
       private long count;
@@ -204,25 +201,25 @@ public class MultiClientStreamingDataTCPServer extends Thread
       {
          for (;;)
          {
-            dataLock.lock();
-            while (!active)
+            synchronized (dataLock)
             {
-               try
+               while (!active)
                {
-                  clientOnlineCondition.await();
+                  try
+                  {
+                     dataLock.wait();
+                  }
+                  catch (InterruptedException e)
+                  {
+                  }
                }
-               catch (InterruptedException e)
-               {
-               }
-            }
-
-            // Flush queue
-            data.poll();
-            while (data.read() != null);
-            data.flush();
-
-            dataLock.unlock();
-            
+               
+               // Flush queue
+               data.poll();
+               while (data.read() != null);
+               data.flush();
+               
+            }            
             System.out.println("Accepted client:  " + client);
 
             for (;;)
@@ -251,15 +248,17 @@ public class MultiClientStreamingDataTCPServer extends Thread
                }
                else
                {
-                  dataLock.lock();
-                  try
+                  synchronized (dataLock)
                   {
-                     dataAvailableCondition.await();
+                     try
+                     {
+                        dataLock.wait();
+                     }
+                     catch (InterruptedException e)
+                     {
+                     }
+                     
                   }
-                  catch (InterruptedException e)
-                  {
-                  }
-                  dataLock.unlock();
                }
 
             }
@@ -272,9 +271,10 @@ public class MultiClientStreamingDataTCPServer extends Thread
             {
             }
 
-            dataLock.lock();
-            active = false;
-            dataLock.unlock();
+            synchronized (dataLock)
+            {
+               active = false;               
+            }
          }
       }
 
@@ -287,17 +287,19 @@ public class MultiClientStreamingDataTCPServer extends Thread
        */
       public boolean setClient(SocketChannel client, int sendEveryNTicks)
       {
-         dataLock.lock();
-         boolean internalActive = active;
-         if (!internalActive)
+         boolean internalActive;
+         synchronized (dataLock)
          {
-            this.client = client;
-            this.sendEveryNTicks = sendEveryNTicks;
-            this.active = true;
-            clientOnlineCondition.signalAll();
+            internalActive = active;
+            if (!internalActive)
+            {
+               this.client = client;
+               this.sendEveryNTicks = sendEveryNTicks;
+               this.active = true;
+               dataLock.notifyAll();
+            }
+            
          }
-         dataLock.unlock();
-
          return !internalActive;
       }
 
@@ -317,9 +319,10 @@ public class MultiClientStreamingDataTCPServer extends Thread
                   nextData.flip();
                }
                data.commit();
-               dataLock.lock();
-               dataAvailableCondition.signalAll();
-               dataLock.unlock();
+               synchronized (dataLock)
+               {
+                  dataLock.notifyAll();
+               }
             }
             count++;
          }
