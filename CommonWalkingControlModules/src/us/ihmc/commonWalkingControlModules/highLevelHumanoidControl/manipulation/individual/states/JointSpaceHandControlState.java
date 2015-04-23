@@ -40,7 +40,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
    private final BooleanYoVariable doPositionControl;
 
    private final double dt;
-   private final boolean[] doIntegrateDesiredAccerations;
+   private final boolean[] doIntegrateDesiredAccelerations;
 
    private final boolean[] hasJointBeenDisabledAtLeastOnce;
 
@@ -81,12 +81,12 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
       this.momentumBasedController = momentumBasedController;
 
-      doIntegrateDesiredAccerations = new boolean[oneDoFJoints.length];
+      doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccerations[i] = joint.getIntegrateDesiredAccelerations();
+         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
       }
 
       parentRegistry.addChild(registry);
@@ -180,7 +180,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         doIntegrateDesiredAccerations[i] = joint.getIntegrateDesiredAccelerations();
+         doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
       }
    }
 
@@ -199,7 +199,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          OneDoFJoint joint = oneDoFJoints[i];
-         joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccerations[i]);
+         joint.setIntegrateDesiredAccelerations(doIntegrateDesiredAccelerations[i]);
          joint.setUnderPositionControl(false);
       }
    }

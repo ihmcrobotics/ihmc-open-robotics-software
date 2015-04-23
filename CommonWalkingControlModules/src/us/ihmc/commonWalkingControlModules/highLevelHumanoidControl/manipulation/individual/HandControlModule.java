@@ -11,10 +11,10 @@ import javax.vecmath.Vector3d;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
@@ -76,6 +76,7 @@ public class HandControlModule
 
    private final StateMachine<HandControlState> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
+   private final TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator;
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
    private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
@@ -218,6 +219,11 @@ public class HandControlModule
               fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
+      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
+      handTaskspaceToJointspaceCalculator.setFullyConstrained();
+      handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
+
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
               yoGraphicsListRegistry);
@@ -244,9 +250,11 @@ public class HandControlModule
 
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
       {
-         taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
-                 momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains,
-                 controlDT, registry);
+//         taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
+//                 momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains,
+//                 controlDT, registry);
+         taskSpacePositionControlState = new TaskspaceToJointspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
+               momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
       }
       else
       {
@@ -369,6 +377,7 @@ public class HandControlModule
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
       taskSpacePositionControlState.setTrajectory(poseTrajectory);
       taskSpacePositionControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
+      taskSpacePositionControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
