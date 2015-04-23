@@ -47,6 +47,7 @@ public class TaskspaceToJointspaceCalculator
 
    private final DenseMatrix64F jointAngleCorrections;
    private final DenseMatrix64F maximumAngleCorrections;
+   private final DenseMatrix64F maximumJointVelocities;
 
    private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
    private final Vector3d errorRotationVector = new Vector3d();
@@ -66,6 +67,11 @@ public class TaskspaceToJointspaceCalculator
 
    public TaskspaceToJointspaceCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, base, endEffector, controlDT, false, parentRegistry);
+   }
+
+   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT, boolean useSVD, YoVariableRegistry parentRegistry)
+   {
       this.controlDT = controlDT;
 
       localJoints = ScrewTools.cloneOneDoFJointPath(base, endEffector);
@@ -80,7 +86,7 @@ public class TaskspaceToJointspaceCalculator
       localControlFrame = createLocalControlFrame(localEndEffectorFrame, originalEndEffectorFrame);
 
       jacobian = new GeometricJacobian(localJoints, localEndEffectorFrame);
-      inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF);
+      inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, useSVD);
 
       jointAngleCorrections = new DenseMatrix64F(numberOfDoF, 1);
       privilegedJointPositions = new DenseMatrix64F(numberOfDoF, 1);
@@ -89,10 +95,12 @@ public class TaskspaceToJointspaceCalculator
       desiredJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoF, 1);
       maximumAngleCorrections = new DenseMatrix64F(numberOfDoF, 1);
+      maximumJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
       for (int i = 0; i < numberOfDoF; i++)
       {
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
          maximumAngleCorrections.set(i, 0, Double.POSITIVE_INFINITY);
+         maximumJointVelocities.set(i, 0, Double.POSITIVE_INFINITY);
       }
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -149,20 +157,11 @@ public class TaskspaceToJointspaceCalculator
       }
    }
 
-   public void setMaximumJointVelocities(DenseMatrix64F maximumVelocities)
+   public void setMaximumJointVelocities(double maximumJointVelocities)
    {
       for (int i = 0; i < numberOfDoF; i++)
-      {
-         maximumAngleCorrections.set(i, 0, maximumVelocities.get(i, 0) * controlDT);
-      }
-   }
-
-   public void setMaximumJointAngleCorrections(DenseMatrix64F maximumJointAngleCorrections)
-   {
-      for (int i = 0; i < numberOfDoF; i++)
-      {
-         maximumAngleCorrections.set(i, 0, maximumJointAngleCorrections.get(i, 0));
-      }
+         this.maximumJointVelocities.set(i, 0, maximumJointVelocities);
+      CommonOps.scale(controlDT, this.maximumJointVelocities, maximumAngleCorrections);
    }
 
    public void setMaximumJointAngleCorrections(double maximumJointAngleCorrections)
@@ -171,6 +170,19 @@ public class TaskspaceToJointspaceCalculator
       {
          maximumAngleCorrections.set(i, 0, maximumJointAngleCorrections);
       }
+      CommonOps.scale(1.0 / controlDT, maximumAngleCorrections, maximumJointVelocities);
+   }
+
+   public void setMaximumJointVelocities(DenseMatrix64F maximumJointVelocities)
+   {
+      this.maximumJointVelocities.set(maximumJointVelocities);
+      CommonOps.scale(controlDT, this.maximumJointVelocities, maximumAngleCorrections);
+   }
+
+   public void setMaximumJointAngleCorrections(DenseMatrix64F maximumJointAngleCorrections)
+   {
+      CommonOps.scale(1.0 / controlDT, maximumJointAngleCorrections, maximumJointVelocities);
+      maximumAngleCorrections.set(maximumJointAngleCorrections);
    }
 
    public void compute(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocity, FrameVector desiredAngularVelocity)
@@ -259,6 +271,7 @@ public class TaskspaceToJointspaceCalculator
 
       for (int i = 0; i < numberOfDoF; i++)
       {
+         desiredJointVelocities.set(i, 0, MathTools.clipToMinMax(desiredJointVelocities.get(i, 0), maximumJointVelocities.get(i, 0)));
          OneDoFJoint joint = localJoints[i];
          double qDotDesired = desiredJointVelocities.get(i, 0);
          joint.setQd(qDotDesired);
@@ -301,6 +314,7 @@ public class TaskspaceToJointspaceCalculator
          dq = MathTools.clipToMinMax(dq, maximumAngleCorrections.get(i, 0));
          double newJointAngle = joint.getQ() + dq;
          newJointAngle = MathTools.clipToMinMax(newJointAngle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredJointVelocities.set(i, 0, (newJointAngle - joint.getQ()) / controlDT);
          joint.setQ(newJointAngle);
          joint.setQd(qDotDesired);
          desiredJointAngles.set(i, newJointAngle);

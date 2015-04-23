@@ -74,7 +74,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.GeometryTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
@@ -199,8 +198,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       FEET_SQUARE_UP,
       GO_HOME,
       TURN_WHEEL,
-      REDO_LAST_TASK, // Keep that one at the end.
-      CUTE_WAVE
+      CUTE_WAVE,
+      REDO_LAST_TASK // Keep that one at the end.
    };
 
    private final EnumYoVariable<DiagnosticTask> lastDiagnosticTask;
@@ -256,6 +255,8 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final DoubleYoVariable steeringWheelFinalAngle;
    private final YoFramePoint steeringWheelInitialPosition;
    private final YoFramePoint steeringWheelFinalPosition;
+   private final BooleanYoVariable steeringWheelControlRotationAxis;
+   private final DoubleYoVariable steeringWheelOffsetFromWristToPalm;
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -501,6 +502,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       steeringWheelPose = new YoFramePose(steeringWheelCenter, steeringWheelOrientation);
       steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
       steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
+      steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
+      steeringWheelOffsetFromWristToPalm = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelOffsetFromWristToPalm", registry);
 
       steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
       {
@@ -523,13 +526,10 @@ public class DiagnosticBehavior extends BehaviorInterface
       showSteeringWheel = new BooleanYoVariable(behaviorNameFirstLowerCase + "ShowSteeringWheel", registry);
       steeringWheelInitialPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", worldFrame, registry);
       steeringWheelFinalPosition = new YoFramePoint(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", worldFrame, registry);
-      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(),
-            registry, yoGraphicsListRegistry);
+      steeringWheelVisualization = new BagOfBalls(numberOfBalls, 0.03, behaviorNameFirstLowerCase + "SteeringWheelVizualization", YoAppearance.Black(), registry, yoGraphicsListRegistry);
       steeringWheelVisualization.hideAll();
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition",
-            steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
-      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition",
-            steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
+      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelInitialPosition", steeringWheelInitialPosition, 0.035, YoAppearance.BlueViolet()));
+      yoGraphicsListRegistry.registerYoGraphic("Steering Wheel", new YoGraphicPosition(behaviorNameFirstLowerCase + "SteeringWheelFinalPosition", steeringWheelFinalPosition, 0.035, YoAppearance.Red()));
 
       updateSteeringWheelParameters();
    }
@@ -540,9 +540,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FramePose defaultSteeringWheelPose = new FramePose(fullRobotModel.getChest().getBodyFixedFrame());
       defaultSteeringWheelPose.setPosition(0.6, 0.0, -0.4);
       defaultSteeringWheelPose.setOrientation(0.0, Math.toRadians(-33.0), 0.0);
-      System.out.println(defaultSteeringWheelPose);
       defaultSteeringWheelPose.changeFrame(worldFrame);
-      System.out.println(defaultSteeringWheelPose);
       steeringWheelPose.set(defaultSteeringWheelPose);
 
       steeringWheelInitialAngle.set(-Math.toRadians(45.0));
@@ -2412,7 +2410,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       steeringWheelAxis.changeFrame(worldFrame);
 
       final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(),
-            steeringWheelAxis.getVectorCopy(), 0.0);
+            steeringWheelAxis.getVectorCopy(), steeringWheelOffsetFromWristToPalm.getDoubleValue());
       pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinderBehavior, yoTime)
       {
          @Override
@@ -2422,11 +2420,12 @@ public class DiagnosticBehavior extends BehaviorInterface
          }
       });
 
+      boolean controlHandOrientationAboutAxis = steeringWheelControlRotationAxis.getBooleanValue();
       double turnAngle = steeringWheelFinalAngle.getDoubleValue() - steeringWheelInitialAngle.getDoubleValue();
       double rotationRateRadPerSec = turnAngle / trajectoryTime.getDoubleValue();
       final RigidBodyTransform wheelTransformToWorld = steeringWheelFrame.getTransformToDesiredFrame(worldFrame);
       pipeLine.submitSingleTaskStage(new RotateHandAboutAxisTask(activeSideForHandControl.getEnumValue(), yoTime, rotateHandAboutAxisBehavior,
-            wheelTransformToWorld, Axis.Z, true, turnAngle, rotationRateRadPerSec, false));
+            wheelTransformToWorld, Axis.Z, controlHandOrientationAboutAxis, turnAngle, rotationRateRadPerSec, false));
    }
 
    private void sequenceTurnInPlace()
