@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
@@ -22,7 +22,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
-
 /**
  * @author twan
  *         Date: 5/9/13
@@ -30,23 +29,24 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   protected final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
+   private final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
 
    // viz stuff:
-   private final Collection<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
-   protected final PoseReferenceFrame desiredPositionFrame;
+   private final YoGraphicReferenceFrame dynamicGraphicReferenceFrame;
+   private final PoseReferenceFrame desiredPositionFrame;
 
    // temp stuff:
-   protected final FramePoint desiredPosition = new FramePoint(worldFrame);
-   protected final FrameVector desiredVelocity = new FrameVector(worldFrame);
-   protected final FrameVector desiredAcceleration = new FrameVector(worldFrame);
+   private final FramePose desiredPose = new FramePose();
+   private final FramePoint desiredPosition = new FramePoint(worldFrame);
+   private final FrameVector desiredVelocity = new FrameVector(worldFrame);
+   private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
 
-   protected final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
-   protected final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
-   protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
+   private final FrameOrientation desiredOrientation = new FrameOrientation(worldFrame);
+   private final FrameVector desiredAngularVelocity = new FrameVector(worldFrame);
+   private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
-   protected PoseTrajectoryGenerator poseTrajectoryGenerator;
-   protected RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
+   private PoseTrajectoryGenerator poseTrajectoryGenerator;
+   private RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
 
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
@@ -62,12 +62,15 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
       {
          YoGraphicsList list = new YoGraphicsList(name);
 
-         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrame, registry, 0.3);
-         dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
+         dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(desiredPositionFrame, registry, 0.3);
          list.add(dynamicGraphicReferenceFrame);
 
          yoGraphicsListRegistry.registerYoGraphicsList(list);
          list.hideYoGraphics();
+      }
+      else
+      {
+         dynamicGraphicReferenceFrame = null;
       }
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
@@ -82,6 +85,7 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
       poseTrajectoryGenerator.compute(getTimeInCurrentState());
 
+      poseTrajectoryGenerator.get(desiredPose);
       poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
       poseTrajectoryGenerator.packAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
@@ -118,10 +122,10 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    {
       if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
          return false;
-      
+
       return getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
    }
-   
+
    private void recordDoneTrajectoryTime()
    {
       if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
@@ -132,13 +136,13 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
 
    private void updateVisualizers()
    {
-      desiredPosition.changeFrame(worldFrame);
-      desiredOrientation.changeFrame(worldFrame);
-      desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
-      desiredPositionFrame.update();
-
-      for (YoGraphicReferenceFrame dynamicGraphicReferenceFrame : dynamicGraphicReferenceFrames)
+      if (dynamicGraphicReferenceFrame != null)
       {
+         desiredPosition.changeFrame(worldFrame);
+         desiredOrientation.changeFrame(worldFrame);
+         desiredPositionFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
+         desiredPositionFrame.update();
+
          dynamicGraphicReferenceFrame.update();
       }
 
@@ -173,27 +177,12 @@ public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceH
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      // FIXME: hack
-
-      FramePoint point = new FramePoint();
-      poseTrajectoryGenerator.get(point);
-      return point.getReferenceFrame();
+      return desiredPose.getReferenceFrame();
    }
 
    @Override
    public FramePose getDesiredPose()
    {
-      poseTrajectoryGenerator.get(desiredPosition);
-      desiredPosition.changeFrame(getFrameToControlPoseOf());
-
-      poseTrajectoryGenerator.get(desiredOrientation);
-      desiredOrientation.changeFrame(getFrameToControlPoseOf());
-
-      return new FramePose(desiredPosition, desiredOrientation);
-   }
-
-   public ReferenceFrame getFrameToControlPoseOf()
-   {
-      return handSpatialAccelerationControlModule.getTrackingFrame();
+      return desiredPose;
    }
 }

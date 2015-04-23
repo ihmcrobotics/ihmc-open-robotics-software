@@ -122,6 +122,11 @@ public class TaskspaceToJointspaceCalculator
       inverseJacobianSolver.setSelectionMatrix(selectionMatrix);
    }
 
+   public void setFullyConstrained()
+   {
+      inverseJacobianSolver.setSelectionMatrixForFullConstraint();
+   }
+
    public void setControlFrameFixedInEndEffector(ReferenceFrame controlFrame)
    {
       originalControlFrame = controlFrame;
@@ -311,6 +316,11 @@ public class TaskspaceToJointspaceCalculator
       }
    }
  
+   public ReferenceFrame getControlFrame()
+   {
+      return originalControlFrame;
+   }
+
    public DenseMatrix64F getSubspaceSpatialError()
    {
       return subspaceSpatialError;
@@ -334,5 +344,10 @@ public class TaskspaceToJointspaceCalculator
    public void packDesiredJointAnglesIntoOneDoFJoints(OneDoFJoint[] joints)
    {
       ScrewTools.setDesiredJointPositions(joints, desiredJointAngles);
+   }
+
+   public void packDesiredJointVelocitiesIntoOneDoFJoints(OneDoFJoint[] joints)
+   {
+      ScrewTools.setDesiredJointVelocities(joints, desiredJointVelocities);
    }
 }
