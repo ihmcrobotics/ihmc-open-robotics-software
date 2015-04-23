@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameGeometry2dPlotter;
 import us.ihmc.utilities.math.geometry.FrameGeometryTestFrame;
@@ -109,7 +109,7 @@ public class OneStepCaptureRegionCalculatorTest
       
       double movePointsFactor = 0.01;
       FrameConvexPolygon2d expectedPolygonInside = new FrameConvexPolygon2d(expectedPointsOnBorder);
-      expectedPolygonInside = ConvexPolygonTools.shrinkConstantDistanceInto(movePointsFactor, expectedPolygonInside);
+      expectedPolygonInside = ConvexPolygonShrinker.shrinkConstantDistanceInto(movePointsFactor, expectedPolygonInside);
       
       assertTrue(expectedPolygonInside.getConvexPolygon2d().isCompletelyInside(captureRegion.getConvexPolygon2d()));
       
