@@ -96,23 +96,24 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    /**
     * PointCloud Parameters
     */
-   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
-   public static final int IBEO_ID = 0;
-   private static final String ibeoSensorName = "/v1/Ibeo_sensor";
-   private static final String ibeoTopic = "/ibeo/points";
+   //Make pointCloudParameters null to not use point cloud in UI.
+   private final DRCRobotPointCloudParameters[] pointCloudParamaters = null;//new DRCRobotPointCloudParameters[1];
+   public static final int POINT_CLOUD_SENSOR_ID = 0;
+   private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
+   private static final String pointCloudTopic = "/v1/Ensenso/Points";
    
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
    
-   private static int forheadCameraId = 0;
+   private static int foreheadCameraId = 0;
    private static int leftHazardCameraId = 1;
    private static int rightHazardCameraId = 2;
-   private static int primaryCameraId = forheadCameraId;
+   private static int primaryCameraId = foreheadCameraId;
    
    private static final String headLinkName = "/v1/Head";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
-   private static final String forheadCameraName = "/v1/HeadWebcam___default__";
-   private static final String forheadCameraTopic = "/forhead/image_raw/compressed";
+   private static final String foreheadCameraName = "/v1/HeadWebcam___default__";
+   private static final String foreheadCameraTopic = "/head/image_raw/compressed";
    
    private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
    private static final String leftCameraTopic = "/v1/LeftHazardCamera/compressed";
@@ -142,10 +143,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      cameraParamaters[0] = new DRCRobotCameraParameters(forheadCameraName,forheadCameraTopic,headLinkName,forheadCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(foreheadCameraName,foreheadCameraTopic,headLinkName,foreheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
-      pointCloudParamaters[IBEO_ID] = new DRCRobotPointCloudParameters(ibeoSensorName,ibeoTopic,headLinkName,IBEO_ID);
+      if(pointCloudParamaters != null)
+      {
+         pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
+      }
       }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
@@ -250,7 +254,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       ArrayList<String> sensorFramesToTrack = new ArrayList<String>();
       sensorFramesToTrack(cameraParamaters,sensorFramesToTrack);
-      sensorFramesToTrack(pointCloudParamaters,sensorFramesToTrack);
       String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
       sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
       return sensorFramesToTrackAsPrimitive;
