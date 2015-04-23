@@ -46,7 +46,14 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      if(sensorInformation.getPointCloudParameters() != null)
+      {
+         this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      }
+      else
+      {
+         this.pointCloudDataReceiver = null;
+      }
    }
 
    @Override
@@ -77,7 +84,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, sensorSuitePacketCommunicator, null);
       sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);
 
-      new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      if(pointCloudDataReceiver != null)
+      {
+         new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      }
       
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
@@ -91,7 +101,10 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       sensorSuitePacketCommunicator.connect();
       if (sensorInformation.getLidarParameters().length > 0)
       {
-         pointCloudDataReceiver.start();
+         if(pointCloudDataReceiver != null)
+         {
+            pointCloudDataReceiver.start();
+         }
       }
    }
 }
