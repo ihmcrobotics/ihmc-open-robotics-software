@@ -20,6 +20,9 @@ public class StepprXSensState
    
    private final IntegerYoVariable sample;
    
+   private final Quat4d Qsi = new Quat4d();
+   private final Quat4d Qip = new Quat4d();
+   
    public StepprXSensState(String name, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
@@ -123,8 +126,7 @@ public class StepprXSensState
       double qxtemp = buffer.getFloat();
       double qytemp = buffer.getFloat();
       double qztemp = buffer.getFloat();
-      Quat4d Qsi = new Quat4d();
-      Quat4d Qip = new Quat4d();
+      
       Qsi.set(qxtemp,qytemp,qztemp,qstemp);
       Qip.set(0,.707106781186548,0,-.707106781186548);
       Qsi.mul(Qip);
