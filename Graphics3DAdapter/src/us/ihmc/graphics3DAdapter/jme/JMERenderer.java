@@ -390,11 +390,11 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       primaryLight = new DirectionalLight();
       primaryLight.setColor(ColorRGBA.White.mult(0.5f));
-      primaryLight.setDirection(new Vector3f(-0.7f, -0.5f, 1.0f).normalizeLocal());
+      primaryLight.setDirection(new Vector3f(-0.1f, -1.0f, -0.2f).normalizeLocal());
       rootNode.addLight(primaryLight);
       
       ambientLight = new AmbientLight();
-      ambientLight.setColor(ColorRGBA.White.mult(0.7f)); //1.3f));
+      ambientLight.setColor(ColorRGBA.White.mult(.8f)); //1.3f));
       rootNode.addLight(ambientLight);
       
       DirectionalLight primaryLight2 = new DirectionalLight();
