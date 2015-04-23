@@ -81,7 +81,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
       this.momentumBasedController = momentumBasedController;
 
-      doIntegrateDesiredAccerations = new boolean[controlledJoints.length];
+      doIntegrateDesiredAccerations = new boolean[oneDoFJoints.length];
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
