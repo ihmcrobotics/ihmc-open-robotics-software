@@ -227,7 +227,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 4096, 2);
       dlsr.setLight(primaryLight);
       dlsr.setLambda(0.8f);
-      dlsr.setShadowIntensity(0.5f);
+      dlsr.setShadowIntensity(0.2f);
       dlsr.setEdgeFilteringMode(EdgeFilteringMode.PCF4);
       viewPort.addProcessor(dlsr);
    }
