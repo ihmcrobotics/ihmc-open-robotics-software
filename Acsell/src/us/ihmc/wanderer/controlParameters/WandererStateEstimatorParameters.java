@@ -7,9 +7,9 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WandererStateEstimatorParameters implements StateEstimatorParameters
@@ -42,17 +42,17 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
       doElasticityCompensation = runningOnRealRobot;
       defaultJointStiffness = Double.POSITIVE_INFINITY;
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
+      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
+      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_X.getSdfName(), 4500.0); //6000
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_X.getSdfName(), 4500.0); //6000
+      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_X.getSdfName(), 4500.0); //6000
+      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_X.getSdfName(), 4500.0); //6000
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_HIP_Y.getSdfName(), 10000.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_HIP_Y.getSdfName(), 10000.0);
+      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_Y.getSdfName(), 10000.0);
+      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_Y.getSdfName(), 10000.0);
       
-      jointSpecificStiffness.put(StepprJoint.LEFT_KNEE_Y.getSdfName(), 6000.0);
-      jointSpecificStiffness.put(StepprJoint.RIGHT_KNEE_Y.getSdfName(), 6000.0);
+      jointSpecificStiffness.put(WandererJoint.LEFT_KNEE_Y.getSdfName(), 6000.0);
+      jointSpecificStiffness.put(WandererJoint.RIGHT_KNEE_Y.getSdfName(), 6000.0);
 
    }
    

@@ -33,7 +33,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
-import us.ihmc.steppr.hardware.controllers.StepprOutputProcessor;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
@@ -321,7 +320,7 @@ public class WandererRobotModel implements DRCRobotModel
    @Override
    public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
    {
-      return new StepprOutputProcessor(controllerFullRobotModel);
+      return null;
    }
 
    @Override
