@@ -86,8 +86,8 @@ public class SDFJointHolder
             hasLimits = true;
             upperLimit = Double.POSITIVE_INFINITY;
             lowerLimit = Double.NEGATIVE_INFINITY;
-            PrintTools.debug(this, sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
-           }
+            PrintTools.debug(DEBUG, this, sdfJoint.getName() + " has invalid joint limits.  LowerLimit = " + sdfLowerLimit + ", UpperLimit = " + sdfUpperLimit + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
+         }
 
          if(sdfJoint.getAxis().getLimit().getVelocity() != null)
          {
