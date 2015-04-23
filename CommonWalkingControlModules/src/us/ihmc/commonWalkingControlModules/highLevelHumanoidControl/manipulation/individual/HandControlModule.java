@@ -8,6 +8,9 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
@@ -23,6 +26,7 @@ import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameMatrix3D;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -34,6 +38,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
@@ -77,6 +82,8 @@ public class HandControlModule
    private final StateMachine<HandControlState> stateMachine;
    private final RigidBodySpatialAccelerationControlModule handSpatialAccelerationControlModule;
    private final TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator;
+   private final FrameMatrix3D selectionFrameMatrix = new FrameMatrix3D();
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
 
    private final Map<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator> quinticPolynomialTrajectoryGenerators;
    private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
@@ -219,10 +226,12 @@ public class HandControlModule
               fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
-      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
+      boolean useSVD = true;
+      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, useSVD, registry);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
       handTaskspaceToJointspaceCalculator.setFullyConstrained();
       handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
+      handTaskspaceToJointspaceCalculator.setMaximumJointVelocities(5.0);
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
@@ -374,10 +383,18 @@ public class HandControlModule
 
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
    {
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+      executeTaskSpaceTrajectory(poseTrajectory, selectionMatrix);
+   }
+
+   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
+   {
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
       taskSpacePositionControlState.setTrajectory(poseTrajectory);
       taskSpacePositionControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       taskSpacePositionControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
+      handTaskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrix);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
@@ -440,7 +457,7 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
-   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean rotateHandAngleAboutAxis, double time)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double time)
    {
       // Limit arm joint motor speed based on Boston Dynamics Limit
       // of 700 rad/s input to the transmission.
@@ -453,9 +470,22 @@ public class HandControlModule
       circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
       circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
       circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
-      circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(rotateHandAngleAboutAxis);
+      circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
-      executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator);
+      if (!controlHandAngleAboutAxis)
+      {
+         selectionFrameMatrix.setToZero(circularPoseTrajectoryGenerator.getCircleFrame());
+         selectionFrameMatrix.setElement(0, 0, 1.0);
+         selectionFrameMatrix.setElement(1, 1, 1.0);
+         selectionFrameMatrix.setElement(2, 2, 0.0);
+         selectionFrameMatrix.changeFrame(fullRobotModel.getHandControlFrame(robotSide));
+
+         selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+         CommonOps.setIdentity(selectionMatrix);
+         selectionFrameMatrix.getDenseMatrix(selectionMatrix, 0, 0);
+      }
+
+      executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
    }
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)
