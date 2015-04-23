@@ -54,6 +54,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
 
    private DoubleYoVariable resizeFootPolygonBy = new DoubleYoVariable("resizeFootPolygonBy", registry);
 
+   private final ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker(); 
+
    //TODO: 110523: Clean this up and make it better. ComVelocity control line is still hackish.
 
    public SpeedControllingCapturePointCenterOfPressureControlModule(double controlDT, CommonHumanoidReferenceFrames referenceFrames,
@@ -236,7 +238,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FramePoint2d centerOfPressureDesired = null;
       
       
-      FrameConvexPolygon2d somewhatSmallerPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(0.004, supportPolygon);
+      FrameConvexPolygon2d somewhatSmallerPolygon = new FrameConvexPolygon2d();
+      shrinker.shrinkConstantDistanceInto(supportPolygon, 0.004, somewhatSmallerPolygon);
       
       if ((desiredVelocity == null) || (desiredVelocity.length() == 0.0))
       {
@@ -303,6 +306,8 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       return centerOfPressureDesired;
    }
 
+   public final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+   
    public void controlSingleSupport(RobotSide supportLeg, OldBipedSupportPolygons supportPolygons, FramePoint currentCapturePoint, FrameVector2d desiredVelocity,
            FrameLineSegment2d guideLine, FramePoint desiredCapturePoint, FramePoint centerOfMassPositionInZUpFrame, FrameVector2d currentVelocity)
    {
@@ -325,7 +330,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
 
 
-      FrameConvexPolygon2d footPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
+      shrinker.shrinkConstantDistanceInto(supportPolygons.getFootPolygonInAnkleZUp(supportLeg), resizeFootPolygonBy.getDoubleValue(), footPolygon);
       
       
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();

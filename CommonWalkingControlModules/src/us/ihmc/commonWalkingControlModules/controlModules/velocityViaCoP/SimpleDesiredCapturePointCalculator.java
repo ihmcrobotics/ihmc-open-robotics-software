@@ -113,6 +113,9 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       }
    }
    
+   private final ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker(); 
+   private final FrameConvexPolygon2d motionPolygon = new FrameConvexPolygon2d();
+
    private FramePoint2d computeCapturePointMotion()
    {
       
@@ -197,7 +200,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       }
       case OFFSET_SUPPORT_POLYGON:
       {
-         FrameConvexPolygon2d motionPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
+         shrinker.shrinkConstantDistanceInto(supportPolygon, icpMotionDistanceToOuterEdge.getDoubleValue(), motionPolygon);
 
          if (motionPolygon == null)
          {

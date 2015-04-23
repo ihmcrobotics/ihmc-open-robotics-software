@@ -109,9 +109,13 @@ public class OneStepCaptureRegionCalculatorTest
       
       double movePointsFactor = 0.01;
       FrameConvexPolygon2d expectedPolygonInside = new FrameConvexPolygon2d(expectedPointsOnBorder);
-      expectedPolygonInside = ConvexPolygonShrinker.shrinkConstantDistanceInto(movePointsFactor, expectedPolygonInside);
       
-      assertTrue(expectedPolygonInside.getConvexPolygon2d().isCompletelyInside(captureRegion.getConvexPolygon2d()));
+      ConvexPolygonShrinker shrinker = new ConvexPolygonShrinker(); 
+      FrameConvexPolygon2d shrunkenPolygon = new FrameConvexPolygon2d();
+      
+      shrinker.shrinkConstantDistanceInto(expectedPolygonInside, movePointsFactor, shrunkenPolygon);
+      
+      assertTrue(shrunkenPolygon.getConvexPolygon2d().isCompletelyInside(captureRegion.getConvexPolygon2d()));
       
       ArrayList<FramePoint2d> expectedPointsOutside = new ArrayList<FramePoint2d>();
       movePointsFactor = 1.03;
@@ -140,7 +144,7 @@ public class OneStepCaptureRegionCalculatorTest
          {
             plotter.addFramePoint2d(expectedPointsOnBorder.get(i), Color.red);
          }
-         plotter.addPolygon(expectedPolygonInside, Color.red);
+         plotter.addPolygon(shrunkenPolygon, Color.red);
          for(int i = 0; i < expectedPointsOutside.size(); i++)
          {
             plotter.addFramePoint2d(expectedPointsOutside.get(i), Color.cyan);
