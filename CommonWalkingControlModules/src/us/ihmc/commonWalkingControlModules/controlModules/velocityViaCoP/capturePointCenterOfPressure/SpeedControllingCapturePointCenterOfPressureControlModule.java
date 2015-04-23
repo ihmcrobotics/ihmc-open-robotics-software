@@ -5,7 +5,7 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.OldBipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.CapturePointCenterOfPressureControlModule;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLine2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
@@ -236,7 +236,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       FramePoint2d centerOfPressureDesired = null;
       
       
-      FrameConvexPolygon2d somewhatSmallerPolygon = ConvexPolygonTools.shrinkConstantDistanceInto(0.004, supportPolygon);
+      FrameConvexPolygon2d somewhatSmallerPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(0.004, supportPolygon);
       
       if ((desiredVelocity == null) || (desiredVelocity.length() == 0.0))
       {
@@ -325,7 +325,7 @@ public class SpeedControllingCapturePointCenterOfPressureControlModule implement
       }
 
 
-      FrameConvexPolygon2d footPolygon = ConvexPolygonTools.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
+      FrameConvexPolygon2d footPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(resizeFootPolygonBy .getDoubleValue(), supportPolygons.getFootPolygonInAnkleZUp(supportLeg));
       
       
       FramePoint2d currentCapturePoint2d = currentCapturePoint.toFramePoint2d();

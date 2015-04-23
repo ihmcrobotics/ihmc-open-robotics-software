@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.DesiredCaptur
 import us.ihmc.commonWalkingControlModules.controllers.regularWalkingGait.SingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.ConvexPolygonTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -197,7 +197,7 @@ public class SimpleDesiredCapturePointCalculator implements DesiredCapturePointC
       }
       case OFFSET_SUPPORT_POLYGON:
       {
-         FrameConvexPolygon2d motionPolygon = ConvexPolygonTools.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
+         FrameConvexPolygon2d motionPolygon = ConvexPolygonShrinker.shrinkConstantDistanceInto(icpMotionDistanceToOuterEdge.getDoubleValue(), supportPolygon);
 
          if (motionPolygon == null)
          {
