@@ -13,8 +13,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.InverseKinematicsTaskspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingPlaneHandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
@@ -98,9 +99,9 @@ public class HandControlModule
 
    private final Map<OneDoFJoint, Double> jointCurrentPositionMap;
 
-   private final TaskspaceHandPositionControlState taskSpacePositionControlState;
+   private final TrajectoryBasedTaskspaceHandControlState taskSpacePositionControlState;
    private final JointSpaceHandControlState jointSpaceHandControlState;
-   private final LoadBearingPlaneHandControlState loadBearingControlState;
+   private final LoadBearingHandControlState loadBearingControlState;
 
    private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
@@ -234,7 +235,7 @@ public class HandControlModule
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
               waypointOrientationTrajectoryGenerator);
 
-      loadBearingControlState = new LoadBearingPlaneHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
+      loadBearingControlState = new LoadBearingHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
               fullRobotModel.getElevator(), hand, jacobianId, registry);
 
       boolean doPositionControl = armControlParameters.doLowLevelPositionControl();
@@ -366,7 +367,8 @@ public class HandControlModule
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory)
    {
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
-      taskSpacePositionControlState.setTrajectory(poseTrajectory, handSpatialAccelerationControlModule);
+      taskSpacePositionControlState.setTrajectory(poseTrajectory);
+      taskSpacePositionControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
@@ -477,7 +479,7 @@ public class HandControlModule
 
       moveTowardsObject(finalDesiredPose, finalDirection, clearance, time, trajectoryFrame);
       loadBearingControlState.setContactNormalVector(surfaceNormal);
-      loadBearingControlState.setControlModule(handSpatialAccelerationControlModule);
+      loadBearingControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       taskSpacePositionControlState.setHoldPositionDuration(holdPositionDuration);
       isExecutingHandStep.set(goToSupportWhenDone);
    }
@@ -526,7 +528,7 @@ public class HandControlModule
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
    {
       FramePose pose;
-      if (stateMachine.getCurrentState() instanceof TaskspaceHandPositionControlState)
+      if (stateMachine.getCurrentState() instanceof TrajectoryBasedTaskspaceHandControlState)
       {
          pose = taskSpacePositionControlState.getDesiredPose();
       }
@@ -544,7 +546,7 @@ public class HandControlModule
    public void requestLoadBearing()
    {
       requestedState.set(loadBearingControlState.getStateEnum());
-      loadBearingControlState.setControlModule(handSpatialAccelerationControlModule);
+      loadBearingControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
    }
 
    public void moveUsingQuinticSplines(Map<OneDoFJoint, Double> desiredJointPositions, double time)

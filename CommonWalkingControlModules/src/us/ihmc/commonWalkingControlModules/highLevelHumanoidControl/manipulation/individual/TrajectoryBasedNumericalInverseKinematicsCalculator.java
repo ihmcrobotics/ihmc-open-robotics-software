@@ -10,6 +10,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.utilities.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -44,6 +45,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    private final FrameOrientation endEffectorOrientationInFrameToControlPoseOf;
 
    // TODO: YoVariableize desired variables
+   private final FramePose desiredPose = new FramePose(worldFrame);
    private final FramePoint desiredPosition = new FramePoint(worldFrame);
    private final FrameVector desiredVelocity = new FrameVector(worldFrame);
    private final FrameVector desiredAcceleration = new FrameVector(worldFrame);
@@ -333,5 +335,16 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
    public DenseMatrix64F getDesiredJointVelocities()
    {
       return desiredAngularVelocities;
+   }
+
+   public FramePose getDesiredPose()
+   {
+      yoDesiredTrajectoryPose.getFramePoseIncludingFrame(desiredPose);
+      return desiredPose;
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return trajectoryFrame;
    }
 }
