@@ -95,7 +95,7 @@ public class JointConfigurationGatherer
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         DenseMatrix64F forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
+         float[] forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
          forceSensorDataList.get(sensorNumber).packWrench(forceAndMomentVector);
       }
    }

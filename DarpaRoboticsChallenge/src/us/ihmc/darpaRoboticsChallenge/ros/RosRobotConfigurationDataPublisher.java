@@ -62,8 +62,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final SideDependentList<Integer> handForceSensorIndexes = new SideDependentList<Integer>();
    private final SideDependentList<RosWrenchPublisher> footForceSensorPublishers = new SideDependentList<RosWrenchPublisher>();
    private final SideDependentList<RosWrenchPublisher> wristForceSensorPublishers = new SideDependentList<RosWrenchPublisher>();
-   private final SideDependentList<DenseMatrix64F> footForceSensorWrenches = new SideDependentList<DenseMatrix64F>();
-   private final SideDependentList<DenseMatrix64F> wristForceSensorWrenches = new SideDependentList<DenseMatrix64F>();
+   private final SideDependentList<float[]> footForceSensorWrenches = new SideDependentList<float[]>();
+   private final SideDependentList<float[]> wristForceSensorWrenches = new SideDependentList<float[]>();
 
    public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
