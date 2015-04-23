@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ClippedSpeedOffsetErrorInterpolatorTest.class,
+   us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.NewPelvisPoseHistoryCorrectionTest.class,
    us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.OutdatedPoseToUpToDateReferenceFrameUpdaterTest.class
 })
 
