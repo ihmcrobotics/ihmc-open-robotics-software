@@ -27,14 +27,14 @@ public class RotateHandAboutAxisBehavior extends HandPoseBehavior
       this.fullRobotModel = fullRobotModel;
    }
 
-   public void setInput(RobotSide robotSide, boolean lockCurrentHandOrientation, Axis axisOrientationInRotationAxisFrame, RigidBodyTransform rotationAxisFrameTransformToWorld,
+   public void setInput(RobotSide robotSide, boolean controlHandOrientationAboutAxis, Axis axisOrientationInRotationAxisFrame, RigidBodyTransform rotationAxisFrameTransformToWorld,
          double totalRotationInRadians, double rotationRateRadPerSec, boolean stopHandIfCollision)
    {
       FramePose currentHandPoseInWorld = new FramePose();
       currentHandPoseInWorld.setToZero(fullRobotModel.getHandControlFrame(robotSide));
       currentHandPoseInWorld.changeFrame(world);
 
-      setInput(robotSide, currentHandPoseInWorld, lockCurrentHandOrientation, axisOrientationInRotationAxisFrame, rotationAxisFrameTransformToWorld, totalRotationInRadians,
+      setInput(robotSide, currentHandPoseInWorld, controlHandOrientationAboutAxis, axisOrientationInRotationAxisFrame, rotationAxisFrameTransformToWorld, totalRotationInRadians,
             rotationRateRadPerSec, stopHandIfCollision);
    }
 
