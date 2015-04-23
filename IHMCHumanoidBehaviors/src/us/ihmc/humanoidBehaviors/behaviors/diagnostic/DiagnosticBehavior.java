@@ -257,6 +257,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    private final YoFramePoint steeringWheelFinalPosition;
    private final BooleanYoVariable steeringWheelControlRotationAxis;
    private final DoubleYoVariable steeringWheelOffsetFromWristToPalm;
+   private final BooleanYoVariable steeringWheelExecuteGraspingFirst;
 
    public DiagnosticBehavior(FullRobotModel fullRobotModel, EnumYoVariable<RobotSide> supportLeg, ReferenceFrames referenceFrames, DoubleYoVariable yoTime,
          BooleanYoVariable yoDoubleSupport, OutgoingCommunicationBridgeInterface outgoingCommunicationBridge,
@@ -503,6 +504,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       steeringWheelRadius = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelRadius", registry);
       steeringWheelResetPose = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelResetPose", registry);
       steeringWheelControlRotationAxis = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelControlRotationAxis", registry);
+      steeringWheelExecuteGraspingFirst = new BooleanYoVariable(behaviorNameFirstLowerCase + "SteeringWheelExecuteGraspingFirst", registry);
+      steeringWheelExecuteGraspingFirst.set(true);
       steeringWheelOffsetFromWristToPalm = new DoubleYoVariable(behaviorNameFirstLowerCase + "SteeringWheelOffsetFromWristToPalm", registry);
 
       steeringWheelFrame = new ReferenceFrame("steeringWheelFrame", worldFrame)
@@ -2402,23 +2405,34 @@ public class DiagnosticBehavior extends BehaviorInterface
          updateSteeringWheelParameters();
       }
 
-      FramePoint graspPoint = new FramePoint();
-      steeringWheelInitialPosition.getFrameTupleIncludingFrame(graspPoint);
-      FrameVector steeringWheelAxis = new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
-
-      graspPoint.changeFrame(worldFrame);
-      steeringWheelAxis.changeFrame(worldFrame);
-
-      final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(),
-            steeringWheelAxis.getVectorCopy(), steeringWheelOffsetFromWristToPalm.getDoubleValue());
-      pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinderBehavior, yoTime)
+      if (steeringWheelExecuteGraspingFirst.getBooleanValue())
       {
-         @Override
-         protected void setBehaviorInput()
+         FramePoint graspPoint = new FramePoint();
+         steeringWheelInitialPosition.getFrameTupleIncludingFrame(graspPoint);
+         FrameVector steeringWheelAxis = new FrameVector(steeringWheelFrame, 0.0, 0.0, 1.0);
+
+         graspPoint.changeFrame(worldFrame);
+         steeringWheelAxis.changeFrame(worldFrame);
+
+         final GraspCylinderPacket graspCylinderPacket = new GraspCylinderPacket(activeSideForHandControl.getEnumValue(), graspPoint.getPointCopy(),
+               steeringWheelAxis.getVectorCopy(), steeringWheelOffsetFromWristToPalm.getDoubleValue());
+         pipeLine.submitSingleTaskStage(new BehaviorTask(graspCylinderBehavior, yoTime)
          {
-            graspCylinderBehavior.setInput(graspCylinderPacket);
-         }
-      });
+            @Override
+            protected void setBehaviorInput()
+            {
+               graspCylinderBehavior.setInput(graspCylinderPacket);
+            }
+         });
+      }
+      else
+      {
+         FramePoint currentHandPosition = new FramePoint(fullRobotModel.getHandControlFrame(activeSideForHandControl.getEnumValue()));
+         currentHandPosition.changeFrame(steeringWheelFrame);
+         double initialAngle = CylindricalCoordinatesCalculator.getAngle(currentHandPosition);
+         steeringWheelInitialAngle.set(initialAngle);
+         updateSteeringWheelParameters();
+      }
 
       boolean controlHandOrientationAboutAxis = steeringWheelControlRotationAxis.getBooleanValue();
       double turnAngle = steeringWheelFinalAngle.getDoubleValue() - steeringWheelInitialAngle.getDoubleValue();
