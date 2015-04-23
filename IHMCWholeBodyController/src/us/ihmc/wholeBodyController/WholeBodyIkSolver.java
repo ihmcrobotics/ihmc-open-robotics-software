@@ -24,6 +24,7 @@ import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
 import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.Vector64F;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -31,6 +32,7 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
+import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
@@ -42,9 +44,18 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
  */
 abstract public class WholeBodyIkSolver
 {
-   static{
-      NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
-      NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
+   static
+   {
+      try
+      {
+         NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
+         NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
+      }
+      catch (UnsatisfiedLinkError e)
+      {
+         if (OperatingSystemTools.isWindows())
+            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2013!!");
+      }
    }
 
    public enum ComputeResult { 
@@ -329,11 +340,19 @@ abstract public class WholeBodyIkSolver
          return urdfModel.getNrOfJoints();
       }
 
-      static 
+   static
+   {
+      try
       {
          NativeLibraryLoader.loadLibrary("us.ihmc.utilities.hierarchicalKinematics", "hik_java");
          NativeLibraryLoader.loadLibrary("us.ihmc.convexOptimization", "qpOASESSwig_rel");
       }
+      catch (UnsatisfiedLinkError e)
+      {
+         if (OperatingSystemTools.isWindows())
+            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2013!!");
+      }
+   }
 
       public WholeBodyIkSolver( WholeBodyControllerParameters robotControllerParameters ) 
       {
