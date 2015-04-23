@@ -521,9 +521,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
 
    private class DoubleSupportState extends State<WalkingState>
-   {
-      public static final boolean DEBUG = false;
-      
+   {      
       private final RobotSide transferToSide;
       private final FramePoint2d desiredICPLocal = new FramePoint2d();
       private final FrameVector2d desiredICPVelocityLocal = new FrameVector2d();
@@ -808,7 +806,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          boolean isInDoubleSupport = supportLeg.getEnumValue() == null;
          if (isInDoubleSupport && !upcomingFootstepList.hasNextFootsteps() && !upcomingFootstepList.isPaused())
          {
-            PrintTools.debug(this, "WALKING COMPLETE");
+            PrintTools.debug(DEBUG, this, "WALKING COMPLETE");
             upcomingFootstepList.notifyWalkingComplete();
          }
          
