@@ -8,15 +8,17 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TrajectoryBasedNumericalInverseKinematicsCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
-import us.ihmc.utilities.screwTheory.SpatialAccelerationVector;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -26,7 +28,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
-public class InverseKinematicsTaskspaceHandPositionControlState extends TaskspaceHandPositionControlState
+public class InverseKinematicsTaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {
    private final boolean lowLevelVersion;
 
@@ -43,12 +45,18 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    private final HashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations = new HashMap<OneDoFJoint, RateLimitedYoVariable>();
    private final DoubleYoVariable maxAccelerationArmJointspace;
 
+   private final DoubleYoVariable doneTrajectoryTime;
+   private final DoubleYoVariable holdPositionDuration;
+
+   private ReferenceFrame trackingFrame;
+   private PoseTrajectoryGenerator poseTrajectoryGenerator;
+
    public InverseKinematicsTaskspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide,
          MomentumBasedController momentumBasedController, int jacobianId, RigidBody base, RigidBody endEffector, YoGraphicsListRegistry yoGraphicsListRegistry,
          ArmControllerParameters armControllerParameters, ControlStatusProducer controlStatusProducer, YoPIDGains gains, double controlDT,
          YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, yoGraphicsListRegistry, parentRegistry);
+      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
       this.controlStatusProducer = controlStatusProducer;
       this.robotSide = robotSide;
       inverseKinematicsCalculator = new TrajectoryBasedNumericalInverseKinematicsCalculator(namePrefix, base, endEffector, controlDT, momentumBasedController.getTwistCalculator(),
@@ -76,22 +84,21 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
       this.controlDT = controlDT;
       maxAccelerationArmJointspace = gains.getYoMaximumAcceleration();
 
-   }
 
-   @Override
-   protected SpatialAccelerationVector computeDesiredSpatialAcceleration()
-   {
-      throw new RuntimeException("Not controlling task space");
+      doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
+      holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
    }
 
    @Override
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-//      if (getPreviousState() == this || getPreviousState() instanceof JointSpaceHandControlState)
-//         inverseKinematicsCalculator.initializeFromDesiredJointAngles();
-//      else
-         inverseKinematicsCalculator.initialize();
+      poseTrajectoryGenerator.showVisualization();
+      poseTrajectoryGenerator.initialize();
+      doneTrajectoryTime.set(Double.NaN);
+
+      inverseKinematicsCalculator.setTrajectory(poseTrajectoryGenerator, poseTrajectoryGenerator, trackingFrame);
+      inverseKinematicsCalculator.initialize();
       inverseKinematicsSolutionIsValid.set(true);
       if (lowLevelVersion)
       {
@@ -102,6 +109,7 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    @Override
    public void doTransitionOutOfAction()
    {
+      super.doTransitionOutOfAction();
       if (lowLevelVersion)
       {
          disableLowLevelPositionControl();
@@ -133,6 +141,9 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
    @Override
    public void doAction()
    {
+      if (poseTrajectoryGenerator.isDone())
+         recordDoneTrajectoryTime();
+
       if (inverseKinematicsSolutionIsValid.getBooleanValue())
       {
          inverseKinematicsSolutionIsValid.set(inverseKinematicsCalculator.compute(getTimeInCurrentState()));
@@ -175,17 +186,57 @@ public class InverseKinematicsTaskspaceHandPositionControlState extends Taskspac
       }
    }
 
-   @Override
-   public boolean isDone()
+   private void recordDoneTrajectoryTime()
    {
-      return super.isDone() || !inverseKinematicsSolutionIsValid.getBooleanValue();
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
+      {
+         doneTrajectoryTime.set(getTimeInCurrentState());
+      }
    }
 
    @Override
-   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator,
-         RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+   public boolean isDone()
    {
-      super.setTrajectory(poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule);
-      inverseKinematicsCalculator.setTrajectory(poseTrajectoryGenerator, poseTrajectoryGenerator, rigidBodySpatialAccelerationControlModule.getTrackingFrame());
+      if (Double.isNaN(doneTrajectoryTime.getDoubleValue()))
+         return false;
+      
+      boolean isTrajectoryDone =  getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
+   
+      return isTrajectoryDone || !inverseKinematicsSolutionIsValid.getBooleanValue();
+   }
+
+   @Override
+   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
+   {
+      this.poseTrajectoryGenerator = poseTrajectoryGenerator;
+   }
+
+   @Override
+   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
+   {
+      trackingFrame = handRigidBodySpatialAccelerationControlModule.getTrackingFrame();
+   }
+
+   @Override
+   public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
+   {
+   }
+
+   @Override
+   public void setHoldPositionDuration(double holdPositionDuration)
+   {
+     this.holdPositionDuration.set(holdPositionDuration);
+   }
+
+   @Override
+   public FramePose getDesiredPose()
+   {
+      return inverseKinematicsCalculator.getDesiredPose();
+   }
+
+   @Override
+   public ReferenceFrame getReferenceFrame()
+   {
+      return inverseKinematicsCalculator.getReferenceFrame();
    }
 }

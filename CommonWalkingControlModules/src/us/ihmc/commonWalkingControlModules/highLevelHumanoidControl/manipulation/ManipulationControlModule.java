@@ -276,8 +276,6 @@ public class ManipulationControlModule
       handControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), trajectoryTime);
    }
    
-   private final Map<OneDoFJoint, Double> temporaryDesiredAngles = new HashMap<OneDoFJoint, Double>();
-   
    public void initializeDesiredToCurrent()
    {  
       hasBeenInitialized.set(true);

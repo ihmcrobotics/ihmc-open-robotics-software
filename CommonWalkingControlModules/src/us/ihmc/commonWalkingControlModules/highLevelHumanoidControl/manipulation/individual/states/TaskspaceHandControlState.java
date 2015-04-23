@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceConstraintData;
 import us.ihmc.utilities.FormattingTools;
@@ -61,15 +63,15 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
       return endEffector;
    }
 
-   @Override
-   public void doAction()
+   protected void submitDesiredAcceleration(SpatialAccelerationVector handAcceleration)
    {
-      SpatialAccelerationVector handAcceleration = computeDesiredSpatialAcceleration();
       taskspaceConstraintData.set(handAcceleration);
       momentumBasedController.setDesiredSpatialAcceleration(jacobianId, taskspaceConstraintData);
    }
 
-   protected abstract SpatialAccelerationVector computeDesiredSpatialAcceleration();
+   public abstract void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule);
+
+   public abstract void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator);
 
    @Override
    public void doTransitionIntoAction()

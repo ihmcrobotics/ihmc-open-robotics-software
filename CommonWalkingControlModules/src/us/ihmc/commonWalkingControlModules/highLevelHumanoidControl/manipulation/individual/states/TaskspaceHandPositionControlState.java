@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -26,7 +27,7 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
  * @author twan
  *         Date: 5/9/13
  */
-public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
+public class TaskspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
 {
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected final SpatialAccelerationVector handAcceleration = new SpatialAccelerationVector();
@@ -73,8 +74,12 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
    }
 
-   protected SpatialAccelerationVector computeDesiredSpatialAcceleration()
+   @Override
+   public void doAction()
    {
+      if (poseTrajectoryGenerator.isDone())
+         recordDoneTrajectoryTime();
+
       poseTrajectoryGenerator.compute(getTimeInCurrentState());
 
       poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
@@ -91,7 +96,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
 
       updateVisualizers();
 
-      return handAcceleration;
+      submitDesiredAcceleration(handAcceleration);
    }
 
    @Override
@@ -115,15 +120,6 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
          return false;
       
       return getTimeInCurrentState() > doneTrajectoryTime.getDoubleValue() + holdPositionDuration.getDoubleValue();
-   }
-   
-   @Override
-   public void doAction()
-   {
-      if (poseTrajectoryGenerator.isDone())
-         recordDoneTrajectoryTime();
-
-      super.doAction();
    }
    
    private void recordDoneTrajectoryTime()
@@ -150,19 +146,31 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
          poseTrajectoryGenerator.hideVisualization();
    }
 
+   @Override
    public void setHoldPositionDuration(double time)
    {
       holdPositionDuration.set(time);
    }
 
-   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator,
-         RigidBodySpatialAccelerationControlModule rigidBodySpatialAccelerationControlModule)
+   @Override
+   public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
    {
+      taskspaceConstraintData.set(getBase(), getEndEffector());
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
-      this.taskspaceConstraintData.set(getBase(), getEndEffector());
-      this.handSpatialAccelerationControlModule = rigidBodySpatialAccelerationControlModule;
    }
 
+   @Override
+   public void setControlModuleForForceControl(RigidBodySpatialAccelerationControlModule handRigidBodySpatialAccelerationControlModule)
+   {
+      handSpatialAccelerationControlModule = handRigidBodySpatialAccelerationControlModule;
+   }
+
+   @Override
+   public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
+   {
+   }
+
+   @Override
    public ReferenceFrame getReferenceFrame()
    {
       // FIXME: hack
@@ -172,6 +180,7 @@ public class TaskspaceHandPositionControlState extends TaskspaceHandControlState
       return point.getReferenceFrame();
    }
 
+   @Override
    public FramePose getDesiredPose()
    {
       poseTrajectoryGenerator.get(desiredPosition);
