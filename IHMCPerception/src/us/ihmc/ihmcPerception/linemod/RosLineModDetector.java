@@ -8,7 +8,6 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
 public class RosLineModDetector extends LineModDetector
 {
@@ -21,7 +20,7 @@ public class RosLineModDetector extends LineModDetector
       setupRosSubscriber();
    }
 
-   private void onNewPointcloud(UnpackedPointCloud unpackedPointCloud)
+   private void onNewPointcloud(RosPointCloudSubscriber.UnpackedPointCloud unpackedPointCloud)
    {
       OrganizedPointCloud organizedPointCloud = new OrganizedPointCloud(unpackedPointCloud.getWidth(), unpackedPointCloud.getHeight(),unpackedPointCloud.getXYZRGB());
       ArrayList<LineModDetection> detections=new ArrayList<>();
@@ -48,8 +47,10 @@ public class RosLineModDetector extends LineModDetector
          {
             try
             {
-               URI rosMasterUri = new URI("http://localhost:11311/");
-               String topic = "/cloud_pcd";
+//               URI rosMasterUri = new URI("http://localhost:11311/");
+//               String topic = "/cloud_pcd";
+               URI rosMasterUri = new URI("http://cpu0:11311/");
+               String topic = "/multisense/organized_image_points2_color";
                RosMainNode mainNode = new RosMainNode(rosMasterUri, "linemod");
                mainNode.attachSubscriber(topic, rosPointCloudSubscriber);
                mainNode.execute();
