@@ -212,6 +212,11 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          confidenceFactor.set(confidence);
          addNewExternalPose(timeStampedExternalPose);
       }
+      else
+      {
+         System.err.println("Error in NewPelvisPoseHistoryCorrection: pelvisPoseBuffer is out of range.");
+         System.err.println("consider increasing the size of the buffer");
+      }
    }
 
    private void addNewExternalPose(TimeStampedTransform3D timeStampedExternalPose)
