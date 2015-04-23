@@ -48,7 +48,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.commons.lang.WordUtils;
-
 import us.ihmc.atlas.AtlasObstacleCourseDemo;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
@@ -1167,8 +1166,8 @@ public class DRCDashboard
    {
       sshSimLauncher.killSim(gazeboMachine);
       userOwnedSim = null;
-      uiSpawner.killAll();
-      scsSpawner.killAll();
+      uiSpawner.shutdown();
+      scsSpawner.shutdown();
 
       launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(startSimIcon);
       launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
