@@ -148,6 +148,8 @@ public class DiagnosticsWhenHangingHelper
       return appliedTorque;
    }
    
+   private final FrameVector jointAxisInWorld = new FrameVector();
+   private final FrameVector jointToCenterOfMassInWorld = new FrameVector(jointToCenterOfMass);
    public void update()
    {
       centerOfMassCalculator.getDesiredFrame().update();
@@ -159,14 +161,14 @@ public class DiagnosticsWhenHangingHelper
       jointAxis.setIncludingFrame(parentJoint.getJointAxis());
       jointAxis.changeFrame(parentJoint.getFrameAfterJoint());
       
-      FrameVector jointAxisInWorld = new FrameVector(jointAxis);
+      jointAxisInWorld.setIncludingFrame(jointAxis);
       jointAxisInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       yoJointAxis.set(jointAxisInWorld);
       
       centerOfMassPosition.changeFrame(jointAxis.getReferenceFrame());
       jointToCenterOfMass.setIncludingFrame(centerOfMassPosition);
       
-      FrameVector jointToCenterOfMassInWorld = new FrameVector(jointToCenterOfMass);
+      jointToCenterOfMassInWorld.setIncludingFrame(jointToCenterOfMass);
       jointToCenterOfMassInWorld.changeFrame(ReferenceFrame.getWorldFrame());
       yoJointToCenterOfMass.set(jointToCenterOfMassInWorld);
       

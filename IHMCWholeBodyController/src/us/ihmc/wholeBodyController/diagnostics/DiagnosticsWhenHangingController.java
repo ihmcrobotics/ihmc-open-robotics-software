@@ -116,8 +116,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       this.fullRobotModel = momentumBasedController.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
+         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
          DoubleYoVariable initialPosition = new DoubleYoVariable(oneDoFJoint.getName() + "InitialPosition", registry);
          DoubleYoVariable finalPosition = new DoubleYoVariable(oneDoFJoint.getName() + "FinalPosition", registry);
          initialPosition.set(oneDoFJoint.getQ());
@@ -133,10 +134,10 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
       copyFinalDesiredPositionsToInitialDesired();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         PDController controller = new PDController(oneDoFJoint.getName(), registry);
-         pdControllers.put(oneDoFJoint, controller);
+         PDController controller = new PDController(oneDoFJoints.get(i).getName(), registry);
+         pdControllers.put(oneDoFJoints.get(i), controller);
       }
 
       setPDControllerGains();
@@ -292,9 +293,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    public void updateDiagnosticsWhenHangingHelpers()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoint);
+         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoints.get(i));
          if (diagnosticsWhenHangingHelper != null)
             diagnosticsWhenHangingHelper.update();
       }
@@ -302,9 +303,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    public void addOffsetTorquesToAppliedTorques()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoint);
+         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoints.get(i));
          if (diagnosticsWhenHangingHelper != null)
             diagnosticsWhenHangingHelper.addOffsetToEstimatedTorque();
       }
@@ -348,9 +349,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private void updatePDControllers()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         updatePDController(oneDoFJoint, stateMachine.timeInCurrentState());
+         updatePDController(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
       }
    }
    
@@ -409,9 +410,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          if (startDiagnostics.getBooleanValue())
             this.transitionToDefaultNextState();
 
-         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            updateTrajectory(oneDoFJoint, stateMachine.timeInCurrentState());
+            updateTrajectory(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
          }
       }
 
@@ -440,9 +441,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       @Override
       public void doAction()
       {
-         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            updateTrajectory(oneDoFJoint, stateMachine.timeInCurrentState());
+            updateTrajectory(oneDoFJoints.get(i), stateMachine.timeInCurrentState());
          }
 
          if (pauseDiagnostics.getBooleanValue())
@@ -453,9 +454,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
       private boolean splinesAreFinished(double timeInCurrentState)
       {
-         for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+         for (int i = 0; i < oneDoFJoints.size(); i++)
          {
-            YoMinimumJerkTrajectory spline = transitionSplines.get(oneDoFJoint);
+            YoMinimumJerkTrajectory spline = transitionSplines.get(oneDoFJoints.get(i));
             if (timeInCurrentState < spline.getFinalTime())
                return false;
          }
@@ -575,8 +576,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private void createTransitionSplines()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
+         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
          YoMinimumJerkTrajectory spline = new YoMinimumJerkTrajectory(oneDoFJoint.getName() + "TransitionSpline", registry);
          transitionSplines.put(oneDoFJoint, spline);
 
@@ -592,8 +594,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private void setTransitionSplines()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
+         OneDoFJoint oneDoFJoint = oneDoFJoints.get(i);
          YoMinimumJerkTrajectory spline = transitionSplines.get(oneDoFJoint);
          double initialPosition = initialPositions.get(oneDoFJoint).getDoubleValue();
          double finalPositon = finalPositions.get(oneDoFJoint).getDoubleValue();
@@ -603,19 +606,19 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private void copyFinalDesiredPositionsToInitialDesired()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         DoubleYoVariable initialPosition = initialPositions.get(oneDoFJoint);
-         DoubleYoVariable finalPosition = finalPositions.get(oneDoFJoint);
+         DoubleYoVariable initialPosition = initialPositions.get(oneDoFJoints.get(i));
+         DoubleYoVariable finalPosition = finalPositions.get(oneDoFJoints.get(i));
          initialPosition.set(finalPosition.getDoubleValue());
       }
    }
 
    private void zeroAllTorques()
    {
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         oneDoFJoint.setTau(0);
+         oneDoFJoints.get(i).setTau(0);
       }
    }
 
@@ -637,7 +640,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       SideDependentList<InverseDynamicsJoint> topLegJoints = new SideDependentList<InverseDynamicsJoint>();
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
       }
@@ -724,9 +727,9 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
       ArrayList<DoubleYoVariable> torqueOffsetVariables = new ArrayList<DoubleYoVariable>();
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoint);
+         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoints.get(i));
          if (diagnosticsWhenHangingHelper != null)
          {
             DoubleYoVariable torqueOffsetVariable = diagnosticsWhenHangingHelper.getTorqueOffsetVariable();
@@ -752,7 +755,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    {
       if (useArms)
       {
-         for (RobotSide robotSide : RobotSide.values())
+         for (RobotSide robotSide : RobotSide.values)
          {
             pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setProportionalGain(20.0);
             pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setDerivativeGain(4.0);
@@ -777,7 +780,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setProportionalGain(150.0);
       pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setDerivativeGain(8.0);
 
-      for (RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values)
       {
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setProportionalGain(30.0);
          pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setDerivativeGain(2.0);
@@ -839,14 +842,14 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       if (outputWriterWithTorqueOffsets == null)
          return;
 
-      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      for (int i = 0; i < oneDoFJoints.size(); i++)
       {
-         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoint);
+         DiagnosticsWhenHangingHelper diagnosticsWhenHangingHelper = helpers.get(oneDoFJoints.get(i));
 
          if (diagnosticsWhenHangingHelper != null)
          {
             double torqueOffset = diagnosticsWhenHangingHelper.getTorqueOffset();
-            outputWriterWithTorqueOffsets.subtractTorqueOffset(oneDoFJoint, torqueOffset);
+            outputWriterWithTorqueOffsets.subtractTorqueOffset(oneDoFJoints.get(i), torqueOffset);
 
             diagnosticsWhenHangingHelper.setTorqueOffset(0.0);
          }
