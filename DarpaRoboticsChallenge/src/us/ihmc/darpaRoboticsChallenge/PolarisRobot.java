@@ -1,5 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge;
 
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -8,38 +12,50 @@ import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 /**
  * This is a non-contactable Polaris model only for visualizing in SCS
  */
 
 public class PolarisRobot extends Robot
 {
-   private final String modelFile = "models/polarisModel.obj";
+   private final static String polarisModelFile = "models/polarisModel.obj";
+   private final static String checkerBoardModelFile = "models/GFE/ihmc/calibration_cube.dae";
+   
    private final FloatingJoint floatingJoint;
-   private final Link link;
-   private final Graphics3DObject linkGraphics;
+   private final Link polarisLink;
+   private final Graphics3DObject polarisLinkGraphics;
 
    public PolarisRobot(String name, RigidBodyTransform rootJointTransform)
    {
       super(name);
 
-      link = new Link(name + "Link");
-      linkGraphics = new Graphics3DObject();
-      linkGraphics.addModelFile(modelFile);
-      link.setLinkGraphics(linkGraphics);
+      polarisLink = new Link(name + "Link");
+      polarisLinkGraphics = new Graphics3DObject();
+      polarisLinkGraphics.addModelFile(polarisModelFile);
+      polarisLink.setLinkGraphics(polarisLinkGraphics);
 
-      link.setMass(1.0);
-      link.setComOffset(new Vector3d());
+      polarisLink.setMass(1.0);
+      polarisLink.setComOffset(new Vector3d());
       Matrix3d inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
-      link.setMomentOfInertia(inertia);
+      polarisLink.setMomentOfInertia(inertia);
 
       floatingJoint = new FloatingJoint(name + "Base", name, new Vector3d(), this);
       floatingJoint.setRotationAndTranslation(rootJointTransform);
-      floatingJoint.setLink(link);
+      floatingJoint.setLink(polarisLink);
       floatingJoint.setDynamic(false);
+      
+      Link checkerBoardLink = new Link(name + "CheckerBoardLink");
+      Graphics3DObject checkerBoardGraphics = new Graphics3DObject();
+      checkerBoardGraphics.scale(new Vector3d(3.0, 3.0, 0.1));
+      checkerBoardGraphics.addModelFile(checkerBoardModelFile);
+      checkerBoardLink.setLinkGraphics(checkerBoardGraphics);
+      
+      FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", new Vector3d(), this);
+      checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, 0.0, 1.2)));
+      checkerBoardJoint.setLink(checkerBoardLink);
+      checkerBoardJoint.setDynamic(false);
+      floatingJoint.addJoint(checkerBoardJoint);
+      
       this.addRootJoint(floatingJoint);
    }
 }
