@@ -126,14 +126,14 @@ public class AtlasNoSimPacketBlaster implements Runnable
 
       for (int sensorNumber = 0; sensorNumber < forceSensorDefinitions.length; sensorNumber++)
       {
-         robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber].set(new DenseMatrix64F(Wrench.SIZE, 1));
+//         robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber].set(new DenseMatrix64F(Wrench.SIZE, 1));
          for (int i = 0; i < 3; i++)
          {
-            robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber].set(i, 0, -momentFixedPointMax + 2.0 * random.nextDouble() * momentFixedPointMax);
+            robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber][i] = (float) (-momentFixedPointMax + 2.0 * random.nextDouble() * momentFixedPointMax);
          }
          for (int i = 3; i < 6; i++)
          {
-            robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber].set(i, 0, -forceFixedPointMax + 2.0 * random.nextDouble() * forceFixedPointMax);
+            robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber][i] = (float) (-forceFixedPointMax + 2.0 * random.nextDouble() * forceFixedPointMax);
          }
       }
       

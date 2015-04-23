@@ -12,7 +12,7 @@ public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.Wrench>
       super(geometry_msgs.Wrench._TYPE,latched);
    }
 
-   public void publish(long timeStamp, DenseMatrix64F footSensorWrench)
+   public void publish(long timeStamp, float[] footSensorWrench)
    {
       /* FROM AtlasSensorReader
       temporaryWrench.set(0, wrist_sensor.getM().getX() - offset.get(0));
@@ -27,13 +27,13 @@ public class RosWrenchPublisher extends RosTopicPublisher<geometry_msgs.Wrench>
       Vector3  force = newMessageFromType(Vector3._TYPE);
       Vector3  torque = newMessageFromType(Vector3._TYPE);
       
-      torque.setX(footSensorWrench.get(0));
-      torque.setY(footSensorWrench.get(1));
-      torque.setZ(footSensorWrench.get(2));
+      torque.setX(footSensorWrench[0]);
+      torque.setY(footSensorWrench[1]);
+      torque.setZ(footSensorWrench[2]);
       
-      force.setX(footSensorWrench.get(3));
-      force.setY(footSensorWrench.get(4));
-      force.setZ(footSensorWrench.get(5));
+      force.setX(footSensorWrench[3]);
+      force.setY(footSensorWrench[4]);
+      force.setZ(footSensorWrench[5]);
       
       message.setTorque(torque);
       message.setForce(force);
