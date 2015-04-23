@@ -1,11 +1,10 @@
 package us.ihmc.atlas.processManagement;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
+import com.martiansoftware.jsap.Switch;
 import us.ihmc.atlas.AtlasNetworkProcessor;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.communication.net.tcpServer.DisconnectedException;
@@ -15,11 +14,11 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runnable
 {
@@ -170,7 +169,7 @@ public class DRCNetworkProcessorEnterpriseCloudDispatcherBackend implements Runn
 
    private void killNetworkProcessor()
    {
-      networkProcessorSpawner.killAll();
+      networkProcessorSpawner.shutdown();
 
       try
       {
