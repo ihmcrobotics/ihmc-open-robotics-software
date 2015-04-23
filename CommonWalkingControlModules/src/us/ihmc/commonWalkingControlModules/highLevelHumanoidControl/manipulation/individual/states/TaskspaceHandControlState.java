@@ -22,7 +22,6 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
    protected final TaskspaceConstraintData taskspaceConstraintData = new TaskspaceConstraintData();
    protected final MomentumBasedController momentumBasedController;
 
-
    public TaskspaceHandControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController, int jacobianId,
                                     RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
