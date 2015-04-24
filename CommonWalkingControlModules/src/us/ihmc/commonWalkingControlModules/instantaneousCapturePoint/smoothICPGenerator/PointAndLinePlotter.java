@@ -13,6 +13,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.plotting.Artifact;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.plotting.SimulationOverheadPlotter;
 import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -72,7 +73,8 @@ public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
       JScrollPane scrollPane = new JScrollPane(plotterKeyJPanel);
       scs.addExtraJpanel(scrollPane, "Plotter Legend");
 
-      scs.getStandardSimulationGUI().selectPanel(plotterName);
+      StandardSimulationGUI standardSimulationGUI = scs.getStandardSimulationGUI();
+      if (standardSimulationGUI != null) standardSimulationGUI.selectPanel(plotterName);
    }
 
 
