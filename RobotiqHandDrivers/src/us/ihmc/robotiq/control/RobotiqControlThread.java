@@ -194,6 +194,18 @@ class RobotiqControlThread extends HandControlThread
                case HALF_CLOSE:
                   robotiqHand.close(0.15);
                   break;
+               case CLOSE_FINGERS:
+                  //TODO
+                  break;
+               case CLOSE_THUMB:
+                  //TODO
+                  break;
+               case OPEN_FINGERS:
+                  //TODO
+                  break;
+               case OPEN_THUMB:
+                  //TODO
+                  break;
                case RESET:
                {
                   robotiqHand.reset();
