@@ -6,6 +6,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
+import us.ihmc.steppr.hardware.configuration.StepprCalibrationOffset;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -135,9 +136,9 @@ public class StepprUpperBodyOffsetCalculator
 
    public void updateOffsets()
    {
-      torsoX.updateCanonicalAngle(q_calc_torso_x.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
-      torsoY.updateCanonicalAngle(q_calc_torso_y.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
-      torsoZ.updateCanonicalAngle(q_calc_torso_z.getDoubleValue() * 120.0, 2.0 * Math.PI / 120.0);
+      torsoX.updateCanonicalAngle(q_calc_torso_x.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_X_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI / 120.0);
+      torsoY.updateCanonicalAngle(q_calc_torso_y.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_Y_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI / 120.0);
+      torsoZ.updateCanonicalAngle(q_calc_torso_z.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_Z_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI / 120.0);
    }
 
    private void read()

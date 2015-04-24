@@ -70,6 +70,8 @@ public class WandererSensorReaderFactory implements SensorReaderFactory
       EnumMap<WandererJoint, OneDoFJoint> wandererJoints = WandererUtil.createJointMap(jointList);
       sensorReader = new AcsellSensorReader<WandererJoint>(state, WandererJoint.values, wandererJoints, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
             stateEstimatorParameters, sensorReaderRegistry);
+      
+      parentRegistry.addChild(sensorReaderRegistry);
 
    }
 

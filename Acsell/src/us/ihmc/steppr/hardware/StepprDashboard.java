@@ -180,8 +180,15 @@ public class StepprDashboard extends JPanel implements PlaybackListener
             }
          }
       };
-      leftFootForce.addVariableChangedListener(robotOnGroundChecker);
-      rightFootForce.addVariableChangedListener(robotOnGroundChecker);
+      try
+      {
+      	leftFootForce.addVariableChangedListener(robotOnGroundChecker);
+      	rightFootForce.addVariableChangedListener(robotOnGroundChecker);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       add(initializationPanel);
       
@@ -238,7 +245,6 @@ public class StepprDashboard extends JPanel implements PlaybackListener
       int row = 0, col = 0;
       for (StepprActuator actuator : StepprActuator.values)
       {
-         YoVariable<?> nudgeVariable = yoVariableHolder.getVariable("StepprSetup", actuator.getName() + "Nudge");
          motorEncoders.put(actuator, yoVariableHolder.getVariable(actuator.getName(), actuator.getName() + "MotorEncoderPosition"));
          motorTemperatures.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MotorTemperature"));
          mcbTemperatures1.put(actuator, yoVariableHolder.getVariable(actuator.getName() + ".SlowSensors", actuator.getName() + "MCBTemperature1"));
