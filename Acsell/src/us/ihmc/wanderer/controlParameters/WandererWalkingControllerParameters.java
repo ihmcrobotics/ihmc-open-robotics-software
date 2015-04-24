@@ -163,28 +163,28 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
 //      return defaultChestOrientationControlJointNames;
    }
 
-   private final double minimumHeightAboveGround = 0.595;
-   private double nominalHeightAboveGround = 0.670 + 0.020;//+0.010;//+0.020;
-   private final double maximumHeightAboveGround = 0.79;//Hip height fully upright//0.735;
+   private final double minimumHeightAboveGround = 0.695;
+   private double nominalHeightAboveGround = 0.770 + 0.020;//+0.010;//+0.020;
+   private final double maximumHeightAboveGround = 0.89;//Hip height fully upright//0.735;
    //private final double additionalOffsetHeightWanderer = 0.15;
-   private final double additionalOffsetHeightWanderer = 0.16; //Spring Ankle
+
 
    @Override
    public double minimumHeightAboveAnkle()
    {
-      return minimumHeightAboveGround + additionalOffsetHeightWanderer;
+      return minimumHeightAboveGround;
    }
 
    @Override
    public double nominalHeightAboveAnkle()
    {
-      return nominalHeightAboveGround + additionalOffsetHeightWanderer;
+      return nominalHeightAboveGround;
    }
 
    @Override
    public double maximumHeightAboveAnkle()
    {
-      return maximumHeightAboveGround + additionalOffsetHeightWanderer;
+      return maximumHeightAboveGround;
    }
 
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
