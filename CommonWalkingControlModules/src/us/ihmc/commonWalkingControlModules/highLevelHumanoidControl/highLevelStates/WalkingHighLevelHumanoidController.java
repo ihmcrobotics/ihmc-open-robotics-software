@@ -378,7 +378,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       // Just to allocate memory
       safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-      supportPolygonSafeMargin.set(0.015);
+      supportPolygonSafeMargin.set(0.04);
    }
 
    private void setupStateMachine()

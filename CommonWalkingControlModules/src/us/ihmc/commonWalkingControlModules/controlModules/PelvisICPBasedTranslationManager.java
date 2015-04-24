@@ -105,7 +105,7 @@ public class PelvisICPBasedTranslationManager
 
       proportionalGain.set(0.5);
       integralGain.set(1.5);
-      maximumIntegralError.set(0.15);
+      maximumIntegralError.set(0.08);
 
       manualMode.addVariableChangedListener(new VariableChangedListener()
       {
