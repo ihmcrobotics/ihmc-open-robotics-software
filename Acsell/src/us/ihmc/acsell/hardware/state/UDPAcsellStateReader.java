@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.state;
+package us.ihmc.acsell.hardware.state;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -18,15 +18,15 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
-public class UDPStepprStateReader
+public class UDPAcsellStateReader
 {
-   private final StepprState state;
+   private final AcsellState<?,?> state;
 
    private DatagramChannel receiveChannel;
    private MembershipKey receiveKey;
    private final ByteBuffer receiveBuffer = ByteBuffer.allocate(65535);
 
-   public UDPStepprStateReader(StepprState state)
+   public UDPAcsellStateReader(AcsellState<?,?> state)
    {
       this.state = state;
       receiveBuffer.order(ByteOrder.LITTLE_ENDIAN);

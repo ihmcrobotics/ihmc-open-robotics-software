@@ -2,7 +2,6 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
-import us.ihmc.acsell.fourbar.StepprFourbarProperties;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
 import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
@@ -11,6 +10,7 @@ import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
+import us.ihmc.steppr.hardware.configuration.StepprFourbarProperties;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;

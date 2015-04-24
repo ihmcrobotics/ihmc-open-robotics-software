@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.sensorReader;
+package us.ihmc.acsell.hardware.sensorReader;
 
 import java.io.IOException;
 import java.util.EnumMap;
@@ -7,8 +7,11 @@ import java.util.List;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
+import us.ihmc.acsell.hardware.state.AcsellState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
+import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -19,10 +22,6 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.steppr.hardware.StepprUtil;
-import us.ihmc.steppr.hardware.state.StepprState;
-import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -32,16 +31,17 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
-public class StepprSensorReader implements SensorReader
+public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> implements SensorReader
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("StepprSensorReader");
 
-   private final StepprState state;
-   private final UDPStepprStateReader reader;
+   private final AcsellState<?,JOINT> state;
+   private final UDPAcsellStateReader reader;
 
    private final SensorProcessing sensorProcessing;
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
-   private final EnumMap<StepprJoint, OneDoFJoint> stepprJoints;
+   
+   private final JOINT[] jointNames;
+   private final EnumMap<JOINT, OneDoFJoint> acsellJoints;
 
    private final SideDependentList<ForceSensorDefinition> forceSensorDefinitions = new SideDependentList<>();
    private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
@@ -52,22 +52,22 @@ public class StepprSensorReader implements SensorReader
    private final Vector3d angularVelocity = new Vector3d();
    private final Vector3d linearAcceleration = new Vector3d();
 
-   private final LongYoVariable corruptedPackets = new LongYoVariable("corruptedPackets", registry);
+   private final LongYoVariable corruptedPackets;
 
-   public StepprSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+   public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DRCRobotSensorInformation sensorInformation,
-         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry parentRegistry)
+         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry sensorReaderRegistry)
    {
-      state = new StepprState(stateEstimatorParameters.getEstimatorDT(), registry);
-      reader = new UDPStepprStateReader(state);
+      this.state = state;
+      reader = new UDPAcsellStateReader(state);
 
-      sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
+      sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, sensorReaderRegistry);
 
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
       this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
 
-      List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
-      stepprJoints = StepprUtil.createJointMap(jointList);
+      this.jointNames = jointNames;
+      this.acsellJoints = acsellJoints;
 
       List<IMUDefinition> imuList = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
       IMUDefinition pelvisIMU = null;
@@ -92,8 +92,8 @@ public class StepprSensorReader implements SensorReader
 
          }
       }
-
-      parentRegistry.addChild(registry);
+      
+      this.corruptedPackets = new LongYoVariable("corruptedPackets", sensorReaderRegistry);
    }
 
    @Override
@@ -103,10 +103,10 @@ public class StepprSensorReader implements SensorReader
       try
       {
          timestamp = reader.receive();
-         for (StepprJoint jointId : StepprJoint.values)
+         for (JOINT jointId : jointNames)
          {
             AcsellJointState jointState = state.getJointState(jointId);
-            OneDoFJoint joint = stepprJoints.get(jointId);
+            OneDoFJoint joint = acsellJoints.get(jointId);
 
             RawJointSensorDataHolder rawJoint = rawJointSensorDataHolderMap.get(joint);
 

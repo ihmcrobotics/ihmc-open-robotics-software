@@ -31,10 +31,10 @@ public enum WandererJoint implements AcsellJoint
    RIGHT_HIP_Y("r_leg_lhy", 10, true, new StrainGaugeInformation(WandererActuator.RIGHT_KNEE, 1, -112.45, 2.5), WandererActuator.RIGHT_HIP_Y),
 
    RIGHT_KNEE_Y("r_leg_kny", 6 * 1.3333333333, true, new StrainGaugeInformation(WandererActuator.RIGHT_KNEE, 0, -78.5 * 1.3333, 2.5),
-         WandererActuator.RIGHT_KNEE, WandererActuator.RIGHT_ANKLE_RIGHT),
+         WandererActuator.RIGHT_KNEE),
 
    RIGHT_ANKLE_Y("r_leg_uay", 6, true, new StrainGaugeInformation(WandererActuator.RIGHT_ANKLE_RIGHT, 2, -219.4 * .12 / 6, 3.53),
-         WandererActuator.RIGHT_ANKLE_RIGHT, WandererActuator.RIGHT_ANKLE_LEFT),
+         WandererActuator.RIGHT_ANKLE_RIGHT),
 
    RIGHT_ANKLE_X("r_leg_lax", RIGHT_ANKLE_Y.getRatio(), true, new StrainGaugeInformation(WandererActuator.RIGHT_ANKLE_RIGHT, 1, -217.4 * .12 / 6, 4.03),
          RIGHT_ANKLE_Y.getActuators()),
@@ -70,6 +70,8 @@ public enum WandererJoint implements AcsellJoint
       this.hasOutputEncoder = hasOutputEncoder;
 
       this.strainGaugeInformation = strainGaugeInformation;
+
+      throw new RuntimeException("TODO: fix me for wanderer and remove this exception");
 
    }
 
