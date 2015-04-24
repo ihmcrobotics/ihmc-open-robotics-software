@@ -230,7 +230,10 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
       handTaskspaceToJointspaceCalculator.setFullyConstrained();
       handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
+      // TODO These need to be extracted
       handTaskspaceToJointspaceCalculator.setMaximumJointVelocities(5.0);
+      handTaskspaceToJointspaceCalculator.setMaximumJointAccelerations(50.0);
+      handTaskspaceToJointspaceCalculator.setMaximumTaskspaceVelocity(1.5, 0.5);
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
