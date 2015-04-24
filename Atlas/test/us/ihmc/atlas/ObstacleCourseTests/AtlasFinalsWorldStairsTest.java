@@ -1,7 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -12,17 +11,16 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.darpaRoboticsChallenge.*;
+import us.ihmc.darpaRoboticsChallenge.DRCSCStartingLocations;
+import us.ihmc.darpaRoboticsChallenge.DRCStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCFinalsEnvironment;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
@@ -33,11 +31,11 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
-import us.ihmc.utilities.math.geometry.*;
-import us.ihmc.utilities.math.trajectories.TrajectoryType;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.utilities.robotSide.SideDependentList;
 
 /**
  * Created by agrabertilton on 4/15/15.
@@ -74,7 +72,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 
-   @BambooAnnotations.EstimatedDuration(duration = 30.4)
+   @EstimatedDuration(duration = 30.4)
    @Test(timeout = 151825)
    public void testWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -122,7 +120,7 @@ public class AtlasFinalsWorldStairsTest
    }
 
 //   @Ignore
-   @BambooAnnotations.EstimatedDuration(duration = 30.4)
+   @EstimatedDuration(duration = 30.4)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
