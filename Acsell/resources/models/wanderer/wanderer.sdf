@@ -189,7 +189,7 @@
       </axis>
     </joint>
     <link name='utorso'>
-      <pose>-0.011968 0.0 0.215900 0.0</pose>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
       <inertial>
         <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
         <mass>19.086895</mass>
@@ -1074,7 +1074,7 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='l_arm_shy' type='revolute'>
+    <joint name='l_arm_shx' type='revolute'>
       <child>l_arm_lgh</child>
       <parent>l_arm_ugh</parent>
       <axis>
@@ -1375,7 +1375,7 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='r_arm_shy' type='revolute'>
+    <joint name='r_arm_shx' type='revolute'>
       <child>r_arm_lgh</child>
       <parent>r_arm_ugh</parent>
       <axis>
