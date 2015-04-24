@@ -71,8 +71,6 @@ public enum WandererJoint implements AcsellJoint
 
       this.strainGaugeInformation = strainGaugeInformation;
 
-      throw new RuntimeException("TODO: fix me for wanderer and remove this exception");
-
    }
 
    public String getSdfName()
