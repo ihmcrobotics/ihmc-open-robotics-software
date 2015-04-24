@@ -5,7 +5,7 @@
 	<param name="filter_padding" type="double" value="0.10" /> <!--cm-->
     	<param name="laser_scan_topic" type="string" value="/multisense/lidar_scan" />
     	<param name="fixed_frame" type="string" value="world" />
-		<param name="target_frame" type="string" value="head" />
+		<param name="target_frame" type="string" value="pelvis" /><!--was head frame-->
 		<param name="base_frame_id" type="string" value="/multisense/motor" />
     	<param name="rotating_frame_id" type="string" value="/multisense/hokuyo_link" />
     	<param name="limit_angle" type="double" value="3.14159265" />

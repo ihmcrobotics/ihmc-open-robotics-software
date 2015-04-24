@@ -1,7 +1,22 @@
 <launch>
+
+	<launch>
+    <node pkg="nodelet" type="nodelet" name="eth_pcl_manager" args="manager" output="screen" />
+    <node pkg="nodelet" type="nodelet" name="pelvis_to_world_z_clip_passthrough_z" args="load pcl/PassThrough pcl_manager" output="screen">
+    <remap from="~input" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud" />
+    <remap from="~output" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud_z_clipped" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: .inf 
+      filter_limit_max:  3.2
+      input_frame: pelvis
+      output_frame: head
+    </rosparam>
+ </node>
+     
 	<node name="mapper_humanoid" type="mapper_humanoid" pkg="ethzasl_icp_mapper_humanoid" output="screen">
 	    <remap from="/icp_correction" to="/ihmc_ros/localization/pelvis_pose_correction" />
-		<remap from="cloud_in" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud" />
+		<remap from="cloud_in" to="/lidar_to_point_cloud_transformer/assembled_lidar_point_cloud_z_clipped" />
 		<param name="subscribe_scan" value="false" />
 		<param name="icpConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/icp.yaml" />
 		<param name="inputFiltersConfig" value="$(find ethzasl_icp_mapper_humanoid)/parameters/standard/input_filters.yaml" />
