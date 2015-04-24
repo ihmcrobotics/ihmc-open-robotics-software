@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.sensorReader;
+package us.ihmc.wanderer.hardware.sensorReader;
 
 import java.io.IOException;
 import java.util.EnumMap;
@@ -12,9 +12,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.steppr.hardware.StepprUtil;
-import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -23,17 +20,20 @@ import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.wanderer.hardware.WandererJoint;
+import us.ihmc.wanderer.hardware.WandererUtil;
+import us.ihmc.wanderer.hardware.state.WandererState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
-public class StepprSensorReaderFactory implements SensorReaderFactory
+public class WandererSensorReaderFactory implements SensorReaderFactory
 {
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
-   private AcsellSensorReader<StepprJoint> sensorReader;
+   private AcsellSensorReader<WandererJoint> sensorReader;
 
    private final DRCRobotSensorInformation sensorInformation;
    private final StateEstimatorParameters stateEstimatorParameters;
    
-   public StepprSensorReaderFactory(DRCRobotModel robotModel)
+   public WandererSensorReaderFactory(DRCRobotModel robotModel)
    {
       sensorInformation = robotModel.getSensorInformation();
       stateEstimatorParameters = robotModel.getStateEstimatorParameters();
@@ -64,11 +64,11 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
          stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
       }
 
-      YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("StepprSensorReader");
-      StepprState state = new StepprState(stateEstimatorParameters.getEstimatorDT(), sensorReaderRegistry);
+      YoVariableRegistry sensorReaderRegistry = new YoVariableRegistry("WandererSensorReader");
+      WandererState state = new WandererState(stateEstimatorParameters.getEstimatorDT(), sensorReaderRegistry);
       List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
-      EnumMap<StepprJoint, OneDoFJoint> stepprJoints = StepprUtil.createJointMap(jointList);
-      sensorReader = new AcsellSensorReader<StepprJoint>(state, StepprJoint.values, stepprJoints, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
+      EnumMap<WandererJoint, OneDoFJoint> wandererJoints = WandererUtil.createJointMap(jointList);
+      sensorReader = new AcsellSensorReader<WandererJoint>(state, WandererJoint.values, wandererJoints, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
             stateEstimatorParameters, sensorReaderRegistry);
 
    }

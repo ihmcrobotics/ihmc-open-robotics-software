@@ -1,4 +1,7 @@
-package us.ihmc.acsell.fourbar;
+package us.ihmc.steppr.hardware.configuration;
+
+import us.ihmc.acsell.fourbar.FourbarLink;
+import us.ihmc.acsell.fourbar.FourbarProperties;
 
 public class StepprFourbarProperties implements FourbarProperties {
 

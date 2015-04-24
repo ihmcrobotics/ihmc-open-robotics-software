@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.controllers;
+package us.ihmc.wanderer.hardware.controllers;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -7,7 +7,6 @@ import javax.xml.bind.JAXBException;
 
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -32,13 +31,14 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.steppr.hardware.output.StepprOutputWriter;
-import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wanderer.hardware.output.WandererOutputWriter;
+import us.ihmc.wanderer.hardware.sensorReader.WandererSensorReaderFactory;
+import us.ihmc.wanderer.parameters.WandererRobotModel;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithAccelerationIntegration;
@@ -49,24 +49,24 @@ import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
 
 import com.martiansoftware.jsap.JSAPException;
 
-public class StepprControllerFactory
+public class WandererControllerFactory
 {
    private static final double gravity = -9.80; // From xsens
 
    //Use DATA_PRODUCER for ui control. Use VELOCITY_HEADING_COMPONENT for joystick control. Use YOVARIABLE for editing step variables by hand.
    private static final WalkingProvider walkingProvider = WalkingProvider.VELOCITY_HEADING_COMPONENT;
 
-   public StepprControllerFactory() throws IOException, JAXBException
+   public WandererControllerFactory() throws IOException, JAXBException
    {
 
       /*
        * Create registries
        */
-      AcsellAffinity stepprAffinity = new AcsellAffinity();
+      AcsellAffinity wandererAffinity = new AcsellAffinity();
       PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
       PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
       PriorityParameters loggerPriority = new PriorityParameters(45);
-      BonoRobotModel robotModel = new BonoRobotModel(true, true);
+      WandererRobotModel robotModel = new WandererRobotModel(true, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
       /*
@@ -87,27 +87,27 @@ public class StepprControllerFactory
        * Create sensors
        */
 
-      StepprSensorReaderFactory sensorReaderFactory = new StepprSensorReaderFactory(robotModel);
+      WandererSensorReaderFactory sensorReaderFactory = new WandererSensorReaderFactory(robotModel);
 
       /*
        * Create output writer
        */
 
-      StepprOutputWriter stepprOutputWriter = new StepprOutputWriter(robotModel);
-      controllerFactory.attachControllerStateChangedListener(stepprOutputWriter);
-      DRCOutputWriter drcOutputWriter = stepprOutputWriter;
+      WandererOutputWriter wandererOutputWriter = new WandererOutputWriter(robotModel);
+      controllerFactory.attachControllerStateChangedListener(wandererOutputWriter);
+      DRCOutputWriter drcOutputWriter = wandererOutputWriter;
       
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
-         DRCOutputWriterWithAccelerationIntegration stepprOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
+         DRCOutputWriterWithAccelerationIntegration wandererOutputWriterWithAccelerationIntegration = new DRCOutputWriterWithAccelerationIntegration(
                drcOutputWriter, new LegJointName[] { LegJointName.KNEE, LegJointName.ANKLE_PITCH }, null, null, robotModel.getControllerDT(), true);
-         stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
-         stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
-         stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
-         stepprOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
+         wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredVelocity(0.0, 0.0);
+         wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
+         wandererOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
+         wandererOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
          
-         drcOutputWriter = stepprOutputWriterWithAccelerationIntegration;
+         drcOutputWriter = wandererOutputWriterWithAccelerationIntegration;
       }
       /*
        * Pelvis Pose Correction
@@ -126,9 +126,9 @@ public class StepprControllerFactory
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
 
       MultiThreadedRealTimeRobotController robotController = new MultiThreadedRealTimeRobotController(estimatorThread);
-      if (stepprAffinity.setAffinity())
+      if (wandererAffinity.setAffinity())
       {
-         robotController.addController(controllerThread, controllerPriority, stepprAffinity.getControlThreadProcessor());
+         robotController.addController(controllerThread, controllerPriority, wandererAffinity.getControlThreadProcessor());
       }
       else
       {
@@ -147,15 +147,15 @@ public class StepprControllerFactory
          e.printStackTrace();
       }
 
-      AcsellSetup stepprSetup = new AcsellSetup(yoVariableServer);
+      AcsellSetup wandererSetup = new AcsellSetup(yoVariableServer);
 
       yoVariableServer.start();
 
       AcsellSetup.startStreamingData();
-      stepprSetup.start();
+      wandererSetup.start();
 
       robotController.start();
-      StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);
+      WandererRunner runner = new WandererRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
       runner.join();
 
@@ -215,6 +215,6 @@ public class StepprControllerFactory
    public static void main(String args[]) throws JSAPException, IOException, JAXBException
    {
       LogTools.setGlobalLogLevel(Level.CONFIG);
-      new StepprControllerFactory();
+      new WandererControllerFactory();
    }
 }

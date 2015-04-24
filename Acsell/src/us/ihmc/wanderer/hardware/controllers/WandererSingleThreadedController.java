@@ -1,4 +1,4 @@
-package us.ihmc.steppr.hardware.controllers;
+package us.ihmc.wanderer.hardware.controllers;
 
 import java.io.IOException;
 import java.util.EnumMap;
@@ -12,59 +12,59 @@ import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.steppr.hardware.command.StepprCommand;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
-import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
+import us.ihmc.wanderer.hardware.WandererJoint;
+import us.ihmc.wanderer.hardware.command.WandererCommand;
+import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
+import us.ihmc.wanderer.hardware.state.WandererState;
+import us.ihmc.wanderer.parameters.WandererRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.humanoidRobot.visualizer.RobotVisualizer;
 
-public class StepprSingleThreadedController extends RealtimeThread
+public class WandererSingleThreadedController extends RealtimeThread
 {
 
-   public static void startController(StepprController stepprController)
+   public static void startController(WandererController wandererController)
    {
       AcsellSetup.startStreamingData();
 
-      YoVariableRegistry registry = new YoVariableRegistry("steppr");
-      BonoRobotModel robotModel = new BonoRobotModel(true, true);
+      YoVariableRegistry registry = new YoVariableRegistry("wanderer");
+      WandererRobotModel robotModel = new WandererRobotModel(true, true);
       PeriodicThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(45);
-      YoVariableServer variableServer = new YoVariableServer(StepprSingleThreadedController.class, scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
+      YoVariableServer variableServer = new YoVariableServer(WandererSingleThreadedController.class, scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.01);
 
-      AcsellSetup stepprSetup = new AcsellSetup(variableServer);
+      AcsellSetup wandererSetup = new AcsellSetup(variableServer);
       PriorityParameters priority = new PriorityParameters(PriorityParameters.getMaximumPriority());
-      StepprSingleThreadedController communicator = new StepprSingleThreadedController(robotModel, priority, variableServer, stepprController, registry);
+      WandererSingleThreadedController communicator = new WandererSingleThreadedController(robotModel, priority, variableServer, wandererController, registry);
 
       variableServer.start();
 
-      stepprSetup.start();
+      wandererSetup.start();
       communicator.start();
 
       ThreadTools.sleepForever();
    }
 
    private final RobotVisualizer visualizer;
-   private final StepprState state;
-   private final StepprController controller;
-   private final StepprCommand command;
+   private final WandererState state;
+   private final WandererController controller;
+   private final WandererCommand command;
 
    private final UDPAcsellOutputWriter outputWriter;
 
    private final SixDoFJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
-   private final EnumMap<StepprJoint, OneDoFJoint> jointMap = new EnumMap<>(StepprJoint.class);
+   private final EnumMap<WandererJoint, OneDoFJoint> jointMap = new EnumMap<>(WandererJoint.class);
    private final RawJointSensorDataHolderMap rawSensors;
 
    private boolean initialized = false;
@@ -72,24 +72,24 @@ public class StepprSingleThreadedController extends RealtimeThread
 
    private volatile boolean requestStop = false;
 
-   private StepprSingleThreadedController(BonoRobotModel robotModel, PriorityParameters priorityParameters, RobotVisualizer visualizer, StepprController stepprController,
+   private WandererSingleThreadedController(WandererRobotModel robotModel, PriorityParameters priorityParameters, RobotVisualizer visualizer, WandererController wandererController,
          YoVariableRegistry registry)
    {
       super(priorityParameters);
-      this.state = new StepprState(0.001, registry);
+      this.state = new WandererState(0.001, registry);
       this.reader = new UDPAcsellStateReader(state);
 
       this.visualizer = visualizer;
 
-      this.command = new StepprCommand(registry);
-      this.controller = stepprController;
+      this.command = new WandererCommand(registry);
+      this.controller = wandererController;
       this.outputWriter = new UDPAcsellOutputWriter(command);
 
       
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       rootJoint = fullRobotModel.getRootJoint();
 
-      for (StepprJoint joint : StepprJoint.values)
+      for (WandererJoint joint : WandererJoint.values)
       {
          OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getSdfName());
          if (oneDoFJoint == null)
@@ -112,7 +112,7 @@ public class StepprSingleThreadedController extends RealtimeThread
          visualizer.setMainRegistry(registry, fullRobotModel, null);
       }
 
-      outputWriter.connect(new StepprNetworkParameters());
+      outputWriter.connect(new WandererNetworkParameters());
 
    }
 
@@ -158,7 +158,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
    public void process(long timestamp)
    {
-      for (StepprJoint joint : StepprJoint.values)
+      for (WandererJoint joint : WandererJoint.values)
       {
          AcsellJointState jointState = state.getJointState(joint);
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
@@ -187,7 +187,7 @@ public class StepprSingleThreadedController extends RealtimeThread
          command.enableActuators();
       }
 
-      for (StepprJoint joint : StepprJoint.values)
+      for (WandererJoint joint : WandererJoint.values)
       {
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
          RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
