@@ -21,7 +21,7 @@ public class WandererCommand extends AcsellCommand<WandererActuator, WandererJoi
 {
    public WandererCommand(YoVariableRegistry parentRegistry)
    {
-      super("Wanderer", parentRegistry);
+      super("WandererCommand", parentRegistry);
    }
 
    protected EnumMap<WandererActuator,AcsellActuatorCommand> createActuatorCommands()

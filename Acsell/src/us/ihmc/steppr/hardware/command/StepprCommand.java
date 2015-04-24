@@ -21,7 +21,7 @@ public class StepprCommand extends AcsellCommand<StepprActuator, StepprJoint>
 {
    public StepprCommand(YoVariableRegistry parentRegistry)
    {
-      super("Steppr", parentRegistry);
+      super("StepprCommand", parentRegistry);
    }
 
    protected EnumMap<StepprActuator,AcsellActuatorCommand> createActuatorCommands()
