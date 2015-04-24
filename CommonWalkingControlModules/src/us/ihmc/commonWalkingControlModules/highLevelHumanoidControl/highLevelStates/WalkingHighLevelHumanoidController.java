@@ -1017,6 +1017,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICPLocal.changeFrame(worldFrame);
             desiredICPVelocityLocal.changeFrame(worldFrame);
          }
+         else
+         {
+            pelvisICPBasedTranslationManager.clearProvider();
+            pelvisOrientationManager.clearProvider();
+            footPoseProvider.clear();
+         }
 
          desiredICP.set(desiredICPLocal);
          desiredICPVelocity.set(desiredICPVelocityLocal);

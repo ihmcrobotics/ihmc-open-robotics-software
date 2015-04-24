@@ -119,6 +119,11 @@ public class PelvisICPBasedTranslationManager
       parentRegistry.addChild(registry);
    }
 
+   public void clearProvider()
+   {
+      desiredPelvisPoseProvider.clearPosition();
+   }
+
    public void compute(RobotSide supportLeg, FramePoint2d actualICP)
    {
       if (isUsingWaypointTrajectory != null)

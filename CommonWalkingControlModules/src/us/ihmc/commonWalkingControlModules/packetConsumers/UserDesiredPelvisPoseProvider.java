@@ -89,6 +89,20 @@ public class UserDesiredPelvisPoseProvider implements PelvisPoseProvider
    }
 
    @Override
+   public void clearOrientation()
+   {
+      isNewPelvisOrientationInformationAvailable.set(false);
+      goToHomeOrientation.set(false);
+   }
+
+   @Override
+   public void clearPosition()
+   {
+      isNewPelvisPositionInformationAvailable.set(false);
+      goToHomePosition.set(false);
+   }
+
+   @Override
    public FrameOrientation getDesiredPelvisOrientation(ReferenceFrame desiredPelvisFrame)
    {
       if (!isNewPelvisOrientationInformationAvailable.getBooleanValue())

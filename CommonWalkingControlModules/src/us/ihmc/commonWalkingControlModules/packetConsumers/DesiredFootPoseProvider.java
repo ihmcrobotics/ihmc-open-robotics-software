@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -54,6 +53,13 @@ public class DesiredFootPoseProvider implements PacketConsumer<FootPosePacket>, 
          return null;
       else
          return footPoseSide.get() == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+   }
+
+   @Override
+   public void clear()
+   {
+      footPosePacket.set(null);
+      footPoseSide.set(-1);
    }
 
    @Override

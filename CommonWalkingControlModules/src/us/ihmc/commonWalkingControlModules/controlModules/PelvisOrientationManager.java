@@ -157,6 +157,11 @@ public class PelvisOrientationManager
       desiredPelvisAngularAcceleration.set(tempAngularAcceleration);
    }
 
+   public void clearProvider()
+   {
+      pelvisPoseProvider.clearOrientation();
+   }
+
    public void compute()
    {
       if (isUsingWaypointTrajectory != null)

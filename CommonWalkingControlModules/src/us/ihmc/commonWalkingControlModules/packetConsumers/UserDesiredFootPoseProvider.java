@@ -50,6 +50,11 @@ public class UserDesiredFootPoseProvider implements FootPoseProvider
       return userFootPoseTakeEm.getBooleanValue();
    }
 
+   @Override
+   public void clear()
+   {
+      userFootPoseTakeEm.set(false);
+   }
 
    @Override
    public RobotSide checkForNewPose()

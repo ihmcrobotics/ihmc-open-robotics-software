@@ -130,6 +130,22 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
    }
 
    @Override
+   public void clearOrientation()
+   {
+      desiredPelvisOrientation.set(null);
+      desiredPelvisOrientationWithWaypoints.set(null);
+      goToHomeOrientation.set(false);
+   }
+
+   @Override
+   public void clearPosition()
+   {
+      desiredPelvisPosition.set(null);
+      desiredPelvisPositionWithWaypoints.set(null);
+      goToHomePosition.set(false);
+   }
+
+   @Override
    public boolean checkForHomePosition()
    {
       return goToHomePosition.getAndSet(false);
