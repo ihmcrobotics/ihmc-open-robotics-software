@@ -1,36 +1,21 @@
+<!-- WANDERER -->
 <sdf version='1.4'>
   <model name='wanderer'>
-  <pose>0 0 0.94 0 0 0</pose>
+  <pose>0 0 0.8999 0 0 0</pose>
     <link name='pelvis'>
       <pose>0 0 0 0 0 0</pose>
-<!-- No Hip X Springs
       <inertial>
-		<pose>-0.05039 -0.00002 0.11723 0 0 0</pose>
-        <mass>12.547</mass>
+		<pose>-0.074017 -0.000014 0.122080 0 0 0</pose>
+        <mass>9.845143</mass>
         <inertia>
-          <ixx> 0.15688</ixx>
-          <ixy> 0.00002</ixy>
-          <ixz>-0.01993</ixz>
-          <iyy> 0.11185</iyy>
-          <iyz> 0.00005</iyz>
-          <izz> 0.16107</izz>
+          <ixx> 0.126304</ixx>
+          <ixy> 0.000007</ixy>
+          <ixz>-0.000490</ixz>
+          <iyy> 0.055959</iyy>
+          <iyz>-0.000021</iyz>
+          <izz> 0.090494</izz>
         </inertia>
       </inertial>
- -->
-<!-- Includes Hip X Springs  -->
-      <inertial>
-        <pose>-0.05257 -0.00002 0.11366 0 0 0</pose>
-        <mass>12.866</mass>
-        <inertia>
-          <ixx> 0.16409</ixx>
-          <ixy> 0.00002</ixy>
-          <ixz>-0.02319</ixz>
-          <iyy> 0.11943</iyy>
-          <iyz> 0.00005</iyz>
-          <izz> 0.16461</izz>
-        </inertia>
-      </inertial>
-
       <collision name='pelvis_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -41,7 +26,7 @@
         </geometry>
       </collision>
       <visual name='pelvis_visual'>
-       <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0.1 .1 .1 1</ambient>
         	<diffuse>.7 .7 .7 1</diffuse>
@@ -84,17 +69,17 @@
         </sensor>
     </link>
     <link name='ltorso'>
-      <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
       <inertial>
-        <pose>0.00926195 0.00268847 5.32617e-06 0 -0 0</pose>
-        <mass>2.24099</mass>
+        <pose>-0.005734 -0.003875 0.000005 0 -0 0</pose>
+        <mass>1.942617</mass>
         <inertia>
-          <ixx> 0.00408432</ixx>
-          <ixy> 5.5226e-05</ixy>
-          <ixz>-8.55028e-08</ixz>
-          <iyy> 0.00280804</iyy>
-          <iyz> 3.96734e-07</iyz>
-          <izz> 0.00507952</izz>
+          <ixx> 0.003370</ixx>
+          <ixy> 0.000045</ixy>
+          <ixz> 0.000000</ixz>
+          <iyy> 0.002102</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.003886</izz>
         </inertia>
       </inertial>
       <collision name='ltorso_collision'>
@@ -108,7 +93,7 @@
       </collision>
       <visual name='ltorso_visual'>
         <pose>0 0 0 0 -0 0</pose>
-                <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0.2 0 0 1</ambient>
         	<diffuse>.9 0 0 1</diffuse>
@@ -144,17 +129,17 @@
       </axis>
     </joint>
     <link name='mtorso'>
-      <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
+      <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
       <inertial>
-        <pose>0.01217 0.00088 0.10677 0 -0 0</pose>
-        <mass>3.79010</mass>
+        <pose>0.014050 0.003626 0.109236 0 -0 0</pose>
+        <mass>3.561282</mass>
         <inertia>
-          <ixx> 0.02319</ixx>
-          <ixy>-0.00012</ixy>
-          <ixz>-0.00028</ixz>
-          <iyy> 0.02609</iyy>
-          <iyz> 0.00059</iyz>
-          <izz> 0.03551</izz>
+          <ixx> 0.016749</ixx>
+          <ixy>-0.000826</ixy>
+          <ixz>-0.000617</ixz>
+          <iyy> 0.019698</iyy>
+          <iyz> 0.000484</iyz>
+          <izz> 0.026730</izz>
         </inertia>
       </inertial>
       <collision name='mtorso_collision'>
@@ -167,7 +152,7 @@
         </geometry>
       </collision>
       <visual name='mtorso_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0.2 .1 .1 1</ambient>
         	<diffuse>0.9 0.1 0.1 1</diffuse>
@@ -191,7 +176,7 @@
       <child>mtorso</child>
       <parent>ltorso</parent>
       <axis>
-        <xyz>1.56265e-16 1 -6.8231e-17</xyz>
+        <xyz>0 1 0</xyz>
         <limit>
           <lower>-0.5236</lower>
           <upper>0.5236</upper>
@@ -204,35 +189,19 @@
       </axis>
     </joint>
     <link name='utorso'>
-      <pose>0.018243 0.0 0.188773 0.0 0.0 0.0</pose>
-<!-- Inertial pose with mass shifted by 0.02 in Y -->
-<!-- With dummy mass  original sdf said 18.9 added 2.2kg to accomodate full robot mass 
-       <inertial>
-        <pose>-0.0195224 0.020144025 0.313439 0 -0 0</pose>
-        <mass>21.14268</mass>
-        <inertia>
-          <ixx> 0.272494</ixx>
-          <ixy> 0.000779065</ixy>
-          <ixz>-0.00449641</ixz>
-          <iyy> 0.208064</iyy>
-          <iyz> 0.000902029</iyz>
-          <izz> 0.190387</izz>
-        </inertia>
-      </inertial> -->
-<!-- without dummy mass original sdf said 7.00027 added 2.2kg to accomodate full robot mass -->
+      <pose>-0.011968 0.0 0.215900 0.0</pose>
       <inertial>
-        <pose>-0.02033 0.00039 0.35741 0 -0 0</pose>
-        <mass>9.20327</mass> 
+        <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
+        <mass>19.086895</mass>
         <inertia>
-          <ixx> 0.18685</ixx>
-          <ixy> 0.00078</ixy>
-          <ixz>-0.00489</ixz>
-          <iyy> 0.14316</iyy>
-          <iyz> 0.00102</iyz>
-          <izz> 0.12898</izz>
+          <ixx> 0.441372</ixx>
+          <ixy> 0.000001</ixy>
+          <ixz>-0.001573</ixz>
+          <iyy> 0.194120</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.365770</izz>
         </inertia>
       </inertial>
-
       <collision name='utorso_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -243,10 +212,10 @@
         </geometry>
       </collision>
       <visual name='utorso_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
-        	<ambient>0 .1 0 1</ambient>
-        	<diffuse>0 .7 0 1</diffuse>
+        	<ambient>0.1 .1 .1 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
         	<emmisive>0 0 1 1</emmisive>
         </material>
@@ -267,7 +236,7 @@
       <child>utorso</child>
       <parent>mtorso</parent>
       <axis>
-        <xyz>-5.9757e-17 -1.18277e-15 1</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
           <lower>-0.38</lower>
           <upper>0.38</upper>
@@ -280,17 +249,17 @@
       </axis>
     </joint>
    <link name='l_uglut'>
-      <pose>0.0 0.13335 0.0 0 0 0</pose>
+      <pose>0.0 0.114300 0.0 0 0 0</pose>
       <inertial>
-        <pose>0.02362 -0.02580 0.05229 0 -0 0</pose>
-        <mass>2.98263</mass>
+        <pose>-0.026725 -0.024857 0.011768 0 -0 0</pose>
+        <mass>3.033570</mass>
         <inertia>
-          <ixx> 0.00823</ixx>
-          <ixy> 0.00277</ixy>
-          <ixz>-0.00358</ixz>
-          <iyy> 0.02049</iyy>
-          <iyz> 0.00175</iyz>
-          <izz> 0.01812</izz>
+          <ixx> 0.008029</ixx>
+          <ixy>-0.002549</ixy>
+          <ixz>-0.000580</ixz>
+          <iyy> 0.012383</iyy>
+          <iyz>-0.000192</iyz>
+          <izz> 0.011805</izz>
         </inertia>
       </inertial>
       <collision name='l_uglut_collision'>
@@ -303,7 +272,7 @@
         </geometry>
       </collision>
       <visual name='l_uglut_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0 0.2 1</ambient>
         	<diffuse>0 0.3 1 1</diffuse>
@@ -340,17 +309,17 @@
       </axis>
     </joint>
     <link name='l_lglut'>
-      <pose>0.0 0.13335 0.0 0 0 0</pose>
+      <pose>0.000010 0.114300 0.0 0 0 0</pose>
       <inertial>
-        <pose>0.04859 0.06369 0.02393 0 -0 0</pose>
-        <mass>4.77890</mass>
+        <pose>-0.069849 0.081724 0.061145 0 -0 0</pose>
+        <mass>4.718064</mass>
         <inertia>
-          <ixx> 0.02521</ixx>
-          <ixy>-0.00416</ixy>
-          <ixz>-0.00452</ixz>
-          <iyy> 0.02511</iyy>
-          <iyz>-0.00551</iyz>
-          <izz> 0.01786</izz>
+          <ixx> 0.021103</ixx>
+          <ixy> 0.003875</ixy>
+          <ixz> 0.003173</ixz>
+          <iyy> 0.024886</iyy>
+          <iyz>-0.003152</iyz>
+          <izz> 0.016717</izz>
         </inertia>
       </inertial>
       <collision name='l_lglut_collision'>
@@ -363,7 +332,7 @@
         </geometry>
       </collision>
       <visual name='l_lglut_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0.2 0.4 1</ambient>
         	<diffuse>0 0.5 1 1</diffuse>
@@ -400,35 +369,19 @@
       </axis>
     </joint>
     <link name='l_uleg'>
-      <pose>0.0 0.146158 -0.085547 0 0 0</pose>
-<!-- Original Upper Leg
+      <pose>0.000010 0.114300 -0.050925 0 0 0</pose>
       <inertial>
-        <pose>-0.02 0.0525 -0.218 0 -0 0</pose>
-        <mass>7.76096</mass>
+        <pose>-0.003185 0.003262 -0.167928 0 -0 0</pose>
+        <mass>9.911709</mass>
         <inertia>
-          <ixx> 0.13628</ixx>
-          <ixy> 0.00235</ixy>
-          <ixz> 0.00075</ixz>
-          <iyy> 0.11781</iyy>
-          <iyz>-0.02074</iyz>
-          <izz> 0.04658</izz>
+          <ixx> 0.202401</ixx>
+          <ixy>-0.002075</ixy>
+          <ixz> 0.003361</ixz>
+          <iyy> 0.175765</iyy>
+          <iyz> 0.005309</iyz>
+          <izz> 0.072711</izz>
         </inertia>
       </inertial>
--->
-<!-- Four bar Upper Leg -->
-      <inertial>
-        <pose>-0.00347 0.03300 -0.16049 0 -0 0</pose>
-        <mass>9.20765</mass>
-        <inertia>
-          <ixx> 0.16930</ixx>
-          <ixy> 0.00601</ixy>
-          <ixz> 0.00367</ixz>
-          <iyy> 0.13914</iyy>
-          <iyz>-0.03211</iyz>
-          <izz> 0.08115</izz>
-        </inertia>
-      </inertial>
-      
       <collision name='l_uleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -475,74 +428,20 @@
         </dynamics>
       </axis>
     </joint>
-<!--   <link name='l_lleg'>
-      <pose>0.0 0.146158 -0.462483 0 0 0</pose>
-      <inertial>
-        <pose>0.000904604 0.000444278 -0.0416523 0 -0 0</pose>
-        <mass>7.62761</mass>
-        <inertia>
-          <ixx> 0.0812169</ixx>
-          <ixy> 0.000202599</ixy>
-          <ixz>-0.000156903</ixz>
-          <iyy> 0.0816633</iyy>
-          <iyz> 0.000291382</iyz>
-          <izz> 0.0199188</izz>
-        </inertia>
-      </inertial>
-      <collision name='l_lleg_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/l_lleg.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='l_lleg_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/l_lleg.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link> 
--->
-   <link name='l_lleg'>
-      <pose>0.0 0.146158 -0.462483 0 0 0</pose>
-<!-- Original Ankle
-      <inertial>
-        <pose>0.013 -0.02 -0.06 0 -0 0</pose>
-        <mass>8.89814</mass>
-        <inertia>
-          <ixx> 0.11869</ixx>
-          <ixy> 0.00024</ixy>
-          <ixz> 0.01144</ixz>
-          <iyy> 0.11709</iyy>
-          <iyz> 0.00037</iyz>
-          <izz> 0.03899</izz>
-        </inertia>
-      </inertial>
--->
-<!-- Spring Ankle -->   
+    <link name='l_lleg'>
+      <pose>0.000010 0.107823 -0.426845 0 0 0</pose>
 	  <inertial>
-        <pose>0.00860 0.00029 -0.07339 0 -0 0</pose>
-        <mass>9.55521</mass>
+        <pose>0.006748 0.027044 -0.058802 0 -0 0</pose>
+        <mass>8.248916</mass>
         <inertia>
-          <ixx> 0.16306</ixx>
-          <ixy> 0.00012</ixy>
-          <ixz> 0.01196</ixz>
-          <iyy> 0.15894</iyy>
-          <iyz> 0.00035</iyz>
-          <izz> 0.04292</izz>
+          <ixx> 0.122150</ixx>
+          <ixy> 0.001649</ixy>
+          <ixz> 0.007736</ixz>
+          <iyy> 0.118953</iyy>
+          <iyz>-0.012417</iyz>
+          <izz> 0.034578</izz>
         </inertia>
       </inertial>
-
       <collision name='l_lleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -552,46 +451,6 @@
           </mesh>
         </geometry>
       </collision>
-      <collision name='l_lleg_collision_ll_ankle_pulley'>
-        <pose>0 0.099055 -0.0889 -8.6023e-17 0.01726 -8.8988e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-<!--
-      <collision name='l_lleg_collision_ll_push_rod'>
-        <pose>0.12698 0.0990431 -0.0911503 -0.142494 -0.12679 0.00378958</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>  
--->
-      <collision name='l_lleg_collision_lr_ankle_pulley'>
-        <pose>0 -0.09876 -0.0889 -8.6154e-17 0.018311 -8.9078e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-<!--
-      <collision name='l_lleg_collision_lr_push_rod'>
-        <pose>0.126978 -0.0987481 -0.0912838 0.165806 -0.0983264 -0.186284</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
--->
       <visual name='l_lleg_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <material>
@@ -608,61 +467,6 @@
           </mesh>
         </geometry>
       </visual>
-      <visual name='l_lleg_visual_ll_ankle_pulley'>
-        <pose>0 0.099055 -0.0889 -8.6023e-17 0.01726 -8.8988e-17</pose>
-                <material>
-        	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
-        	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
-        </material>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-<!--
-      <visual name='l_lleg_visual_ll_push_rod'>
-        <pose>0.12698 0.0990431 -0.0911503 -0.142494 -0.12679 0.00378958</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
--->
-      <visual name='l_lleg_visual_lr_ankle_pulley'>
-      
-        <pose>0 -0.09876 -0.0889 -8.6154e-17 0.018311 -8.9078e-17</pose>
-                <material>
-        	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
-        	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
-        </material>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-<!--
-      <visual name='l_lleg_visual_lr_push_rod'>
-        <pose>0.126978 -0.0987481 -0.0912838 0.165806 -0.0983264 -0.186284</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
--->
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -684,39 +488,22 @@
         </dynamics>
       </axis>
     </joint>
-    <link name='l_talus'>    
-<!-- Original Talus
-      <pose>0.0 0.146158 -0.884123 1.570796 0 0</pose>
+    <link name='l_talus'>
+      <pose>0.000010 0.107820 -0.833181 0 0 0</pose>
       <inertial>
-        <pose>0.00030 0.00031 0 0 -0 0</pose>
-        <mass>0.08082</mass>
+        <pose>-0.003726 0.000000 0.003144 0 -0 0</pose>
+        <mass>0.898661</mass>
         <inertia>
-          <ixx> 0.09289e-04</ixx>
-          <ixy> 0.00008e-04</ixy>
-          <ixz> 0</ixz>
-          <iyy> 0.09290e-04</iyy>
-          <iyz> 0</iyz>
-          <izz> 0.16488e-04</izz>
+          <ixx> 0.001400</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000005</ixz>
+          <iyy> 0.000497</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.001357</izz>
         </inertia>
       </inertial>
--->
-<!-- Spring Talus -->
-      <pose>0.0 0.146158 -0.868883 0 -0 0</pose>
-      <inertial>
-        <pose>-0.00320 -0.00000 0.00284 0 -0 0</pose>
-        <mass>1.05332</mass>
-        <inertia>
-          <ixx> 0.00239</ixx>
-          <ixy> 0.00000</ixy>
-          <ixz> 0.00001</ixz>
-          <iyy> 0.00055</iyy>
-          <iyz> 0.00000</iyz>
-          <izz> 0.00236</izz>
-        </inertia>
-      </inertial>
-      
       <collision name='l_talus_collision'>
-        <pose>0 0 0 1.5708 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -725,7 +512,7 @@
         </geometry>
       </collision>
       <visual name='l_talus_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0.2 0.2 0.2 1</ambient>
         	<diffuse>0.8 0.8 0.8 1</diffuse>
@@ -762,51 +549,19 @@
       </axis>
     </joint>
     <link name='l_foot'>
-<!-- Original Foot
-      <pose>0.0 0.146158 -0.884123 0 0 0</pose>
+      <pose>0.000009 0.107820 -0.833181 0 0 0</pose>
       <inertial>
-        <pose>0.07958 0.00001 -0.03190 0 -0 0</pose>
-        <mass>1.62221</mass>
+        <pose>0.075312 0.000000 -0.050496 0 -0 0</pose>
+        <mass>0.733719</mass>
         <inertia>
-          <ixx> 0.00344</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz>-0.00019</ixz>
-          <iyy> 0.00987</iyy>
-          <iyz> 0</iyz>
-          <izz> 0.01288</izz>
+          <ixx> 0.001674</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000028</ixz>
+          <iyy> 0.004680</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.006016</izz>
         </inertia>
       </inertial>
--->
-<!-- IHMC Edit
-      <pose>0.0 0.146158 -0.884123 0 0 0</pose>
-      <inertial>
-        <pose>0.121 0.0 0.0 0 -0 0</pose>
-        <mass>1.62221</mass>
-        <inertia>
-          <ixx> 0.00344</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz>-0.00019</ixz>
-          <iyy> 0.00987</iyy>
-          <iyz> 0</iyz>
-          <izz> 0.01288</izz>
-        </inertia>
-      </inertial>
--->
-<!-- Spring Foot -->
-      <pose>0.0 0.146158 -0.868883 0 0 0</pose>
-      <inertial>
-        <pose>0.07332 0.00001 -0.05292 0 -0 0</pose>
-        <mass>1.79430</mass>
-        <inertia>
-          <ixx> 0.00384</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz> 0.00036</ixz>
-          <iyy> 0.01148</iyy>
-          <iyz>-0.00000</iyz>
-          <izz> 0.01411</izz>
-        </inertia>
-      </inertial>
-      
       <collision name='l_foot_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -853,232 +608,19 @@
         </dynamics>
       </axis>
     </joint>
-<!--    <link name='ll_ankle_pulley'>
-      <pose>0.0 0.244939 -0.551383 0.0 0.0 0.0</pose>
-      <inertial>
-        <pose>0.0258325 -0.000139051 0.0112638 0 -0 0</pose>
-        <mass>0.440393</mass>
-        <inertia>
-          <ixx> 0.000293173</ixx>
-          <ixy> 2.58273e-06</ixy>
-          <ixz> 0.000136715</ixz>
-          <iyy> 0.00134739</iyy>
-          <iyz> 1.76496e-07</iyz>
-          <izz> 0.00113995</izz>
-        </inertia>
-      </inertial>
-      <collision name='ll_ankle_pulley_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='ll_ankle_pulley_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link>
-    <joint name='ll_ankle_pulley' type='revolute'>
-      <child>ll_ankle_pulley</child>
-      <parent>l_lleg</parent>
-      <axis>
-        <xyz>0 1 0</xyz>
-        <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>238</effort>
-          <velocity>10</velocity>
-        </limit>
-        <dynamics>
-          <damping>0.05</damping>
-        </dynamics>
-      </axis>
-    </joint>
-    <link name='ll_push_rod'>
-      <pose>0.269019 0.244927 0.368583 -0.142494 -0.12679 0.00378958</pose>
-      <inertial>
-        <pose>-1.86447e-05 -4.48906e-10 -0.20659 0 -0 0</pose>
-        <mass>0.177076</mass>
-        <inertia>
-          <ixx> 0.00156205</ixx>
-          <ixy>-5.98197e-13</ixy>
-          <ixz>-2.098e-07</ixz>
-          <iyy> 0.00156153</iyy>
-          <iyz>-4.61663e-13</iyz>
-          <izz> 1.48944e-05</izz>
-        </inertia>
-      </inertial>
-      <collision name='ll_push_rod_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='ll_push_rod_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/ll_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link>
-    <joint name='ll_push_rod_top' type='revolute'>
-      <child>ll_push_rod</child>
-      <parent>ll_ankle_pulley</parent>
-      <axis>
-        <xyz>0.0142062 0.989926 -0.140872</xyz>
-        <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>500</effort>
-          <velocity>10</velocity>
-        </limit>
-        <dynamics>
-          <damping>0</damping>
-        </dynamics>
-      </axis>
-    </joint>
--->
-<!--    <link name='lr_ankle_pulley'>
-      <pose>0.0 0.047124 -0.551383 0.0 0.0 0.0</pose>
-      <inertial>
-        <pose>0.0258301 4.76736e-05 0.0112642 0 -0 0</pose>
-        <mass>0.440377</mass>
-        <inertia>
-          <ixx> 0.000293173</ixx>
-          <ixy>-5.73673e-06</ixy>
-          <ixz> 0.000136703</ixz>
-          <iyy> 0.00134731</iyy>
-          <iyz> 4.76803e-07</iyz>
-          <izz> 0.00113989</izz>
-        </inertia>
-      </inertial>
-      <collision name='lr_ankle_pulley_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='lr_ankle_pulley_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link>
-    <joint name='lr_ankle_pulley' type='revolute'>
-      <child>lr_ankle_pulley</child>
-      <parent>l_lleg</parent>
-      <axis>
-        <xyz>0 1 0</xyz>
-        <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>238</effort>
-          <velocity>10</velocity>
-        </limit>
-        <dynamics>
-          <damping>0.05</damping>
-        </dynamics>
-      </axis>
-    </joint>
-    <link name='lr_push_rod'>
-      <pose>0.269017 0.0471359 0.368449 0.165806 -0.0983264 -0.186284</pose>
-      <inertial>
-        <pose>-1.86447e-05 -4.48906e-10 -0.20659 0 -0 0</pose>
-        <mass>0.177076</mass>
-        <inertia>
-          <ixx> 0.00156205</ixx>
-          <ixy>-5.98197e-13</ixy>
-          <ixz>-2.098e-07</ixz>
-          <iyy> 0.00156153</iyy>
-          <iyz>-4.61663e-13</iyz>
-          <izz> 1.48944e-05</izz>
-        </inertia>
-      </inertial>
-      <collision name='lr_push_rod_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='lr_push_rod_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/lr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link>
-    <joint name='lr_push_rod_top' type='revolute'>
-      <child>lr_push_rod</child>
-      <parent>lr_ankle_pulley</parent>
-      <axis>
-        <xyz>0.166747 0.972223 0.16425</xyz>
-        <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>500</effort>
-          <velocity>10</velocity>
-        </limit>
-        <dynamics>
-          <damping>0</damping>
-        </dynamics>
-      </axis>
-    </joint>
- -->
+	
     <link name='r_uglut'>
-      <pose>0.0 -0.13335 0.0 0 0 0</pose>
+      <pose>0.0 -0.114300 0.0 0 0 0</pose>
       <inertial>
-        <pose>0.02353 0.02583 0.05228 0 -0 0</pose>
-        <mass>2.98085</mass>
+        <pose>-0.026889 0.024933 0.011772 0 -0 0</pose>
+        <mass>3.033569</mass>
         <inertia>
-          <ixx> 0.00822</ixx>
-          <ixy>-0.00281</ixy>
-          <ixz>-0.00357</ixz>
-          <iyy> 0.02044</iyy>
-          <iyz>-0.00175</iyz>
-          <izz> 0.01809</izz>
+		  <ixx> 0.008039</ixx>
+		  <ixy> 0.002637</ixy>
+		  <ixz>-0.000606</ixz>
+		  <iyy> 0.012457</iyy>
+		  <iyz> 0.000189</iyz>
+		  <izz> 0.011889</izz>
         </inertia>
       </inertial>
       <collision name='r_uglut_collision'>
@@ -1091,7 +633,7 @@
         </geometry>
       </collision>
       <visual name='r_uglut_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0 0.2 1</ambient>
         	<diffuse>0 0.3 1 1</diffuse>
@@ -1128,17 +670,17 @@
       </axis>
     </joint>
     <link name='r_lglut'>
-      <pose>0.0 -0.13335 0.0 0 0 0</pose>
+      <pose>-0.000002 -0.114300 0.0 0 0 0</pose>
       <inertial>
-        <pose>0.04856 -0.06373 0.02393 0 -0 0</pose>
-        <mass>4.77402</mass>
+        <pose>-0.071496 0.081716 0.060720 0 -0 0</pose>
+        <mass>4.718065</mass>
         <inertia>
-          <ixx> 0.02514</ixx>
-          <ixy> 0.00411</ixy>
-          <ixz>-0.00448</ixz>
-          <iyy> 0.02502</iyy>
-          <iyz> 0.00554</iyz>
-          <izz> 0.01780</izz>
+          <ixx> 0.020718</ixx>
+          <ixy>-0.003949</ixy>
+          <ixz> 0.003824</ixz>
+          <iyy> 0.025022</iyy>
+          <iyz> 0.003120</iyz>
+          <izz> 0.017235</izz>
         </inertia>
       </inertial>
       <collision name='r_lglut_collision'>
@@ -1151,7 +693,7 @@
         </geometry>
       </collision>
       <visual name='r_lglut_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0.2 0.4 1</ambient>
         	<diffuse>0 0.5 1 1</diffuse>
@@ -1188,35 +730,19 @@
       </axis>
     </joint>
     <link name='r_uleg'>
-      <pose>0.0 -0.146158 -0.085547 0 0 0</pose>
-<!-- Original Upper Leg
+      <pose>-0.000002 -0.114300 -0.050925 0 0 0</pose>
       <inertial>
-        <pose>-0.02 -0.0525 -0.218 0 -0 0</pose>
-        <mass>7.76243</mass>
+        <pose>-0.003268 -0.003277 -0.167898 0 -0 0</pose>
+        <mass>9.905477</mass>
         <inertia>
-          <ixx> 0.13623</ixx>
-          <ixy>-0.00240</ixy>
-          <ixz> 0.00083</ixz>
-          <iyy> 0.11776</iyy>
-          <iyz> 0.02081</iyz>
-          <izz> 0.04665</izz>
+          <ixx> 0.202417</ixx>
+          <ixy> 0.001988</ixy>
+          <ixz> 0.003490</ixz>
+          <iyy> 0.175751</iyy>
+          <iyz>-0.005305</iyz>
+          <izz> 0.072708</izz>
         </inertia>
       </inertial>
--->
-<!-- Four bar Upper Leg -->
-      <inertial>
-        <pose>-0.00347 -0.03300 -0.16049 0 -0 0</pose>
-        <mass>9.20765</mass>
-        <inertia>
-          <ixx> 0.16930</ixx>
-          <ixy>-0.00601</ixy>
-          <ixz> 0.00367</ixz>
-          <iyy> 0.13914</iyy>
-          <iyz> 0.03211</iyz>
-          <izz> 0.08115</izz>
-        </inertia>
-      </inertial>
-
       <collision name='r_uleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -1227,7 +753,7 @@
         </geometry>
       </collision>
       <visual name='r_uleg_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0 0.2 1</ambient>
         	<diffuse>0 0.3 1 1</diffuse>
@@ -1263,74 +789,20 @@
         </dynamics>
       </axis>
     </joint>
-<!--    <link name='r_lleg'>
-      <pose>0.0 -0.146158 -0.462483 0 0 0</pose>
-      <inertial>
-        <pose>0.000976513 -0.000162632 -0.0411224 0 -0 0</pose>
-        <mass>7.60476</mass>
-        <inertia>
-          <ixx> 0.0806158</ixx>
-          <ixy>-8.1038e-05</ixy>
-          <ixz>-3.07137e-05</ixz>
-          <iyy> 0.0811019</iyy>
-          <iyz> 1.3945e-05</iyz>
-          <izz> 0.019801</izz>
-        </inertia>
-      </inertial>
-      <collision name='r_lleg_collision'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/r_lleg.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-      <visual name='r_lleg_visual'>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/r_lleg.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
-    </link>
--->
-  <link name='r_lleg'>
-      <pose>0.0 -0.146158 -0.462483 0 0 0</pose>
-<!-- Original Ankle 
-      <inertial>
-        <pose>0.013 0.02 -0.06 0 -0 0</pose>
-        <mass>8.87430</mass>
-        <inertia>
-          <ixx> 0.11823</ixx>
-          <ixy>-0.00012</ixy>
-          <ixz> 0.01160</ixz>
-          <iyy> 0.11665</iyy>
-          <iyz>-0.00009</iyz>
-          <izz> 0.03882</izz>
-        </inertia>
-      </inertial>
--->
-<!-- Spring Ankle -->
+    <link name='r_lleg'>
+      <pose>-0.000002 -0.107823 -0.426845 0 0 0</pose>
 	  <inertial>
-        <pose>0.00860 -0.00029 -0.07339 0 -0 0</pose>
-        <mass>9.65521</mass>
+        <pose>0.006739 -0.026752 -0.058812 0 -0 0</pose>
+        <mass>8.248955</mass>
         <inertia>
-          <ixx> 0.16306</ixx>
-          <ixy>-0.00012</ixy>
-          <ixz> 0.01196</ixz>
-          <iyy> 0.15894</iyy>
-          <iyz>-0.00035</iyz>
-          <izz> 0.04292</izz>
+          <ixx> 0.122306</ixx>
+          <ixy>-0.001621</ixy>
+          <ixz> 0.007738</ixz>
+          <iyy> 0.118969</iyy>
+          <iyz> 0.013028</iyz>
+          <izz> 0.034718</izz>
         </inertia>
       </inertial>
-
       <collision name='r_lleg_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -1340,48 +812,8 @@
           </mesh>
         </geometry>
       </collision>
-      <collision name='r_lleg_collision_rl_ankle_pulley'>
-        <pose>-0.0008366 0.098654 -0.088896 -1.6567e-16 0.026671 9.0419e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-<!--
-      <collision name='r_lleg_collision_rl_push_rod'>
-        <pose>0.126117 0.0986421 -0.0923412 -0.148503 -0.109613 0.0571355</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
--->
-      <collision name='r_lleg_collision_rr_ankle_pulley'>
-        <pose>-0.0008366 -0.099162 -0.088896 -4.859e-17 0.026961 5.7481e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
-<!--
-      <collision name='r_lleg_collision_rr_push_rod'>
-        <pose>0.126116 -0.0991501 -0.092378 0.143388 -0.117189 -0.00519735</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </collision>
--->
       <visual name='r_lleg_visual'>
-              <material>
+        <material>
         	<lighting>1</lighting>
 		   	<ambient>0 0.2 0.4 1</ambient>
         	<diffuse>0 0.5 1 1</diffuse> 
@@ -1396,60 +828,6 @@
           </mesh>
         </geometry>
       </visual>
-      <visual name='r_lleg_visual_rl_ankle_pulley'>
-              <material>
-        	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
-        	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
-        </material>
-        <pose>-0.0008366 0.098654 -0.088896 -1.6567e-16 0.026671 9.0419e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-<!--
-      <visual name='r_lleg_visual_rl_push_rod'>
-        <pose>0.126117 0.0986421 -0.0923412 -0.148503 -0.109613 0.0571355</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
--->
-      <visual name='r_lleg_visual_rr_ankle_pulley'>
-              <material>
-        	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
-        	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
-        </material>
-        <pose>-0.0008366 -0.099162 -0.088896 -4.859e-17 0.026961 5.7481e-17</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_ankle_pulley.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
-<!--
-      <visual name='r_lleg_visual_rr_push_rod'>
-        <pose>0.126116 -0.0991501 -0.092378 0.143388 -0.117189 -0.00519735</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_push_rod.STL</uri>
-          </mesh>
-        </geometry>
-      </visual>
--->
       <velocity_decay>
         <linear>0</linear>
         <angular>0</angular>
@@ -1472,38 +850,21 @@
       </axis>
     </joint>
     <link name='r_talus'>
-<!-- Original Talus
-      <pose>0.0 -0.146158 -0.884123 1.570796 0 0</pose>
+      <pose>-0.000002 -0.107820 -0.833245 0 0 0</pose>
       <inertial>
-        <pose>0.00030 -0.00031 0 0 -0 0</pose>
-        <mass>0.08082</mass>
+        <pose>-0.003726 0.000000 0.003144 0 -0 0</pose>
+        <mass>0.898661</mass>
         <inertia>
-          <ixx> 0.09289e-04</ixx>
-          <ixy>-0.00008e-04</ixy>
-          <ixz> 0</ixz>
-          <iyy> 0.09290e-04</iyy>
-          <iyz> 0</iyz>
-          <izz> 0.16488e-04</izz>
+          <ixx> 0.001400</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000005</ixz>
+          <iyy> 0.000497</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.001357</izz>
         </inertia>
       </inertial>
--->
-<!-- Spring Talus -->
-      <pose>0.0 -0.146158 -0.868883 0 -0 0</pose>
-      <inertial>
-        <pose>-0.00320 0.00000 0.00284 0 -0 0</pose>
-        <mass>1.05332</mass>
-        <inertia>
-          <ixx> 0.00239</ixx>
-          <ixy>-0.00000</ixy>
-          <ixz> 0.00001</ixz>
-          <iyy> 0.00055</iyy>
-          <iyz>-0.00000</iyz>
-          <izz> 0.00236</izz>
-        </inertia>
-      </inertial>
-
       <collision name='r_talus_collision'>
-        <pose>0 0 0 1.5708 -0 0</pose>
+        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
@@ -1513,7 +874,7 @@
       </collision>
       <visual name='r_talus_visual'>
         <pose>0 0 0 0 -0 0</pose>
-                <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0.2 0.2 0.2 1</ambient>
         	<diffuse>0.8 0.8 0.8 1</diffuse>
@@ -1549,51 +910,19 @@
       </axis>
     </joint>
     <link name='r_foot'>
-<!-- Original Foot
-      <pose>0.0 -0.146158 -0.884123 0 0 0</pose>
+      <pose>-0.000003 -0.107820 -0.833245 0 0 0</pose>
       <inertial>
-        <pose>0.07958 0.00001 -0.03190 0 -0 0</pose>
-        <mass>1.62221</mass>
+        <pose>0.075312 0.000000 -0.050496 0 -0 0</pose>
+        <mass>0.733719</mass>
         <inertia>
-          <ixx> 0.00344</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz>-0.00019</ixz>
-          <iyy> 0.00987</iyy>
-          <iyz>-0</iyz>
-          <izz> 0.01288</izz>
+          <ixx> 0.001674</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000028</ixz>
+          <iyy> 0.004680</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.006016</izz>
         </inertia>
       </inertial>
--->
-<!-- IHMC Edit
-      <pose>0.0 -0.146158 -0.884123 0 0 0</pose>
-      <inertial>
-        <pose>0.121 0.0 0.0 0 -0 0</pose>
-        <mass>1.62221</mass>
-        <inertia>
-          <ixx> 0.00344</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz>-0.00019</ixz>
-          <iyy> 0.00987</iyy>
-          <iyz>-0</iyz>
-          <izz> 0.01288</izz>
-        </inertia>
-      </inertial>
--->
-<!-- Spring Foot -->
-      <pose>0.0 -0.146158 -0.868883 0 0 0</pose>
-      <inertial>
-        <pose>0.07332 0.00001 -0.05292 0 -0 0</pose>
-        <mass>1.79430</mass>
-        <inertia>
-          <ixx> 0.00384</ixx>
-          <ixy>-0.00001</ixy>
-          <ixz> 0.00036</ixz>
-          <iyy> 0.01148</iyy>
-          <iyz>-0.00000</iyz>
-          <izz> 0.01411</izz>
-        </inertia>
-      </inertial>
-
       <collision name='r_foot_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -1605,7 +934,7 @@
       </collision>
       <visual name='r_foot_visual'>
         <pose>0 0 0 0 -0 0</pose>
-                <material>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0 0.1 1</ambient>
         	<diffuse>0 0 1 1</diffuse>
@@ -1640,42 +969,43 @@
         </dynamics>
       </axis>
     </joint>
-<!--    <link name='rl_ankle_pulley'>
-      <pose>0.0 -0.047124 -0.551383 0.0 0.0 0.0</pose>
+	
+	<link name='l_arm_ugh'>
+      <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
       <inertial>
-        <pose>0.0258325 -0.000139051 0.0112638 0 -0 0</pose>
-        <mass>0.440393</mass>
+        <pose>0.004318 -0.021559 0.0 0 -0 0</pose>
+        <mass>0.022453</mass>
         <inertia>
-          <ixx> 0.000293173</ixx>
-          <ixy> 2.58273e-06</ixy>
-          <ixz> 0.000136715</ixz>
-          <iyy> 0.00134739</iyy>
-          <iyz> 1.76496e-07</iyz>
-          <izz> 0.00113995</izz>
+          <ixx> 0.000007</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000015</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000018</izz>
         </inertia>
       </inertial>
-      <collision name='rl_ankle_pulley_collision'>
+      <collision name='l_arm_ugh_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_ankle_pulley.STL</uri>
+            <uri>model://wanderer/meshes/l_arm_ugh.STL</uri>
           </mesh>
         </geometry>
       </collision>
-      <visual name='rl_ankle_pulley_visual'>
-              <material>
+      <visual name='l_arm_ugh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
         	<lighting>1</lighting>
         	<ambient>0 0 0.1 1</ambient>
         	<diffuse>0 0 1 1</diffuse>
         	<specular>1 1 1 1</specular>
         	<emmisive>0 0 1 1</emmisive>
         </material>
-        <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_ankle_pulley.STL</uri>
+            <uri>model://wanderer/meshes/l_arm_ugh.STL</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1684,51 +1014,58 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='rl_ankle_pulley' type='revolute'>
-      <child>rl_ankle_pulley</child>
-      <parent>r_lleg</parent>
+    <joint name='l_arm_shy' type='revolute'>
+      <child>l_arm_ugh</child>
+      <parent>utorso</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>238</effort>
-          <velocity>10</velocity>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
         </limit>
         <dynamics>
-          <damping>0.05</damping>
+          <damping>0.1</damping>
         </dynamics>
       </axis>
-    </joint>
-    <link name='rl_push_rod'>
-      <pose>0.269009 -0.0475569 0.368583 -0.149044 -0.119008 0.0571972</pose>
+    </joint>	
+	<link name='l_arm_lgh'>
+      <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
       <inertial>
-        <pose>-1.86447e-05 -4.48906e-10 -0.20659 0 -0 0</pose>
-        <mass>0.177076</mass>
+        <pose>-0.000177 0.004503 -0.045238 0 -0 0</pose>
+        <mass>0.291416</mass>
         <inertia>
-          <ixx> 0.00156205</ixx>
-          <ixy>-5.98197e-13</ixy>
-          <ixz>-2.098e-07</ixz>
-          <iyy> 0.00156153</iyy>
-          <iyz>-4.61663e-13</iyz>
-          <izz> 1.48944e-05</izz>
+          <ixx> 0.000405</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz> 0.000004</ixz>
+          <iyy> 0.000391</iyy>
+          <iyz> 0.000043</iyz>
+          <izz> 0.000095</izz>
         </inertia>
       </inertial>
-      <collision name='rl_push_rod_collision'>
+      <collision name='l_arm_lgh_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_push_rod.STL</uri>
+            <uri>model://wanderer/meshes/l_arm_lgh.STL</uri>
           </mesh>
         </geometry>
       </collision>
-      <visual name='rl_push_rod_visual'>
+      <visual name='l_arm_lgh_visual'>
         <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rl_push_rod.STL</uri>
+            <uri>model://wanderer/meshes/l_arm_lgh.STL</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1737,52 +1074,58 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='rl_push_rod_top' type='revolute'>
-      <child>rl_push_rod</child>
-      <parent>rl_ankle_pulley</parent>
+    <joint name='l_arm_shy' type='revolute'>
+      <child>l_arm_lgh</child>
+      <parent>l_arm_ugh</parent>
       <axis>
-        <xyz>-0.038931 0.988304 -0.147443</xyz>
+        <xyz>1 0 0</xyz>
         <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>500</effort>
-          <velocity>10</velocity>
+          <lower>-3.14</lower>
+          <upper>0</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.1</damping>
         </dynamics>
       </axis>
     </joint>
--->
-<!--    <link name='rr_ankle_pulley'>
-      <pose>0.0 -0.244939 -0.551383 0 0 0</pose>
+	<link name='l_arm_hum'>
+      <pose>-0.006749 0.342194 0.369376 0 0 0</pose>
       <inertial>
-        <pose>0.0258301 4.76736e-05 0.0112642 0 -0 0</pose>
-        <mass>0.440377</mass>
+        <pose> 0.000172 0.001366 0.086391 0 -0 0</pose>
+        <mass>0.063676</mass>
         <inertia>
-          <ixx> 0.000293173</ixx>
-          <ixy>-5.73673e-06</ixy>
-          <ixz> 0.000136703</ixz>
-          <iyy> 0.00134731</iyy>
-          <iyz> 4.76803e-07</iyz>
-          <izz> 0.00113989</izz>
+          <ixx> 0.000291</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000282</iyy>
+          <iyz> 0.000008</iyz>
+          <izz> 0.000017</izz>
         </inertia>
       </inertial>
-      <collision name='rr_ankle_pulley_collision'>
+      <collision name='l_arm_hum_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_ankle_pulley.STL</uri>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
           </mesh>
         </geometry>
       </collision>
-      <visual name='rr_ankle_pulley_visual'>
+      <visual name='l_arm_hum_visual'>
         <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_ankle_pulley.STL</uri>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1791,51 +1134,118 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='rr_ankle_pulley' type='revolute'>
-      <child>rr_ankle_pulley</child>
-      <parent>r_lleg</parent>
+    <joint name='l_arm_shz' type='revolute'>
+      <child>l_arm_hum</child>
+      <parent>l_arm_lgh</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='l_arm_fore'>
+      <pose>-0.006749 0.342194 0.369376 0 0 0</pose>
+      <inertial>
+        <pose>-0.004536 -0.000247 -0.037863 0 -0 0</pose>
+        <mass>0.214833</mass>
+        <inertia>
+          <ixx> 0.000237</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000035</ixz>
+          <iyy> 0.000243</iyy>
+          <iyz> 0.000003</iyz>
+          <izz> 0.000059</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_arm_fore_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='l_arm_fore_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='l_arm_ely' type='revolute'>
+      <child>l_arm_fore</child>
+      <parent>l_arm_hum</parent>
       <axis>
         <xyz>0 1 0</xyz>
         <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>238</effort>
-          <velocity>10</velocity>
+          <lower>-2.00</lower>
+          <upper>2.00</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
         </limit>
         <dynamics>
-          <damping>0.05</damping>
+          <damping>0.1</damping>
         </dynamics>
       </axis>
     </joint>
-    <link name='rr_push_rod'>
-      <pose>0.269008 -0.245349 0.368546 0.143438 -0.1266 -0.00520335</pose>
+	<link name='l_arm_hand'>
+      <pose>-0.007780 0.342180 0.015487 0 0 0</pose>
       <inertial>
-        <pose>-1.86447e-05 -4.48906e-10 -0.20659 0 -0 0</pose>
-        <mass>0.177076</mass>
+        <pose>-0.000124 -0.000045 0.086910 0 -0 0</pose>
+        <mass>0.111092</mass>
         <inertia>
-          <ixx> 0.00156205</ixx>
-          <ixy>-5.98197e-13</ixy>
-          <ixz>-2.098e-07</ixz>
-          <iyy> 0.00156153</iyy>
-          <iyz>-4.61663e-13</iyz>
-          <izz> 1.48944e-05</izz>
+          <ixx> 0.000824</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz> 0.000001</ixz>
+          <iyy> 0.001047</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000255</izz>
         </inertia>
       </inertial>
-      <collision name='rr_push_rod_collision'>
+      <collision name='l_arm_hand_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_push_rod.STL</uri>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
           </mesh>
         </geometry>
       </collision>
-      <visual name='rr_push_rod_visual'>
+      <visual name='l_arm_hand_visual'>
         <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://wanderer/meshes/rr_push_rod.STL</uri>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
           </mesh>
         </geometry>
       </visual>
@@ -1844,22 +1254,322 @@
         <angular>0</angular>
       </velocity_decay>
     </link>
-    <joint name='rr_push_rod_top' type='revolute'>
-      <child>rr_push_rod</child>
-      <parent>rr_ankle_pulley</parent>
+    <joint name='l_arm_wrz' type='revolute'>
+      <child>l_arm_hand</child>
+      <parent>l_arm_fore</parent>
       <axis>
-        <xyz>-0.0128986 0.989811 0.141802</xyz>
+        <xyz>0 0 1</xyz>
         <limit>
-          <lower>-0.7</lower>
-          <upper>0.7</upper>
-          <effort>500</effort>
-          <velocity>10</velocity>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
         </limit>
         <dynamics>
-          <damping>0</damping>
+          <damping>0.1</damping>
         </dynamics>
       </axis>
     </joint>
--->
+	
+	<link name='r_arm_ugh'>
+      <pose>-0.006817 -0.347282 0.671245 0 0 0</pose>
+      <inertial>
+        <pose>-0.004318 0.021559 0.0 0 -0 0</pose>
+        <mass>0.022453</mass>
+        <inertia>
+          <ixx> 0.000007</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000015</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000018</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_ugh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_ugh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_ugh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shy' type='revolute'>
+      <child>r_arm_ugh</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>	
+	<link name='r_arm_lgh'>
+      <pose>-0.006817 -0.347282 0.671245 0 0 0</pose>
+      <inertial>
+        <pose> 0.000177 -0.004503 -0.045238 0 -0 0</pose>
+        <mass>0.291416</mass>
+        <inertia>
+          <ixx> 0.000405</ixx>
+          <ixy>-0.000000</ixy>
+          <ixz>-0.000004</ixz>
+          <iyy> 0.000391</iyy>
+          <iyz>-0.000043</iyz>
+          <izz> 0.000095</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_lgh_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_lgh_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/r_arm_lgh.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shy' type='revolute'>
+      <child>r_arm_lgh</child>
+      <parent>r_arm_ugh</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_hum'>
+      <pose>-0.006885 -0.342183 0.369376 0 0 0</pose>
+      <inertial>
+        <pose> 0.000172 0.001366 0.086391 0 -0 0</pose>
+        <mass>0.063676</mass>
+        <inertia>
+          <ixx> 0.000291</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000000</ixz>
+          <iyy> 0.000282</iyy>
+          <iyz> 0.000008</iyz>
+          <izz> 0.000017</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_hum_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_hum_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hum.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_shz' type='revolute'>
+      <child>r_arm_hum</child>
+      <parent>r_arm_lgh</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_fore'>
+      <pose>-0.006885 -0.342183 0.369376 0 0 0</pose>
+      <inertial>
+        <pose>-0.004536 -0.000247 -0.037863 0 -0 0</pose>
+        <mass>0.214833</mass>
+        <inertia>
+          <ixx> 0.000237</ixx>
+          <ixy> 0.000000</ixy>
+          <ixz>-0.000035</ixz>
+          <iyy> 0.000243</iyy>
+          <iyz> 0.000003</iyz>
+          <izz> 0.000059</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_fore_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_fore_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_fore.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_ely' type='revolute'>
+      <child>r_arm_fore</child>
+      <parent>r_arm_hum</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.00</lower>
+          <upper>2.00</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
+	<link name='r_arm_hand'>
+      <pose>-0.007916 -0.342197 0.015487 0 0 0</pose>
+      <inertial>
+        <pose>-0.000124 -0.000045 0.086910 0 -0 0</pose>
+        <mass>0.111092</mass>
+        <inertia>
+          <ixx> 0.000824</ixx>
+          <ixy>-0.000002</ixy>
+          <ixz> 0.000001</ixz>
+          <iyy> 0.001047</iyy>
+          <iyz>-0.000000</iyz>
+          <izz> 0.000255</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_arm_hand_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='r_arm_hand_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0 0 0.1 1</ambient>
+        	<diffuse>0 0 1 1</diffuse>
+        	<specular>1 1 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://wanderer/meshes/arm_hand.STL</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay>
+        <linear>0</linear>
+        <angular>0</angular>
+      </velocity_decay>
+    </link>
+    <joint name='r_arm_wrz' type='revolute'>
+      <child>r_arm_hand</child>
+      <parent>r_arm_fore</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>10</effort>
+          <velocity>2</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+        </dynamics>
+      </axis>
+    </joint>
   </model>
 </sdf>
