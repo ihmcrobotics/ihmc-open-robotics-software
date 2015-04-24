@@ -226,8 +226,7 @@ public class HandControlModule
               fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
-      boolean useSVD = true;
-      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, useSVD, registry);
+      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
       handTaskspaceToJointspaceCalculator.setFullyConstrained();
       handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();

@@ -4,12 +4,14 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
 import us.ihmc.utilities.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
+import us.ihmc.utilities.math.SolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -24,9 +26,12 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 
 public class TaskspaceToJointspaceCalculator
 {
+   private static final boolean USE_SOLVER_WITH_YOVARIABLES = false;
+
    private final YoVariableRegistry registry;
    private final DoubleYoVariable lambdaLeastSquares;
 
@@ -67,11 +72,7 @@ public class TaskspaceToJointspaceCalculator
 
    public TaskspaceToJointspaceCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, base, endEffector, controlDT, false, parentRegistry);
-   }
-
-   public TaskspaceToJointspaceCalculator(String namePrefix, RigidBody base, RigidBody endEffector, double controlDT, boolean useSVD, YoVariableRegistry parentRegistry)
-   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.controlDT = controlDT;
 
       localJoints = ScrewTools.cloneOneDoFJointPath(base, endEffector);
@@ -86,7 +87,13 @@ public class TaskspaceToJointspaceCalculator
       localControlFrame = createLocalControlFrame(localEndEffectorFrame, originalEndEffectorFrame);
 
       jacobian = new GeometricJacobian(localJoints, localEndEffectorFrame);
-      inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, useSVD);
+      LinearSolver<DenseMatrix64F> solver;
+      if (USE_SOLVER_WITH_YOVARIABLES)
+         solver = new YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(namePrefix, maxNumberOfConstraints, maxNumberOfConstraints, registry);
+      else
+         solver = new SolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(maxNumberOfConstraints, maxNumberOfConstraints);
+
+      inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, solver);
 
       jointAngleCorrections = new DenseMatrix64F(numberOfDoF, 1);
       privilegedJointPositions = new DenseMatrix64F(numberOfDoF, 1);
@@ -103,7 +110,6 @@ public class TaskspaceToJointspaceCalculator
          maximumJointVelocities.set(i, 0, Double.POSITIVE_INFINITY);
       }
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       lambdaLeastSquares = new DoubleYoVariable(namePrefix + "LambdaLeastSquares", registry);
@@ -238,7 +244,6 @@ public class TaskspaceToJointspaceCalculator
 
       computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight, privilegedJointPositions);
 
-      //      inverseJacobianSolver.solveUsingDampedLeastSquares(spatialError, jacobian.getJacobianMatrix(), lambdaLeastSquares.getDoubleValue());
       inverseJacobianSolver.solveUsingNullspaceMethod(spatialError, jacobian.getJacobianMatrix(), privilegedJointVelocities);
       jointAngleCorrections.set(inverseJacobianSolver.getJointspaceVelocity());
 
@@ -265,7 +270,6 @@ public class TaskspaceToJointspaceCalculator
 
       computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight, privilegedJointPositions);
 
-//    inverseJacobianSolver.solveUsingDampedLeastSquares(spatialDesiredVelocity, jacobian.getJacobianMatrix(), lambdaLeastSquares.getDoubleValue());
       inverseJacobianSolver.solveUsingNullspaceMethod(spatialDesiredVelocity, jacobian.getJacobianMatrix(), privilegedJointVelocities);
       desiredJointVelocities.set(inverseJacobianSolver.getJointspaceVelocity());
 
@@ -297,7 +301,6 @@ public class TaskspaceToJointspaceCalculator
 
       computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight, privilegedJointPositions);
 
-//      inverseJacobianSolver.solveUsingDampedLeastSquares(spatialDesiredVelocity, jacobian.getJacobianMatrix(), lambdaLeastSquares.getDoubleValue());
       inverseJacobianSolver.solveUsingNullspaceMethod(spatialDesiredVelocity, jacobian.getJacobianMatrix(), privilegedJointVelocities);
       desiredJointVelocities.set(inverseJacobianSolver.getJointspaceVelocity());
 
@@ -363,5 +366,16 @@ public class TaskspaceToJointspaceCalculator
    public void packDesiredJointVelocitiesIntoOneDoFJoints(OneDoFJoint[] joints)
    {
       ScrewTools.setDesiredJointVelocities(joints, desiredJointVelocities);
+   }
+
+   public double computeDeterminant()
+   {
+      jacobian.compute();
+      return inverseJacobianSolver.computeDeterminant(jacobian.getJacobianMatrix());
+   }
+
+   public double getLastComputedDeterminant()
+   {
+      return inverseJacobianSolver.getLastComputedDeterminant();
    }
 }
