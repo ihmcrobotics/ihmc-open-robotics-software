@@ -1,49 +1,44 @@
-package us.ihmc.steppr.hardware.state;
+package us.ihmc.acsell.hardware.state;
 
-import us.ihmc.acsell.hardware.state.AcsellActuatorState;
-import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-public class StepprKneeJointState implements AcsellJointState
+public class AcsellLinearTransmissionJointState implements AcsellJointState
 {
    private final YoVariableRegistry registry;
 
    private final AcsellActuatorState actuator;
-   private final AcsellActuatorState ankle;
-   private final StrainSensor strainSensor;
-   
 
-   private double ratio;
+   private final StrainSensor strainSensor;
+   private final double ratio;
+   private final boolean hasOutputEncoder;
 
    private double motorAngle;
    
    private final DoubleYoVariable q;
    private final DoubleYoVariable qd;
-   private final DoubleYoVariable tau_current;
    private final DoubleYoVariable tau_strain;
+   private final DoubleYoVariable tau_current;
+   private final DoubleYoVariable tau_error;
 
-   public StepprKneeJointState(StepprJoint joint, AcsellActuatorState actuator, AcsellActuatorState ankle, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
+   public AcsellLinearTransmissionJointState(String name, double ratio, boolean hasOutputEncoder, AcsellActuatorState actuator, StrainSensor strainSensor, YoVariableRegistry parentRegistry)
    {
-      String name = joint.getSdfName();
       this.registry = new YoVariableRegistry(name);
-      this.ratio = joint.getRatio();
+      this.ratio = ratio;
       this.actuator = actuator;
-      this.ankle = ankle;
+      this.hasOutputEncoder = hasOutputEncoder;
       this.strainSensor = strainSensor;
-      
-      
+
       this.q = new DoubleYoVariable(name + "_q", registry);
       this.qd = new DoubleYoVariable(name + "_qd", registry);
       this.tau_current = new DoubleYoVariable(name + "_tauPredictedCurrent", registry);
       this.tau_strain = new DoubleYoVariable(name + "_tauMeasuredStrain", registry);
+      this.tau_error = new DoubleYoVariable(name + "_tauCurrentStrainError", registry);
       
       parentRegistry.addChild(registry);
    }
-
 
    @Override
    public double getQ()
@@ -67,18 +62,23 @@ public class StepprKneeJointState implements AcsellJointState
    public void update()
    {
       
-      final long toleranceWindowSize=1;
-      if(ankle.getConsecutivePacketDropCount()<=toleranceWindowSize && actuator.getConsecutivePacketDropCount()<=toleranceWindowSize)
+      motorAngle = actuator.getMotorPosition();
+      if(hasOutputEncoder)
       {
-         double ankleAngle = ankle.getMotorPosition();
-         double ankleVelocity = ankle.getMotorVelocity();      
-         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition() + ankleAngle));
-         qd.set(actuator.getJointVelocity() + ankleVelocity);
+         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getJointPosition()));
+         qd.set(actuator.getJointVelocity());
       }
-      
-      motorAngle = actuator.getMotorPosition();      
+      else
+      {
+         q.set(AngleTools.trimAngleMinusPiToPi(actuator.getMotorPosition() / ratio)); 
+         qd.set(actuator.getMotorVelocity() / ratio); 
+      }
       tau_current.set(actuator.getMotorTorque() * ratio);
-      tau_strain.set(strainSensor.getCalibratedValue());
+      if(strainSensor!=null)
+      {
+         tau_strain.set(strainSensor.getCalibratedValue());
+         tau_error.set(tau_strain.getDoubleValue()-tau_current.getDoubleValue());
+      }
    }
 
    @Override
@@ -92,7 +92,6 @@ public class StepprKneeJointState implements AcsellJointState
    {
       return motorAngle;
    }
-
 
    @Override
    public void updateOffsets()

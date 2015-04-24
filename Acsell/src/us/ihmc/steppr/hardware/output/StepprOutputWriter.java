@@ -3,6 +3,8 @@ package us.ihmc.steppr.hardware.output;
 import java.util.EnumMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.acsell.hardware.command.AcsellJointCommand;
+import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.springs.HystereticSpringCalculator;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
 import us.ihmc.acsell.springs.LinearSpringCalculator;
@@ -11,17 +13,16 @@ import us.ihmc.acsell.springs.StepprLeftAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprLeftHipXSpringProperties;
 import us.ihmc.acsell.springs.StepprRightAnkleSpringProperties;
 import us.ihmc.acsell.springs.StepprRightHipXSpringProperties;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 //import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.command.StepprCommand;
-import us.ihmc.steppr.hardware.command.StepprJointCommand;
-import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
+import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -54,7 +55,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
 
    private RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
-   private final UDPStepprOutputWriter outputWriter;
+   private final UDPAcsellOutputWriter outputWriter;
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauSpringCorrection = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoTauTotal = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
    private final EnumMap<StepprJoint, DoubleYoVariable> yoAngleSpring = new EnumMap<StepprJoint, DoubleYoVariable>(StepprJoint.class);
@@ -130,12 +131,12 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
       initializeMotorDamping();
       initializeFeedForwardTorqueFromDesiredAcceleration();
 
-      outputWriter = new UDPStepprOutputWriter(command);
+      outputWriter = new UDPAcsellOutputWriter(command);
 
       standPrep.setFullRobotModel(standPrepFullRobotModel);
       registry.addChild(standPrep.getYoVariableRegistry());
 
-      outputWriter.connect();
+      outputWriter.connect(new StepprNetworkParameters());
 
    }
 
@@ -233,7 +234,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
             double kd = (wholeBodyControlJoint.getKd()+masterMotorDamping.getDoubleValue()*yoMotorDamping.get(joint).getDoubleValue()) * controlRatio + standPrepJoint.getKd() * (1.0 - controlRatio);
             double tau = (wholeBodyControlJoint.getTau()+ motorInertiaTorque+desiredQddFeedForwardTorque) * controlRatio + standPrepJoint.getTau() * (1.0 - controlRatio);
 
-            StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
+            AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
 
             desiredJointQ.get(joint).set(wholeBodyControlJoint.getqDesired());
 

@@ -1,6 +1,8 @@
 package us.ihmc.steppr.hardware.configuration;
 
-public class StepprNetworkParameters
+import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
+
+public class StepprNetworkParameters implements AcsellNetworkParameters
 {
    public static final int VARIABLE_SERVER_PORT = 5555;
    
@@ -17,4 +19,18 @@ public class StepprNetworkParameters
    
    
    public static final String STEPPR_MULTICAST_GROUP = "224.0.0.123";
+
+
+   @Override
+   public String getMultiCastGroup()
+   {
+      return STEPPR_MULTICAST_GROUP;
+   }
+
+
+   @Override
+   public int getMulticastControlPort()
+   {
+      return UDP_MULTICAST_CONTROL_PORT;
+   }
 }

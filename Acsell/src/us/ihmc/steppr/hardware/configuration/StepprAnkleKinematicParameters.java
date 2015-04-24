@@ -1,6 +1,8 @@
 package us.ihmc.steppr.hardware.configuration;
 
-public final class StepprAnkleKinematicParameters {
+import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
+
+public final class StepprAnkleKinematicParameters implements AcsellAnkleKinematicParameters{
    
       private static final double N = 6.0; 
 
@@ -40,47 +42,56 @@ public final class StepprAnkleKinematicParameters {
       private static final double p_j_JitY[] = { 0.4637,  0.1027,  0.0539, -0.1251, -0.0482, -0.3714, -0.1127, -0.1165, -0.1780,  0.0591};
 
       
-	   public static double[] getXParams()
+	   @Override
+      public double[] getXParams()
 	   {
 		   return px;
 	   }
 	   
-	   public static double[] getYParams()
+	   @Override
+      public double[] getYParams()
 	   {
 		   return py;
 	   }
 	   
-	   public static double[] getJITX_FromMotorParams()
+	   @Override
+      public double[] getJITX_FromMotorParams()
 	   {
 		   return p_m_JitX;
 	   }
 	   
-	   public static double[] getJITY_FromMotorParams()
+	   @Override
+      public double[] getJITY_FromMotorParams()
 	   {
 		   return p_m_JitY;
 	   }
 	   
-	   public static double[] getJITX_FromJointParams()
+	   @Override
+      public double[] getJITX_FromJointParams()
 	   {
 		   return p_j_JitX;
 	   }
 	   
-	   public static double[] getJITY_FromJointParams()
+	   @Override
+      public double[] getJITY_FromJointParams()
 	   {
 		   return p_j_JitY;
 	   }
 	   
-	   public static double[] getM1Params()
+	   @Override
+      public double[] getM1Params()
 	   {
 		   return pM1;
 	   }
 	   
-	   public static double[] getM2Params()
+	   @Override
+      public double[] getM2Params()
 	   {
 		   return pM2;
 	   }
 	   
-	   public static double getN()
+	   @Override
+      public double getN()
 	   {
 		   return N;
 	   }

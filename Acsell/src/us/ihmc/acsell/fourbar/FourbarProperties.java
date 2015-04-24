@@ -7,4 +7,6 @@ public interface FourbarProperties
 	public FourbarLink getFloatingLink();
 	public FourbarLink getOutputLink();
 	public boolean isElbowDown();
+   public abstract double getRightLinkageBeta0();
+   public abstract double getLeftLinkageBeta0();
 }
