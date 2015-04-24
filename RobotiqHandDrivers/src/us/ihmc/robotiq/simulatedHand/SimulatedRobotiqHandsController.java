@@ -244,7 +244,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case CLOSE_THUMB:
-                //TODO
+                  individualRobotiqHandController.closeThumb();
                   break;
 
                case RESET:
@@ -268,7 +268,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case CRUSH_THUMB:
-                //TODO
+                  individualRobotiqHandController.crushThumb();
                   break;
                   
                case STOP:
