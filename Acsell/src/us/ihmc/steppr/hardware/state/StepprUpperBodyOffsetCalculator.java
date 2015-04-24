@@ -4,6 +4,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.acsell.hardware.state.AcsellActuatorState;
+import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -21,12 +23,12 @@ public class StepprUpperBodyOffsetCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final StepprActuatorState imuState;
-   private final StepprActuatorState torsoX;
-   private final StepprActuatorState torsoY;
-   private final StepprActuatorState torsoZ;
+   private final AcsellActuatorState imuState;
+   private final AcsellActuatorState torsoX;
+   private final AcsellActuatorState torsoY;
+   private final AcsellActuatorState torsoZ;
 
-   private final StepprXSensState xsens;
+   private final AcsellXSensState xsens;
 
    private final Quat4d xsensQuat = new Quat4d();
    private final Matrix3d xsensMatrix = new Matrix3d();
@@ -57,8 +59,8 @@ public class StepprUpperBodyOffsetCalculator
 
    private double[] yawPitchRoll = new double[3];
 
-   public StepprUpperBodyOffsetCalculator(StepprActuatorState imuState, StepprActuatorState backX, StepprActuatorState backY, StepprActuatorState backZ,
-         StepprXSensState xsens, double dt, YoVariableRegistry parentRegistry)
+   public StepprUpperBodyOffsetCalculator(AcsellActuatorState imuState, AcsellActuatorState backX, AcsellActuatorState backY, AcsellActuatorState backZ,
+         AcsellXSensState xsens, double dt, YoVariableRegistry parentRegistry)
    {
       this.imuState = imuState;
       this.torsoX = backX;

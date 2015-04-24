@@ -1,6 +1,9 @@
 package us.ihmc.wanderer.hardware;
 
-public enum WandererActuator
+import us.ihmc.acsell.hardware.AcsellActuator;
+
+
+public enum WandererActuator implements AcsellActuator
 {
    LEFT_ANKLE_RIGHT("leftAnkleRightActuator", 1.01e-3, 1.152, 0.587, 0, 1, -1), //measured current is -1*commanded current
    LEFT_ANKLE_LEFT("leftAnkleLeftActuator", 1.01e-3, 1.152, 0.587, 0, 2, 1),

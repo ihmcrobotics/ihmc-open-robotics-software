@@ -2,13 +2,15 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
+import us.ihmc.acsell.fourbar.StepprFourbarProperties;
+import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
+import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
+import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
-import us.ihmc.steppr.hardware.state.StepprAnkleAngleCalculator;
-import us.ihmc.steppr.hardware.state.StepprAnkleInterpolator;
-import us.ihmc.steppr.hardware.state.StepprFourbarCalculator;
+import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -25,9 +27,9 @@ public class StepprOutputProcessor implements OutputProcessor
    private final SimpleMovingAverageFilteredYoVariable totalPredictedRobotPowerAverage = new SimpleMovingAverageFilteredYoVariable(
          totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
 
-   private final StepprAnkleAngleCalculator ankleInterpolator = new StepprAnkleInterpolator();
-   private final StepprFourbarCalculator leftFourbar;
-   private final StepprFourbarCalculator rightFourbar;
+   private final AcsellAnkleAngleCalculator ankleInterpolator = new AcsellAnkleInterpolator(new StepprAnkleKinematicParameters());
+   private final AcsellFourbarCalculator leftFourbar;
+   private final AcsellFourbarCalculator rightFourbar;
    private EnumMap<StepprJoint, OneDoFJoint> wholeBodyControlJoints;
 
    public StepprOutputProcessor(FullRobotModel controllerFullRobotModel)
@@ -38,8 +40,8 @@ public class StepprOutputProcessor implements OutputProcessor
       {
          predictedMotorPower.put(actuator, new DoubleYoVariable(actuator.getName() + "PredictedMotorPower", registry));
       }
-      leftFourbar = new StepprFourbarCalculator("leftOutputProcessor", RobotSide.LEFT, registry);
-      rightFourbar = new StepprFourbarCalculator("rightOutputProcessor", RobotSide.RIGHT, registry);
+      leftFourbar = new AcsellFourbarCalculator(new StepprFourbarProperties(), "leftOutputProcessor", RobotSide.LEFT, registry);
+      rightFourbar = new AcsellFourbarCalculator(new StepprFourbarProperties(), "rightOutputProcessor", RobotSide.RIGHT, registry);
    }
 
    @Override

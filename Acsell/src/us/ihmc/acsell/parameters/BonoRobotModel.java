@@ -1,7 +1,6 @@
 package us.ihmc.acsell.parameters;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;

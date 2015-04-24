@@ -1,21 +1,21 @@
 package us.ihmc.acsell.parameters;
 
-import us.ihmc.steppr.hardware.StepprActuator;
+import us.ihmc.acsell.hardware.AcsellActuator;
 
 public class StrainGaugeInformation
 {
-   private StepprActuator strainSensorBoard;
+   private AcsellActuator strainSensorBoard;
    private int strainSensorConnectorId;
    private double strainSensorGain, strainSensorOffset;
    
-   public StrainGaugeInformation(StepprActuator strainSensorBoard, int strainSensorConnectorId, double strainSensorGain, double strainSensorOffset)
+   public StrainGaugeInformation(AcsellActuator rightHipZ, int strainSensorConnectorId, double strainSensorGain, double strainSensorOffset)
    {
-      this.strainSensorBoard = strainSensorBoard;
+      this.strainSensorBoard = rightHipZ;
       this.strainSensorConnectorId = strainSensorConnectorId;    
       this.strainSensorGain = strainSensorGain;
       this.strainSensorOffset = strainSensorOffset;
    }
-   public StepprActuator getStrainSensorBoard()
+   public AcsellActuator getStrainSensorBoard()
    {
       return strainSensorBoard;
    }

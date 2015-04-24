@@ -2,8 +2,8 @@ package us.ihmc.acsell.fourbar;
 
 public class StepprFourbarProperties implements FourbarProperties {
 
-	public static final double LEFT_LINKAGE_BETA0 = 2.46;
-	public static final double RIGHT_LINKAGE_BETA0 = 2.51;
+	private static final double LEFT_LINKAGE_BETA0 = 2.46;
+	private static final double RIGHT_LINKAGE_BETA0 = 2.51;
 	private final double L1 = 3.57*0.0254;
 	private final double L2 = 5.2*0.0254;
 	private final double L3 = 5.3*0.0254;
@@ -19,6 +19,18 @@ public class StepprFourbarProperties implements FourbarProperties {
 		this.Link2 = new FourbarLink(L2);
 		this.Link3 = new FourbarLink(L3);
 		this.Link4 = new FourbarLink(L4);
+	}
+	
+	@Override
+   public double getLeftLinkageBeta0()
+	{
+	   return LEFT_LINKAGE_BETA0;
+	}
+	
+	@Override
+   public double getRightLinkageBeta0()
+	{
+	   return RIGHT_LINKAGE_BETA0;
 	}
 	
 	@Override

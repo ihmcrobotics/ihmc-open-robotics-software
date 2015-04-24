@@ -6,6 +6,10 @@ import java.util.EnumMap;
 import javax.vecmath.Quat4d;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.acsell.hardware.command.AcsellJointCommand;
+import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
+import us.ihmc.acsell.hardware.state.AcsellJointState;
+import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
@@ -16,11 +20,8 @@ import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.command.StepprCommand;
-import us.ihmc.steppr.hardware.command.StepprJointCommand;
-import us.ihmc.steppr.hardware.command.UDPStepprOutputWriter;
-import us.ihmc.steppr.hardware.state.StepprJointState;
+import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.state.StepprState;
-import us.ihmc.steppr.hardware.state.StepprXSensState;
 import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -59,7 +60,7 @@ public class StepprSingleThreadedController extends RealtimeThread
    private final StepprController controller;
    private final StepprCommand command;
 
-   private final UDPStepprOutputWriter outputWriter;
+   private final UDPAcsellOutputWriter outputWriter;
 
    private final SixDoFJoint rootJoint;
    private final Quat4d rotation = new Quat4d();
@@ -82,7 +83,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       this.command = new StepprCommand(registry);
       this.controller = stepprController;
-      this.outputWriter = new UDPStepprOutputWriter(command);
+      this.outputWriter = new UDPAcsellOutputWriter(command);
 
       
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -111,7 +112,7 @@ public class StepprSingleThreadedController extends RealtimeThread
          visualizer.setMainRegistry(registry, fullRobotModel, null);
       }
 
-      outputWriter.connect();
+      outputWriter.connect(new StepprNetworkParameters());
 
    }
 
@@ -159,7 +160,7 @@ public class StepprSingleThreadedController extends RealtimeThread
    {
       for (StepprJoint joint : StepprJoint.values)
       {
-         StepprJointState jointState = state.getJointState(joint);
+         AcsellJointState jointState = state.getJointState(joint);
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
          RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
 
@@ -169,7 +170,7 @@ public class StepprSingleThreadedController extends RealtimeThread
 
       }
 
-      StepprXSensState xSensState = state.getXSensState();
+      AcsellXSensState xSensState = state.getXSensState();
       xSensState.getQuaternion(rotation);
       //      rootJoint.setRotation(rotation);
       rootJoint.updateFramesRecursively();
@@ -191,7 +192,7 @@ public class StepprSingleThreadedController extends RealtimeThread
          OneDoFJoint oneDoFJoint = jointMap.get(joint);
          RawJointSensorDataHolder rawSensor = rawSensors.get(oneDoFJoint);
 
-         StepprJointCommand jointCommand = command.getStepprJointCommand(joint);
+         AcsellJointCommand jointCommand = command.getAcsellJointCommand(joint);
          jointCommand.setTauDesired(oneDoFJoint.getTau(), 0.0, rawSensor);
          jointCommand.setDamping(oneDoFJoint.getKd());
       }

@@ -7,6 +7,8 @@ import java.util.List;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.acsell.hardware.state.AcsellJointState;
+import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -19,9 +21,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.StepprUtil;
-import us.ihmc.steppr.hardware.state.StepprJointState;
 import us.ihmc.steppr.hardware.state.StepprState;
-import us.ihmc.steppr.hardware.state.StepprXSensState;
 import us.ihmc.steppr.hardware.state.UDPStepprStateReader;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
@@ -105,7 +105,7 @@ public class StepprSensorReader implements SensorReader
          timestamp = reader.receive();
          for (StepprJoint jointId : StepprJoint.values)
          {
-            StepprJointState jointState = state.getJointState(jointId);
+            AcsellJointState jointState = state.getJointState(jointId);
             OneDoFJoint joint = stepprJoints.get(jointId);
 
             RawJointSensorDataHolder rawJoint = rawJointSensorDataHolderMap.get(joint);
@@ -117,7 +117,7 @@ public class StepprSensorReader implements SensorReader
             sensorProcessing.setJointVelocitySensorValue(joint, jointState.getQd());
          }
 
-         StepprXSensState xSensState = state.getXSensState();
+         AcsellXSensState xSensState = state.getXSensState();
          xSensState.getQuaternion(quaternion);
          xSensState.getGyro(angularVelocity);
          xSensState.getAccel(linearAcceleration);

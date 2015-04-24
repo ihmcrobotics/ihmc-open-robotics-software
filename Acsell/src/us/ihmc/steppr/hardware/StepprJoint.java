@@ -1,10 +1,11 @@
 package us.ihmc.steppr.hardware;
 
+import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.parameters.StrainGaugeInformation;
 
 
 
-public enum StepprJoint
+public enum StepprJoint implements AcsellJoint
 {
 	// BeltRatio = 1.3333;
    LEFT_HIP_X("l_leg_mhx", 10, true, new StrainGaugeInformation(StepprActuator.LEFT_HIP_Z, 1, -73.33, 2.5), StepprActuator.LEFT_HIP_X),

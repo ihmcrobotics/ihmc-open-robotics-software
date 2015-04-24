@@ -30,7 +30,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.steppr.hardware.StepprAffinity;
+import us.ihmc.steppr.hardware.AcsellAffinity;
 import us.ihmc.steppr.hardware.StepprSetup;
 import us.ihmc.steppr.hardware.output.StepprOutputWriter;
 import us.ihmc.steppr.hardware.sensorReader.StepprSensorReaderFactory;
@@ -62,7 +62,7 @@ public class StepprControllerFactory
       /*
        * Create registries
        */
-      StepprAffinity stepprAffinity = new StepprAffinity();
+      AcsellAffinity stepprAffinity = new AcsellAffinity();
       PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
       PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
       PriorityParameters loggerPriority = new PriorityParameters(45);
