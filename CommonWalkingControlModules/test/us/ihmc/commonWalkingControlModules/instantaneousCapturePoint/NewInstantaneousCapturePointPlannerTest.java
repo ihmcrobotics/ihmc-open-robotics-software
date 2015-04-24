@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGe
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -322,7 +323,7 @@ public class NewInstantaneousCapturePointPlannerTest
 	}
 
 	@EstimatedDuration(duration = 2.9)
-	@Test(timeout = 30000)
+	@Test(timeout = 300000)
 	public void visualizePlanner()
 	{
 		icpPlanner = new NewInstantaneousCapturePointPlanner(maxNumberOfConsideredFootsteps, testICPPlannerParams, registry,
@@ -502,7 +503,9 @@ public class NewInstantaneousCapturePointPlannerTest
 		ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
 		Robot robot = new Robot("TestRobot");
-		scs = new SimulationConstructionSet(robot);
+		
+		SimulationConstructionSetParameters simulationConstructionSetParameters = SimulationConstructionSetParameters.createFromEnvironmentVariables();
+		scs = new SimulationConstructionSet(robot, simulationConstructionSetParameters);
 
 		scs.setDT(deltaT, 1);
 		scs.changeBufferSize(16000);
