@@ -10,9 +10,11 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -31,7 +33,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private final BooleanYoVariable hasBeenCalled;
 
-   private final DoubleYoVariable alphaFilterBreakFrequency;
+   private final DoubleYoVariable alphaFilter_BreakFrequency;
    private final DoubleYoVariable dt;
 
 ////////////////////////////////////////////
@@ -113,14 +115,14 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final YoFrameOrientation yoInterpolatedOffsetFrameOrientation_Rotation;
    
    public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, DoubleYoVariable alphaFilterBreakFrequency,
-         double dt, boolean correctRotation)
+         double estimator_dt, boolean correctRotation)
    {
       this.registry = new YoVariableRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      this.alphaFilterBreakFrequency = alphaFilterBreakFrequency;
+      this.alphaFilter_BreakFrequency = alphaFilterBreakFrequency;
       this.dt = new DoubleYoVariable("dt", registry);
-      this.dt.set(dt);
+      this.dt.set(estimator_dt);
 
       this.referenceFrameToBeCorrected = referenceFrame;
 
@@ -131,7 +133,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       hasBeenCalled.set(false);
 
       alphaFilter_AlphaValue = new DoubleYoVariable("alphaFilter_AlphaValue", registry);
-      alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(alphaFilterBreakFrequency.getDoubleValue(),
+      alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(this.alphaFilter_BreakFrequency.getDoubleValue(),
             this.dt.getDoubleValue()));
       alphaFilter_PositionValue = new DoubleYoVariable("alphaFilter_PositionValue", registry);
       alphaFilter_PositionValue.set(0.0);
@@ -169,6 +171,16 @@ public class ClippedSpeedOffsetErrorInterpolator
      yoGoalOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
      yoInterpolatedOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoInterpolatedOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
       
+      this.alphaFilter_BreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            alphaFilter_AlphaValue.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(alphaFilter_BreakFrequency.getDoubleValue(),
+                  dt.getDoubleValue()));
+         }
+      });
+     
    }
 
    public void setInterpolatorInputs(FramePose startOffsetError, FramePose goalOffsetError, double alphaFilterPosition)
