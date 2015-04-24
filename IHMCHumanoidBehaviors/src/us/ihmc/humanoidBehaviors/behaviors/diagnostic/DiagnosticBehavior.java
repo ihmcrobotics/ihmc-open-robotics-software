@@ -196,9 +196,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       TURN_IN_PLACE_SEQUENCE,
       TURN_IN_PLACE_ANGLE,
       FEET_SQUARE_UP,
-      GO_HOME,
       TURN_WHEEL,
       CUTE_WAVE,
+      HAND_SHAKE_PREP,
+      HAND_SHAKE_SHAKE,
+      GO_HOME,
       REDO_LAST_TASK // Keep that one at the end.
    };
 
@@ -1405,6 +1407,61 @@ public class DiagnosticBehavior extends BehaviorInterface
       // Put the foot back on the ground
       submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
    }
+   
+   private final double shoulderExtensionAngle = Math.toRadians(20.0);
+   private final double shakeHandAngle = Math.toRadians(20.0);
+   
+   private void sequenceHandShakePrep()
+   {
+      
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      boolean mirrorOrientationForRightSide = true;
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, 0.3);
+      
+      double[] desiredUpperArmJointAngles = computeUpperArmJointAngles(RobotSide.RIGHT, desiredUpperArmOrientation, mirrorOrientationForRightSide);
+      HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(RobotSide.RIGHT);
+      
+      double[] desiredElbowAndLowerJointAnglesTwo = {shoulderExtensionAngle-Math.PI/2.0, 0.0, 0.0, shakeHandAngle};
+      double[] desiredJointAngles = ArrayUtils.addAll(desiredUpperArmJointAngles, desiredElbowAndLowerJointAnglesTwo);
+      pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(RobotSide.RIGHT, desiredJointAngles, yoTime, handPoseBehavior, 0.25, 0.05));
+      pipeLine.requestNewStage();
+
+   }
+   
+   private void sequenceHandShakeShake()
+   {
+      FrameOrientation desiredUpperArmOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      boolean mirrorOrientationForRightSide = true;
+      
+      
+      desiredUpperArmOrientation.setYawPitchRoll(0.0, -shoulderExtensionAngle, 0.3);
+      
+      double[] desiredUpperArmJointAngles = computeUpperArmJointAngles(RobotSide.RIGHT, desiredUpperArmOrientation, mirrorOrientationForRightSide);
+      
+//      submitHandPose(RobotSide.RIGHT, desiredUpperArmOrientation, shoulderExtensionAngle-Math.PI/2.0 , null, mirrorOrientationForRightSide);
+//      
+//      pipeLine.requestNewStage();
+      
+      int numberOfShakes = 3;
+      
+      for(int i = 0; i<numberOfShakes; i++){
+         
+         HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(RobotSide.RIGHT);
+         
+         double[] desiredElbowAndLowerJointAngles = {shakeHandAngle+shoulderExtensionAngle-Math.PI/2.0, 0.0, 0.0, 0.0};
+         double[] desiredJointAngles = ArrayUtils.addAll(desiredUpperArmJointAngles, desiredElbowAndLowerJointAngles);
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(RobotSide.RIGHT, desiredJointAngles, yoTime, handPoseBehavior, 0.25, 0.05));
+         pipeLine.requestNewStage();
+
+         double[] desiredElbowAndLowerJointAnglesTwo = {shoulderExtensionAngle-Math.PI/2.0, 0.0, 0.0, shakeHandAngle};
+         desiredJointAngles = ArrayUtils.addAll(desiredUpperArmJointAngles, desiredElbowAndLowerJointAnglesTwo);
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(RobotSide.RIGHT, desiredJointAngles, yoTime, handPoseBehavior, 0.25, 0.05));
+         pipeLine.requestNewStage();
+         
+      }
+      
+   }
 
    private void sequenceCuteWave()
    {
@@ -1441,14 +1498,14 @@ public class DiagnosticBehavior extends BehaviorInterface
          
          HandPoseBehavior handPoseBehavior = handPoseBehaviors.get(robotSide);
          //Valkyrie Specific
-         double[] desiredElbowAndLowerJointAngles = {-Math.PI, 0.0, 0.0, mirrorSign*Math.toRadians(20.0)};
+         double[] desiredElbowAndLowerJointAngles = {-Math.PI, 0.0, 0.0, mirrorSign*Math.toRadians(50.0)};
          double[] desiredJointAngles = ArrayUtils.addAll(desiredUpperArmJointAngles, desiredElbowAndLowerJointAngles);
-         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, 0.5, 0.25));
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, 0.25, 0.05));
          pipeLine.requestNewStage();
 
-         double[] desiredElbowAndLowerJointAnglesTwo = {-Math.PI, 0.0, 0.0, mirrorSign*Math.toRadians(-20.0)};
+         double[] desiredElbowAndLowerJointAnglesTwo = {-Math.PI, 0.0, 0.0, mirrorSign*Math.toRadians(-50.0)};
          desiredJointAngles = ArrayUtils.addAll(desiredUpperArmJointAngles, desiredElbowAndLowerJointAnglesTwo);
-         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, 0.5, 0.25));
+         pipeLine.submitTaskForPallelPipesStage(handPoseBehavior,new HandPoseTask(robotSide, desiredJointAngles, yoTime, handPoseBehavior, 0.25, 0.05));
          pipeLine.requestNewStage();
          
       }
@@ -2384,6 +2441,14 @@ public class DiagnosticBehavior extends BehaviorInterface
          case CUTE_WAVE:
             lastDiagnosticTask.set(DiagnosticTask.CUTE_WAVE);
             sequenceCuteWave();
+            break;
+         case HAND_SHAKE_PREP:
+            lastDiagnosticTask.set(DiagnosticTask.HAND_SHAKE_PREP);
+            sequenceHandShakePrep();
+            break;
+         case HAND_SHAKE_SHAKE:
+            lastDiagnosticTask.set(DiagnosticTask.HAND_SHAKE_SHAKE);
+            sequenceHandShakeShake();
             break;
          default:
             break;
