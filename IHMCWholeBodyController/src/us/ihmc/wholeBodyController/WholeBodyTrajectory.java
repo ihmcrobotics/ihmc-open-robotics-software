@@ -41,6 +41,7 @@ public class WholeBodyTrajectory
    private final HashMap<String, Double> desiredJointAngles = new HashMap<String, Double> ();
    private RigidBodyTransform worldToFoot; 
    private final SDFFullRobotModel fullRobotModel;
+   private double minimumExecutionTime = 0.5;
 
    public WholeBodyTrajectory(SDFFullRobotModel fullRobotModel, double maxJointVelocity, double maxJointAcceleration, double maxDistanceInTaskSpaceBetweenWaypoints)
    {
@@ -50,6 +51,11 @@ public class WholeBodyTrajectory
       this.maxJointVelocity = maxJointVelocity;
       this.maxJointAcceleration = maxJointAcceleration;
       this.maxDistanceInTaskSpaceBetweenWaypoints = maxDistanceInTaskSpaceBetweenWaypoints;
+   }
+   
+   public void setMinimumExecutionTime(double minTime)
+   {
+      minimumExecutionTime = minTime;
    }
 
    public TrajectoryND createTaskSpaceTrajectory(
@@ -239,7 +245,7 @@ public class WholeBodyTrajectory
       }
 
 
-      wb_trajectory.buildTrajectory();
+      wb_trajectory.buildTrajectory( minimumExecutionTime);
 
 
       wbSolver.setConfiguration( savedParameters );
