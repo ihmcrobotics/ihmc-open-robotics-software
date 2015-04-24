@@ -45,6 +45,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -183,6 +184,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
 
+   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   
    private final BooleanYoVariable preparingForLocomotion = new BooleanYoVariable("preparingForLocomotion", registry);
    private final DoubleYoVariable timeToGetPreparedForLocomotion = new DoubleYoVariable("timeToGetPreparedForLocomotion", registry);
    private final DoubleYoVariable preparingForLocomotionStartTime = new DoubleYoVariable("preparingForLocomotionStartTime", registry);
@@ -196,6 +199,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FootExplorationControlModule footExplorationControlModule;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
+   private final FrameConvexPolygon2d tempFrameConvexPolygon2dForShrinking = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
    private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
 
@@ -595,8 +599,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pelvisICPBasedTranslationManager.compute(null, capturePoint2d);
             pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
 
-            safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-            safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
+            tempFrameConvexPolygon2dForShrinking.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
+            convexPolygonShrinker.shrinkConstantDistanceInto(tempFrameConvexPolygon2dForShrinking, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
+
             safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
@@ -1004,8 +1009,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             desiredICPVelocityLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
             pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
 
-            safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
-            safeSupportPolygonToConstrainICPOffset.shrink(supportPolygonSafeMargin.getDoubleValue());
+            tempFrameConvexPolygon2dForShrinking.setIncludingFrameAndUpdate(bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
+            convexPolygonShrinker.shrinkConstantDistanceInto(tempFrameConvexPolygon2dForShrinking, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
+            
             safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
 
             desiredICPLocal.changeFrame(worldFrame);
