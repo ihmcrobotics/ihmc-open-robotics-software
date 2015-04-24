@@ -135,8 +135,7 @@ public class PacketCommunicator
    }
    
    /**
-    * 
-    * @param Send a packet to connected receivers. Does not call listeners 
+    * @param packet Send a packet to connected receivers. Does not call listeners
     * @return
     */
    public int send(Packet<?> packet)
@@ -160,7 +159,6 @@ public class PacketCommunicator
             globalPacketConsumer.receivedPacket((Packet<?>) object);
          }
       }
-      
    }
 
    private static class PacketObjectConsumer<T extends Packet<?>> implements ObjectConsumer<T>
