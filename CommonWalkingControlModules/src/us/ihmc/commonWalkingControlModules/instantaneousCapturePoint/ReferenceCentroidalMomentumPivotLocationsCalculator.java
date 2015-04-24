@@ -12,6 +12,7 @@ import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -84,6 +85,8 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    private final FramePoint2d firstEntryCMPForSingleSupport = new FramePoint2d();
    private final SideDependentList<ConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
    private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempSupportPolygonForShrinking = new FrameConvexPolygon2d();
+   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
 
    private final DoubleYoVariable safeDistanceFromCMPToSupportEdges;
    private final DoubleYoVariable safeDistanceFromCMPToSupportEdgesWhenSteppingDown;
@@ -550,7 +553,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       exitCMPToPack.setY(tempSupportPolygon.getCentroid().getY());
 
       // Then constrain the computed CMP to be inside a safe support region
-      tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue());
+      tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(tempSupportPolygon);
+      convexPolygonShrinker.shrinkConstantDistanceInto(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdgesWhenSteppingDown.getDoubleValue(), tempSupportPolygon);
+      
       tempSupportPolygon.orthogonalProjection(exitCMPToPack);
    }
 
@@ -564,7 +569,9 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
       cmpToPack.add(cmpXOffsetFromCentroid, cmpOffset.getY());
       
       // Then constrain the computed CMP to be inside a safe support region
-      tempSupportPolygon.shrink(safeDistanceFromCMPToSupportEdges.getDoubleValue());
+      tempSupportPolygonForShrinking.setIncludingFrameAndUpdate(tempSupportPolygon);
+      convexPolygonShrinker.shrinkConstantDistanceInto(tempSupportPolygonForShrinking, safeDistanceFromCMPToSupportEdges.getDoubleValue(), tempSupportPolygon);
+
       tempSupportPolygon.orthogonalProjection(cmpToPack);
    }
 

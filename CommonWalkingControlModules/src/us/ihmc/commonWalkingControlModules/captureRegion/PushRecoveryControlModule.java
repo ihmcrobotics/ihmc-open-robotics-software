@@ -10,7 +10,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.plotting.shapes.PointArtifact;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -26,8 +29,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.graphics.plotting.YoArtifactLine2d;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.frames.YoFrameLine2d;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
@@ -148,7 +149,10 @@ public class PushRecoveryControlModule
       private final YoVariableRegistry registry;
 
       private final RigidBodyTransform fromWorldToPelvis = new RigidBodyTransform();
+      
+      private final ConvexPolygonShrinker convexPolygonShrinker;
       private final FrameConvexPolygon2d reducedSupportPolygon;
+      
       private final ReferenceFrame midFeetZUp;
       private double regularSwingTime;
       private ReferenceFrame soleFrame;
@@ -165,7 +169,9 @@ public class PushRecoveryControlModule
       public IsFallingFromDoubleSupportCondition(RobotSide robotSide)
       {
          this.transferToSide = robotSide;
+         this.convexPolygonShrinker = new ConvexPolygonShrinker();
          this.reducedSupportPolygon = new FrameConvexPolygon2d(supportPolygonInMidFeetZUp);
+         
          this.projectedCapturePoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
          this.projectedCapturePoint2d = new FramePoint2d(worldFrame, 0.0, 0.0);
          this.footPolygon = new FrameConvexPolygon2d(worldFrame);
@@ -216,8 +222,7 @@ public class PushRecoveryControlModule
 
                // get current robot status
                reducedSupportPolygon.changeFrame(midFeetZUp);
-               reducedSupportPolygon.setAndUpdate(supportPolygonInMidFeetZUp);
-               reducedSupportPolygon.shrink(DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE);
+               convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE, reducedSupportPolygon);
 
                capturePoint2d.changeFrame(midFeetZUp);
 
