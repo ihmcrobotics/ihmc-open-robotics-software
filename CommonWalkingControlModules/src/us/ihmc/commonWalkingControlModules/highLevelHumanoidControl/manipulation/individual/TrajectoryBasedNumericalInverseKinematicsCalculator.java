@@ -136,7 +136,7 @@ public class TrajectoryBasedNumericalInverseKinematicsCalculator
       };
 
       ikJacobian = new GeometricJacobian(revoluteJointsCopyForIK[0].getPredecessor(), endEffectorForIK, baseFrameForIK);
-      inverseJacobianSolver = new InverseJacobianSolver(SpatialMotionVector.SIZE, revoluteJoints.length);
+      inverseJacobianSolver = InverseJacobianSolver.createInverseJacobianSolver(SpatialMotionVector.SIZE, revoluteJoints.length, false);
 
       desiredAngles = new DenseMatrix64F(ikJacobian.getNumberOfColumns(), 1);
       desiredAngularVelocities = new DenseMatrix64F(ikJacobian.getNumberOfColumns(), 1);
