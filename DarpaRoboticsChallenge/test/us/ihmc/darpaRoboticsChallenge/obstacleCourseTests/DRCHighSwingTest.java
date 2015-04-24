@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -12,7 +11,6 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.walking.FootstepData;
@@ -22,26 +20,19 @@ import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.darpaRoboticsChallenge.testTools.ScriptedFootstepGenerator;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.dataProcessors.ValueDataCheckerParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.YoVariableValueDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
-import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifierWithStackTracing;
-import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.utilities.math.geometry.*;
+import us.ihmc.utilities.math.geometry.BoundingBox3d;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 /**
@@ -78,7 +69,7 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
    }
 
 
-   @BambooAnnotations.EstimatedDuration(duration = 30.4)
+   @EstimatedDuration(duration = 30.4)
    @Test(timeout = 151825)
    public void testWalkingWithHighSteps() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
