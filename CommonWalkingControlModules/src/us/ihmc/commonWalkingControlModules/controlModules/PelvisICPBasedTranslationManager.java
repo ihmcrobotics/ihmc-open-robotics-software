@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
+import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -35,6 +37,9 @@ public class PelvisICPBasedTranslationManager
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
+   private final DoubleYoVariable frozenOffsetDecayAlpha = new DoubleYoVariable("frozenOffsetDecayAlpha", registry);
+
    private final YoFramePoint2d desiredPelvisPosition = new YoFramePoint2d("desiredPelvis", worldFrame, registry);
 
    private final DoubleYoVariable initialPelvisPositionTime = new DoubleYoVariable("initialPelvisPositionTime", registry);
@@ -60,6 +65,7 @@ public class PelvisICPBasedTranslationManager
 
    private final BooleanYoVariable isEnabled = new BooleanYoVariable("isPelvisTranslationManagerEnabled", registry);
    private final BooleanYoVariable isRunning = new BooleanYoVariable("isPelvisTranslationManagerRunning", registry);
+   private final BooleanYoVariable isFrozen = new BooleanYoVariable("isPelvisTranslationManagerFrozen", registry);
 
    private final BooleanYoVariable manualMode = new BooleanYoVariable("manualModeICPOffset", registry);
 
@@ -78,10 +84,14 @@ public class PelvisICPBasedTranslationManager
    private final FramePoint2d tempPosition2d = new FramePoint2d();
    private final FrameVector2d tempError2d = new FrameVector2d();
    private final FrameVector2d tempICPOffset = new FrameVector2d();
+   private final FrameVector2d icpOffsetForFreezing = new FrameVector2d();
 
    public PelvisICPBasedTranslationManager(MomentumBasedController momentumBasedController, PelvisPoseProvider desiredPelvisPoseProvider,
          YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
+      supportPolygonSafeMargin.set(0.04);
+      frozenOffsetDecayAlpha.set(0.99);
+
       yoTime = momentumBasedController.getYoTime();
       controlDT = momentumBasedController.getControlDT();
       pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
@@ -126,6 +136,12 @@ public class PelvisICPBasedTranslationManager
 
    public void compute(RobotSide supportLeg, FramePoint2d actualICP)
    {
+      if (isFrozen.getBooleanValue()) 
+      {
+         icpOffsetForFreezing.scale(frozenOffsetDecayAlpha.getDoubleValue());
+         return;
+      }
+      
       if (isUsingWaypointTrajectory != null)
       {
          if (isUsingWaypointTrajectory.getBooleanValue())
@@ -238,11 +254,25 @@ public class PelvisICPBasedTranslationManager
       desiredICPOffset.add(integralTerm);
    }
 
-   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify)
+   
+   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
+
+   private final FramePoint2d originalICPToModify = new FramePoint2d();
+   
+   public void addICPOffset(FramePoint2d desiredICPToModify, FrameVector2d desiredICPVelocityToModify, FrameConvexPolygon2d supportPolygon)
    {
-      if (!isEnabled.getBooleanValue())
+      desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
+      desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());
+      
+      originalICPToModify.setIncludingFrame(desiredICPToModify);
+      
+      if (!isEnabled.getBooleanValue() || !isRunning.getBooleanValue())
       {
          desiredICPOffset.setToZero();
+         icpOffsetForFreezing.setToZero();
+         desiredICPToModify.changeFrame(worldFrame);
+         desiredICPVelocityToModify.changeFrame(worldFrame);
          return;
       }
 
@@ -251,23 +281,39 @@ public class PelvisICPBasedTranslationManager
          // Ignore the desiredICPOffset frame assuming the user wants to control the ICP in the supportFrame
          tempICPOffset.setIncludingFrame(supportFrame, desiredICPOffset.getX(), desiredICPOffset.getY());
       }
-      else if (!isRunning.getBooleanValue())
-      {
-         desiredICPOffset.setToZero();
-         return;
-      }
+      
       else
       {
          desiredICPOffset.getFrameTuple2dIncludingFrame(tempICPOffset);
          tempICPOffset.changeFrame(supportFrame);
       }
-      desiredICPToModify.add(tempICPOffset);
+      
+      if (isFrozen.getBooleanValue())
+      {
+         desiredICPOffset.setAndMatchFrame(icpOffsetForFreezing);
+         desiredICPToModify.add(icpOffsetForFreezing);
+      }
+      
+      else
+      {
+         desiredICPToModify.add(tempICPOffset);
+
+         convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygon, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
+         safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
+
+         icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
+         icpOffsetForFreezing.sub(originalICPToModify);
+      }
+
+      desiredICPToModify.changeFrame(worldFrame);
+      desiredICPVelocityToModify.changeFrame(worldFrame);
    }
 
    public void disable()
    {
       isEnabled.set(false);
       isRunning.set(false);
+      isFrozen.set(false);
 
       pelvisPositionError.setToZero();
       pelvisPositionCumulatedError.setToZero();
@@ -283,7 +329,13 @@ public class PelvisICPBasedTranslationManager
       if (isEnabled.getBooleanValue())
          return;
       isEnabled.set(true);
+      isFrozen.set(false);
       initialize();
+   }
+   
+   public void freeze()
+   {
+      isFrozen.set(true);
    }
 
    private void initialize()
