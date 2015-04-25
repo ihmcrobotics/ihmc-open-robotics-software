@@ -7,13 +7,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.37278711795806885</x>
-      <y>0.34214282035827637</y>
-      <z>1.3326124995946884</z>
+      <x>0.4957192518032384</x>
+      <y>0.39689241829455574</y>
+      <z>1.419158279353664</z>
     </position>
     <orientation>
       <x>0.6156760567898663</x>
-      <y>-0.09825948062238869</y>
+      <y>-0.0982594806223887</y>
       <z>0.3258560360061841</z>
       <w>0.7107080352450198</w>
     </orientation>
@@ -36,13 +36,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3709641695022583</x>
-      <y>0.3630639314651489</y>
-      <z>1.3313619941473007</z>
+      <x>0.4892390050019483</x>
+      <y>0.430824753917469</y>
+      <z>1.4151446548123001</z>
     </position>
     <orientation>
       <x>0.6066767515292087</x>
-      <y>-0.06549732324378932</y>
+      <y>-0.06549732324378933</y>
       <z>0.35510736364002293</z>
       <w>0.7082034877706391</w>
     </orientation>
@@ -65,15 +65,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.36132705211639404</x>
-      <y>0.3867717981338501</y>
-      <z>1.3252510875463486</z>
+      <x>0.4751402589265458</x>
+      <y>0.4694311005900081</y>
+      <z>1.4015006362207572</z>
     </position>
     <orientation>
       <x>0.5981516910707427</x>
-      <y>-0.01592104156276773</y>
-      <z>0.3795790420371394</z>
-      <w>0.7056067075580665</w>
+      <y>-0.015921041562767784</y>
+      <z>0.37957904203713927</z>
+      <w>0.7056067075580666</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>
@@ -94,14 +94,14 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3306771516799927</x>
-      <y>0.4069254398345947</y>
-      <z>1.3065066188573837</z>
+      <x>0.43419941423124186</x>
+      <y>0.5060063135715184</y>
+      <z>1.3776833117827931</z>
     </position>
     <orientation>
       <x>0.5845832453434707</x>
-      <y>0.03232193117442922</y>
-      <z>0.41886539877686446</z>
+      <y>0.03232193117442926</y>
+      <z>0.4188653987768646</z>
       <w>0.6940961747022881</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
@@ -123,15 +123,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3150752782821655</x>
-      <y>0.37794744968414307</y>
-      <z>1.2989924997091293</z>
+      <x>0.37758341051726263</x>
+      <y>0.517821176328155</y>
+      <z>1.3451235521488454</z>
     </position>
     <orientation>
       <x>0.5025099039469251</x>
       <y>0.17792649990604426</y>
       <z>0.5224980836295058</z>
-      <w>0.6654485026430901</w>
+      <w>0.66544850264309</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>
@@ -152,13 +152,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.2401055097579956</x>
-      <y>0.3864070177078247</y>
-      <z>1.2580025047063828</z>
+      <x>0.3315653658912361</x>
+      <y>0.5025508737319897</y>
+      <z>1.3192046241461945</z>
     </position>
     <orientation>
       <x>0.5731100744376503</x>
-      <y>0.100108792733708</y>
+      <y>0.10010879273370796</y>
       <z>0.45184751764397585</z>
       <w>0.6762816669069533</w>
     </orientation>
@@ -181,9 +181,9 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.21225106716156006</x>
-      <y>0.34698450565338135</y>
-      <z>1.244629368185997</z>
+      <x>0.2973291443147795</x>
+      <y>0.4706323475322311</y>
+      <z>1.3000634009331624</z>
     </position>
     <orientation>
       <x>0.5643236719846163</x>
@@ -210,15 +210,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.18519240617752075</x>
-      <y>0.3052104711532593</y>
-      <z>1.2353455871343613</z>
+      <x>0.2753962406663568</x>
+      <y>0.4262871213092321</y>
+      <z>1.288295686572595</z>
     </position>
     <orientation>
-      <x>0.5730931872531031</x>
+      <x>0.5730931872531032</x>
       <y>0.1348190781388066</y>
-      <z>0.44714296750836824</z>
-      <w>0.6733878388430344</w>
+      <z>0.4471429675083682</z>
+      <w>0.6733878388430343</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>
@@ -239,9 +239,9 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.1764744520187378</x>
-      <y>0.2512279748916626</y>
-      <z>1.2375563234090805</z>
+      <x>0.2703983855689923</x>
+      <y>0.37135410106634736</y>
+      <z>1.2860125770479154</z>
     </position>
     <orientation>
       <x>0.573714562572049</x>
@@ -268,14 +268,14 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.1860916018486023</x>
-      <y>0.19857358932495117</y>
-      <z>1.2489383071660995</z>
+      <x>0.2877025829755387</x>
+      <y>0.3126601489064229</y>
+      <z>1.2964721418240006</z>
     </position>
     <orientation>
       <x>0.5780915081575296</x>
-      <y>0.12578039001136937</y>
-      <z>0.40822172586342276</z>
+      <y>0.12578039001136934</y>
+      <z>0.4082217258634228</z>
       <w>0.6952298355348605</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
@@ -297,15 +297,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.19056278467178345</x>
-      <y>0.19744622707366943</y>
-      <z>1.2548751682043076</z>
+      <x>0.3165764872372037</x>
+      <y>0.2770620215257318</y>
+      <z>1.3130290334199641</z>
     </position>
     <orientation>
       <x>0.6201361045720132</x>
-      <y>0.02753038803836398</y>
+      <y>0.02753038803836394</y>
       <z>0.3247295139304691</z>
-      <w>0.7135993500019373</w>
+      <w>0.7135993500019374</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>
@@ -326,15 +326,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.21561819314956665</x>
-      <y>0.18344056606292725</y>
-      <z>1.2693595737218857</z>
+      <x>0.34316669487875595</x>
+      <y>0.26013653068868314</y>
+      <z>1.3280886867474013</z>
     </position>
     <orientation>
       <x>0.6183910564260512</x>
-      <y>0.018201141367309458</y>
+      <y>0.018201141367309416</y>
       <z>0.3179302605119722</z>
-      <w>0.7184577713658534</w>
+      <w>0.7184577713658535</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>
@@ -355,13 +355,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.2636396288871765</x>
-      <y>0.1851276159286499</y>
-      <z>1.2953438609838486</z>
+      <x>0.3952584795970262</x>
+      <y>0.2518394282142414</y>
+      <z>1.357198628297212</z>
     </position>
     <orientation>
-      <x>0.6188188649916162</x>
-      <y>-0.01261651487140367</y>
+      <x>0.6188188649916163</x>
+      <y>-0.01261651487140369</y>
       <z>0.2975431314687325</z>
       <w>0.7268920970809685</w>
     </orientation>
@@ -384,9 +384,9 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3049577474594116</x>
-      <y>0.18997347354888916</y>
-      <z>1.314923271536827</z>
+      <x>0.43268429648445417</x>
+      <y>0.2629367632117504</y>
+      <z>1.3778699714958147</z>
     </position>
     <orientation>
       <x>0.6054671947981671</x>
@@ -413,13 +413,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3455618619918823</x>
-      <y>0.21148920059204102</y>
-      <z>1.335659846663475</z>
+      <x>0.46880449273963626</x>
+      <y>0.29232462728580005</y>
+      <z>1.3979245056411864</z>
     </position>
     <orientation>
-      <x>0.5907571705330629</x>
-      <y>0.0076364723159074235</y>
+      <x>0.590757170533063</x>
+      <y>0.0076364723159074045</y>
       <z>0.3388339758699492</z>
       <w>0.7322152597088514</w>
     </orientation>
@@ -442,13 +442,13 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3803318738937378</x>
-      <y>0.2446538209915161</y>
-      <z>1.3528485149145126</z>
+      <x>0.49484418270928904</x>
+      <y>0.3393827411437509</y>
+      <z>1.4121221415668725</z>
     </position>
     <orientation>
       <x>0.5681303381086845</x>
-      <y>0.03810487447165674</y>
+      <y>0.03810487447165672</y>
       <z>0.3750960590207549</z>
       <w>0.7314908638999598</w>
     </orientation>
@@ -471,15 +471,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.3909209966659546</x>
-      <y>0.2967299222946167</y>
-      <z>1.353283628821373</z>
+      <x>0.5016726382993181</x>
+      <y>0.39425906345258466</y>
+      <z>1.4151070912001833</z>
     </position>
     <orientation>
-      <x>0.563042970664486</x>
-      <y>0.03672721801645469</y>
+      <x>0.5630429706644859</x>
+      <y>0.036727218016454684</y>
       <z>0.3905793534641979</z>
-      <w>0.72737988237892</w>
+      <w>0.7273798823789202</w>
     </orientation>
     <trajectoryTime>4.3</trajectoryTime>
     <jointAngles>

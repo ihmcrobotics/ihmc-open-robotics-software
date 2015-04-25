@@ -1,52 +1,30 @@
 <object-stream>
   <long>343997042632</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>-0.10902393829906981</x>
-      <y>0.5370691686369805</y>
-      <z>0.16640625230816147</z>
-      <w>0.8197435258482348</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.05</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>348834218332</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>-0.20573647119911362</x>
-      <y>0.5079389879121242</y>
-      <z>0.31402126605843406</z>
-      <w>0.7752813253525467</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.05</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>358258854643</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>0.20573647119911362</x>
-      <y>0.5079389879121242</y>
-      <z>-0.31402126605843406</z>
-      <w>0.7752813253525467</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.05</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>378759210378</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>0.0</x>
-      <y>0.5480232759862091</y>
-      <z>-0.0</z>
-      <w>0.836463082853836</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.05</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>393004376988</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -54,13 +32,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -68,13 +48,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -83,12 +65,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -96,13 +80,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -110,13 +96,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -125,12 +113,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -139,12 +129,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -153,12 +145,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -167,12 +161,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -181,12 +177,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -195,12 +193,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -209,12 +209,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -222,21 +224,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393017070707</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -244,13 +248,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -258,13 +264,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -273,12 +281,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -286,13 +296,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -300,13 +312,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -315,12 +329,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -329,12 +345,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -343,12 +361,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -357,12 +377,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -371,12 +393,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -385,12 +409,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -399,12 +425,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -412,21 +440,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393022942051</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -434,13 +464,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -448,13 +480,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -463,12 +497,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -476,13 +512,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -490,13 +528,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -505,12 +545,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -519,12 +561,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -533,12 +577,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -547,12 +593,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -561,12 +609,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -575,12 +625,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -589,12 +641,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -602,21 +656,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393029050370</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -624,13 +680,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -638,13 +696,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -653,12 +713,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -666,13 +728,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -680,13 +744,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -695,12 +761,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -709,12 +777,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -723,12 +793,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -737,12 +809,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -751,12 +825,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -765,12 +841,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -779,12 +857,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -792,21 +872,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393035061640</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -814,13 +896,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -828,13 +912,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -843,12 +929,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -856,13 +944,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -870,13 +960,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -885,12 +977,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -899,12 +993,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -913,12 +1009,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -927,12 +1025,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -941,12 +1041,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -955,12 +1057,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -969,12 +1073,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -982,21 +1088,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393042014626</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1004,13 +1112,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1018,13 +1128,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1033,12 +1145,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1046,13 +1160,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -1060,13 +1176,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -1075,12 +1193,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -1089,12 +1209,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -1103,12 +1225,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -1117,12 +1241,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -1131,12 +1257,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -1145,12 +1273,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -1159,12 +1289,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -1172,21 +1304,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393048186671</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1194,13 +1328,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1208,13 +1344,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1223,12 +1361,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1236,13 +1376,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -1250,13 +1392,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -1265,12 +1409,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -1279,12 +1425,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -1293,12 +1441,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -1307,12 +1457,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -1321,12 +1473,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -1335,12 +1489,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -1349,12 +1505,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -1362,21 +1520,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393052686441</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1384,13 +1544,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1398,13 +1560,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1413,12 +1577,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1426,13 +1592,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -1440,13 +1608,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -1455,12 +1625,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -1469,12 +1641,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -1483,12 +1657,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -1497,12 +1673,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -1511,12 +1689,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -1525,12 +1705,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -1539,12 +1721,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -1552,21 +1736,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393057562139</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1574,13 +1760,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1588,13 +1776,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1603,12 +1793,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1616,13 +1808,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -1630,13 +1824,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -1645,12 +1841,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -1659,12 +1857,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -1673,12 +1873,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -1687,12 +1889,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -1701,12 +1905,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -1715,12 +1921,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -1729,12 +1937,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -1742,21 +1952,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393061648290</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1764,13 +1976,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1778,13 +1992,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1793,12 +2009,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1806,13 +2024,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -1820,13 +2040,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -1835,12 +2057,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -1849,12 +2073,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -1863,12 +2089,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -1877,12 +2105,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -1891,12 +2121,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -1905,12 +2137,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -1919,12 +2153,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -1932,21 +2168,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393065801020</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -1954,13 +2192,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -1968,13 +2208,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -1983,12 +2225,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -1996,13 +2240,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -2010,13 +2256,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -2025,12 +2273,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -2039,12 +2289,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -2053,12 +2305,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -2067,12 +2321,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -2081,12 +2337,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -2095,12 +2353,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -2109,12 +2369,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -2122,21 +2384,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393069745331</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -2144,13 +2408,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -2158,13 +2424,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -2173,12 +2441,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -2186,13 +2456,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -2200,13 +2472,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -2215,12 +2489,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -2229,12 +2505,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -2243,12 +2521,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -2257,12 +2537,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -2271,12 +2553,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -2285,12 +2569,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -2299,12 +2585,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -2312,21 +2600,23 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>393074663344</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22975163505258184</x>
@@ -2334,13 +2624,15 @@
           <z>-0.02987535949617015</z>
         </location>
         <orientation>
-          <x>0.10388797702290378</x>
+          <x>0.10388797702290382</x>
           <y>0.07902114155063722</y>
-          <z>0.6854966870048804</z>
-          <w>0.7162801403944239</w>
+          <z>0.6854966870048803</z>
+          <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.589978863984131</x>
@@ -2348,13 +2640,15 @@
           <z>-0.12587274122228492</z>
         </location>
         <orientation>
-          <x>0.1038879770229038</x>
+          <x>0.10388797702290377</x>
           <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3520499195565967</x>
@@ -2363,12 +2657,14 @@
         </location>
         <orientation>
           <x>0.1038879770229037</x>
-          <y>0.07902114155063691</y>
+          <y>0.0790211415506369</y>
           <z>0.6854966870048804</z>
           <w>0.716280140394424</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5418739633106138</x>
@@ -2376,13 +2672,15 @@
           <z>-0.09788978869637449</z>
         </location>
         <orientation>
-          <x>0.10388797702290452</x>
+          <x>0.10388797702290453</x>
           <y>0.07902114155063793</y>
           <z>0.6854966870048803</z>
           <w>0.7162801403944239</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.32705187735207897</x>
@@ -2390,13 +2688,15 @@
           <z>0.12599590708224523</z>
         </location>
         <orientation>
-          <x>0.10723595901373338</x>
-          <y>0.07441439159384207</y>
-          <z>0.7160880072394659</z>
-          <w>0.6856973919346158</w>
+          <x>0.1072359590137334</x>
+          <y>0.07441439159384208</y>
+          <z>0.716088007239466</z>
+          <w>0.6856973919346155</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5333739524543163</x>
@@ -2405,12 +2705,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.337085264136306</x>
@@ -2419,12 +2721,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5469726688604439</x>
@@ -2433,12 +2737,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.3013425513960456</x>
@@ -2447,12 +2753,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5113841611201582</x>
@@ -2461,12 +2769,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22822593842254454</x>
@@ -2475,12 +2785,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.44343257499406696</x>
@@ -2489,12 +2801,14 @@
         </location>
         <orientation>
           <x>0.10723595617238812</x>
-          <y>0.07441439568840746</y>
+          <y>0.07441439568840745</y>
           <z>0.7160879810576457</z>
           <w>0.6856974192768321</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.22173603376894607</x>
@@ -2502,45 +2816,35 @@
           <z>0.05699644851548141</z>
         </location>
         <orientation>
-          <x>0.10723595617238818</x>
-          <y>0.07441439568840733</y>
-          <z>0.7160879810576457</z>
-          <w>0.6856974192768321</w>
+          <x>0.1072359561723882</x>
+          <y>0.07441439568840734</y>
+          <z>0.7160879810576458</z>
+          <w>0.685697419276832</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
     <swingTime>1.5</swingTime>
     <transferTime>1.5</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>424119360372</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>469985288371</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>0.0</x>
-      <y>0.5728668125783684</y>
-      <z>-0.0</z>
-      <w>0.8196484704105172</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.11</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>477827205197</long>
   <us.ihmc.communication.packets.walking.HeadOrientationPacket>
-    <quaternion>
-      <x>0.0</x>
-      <y>0.5951877029883754</y>
-      <z>-0.0</z>
-      <w>0.8035867085831009</w>
-    </quaternion>
-    <desiredJointForExtendedNeckPitchRangeAngle>0.16500000000000004</desiredJointForExtendedNeckPitchRangeAngle>
-    <desiredNeckPitchAngle>1.10999842</desiredNeckPitchAngle>
+    <destination>0</destination>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.HeadOrientationPacket>
   <long>497858691300</long>
   <us.ihmc.communication.packets.sensing.DepthDataFilterParameters>
+    <destination>0</destination>
     <quadtree>true</quadtree>
     <octree>true</octree>
     <nearScan>true</nearScan>
@@ -2558,10 +2862,15 @@
     <octreeZMaxAboveHead>0.0</octreeZMaxAboveHead>
     <xCutoffPelvis>0.0</xCutoffPelvis>
     <quadtreeHeightThreshold>0.05</quadtreeHeightThreshold>
+    <quadTreeMaxMultiLevelZChangeToFilterNoise>0.0</quadTreeMaxMultiLevelZChangeToFilterNoise>
+    <maxSameHeightPointsPerNode>0</maxSameHeightPointsPerNode>
+    <maxAllowableXYDistanceForAPointToBeConsideredClose>0.0</maxAllowableXYDistanceForAPointToBeConsideredClose>
     <quadTreeZAboveFeet>0.25</quadTreeZAboveFeet>
     <quadTreeZSlope>0.5</quadTreeZSlope>
     <quadTreeZMax>1.5</quadTreeZMax>
   </us.ihmc.communication.packets.sensing.DepthDataFilterParameters>
   <long>553262177668</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
+  <us.ihmc.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

@@ -1,19 +1,20 @@
 <object-stream>
   <long>76376521011</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.835345983505249</x>
-      <y>-0.8256687819957733</y>
-      <z>1.2528283596038818</z>
+      <x>0.8383050055597376</x>
+      <y>-0.9563397582921368</y>
+      <z>1.3451123784925079</z>
     </position>
     <orientation>
-      <x>0.6829302088148803</x>
-      <y>-0.664847520039254</y>
-      <z>0.22075060855503587</z>
-      <w>0.20701032293995314</w>
+      <x>0.6829302088177156</x>
+      <y>-0.6648475200395181</y>
+      <z>0.22075060855414616</z>
+      <w>0.2070103229417999</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -27,19 +28,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>90703848691</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.8653312921524048</x>
-      <y>-0.8266061842441559</y>
-      <z>1.1198300123214722</z>
+      <x>0.8682903142068934</x>
+      <y>-0.9572771605405194</y>
+      <z>1.2121140312100982</z>
     </position>
     <orientation>
-      <x>0.6829302088148803</x>
-      <y>-0.664847520039254</y>
-      <z>0.22075060855503587</z>
-      <w>0.20701032293995314</w>
+      <x>0.6829302088177156</x>
+      <y>-0.6648475200395181</y>
+      <z>0.22075060855414616</z>
+      <w>0.2070103229417999</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -53,23 +55,26 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>103739618455</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>-0.07840000000000001</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>268231403545</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.8928306102752686</x>
-      <y>-1.1834160089492798</y>
-      <z>1.1729412078857422</z>
+      <x>0.8312282587927725</x>
+      <y>-1.3196629000249491</y>
+      <z>1.2298792001584045</z>
     </position>
     <orientation>
-      <x>0.5449462995516384</x>
-      <y>-0.8139312067867392</y>
-      <z>0.17327244155225727</z>
-      <w>0.10259718427993295</w>
+      <x>0.5449462995516431</x>
+      <y>-0.8139312067867406</y>
+      <z>0.17327244155225632</z>
+      <w>0.10259718427993467</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -83,19 +88,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>324972663808</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.8179618716239929</x>
-      <y>-1.1678513288497925</y>
-      <z>1.262630581855774</z>
+      <x>0.8219068425965579</x>
+      <y>-1.3179344427300028</y>
+      <z>1.317943294065947</z>
     </position>
     <orientation>
-      <x>0.70590099626174</x>
-      <y>-0.6861811017422667</y>
-      <z>0.1297207050648057</z>
-      <w>0.11845597395394976</w>
+      <x>0.705900996262121</x>
+      <y>-0.6861811017422744</y>
+      <z>0.12972070506473812</z>
+      <w>0.11845597395408422</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -109,19 +115,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>337632253763</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9298398494720459</x>
-      <y>-1.1624339520931244</y>
-      <z>1.2536301612854004</z>
+      <x>0.9337848204446109</x>
+      <y>-1.3125170659733347</y>
+      <z>1.3089428734955735</z>
     </position>
     <orientation>
-      <x>0.70590099626174</x>
-      <y>-0.6861811017422667</y>
-      <z>0.1297207050648057</z>
-      <w>0.11845597395394976</w>
+      <x>0.705900996262121</x>
+      <y>-0.6861811017422744</y>
+      <z>0.12972070506473812</z>
+      <w>0.11845597395408422</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -135,19 +142,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>382230771037</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9487934708595276</x>
-      <y>-1.200416624546051</y>
-      <z>1.2235493659973145</z>
+      <x>0.9333856368409624</x>
+      <y>-1.3526362584015157</y>
+      <z>1.270365834464774</z>
     </position>
     <orientation>
-      <x>0.6656670018666531</x>
-      <y>-0.7310482732676346</y>
-      <z>0.11712345392952359</z>
-      <w>0.09347706305315936</w>
+      <x>0.6656670018672314</x>
+      <y>-0.7310482732676791</y>
+      <z>0.11712345392943695</z>
+      <w>0.09347706305332545</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -161,19 +169,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>501171328789</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9301497936248779</x>
-      <y>-1.1619985401630402</y>
-      <z>1.1820478439331055</z>
+      <x>0.936884872394421</x>
+      <y>-1.316855496687454</y>
+      <z>1.2217210304696555</z>
     </position>
     <orientation>
-      <x>0.7181477511827233</x>
-      <y>-0.6843275198105335</y>
-      <z>0.10319265707996543</z>
-      <w>0.07287611832342897</w>
+      <x>0.7181477511855325</x>
+      <y>-0.6843275198105265</y>
+      <z>0.10319265707961611</z>
+      <w>0.0728761183240751</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -187,19 +196,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>524905075259</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9370374083518982</x>
-      <y>-1.10306978225708</y>
-      <z>1.1631293296813965</z>
+      <x>0.9383301663240026</x>
+      <y>-1.2587897122912892</y>
+      <z>1.1998666699085627</z>
     </position>
     <orientation>
-      <x>0.7069574656901687</x>
-      <y>-0.6973817965718471</y>
-      <z>0.09807528306054264</z>
-      <w>0.06519977274116616</w>
+      <x>0.7069574656917372</x>
+      <y>-0.697381796571866</y>
+      <z>0.09807528306036196</z>
+      <w>0.0651997727414946</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -213,19 +223,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>544496191006</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9325766563415527</x>
-      <y>-1.0414341986179352</y>
-      <z>1.2314879894256592</z>
+      <x>0.9371956843878132</x>
+      <y>-1.196814345093559</y>
+      <z>1.1935976917081494</z>
     </position>
     <orientation>
-      <x>0.7103193928335931</x>
-      <y>-0.6933336714388393</y>
-      <z>-0.06967034810164968</z>
-      <w>-0.09940232797562856</w>
+      <x>0.7103193928350218</x>
+      <y>-0.6933336714388356</y>
+      <z>-0.06967034810147646</z>
+      <w>-0.09940232797600725</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -239,19 +250,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>569380040533</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.927364706993103</x>
-      <y>-1.0729679763317108</y>
-      <z>1.2400331497192383</z>
+      <x>0.9340461167430872</x>
+      <y>-1.2011280655565086</y>
+      <z>1.1444802832334824</z>
     </position>
     <orientation>
-      <x>0.6821695551300759</x>
-      <y>-0.6595970220060604</y>
-      <z>-0.2098865481448861</z>
-      <w>-0.23563553109671584</w>
+      <x>0.6821695551342365</x>
+      <y>-0.6595970220064017</y>
+      <z>-0.20988654814348126</z>
+      <w>-0.23563553109974383</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -265,19 +277,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>580487972061</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9299981594085693</x>
-      <y>-1.077218383550644</y>
-      <z>1.1940312385559082</z>
+      <x>0.9366795691585535</x>
+      <y>-1.2053784727754417</y>
+      <z>1.0984783720701523</z>
     </position>
     <orientation>
-      <x>0.6821695551300759</x>
-      <y>-0.6595970220060604</y>
-      <z>-0.2098865481448861</z>
-      <w>-0.23563553109671584</w>
+      <x>0.6821695551342365</x>
+      <y>-0.6595970220064017</y>
+      <z>-0.20988654814348126</z>
+      <w>-0.23563553109974383</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -291,19 +304,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>677642878369</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9299981594085693</x>
-      <y>-1.077218383550644</y>
-      <z>1.1940312385559082</z>
+      <x>0.9366795691585535</x>
+      <y>-1.2053784727754417</y>
+      <z>1.0984783720701523</z>
     </position>
     <orientation>
-      <x>0.6821695551300759</x>
-      <y>-0.6595970220060604</y>
-      <z>-0.2098865481448861</z>
-      <w>-0.23563553109671584</w>
+      <x>0.6821695551342365</x>
+      <y>-0.6595970220064017</y>
+      <z>-0.20988654814348126</z>
+      <w>-0.23563553109974383</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -317,19 +331,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>800364206168</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9494441151618958</x>
-      <y>-1.162435531616211</y>
-      <z>1.2306842803955078</z>
+      <x>0.9373044021700013</x>
+      <y>-1.2653708824535055</y>
+      <z>1.1087952287277</z>
     </position>
     <orientation>
-      <x>0.6144242751073811</x>
-      <y>-0.6674371681563652</y>
-      <z>-0.3040793147562178</z>
-      <w>-0.2907683047514449</w>
+      <x>0.6144242751134606</x>
+      <y>-0.6674371681579967</y>
+      <z>-0.30407931475341143</z>
+      <w>-0.29076830475763393</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -343,19 +358,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>804667030371</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9491784572601318</x>
-      <y>-1.196434497833252</y>
-      <z>1.2156835794448853</z>
+      <x>0.9370387442682374</x>
+      <y>-1.2993698486705465</y>
+      <z>1.0937945277770775</z>
     </position>
     <orientation>
-      <x>0.6144242751073811</x>
-      <y>-0.6674371681563652</y>
-      <z>-0.3040793147562178</z>
-      <w>-0.2907683047514449</w>
+      <x>0.6144242751134606</x>
+      <y>-0.6674371681579967</y>
+      <z>-0.30407931475341143</z>
+      <w>-0.29076830475763393</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -369,19 +385,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>824447597897</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9501343369483948</x>
-      <y>-1.21618190407753</y>
-      <z>1.1946825981140137</z>
+      <x>0.9379946239565004</x>
+      <y>-1.3191172549148245</y>
+      <z>1.072793546446206</z>
     </position>
     <orientation>
-      <x>0.6144242751073811</x>
-      <y>-0.6674371681563652</y>
-      <z>-0.3040793147562178</z>
-      <w>-0.2907683047514449</w>
+      <x>0.6144242751134606</x>
+      <y>-0.6674371681579967</y>
+      <z>-0.30407931475341143</z>
+      <w>-0.29076830475763393</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -395,19 +412,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>831969996925</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9506810307502747</x>
-      <y>-1.2261668145656586</y>
-      <z>1.1606810092926025</z>
+      <x>0.9385413177583802</x>
+      <y>-1.3291021654029531</y>
+      <z>1.0387919576247948</z>
     </position>
     <orientation>
-      <x>0.6144242751073811</x>
-      <y>-0.6674371681563652</y>
-      <z>-0.3040793147562178</z>
-      <w>-0.2907683047514449</w>
+      <x>0.6144242751134606</x>
+      <y>-0.6674371681579967</y>
+      <z>-0.30407931475341143</z>
+      <w>-0.29076830475763393</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -421,19 +439,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>841576704893</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9514265060424805</x>
-      <y>-1.2300967574119568</y>
-      <z>1.0876799821853638</z>
+      <x>0.939286793050586</x>
+      <y>-1.3330321082492513</y>
+      <z>0.965790930517556</z>
     </position>
     <orientation>
-      <x>0.6144242751073811</x>
-      <y>-0.6674371681563652</y>
-      <z>-0.3040793147562178</z>
-      <w>-0.2907683047514449</w>
+      <x>0.6144242751134606</x>
+      <y>-0.6674371681579967</y>
+      <z>-0.30407931475341143</z>
+      <w>-0.29076830475763393</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -447,19 +466,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>870331496220</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9558359384536743</x>
-      <y>-1.1640959084033966</y>
-      <z>1.0870535373687744</z>
+      <x>0.9381442292172522</x>
+      <y>-1.2669313387956196</y>
+      <z>0.9657610080013803</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -473,19 +493,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>877642712905</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9560078382492065</x>
-      <y>-1.1530972719192505</y>
-      <z>1.1610544919967651</z>
+      <x>0.9383161290127844</x>
+      <y>-1.2559327023114735</y>
+      <z>1.039761962629371</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -499,19 +520,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>885558452026</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9554767608642578</x>
-      <y>-1.1361055374145508</y>
-      <z>1.1770552396774292</z>
+      <x>0.9377850516278357</x>
+      <y>-1.2389409678067738</y>
+      <z>1.055762710310035</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -525,19 +547,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>893253711219</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9549147486686707</x>
-      <y>-1.0860986411571503</y>
-      <z>1.1780554056167603</z>
+      <x>0.9372230394322485</x>
+      <y>-1.1889340715493733</y>
+      <z>1.0567628762493662</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -551,19 +574,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>908292022391</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9574307203292847</x>
-      <y>-1.0568994581699371</y>
-      <z>1.136053442955017</z>
+      <x>0.9397390110928625</x>
+      <y>-1.1597348885621601</y>
+      <z>1.014760913587623</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -577,19 +601,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>930008103743</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.958126425743103</x>
-      <y>-0.9895385205745697</y>
-      <z>1.0920535326004028</z>
+      <x>0.9404347165066809</x>
+      <y>-1.0923739509667927</y>
+      <z>0.9707610032330087</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -603,19 +628,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>938279709383</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9569075107574463</x>
-      <y>-0.9395131766796112</y>
-      <z>1.084053635597229</z>
+      <x>0.9392158015210241</x>
+      <y>-1.0423486070718342</y>
+      <z>0.9627611062298349</z>
     </position>
     <orientation>
-      <x>0.612646268568727</x>
-      <y>-0.6672121886398983</y>
-      <z>-0.33183502933312303</z>
-      <w>-0.26339695939702623</w>
+      <x>0.6126462685834928</x>
+      <y>-0.6672121886443333</y>
+      <z>-0.33183502932670894</z>
+      <w>-0.2633969594108929</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -629,19 +655,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1072777059377</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9547576904296875</x>
-      <y>-0.8979686498641968</y>
-      <z>1.0702431201934814</z>
+      <x>0.9375517399832332</x>
+      <y>-1.00707366578991</y>
+      <z>0.9544845318767435</z>
     </position>
     <orientation>
-      <x>0.621122807417142</x>
-      <y>-0.6738784750910465</y>
-      <z>-0.3156840128236668</z>
-      <w>-0.2458411335283521</w>
+      <x>0.6211228074330974</x>
+      <y>-0.6738784750953298</y>
+      <z>-0.3156840128171884</z>
+      <w>-0.2458411335420855</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -655,13 +682,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1119710485630</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9328391551971436</x>
-      <y>-0.9749754369258881</y>
-      <z>1.1553864479064941</z>
+      <x>0.9354214375384655</x>
+      <y>-1.0246046274015237</y>
+      <z>1.0033000406550807</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -681,13 +709,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1134722355809</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9344332218170166</x>
-      <y>-1.0493979752063751</y>
-      <z>1.174386978149414</z>
+      <x>0.9370155041583386</x>
+      <y>-1.0990271656820108</y>
+      <z>1.0223005708980006</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -707,13 +736,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1142616605409</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9341912269592285</x>
-      <y>-1.080397129058838</y>
-      <z>1.2043883800506592</z>
+      <x>0.9367735093005505</x>
+      <y>-1.1300263195344735</y>
+      <z>1.0523019727992458</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -733,13 +763,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1146780034076</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9341208338737488</x>
-      <y>-1.0893968343734741</y>
-      <z>1.2353898286819458</z>
+      <x>0.9367031162150707</x>
+      <y>-1.1390260248491098</y>
+      <z>1.0833034214305324</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -759,25 +790,32 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1152645258349</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>-0.06272</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1162551565972</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>-0.04704</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1166851349437</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>-0.03136</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>1190527765446</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.934448778629303</x>
-      <y>-1.09638911485672</y>
-      <z>1.3633900880813599</z>
+      <x>0.9370310609706249</x>
+      <y>-1.1460183053323556</y>
+      <z>1.2113036808299464</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -797,13 +835,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1204054684123</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9339480996131897</x>
-      <y>-1.03240966796875</y>
-      <z>1.3673903942108154</z>
+      <x>0.9365303819545117</x>
+      <y>-1.0820388584443856</y>
+      <z>1.215303986959402</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -823,13 +862,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1216630370546</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9315744042396545</x>
-      <y>-0.9944838881492615</y>
-      <z>1.3493895530700684</z>
+      <x>0.9341566865809765</x>
+      <y>-1.044113078624897</y>
+      <z>1.197303145818655</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -849,13 +889,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1229390389976</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.93425452709198</x>
-      <y>-0.9732749462127686</y>
-      <z>1.3323886394500732</z>
+      <x>0.9368368094333019</x>
+      <y>-1.0229041366884042</y>
+      <z>1.1803022321986598</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -875,13 +916,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1240598923414</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9324674606323242</x>
-      <y>-0.9321192502975464</y>
-      <z>1.3853912353515625</z>
+      <x>0.9350497429736462</x>
+      <y>-0.981748440773182</y>
+      <z>1.233304828100149</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -901,13 +943,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1264020905074</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9310512542724609</x>
-      <y>-0.9994159936904907</y>
-      <z>1.4263930320739746</z>
+      <x>0.9336335366137829</x>
+      <y>-1.0490451841661264</y>
+      <z>1.2743066248225612</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -927,13 +970,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1335299783098</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9328197240829468</x>
-      <y>-1.0537194609642029</y>
-      <z>1.4383935928344727</z>
+      <x>0.9354020064242687</x>
+      <y>-1.1033486514398385</y>
+      <z>1.2863071855830592</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -953,13 +997,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1345189346850</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9327645301818848</x>
-      <y>-1.124053418636322</y>
-      <z>1.4293931722640991</z>
+      <x>0.9353468125232067</x>
+      <y>-1.1736826091119577</y>
+      <z>1.2773067650126857</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -979,13 +1024,14 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1358499511310</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.932555615901947</x>
-      <y>-1.1713181734085083</y>
-      <z>1.4273930788040161</z>
+      <x>0.935137898243269</x>
+      <y>-1.220947363884144</y>
+      <z>1.2753066715526027</z>
     </position>
     <orientation>
       <x>0.5789435175889692</x>
@@ -1005,19 +1051,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1384034891442</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9430493712425232</x>
-      <y>-1.146648794412613</y>
-      <z>1.4016077518463135</z>
+      <x>0.9348937520362594</x>
+      <y>-1.267386366840366</y>
+      <z>1.2969371997334316</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1031,19 +1078,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1388005099693</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9423384666442871</x>
-      <y>-1.182877093553543</y>
-      <z>1.4236087799072266</z>
+      <x>0.9341828474380233</x>
+      <y>-1.3036146659812962</y>
+      <z>1.3189382277943447</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1057,19 +1105,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1399218357502</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9433099031448364</x>
-      <y>-1.1980775594711304</y>
-      <z>1.4376094341278076</z>
+      <x>0.9351542839385726</x>
+      <y>-1.3188151318988834</y>
+      <z>1.3329388820149257</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1083,19 +1132,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1408202558725</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9417293071746826</x>
-      <y>-1.2392298579216003</y>
-      <z>1.3966073989868164</z>
+      <x>0.9335736879684188</x>
+      <y>-1.3599674303493534</y>
+      <z>1.2919368468739345</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1109,19 +1159,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1420177722117</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.9428223967552185</x>
-      <y>-1.2112512290477753</y>
-      <z>1.3616056442260742</z>
+      <x>0.9346667775489547</x>
+      <y>-1.3319888014755283</y>
+      <z>1.2569350921131923</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1135,19 +1186,20 @@
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1424069559452</long>
   <us.ihmc.communication.packets.manipulation.HandPosePacket>
+    <destination>0</destination>
     <robotSide>LEFT</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.8628249764442444</x>
-      <y>-1.21187624335289</y>
-      <z>1.3616058826446533</z>
+      <x>0.8546693572379805</x>
+      <y>-1.332613815780643</y>
+      <z>1.2569353305317714</z>
     </position>
     <orientation>
-      <x>0.6453863973384125</x>
-      <y>-0.6791706045520131</y>
-      <z>-0.2534040250904233</z>
-      <w>-0.24081131225706542</w>
+      <x>0.6453863973384126</x>
+      <y>-0.679170604552013</y>
+      <z>-0.25340402509042326</z>
+      <w>-0.24081131225706548</w>
     </orientation>
     <trajectoryTime>1.925</trajectoryTime>
     <jointAngles>
@@ -1160,5 +1212,7 @@
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
   <long>1430297888140</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
+  <us.ihmc.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
