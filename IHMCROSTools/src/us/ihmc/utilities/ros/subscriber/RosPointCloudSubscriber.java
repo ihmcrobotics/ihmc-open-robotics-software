@@ -58,6 +58,21 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
       PointType pointType = null;
       int width;
       int height;
+      
+      public UnpackedPointCloud()
+      {
+         
+      }
+      
+      public UnpackedPointCloud(int width, int height, PointType pointType, Point3d[] points, Color[] pointColors)
+      {
+         this.pointColors=pointColors;
+         this.points = points;
+         this.width=width;
+         this.height=height;
+         this.pointType=pointType;
+      }
+      
 
 
       public int getWidth()

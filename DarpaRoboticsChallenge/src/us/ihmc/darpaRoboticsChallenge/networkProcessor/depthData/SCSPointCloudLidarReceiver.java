@@ -45,7 +45,7 @@ public class SCSPointCloudLidarReceiver implements ObjectConsumer<SimulatedLidar
       long[] timestamps = new long[points.size()];
       Arrays.fill(timestamps, packet.getScanStartTime());
 
-      pointCloudDataReceiver.receivedPointCloudData(lidarScanFrame, lidarFrame, timestamps, points);
+      pointCloudDataReceiver.receivedPointCloudData(lidarScanFrame, lidarFrame, timestamps, points, PointCloudSource.NEARSCAN,PointCloudSource.QUADTREE);
    }
 
    public void connect()

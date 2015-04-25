@@ -4,6 +4,7 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
 {
    private final String lidarSensorName;
    private final String laserTopic;
+   private final String quadTreeCloudTopic;
    private final String lidarSpindleJointName;
    private final String lidarSpindleJointTopic;
    private final String lidarBaseFrameForRos;
@@ -13,12 +14,13 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    private final boolean useRosForTransformFromPoseToSensor;
    private final int lidarId;
 
-   public DRCRobotLidarParameters(boolean useRosForTransformFromPoseToSensor, String lidarSensorName, String laserTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
+   public DRCRobotLidarParameters(boolean useRosForTransformFromPoseToSensor, String lidarSensorName, String laserTopic, String groundCloudTopic, String lidarSpindleJointName, String lidarSpindleJointTopic,
          String poseFrameName, String lidarBaseFrameForRos, String lidarEndFrameForRos, double lidar_spindle_velocity, int lidarId)
    {
       this.useRosForTransformFromPoseToSensor = useRosForTransformFromPoseToSensor;
       this.lidarSensorName = lidarSensorName;//"head_hokuyo_sensor"
       this.laserTopic = laserTopic;//multisense_namespace+"/lidar_scan"
+      this.quadTreeCloudTopic = groundCloudTopic;
       this.lidarSpindleJointName = lidarSpindleJointName;//"hokuyo_joint";
       this.lidarSpindleJointTopic = lidarSpindleJointTopic;//multisense_namespace + "/joint_states";
       this.poseFrameName = poseFrameName;//"head";
@@ -36,6 +38,11 @@ public class DRCRobotLidarParameters implements DRCRobotSensorParameters
    public String getRosTopic()
    {
       return laserTopic;
+   }
+   
+   public String getGroundCloudTopic()
+   {
+      return quadTreeCloudTopic;
    }
 
    public String getLidarSpindleJointName()

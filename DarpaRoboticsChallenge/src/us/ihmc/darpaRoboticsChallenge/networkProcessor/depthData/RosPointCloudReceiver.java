@@ -17,25 +17,28 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
    private final ReferenceFrame cloudFrame;
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final ReferenceFrame sensorframe;
+   private final PointCloudSource[] pointCloudSource;
 
-   public RosPointCloudReceiver(DRCRobotLidarParameters lidarParameters, RosMainNode rosMainNode, ReferenceFrame scanFrame,
-         PointCloudDataReceiver pointCloudDataReceiver)
+   public RosPointCloudReceiver(String sensorNameInSdf, String rosTopic, RosMainNode rosMainNode, ReferenceFrame scanFrame,
+         PointCloudDataReceiver pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
       this.cloudFrame = scanFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
-      this.sensorframe = pointCloudDataReceiver.getLidarFrame(lidarParameters.getSensorNameInSdf());
+      this.sensorframe = pointCloudDataReceiver.getLidarFrame(sensorNameInSdf);
+      this.pointCloudSource = pointCloudSource;
 
 
-      rosMainNode.attachSubscriber(lidarParameters.getRosTopic(), this);
+      rosMainNode.attachSubscriber(rosTopic, this);
 
    }
    
    public RosPointCloudReceiver(DRCRobotPointCloudParameters pointCloudParameters, RosMainNode rosMainNode, ReferenceFrame cloudFrame,
-         PointCloudDataReceiver pointCloudDataReceiver)
+         PointCloudDataReceiver pointCloudDataReceiver, PointCloudSource... pointCloudSource)
    {
       this.cloudFrame = cloudFrame;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
       this.sensorframe = pointCloudDataReceiver.getLidarFrame(pointCloudParameters.getSensorNameInSdf());
+      this.pointCloudSource=pointCloudSource;
 
       rosMainNode.attachSubscriber(pointCloudParameters.getRosTopic(), this);
    }
@@ -50,6 +53,6 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
 	   long[] timestamps = new long[points.length];
 	   long time = pointCloud.getHeader().getStamp().totalNsecs();
 	   Arrays.fill(timestamps, time);
-		RosPointCloudReceiver.this.pointCloudDataReceiver.receivedPointCloudData(RosPointCloudReceiver.this.cloudFrame, sensorframe, timestamps, pointsAsArrayList);
+		pointCloudDataReceiver.receivedPointCloudData(cloudFrame, sensorframe, timestamps, pointsAsArrayList, pointCloudSource);
 	}
 }

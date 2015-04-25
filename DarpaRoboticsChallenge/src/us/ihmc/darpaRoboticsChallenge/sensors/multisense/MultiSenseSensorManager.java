@@ -12,6 +12,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraLogger;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -89,7 +90,8 @@ public class MultiSenseSensorManager
 
    private void registerLidarReceivers()
    { 
-      new RosPointCloudReceiver(lidarParamaters, rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getRosTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN);
+      new RosPointCloudReceiver(lidarParamaters.getSensorNameInSdf(), lidarParamaters.getGroundCloudTopic(), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.QUADTREE);
    }
 
    private void registerCameraReceivers()
