@@ -161,9 +161,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       previousClippedAlphaFilterValue.set(0.0);
 
       maxTranslationalCorrectionVelocity = new DoubleYoVariable("maxTranslationalCorrectionVelocity", parentRegistry);
-      maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED * this.dt.getDoubleValue());
+      maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
       maxRotationalCorrectionVelocity = new DoubleYoVariable("maxRotationalCorrectionVelocity", parentRegistry);
-      maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED * this.dt.getDoubleValue());
+      maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED);
 
       distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
       distanceToTravel.set(0.0);
@@ -317,26 +317,26 @@ public class ClippedSpeedOffsetErrorInterpolator
       if (translationalSpeedForGivenDistanceToTravel.getDoubleValue() * alphaFilter.getDoubleValue() <= translationalSpeedForGivenDistanceToTravel
             .getDoubleValue()
             * previousClippedAlphaFilterValue.getDoubleValue()
-            + (maxTranslationalCorrectionVelocity.getDoubleValue() / distanceToTravel.getDoubleValue()))
+            + (maxTranslationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / distanceToTravel.getDoubleValue()))
       {
          temporaryTranslationAlphaClipped.set(alphaFilter.getDoubleValue());
       }
       else
       {
          temporaryTranslationAlphaClipped.set(previousClippedAlphaFilterValue.getDoubleValue()
-               + (maxTranslationalCorrectionVelocity.getDoubleValue() / distanceToTravel.getDoubleValue()));
+               + (maxTranslationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / distanceToTravel.getDoubleValue()));
       }
 
       //rotation
       if (rotationalSpeedForGivenAngleToTravel.getDoubleValue() * alphaFilter.getDoubleValue() <= rotationalSpeedForGivenAngleToTravel.getDoubleValue()
-            * previousClippedAlphaFilterValue.getDoubleValue() + (maxRotationalCorrectionVelocity.getDoubleValue() / angleToTravel.getDoubleValue()))
+            * previousClippedAlphaFilterValue.getDoubleValue() + (maxRotationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / angleToTravel.getDoubleValue()))
       {
          temporaryRotationAlphaClipped.set(alphaFilter.getDoubleValue());
       }
       else
       {
          temporaryRotationAlphaClipped.set(previousClippedAlphaFilterValue.getDoubleValue()
-               + (maxRotationalCorrectionVelocity.getDoubleValue() / angleToTravel.getDoubleValue()));
+               + (maxRotationalCorrectionVelocity.getDoubleValue() * dt.getDoubleValue() / angleToTravel.getDoubleValue()));
       }
 
       //chose the smaller alpha (so the slower correction) between translation and rotation
