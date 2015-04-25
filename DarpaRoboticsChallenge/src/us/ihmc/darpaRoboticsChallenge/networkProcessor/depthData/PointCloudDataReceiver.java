@@ -25,6 +25,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
+import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -39,27 +40,28 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
    private final CollisionShapeTester collisionBoxNode;
-   
+
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
-   
+
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-   private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<>();   
+   private final LinkedBlockingQueue<Pair<PointCloudSource[], PointCloudData>> dataQueue = new LinkedBlockingQueue<Pair<PointCloudSource[], PointCloudData>>();
    private final AtomicBoolean sendData = new AtomicBoolean(false);
    private volatile boolean running = true;
-   
+
    private volatile boolean clearQuadTree = false;
    private volatile boolean clearDecayingPointCloud = false;
 
-   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, DRCHandType handType, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap,
-         RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator sensorSuitePacketCommunicator)
+   public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, DRCHandType handType,
+         PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
+         PacketCommunicator sensorSuitePacketCommunicator)
    {
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.depthDataFilter = new RobotDepthDataFilter(handType, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(sensorSuitePacketCommunicator, readWriteLock.readLock(), depthDataFilter);
-      
-      if(collisionBoxProvider != null)
+
+      if (collisionBoxProvider != null)
       {
          collisionBoxNode = new CollisionShapeTester(this.fullRobotModel, collisionBoxProvider);
       }
@@ -70,18 +72,18 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       setupListeners(sensorSuitePacketCommunicator);
       sensorSuitePacketCommunicator.attachStateListener(this);
 
-   }  
-   
+   }
+
    public RigidBodyTransform getLidarToSensorTransform(String lidarName)
    {
       return fullRobotModel.getLidarBaseToSensorTransform(lidarName);
    }
-   
+
    public ReferenceFrame getLidarFrame(String lidarName)
    {
       return fullRobotModel.getLidarBaseFrame(lidarName);
    }
-   
+
    public InverseDynamicsJoint getLidarJoint(String lidarName)
    {
       return fullRobotModel.getLidarJoint(lidarName);
@@ -94,12 +96,14 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       {
          try
          {
-            PointCloudData data = dataQueue.take(); // Do this outside lock to avoid dead-locks
+            Pair<PointCloudSource[], PointCloudData> pair = dataQueue.take(); // Do this outside lock to avoid dead-locks
+            PointCloudSource[] cloudSources = pair.first();
+            PointCloudData data = pair.second();
 
             readWriteLock.writeLock().lock();
-            if(clearDecayingPointCloud)
+            if (clearDecayingPointCloud)
             {
-               if(robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
+               if (robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
                {
                   depthDataFilter.clearLidarData(DepthDataTree.DECAY_POINT_CLOUD);
                   clearDecayingPointCloud = false;
@@ -113,30 +117,30 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   clearQuadTree = false;
                }
             }
-            
+
             if (data != null && sendData.get())
             {
                long prevTimestamp = -1;
-               
+
                RigidBodyTransform scanFrameToWorld = new RigidBodyTransform();
                for (int i = 0; i < data.points.size(); i++)
                {
                   long nextTimestamp = ppsTimestampOffsetProvider.adjustTimeStampToRobotClock(data.timestamps[i]);
-                  if(nextTimestamp != prevTimestamp)
+                  if (nextTimestamp != prevTimestamp)
                   {
-                     if(robotConfigurationDataBuffer.updateFullRobotModel(true, nextTimestamp, fullRobotModel, null) == -1)
+                     if (robotConfigurationDataBuffer.updateFullRobotModel(true, nextTimestamp, fullRobotModel, null) == -1)
                      {
                         continue;
                      }
                      collisionBoxNode.update();
                      prevTimestamp = nextTimestamp;
                   }
-                  
-                  Point3d pointInWorld; 
-                  if(!data.scanFrame.isWorldFrame())
+
+                  Point3d pointInWorld;
+                  if (!data.scanFrame.isWorldFrame())
                   {
                      data.scanFrame.getTransformToDesiredFrame(scanFrameToWorld, ReferenceFrame.getWorldFrame());
-                     
+
                      pointInWorld = data.points.get(i);
                      scanFrameToWorld.transform(pointInWorld);
                   }
@@ -144,12 +148,25 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   {
                      pointInWorld = data.points.get(i);
                   }
-                  
+
                   Point3d origin = new Point3d();
                   data.lidarFrame.getTransformToWorldFrame().transform(origin);
-                  if(collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld))
+                  if (collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld))
                   {
-                     depthDataFilter.addPoint(pointInWorld, origin);
+                     for (PointCloudSource cloudSource : cloudSources)
+                     {
+                        switch (cloudSource)
+                        {
+                        case NEARSCAN:
+                           depthDataFilter.addNearScanPoint(pointInWorld, origin);
+                           break;
+                        case QUADTREE:
+                           depthDataFilter.addQuatreePoint(pointInWorld, origin);
+                           break;
+                        default:
+                           System.out.println(getClass().getSimpleName() + " unrecognized cloud source " + cloudSource.name());
+                        }
+                     }
                   }
                }
             }
@@ -169,8 +186,10 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
     * @param lidarFrame
     * @param timestamps
     * @param points
+    * @param sources
     */
-   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points)
+   public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
+         PointCloudSource... sources)
    {
       if (timestamps.length != points.size())
       {
@@ -179,7 +198,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
       try
       {
-         dataQueue.put(new PointCloudData(scanFrame, lidarFrame, timestamps, points));
+            dataQueue.put(new Pair<PointCloudSource[], PointCloudData>(sources, new PointCloudData(scanFrame, lidarFrame, timestamps, points)));
       }
       catch (InterruptedException e)
       {
@@ -239,7 +258,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    public void clearLidar(DepthDataClearCommand object)
    {
-      switch(object.getDepthDataTree())
+      switch (object.getDepthDataTree())
       {
       case DECAY_POINT_CLOUD:
          clearDecayingPointCloud = true;
@@ -289,7 +308,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       interrupt();
       this.pointCloudWorldPacketGenerator.stop();
    }
-   
+
    private static class PointCloudData
    {
       private ReferenceFrame scanFrame;
