@@ -354,7 +354,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       dwellInSingleSupportDuration.set(0.0); //0.2);
 
       loadFoot.set(false);
-      loadFootDuration.set(0.6);
+      loadFootDuration.set(1.2);
       loadFootTransferDuration.set(0.8);
  
       maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
@@ -1415,8 +1415,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             if (isInFlamingoStance.getBooleanValue() && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide))
             {
-               System.out.println("WhooHoo!! Requested Load Bearing");
-               
                loadFoot.set(true);
                loadFootStartTime.set(yoTime.getDoubleValue());
                capturePointPlannerAdapter.setSingleSupportTime(loadFootDuration.getDoubleValue());
