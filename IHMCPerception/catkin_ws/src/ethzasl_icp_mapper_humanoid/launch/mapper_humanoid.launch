@@ -7,7 +7,7 @@
         <rosparam>
           filter_field_name: z
           filter_limit_min: -.inf 
-          filter_limit_max: 2.5
+          filter_limit_max: 1.6
           input_frame: pelvis
           output_frame: head
         </rosparam>
