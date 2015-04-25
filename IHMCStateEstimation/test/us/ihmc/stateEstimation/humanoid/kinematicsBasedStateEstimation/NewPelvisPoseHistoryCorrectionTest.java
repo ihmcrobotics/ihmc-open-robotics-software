@@ -114,6 +114,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
       pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, externalPelvisPoseCreator);
+      pelvisCorrector.setDeadZoneSizes(0.0, 0.0, 0.0);
    }
    
    private void generatePelvisWayPoints()
