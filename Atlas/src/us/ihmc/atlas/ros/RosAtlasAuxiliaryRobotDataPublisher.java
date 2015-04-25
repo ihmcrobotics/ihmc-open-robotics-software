@@ -11,6 +11,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
+import us.ihmc.utilities.ros.publisher.RosCachedRawIMUDataPublisher;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
 import us.ihmc.utilities.ros.publisher.RosInt64Publisher;
 
@@ -42,6 +43,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
    private final RosDoublePublisher remainingAmpHoursPublisher = new RosDoublePublisher(false);
    private final RosDoublePublisher remainingChargePercentagePublisher = new RosDoublePublisher(false);
    private final RosInt64Publisher cycleCountPublisher = new RosInt64Publisher(false);
+   private final RosCachedRawIMUDataPublisher rawImuBatchPublisher = new RosCachedRawIMUDataPublisher(false, "/pelvis_imu");
 
    public RosAtlasAuxiliaryRobotDataPublisher(RosMainNode rosMainNode, String rosNameSpace)
    {
@@ -60,9 +62,15 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       setupElectricForearmPublishers(rosNameSpace);
       setupPumpPublishers(rosNameSpace);
       setupBatteryPublishers(rosMainNode, rosNameSpace);
+      setupBatchImuPublisher(rosMainNode, rosNameSpace);
       
       Thread thread = new Thread(this, getClass().getName());
       thread.start();
+   }
+
+   private void setupBatchImuPublisher(RosMainNode rosMainNode, String rosNameSpace)
+   {
+      rosMainNode.attachPublisher(rosNameSpace + "/output/imu/raw_imu_sensor_batch", rawImuBatchPublisher);
    }
 
    private void setupBatteryPublishers(RosMainNode rosMainNode, String rosNameSpace)
@@ -126,8 +134,16 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
             publishPumpData(auxiliaryRobotData);
 
             publishBatteryData(auxiliaryRobotData);
+            
+            publishImuData(auxiliaryRobotData);
          }
       }
+   }
+
+   private void publishImuData(AtlasAuxiliaryRobotData auxiliaryRobotData)
+   {
+      rawImuBatchPublisher.publish(auxiliaryRobotData.rawImuDeltas, auxiliaryRobotData.rawImuRates, auxiliaryRobotData.rawImuTimestamps,
+            auxiliaryRobotData.rawImuPacketCounts);
    }
 
    private void publishElectricForearmData(AtlasAuxiliaryRobotData auxiliaryRobotData)
