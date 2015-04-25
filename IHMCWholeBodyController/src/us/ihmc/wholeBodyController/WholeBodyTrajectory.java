@@ -95,16 +95,10 @@ public class WholeBodyTrajectory
          ReferenceFrame initialTargetFrame = initialRobotState.getHandControlFrame( side );
          ReferenceFrame finalTargetFrame   = finalRoboState.getHandControlFrame( side );
 
-         ReferenceFrame attachment = wbSolver.getDesiredGripperAttachmentFrame(side, worldFrame );
-         ReferenceFrame palm       = wbSolver.getDesiredGripperPalmFrame(side, worldFrame );
-         RigidBodyTransform attachmentToPalm = palm.getTransformToDesiredFrame( attachment );
-
          RigidBodyTransform transform =  initialTargetFrame.getTransformToWorldFrame();
-         transform.multiply( attachmentToPalm );
          initialTransform.set( side, transform );
 
          transform =  finalTargetFrame.getTransformToWorldFrame();
-         transform.multiply( attachmentToPalm );
          finalTransform.set( side, transform );
 
          if( wbSolver.getConfiguration().getNumberOfControlledDoF(side) != ControlledDoF.DOF_NONE)
