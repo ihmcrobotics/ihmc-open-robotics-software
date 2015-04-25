@@ -232,7 +232,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
                   
                case OPEN_FINGERS:
-                  //TODO
+                  individualRobotiqHandController.openFingers();
                   break;
 
                case OPEN_THUMB:
@@ -244,7 +244,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
                   break;
 
                case CLOSE_FINGERS:
-                //TODO
+                  individualRobotiqHandController.closeFingers();
                   break;
 
                case CLOSE_THUMB:
