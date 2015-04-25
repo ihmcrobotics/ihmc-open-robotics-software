@@ -7,9 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
 import javax.vecmath.Vector3f;
 
 import org.ros.message.Time;
@@ -50,6 +48,27 @@ public class RosCachedRawIMUDataPublisher extends RosTopicPublisher<BatchRawImuD
       message.setData(imuData);
       
       publish(message);
+   }
+   
+   public void publish(float[][] rawImuDeltas, float[][] rawImuRates, long[] rawImuTimestamps, long[] rawImuPacketCounts)
+   {
+      ArrayList<RawImuData> rawImuMsgs = new ArrayList<RawImuData>();
+      for (int i = 0; i < rawImuPacketCounts.length; i++)
+      {
+         RawImuData rawImuData = newMessageFromType(RawImuData._TYPE);
+         rawImuData.setImuTimestamp(rawImuTimestamps[i]);
+         //delta angle (radians) in the frame of the IMU
+         rawImuData.setDax(rawImuDeltas[i][0]);
+         rawImuData.setDay(rawImuDeltas[i][1]);
+         rawImuData.setDaz(rawImuDeltas[i][2]);
+         //linear acceleration (m/s^2) in the frame of the IM
+         rawImuData.setDdx(rawImuRates[i][0]);
+         rawImuData.setDdy(rawImuRates[i][1]);
+         rawImuData.setDdz(rawImuRates[i][2]);
+         rawImuData.setPacketCount(rawImuPacketCounts[i]);
+         rawImuMsgs.add(rawImuData);
+      }
+      publish(rawImuTimestamps[0], rawImuMsgs);
    }
    
    /**
