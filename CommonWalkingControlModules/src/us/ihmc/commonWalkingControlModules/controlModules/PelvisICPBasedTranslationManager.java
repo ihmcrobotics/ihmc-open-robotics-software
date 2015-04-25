@@ -90,7 +90,7 @@ public class PelvisICPBasedTranslationManager
          YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
-      frozenOffsetDecayAlpha.set(0.99);
+      frozenOffsetDecayAlpha.set(0.998);
 
       yoTime = momentumBasedController.getYoTime();
       controlDT = momentumBasedController.getControlDT();
