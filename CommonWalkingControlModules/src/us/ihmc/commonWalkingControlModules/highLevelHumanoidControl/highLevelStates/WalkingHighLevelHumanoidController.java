@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.HeelSwitch;
@@ -156,6 +157,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final UpcomingFootstepList upcomingFootstepList;
    private final FootPoseProvider footPoseProvider;
+   private final DesiredFootStateProvider desiredFootStateProvider;
 
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
 
@@ -183,8 +185,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFramePoint ecmpViz = new YoFramePoint("ecmpViz", worldFrame, registry);
 
    private final YoFramePoint2dInPolygonCoordinate doubleSupportDesiredICP;
-
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    
    private final BooleanYoVariable preparingForLocomotion = new BooleanYoVariable("preparingForLocomotion", registry);
    private final DoubleYoVariable timeToGetPreparedForLocomotion = new DoubleYoVariable("timeToGetPreparedForLocomotion", registry);
@@ -199,16 +199,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final FootExplorationControlModule footExplorationControlModule;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final FrameConvexPolygon2d tempFrameConvexPolygon2dForShrinking = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
-   private final DoubleYoVariable supportPolygonSafeMargin = new DoubleYoVariable("supportPolygonSafeMargin", registry);
-
    private final BooleanYoVariable hasWalkingControllerBeenInitialized = new BooleanYoVariable("hasWalkingControllerBeenInitialized", registry);
 
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
    private final DoubleYoVariable icpErrorThresholdToSpeedUpSwing = new DoubleYoVariable("icpErrorThresholdToSpeedUpSwing", registry);
 
+   private final BooleanYoVariable loadFoot = new BooleanYoVariable("loadFoot", registry);
+   private final DoubleYoVariable loadFootStartTime = new DoubleYoVariable("loadFootStartTime", registry);
+   private final DoubleYoVariable loadFootDuration = new DoubleYoVariable("loadFootDuration", registry);
+   private final DoubleYoVariable loadFootTransferDuration = new DoubleYoVariable("loadFootTransferDuration", registry);
+   
+   
    @Deprecated
    private final BooleanYoVariable useICPPlannerHackN13 = new BooleanYoVariable("useICPPlannerHackN13", registry);
    @Deprecated
@@ -315,6 +317,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       FootstepProvider footstepProvider = variousWalkingProviders.getFootstepProvider();
       this.upcomingFootstepList = new UpcomingFootstepList(footstepProvider, registry);
       footPoseProvider = variousWalkingProviders.getDesiredFootPoseProvider();
+      desiredFootStateProvider = variousWalkingProviders.getDesiredFootStateProvider();
 
       YoPDGains comHeightControlGains = walkingControllerParameters.createCoMHeightControlGains(registry);
       DoubleYoVariable kpCoMHeight = comHeightControlGains.getYoKp();
@@ -350,6 +353,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       dwellInSingleSupportDuration.set(0.0); //0.2);
 
+      loadFoot.set(false);
+      loadFootDuration.set(0.6);
+      loadFootTransferDuration.set(0.8);
+ 
       maxICPErrorBeforeSingleSupportX.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportX());
       maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
@@ -375,10 +382,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       resetIntegratorsAfterSwing.set(true);
       alwaysIntegrateAnkleAcceleration.set(true);
-
-      // Just to allocate memory
-      safeSupportPolygonToConstrainICPOffset.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-      supportPolygonSafeMargin.set(0.04);
    }
 
    private void setupStateMachine()
@@ -594,18 +597,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                moveICPToInsideOfFootAtEndOfSwing(previousSupport, stanceFootLocation, swingTimeCalculationProvider.getValue(), 0.0, desiredICPLocal);
             }
 
-            desiredICPLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
-            desiredICPVelocityLocal.changeFrame(referenceFrames.getMidFeetZUpFrame());
             pelvisICPBasedTranslationManager.compute(null, capturePoint2d);
-            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
-
-            tempFrameConvexPolygon2dForShrinking.setIncludingFrameAndUpdate(bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
-            convexPolygonShrinker.shrinkConstantDistanceInto(tempFrameConvexPolygon2dForShrinking, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
-
-            safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
-
-            desiredICPLocal.changeFrame(worldFrame);
-            desiredICPVelocityLocal.changeFrame(worldFrame);
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal, bipedSupportPolygons.getSupportPolygonInMidFeetZUp());
          }
 
          desiredICP.set(desiredICPLocal);
@@ -1001,21 +994,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             moveICPToInsideOfFootAtEndOfSwing(supportSide, transferToFootstepLocation, swingTimeCalculationProvider.getValue(), swingTimeRemaining, desiredICPLocal);
          }
 
-         pelvisICPBasedTranslationManager.compute(supportSide, capturePoint2d);
 
          if (isInFlamingoStance.getBooleanValue())
          {
-            desiredICPLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
-            desiredICPVelocityLocal.changeFrame(referenceFrames.getAnkleZUpFrame(supportSide));
-            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal);
-
-            tempFrameConvexPolygon2dForShrinking.setIncludingFrameAndUpdate(bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
-            convexPolygonShrinker.shrinkConstantDistanceInto(tempFrameConvexPolygon2dForShrinking, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
-            
-            safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPLocal);
-
-            desiredICPLocal.changeFrame(worldFrame);
-            desiredICPVelocityLocal.changeFrame(worldFrame);
+            pelvisICPBasedTranslationManager.compute(supportSide, capturePoint2d);
+            pelvisICPBasedTranslationManager.addICPOffset(desiredICPLocal, desiredICPVelocityLocal, bipedSupportPolygons.getFootPolygonInAnkleZUp(supportSide));
          }
          else
          {
@@ -1132,6 +1115,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             pelvisOrientationManager.setToHoldCurrentDesired();
             centerOfMassHeightTrajectoryGenerator.setSupportLeg(supportSide);
+         }
+         
+         if (desiredFootStateProvider != null)
+         {
+            desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide);
+            loadFoot.set(false);
          }
       }
 
@@ -1419,6 +1408,30 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                if (hasICPPlannerFinished.getBooleanValue()
                      && (yoTime.getDoubleValue() > timeThatICPPlannerFinished.getDoubleValue() + dwellInSingleSupportDuration.getDoubleValue()))
                   return true;
+            }
+         }
+         
+         if (desiredFootStateProvider != null)
+         {
+            if (isInFlamingoStance.getBooleanValue() && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide))
+            {
+               System.out.println("WhooHoo!! Requested Load Bearing");
+               
+               loadFoot.set(true);
+               loadFootStartTime.set(yoTime.getDoubleValue());
+               capturePointPlannerAdapter.setSingleSupportTime(loadFootDuration.getDoubleValue());
+               capturePointPlannerAdapter.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
+               capturePointPlannerAdapter.clear();
+               capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(swingSide));
+               capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
+               
+               pelvisICPBasedTranslationManager.freeze();
+            }
+            
+            if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
+            {
+               loadFoot.set(false);
+               return true;
             }
          }
 
