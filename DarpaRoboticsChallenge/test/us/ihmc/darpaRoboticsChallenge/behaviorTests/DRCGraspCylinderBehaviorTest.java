@@ -13,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
@@ -132,10 +131,9 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-      double palmOffsetFromWrist = 0.1;
 
       graspBehavior.initialize();
-      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, palmOffsetFromWrist, false);
+      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
 
       assertTrue(graspBehavior.hasInputBeenSet());
 
@@ -170,10 +168,9 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-      double palmOffsetFromWrist = 0.1;
 
       graspBehavior.initialize();
-      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, palmOffsetFromWrist, false);
+      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
 
       assertTrue(graspBehavior.hasInputBeenSet());
 
@@ -208,10 +205,9 @@ public abstract class DRCGraspCylinderBehaviorTest implements MultiRobotTestInte
       
       FramePoint graspPoint = new FramePoint(cylinderFrame, 0.0, 0.0, 0.0);
       FrameVector cylinderLongAxis = new FrameVector(cylinderFrame, 0.0, 0.0, 1.0);
-      double palmOffsetFromWrist = 0.1;
 
       graspBehavior.initialize();
-      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, palmOffsetFromWrist, false);
+      graspBehavior.setGraspPose(robotSideOfGraspingHand, graspPoint, cylinderLongAxis, false);
 
       assertTrue(graspBehavior.hasInputBeenSet());
 
