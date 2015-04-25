@@ -84,7 +84,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, false);
-
+      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0);
+      
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
       
@@ -236,7 +237,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       ClippedSpeedOffsetErrorInterpolator clippedSpeedOffsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, referenceFrameToBeCorrected,
             alphaFilterBreakFrequency, dt, true);
-
+      clippedSpeedOffsetErrorInterpolator.setDeadZoneSizes(0.0, 0.0, 0.0);
+      
       generateRandomReferenceFrameToBeCorrectedWaypoints(0, numberOfTicks);
       TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
       

@@ -264,4 +264,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    {
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
    }
+   
+   public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize)
+   {
+      offsetErrorInterpolator.setDeadZoneSizes(xDeadzoneSize, yDeadzoneSize, zDeadzoneSize);
+   }
+   
 }
