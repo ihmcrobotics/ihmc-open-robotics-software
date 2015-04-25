@@ -187,25 +187,21 @@ public class WholeBodyIkSolverTestHelper
             // you don't need to check if you are not trying to control any DoF
             if ((dofToControl.get(side) != ControlledDoF.DOF_NONE) && (endEffectorTarget.get(side) != null))
             {
-               ReferenceFrame calculatedHandFrame = hikSolver.getDesiredGripperAttachmentFrame(side, ReferenceFrame.getWorldFrame());
-               RigidBodyTransform calculatedAttachmnent = calculatedHandFrame.getTransformToWorldFrame();
-
-               calculatedHandFrame = hikSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame());
+               ReferenceFrame calculatedHandFrame = hikSolver.getDesiredGripperPalmFrame(side, ReferenceFrame.getWorldFrame());
                RigidBodyTransform calculatedPalm = calculatedHandFrame.getTransformToWorldFrame();
 
-               RigidBodyTransform desiredAttachment = new RigidBodyTransform();
-               endEffectorTarget.get(side).getRigidBodyTransform(desiredAttachment);
+               RigidBodyTransform desiredPalm = new RigidBodyTransform();
+               endEffectorTarget.get(side).getRigidBodyTransform(desiredPalm);
 
-               RigidBodyTransform actualAttachment = desiredRobotModel.getHandControlFrame(side).getTransformToWorldFrame();
+               RigidBodyTransform actualPalm = desiredRobotModel.getHandControlFrame(side).getTransformToWorldFrame();
 
-               Vector3d errorVector = RigidBodyTransform.getTranslationDifference(desiredAttachment, actualAttachment);
+               Vector3d errorVector = RigidBodyTransform.getTranslationDifference(desiredPalm, actualPalm);
 
                if (DEBUG)
                {
-                  System.out.println(" actual\n" + actualAttachment);
-                  System.out.println(" wanted\n" + desiredAttachment);
-                  System.out.println(" calculated Att\n" + calculatedAttachmnent);
-                  System.out.println(" calculated Palm\n" + calculatedPalm);
+                  System.out.println(" actual\n" + actualPalm);
+                  System.out.println(" wanted\n" + desiredPalm);
+                  System.out.println(" calculated Att\n" + calculatedPalm);
 
                   System.out.println(" actual sole\n" + actualRobotModel.getSoleFrame(side).getTransformToWorldFrame());
 

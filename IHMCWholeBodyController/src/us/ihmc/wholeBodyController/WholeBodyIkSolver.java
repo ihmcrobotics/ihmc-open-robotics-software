@@ -206,7 +206,7 @@ abstract public class WholeBodyIkSolver
       
       //------- Abstract method that provide robot-specific information and configuration  -------------
 
-      abstract public String getGripperAttachmentLinkName(RobotSide side);
+
       abstract public String getGripperPalmLinkName(RobotSide side);
       abstract public String getFootLinkName(RobotSide side);
 
@@ -560,17 +560,6 @@ abstract public class WholeBodyIkSolver
 
       }
 
-      /*
-       * We call "GripperAttachment" the location where the end effector would be if no gripper is present.
-       * Its position corresponds with SDFFullRobotModel.getHandControlFrame
-       */
-      public void setGripperAttachmentTarget(RobotSide endEffectorSide, FramePose endEffectorPose)
-      {
-         handTarget.set(endEffectorSide, endEffectorPose);
-         
-         taskEndEffectorPosition.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
-         taskEndEffectorRotation.get(endEffectorSide).setBodyToControl( getGripperAttachmentLinkName(endEffectorSide));
-      }
 
       /*
        * We call "GripperPalm" the location where grasping shall be made.
@@ -1176,11 +1165,6 @@ abstract public class WholeBodyIkSolver
       public SDFFullRobotModel getCachedModel()
       {
          return cachedModel;
-      }
-
-      public ReferenceFrame getDesiredGripperAttachmentFrame(RobotSide handSide, ReferenceFrame parentFrame)
-      {
-         return getDesiredBodyFrame(getGripperAttachmentLinkName(handSide), parentFrame);
       }
 
       public ReferenceFrame getDesiredGripperPalmFrame(RobotSide handSide, ReferenceFrame parentFrame)
