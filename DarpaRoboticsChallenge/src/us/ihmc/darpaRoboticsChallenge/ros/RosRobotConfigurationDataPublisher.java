@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.ejml.data.DenseMatrix64F;
 import org.ros.message.Time;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
