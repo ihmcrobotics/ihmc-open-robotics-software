@@ -57,19 +57,19 @@ public class WholeBodyInverseKinematicTask extends BehaviorTask
       if (offsetHandPoseAlongPalmNormalByThisMuch != 0.0)
       {
          wholeBodyIKBehavior.initialize();
-         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, 0, ControlledDoF.DOF_3P2R, true);
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, 0, ControlledDoF.DOF_3P2R);
          wholeBodyIKBehavior.computeSolution();
 
          desiredHandPose.setToZero(wholeBodyIKBehavior.getDesiredFullRobotModel().getHandControlFrame(robotSide));
          desiredHandPose.translate(-offsetHandPoseAlongPalmNormalByThisMuch, 0.0, 0.0);
          desiredHandPose.changeFrame(worldFrame);
 
-         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs, setPalmTarget);
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs);
          wholeBodyIKBehavior.computeSolution();
       }
       else
       {
-         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs, setPalmTarget);
+         wholeBodyIKBehavior.setInputs(robotSide, desiredHandPose, trajectoryTime, numberOfReseeds, controlledDofs);
          wholeBodyIKBehavior.computeSolution(); 
       }
    }
