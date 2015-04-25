@@ -119,17 +119,17 @@ public class HandPoseBehavior extends BehaviorInterface
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, desiredHandFrame.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
    
-   public void orientAndMoveHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, double palmOffsetFromWrist, FullRobotModel fullRobotModel, double trajectoryTime)
+   public void orientAndMoveHandToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel, double trajectoryTime)
    {
       this.robotSide = robotSide;
       fullRobotModel.updateFrames();
       
-      ReferenceFrame frameOrientedForGrasping = orientAndTranslateHandFrameToGraspCylinder(robotSide, cylinderLongAxis, cylinderOrigin, palmOffsetFromWrist, fullRobotModel);
+      ReferenceFrame frameOrientedForGrasping = orientAndTranslateHandFrameToGraspCylinder(robotSide, cylinderLongAxis, cylinderOrigin, fullRobotModel);
 
       setInput(PacketControllerTools.createHandPosePacket(Frame.WORLD, frameOrientedForGrasping.getTransformToWorldFrame(), robotSide, trajectoryTime));
    }
    
-   public static ReferenceFrame orientAndTranslateHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, double palmOffsetFromWrist, FullRobotModel fullRobotModel)
+   public static ReferenceFrame orientAndTranslateHandFrameToGraspCylinder(RobotSide robotSide, FrameVector cylinderLongAxis, FramePoint cylinderOrigin, FullRobotModel fullRobotModel)
    {
       fullRobotModel.updateFrames();
       
@@ -138,7 +138,6 @@ public class HandPoseBehavior extends BehaviorInterface
       RigidBodyTransform desiredHandTransformToWorld = frameOrientedForGrasping.getTransformToWorldFrame();
 
       cylinderOrigin.changeFrame(frameOrientedForGrasping);
-      cylinderOrigin.setX(cylinderOrigin.getX() - palmOffsetFromWrist);
       
       cylinderOrigin.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandTransformToWorld.setTranslation(cylinderOrigin.getVectorCopy());

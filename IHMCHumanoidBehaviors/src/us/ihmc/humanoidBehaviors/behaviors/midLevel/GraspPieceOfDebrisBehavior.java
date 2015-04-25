@@ -40,7 +40,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double trajectoryTime = 2.5;
-   private static final double wristOffset = 0.14;
    private static final double offsetToThePointOfGrabbing = 0.05;
    
    private final PipeLine<BehaviorInterface> pipeLine = new PipeLine<>();
@@ -160,7 +159,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    private void computeDesiredApproachPose(FramePose approachPoseToPack, SDFFullRobotModel graspingDebrisRobot)
    {
       approachPoseToPack.setToZero(graspingDebrisRobot.getHandControlFrame(robotSide));
-      approachPoseToPack.setX(-offsetToThePointOfGrabbing - wristOffset);
+      approachPoseToPack.setX(-offsetToThePointOfGrabbing);
       approachPoseToPack.changeFrame(worldFrame);
    }
 
@@ -172,7 +171,6 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
 
       PoseReferenceFrame graspWithoutOffsetReferenceFrame = new PoseReferenceFrame("graspWithoutOffsetReferenceFrame", graspPoseWithoutOffset);
       desiredPoseToPack.setToZero(graspWithoutOffsetReferenceFrame);
-      desiredPoseToPack.translate(-wristOffset, 0.0, 0.0);
       desiredPoseToPack.changeFrame(worldFrame);
    }
    
@@ -208,7 +206,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
       wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide, controlledDofs);
       wholeBodyIKSolver.getConfiguration().setNumberOfControlledDoF(robotSide.getOppositeSide(), ControlledDoF.DOF_NONE);
       wholeBodyIKSolver.getConfiguration().setMaxNumberOfAutomaticReseeds( numberOfReseeds );
-      wholeBodyIKSolver.setGripperAttachmentTarget( robotSide, endEffectorPose);
+      wholeBodyIKSolver.setGripperPalmTarget( robotSide, endEffectorPose);
       setPositionAndOrientationErrorTolerance(positionTolerance, orientationTolerance);
 
       try

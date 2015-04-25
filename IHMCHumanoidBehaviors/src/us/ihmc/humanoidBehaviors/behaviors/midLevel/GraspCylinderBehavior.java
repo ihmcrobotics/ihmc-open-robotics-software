@@ -61,12 +61,11 @@ public class GraspCylinderBehavior extends BehaviorInterface
    {
       FramePoint graspPoint = new FramePoint(worldFrame, graspCylinderPacket.graspPointInWorld);
       FrameVector graspCylinderLongAxis = new FrameVector(worldFrame, graspCylinderPacket.getCylinderLongAxisInWorld());
-      double palmOffsetFromWrist = graspCylinderPacket.getPalmOffsetFromWrist();
       
-      setGraspPose(graspCylinderPacket.getRobotSide(), graspPoint, graspCylinderLongAxis, palmOffsetFromWrist, false);
+      setGraspPose(graspCylinderPacket.getRobotSide(), graspPoint, graspCylinderLongAxis, false);
    }
 
-   public void setGraspPose(RobotSide robotSide, FramePoint graspPoint, FrameVector graspedCylinderLongAxis, double palmOffsetFromWrist, boolean stopHandIfCollision)
+   public void setGraspPose(RobotSide robotSide, FramePoint graspPoint, FrameVector graspedCylinderLongAxis, boolean stopHandIfCollision)
    {
       this.robotSide = robotSide;
 
@@ -78,7 +77,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
       OrientPalmToGraspCylinderTask orientPalmForGraspingTask = new OrientPalmToGraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis,
             fullRobotModel, yoTime, handPoseBehavior, 3.0);
 
-      GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, palmOffsetFromWrist, fullRobotModel, yoTime,
+      GraspCylinderTask movePalmToContactCylinder = new GraspCylinderTask(robotSide, graspPoint, graspedCylinderLongAxis, fullRobotModel, yoTime,
             handPoseBehavior, 1.0);
 
       FingerStateTask closeHandTask = new FingerStateTask(robotSide, FingerState.CLOSE, fingerStateBehavior, yoTime);
