@@ -25,7 +25,7 @@ public class DepthDataFilter extends DepthDataStore
       this.worldToCorrected.set(adjustment);
    }
 
-   public boolean addPoint(Point3d point, Point3d sensorOrigin)
+   public boolean addNearScanPoint(Point3d point, Point3d sensorOrigin)
    {
       boolean send = false;
       if(!pointInRange(point, sensorOrigin))
@@ -40,6 +40,18 @@ public class DepthDataFilter extends DepthDataStore
          send = nearScan.add(point.x, point.y, point.z) || send;
       }
 
+      return send;
+   }
+   public boolean addQuatreePoint(Point3d point, Point3d sensorOrigin)
+   {
+      boolean send = false;
+      if(!pointInRange(point, sensorOrigin))
+         return false;
+
+      // This is here so the user can manually correct for calibration errors.  It should only be not identity in the user interface
+      if (DepthDataFilterParameters.LIDAR_ADJUSTMENT_ACTIVE)
+         worldToCorrected.transform(point);
+
       if (isValidPoint(point, sensorOrigin))
       {
          if (isPossibleGround(point, sensorOrigin))
@@ -50,6 +62,12 @@ public class DepthDataFilter extends DepthDataStore
 
       return send;
    }
+   
+   public boolean addPoint(Point3d point,Point3d sensorOrigin)
+   {
+      return addNearScanPoint(point, sensorOrigin)| addQuatreePoint(point, sensorOrigin);
+   }
+   
 
    protected boolean isValidNearScan(Point3d point, Point3d lidarOrigin)
    {
@@ -85,18 +103,5 @@ public class DepthDataFilter extends DepthDataStore
 
       return (dist > parameters.minRange) && (dist < parameters.maxRange);
    }
-   
-   @Deprecated
-   private void addLidarScan(LidarScan lidarScan, int i, ArrayList<Point3d> points)
-   {
-      Point3d lidarOrigin = new Point3d();
-      lidarScan.getAverageTransform().transform(lidarOrigin);
 
-  
-         Point3d point = lidarScan.getPoint(i);
-         if(addPoint(point, lidarOrigin))
-         {
-            points.add(point);
-         }
-   }
 }
