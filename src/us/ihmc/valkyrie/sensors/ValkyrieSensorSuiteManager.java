@@ -17,6 +17,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoRecie
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudSource;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.RosPointCloudReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLidarReceiver;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
@@ -86,7 +87,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       if(pointCloudDataReceiver != null)
       {
-         new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0), rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver);
+         new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0).getSensorNameInSdf(),sensorInformation.getPointCloudParameters(0).getRosTopic(),
+               rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN, PointCloudSource.QUADTREE);
       }
       
       
