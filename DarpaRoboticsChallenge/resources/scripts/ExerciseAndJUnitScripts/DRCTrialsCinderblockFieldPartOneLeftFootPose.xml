@@ -1,8 +1,10 @@
 <object-stream>
   <long>2915499402</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.23945257938822073</x>
@@ -15,8 +17,10 @@
           <z>-0.01500109980406942</z>
           <w>0.999871234427035</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.5960523106525555</x>
@@ -24,13 +28,15 @@
           <z>0.0776186303526345</z>
         </location>
         <orientation>
-          <x>-0.010421634461906871</x>
+          <x>-0.010421634461906873</x>
           <y>-0.02150673864901145</y>
           <z>-0.015215708204547049</z>
           <w>0.9995985854089928</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.6062887004481776</x>
@@ -38,46 +44,56 @@
           <z>0.08679881518043064</z>
         </location>
         <orientation>
-          <x>0.0015634062616465088</x>
+          <x>0.001563406261646509</x>
           <y>-0.005179372606109725</y>
           <z>-0.014997859329627355</z>
           <w>0.99987288895929</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>13826179182</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>18995000930</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>0.0343</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>22442632175</long>
   <us.ihmc.communication.packets.walking.ComHeightPacket>
+    <destination>0</destination>
     <heightOffset>0.046060000000000004</heightOffset>
+    <trajectoryTime>0.0</trajectoryTime>
   </us.ihmc.communication.packets.walking.ComHeightPacket>
   <long>28906649083</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
-    <us.ihmc.communication.packets.walking.FootstepData>
+      <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.92887004481776</x>
-          <y>0.065692448695782945</y>
+          <y>0.06569244869578295</y>
           <z>0.08679881518043064</z>
         </location>
         <orientation>
-          <x>0.0015634062616465088</x>
+          <x>0.001563406261646509</x>
           <y>-0.005179372606109725</y>
           <z>-0.014997859329627355</z>
           <w>0.99987288895929</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.03</x>
@@ -85,13 +101,15 @@
           <z>0.2225536654643855</z>
         </location>
         <orientation>
-          <x>0.012930538816834031</x>
+          <x>0.012930538816834033</x>
           <y>0.005980445467575052</y>
-          <z>-0.02514442431818607</z>
+          <z>-0.025144424318186073</z>
           <w>0.9995823094491132</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.35</x>
@@ -99,24 +117,28 @@
           <z>0.22</z>
         </location>
         <orientation>
-          <x>0.0015634062616465088</x>
+          <x>0.001563406261646509</x>
           <y>-0.005179372606109725</y>
           <z>-0.014997859329627355</z>
           <w>0.99987288895929</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>35142719557</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>40298539682</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.35</x>
@@ -124,38 +146,44 @@
           <z>0.38308863102035906</z>
         </location>
         <orientation>
-          <x>-1.8494001549635965E-4</x>
+          <x>-1.8494001549635962E-4</x>
           <y>0.0011957444855931801</y>
-          <z>-0.05026812870239602</z>
+          <z>-0.050268128702396025</z>
           <w>0.9987350255343382</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.77</x>
-          <y>0.10</y>
+          <y>0.1</y>
           <z>0.37989500306839663</z>
         </location>
         <orientation>
-          <x>-1.8494001549635987E-4</x>
+          <x>-1.8494001549635984E-4</x>
           <y>0.0011957444855931801</y>
-          <z>-0.05026812870239602</z>
+          <z>-0.050268128702396025</z>
           <w>0.9987350255343382</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>43559431622</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>79176222141</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>1.8084176311097315</x>
@@ -163,13 +191,15 @@
           <z>0.5263875536513343</z>
         </location>
         <orientation>
-          <x>-0.01401149535435165</x>
+          <x>-0.014011495354351651</x>
           <y>-0.012144388013913742</y>
           <z>-0.04675657340303154</z>
           <w>0.9987342062237127</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.17</x>
@@ -177,24 +207,28 @@
           <z>0.5262090372389392</z>
         </location>
         <orientation>
-          <x>0.002041462627313193</x>
+          <x>0.0020414626273131935</x>
           <y>-0.00818932060998319</y>
-          <z>0.049386267909821015</z>
+          <z>0.04938626790982102</z>
           <w>0.9987440933493562</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>82359202409</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>116758916405</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.17</x>
@@ -202,13 +236,15 @@
           <z>0.6965756388038415</z>
         </location>
         <orientation>
-          <x>0.007075884650338324</x>
+          <x>0.007075884650338323</x>
           <y>-0.002972894774957719</y>
           <z>-0.05092269491469743</z>
           <w>0.9986731061241695</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.17</x>
@@ -216,24 +252,28 @@
           <z>0.6742976922675836</z>
         </location>
         <orientation>
-          <x>-0.008268788209526536</x>
+          <x>-0.008268788209526534</x>
           <y>0.030139966868281347</y>
           <z>0.0011585747456270004</z>
           <w>0.999510813970156</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>120058742665</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>150125554627</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>2.64</x>
@@ -241,13 +281,15 @@
           <z>0.5238672561705764</z>
         </location>
         <orientation>
-          <x>-0.028214980006300815</x>
+          <x>-0.02821498000630081</x>
           <y>0.01798114364557475</y>
-          <z>-0.019102516657977995</z>
+          <z>-0.01910251665797799</z>
           <w>0.9992575680142597</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>2.62</x>
@@ -255,24 +297,28 @@
           <z>0.5226485113318047</z>
         </location>
         <orientation>
-          <x>-0.004572021762825969</x>
-          <y>0.025867089666026393</y>
+          <x>-0.00457202176282597</x>
+          <y>0.0258670896660264</y>
           <z>0.041513118520363185</z>
           <w>0.9987925967286323</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>157075271477</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>176191860447</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.020907940109818</x>
@@ -280,16 +326,18 @@
           <z>0.3669414541211169</z>
         </location>
         <orientation>
-          <x>-0.02798694508810882</x>
+          <x>-0.02798694508810883</x>
           <y>0.022810765075241213</y>
           <z>0.04771999628134484</z>
           <w>0.9982079952876683</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>3.0034740335389307</x>
+          <x>3.0034740335389305</x>
           <y>-0.3</y>
           <z>0.3609329843074983</z>
         </location>
@@ -299,19 +347,23 @@
           <z>-0.0057201254703304035</z>
           <w>0.9994013405773865</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>182774942002</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>200896667335</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.419415683003401</x>
@@ -319,38 +371,44 @@
           <z>0.2107550832878592</z>
         </location>
         <orientation>
-          <x>-0.01740574592821761</x>
-          <y>-6.243805255131713E-4</y>
+          <x>-0.017405745928217614</x>
+          <y>-6.243805255131712E-4</y>
           <z>-0.023942482240811778</z>
           <w>0.9995616077570156</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>3.41179786064299516</x>
+          <x>3.411797860642995</x>
           <y>-0.12</y>
           <z>0.2142745451982747</z>
         </location>
         <orientation>
-          <x>0.014730766876688907</x>
+          <x>0.014730766876688908</x>
           <y>0.012730725063343974</y>
-          <z>0.010797537659568498</z>
+          <z>0.0107975376595685</z>
           <w>0.9997521424468548</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>207378612632</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>224408117891</long>
   <us.ihmc.communication.packets.walking.FootstepDataList>
+    <destination>0</destination>
     <footstepDataList>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>LEFT</robotSide>
         <location>
           <x>3.8</x>
@@ -358,13 +416,15 @@
           <z>0.06445826571316604</z>
         </location>
         <orientation>
-          <x>-0.04373249288823236</x>
-          <y>0.001901852000051211</y>
-          <z>0.023380193894191426</z>
+          <x>-0.043732492888232374</x>
+          <y>0.0019018520000512109</y>
+          <z>0.02338019389419143</z>
           <w>0.998767850182524</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
       <us.ihmc.communication.packets.walking.FootstepData>
+        <destination>0</destination>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>3.8</x>
@@ -373,19 +433,23 @@
         </location>
         <orientation>
           <x>0.05714751935997314</x>
-          <y>0.010204808718209639</y>
+          <y>0.010204808718209637</y>
           <z>-0.03815683116743997</z>
           <w>0.9975841213377875</w>
         </orientation>
+        <swingHeight>0.0</swingHeight>
       </us.ihmc.communication.packets.walking.FootstepData>
     </footstepDataList>
-    <trajectoryWaypointGenerationMethod>DEFAULT</trajectoryWaypointGenerationMethod>
-    <speed>0.5</speed>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.communication.packets.walking.FootstepDataList>
   <long>230674441568</long>
   <us.ihmc.communication.packets.walking.PauseCommand>
+    <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.communication.packets.walking.PauseCommand>
   <long>238414155300</long>
-  <us.ihmc.communication.packets.walking.EndOfScriptCommand/>
+  <us.ihmc.communication.packets.walking.EndOfScriptCommand>
+    <destination>0</destination>
+  </us.ihmc.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

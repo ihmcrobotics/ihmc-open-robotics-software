@@ -15,7 +15,6 @@ import org.junit.Test;
 import us.ihmc.communication.packets.behaviors.HumanoidBehaviorControlModePacket.HumanoidBehaviorControlModeEnum;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
@@ -46,11 +45,14 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 
 public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 {
+   private Random random;
+
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
+      random = new Random(2165161L);
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
 
@@ -70,7 +72,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
          armJointNames = null;
          armJointIndices = null;
       }
-
+      random = null;
       GlobalTimer.clearTimers();
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -597,7 +599,7 @@ public abstract class DRCHandPoseBehaviorTest implements MultiRobotTestInterface
 
       for (int jointNum = 0; jointNum < numberOfArmJoints; jointNum++)
       {
-         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(new Random(), 1.5));
+         double qDesired = clipDesiredJointQToJointLimits(robotSide, armJointNames[jointNum], RandomTools.generateRandomDouble(random, 1.5));
          armPose[jointNum] = qDesired;
       }
 

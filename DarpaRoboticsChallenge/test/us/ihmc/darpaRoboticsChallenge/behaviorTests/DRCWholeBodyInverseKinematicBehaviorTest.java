@@ -182,7 +182,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
       wholeBodyIKBehavior.initialize();
       wholeBodyIKBehavior.setPositionAndOrientationErrorTolerance(handPoseBehaviorPositionError, handPoseBehaviorOrientationError);
          
-      wholeBodyIKBehavior.setInputs(robotSide, handPoseAcheivedInJointSpace, trajectoryTime, 5, ControlledDoF.DOF_3P3R, false);
+      wholeBodyIKBehavior.setInputs(robotSide, handPoseAcheivedInJointSpace, trajectoryTime, 5, ControlledDoF.DOF_3P3R);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
 
       wholeBodyIKBehavior.computeSolution();
@@ -232,7 +232,7 @@ public abstract class DRCWholeBodyInverseKinematicBehaviorTest implements MultiR
          System.out.println(desiredHandPose);
          System.out.println("  ");
       }
-      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration, 5, ControlledDoF.DOF_3P3R, false);
+      wholeBodyIKBehavior.setInputs(side, desiredHandPose, trajectoryDuration, 5, ControlledDoF.DOF_3P3R);
       assertTrue(wholeBodyIKBehavior.hasInputBeenSet());
 
       wholeBodyIKBehavior.computeSolution();
