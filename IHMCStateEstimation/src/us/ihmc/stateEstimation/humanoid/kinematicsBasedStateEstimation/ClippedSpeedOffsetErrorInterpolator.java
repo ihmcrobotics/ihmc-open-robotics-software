@@ -177,11 +177,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       temporaryRotationAlphaClipped = new DoubleYoVariable("temporaryRotationAlphaClipped", registry);
 
       xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
-      xDeadzoneSize.set(0.02);
+      xDeadzoneSize.set(0.014);
       yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry); 
-      yDeadzoneSize.set(0.02);
+      yDeadzoneSize.set(0.014);
       zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
-      zDeadzoneSize.set(0.02);
+      zDeadzoneSize.set(0.014);
       
       goalTranslationRawX = new DoubleYoVariable("goalTranslationRawX", registry);
       goalTranslationRawY = new DoubleYoVariable("goalTranslationRawY", registry);
