@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ros;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -45,14 +46,22 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
    public RosAtlasAuxiliaryRobotDataPublisher(RosMainNode rosMainNode, String rosNameSpace)
    {
       this.rosMainNode = rosMainNode;
+      initialize(rosMainNode, rosNameSpace);
+   }
 
+   public RosAtlasAuxiliaryRobotDataPublisher(URI rosuri, String nameSpace)
+   {
+      this.rosMainNode = new RosMainNode(rosuri, nameSpace + getClass().getName());
+      initialize(rosMainNode, nameSpace);
+   }
+   
+   private void initialize(RosMainNode rosMainNode, String rosNameSpace)
+   {
       setupElectricForearmPublishers(rosNameSpace);
-
       setupPumpPublishers(rosNameSpace);
-
       setupBatteryPublishers(rosMainNode, rosNameSpace);
-
-      Thread thread = new Thread(this, "RosAtlasAuxiliaryRobotDataPublisher");
+      
+      Thread thread = new Thread(this, getClass().getName());
       thread.start();
    }
 

@@ -17,7 +17,8 @@ public enum PacketDestination
    SCRIPTED_FOOTSTEP_DATA_LIST,
    TRAFFIC_SHAPER,
    MULTISENSE_TEST_MODULE,
-   GFE;
+   GFE, 
+   AUXILIARY_ROBOT_DATA_PUBLISHER;
 
    public static final PacketDestination[] values = values();
    

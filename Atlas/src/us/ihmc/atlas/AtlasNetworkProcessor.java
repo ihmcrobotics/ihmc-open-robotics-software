@@ -4,7 +4,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.atlas.ros.RosAtlasAuxiliaryRobotDataPublisher;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.DRCNetworkProcessor;
@@ -17,6 +23,8 @@ import com.martiansoftware.jsap.Switch;
 
 public class AtlasNetworkProcessor
 {
+   private static String defaultRosNameSpace = "/ihmc_ros/atlas";
+   
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
@@ -57,6 +65,8 @@ public class AtlasNetworkProcessor
            networkModuleParams.enableRosModule(true);
            networkModuleParams.setRosUri(rosuri);
            System.out.println("ROS_MASTER_URI="+rosuri);
+           
+            createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
         }
     	  try
     	  {
@@ -101,5 +111,15 @@ public class AtlasNetworkProcessor
          System.out.println(jsap.getHelp());
          return;
       }
+   }
+
+   private static void createAuxiliaryRobotDataRosPublisher(DRCNetworkModuleParameters networkModuleParams, URI rosuri)
+   {
+      RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosuri, defaultRosNameSpace);
+      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER,
+            new IHMCCommunicationKryoNetClassList());
+      packetCommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
+
+      networkModuleParams.addRobotSpecificModuleCommunicatorPort(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER, PacketDestination.AUXILIARY_ROBOT_DATA_PUBLISHER);
    }
 }
