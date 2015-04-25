@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -14,7 +12,6 @@ import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -50,7 +47,7 @@ public class ProvidedMassMatrixToolRigidBody
    private final RigidBody toolBody;
    
    private final ReferenceFrame handFixedFrame;
-   private final ReferenceFrame handCenterFrame;
+   private final ReferenceFrame handControlFrame;
    
    private final YoFramePoint objectCenterOfMass;
    private final YoFramePoint objectCenterOfMassInWorld;
@@ -76,13 +73,8 @@ public class ProvidedMassMatrixToolRigidBody
       this.fullRobotModel = fullRobotModel;
       this.gravity = gravity;
       
-      this.handFixedFrame = fullRobotModel.getHand(robotSide).getParentJoint().getSuccessor().getBodyFixedFrame();
-      
-      ReferenceFrame attachmentPlateFrame = fullRobotModel.getHandControlFrame(robotSide);
-      Vector3d attachmentPlateToHandCenterOffset = new Vector3d(armControllerParameters.getWristHandCenterOffset(), 0.0, 0.0);
-      RigidBodyTransform attachmentPlateToHandCenter = new RigidBodyTransform(new Quat4d(), attachmentPlateToHandCenterOffset);
-      this.handCenterFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "ObjectCoMFrame",
-            attachmentPlateFrame, attachmentPlateToHandCenter);
+      this.handFixedFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
+      this.handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
@@ -92,7 +84,7 @@ public class ProvidedMassMatrixToolRigidBody
       this.toolJoint = new SixDoFJoint(name+"Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       this.toolBody = new RigidBody(name+"Body", inertia, toolJoint);
         
-      objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handCenterFrame, registry);
+      objectCenterOfMass = new YoFramePoint(name + "CoMOffset", handControlFrame, registry);
       objectMass = new DoubleYoVariable(name + "ObjectMass", registry);
       objectForceInWorld = new YoFrameVector(name + "Force", ReferenceFrame.getWorldFrame(), registry);
       
