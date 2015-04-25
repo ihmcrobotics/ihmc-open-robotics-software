@@ -3,10 +3,10 @@
   <us.ihmc.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
-      <x>-3.3157737542816617E-6</x>
-      <y>-1.9430671528467733E-6</y>
-      <z>-0.803171929552158</z>
-      <w>0.5957473051258337</w>
+      <x>-3.315773754281662E-6</x>
+      <y>-1.9430671528467745E-6</y>
+      <z>-0.8031719295521581</z>
+      <w>0.5957473051258338</w>
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
@@ -19,9 +19,9 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.7547141433786737</x>
-      <y>0.4372799042856197</y>
-      <z>0.9663205137476326</z>
+      <x>0.7430525863049383</x>
+      <y>0.27770558916899124</y>
+      <z>0.9665350869868077</z>
     </position>
     <orientation>
       <x>-0.08601229809700103</x>
@@ -43,10 +43,10 @@
   <us.ihmc.communication.packets.walking.ChestOrientationPacket>
     <destination>0</destination>
     <orientation>
-      <x>7.450569020343643E-9</x>
-      <y>1.3287105111196744E-11</y>
+      <x>7.450569020343641E-9</x>
+      <y>1.3287105111197611E-11</y>
       <z>-0.8782584343184686</z>
-      <w>0.47818628435837873</w>
+      <w>0.4781862843583786</w>
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
@@ -58,7 +58,7 @@
       <x>5.811966770896798E-17</x>
       <y>9.459416403498395E-17</y>
       <z>-0.8520284837987548</z>
-      <w>0.5234954276740105</w>
+      <w>0.5234954276740104</w>
     </orientation>
     <trajectoryTime>0.0</trajectoryTime>
     <toHomeOrientation>false</toHomeOrientation>
@@ -71,15 +71,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.7892309581149419</x>
-      <y>0.43707313131430314</y>
-      <z>0.9727677693590523</z>
+      <x>0.7920323490463781</x>
+      <y>0.27734494392426834</y>
+      <z>0.9638762924320616</z>
     </position>
     <orientation>
-      <x>0.713188593622622</x>
+      <x>0.7131885936226221</x>
       <y>-0.7003149059843715</y>
       <z>-0.028366984248644637</z>
-      <w>-0.010787798075810864</w>
+      <w>-0.010787798075810874</w>
     </orientation>
     <trajectoryTime>1.26</trajectoryTime>
     <jointAngles>
@@ -99,15 +99,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.7822610878949554</x>
-      <y>0.2540862998704238</y>
-      <z>0.9727677097544075</z>
+      <x>0.7850624788263916</x>
+      <y>0.09435811248038903</y>
+      <z>0.9638762328274169</z>
     </position>
     <orientation>
-      <x>0.713188593622622</x>
+      <x>0.7131885936226221</x>
       <y>-0.7003149059843715</y>
       <z>-0.028366984248644637</z>
-      <w>-0.010787798075810864</w>
+      <w>-0.010787798075810874</w>
     </orientation>
     <trajectoryTime>1.26</trajectoryTime>
     <jointAngles>
@@ -127,15 +127,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.8108610051183143</x>
-      <y>0.2602372037612697</y>
-      <z>0.8820971837267281</z>
+      <x>0.8289503997664598</x>
+      <y>0.1026864411483164</y>
+      <z>0.8608714681595092</z>
     </position>
     <orientation>
       <x>0.6060820513550438</x>
       <y>-0.5880255655619869</y>
       <z>0.3125645148926066</z>
-      <w>-0.43496425749792006</w>
+      <w>-0.4349642574979201</w>
     </orientation>
     <trajectoryTime>1.26</trajectoryTime>
     <jointAngles>
@@ -155,15 +155,15 @@
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
     <position>
-      <x>0.7822610878949554</x>
-      <y>0.2540862998704238</y>
-      <z>0.9727677097544075</z>
+      <x>0.7850624788263916</x>
+      <y>0.09435811248038903</y>
+      <z>0.9638762328274169</z>
     </position>
     <orientation>
-      <x>0.713188593622622</x>
+      <x>0.7131885936226221</x>
       <y>-0.7003149059843715</y>
       <z>-0.028366984248644637</z>
-      <w>-0.010787798075810864</w>
+      <w>-0.010787798075810874</w>
     </orientation>
     <trajectoryTime>1.26</trajectoryTime>
     <jointAngles>
@@ -175,3 +175,4 @@
       <double>-0.20624015629787235</double>
     </jointAngles>
   </us.ihmc.communication.packets.manipulation.HandPosePacket>
+</object-stream>

@@ -24,11 +24,6 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       return (side == RobotSide.LEFT) ? "l_gripper_palm" :  "r_gripper_palm";
    }
 
-   @Override 
-   public String getGripperAttachmentLinkName(RobotSide side)  {
-      return (side == RobotSide.LEFT) ? "l_gripper_attachment" :  "r_gripper_attachment";
-   }
-
    @Override
    public String getFootLinkName(RobotSide side) {
       return (side == RobotSide.LEFT) ? "l_foot" : "r_foot";
