@@ -24,6 +24,8 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -32,6 +34,8 @@ public class TaskspaceToJointspaceCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry;
+
+   public enum SecondaryObjective {TOWARD_RESTING_CONFIGURATION, AWAY_FROM_JOINT_LIMITS};
 
    private final FramePose desiredControlFramePose = new FramePose();
    private final Twist desiredControlFrameTwist = new Twist();
@@ -49,8 +53,12 @@ public class TaskspaceToJointspaceCalculator
    private final int numberOfDoF;
    private final int maxNumberOfConstraints = SpatialMotionVector.SIZE;
 
-   private final DenseMatrix64F maximumJointVelocities;
-   private final DenseMatrix64F maximumJointAccelerations;
+   private final DoubleYoVariable jointAngleRegularizationWeight;
+   private final IntegerYoVariable exponentForPNorm;
+   private final EnumYoVariable<SecondaryObjective> currentSecondaryObjective;
+
+   private final DoubleYoVariable maximumJointVelocities;
+   private final DoubleYoVariable maximumJointAccelerations;
 
    private final DoubleYoVariable maximumTaskspaceAngularVelocityMagnitude;
    private final DoubleYoVariable maximumTaskspaceLinearVelocityMagnitude;
@@ -65,10 +73,11 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F subspaceSpatialError = new DenseMatrix64F(maxNumberOfConstraints, 1);
    private final DenseMatrix64F spatialDesiredVelocity = new DenseMatrix64F(maxNumberOfConstraints, 1);
 
-   private final double jointAngleRegularizationWeight = 1.0;
-   private final DenseMatrix64F privilegedJointPositions;
+   private final DoubleYoVariable[] yoPrivilegedJointPositions;
+
    private final DenseMatrix64F privilegedJointVelocities;
    private final DenseMatrix64F jointSquaredRangeOfMotions;
+   private final DenseMatrix64F jointAnlgesAtMidRangeOfMotion;
    private final DenseMatrix64F desiredJointAngles;
    private final DenseMatrix64F desiredJointVelocities;
    private final DenseMatrix64F desiredJointAccelerations;
@@ -80,7 +89,8 @@ public class TaskspaceToJointspaceCalculator
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.controlDT = controlDT;
 
-      localJoints = ScrewTools.cloneOneDoFJointPath(base, endEffector);
+      OneDoFJoint[] originalOneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
+      localJoints = ScrewTools.cloneJointPathAndFilter(originalOneDoFJoints, OneDoFJoint.class);
       numberOfDoF = localJoints.length;
 
       baseFrame = base.getBodyFixedFrame();
@@ -96,7 +106,16 @@ public class TaskspaceToJointspaceCalculator
 
       inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, solver);
 
-      privilegedJointPositions = new DenseMatrix64F(numberOfDoF, 1);
+      jointAngleRegularizationWeight = new DoubleYoVariable(namePrefix + "JointAngleRegularizationWeight", registry);
+      jointAngleRegularizationWeight.set(5.0);
+
+      exponentForPNorm = new IntegerYoVariable(namePrefix + "ExponentForPNorm", registry);
+      exponentForPNorm.set(6);
+
+      currentSecondaryObjective = new EnumYoVariable<>(namePrefix + "SecondaryObjective", registry, SecondaryObjective.class);
+      currentSecondaryObjective.set(SecondaryObjective.TOWARD_RESTING_CONFIGURATION);
+
+      yoPrivilegedJointPositions = new DoubleYoVariable[numberOfDoF];
       privilegedJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
 
       desiredJointAngles = new DenseMatrix64F(numberOfDoF, 1);
@@ -104,9 +123,12 @@ public class TaskspaceToJointspaceCalculator
       desiredJointAccelerations = new DenseMatrix64F(numberOfDoF, 1);
 
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoF, 1);
+      jointAnlgesAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoF, 1);
 
-      maximumJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
-      maximumJointAccelerations = new DenseMatrix64F(numberOfDoF, 1);
+      maximumJointVelocities = new DoubleYoVariable(namePrefix + "MaximumJointVelocities", registry);
+      maximumJointVelocities.set(Double.POSITIVE_INFINITY);
+      maximumJointAccelerations = new DoubleYoVariable(namePrefix + "MaximumJointAccelerations", registry);
+      maximumJointAccelerations.set(Double.POSITIVE_INFINITY);
 
       maximumTaskspaceAngularVelocityMagnitude = new DoubleYoVariable(namePrefix + "MaximumTaskspaceAngularVelocityMagnitude", registry);
       maximumTaskspaceLinearVelocityMagnitude = new DoubleYoVariable(namePrefix + "MaximumTaskspaceLinearVelocityMagnitude", registry);
@@ -116,9 +138,10 @@ public class TaskspaceToJointspaceCalculator
 
       for (int i = 0; i < numberOfDoF; i++)
       {
+         String jointName = originalOneDoFJoints[i].getName();
+         yoPrivilegedJointPositions[i] = new DoubleYoVariable("q_privileged_" + jointName, registry);
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
-         maximumJointVelocities.set(i, 0, Double.POSITIVE_INFINITY);
-         maximumJointAccelerations.set(i, 0, Double.POSITIVE_INFINITY);
+         jointAnlgesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
       }
 
       yoAngularVelocityFromError = new YoFrameVector(namePrefix + "AngularVelocityFromError", worldFrame, registry);
@@ -165,44 +188,33 @@ public class TaskspaceToJointspaceCalculator
       localJoints[0].updateFramesRecursively();
    }
 
+   public void setSecondaryObjective(SecondaryObjective secondaryObjective)
+   {
+      this.currentSecondaryObjective.set(secondaryObjective);
+   }
+
+   public void setJointAngleRegularizationWeight(double weight)
+   {
+      jointAngleRegularizationWeight.set(weight);
+   }
+
    public void setPrivilegedJointPositionsToMidRange()
    {
       for (int i = 0; i < numberOfDoF; i++)
-      {
-         double midRange = 0.5 * (localJoints[i].getJointLimitLower() + localJoints[i].getJointLimitUpper());
-         privilegedJointPositions.set(i, 0, midRange);
-      }
+         yoPrivilegedJointPositions[i].set(jointAnlgesAtMidRangeOfMotion.get(i, 0));
    }
 
    public void setMaximumJointVelocities(double maximumJointVelocities)
    {
-      for (int i = 0; i < numberOfDoF; i++)
-         this.maximumJointVelocities.set(i, 0, maximumJointVelocities);
+      this.maximumJointVelocities.set(maximumJointVelocities);
    }
 
    public void setMaximumJointAngleCorrections(double maximumJointAngleCorrections)
    {
-      for (int i = 0; i < numberOfDoF; i++)
-         this.maximumJointVelocities.set(i, 0, maximumJointAngleCorrections / controlDT);
+      this.maximumJointVelocities.set(maximumJointAngleCorrections / controlDT);
    }
    
    public void setMaximumJointAccelerations(double maximumJointAccelerations)
-   {
-      for (int i = 0; i < numberOfDoF; i++)
-         this.maximumJointAccelerations.set(i, 0, maximumJointAccelerations);
-   }
-
-   public void setMaximumJointVelocities(DenseMatrix64F maximumJointVelocities)
-   {
-      this.maximumJointVelocities.set(maximumJointVelocities);
-   }
-
-   public void setMaximumJointAngleCorrections(DenseMatrix64F maximumJointAngleCorrections)
-   {
-      CommonOps.scale(1.0 / controlDT, maximumJointAngleCorrections, maximumJointVelocities);
-   }
-
-   public void setMaximumJointAccelerations(DenseMatrix64F maximumJointAccelerations)
    {
       this.maximumJointAccelerations.set(maximumJointAccelerations);
    }
@@ -252,7 +264,10 @@ public class TaskspaceToJointspaceCalculator
       desiredControlFrameTwist.packMatrix(spatialDesiredVelocity, 0);
       CommonOps.add(spatialVelocityFromError, spatialDesiredVelocity, spatialDesiredVelocity);
 
-      computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight, privilegedJointPositions);
+      if (currentSecondaryObjective.getEnumValue() == SecondaryObjective.TOWARD_RESTING_CONFIGURATION)
+         computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight.getDoubleValue(), yoPrivilegedJointPositions);
+      else
+         computePrivilegedVelocitiesForStayingAwayFromJointLimits(privilegedJointVelocities, jointAngleRegularizationWeight.getDoubleValue());
 
       inverseJacobianSolver.solveUsingNullspaceMethod(spatialDesiredVelocity, jacobian.getJacobianMatrix(), privilegedJointVelocities);
       desiredJointVelocities.set(inverseJacobianSolver.getJointspaceVelocity());
@@ -264,9 +279,9 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          OneDoFJoint joint = localJoints[i];
-         double qDotDesired = MathTools.clipToMinMax(desiredJointVelocities.get(i, 0), maximumJointVelocities.get(i, 0));
+         double qDotDesired = MathTools.clipToMinMax(desiredJointVelocities.get(i, 0), maximumJointVelocities.getDoubleValue());
          double qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
-         qDotDotDesired = MathTools.clipToMinMax(qDotDotDesired, maximumJointAccelerations.get(i, 0));
+         qDotDotDesired = MathTools.clipToMinMax(qDotDotDesired, maximumJointAccelerations.getDoubleValue());
          qDotDesired = joint.getQd() + qDotDotDesired * controlDT;
          
          double qDesired = joint.getQ() + qDotDesired * controlDT;
@@ -313,14 +328,41 @@ public class TaskspaceToJointspaceCalculator
       }
    }
 
-   private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight, DenseMatrix64F privilegedJointPositions)
+   private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight, DoubleYoVariable[] yoPrivilegedJointPositions)
    {
       for (int i = 0; i < numberOfDoF; i++)
       {
-         privilegedJointVelocitiesToPack.set(i, 0, - 2.0 * weight * (localJoints[i].getQ() - privilegedJointPositions.get(i)) / jointSquaredRangeOfMotions.get(i, 0));
+         privilegedJointVelocitiesToPack.set(i, 0, - 2.0 * weight * (localJoints[i].getQ() - yoPrivilegedJointPositions[i].getDoubleValue()) / jointSquaredRangeOfMotions.get(i, 0));
       }
    }
- 
+
+   /**
+    * Compute the gradient of q times the p-norm |q - q_midRange|_p
+    * @param privilegedJointVelocitiesToPack
+    * @param weight
+    */
+   private void computePrivilegedVelocitiesForStayingAwayFromJointLimits(DenseMatrix64F privilegedJointVelocitiesToPack, double weight)
+   {
+      int p = exponentForPNorm.getIntegerValue();
+
+      double sumOfPows = 0.0;
+      double pThRootOfSumOfPows = 0.0;
+      
+      for (int i = 0; i < numberOfDoF; i++)
+      {
+         sumOfPows += MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnlgesAtMidRangeOfMotion.get(i, 0)), p);
+      }
+
+      pThRootOfSumOfPows = Math.pow(sumOfPows, 1.0 / ((double) p));
+
+      for (int i = 0; i < numberOfDoF; i++)
+      {
+         double numerator = MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnlgesAtMidRangeOfMotion.get(i, 0)), p - 1) * pThRootOfSumOfPows;
+         double qDotPrivileged = - weight * numerator / sumOfPows;
+         privilegedJointVelocitiesToPack.set(i, 0, qDotPrivileged);
+      }
+   }
+
    public ReferenceFrame getControlFrame()
    {
       return originalControlFrame;

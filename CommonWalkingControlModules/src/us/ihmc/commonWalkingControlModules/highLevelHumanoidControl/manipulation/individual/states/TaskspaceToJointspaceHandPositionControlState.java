@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import java.util.LinkedHashMap;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
@@ -10,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -18,6 +20,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -48,27 +51,51 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
    private final DoubleYoVariable maxAcceleration;
 
+   private final DoubleYoVariable percentOfTrajectoryWithOrientationBeingControlled;
+   private final DoubleYoVariable startTimeInStateToIgnoreOrientation;
+   private final DoubleYoVariable endTimeInStateToIgnoreOrientation;
+   private final DoubleYoVariable currentOrientationControlFactor;
+   private final DoubleYoVariable activeTrajectoryTime;
+
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
    private final BooleanYoVariable doPositionControl;
 
+   private final DenseMatrix64F identityScaledWithOrientationControlFactor = CommonOps.identity(SpatialMotionVector.SIZE);
+   private final DenseMatrix64F selectionMatrixWithReducedAngularControl = CommonOps.identity(SpatialMotionVector.SIZE);
+
    private final double dt;
    private final OneDoFJoint[] oneDoFJoints;
    private final boolean[] doIntegrateDesiredAccelerations;
 
-   public TaskspaceToJointspaceHandPositionControlState(String namePrefix, HandControlState stateEnum, MomentumBasedController momentumBasedController,
-         int jacobianId, RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
+   public TaskspaceToJointspaceHandPositionControlState(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
+         RigidBody endEffector, boolean doPositionControl, double controlDT, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      super(namePrefix, stateEnum, momentumBasedController, jacobianId, base, endEffector, parentRegistry);
+      super(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, -1, base, endEffector, parentRegistry);
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
 
-      this.doPositionControl = new BooleanYoVariable("doPositionControlForArmJointspaceController", registry);
+      this.doPositionControl = new BooleanYoVariable(namePrefix + "DoPositionControlForArmJointspaceController", registry);
       this.doPositionControl.set(doPositionControl);
 
-      dt = momentumBasedController.getControlDT();
+      percentOfTrajectoryWithOrientationBeingControlled = new DoubleYoVariable(namePrefix + "PercentOfTrajectoryWithOrientationBeingControlled", registry);
+      percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
+
+      activeTrajectoryTime = new DoubleYoVariable(namePrefix + "ActiveTrajectoryTime", registry);
+      activeTrajectoryTime.set(Double.NaN);
+
+      startTimeInStateToIgnoreOrientation = new DoubleYoVariable(namePrefix + "StartTimeInStateToIgnoreOrientation", registry);
+      startTimeInStateToIgnoreOrientation.set(Double.NaN);
+
+      endTimeInStateToIgnoreOrientation = new DoubleYoVariable(namePrefix + "EndTimeInStateToIgnoreOrientation", registry);
+      endTimeInStateToIgnoreOrientation.set(Double.NaN);
+
+      currentOrientationControlFactor = new DoubleYoVariable(namePrefix + "CurrentOrientationControlFactor", registry);
+      currentOrientationControlFactor.set(Double.NaN);
+
+      dt = controlDT;
 
       oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
 
@@ -113,6 +140,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       ReferenceFrame controlFrame = taskspaceToJointspaceCalculator.getControlFrame();
       desiredVelocity.changeFrame(controlFrame);
       desiredAngularVelocity.changeFrame(controlFrame);
+
+      decayAngularControl(getTimeInCurrentState());
+
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
       taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
@@ -143,6 +173,34 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
    }
 
+   private void decayAngularControl(double time)
+   {
+      if (activeTrajectoryTime.isNaN() || percentOfTrajectoryWithOrientationBeingControlled.isNaN())
+         return;
+
+      if (time < startTimeInStateToIgnoreOrientation.getDoubleValue())
+      {
+         double alpha = 1.0 - time / startTimeInStateToIgnoreOrientation.getDoubleValue();
+         alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+         alpha *= alpha;
+         currentOrientationControlFactor.set(alpha);
+         applyAlphaFactorForOrientationControl(alpha);
+      }
+      else if (time > endTimeInStateToIgnoreOrientation.getDoubleValue())
+      {
+         double alpha = time - endTimeInStateToIgnoreOrientation.getDoubleValue();
+         alpha /= activeTrajectoryTime.getDoubleValue() - endTimeInStateToIgnoreOrientation.getDoubleValue();
+         alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+         alpha *= alpha;
+         currentOrientationControlFactor.set(alpha);
+         applyAlphaFactorForOrientationControl(alpha);
+      }
+      else
+      {
+         setupSelectionMatrixForLinearControlOnly();
+      }
+   }
+
    @Override
    public void doTransitionIntoAction()
    {
@@ -155,8 +213,58 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       if (doPositionControl.getBooleanValue())
          enablePositionControl();
 
-      ScrewTools.getJointPositions(oneDoFJoints, jointAngles);
+      if (getPreviousState() == this || getPreviousState() instanceof JointSpaceHandControlState)
+         ScrewTools.getJointDesiredPositions(oneDoFJoints, jointAngles);
+      else
+         ScrewTools.getJointPositions(oneDoFJoints, jointAngles);
+
       taskspaceToJointspaceCalculator.initialize(jointAngles);
+      taskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrix);
+
+      selectionMatrixWithReducedAngularControl.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(identityScaledWithOrientationControlFactor);
+      CommonOps.setIdentity(selectionMatrixWithReducedAngularControl);
+
+      if (activeTrajectoryTime.isNaN() || percentOfTrajectoryWithOrientationBeingControlled.isNaN())
+      {
+         startTimeInStateToIgnoreOrientation.set(Double.NaN);
+         endTimeInStateToIgnoreOrientation.set(Double.NaN);
+         currentOrientationControlFactor.set(Double.NaN);
+      }
+      else if (MathTools.epsilonEquals(percentOfTrajectoryWithOrientationBeingControlled.getDoubleValue(), 0.0, 1.0e-2))
+      {
+         activeTrajectoryTime.set(Double.NaN);
+         percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
+         startTimeInStateToIgnoreOrientation.set(Double.NaN);
+         endTimeInStateToIgnoreOrientation.set(Double.NaN);
+         currentOrientationControlFactor.set(0.0);
+         setupSelectionMatrixForLinearControlOnly();
+      }
+      else
+      {
+         double timeToDecayOrientationControl = 0.5 * percentOfTrajectoryWithOrientationBeingControlled.getDoubleValue() * activeTrajectoryTime.getDoubleValue();
+         startTimeInStateToIgnoreOrientation.set(timeToDecayOrientationControl);
+         endTimeInStateToIgnoreOrientation.set(activeTrajectoryTime.getDoubleValue() - timeToDecayOrientationControl);
+      }
+   }
+
+   private void setupSelectionMatrixForLinearControlOnly()
+   {
+      applyAlphaFactorForOrientationControl(0.0);
+   }
+
+   private void applyAlphaFactorForOrientationControl(double alpha)
+   {
+      CommonOps.setIdentity(identityScaledWithOrientationControlFactor);
+      for (int i = 0; i < 3; i++)
+         identityScaledWithOrientationControlFactor.set(i, i, alpha);
+
+      selectionMatrixWithReducedAngularControl.reshape(selectionMatrix.getNumRows(), SpatialMotionVector.SIZE);
+      CommonOps.mult(selectionMatrix, identityScaledWithOrientationControlFactor, selectionMatrixWithReducedAngularControl);
+
+      MatrixTools.removeZeroRows(selectionMatrixWithReducedAngularControl, 1.0e-12);
+
+      taskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrixWithReducedAngularControl);
    }
 
    @Override
@@ -164,6 +272,10 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    {
       holdPositionDuration.set(0.0);
       disablePositionControl();
+
+      startTimeInStateToIgnoreOrientation.set(Double.NaN);
+      endTimeInStateToIgnoreOrientation.set(Double.NaN);
+      currentOrientationControlFactor.set(Double.NaN);
    }
 
    private void saveDoAccelerationIntegration()
@@ -221,7 +333,24 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public void setTrajectory(PoseTrajectoryGenerator poseTrajectoryGenerator)
    {
+      setTrajectoryWithAngularControlQuality(poseTrajectoryGenerator, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public void setTrajectoryWithAngularControlQuality(PoseTrajectoryGenerator poseTrajectoryGenerator, double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
+   {
       this.poseTrajectoryGenerator = poseTrajectoryGenerator;
+      percentOfTrajectoryWithOrientationBeingControlled = MathTools.clipToMinMax(percentOfTrajectoryWithOrientationBeingControlled, 0.0, 1.0);
+      if (MathTools.epsilonEquals(percentOfTrajectoryWithOrientationBeingControlled, 1.0, 0.01))
+      {
+         this.percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
+         this.activeTrajectoryTime.set(Double.NaN);
+      }
+      else
+      {
+         this.percentOfTrajectoryWithOrientationBeingControlled.set(percentOfTrajectoryWithOrientationBeingControlled);
+         this.activeTrajectoryTime.set(trajectoryTime);
+      }
    }
 
    @Override

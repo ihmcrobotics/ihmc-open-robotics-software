@@ -26,6 +26,7 @@ import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -231,6 +232,7 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setFullyConstrained();
       handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
       // TODO These need to be extracted
+      handTaskspaceToJointspaceCalculator.setJointAngleRegularizationWeight(5.0);
       handTaskspaceToJointspaceCalculator.setMaximumJointVelocities(5.0);
       handTaskspaceToJointspaceCalculator.setMaximumJointAccelerations(50.0);
       handTaskspaceToJointspaceCalculator.setMaximumTaskspaceVelocity(1.5, 0.5);
@@ -261,11 +263,8 @@ public class HandControlModule
 
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
       {
-//         taskSpacePositionControlState = new InverseKinematicsTaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, robotSide,
-//                 momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, armControlParameters, controlStatusProducer, jointspaceGains,
-//                 controlDT, registry);
-         taskSpacePositionControlState = new TaskspaceToJointspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION,
-               momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
+         taskSpacePositionControlState = new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController,
+               chest, hand, doPositionControl, controlDT, jointspaceGains, registry);
       }
       else
       {
@@ -392,11 +391,16 @@ public class HandControlModule
 
    public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
    {
+      executeTaskSpaceTrajectory(poseTrajectory, selectionMatrix, Double.NaN, Double.NaN);
+   }
+
+   public void executeTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix, double percentOfTrajectoryWithOrientationBeingControlled, double trajectoryTime)
+   {
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
-      taskSpacePositionControlState.setTrajectory(poseTrajectory);
+      taskSpacePositionControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, percentOfTrajectoryWithOrientationBeingControlled, trajectoryTime);
       taskSpacePositionControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
       taskSpacePositionControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
-      handTaskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrix);
+      taskSpacePositionControlState.setSelectionMatrix(selectionMatrix);
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
@@ -490,8 +494,20 @@ public class HandControlModule
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
    }
 
-   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, double swingClearance)
+   public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes, double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
    {
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+
+      if (controlledOrientationAxes != null)
+      {
+         for (int i = 2; i >= 0; i--)
+         {
+            if (!controlledOrientationAxes[i])
+               MatrixTools.removeRow(selectionMatrix, i);
+         }
+      }
+
       if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
       {
          FramePose pose = computeDesiredFramePose(trajectoryFrame);
@@ -499,7 +515,7 @@ public class HandControlModule
          straightLinePoseTrajectoryGenerator.setInitialPose(pose);
          straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
          straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
-         executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator);
+         executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator, selectionMatrix, percentOfTrajectoryWithOrientationBeingControlled, time);
       }
       else
       {

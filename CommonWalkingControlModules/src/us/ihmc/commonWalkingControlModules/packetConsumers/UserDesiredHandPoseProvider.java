@@ -18,6 +18,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -43,6 +44,11 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<FramePose>();
    private final SideDependentList<Map<OneDoFJoint, Double>> finalDesiredJointAngleMaps = new SideDependentList<Map<OneDoFJoint, Double>>();
 
+   private final BooleanYoVariable[] yoUserHandControlledOrientationAxes = new BooleanYoVariable[3];
+   private final boolean[] userHandControlledOrientationAxes = new boolean[SpatialMotionVector.SIZE];
+
+   private final DoubleYoVariable userHandPercentOfTrajectoryWithOrientationControlled = new DoubleYoVariable("userHandPercentOfTrajectoryWithOrientationControlled", registry);
+
    private final ReferenceFrame chestFrame;
 
    private final SideDependentList<ReferenceFrame> packetReferenceFrames;
@@ -59,13 +65,19 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
          FramePose homePose = new FramePose(chestFrame, desiredHandPosesWithRespectToChestFrame.get(robotSide));
          homePositions.put(robotSide, homePose);
          
-//         System.out.println("homePose = " + homePose);
-
          desiredHandPoses.put(robotSide, homePose);
 
          finalDesiredJointAngleMaps.put(robotSide, new LinkedHashMap<OneDoFJoint, Double>());
       }
 
+      yoUserHandControlledOrientationAxes[0] = new BooleanYoVariable("userHandControlAngularX", registry);
+      yoUserHandControlledOrientationAxes[1] = new BooleanYoVariable("userHandControlAngularY", registry);
+      yoUserHandControlledOrientationAxes[2] = new BooleanYoVariable("userHandControlAngularZ", registry);
+
+      for (int i = 0; i < yoUserHandControlledOrientationAxes.length; i++)
+         yoUserHandControlledOrientationAxes[i].set(true);
+
+      userHandPercentOfTrajectoryWithOrientationControlled.set(1.0);
       userHandPoseTrajectoryTime.set(1.0);
       
       parentRegistry.addChild(registry);
@@ -159,8 +171,21 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    @Override
    public boolean checkAndResetStopCommand(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return false;
+   }
+
+   @Override
+   public boolean[] getControlledOrientationAxes(RobotSide robotSide)
+   {
+      for (int i = 0; i < userHandControlledOrientationAxes.length; i++)
+         userHandControlledOrientationAxes[i] = yoUserHandControlledOrientationAxes[i].getBooleanValue();
+      return userHandControlledOrientationAxes;
+   }
+
+   @Override
+   public double getPercentOfTrajectoryWithOrientationBeingControlled(RobotSide robotSide)
+   {
+      return userHandPercentOfTrajectoryWithOrientationControlled.getDoubleValue();
    }
 
    @Override
@@ -178,63 +203,54 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    @Override
    public FramePose[] getDesiredHandPoses(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public DataType checkHandPoseListPacketDataType(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public boolean checkForNewRotateAboutAxisPacket(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public Point3d getRotationAxisOriginInWorld(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public Vector3d getRotationAxisInWorld(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public double getRotationAngleRightHandRule(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return 0;
    }
 
    @Override
    public boolean checkForNewArmJointTrajectory(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
    @Override
    public boolean controlHandAngleAboutAxis(RobotSide robotSide)
    {
-      // TODO Auto-generated method stub
       return false;
    }
 

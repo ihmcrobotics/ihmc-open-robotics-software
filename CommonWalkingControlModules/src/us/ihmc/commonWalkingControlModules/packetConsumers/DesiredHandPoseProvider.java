@@ -47,6 +47,9 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<Double> rotationAnglesRightHandRules = new SideDependentList<>();
    private final SideDependentList<Boolean> controlHandAngleAboutAxis = new SideDependentList<>();
 
+   private final SideDependentList<AtomicReference<boolean[]>> controlledAxes = new SideDependentList<>();
+   private final SideDependentList<Double> percentOfTrajectoryWithOrientationControlled = new SideDependentList<Double>(1.0, 1.0);
+
    private double trajectoryTime = 1.0;
 
    private final ReferenceFrame chestFrame;
@@ -87,6 +90,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          desiredHandPoseListJointAngles.put(robotSide, new LinkedHashMap<OneDoFJoint, double[]>());
          rotationAxisOriginsInWorld.put(robotSide, new Point3d());
          rotationAxesInWorld.put(robotSide, new Vector3d());
+
+         controlledAxes.put(robotSide, new AtomicReference<boolean[]>(null));
       }
 
       handPauseCommandConsumer = new PacketConsumer<StopMotionPacket>()
@@ -143,6 +148,8 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
       if (object != null)
       {
          trajectoryTime = object.getTrajectoryTime();
+         controlledAxes.get(robotSide).set(object.getControlledOrientationAxes());
+         percentOfTrajectoryWithOrientationControlled.put(robotSide, object.getPercentOfTrajectoryWithHandOrientationBeingControlled());
 
          if (object.isToHomePosition())
          {
@@ -468,5 +475,17 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    public PacketConsumer<WholeBodyTrajectoryPacket> getWholeBodyTrajectoryPacketConsumer()
    {
       return wholeBodyTrajectoryHandPoseListConsumer;
+   }
+
+   @Override
+   public boolean[] getControlledOrientationAxes(RobotSide robotSide)
+   {
+      return controlledAxes.get(robotSide).get();
+   }
+
+   @Override
+   public double getPercentOfTrajectoryWithOrientationBeingControlled(RobotSide robotSide)
+   {
+      return percentOfTrajectoryWithOrientationControlled.get(robotSide);
    }
 }
