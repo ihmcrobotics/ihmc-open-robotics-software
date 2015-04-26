@@ -51,4 +51,11 @@ public interface HandPoseProvider
    public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
 
    public abstract ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide);
+
+   /**
+    * By default it should be all true, meaning the hand orientation will be full constrained.
+    */
+   public abstract boolean[] getControlledOrientationAxes(RobotSide robotSide);
+
+   public abstract double getPercentOfTrajectoryWithOrientationBeingControlled(RobotSide robotSide);
 }

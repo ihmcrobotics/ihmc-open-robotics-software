@@ -2,6 +2,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
@@ -21,6 +25,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -51,7 +56,7 @@ public class ManipulationControlModule
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
-   
+
    private final ObjectWeightProvider objectWeightProvider;
    private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies;
 
@@ -73,7 +78,7 @@ public class ManipulationControlModule
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
-      
+
       objectWeightProvider = variousWalkingProviders.getObjectWeightProvider();
       toolRigidBodies = momentumBasedController.getToolRigitBodies();
 
@@ -152,8 +157,8 @@ public class ManipulationControlModule
       {
          handControlModules.get(robotSide).doControl();
       }
-      
-      if(objectWeightProvider != null && objectWeightProvider.isNewInformationAvailable())
+
+      if (objectWeightProvider != null && objectWeightProvider.isNewInformationAvailable())
       {
          toolRigidBodies.get(objectWeightProvider.getRobotSide()).setMass(objectWeightProvider.getWeight());
       }
@@ -179,33 +184,49 @@ public class ManipulationControlModule
       {
          if (handPoseProvider.checkHandPosePacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            handControlModules.get(robotSide).moveInStraightLine(handPoseProvider.getDesiredHandPose(robotSide), handPoseProvider.getTrajectoryTime(),
-                  handPoseProvider.getDesiredReferenceFrame(robotSide), handSwingClearance.getDoubleValue());
+            FramePose desiredHandPose = handPoseProvider.getDesiredHandPose(robotSide);
+            double trajectoryTime = handPoseProvider.getTrajectoryTime();
+            ReferenceFrame desiredReferenceFrame = handPoseProvider.getDesiredReferenceFrame(robotSide);
+            boolean[] controlledOrientationAxes = handPoseProvider.getControlledOrientationAxes(robotSide);
+            double percentOfTrajectoryWithOrientationBeingControlled = handPoseProvider.getPercentOfTrajectoryWithOrientationBeingControlled(robotSide);
+
+            handControlModules.get(robotSide).moveInStraightLine(desiredHandPose, trajectoryTime, desiredReferenceFrame, controlledOrientationAxes,
+                  percentOfTrajectoryWithOrientationBeingControlled, handSwingClearance.getDoubleValue());
          }
          else
          {
-            handControlModules.get(robotSide).moveUsingQuinticSplines(handPoseProvider.getFinalDesiredJointAngleMaps(robotSide),
-                  handPoseProvider.getTrajectoryTime());
+            Map<OneDoFJoint, Double> finalDesiredJointAngleMaps = handPoseProvider.getFinalDesiredJointAngleMaps(robotSide);
+            double trajectoryTime = handPoseProvider.getTrajectoryTime();
+            handControlModules.get(robotSide).moveUsingQuinticSplines(finalDesiredJointAngleMaps, trajectoryTime);
          }
       }
       else if (handPoseProvider.checkForNewPoseList(robotSide))
       {
          if (handPoseProvider.checkHandPoseListPacketDataType(robotSide) == HandPosePacket.DataType.HAND_POSE)
          {
-            handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(handPoseProvider.getDesiredHandPoses(robotSide),
-                  handPoseProvider.getTrajectoryTime(), handPoseProvider.getDesiredReferenceFrame(robotSide));
+            FramePose[] desiredHandPoses = handPoseProvider.getDesiredHandPoses(robotSide);
+            double trajectoryTime = handPoseProvider.getTrajectoryTime();
+            ReferenceFrame desiredReferenceFrame = handPoseProvider.getDesiredReferenceFrame(robotSide);
+
+            handControlModules.get(robotSide).moveInStraightLinesViaWayPoints(desiredHandPoses, trajectoryTime, desiredReferenceFrame);
          }
          else
          {
-            handControlModules.get(robotSide).moveJointspaceWithWaypoints(handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide),
-                  handPoseProvider.getTrajectoryTime());
+            Map<OneDoFJoint, double[]> desiredJointAngleForWaypointTrajectory = handPoseProvider.getDesiredJointAngleForWaypointTrajectory(robotSide);
+            double trajectoryTime = handPoseProvider.getTrajectoryTime();
+
+            handControlModules.get(robotSide).moveJointspaceWithWaypoints(desiredJointAngleForWaypointTrajectory, trajectoryTime);
          }
       }
       else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
       {
-         handControlModules.get(robotSide).moveInCircle(handPoseProvider.getRotationAxisOriginInWorld(robotSide),
-               handPoseProvider.getRotationAxisInWorld(robotSide), handPoseProvider.getRotationAngleRightHandRule(robotSide),
-               handPoseProvider.controlHandAngleAboutAxis(robotSide), handPoseProvider.getTrajectoryTime());
+         Point3d rotationAxisOriginInWorld = handPoseProvider.getRotationAxisOriginInWorld(robotSide);
+         Vector3d rotationAxisInWorld = handPoseProvider.getRotationAxisInWorld(robotSide);
+         double rotationAngleRightHandRule = handPoseProvider.getRotationAngleRightHandRule(robotSide);
+         boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
+         double trajectoryTime = handPoseProvider.getTrajectoryTime();
+
+         handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, trajectoryTime);
       }
       else if (handPoseProvider.checkForNewArmJointTrajectory(robotSide))
       {
@@ -272,14 +293,14 @@ public class ManipulationControlModule
    {
       handControlModules.get(robotSide).moveUsingQuinticSplines(armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide), trajectoryTime);
    }
-   
+
    public void initializeDesiredToCurrent()
-   {  
+   {
       hasBeenInitialized.set(true);
-      for (RobotSide side: RobotSide.values)
+      for (RobotSide side : RobotSide.values)
       {
-         handControlModules.get(side).initializeDesiredToCurrent( );
-      }  
+         handControlModules.get(side).initializeDesiredToCurrent();
+      }
    }
 
    public void prepareForLocomotion()
