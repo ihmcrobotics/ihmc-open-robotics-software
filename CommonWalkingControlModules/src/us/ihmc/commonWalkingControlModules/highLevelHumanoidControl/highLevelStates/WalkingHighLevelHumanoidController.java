@@ -526,6 +526,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    }
 
    private final EnumYoVariable<RobotSide> trailingLeg = new EnumYoVariable<RobotSide>("trailingLeg", "", registry, RobotSide.class, true);
+   private final EnumYoVariable<RobotSide> lastPlantedLeg = new EnumYoVariable<RobotSide>("lastPlantedLeg", "", registry, RobotSide.class, true);
 
    private class DoubleSupportState extends State<WalkingState>
    {      
@@ -699,6 +700,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                ecmpBasedToeOffHasBeenInitialized.set(true);
             }
          }
+         else
+         {
+            // Always do this so that when a foot slips or is loaded in the air, the height
+            // gets adjusted.
+            if (transferToSide != null)
+               centerOfMassHeightTrajectoryGenerator.setSupportLeg(transferToSide);
+            else
+               centerOfMassHeightTrajectoryGenerator.setSupportLeg(lastPlantedLeg.getEnumValue());
+
+
+         }
       }
 
       private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
@@ -843,7 +855,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null)
-            transferToSideToUseInFootstepData = RobotSide.LEFT; // Arbitrary here.
+            transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
 
          if (!centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
          {
@@ -1048,6 +1060,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doTransitionIntoAction()
       {
+         lastPlantedLeg.set(swingSide.getOppositeSide());
          captureTime = 0.0;
          hasICPPlannerFinished.set(false);
          trailingLeg.set(null);
