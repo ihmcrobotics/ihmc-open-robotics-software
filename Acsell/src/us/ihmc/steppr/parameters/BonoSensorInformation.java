@@ -1,4 +1,4 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;

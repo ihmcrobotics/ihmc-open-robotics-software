@@ -12,7 +12,7 @@ import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeMemory;
 import us.ihmc.realtime.RealtimeThread;

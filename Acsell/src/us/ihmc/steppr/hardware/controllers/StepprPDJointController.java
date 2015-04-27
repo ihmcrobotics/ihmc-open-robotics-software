@@ -3,7 +3,7 @@ package us.ihmc.steppr.hardware.controllers;
 import java.util.ArrayList;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

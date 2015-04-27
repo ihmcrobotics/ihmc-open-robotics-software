@@ -1,8 +1,8 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
-import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footLength;
-import static us.ihmc.acsell.parameters.BonoPhysicalProperties.footWidth;
-import static us.ihmc.acsell.parameters.BonoPhysicalProperties.toeWidth;
+import static us.ihmc.steppr.parameters.BonoPhysicalProperties.footLength;
+import static us.ihmc.steppr.parameters.BonoPhysicalProperties.footWidth;
+import static us.ihmc.steppr.parameters.BonoPhysicalProperties.toeWidth;
 
 import java.util.ArrayList;
 import java.util.List;

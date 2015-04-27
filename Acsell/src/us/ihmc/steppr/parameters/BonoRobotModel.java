@@ -1,4 +1,4 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;

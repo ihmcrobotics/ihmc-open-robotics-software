@@ -3,11 +3,13 @@ package us.ihmc.acsell.hardware.command;
 import java.nio.ByteBuffer;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
+import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public abstract class AcsellActuatorCommand
 {
@@ -15,10 +17,13 @@ public abstract class AcsellActuatorCommand
    private final BooleanYoVariable enabled;
    private final DoubleYoVariable tauDesired;
    private final DoubleYoVariable tauInertia;
-   private final DoubleYoVariable currentDesired;
+   //private final DoubleYoVariable currentDesired;
    private final DoubleYoVariable damping;
    private final DoubleYoVariable qddDesired;
    private final double currentLimit;
+   
+   private final DoubleYoVariable rawCurrentDesired;
+   private final AlphaFilteredYoVariable filteredCurrentDesired;
    
    private final AcsellActuator actuator;
    
@@ -33,9 +38,15 @@ public abstract class AcsellActuatorCommand
       this.tauInertia = new DoubleYoVariable(name + "TauInertia", registry);
       this.qddDesired = new DoubleYoVariable(name + "qdd_d", registry);
       this.damping = new DoubleYoVariable(name + "Damping", registry);
-      this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
+      //this.currentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
+      this.rawCurrentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
       
-      currentDesired.addVariableChangedListener(new VariableChangedListener()
+      if(actuator==StepprActuator.LEFT_HIP_Z || actuator==StepprActuator.RIGHT_HIP_Z)
+         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 0.95, rawCurrentDesired);
+      else
+         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 1.0, rawCurrentDesired);
+      
+      rawCurrentDesired.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
@@ -57,7 +68,7 @@ public abstract class AcsellActuatorCommand
       if(enabled.getBooleanValue())
       {
          target.put((byte) 3);
-         target.putFloat((float) (currentDesired.getDoubleValue()));
+         target.putFloat((float) (filteredCurrentDesired.getDoubleValue()));
          target.putFloat((float) (damping.getDoubleValue() / actuator.getKt()));
          target.putFloat(0f);
          target.putInt(controlID);
@@ -90,7 +101,7 @@ public abstract class AcsellActuatorCommand
    protected void setTauDesired(double tau)
    {
       tauDesired.set(tau);
-      this.currentDesired.set(tau/actuator.getKt());
+      this.rawCurrentDesired.set(tau/actuator.getKt());
    }
    
    protected void setDamping(double damping)

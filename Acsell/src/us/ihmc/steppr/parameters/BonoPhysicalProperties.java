@@ -1,4 +1,4 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
 import javax.vecmath.Vector3d;
 

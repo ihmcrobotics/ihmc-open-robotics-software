@@ -2,7 +2,7 @@ package us.ihmc.acsell.simulation;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.SDFRobot;
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.acsell.treadmill.TreadmillJoystickEventListener;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTrack;

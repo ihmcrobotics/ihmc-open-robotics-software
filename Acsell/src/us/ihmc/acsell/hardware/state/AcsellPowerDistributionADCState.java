@@ -2,7 +2,7 @@ package us.ihmc.acsell.hardware.state;
 
 import java.nio.ByteBuffer;
 
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -34,7 +34,7 @@ public class AcsellPowerDistributionADCState
       leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
       rightLimbCurrent = new DoubleYoVariable("rightLimbCurrent", registry);
       torsoLimbCurrent = new DoubleYoVariable("torsoLimbCurrent", registry);
-      dt = (new BonoRobotModel(true, false)).getEstimatorDT();            
+      dt = (new BonoRobotModel(true, false)).getEstimatorDT(); //TODO: make generic
       parentRegistry.addChild(registry);
    }
 

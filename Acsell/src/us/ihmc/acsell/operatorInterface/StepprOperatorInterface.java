@@ -3,7 +3,7 @@ package us.ihmc.acsell.operatorInterface;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 
 import com.martiansoftware.jsap.JSAP;
