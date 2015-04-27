@@ -253,8 +253,8 @@ public class PushButtonBehavior extends BehaviorInterface
       pushVector.normalize();
       newHandPosition =  new Point3d(pushLocations.get(buttonNumber));
 
-      // Place hand 0.2 away from assumed button position to avoid early collision.
-      pushVector.scale(0.2);
+      // Place hand 0.05 away from assumed button position to avoid early collision.
+      pushVector.scale(0.05);
       newHandPosition.sub(pushVector);
       pushVector.normalize();
       if(DEBUG)
@@ -269,7 +269,7 @@ public class PushButtonBehavior extends BehaviorInterface
       poseRotation.mul(poseZRotation, poseYRotation);
 
       // Transform the wrist offset
-      wristOffset.set(0.1, 0.0, 0.0);
+      wristOffset.set(0.26, 0.0, 0.0);
       poseRotation.transform(wristOffset);
 
       initialHandPose.setOrientation(poseRotation);
