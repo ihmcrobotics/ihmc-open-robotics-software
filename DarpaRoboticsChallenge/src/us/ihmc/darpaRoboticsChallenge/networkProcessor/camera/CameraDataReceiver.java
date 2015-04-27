@@ -1,5 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -12,18 +13,21 @@ import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.sensing.CropVideoPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
-public abstract class CameraDataReceiver extends Thread
+public abstract class CameraDataReceiver extends Thread implements PacketConsumer<CropVideoPacket>
 {
    protected final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;
@@ -41,6 +45,10 @@ public abstract class CameraDataReceiver extends Thread
    private final LinkedBlockingQueue<CameraData> dataQueue = new LinkedBlockingQueue<>();
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private volatile boolean running = true;
+   
+   private boolean cropVideo = false;
+   private int cropX;
+   private int cropY;
 
    public CameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
          final PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
@@ -50,7 +58,9 @@ public abstract class CameraDataReceiver extends Thread
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
 
-      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(sensorSuitePacketCommunicator, new VideoPacketHandler(sensorSuitePacketCommunicator));
+      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new VideoPacketHandler(sensorSuitePacketCommunicator));
+      
+      sensorSuitePacketCommunicator.attachListener(CropVideoPacket.class, this);
    }
 
    public void setCameraFrame(ReferenceFrame cameraFrame)
@@ -97,7 +107,28 @@ public abstract class CameraDataReceiver extends Thread
                   stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.intrinsicParameters);
                }
 
-               compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
+               
+               BufferedImage image = data.image;
+               if (cropVideo)
+               {
+                  int width = image.getWidth();
+                  int height = image.getHeight();
+
+                  int newWidth = width / 2;
+                  int newHeight = height / 2;
+
+                  int x = (newWidth * cropX) / 100;
+                  int y = (newHeight * cropY) / 100;
+
+                  BufferedImage croppedImage = new BufferedImage(newWidth, newHeight, image.getType());
+                  Graphics2D graphics = croppedImage.createGraphics();
+                  graphics.drawImage(image, 0, 0, newWidth, newHeight, x, y, x + newWidth, y + newHeight, null);
+                  graphics.dispose();
+                  image = croppedImage;
+               }
+               
+               
+               compressedVideoDataServer.updateImage(data.robotSide, image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
          }
@@ -170,6 +201,13 @@ public abstract class CameraDataReceiver extends Thread
          return packetCommunicator.isConnected();
       }
 
+   }
+   
+   public void receivedPacket(CropVideoPacket packet)
+   {
+      cropX = MathTools.clipToMinMax(packet.cropX(), 0, 100);
+      cropY = MathTools.clipToMinMax(packet.cropY(), 0, 100);
+      cropVideo = packet.crop();
    }
 
 }
