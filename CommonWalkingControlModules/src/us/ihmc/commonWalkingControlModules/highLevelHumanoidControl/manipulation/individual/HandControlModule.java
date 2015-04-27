@@ -220,8 +220,8 @@ public class HandControlModule
          wholeBodyWaypointsPolynomialTrajectoryGenerators.put(oneDoFJoint, multiWaypointTrajectoryGenerator);
       }
 
-      DoubleYoVariable simulationTime = momentumBasedController.getYoTime();
-      stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, simulationTime, registry);
+      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, yoTime, registry);
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand,
               fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
@@ -229,13 +229,7 @@ public class HandControlModule
 
       handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
-      handTaskspaceToJointspaceCalculator.setFullyConstrained();
-      handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
-      // TODO These need to be extracted
-      handTaskspaceToJointspaceCalculator.setJointAngleRegularizationWeight(5.0);
-      handTaskspaceToJointspaceCalculator.setMaximumJointVelocities(5.0);
-      handTaskspaceToJointspaceCalculator.setMaximumJointAccelerations(50.0);
-      handTaskspaceToJointspaceCalculator.setMaximumTaskspaceVelocity(1.5, 0.5);
+      handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
@@ -265,11 +259,11 @@ public class HandControlModule
       {
          if (doPositionControl)
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, jacobianId, jointspaceGains, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, yoTime, registry);
          }
          else
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, jacobianId, jointspaceGains, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
          }
       }
       else
