@@ -37,35 +37,35 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable alphaFilter_BreakFrequency;
    private final DoubleYoVariable dt;
 
-////////////////////////////////////////////
+   ////////////////////////////////////////////
    private final FramePose referenceFrameToBeCorrectedPose_Translation = new FramePose(worldFrame);
    private final PoseReferenceFrame referenceFrameToBeCorrectedPoseReferenceFrame_Translation = new PoseReferenceFrame("referenceFrameToBeCorrectedPoseReferenceFrame_Translation", referenceFrameToBeCorrectedPose_Translation);
    private final FramePose referenceFrameToBeCorrectedPose_Rotation = new FramePose(worldFrame);
    private final PoseReferenceFrame referenceFrameToBeCorrectedPoseReferenceFrame_Rotation = new PoseReferenceFrame("referenceFrameToBeCorrectedPoseReferenceFrame_Rotation", referenceFrameToBeCorrectedPose_Rotation);
-   
+
    private final RigidBodyTransform updatedStartOffsetTransform = new RigidBodyTransform();
    private final FramePose startOffsetErrorPose = new FramePose(worldFrame);
    private final Vector3d updatedStartOffset_Translation = new Vector3d();
    private final FrameOrientation updatedStartOffset_Rotation = new FrameOrientation(worldFrame);
-   private final Quat4d updatedStartOffset_Rotation_quat = new Quat4d(0.0,0.0,0.0,1.0);
+   private final Quat4d updatedStartOffset_Rotation_quat = new Quat4d(0.0, 0.0, 0.0, 1.0);
    private final RigidBodyTransform startOffsetTransform_Translation = new RigidBodyTransform();
    private final RigidBodyTransform startOffsetTransform_Rotation = new RigidBodyTransform();
-   
+
    private final Vector3d interpolatedTranslation = new Vector3d();
    private final RigidBodyTransform interpolatedTransform_Translation = new RigidBodyTransform();
    private final RigidBodyTransform interpolatedTransform_Rotation = new RigidBodyTransform();
-   private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform(); 
-   private final Quat4d interpolatedRotation = new Quat4d(0.0,0.0,0.0,1.0);
-   
+   private final RigidBodyTransform interpolatedTransform = new RigidBodyTransform();
+   private final Quat4d interpolatedRotation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+
    private final RigidBodyTransform updatedGoalOffsetTransform = new RigidBodyTransform();
    private final FramePose goalOffsetErrorPose = new FramePose(worldFrame);
    private final Vector3d updatedGoalOffset_Translation = new Vector3d();
    private final FrameOrientation updatedGoalOffset_Rotation = new FrameOrientation(worldFrame);
-   private final Quat4d updatedGoalOffset_Rotation_quat = new Quat4d(0.0,0.0,0.0,1.0);
+   private final Quat4d updatedGoalOffset_Rotation_quat = new Quat4d(0.0, 0.0, 0.0, 1.0);
    private final RigidBodyTransform goalOffsetTransform_Translation = new RigidBodyTransform();
    private final RigidBodyTransform goalOffsetTransform_Rotation = new RigidBodyTransform();
    ////////////////////////////////////////////
-   
+
    private final AlphaFilteredYoVariable alphaFilter;
    private final DoubleYoVariable alphaFilter_AlphaValue;
    private final DoubleYoVariable alphaFilter_PositionValue;
@@ -75,10 +75,9 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable maxTranslationalCorrectionVelocity;
    private final DoubleYoVariable maxRotationalCorrectionVelocity;
 
-   
    private final Vector3d distanceToTravelVector = new Vector3d();
    private final DoubleYoVariable distanceToTravel;
-   
+
    private final FrameOrientation rotationToTravel = new FrameOrientation(worldFrame);
    private final DoubleYoVariable angleToTravel;
    private final AxisAngle4d axisAngletoTravel = new AxisAngle4d();
@@ -96,25 +95,30 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable xDeadzoneSize;
    private final DoubleYoVariable yDeadzoneSize;
    private final DoubleYoVariable zDeadzoneSize;
-   
+
    private final DeadzoneYoVariable goalTranslationWithDeadzoneX;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneY;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneZ;
-   
+
    private final DoubleYoVariable goalTranslationRawX;
    private final DoubleYoVariable goalTranslationRawY;
    private final DoubleYoVariable goalTranslationRawZ;
-   
+
    private final Vector3d offsetBetweenStartAndGoalVector_Translation = new Vector3d();
    private final Vector3d updatedGoalOffsetWithDeadzone_Translation = new Vector3d();
 
-   
+   //used to check if the orientation error is too big
+   private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
+   private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
+   private final double[] yawPitchRoll = new double[3];
+   private final DoubleYoVariable maximumErrorAngleInDegrees;
+
    //for feedBack in scs
    private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
    private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
    private final YoFramePose yoInterpolatedOffset_InWorldFrame;
-   
-   private final FramePose startOffsetErrorPose_Translation = new FramePose(worldFrame); 
+
+   private final FramePose startOffsetErrorPose_Translation = new FramePose(worldFrame);
    private final FramePose startOffsetErrorPose_Rotation = new FramePose(worldFrame);
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Translation = new PoseReferenceFrame("startOffsetErrorReferenceFrame_Translation", startOffsetErrorPose_Translation);
    private final PoseReferenceFrame startOffsetErrorReferenceFrame_Rotation= new PoseReferenceFrame("startOffsetErrorReferenceFrame_Rotation", startOffsetErrorPose_Rotation);
@@ -129,7 +133,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
    private final YoFrameOrientation yoGoalOffsetFrameOrientation_Rotation;
    private final YoFrameOrientation yoInterpolatedOffsetFrameOrientation_Rotation;
-   
+
    public ClippedSpeedOffsetErrorInterpolator(YoVariableRegistry parentRegistry, ReferenceFrame referenceFrame, DoubleYoVariable alphaFilterBreakFrequency,
          double estimator_dt, boolean correctRotation)
    {
@@ -178,30 +182,30 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       xDeadzoneSize = new DoubleYoVariable("xDeadzoneSize", registry);
       xDeadzoneSize.set(0.014);
-      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry); 
+      yDeadzoneSize = new DoubleYoVariable("yDeadzoneSize", registry);
       yDeadzoneSize.set(0.014);
       zDeadzoneSize = new DoubleYoVariable("zDeadzoneSize", registry);
       zDeadzoneSize.set(0.014);
-      
+
       goalTranslationRawX = new DoubleYoVariable("goalTranslationRawX", registry);
       goalTranslationRawY = new DoubleYoVariable("goalTranslationRawY", registry);
       goalTranslationRawZ = new DoubleYoVariable("goalTranslationRawZ", registry);
-      
+
       goalTranslationWithDeadzoneX = new DeadzoneYoVariable("goalTranslationWithDeadzoneX", goalTranslationRawX, xDeadzoneSize, registry);
       goalTranslationWithDeadzoneY = new DeadzoneYoVariable("goalTranslationWithDeadzoneY", goalTranslationRawY, yDeadzoneSize, registry);
       goalTranslationWithDeadzoneZ = new DeadzoneYoVariable("goalTranslationWithDeadzoneZ", goalTranslationRawZ, zDeadzoneSize, registry);
-      
+
       // for feedback in SCS
       yoStartOffsetErrorPose_InWorldFrame = new YoFramePose("yoStartOffsetErrorPose_InWorldFrame", worldFrame, registry);
       yoGoalOffsetErrorPose_InWorldFrame = new YoFramePose("yoGoalOffsetErrorPose_InWorldFrame", worldFrame, registry);
       yoInterpolatedOffset_InWorldFrame = new YoFramePose("yoInterpolatedOffset_InWorldFrame", worldFrame, registry);
-      
+
       yoGoalOffsetFramePoint_Translation = new YoFramePoint("yoGoalOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
       yoInterpolatedOffsetFramePoint_Translation = new YoFramePoint("yoInterpolatedOffsetFramePoint_Translation", startOffsetErrorReferenceFrame_Translation, registry);
-      
-     yoGoalOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
+
+      yoGoalOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoGoalOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
      yoInterpolatedOffsetFrameOrientation_Rotation = new YoFrameOrientation("yoInterpolatedOffsetFrameOrientation_Rotation", startOffsetErrorReferenceFrame_Rotation, registry);
-      
+
       this.alphaFilter_BreakFrequency.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
@@ -211,7 +215,25 @@ public class ClippedSpeedOffsetErrorInterpolator
                   dt.getDoubleValue()));
          }
       });
-     
+
+      maximumErrorAngleInDegrees = new DoubleYoVariable("maximumErrorAngleInDegrees", registry);
+      maximumErrorAngleInDegrees.set(10.0);
+   }
+
+   public boolean checkIfRotationErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose)
+   {
+      correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
+      iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(iterativeClosestPointOrientation);
+      iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
+
+      iterativeClosestPointOrientation.getYawPitchRoll(yawPitchRoll);
+
+      for (int i = 0; i < yawPitchRoll.length; i++)
+      {
+         if (Math.abs(yawPitchRoll[i]) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
+            return true;
+      }
+      return false;
    }
 
    public void setInterpolatorInputs(FramePose startOffsetError, FramePose goalOffsetError, double alphaFilterPosition)
@@ -228,29 +250,26 @@ public class ClippedSpeedOffsetErrorInterpolator
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
       yoGoalOffsetErrorPose_InWorldFrame.set(goalOffsetErrorPose);
       ///////////
-      
+
       referenceFrameToBeCorrected.update();
       referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Translation, worldFrame);
       referenceFrameToBeCorrectedTransform_Translation.setRotationToIdentity();
       referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Rotation, worldFrame);
       referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
 
-
       referenceFrameToBeCorrectedPose_Translation.setPose(referenceFrameToBeCorrectedTransform_Translation);
       referenceFrameToBeCorrectedPoseReferenceFrame_Translation.setPoseAndUpdate(referenceFrameToBeCorrectedPose_Translation);
-      
+
       referenceFrameToBeCorrectedPose_Rotation.setPose(referenceFrameToBeCorrectedTransform_Rotation);
       referenceFrameToBeCorrectedPoseReferenceFrame_Rotation.setPoseAndUpdate(referenceFrameToBeCorrectedPose_Rotation);
 
-      
       startOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Translation);
       startOffsetErrorPose.getPosition(updatedStartOffset_Translation);
       startOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Rotation);
       startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation_quat);
       startOffsetErrorPose.changeFrame(worldFrame);
       startOffsetErrorPose.getOrientationIncludingFrame(updatedStartOffset_Rotation);
-      
-      
+
       goalOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Translation);
       goalOffsetErrorPose.getPosition(updatedGoalOffset_Translation);
       goalOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Rotation);
@@ -268,15 +287,14 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalTranslationWithDeadzoneX.update();
       goalTranslationWithDeadzoneY.update();
       goalTranslationWithDeadzoneZ.update();
-      
+
       updatedGoalOffsetWithDeadzone_Translation.setX(updatedStartOffset_Translation.getX() + goalTranslationWithDeadzoneX.getDoubleValue());
       updatedGoalOffsetWithDeadzone_Translation.setY(updatedStartOffset_Translation.getY() + goalTranslationWithDeadzoneY.getDoubleValue());
       updatedGoalOffsetWithDeadzone_Translation.setZ(updatedStartOffset_Translation.getZ() + goalTranslationWithDeadzoneZ.getDoubleValue());
-      
+
       goalOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedGoalOffsetWithDeadzone_Translation);
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffset_Rotation_quat);
 
-      
       alphaFilter_PositionValue.set(alphaFilterPosition);
       alphaFilter.set(0.0);
       previousClippedAlphaFilterValue.set(0.0);
@@ -290,13 +308,13 @@ public class ClippedSpeedOffsetErrorInterpolator
    private void updateMaxAlphaVariationSpeed()
    {
       distanceToTravelVector.sub(updatedGoalOffsetWithDeadzone_Translation, updatedStartOffset_Translation);
-      
+
       distanceToTravel.set(distanceToTravelVector.length());
       translationalSpeedForGivenDistanceToTravel.set(distanceToTravel.getDoubleValue() / dt.getDoubleValue());
-      
+
       rotationToTravel.setOrientationFromOneToTwo(updatedStartOffset_Rotation, updatedGoalOffset_Rotation);
       rotationToTravel.getAxisAngle(axisAngletoTravel);
-      
+
       angleToTravel.set(axisAngletoTravel.getAngle());
       rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());
    }
@@ -312,7 +330,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       {
          alphaFilter.update();
       }
-      
+
       //translation
       if (translationalSpeedForGivenDistanceToTravel.getDoubleValue() * alphaFilter.getDoubleValue() <= translationalSpeedForGivenDistanceToTravel
             .getDoubleValue()
@@ -347,7 +365,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       referenceFrameToBeCorrectedTransform_Translation.setRotationToIdentity();
       referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Rotation, worldFrame);
       referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
-      
+
       //update the start and goal translations and rotations
       updatedStartOffsetTransform.setIdentity();
       updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
@@ -357,16 +375,16 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       updatedStartOffsetTransform.getTranslation(updatedStartOffset_Translation);
       updatedStartOffsetTransform.getRotation(updatedStartOffset_Rotation_quat);
-      
+
       updatedGoalOffsetTransform.setIdentity();
       updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Translation);
       updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Rotation);
-      
+
       updatedGoalOffsetTransform.getTranslation(updatedGoalOffset_Translation);
       updatedGoalOffsetTransform.getRotation(updatedGoalOffset_Rotation_quat);
-      
+
       //interpolation here
       interpolatedTranslation.interpolate(updatedStartOffset_Translation, updatedGoalOffset_Translation, cLippedAlphaFilterValue.getDoubleValue());
       interpolatedTransform_Translation.setTranslationAndIdentityRotation(interpolatedTranslation);
@@ -384,7 +402,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       interpolatedTransform.setIdentity();
       interpolatedTransform.multiply(interpolatedTransform_Translation);
       interpolatedTransform.multiply(interpolatedTransform_Rotation);
-      
+
       offsetPoseToPack.setPose(interpolatedTransform);
 
       //scs feedback only
@@ -398,7 +416,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       startOffsetErrorPose_Translation.setToZero(worldFrame);
       startOffsetErrorPose_Translation.setPosition(updatedStartOffset_Translation);
       startOffsetErrorReferenceFrame_Translation.setPoseAndUpdate(startOffsetErrorPose_Translation);
-      
+
       startOffsetErrorPose_Rotation.setToZero(worldFrame);
       startOffsetErrorPose_Rotation.setOrientation(updatedStartOffset_Rotation);
       startOffsetErrorReferenceFrame_Rotation.setPoseAndUpdate(startOffsetErrorPose_Rotation);
@@ -407,29 +425,27 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetFramePoint_Translation.set(updatedGoalOffset_Translation);
       goalOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
       yoGoalOffsetFramePoint_Translation.setAndMatchFrame(goalOffsetFramePoint_Translation);
-      
+
       interpolatedOffsetFramePoint_Translation.changeFrame(worldFrame);
       interpolatedOffsetFramePoint_Translation.set(interpolatedTranslation);
       interpolatedOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
       yoInterpolatedOffsetFramePoint_Translation.setAndMatchFrame(interpolatedOffsetFramePoint_Translation);
-      
-      
+
       goalOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
       goalOffsetFrameOrientation_Rotation.set(updatedGoalOffset_Rotation);
       goalOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
       yoGoalOffsetFrameOrientation_Rotation.setAndMatchFrame(goalOffsetFrameOrientation_Rotation);
-      
+
       interpolatedOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
       interpolatedOffsetFrameOrientation_Rotation.set(interpolatedRotation);
       interpolatedOffsetFrameOrientation_Rotation.changeFrame(startOffsetErrorReferenceFrame_Rotation);
       yoInterpolatedOffsetFrameOrientation_Rotation.setAndMatchFrame(interpolatedOffsetFrameOrientation_Rotation);
    }
-   
+
    public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize)
    {
       this.xDeadzoneSize.set(xDeadzoneSize);
       this.yDeadzoneSize.set(yDeadzoneSize);
       this.zDeadzoneSize.set(zDeadzoneSize);
    }
-   
 }

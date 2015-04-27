@@ -12,6 +12,7 @@ import javax.vecmath.Vector4d;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -801,6 +802,13 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
            PelvisPoseErrorPacket pelvisPoseErrorPacket) 
       {
         //doNothing
+      }
+
+      @Override
+      public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
+      {
+         // TODO Auto-generated method stub
+         
       }
    }
 

@@ -4,6 +4,7 @@ import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
@@ -81,6 +82,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
    private final Quat4d errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quat4d();
    
+   private final BooleanYoVariable isRotationErrorTooBig;
+   
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
    {
@@ -131,6 +134,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       
       hasOneIcpPacketEverBeenReceived = new BooleanYoVariable("hasOneIcpPacketEverBeenReceived", registry);
       hasOneIcpPacketEverBeenReceived.set(false);
+      
+      isRotationErrorTooBig = new BooleanYoVariable("isRotationErrorTooBig", registry);
+      isRotationErrorTooBig.set(false);
    }
    
    public void doControl(long timestamp)
@@ -242,9 +248,23 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-      offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, confidenceFactor.getDoubleValue());
+      if(offsetErrorInterpolator.checkIfRotationErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
+      {
+         requestLocalizationReset();
+         isRotationErrorTooBig.set(true);
+      }
+      else
+      {
+         offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, confidenceFactor.getDoubleValue());
+         isRotationErrorTooBig.set(false);
+      }
    }
    
+   private void requestLocalizationReset()
+   {
+      pelvisPoseCorrectionCommunicator.sendLocalizationResetRequest(new LocalizationPacket(true, true));
+   }
+
    private void checkForNeedToSendCorrectionUpdate()
    {
       if (sendCorrectionUpdate)
