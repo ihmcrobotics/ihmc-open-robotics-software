@@ -18,18 +18,21 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
    private final MultisenseTest testInfo;
    private final MultisenseFrameName frame;
    private final AtomicReference<RigidBodyTransform> lidarOriginInWorldAtomicReference = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
+   private final RigidBodyTransform transformFromMocapCentroidToLidarBaseFrame;
    
    public MultisensePointCloudReceiver(PacketCommunicator packetCommunicator, MultisenseTest testInfo)
    {
       this.packetCommunicator = packetCommunicator;
       this.testInfo = testInfo;
       this.frame = testInfo.getFrame();
+      transformFromMocapCentroidToLidarBaseFrame = frame.getTransformFromMocapCentroidToLidarFrame();
+      lidarOriginInWorldAtomicReference.set(new RigidBodyTransform(transformFromMocapCentroidToLidarBaseFrame));
    }
    
    public void setWorldTransform(RigidBodyTransform lidarOriginInMocap)
    {
       RigidBodyTransform lidarOriginInWorld = new RigidBodyTransform(lidarOriginInMocap);
-      lidarOriginInWorld.multiply(frame.getTransformToMocapCentroid());
+      lidarOriginInWorld.multiply(transformFromMocapCentroidToLidarBaseFrame);
       lidarOriginInWorldAtomicReference.set(lidarOriginInWorld);
    }
    
