@@ -46,7 +46,8 @@ public class PolarisRobot extends Robot
       
       Link checkerBoardLink = new Link(name + "CheckerBoardLink");
       Graphics3DObject checkerBoardGraphics = new Graphics3DObject();
-      checkerBoardGraphics.scale(new Vector3d(3.0, 3.0, 0.1));
+      // value of 2.68 corresponds to real board with grid size of 3.35cm
+      checkerBoardGraphics.scale(new Vector3d(2.68, 2.68, 0.1));
       checkerBoardGraphics.addModelFile(checkerBoardModelFile);
       checkerBoardLink.setLinkGraphics(checkerBoardGraphics);
       
