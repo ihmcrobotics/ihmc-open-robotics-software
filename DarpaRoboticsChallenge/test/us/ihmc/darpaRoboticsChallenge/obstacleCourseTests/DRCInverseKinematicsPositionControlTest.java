@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.obstacleCourseTests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JointPositionControllerFactory;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
+import us.ihmc.communication.util.PacketControllerTools;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.MultiRobotTestInterface;
 import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
@@ -25,10 +28,13 @@ import us.ihmc.darpaRoboticsChallenge.testTools.DRCSimulationTestHelper;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
+import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
@@ -38,6 +44,9 @@ import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.controllers.GainCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -76,7 +85,7 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
    public static final double POSITION_THRESHOLD = 0.01;
    public static final double ORIENTATION_THRESHOLD = 0.03;
    public static final double JOINT_POSITION_THRESHOLD = 0.05;
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -124,11 +133,59 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
       drcSimulationTestHelper.send(jointSpacePacket);
       
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0);
-      assertTrue(success);
       
+      assertTrue(success);
       assertCurrentHandPoseIsWithinThresholds(robotSide, desiredJointAngles);
+      assertArmJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
       
       BambooTools.reportTestFinishedMessage();
+   }
+	
+   @EstimatedDuration(duration = 105.6)
+   @Test(timeout = 316687)
+   public void testTaskSpaceHandPose() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 2.0;
+      double[] initialJointAngles = getCurrentArmPose(robotSide);
+      double[] desiredJointAngles = createRandomArmPose(robotSide);
+
+      drcSimulationTestHelper.send(new HandPosePacket(robotSide, trajectoryTime, desiredJointAngles));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0);
+      assertTrue(success);
+      assertCurrentHandPoseIsWithinThresholds(robotSide, desiredJointAngles);
+      
+      FramePose reachableHandPose = getCurrentHandPose(robotSide);
+      reachableHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      RigidBodyTransform reachableHandPoseTransformToWorld = new RigidBodyTransform();
+      reachableHandPose.getPose(reachableHandPoseTransformToWorld);
+      
+      drcSimulationTestHelper.send(new HandPosePacket(robotSide, trajectoryTime, initialJointAngles));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0);
+      assertTrue(success);
+      assertCurrentHandPoseIsWithinThresholds(robotSide, initialJointAngles);
+
+      drcSimulationTestHelper.send(PacketControllerTools.createHandPosePacket(Frame.WORLD, reachableHandPoseTransformToWorld, robotSide, trajectoryTime));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.0);
+      
+      assertTrue(success);
+      assertCurrentHandPoseIsWithinThresholds(robotSide, reachableHandPose);
+      assertArmJointsMovedSmoothlyWithinKinematicAndDynamicLimits();
+
+      BambooTools.reportTestFinishedMessage();
+   }
+   
+   private FramePose getCurrentHandPose(RobotSide robotSideToTest)
+   {
+      FramePose ret = new FramePose();
+      ret.setToZero(drcSimulationTestHelper.getControllerFullRobotModel().getHandControlFrame(robotSideToTest));
+      ret.changeFrame(ReferenceFrame.getWorldFrame());
+      return ret;
    }
 	
    private double[] getCurrentArmPose(RobotSide robotSide)
@@ -200,6 +257,69 @@ public abstract class DRCInverseKinematicsPositionControlTest implements MultiRo
          assertEquals(armJointName + " position error (" + Math.toDegrees(error) + " degrees) exceeds threshold of " + Math.toDegrees(JOINT_POSITION_THRESHOLD)
                + " degrees.", q_desired, q_actual, JOINT_POSITION_THRESHOLD);
       }
+   }
+   
+   private void assertCurrentHandPoseIsWithinThresholds(RobotSide robotSide, FramePose desiredPose)
+   {
+      FramePose currentPose = getCurrentHandPose(robotSide);
+      assertPosesAreWithinThresholds(desiredPose, currentPose);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose)
+   {
+      assertPosesAreWithinThresholds(desiredPose, actualPose, POSITION_THRESHOLD, ORIENTATION_THRESHOLD);
+   }
+
+   private void assertPosesAreWithinThresholds(FramePose desiredPose, FramePose actualPose, double positionThreshold, double orientationThreshold)
+   {
+      double positionDistance = desiredPose.getPositionDistance(actualPose);
+      double orientationDistance = desiredPose.getOrientationDistance(actualPose);
+
+      if (DEBUG)
+      {
+         System.out.println("testSimpleHandPoseMove: positionDistance=" + positionDistance);
+         System.out.println("testSimpleHandPoseMove: orientationDistance=" + orientationDistance);
+      }
+
+      assertEquals("Pose position error :" + positionDistance + " exceeds threshold: " + positionThreshold, 0.0, positionDistance, positionThreshold);
+      assertEquals("Pose orientation error :" + orientationDistance + " exceeds threshold: " + orientationThreshold, 0.0, orientationDistance,
+            orientationThreshold);
+   }
+   
+   private final double maximumJointVelocity = 1.5;
+   private final double maximumJointAcceleration = 15.0;
+   
+   private void assertArmJointsMovedSmoothlyWithinKinematicAndDynamicLimits()
+   {
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      Robot robot = drcSimulationTestHelper.getRobot();
+      
+      ArrayList<OneDegreeOfFreedomJoint> allJoints = new ArrayList<>();
+      ArrayList<OneDegreeOfFreedomJoint> jointsToCheck = new ArrayList<>();
+
+      robot.getAllOneDegreeOfFreedomJoints(allJoints);
+
+      for (OneDegreeOfFreedomJoint joint : allJoints)
+      {
+         if (!joint.getName().contains("leg") && !joint.getName().contains("back") && !joint.getName().contains("ankle") && !joint.getName().contains("neck")
+               && !joint.getName().contains("hokuyo"))
+            jointsToCheck.add(joint);
+      }
+
+      RobotAllJointsDataChecker checker = new RobotAllJointsDataChecker(scs, robot, jointsToCheck);
+
+      checker.setMaximumDerivativeForAllJoints(10.2 * maximumJointVelocity);
+      checker.setMaximumSecondDerivativeForAllJoints(1.2 * maximumJointAcceleration);
+    
+      checker.cropFirstPoint();
+      
+      scs.applyDataProcessingFunction(checker);
+      
+      assertFalse(checker.getDerivativeCompError(), checker.hasDerivativeComparisonErrorOccurredAnyJoint());
+      assertFalse(checker.getMaxDerivativeExceededError(), checker.hasMaxDerivativeExeededAnyJoint());
+//      assertFalse(checker.getMaxSecondDerivativeExceededError(), checker.hasMaxSecondDerivativeExeededAnyJoint());
+      assertFalse(checker.getMaxValueExceededError(), checker.hasMaxValueExeededAnyJoint());
+      assertFalse(checker.getMinValueExceededError(), checker.hasMinValueExeededAnyJoint());
    }
    
    
