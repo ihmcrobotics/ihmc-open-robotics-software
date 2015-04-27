@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import optitrack.MocapDataClient;
@@ -20,7 +21,8 @@ import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbodiesListener
 {
-   private static final boolean ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER = true;
+   private static final boolean ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER = false;
+   private static final boolean TRANSFORM_POINTS_TO_MOCAP_WORLD = false;
    private static final int MULTISENSE_MOCAP_ID = 0;
    private static final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
 
@@ -29,9 +31,6 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
    private final ArrayList<MultisensePointCloudReceiver> multisensePointCloudReceivers = new ArrayList<MultisensePointCloudReceiver>();
    private final RosConnectedZeroPoseRobotConfigurationDataProducer zeroPoseProducer;
    private final MocapDataClient mocapDataClient;
-
-   /** Manual calibration offset to correct for errors in mocap rig */
-   private final RigidBodyTransform mocapManualCalibration = new RigidBodyTransform();
 
    /**
     * Used to inspect the lidar at each stage on the route from multisense to the DRCOperatorInterface
@@ -92,7 +91,6 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
             RigidBodyTransform pose = new RigidBodyTransform();
             mocapObject.getPose(pose);
 
-            pose.multiply(mocapManualCalibration, pose);
             updateReceiversWithMocapPose(pose);
          }
       }
@@ -108,16 +106,24 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
          zeroPoseProducer.updateRobotLocationBasedOnMultisensePose(headPose);
       }
 
-      for (int i = 0; i < multisensePointCloudReceivers.size(); i++)
+      if(TRANSFORM_POINTS_TO_MOCAP_WORLD)
       {
-         MultisensePointCloudReceiver pointCloudReceiver = multisensePointCloudReceivers.get(i);
-         if (pointCloudReceiver.getFrame() != MultisenseFrameName.WORLD)
-         {
-            pointCloudReceiver.setWorldTransform(headPose);
-         }
+    	  for (int i = 0; i < multisensePointCloudReceivers.size(); i++)
+    	  {
+    		  MultisensePointCloudReceiver pointCloudReceiver = multisensePointCloudReceivers.get(i);
+    		  if (pointCloudReceiver.getFrame() != MultisenseFrameName.WORLD)
+    		  {
+    			  pointCloudReceiver.setWorldTransform(headPose);
+    		  }
+    	  }
       }
    }
+   
+   public static void main(String[] args) throws URISyntaxException
+   {
+	   new MultisenseMocapManualCalibrationTestModule(null, new URI("http://localhost:11311"));
+   }
+   
 }
 
 
-//~ Formatted by Jindent --- http://www.jindent.com
