@@ -6,15 +6,17 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class BusVoltage implements AcsellSlowSensor
 {
    private final DoubleYoVariable voltage;
+   private final double conversionFactor;
 
-   public BusVoltage(String name, YoVariableRegistry slowSensorRegistry)
+   public BusVoltage(String name, double conversionFactor, YoVariableRegistry slowSensorRegistry)
    {
       voltage = new DoubleYoVariable(name + "BusVoltage", slowSensorRegistry);
+      this.conversionFactor = conversionFactor;
    }
 
    @Override
    public void update(int value)
    {
-      voltage.set(((double) value) * 3.3 / 4096 * 100.0 / 2.2);
+      voltage.set(((double) value) * conversionFactor); //3.3 / 4096 * 100.0 / 2.2);
    }
 }

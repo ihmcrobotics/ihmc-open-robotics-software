@@ -17,6 +17,7 @@ import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprAnkle;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.steppr.hardware.configuration.StepprAnkleKinematicParameters;
+import us.ihmc.steppr.hardware.state.slowSensors.StepprSlowSensorConstants;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -186,7 +187,7 @@ public class StepprState extends AcsellState<StepprActuator, StepprJoint>
       for (StepprActuator actuatorName : StepprActuator.values)
       {
          actuatorStates
-               .put(actuatorName, new AcsellActuatorState(actuatorName.getName(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
+               .put(actuatorName, new AcsellActuatorState(actuatorName.getName(), new StepprSlowSensorConstants(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
       }
       return actuatorStates;
    }

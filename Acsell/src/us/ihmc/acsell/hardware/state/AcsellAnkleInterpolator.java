@@ -10,13 +10,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public class AcsellAnkleInterpolator implements AcsellAnkleAngleCalculator
 {
-	   private final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = false;//If false use joint
-	   private final boolean COMPUTE_JACOBIAN_FROM_JOINT_ANGLES = true;
-	   private final boolean COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES = true;
+	   private final boolean USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES;// = false;//If false use joint
+	   private final boolean COMPUTE_JACOBIAN_FROM_JOINT_ANGLES;// = true;
+	   private final boolean COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES;// = true;
 	   
 	   // Cable reduction of pulleys
 	   private final double N;
-	                                  ;
+	                                  
 	   private final double[] px;
 	   private final double[] py;
 	   private final double[] p_m_JitX;
@@ -67,6 +67,10 @@ public class AcsellAnkleInterpolator implements AcsellAnkleAngleCalculator
       p_j_JitY = parameters.getJITY_FromJointParams();
       pM1 = parameters.getM1Params();
       pM2 = parameters.getM2Params();
+      
+      USE_JACOBIAN_COMPUTED_FROM_MOTOR_ANGLES = parameters.useJacobianComputedFromMotors();
+      COMPUTE_JACOBIAN_FROM_JOINT_ANGLES = parameters.isJacobianFromJointAnglesComputationPerformed();
+      COMPUTE_JACOBIAN_FROM_MOTOR_ANGLES = parameters.isJacobianFromMotorAnglesComputationPerformed();
   
    }
 	   

@@ -95,5 +95,23 @@ public final class StepprAnkleKinematicParameters implements AcsellAnkleKinemati
 	   {
 		   return N;
 	   }
+
+      @Override
+      public boolean useJacobianComputedFromMotors()
+      {
+         return false;
+      }
+
+      @Override
+      public boolean isJacobianFromJointAnglesComputationPerformed()
+      {
+         return true;
+      }
+
+      @Override
+      public boolean isJacobianFromMotorAnglesComputationPerformed()
+      {
+         return true;
+      }
 	   
 }

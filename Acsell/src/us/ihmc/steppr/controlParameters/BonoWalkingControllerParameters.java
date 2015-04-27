@@ -1,4 +1,4 @@
-package us.ihmc.acsell.controlParameters;
+package us.ihmc.steppr.controlParameters;
 
 import java.util.LinkedHashMap;
 
@@ -164,7 +164,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    private final double minimumHeightAboveGround = 0.595;
-   private double nominalHeightAboveGround = 0.670 + 0.020;//+0.010;//+0.020;
+   private double nominalHeightAboveGround = 0.670+0.020-0.03-0.02;//+0.010;//+0.020;
    private final double maximumHeightAboveGround = 0.79;//Hip height fully upright//0.735;
    //private final double additionalOffsetHeightBono = 0.15;
    private final double additionalOffsetHeightBono = 0.16; //Spring Ankle
@@ -281,7 +281,7 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    public double getMinStepWidth()
    {
       // TODO The smallest the best in terms of control.
-      return 0.375;//0.35;
+      return 0.35;//0.375;
    }
 
    @Override
@@ -343,7 +343,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    {
       ICPControlGains gains = new ICPControlGains();
 
-      double kp = 1.5;
+      double kpParallel = 1.5;
+      double kpOrthogonal = 1.8;
       double ki = 4.0;
       double kiBleedOff = 0.9;
       boolean useRawCMP = false;
@@ -351,8 +352,8 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       double cmpRateLimit = 6.0;
       double cmpAccelerationLimit = 200.0;
 
-      gains.setKpParallelToMotion(kp);
-      gains.setKpOrthogonalToMotion(kp);
+      gains.setKpParallelToMotion(kpParallel);
+      gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
       gains.setUseRawCMP(useRawCMP);

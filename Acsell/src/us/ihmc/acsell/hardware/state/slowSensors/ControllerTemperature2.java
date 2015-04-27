@@ -6,16 +6,22 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class ControllerTemperature2 implements AcsellSlowSensor
 {
    private final DoubleYoVariable mcbTemperature2;
-   private final double THERM_B = 3730;
-   private final double THERM_R_25C = 22000;
-   private final double SERIES_RESISTANCE = 100.0e3;
-   private final double V_S = 12.0;
-   private final double MAX_ADC_COUNT = 4096.0;
-   private final double MAX_ADC_VOLTAGE = 3.3;
+   private final double THERM_B;// = 3730;
+   private final double THERM_R_25C;// = 22000;
+   private final double SERIES_RESISTANCE;// = 100.0e3;
+   private final double V_S;// = 12.0;
+   private final double MAX_ADC_COUNT;// = 4096.0;
+   private final double MAX_ADC_VOLTAGE;// = 3.3;
    
-   public ControllerTemperature2(String name, YoVariableRegistry parentRegistry)
+   public ControllerTemperature2(String name, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry parentRegistry)
    {
       mcbTemperature2 = new DoubleYoVariable(name + "MCBTemperature2", parentRegistry);
+      this.THERM_B = slowSensorConstants.getBoardThermistorBeta();
+      this.THERM_R_25C = slowSensorConstants.getBoardThermistorRoomTempResistance();
+      this.SERIES_RESISTANCE = slowSensorConstants.getBoardThermistorSeriesResistance();
+      this.V_S = slowSensorConstants.getBoardThermistorSourceVoltage();
+      this.MAX_ADC_COUNT = slowSensorConstants.getBoardThermistorADCCounts();
+      this.MAX_ADC_VOLTAGE = slowSensorConstants.getBoardThermistorADCMaxVoltage();
    }
 
    @Override
