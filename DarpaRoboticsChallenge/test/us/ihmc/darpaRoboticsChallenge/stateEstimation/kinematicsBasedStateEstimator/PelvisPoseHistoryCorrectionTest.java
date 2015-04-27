@@ -18,6 +18,7 @@ import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelHumanoidControllerManager;
 import us.ihmc.communication.packets.StampedPosePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -928,6 +929,13 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
       public void sendPelvisPoseErrorPacket(PelvisPoseErrorPacket pelvisPoseErrorPacket) 
       {
         //doNothing
+      }
+
+      @Override
+      public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
+      {
+         // TODO Auto-generated method stub
+         
       }
    }
 

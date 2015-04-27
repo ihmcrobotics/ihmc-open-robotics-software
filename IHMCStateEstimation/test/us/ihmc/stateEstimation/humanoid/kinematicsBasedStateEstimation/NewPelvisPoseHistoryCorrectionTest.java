@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.communication.subscribers.TimeStampedTransformBuffer;
@@ -65,6 +66,8 @@ public class NewPelvisPoseHistoryCorrectionTest
    int numberOfIcpOffsets = 16;
    TimeStampedTransformBuffer icpTransformPoseBufferInWorldFrame = new TimeStampedTransformBuffer(70);
    TimeStampedTransformBuffer icpOffsetsTransformPoseBuffer = new TimeStampedTransformBuffer(70);
+   
+   private boolean angleErrorTooBigDetectedAndPacketSent = false;
    
    @Before
    public void setUp()
@@ -303,6 +306,110 @@ public class NewPelvisPoseHistoryCorrectionTest
       }
    }
    
+   @EstimatedDuration(duration = 1.0)
+   @Test(timeout = 60000)
+   public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
+   {
+      boolean checkPacketHasBeenSentNextLoopIteration = false;
+      generatePelvisWayPoints();
+      generateIcpOffsetsAroundPelvisWithTooBigAngleErrors();
+      
+      TimeStampedTransform3D pelvisTimeStampedTransform3D = new TimeStampedTransform3D();
+      TimeStampedTransform3D icpTimeStampedTransform3D = new TimeStampedTransform3D();
+      
+      RigidBodyTransform pelvisBeforeCorrection = new RigidBodyTransform();
+      RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
+      
+      FramePose correctedPelvisverify = new FramePose(worldFrame); 
+      YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
+      
+      
+      for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
+      {
+         pelvisWaypointsTransformPoseBufferInWorldFrame.findTransform(timeStamp, pelvisTimeStampedTransform3D);
+         pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
+         pelvisReferenceFrame.update();
+         
+         sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
+         sixDofPelvisJoint.updateFramesRecursively();
+         pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
+         
+         pelvisCorrector.doControl(timeStamp);
+         pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
+         if(checkPacketHasBeenSentNextLoopIteration)
+         {
+            assertTrue(angleErrorTooBigDetectedAndPacketSent);
+            angleErrorTooBigDetectedAndPacketSent = false;
+            checkPacketHasBeenSentNextLoopIteration = false;
+         }
+         
+         if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
+         {
+            icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
+            StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
+            externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
+            checkPacketHasBeenSentNextLoopIteration = true;
+         }
+         
+         correctedPelvisverify.setPose(pelvisAfterCorrection);
+         correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
+         
+         simulationConstructionSet.tickAndUpdate();
+
+         assertTrue(pelvisBeforeCorrection.epsilonEquals(pelvisAfterCorrection, 1e-4));
+
+      }
+   }
+
+   private void generateIcpOffsetsAroundPelvisWithTooBigAngleErrors()
+   {
+      int index = 0;
+      Random random = new Random();
+      Quat4d[] orientationTooBigOffset = new Quat4d[16];
+      Quat4d tempQuat = new Quat4d();
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
+      orientationTooBigOffset[0] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(10.5), Math.toRadians(0.0));
+      orientationTooBigOffset[1] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(11.0));
+      orientationTooBigOffset[2] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.5), Math.toRadians(22.0), Math.toRadians(0.0));
+      orientationTooBigOffset[3] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(30.0), Math.toRadians(0.0), Math.toRadians(15.0));
+      orientationTooBigOffset[4] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(15.0), Math.toRadians(20.0));
+      orientationTooBigOffset[5] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(10.15), Math.toRadians(20.0), Math.toRadians(30.0));
+      orientationTooBigOffset[6] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-11.0), Math.toRadians(0.0), Math.toRadians(0.0));
+      orientationTooBigOffset[7] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(0.0));
+      orientationTooBigOffset[8] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-50.0));
+      orientationTooBigOffset[9] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-22.0), Math.toRadians(-22.0), Math.toRadians(0.0));
+      orientationTooBigOffset[10] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-30.0), Math.toRadians(0.0), Math.toRadians(-60.0));
+      orientationTooBigOffset[11] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(0.0), Math.toRadians(-12.0), Math.toRadians(-22.0));
+      orientationTooBigOffset[12] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-12.0), Math.toRadians(-11.0), Math.toRadians(-10.2));
+      orientationTooBigOffset[13] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(12.0), Math.toRadians(-20.0), Math.toRadians(0.0));
+      orientationTooBigOffset[14] = tempQuat;
+      RotationFunctions.setQuaternionBasedOnYawPitchRoll(tempQuat, Math.toRadians(-20.0), Math.toRadians(0.0), Math.toRadians(0.9));
+      orientationTooBigOffset[15] = tempQuat;
+      
+      for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
+      {
+         Vector3d translationOffset = RandomTools.generateRandomVector(random, 0.04);
+         Quat4d rotationOffset = orientationTooBigOffset[index];
+         saveIcpOffsetInTransformBuffer(timeStamp, translationOffset, rotationOffset);
+         generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);
+         index++;
+      }
+   }
+
    /////////////////////////////////////////////////////////
    ///////   Necessary class to make the test work   ///////
    /////////////////////////////////////////////////////////
@@ -340,6 +447,13 @@ public class NewPelvisPoseHistoryCorrectionTest
       public void sendPelvisPoseErrorPacket(PelvisPoseErrorPacket pelvisPoseErrorPacket)
       {
          //doNothing
+      }
+
+      @Override
+      public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
+      {
+         angleErrorTooBigDetectedAndPacketSent = true;
+         
       }
    }
 }
