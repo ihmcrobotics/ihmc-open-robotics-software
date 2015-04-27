@@ -101,7 +101,7 @@ public class AtlasArmControllerParameters implements ArmControllerParameters
    @Override
    public boolean useInverseKinematicsTaskspaceControl()
    {
-      return false;
+      return true;
    }
 
    @Override
