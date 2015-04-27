@@ -2,8 +2,6 @@ package us.ihmc.acsell;
 
 import org.junit.Test;
 
-import us.ihmc.acsell.controlParameters.BonoStateEstimatorParameters;
-import us.ihmc.acsell.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
@@ -13,6 +11,8 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
+import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
+import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
