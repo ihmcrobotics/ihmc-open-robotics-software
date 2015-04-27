@@ -2,15 +2,15 @@ package us.ihmc.acsell;
 
 import org.junit.Test;
 
-import us.ihmc.acsell.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCFlatGroundWalkingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
 @BambooPlan(planType = BambooPlanType.InDevelopment)
 public class BonoFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
