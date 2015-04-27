@@ -20,8 +20,9 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
-import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -29,11 +30,18 @@ import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
 public class JointPositionHighLevelController extends HighLevelBehavior implements Stoppable
 {   
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean VISUALIZE_TASKSPACE_TRAJECTORIES = true;
+   
+   private final String name;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HashSet<OneDoFJoint> jointsBeingControlled = new HashSet<OneDoFJoint>();
@@ -60,11 +68,19 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private double[] spineJointAngles;
    private double neckJointAngle;
    
+   private final BooleanYoVariable controlWithTaskspaceTrajectories;
+   
+   // trajectories for taskspace commands
+   private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
+   private final CirclePoseTrajectoryGenerator circularPoseTrajectoryGenerator;   
+   
    private final static double MAX_DELTA_TO_BELIEVE_DESIRED = 0.05;
 
    public JointPositionHighLevelController(final MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders)
    {
       super(controllerState);
+      
+      name = getClass().getSimpleName();
 
       timeProvider = momentumBasedController.getYoTime();
       this.desiredJointsProvider = variousWalkingProviders.getDesiredJointsPositionProvider();
@@ -78,6 +94,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
       
+      controlWithTaskspaceTrajectories = new BooleanYoVariable(name + "TaskspaceControl", registry);
+
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
@@ -99,10 +117,19 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          useAlternative.set(false);
          useAlternativeController.put(joint, useAlternative ); 
       }
+      
+      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+            
+      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, VISUALIZE_TASKSPACE_TRAJECTORIES,
+            yoGraphicsListRegistry);
+      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
+            yoGraphicsListRegistry);
    }
    
    private void initializeFromJointMap(Map<OneDoFJoint, Double> jointTarget, double trajectoryTime)
    {
+      controlWithTaskspaceTrajectories.set(false);
+
       initialTrajectoryTime = timeProvider.getDoubleValue();
       trajectoryTimeProvider.set( trajectoryTime );
       
@@ -130,6 +157,16 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
          }
       }
+   }
+   
+   private void initializeFromHandPose(FramePose handPose, double trajectoryTime)
+   {
+      controlWithTaskspaceTrajectories.set(true);
+      
+      initialTrajectoryTime = timeProvider.getDoubleValue();
+      trajectoryTimeProvider.set(trajectoryTime);
+      
+      // TODO
    }
 
    private void initializeFromPacket(JointAnglesPacket packet)
@@ -334,7 +371,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          {
             if (handPoseProvider.checkHandPosePacketDataType(side) == HandPosePacket.DataType.HAND_POSE)
             {
-               PrintTools.info("Got hand pose of data type " + HandPosePacket.DataType.HAND_POSE + " - skipping packet");
+               initializeFromHandPose(handPoseProvider.getDesiredHandPose(side), handPoseProvider.getTrajectoryTime());
             }
             else
             {            
@@ -354,21 +391,28 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             generator.compute(time);
          }
 
-         if( useAlternativeController.get(joint).getBooleanValue() )
+         if(controlWithTaskspaceTrajectories.getBooleanValue())
          {
-            PIDController controller = alternativeController.get(joint);
-            double effort = controller.compute( joint.getQ(), generator.getValue(), joint.getQd(), generator.getVelocity(), 0.003 );
+            // TODO
+         } 
+         else
+         {
+            if( useAlternativeController.get(joint).getBooleanValue() )
+            {
+               PIDController controller = alternativeController.get(joint);
+               double effort = controller.compute( joint.getQ(), generator.getValue(), joint.getQd(), generator.getVelocity(), 0.003 );
+               
+               joint.setUnderPositionControl(false);
+               joint.setTau( effort );
+            }
+            else{
+               joint.setUnderPositionControl(true);
+               joint.setqDesired(generator.getValue());
+               joint.setQdDesired(generator.getVelocity());
+            }
             
-            joint.setUnderPositionControl(false);
-            joint.setTau( effort );
+            previousPosition.put(joint, generator.getValue());            
          }
-         else{
-            joint.setUnderPositionControl(true);
-            joint.setqDesired(generator.getValue());
-            joint.setQdDesired(generator.getVelocity());
-         }
-         
-         previousPosition.put(joint, generator.getValue());
       }
    }
 
