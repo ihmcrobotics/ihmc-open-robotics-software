@@ -32,7 +32,7 @@ public class BonoPhysicalProperties extends DRCRobotPhysicalProperties
    public static final double shortenFoot = 0.0;//0.025;
    public static final double footForward = 0.202 + shiftFootForward - shortenFoot;
    public static final double heelExtension = 2*0.0254;
-   public static final double footBack = 0.05 + heelExtension - shiftFootForward;
+   public static final double footBack = 0.092;//0.05 + heelExtension - shiftFootForward;
    public static final double footLength = footForward + footBack;
    public static final double toeWidth = 0.152;
    public static final double footWidth = toeWidth - 0.022;

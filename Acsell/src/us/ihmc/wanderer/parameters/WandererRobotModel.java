@@ -365,7 +365,7 @@ public class WandererRobotModel implements DRCRobotModel
 
    @Override public String getSimpleRobotName()
    {
-      return "STEPPR";
+      return "WANDERER";
    }
 
    @Override

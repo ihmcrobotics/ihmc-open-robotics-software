@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensor;
+import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensorConstants;
 import us.ihmc.acsell.hardware.state.slowSensors.BusVoltage;
 import us.ihmc.acsell.hardware.state.slowSensors.ControlMode;
 import us.ihmc.acsell.hardware.state.slowSensors.ControllerTemperature1;
@@ -21,7 +22,7 @@ import us.ihmc.acsell.hardware.state.slowSensors.QuadratureControlEffort;
 import us.ihmc.acsell.hardware.state.slowSensors.RawEncoderTicks;
 import us.ihmc.acsell.hardware.state.slowSensors.RawPhaseCurrentADTicks;
 import us.ihmc.acsell.hardware.state.slowSensors.SensorMCUTime;
-import us.ihmc.acsell.hardware.state.slowSensors.StatorHalSwitches;
+import us.ihmc.acsell.hardware.state.slowSensors.StatorHallSwitches;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -65,11 +66,13 @@ public class AcsellActuatorState
    private long lastmicroControllerTime;
    private final LongYoVariable consecutivePacketDropCount;
    private final LongYoVariable totalPacketDropCount;
+   private final AcsellSlowSensorConstants slowSensorConstants;
 
-   public AcsellActuatorState(String name, double motorKt, int SensedCurrentToTorqueDirection, YoVariableRegistry parentRegistry)
+   public AcsellActuatorState(String name, AcsellSlowSensorConstants slowSensorConstants, double motorKt, int SensedCurrentToTorqueDirection, YoVariableRegistry parentRegistry)
    {
       this.registry = new YoVariableRegistry(name);
       this.motorKt = motorKt;
+      this.slowSensorConstants = slowSensorConstants;
       this.SensedCurrentToTorqueDirection = SensedCurrentToTorqueDirection;
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
@@ -103,30 +106,30 @@ public class AcsellActuatorState
    {
 
       YoVariableRegistry slowSensorRegistry = new YoVariableRegistry("SlowSensors");
-      slowSensors[0] = new StatorHalSwitches(name, slowSensorRegistry);
+      slowSensors[0] = new StatorHallSwitches(name, slowSensorRegistry);
       slowSensors[1] = new RawEncoderTicks(name, slowSensorRegistry);
 
-      slowSensors[2] = new RawPhaseCurrentADTicks(name, "A", slowSensorRegistry);
-      slowSensors[3] = new RawPhaseCurrentADTicks(name, "B", slowSensorRegistry);
-      slowSensors[4] = new RawPhaseCurrentADTicks(name, "C", slowSensorRegistry);
+      slowSensors[2] = new RawPhaseCurrentADTicks(name, "A", slowSensorConstants.getCurrentSensorConversion(), slowSensorRegistry);
+      slowSensors[3] = new RawPhaseCurrentADTicks(name, "B", slowSensorConstants.getCurrentSensorConversion(), slowSensorRegistry);
+      slowSensors[4] = new RawPhaseCurrentADTicks(name, "C", slowSensorConstants.getCurrentSensorConversion(), slowSensorRegistry);
 
       slowSensors[5] = new ControlMode(name, slowSensorRegistry);
 
       slowSensors[6] = new MotorThermistorADTicks(name, slowSensorRegistry);
-      slowSensors[7] = new ControllerTemperature1(name, slowSensorRegistry);
-      slowSensors[8] = new BusVoltage(name, slowSensorRegistry);
+      slowSensors[7] = new ControllerTemperature1(name, slowSensorConstants, slowSensorRegistry);
+      slowSensors[8] = new BusVoltage(name, slowSensorConstants.getBusVoltageConversion(), slowSensorRegistry);
 
-      slowSensors[9] = new InphaseControlEffort(name, slowSensorRegistry);
-      slowSensors[10] = new QuadratureControlEffort(name, slowSensorRegistry);
+      slowSensors[9] = new InphaseControlEffort(name, slowSensorConstants.getControlVoltageConversion(), slowSensorRegistry);
+      slowSensors[10] = new QuadratureControlEffort(name, slowSensorConstants.getControlVoltageConversion(), slowSensorRegistry);
 
-      slowSensors[11] = new PressureSensor(name, 0, slowSensorRegistry);
-      slowSensors[12] = new PressureSensor(name, 1, slowSensorRegistry);
-      slowSensors[13] = new PressureSensor(name, 2, slowSensorRegistry);
-      slowSensors[14] = new PressureSensor(name, 3, slowSensorRegistry);
+      slowSensors[11] = new PressureSensor(name, 0, slowSensorConstants, slowSensorRegistry);
+      slowSensors[12] = new PressureSensor(name, 1, slowSensorConstants, slowSensorRegistry);
+      slowSensors[13] = new PressureSensor(name, 2, slowSensorConstants, slowSensorRegistry);
+      slowSensors[14] = new PressureSensor(name, 3, slowSensorConstants, slowSensorRegistry);
 
-      slowSensors[STRAIN_SENSOR_BASE_15 + 0] = new StrainSensor(name, 0, slowSensorRegistry);
-      slowSensors[STRAIN_SENSOR_BASE_15 + 1] = new StrainSensor(name, 1, slowSensorRegistry);
-      slowSensors[STRAIN_SENSOR_BASE_15 + 2] = new StrainSensor(name, 2, slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 0] = new StrainSensor(name, 0, slowSensorConstants.getStrainSensorConversion(), slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 1] = new StrainSensor(name, 1, slowSensorConstants.getStrainSensorConversion(), slowSensorRegistry);
+      slowSensors[STRAIN_SENSOR_BASE_15 + 2] = new StrainSensor(name, 2, slowSensorConstants.getStrainSensorConversion(), slowSensorRegistry);
 
       slowSensors[18] = new IMUAccelSensor(name, "X", slowSensorRegistry);
       slowSensors[19] = new IMUAccelSensor(name, "Y", slowSensorRegistry);
@@ -141,8 +144,8 @@ public class AcsellActuatorState
       slowSensors[26] = new IMUMagSensor(name, "Z", slowSensorRegistry);
 
       slowSensors[27] = new SensorMCUTime(name, slowSensorRegistry);
-      slowSensors[28] = new ControllerTemperature2(name, slowSensorRegistry);
-      slowSensors[29] = new MotorTemperature(name, slowSensorRegistry);
+      slowSensors[28] = new ControllerTemperature2(name, slowSensorConstants, slowSensorRegistry);
+      slowSensors[29] = new MotorTemperature(name, slowSensorConstants.getMotorTemperatureConversion(), slowSensorRegistry);
       this.registry.addChild(slowSensorRegistry);
    }
 

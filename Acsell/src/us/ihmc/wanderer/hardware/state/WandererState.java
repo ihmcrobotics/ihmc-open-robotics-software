@@ -78,7 +78,7 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
       for (WandererActuator actuatorName : WandererActuator.values)
       {
          actuatorStates.put(actuatorName,
-               new AcsellActuatorState(actuatorName.getName(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
+               new AcsellActuatorState(actuatorName.getName(), new WandererSlowSensorConstants(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
       }
       return actuatorStates;
    }

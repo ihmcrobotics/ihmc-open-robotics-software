@@ -3,6 +3,10 @@ package us.ihmc.acsell.hardware.configuration;
 public interface AcsellAnkleKinematicParameters
 {
 
+   public abstract boolean useJacobianComputedFromMotors();
+   public abstract boolean isJacobianFromJointAnglesComputationPerformed();
+   public abstract boolean isJacobianFromMotorAnglesComputationPerformed();
+   
    public abstract double getN();
 
    public abstract double[] getM2Params();

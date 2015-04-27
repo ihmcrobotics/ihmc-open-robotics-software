@@ -169,7 +169,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       double desiredVelocityX_Bias = 0.0;
       double desiredVelocityY_Bias = 0.0;
       double desiredHeadingDot_Bias = 0.0;
-      final double maxDesiredVelocityX = 0.25;
+      final double maxDesiredVelocityX = 0.35;
       final double minVelocityX = -0.10;
       
       

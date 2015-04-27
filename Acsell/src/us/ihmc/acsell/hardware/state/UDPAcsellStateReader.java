@@ -12,11 +12,11 @@ import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.MembershipKey;
 
+import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 
 public class UDPAcsellStateReader
 {
@@ -66,12 +66,12 @@ public class UDPAcsellStateReader
       NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
       System.out.println("Binding to interface: " + iface);
 
-      InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_STATE_PORT);
+      InetSocketAddress receiveAddress = new InetSocketAddress(AcsellNetworkParameters.UDP_MULTICAST_STATE_PORT);
 
       receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
       receiveChannel.socket().setReceiveBufferSize(65535);
       receiveChannel.socket().setSoTimeout(1000);
-      InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
+      InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
       receiveKey = receiveChannel.join(group, iface);
    }
 

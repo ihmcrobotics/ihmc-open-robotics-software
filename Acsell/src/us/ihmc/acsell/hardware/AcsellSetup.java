@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
+import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
@@ -17,7 +18,6 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
@@ -73,10 +73,10 @@ public class AcsellSetup extends RealtimeThread
          NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
          System.out.println("Binding setup to interface: " + iface);
 
-         InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
-         powerCommandAddress = new InetSocketAddress(group, StepprNetworkParameters.UDP_MULTICAST_POWER_BUS_PORT);
+         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
+         powerCommandAddress = new InetSocketAddress(group, AcsellNetworkParameters.UDP_MULTICAST_POWER_BUS_PORT);
 
-         InetSocketAddress receiveAddress = new InetSocketAddress(StepprNetworkParameters.UDP_MULTICAST_PARAMETER_REPLY_PORT);
+         InetSocketAddress receiveAddress = new InetSocketAddress(AcsellNetworkParameters.UDP_MULTICAST_PARAMETER_REPLY_PORT);
          channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
                .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface).bind(receiveAddress);
          channel.configureBlocking(false);
@@ -269,8 +269,8 @@ public class AcsellSetup extends RealtimeThread
       {
          NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
 
-         InetAddress group = InetAddress.getByName(StepprNetworkParameters.STEPPR_MULTICAST_GROUP);
-         InetSocketAddress streamAddress = new InetSocketAddress(group, StepprNetworkParameters.UDP_MULTICAST_STREAM_COMMAND_PORT);
+         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
+         InetSocketAddress streamAddress = new InetSocketAddress(group, AcsellNetworkParameters.UDP_MULTICAST_STREAM_COMMAND_PORT);
 
          DatagramChannel channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
                .setOption(StandardSocketOptions.IP_MULTICAST_IF, iface);

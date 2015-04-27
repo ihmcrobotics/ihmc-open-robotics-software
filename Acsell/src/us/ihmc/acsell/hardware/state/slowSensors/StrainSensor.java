@@ -7,16 +7,18 @@ public class StrainSensor implements AcsellSlowSensor
 {
    private final DoubleYoVariable strainSensor;
    private double gain = 1, offset = 0;
+   private final double conversionFactor;
 
-   public StrainSensor(String name, int sensor, YoVariableRegistry registry)
+   public StrainSensor(String name, int sensor, double conversionFactor, YoVariableRegistry registry)
    {
+      this.conversionFactor = conversionFactor;
       strainSensor = new DoubleYoVariable(name + "StrainSensor" + sensor, registry);
    }
 
    @Override
    public void update(int value)
    {
-      strainSensor.set(((double) value) * 5.0 / 65535.0);
+      strainSensor.set(((double) value) * conversionFactor); // 5.0 / 65535.0);
    }
 
    public double getCalibratedValue()

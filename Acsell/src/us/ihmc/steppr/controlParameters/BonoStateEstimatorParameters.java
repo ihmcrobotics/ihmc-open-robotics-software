@@ -1,4 +1,4 @@
-package us.ihmc.acsell.controlParameters;
+package us.ihmc.steppr.controlParameters;
 
 import java.util.HashMap;
 import java.util.Map;

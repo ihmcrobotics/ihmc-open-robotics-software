@@ -18,12 +18,14 @@ public abstract class AcsellActuatorCommand
    private final DoubleYoVariable currentDesired;
    private final DoubleYoVariable damping;
    private final DoubleYoVariable qddDesired;
+   private final double currentLimit;
    
    private final AcsellActuator actuator;
    
    public AcsellActuatorCommand(String name, AcsellActuator actuator, YoVariableRegistry parentRegistry)
    {
       this.actuator = actuator;
+      this.currentLimit = actuator.getCurrentLimit();
       this.registry = new YoVariableRegistry(name);
 
       this.enabled = new BooleanYoVariable(name + "Enabled", registry);
@@ -38,9 +40,8 @@ public abstract class AcsellActuatorCommand
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-        	 final double maxCurrent = 22.0;
-        	 if(v.getValueAsDouble()>maxCurrent) v.setValueFromDouble(maxCurrent);
-        	 if(v.getValueAsDouble()<-maxCurrent) v.setValueFromDouble(-maxCurrent);        	 
+        	 if(v.getValueAsDouble()>currentLimit) v.setValueFromDouble(currentLimit);
+        	 if(v.getValueAsDouble()<-currentLimit) v.setValueFromDouble(-currentLimit);        	 
          }
       });
       
