@@ -165,6 +165,17 @@ public class TaskspaceToJointspaceCalculator
       return localControlFrame;
    }
 
+   // TODO Need to be extracted
+   public void setupWithDefaultParameters()
+   {
+      setFullyConstrained();
+      setPrivilegedJointPositionsToMidRange();
+      setJointAngleRegularizationWeight(5.0);
+      setMaximumJointVelocities(5.0);
+      setMaximumJointAccelerations(50.0);
+      setMaximumTaskspaceVelocity(1.5, 0.5);
+   }
+
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       inverseJacobianSolver.setSelectionMatrix(selectionMatrix);

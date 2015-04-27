@@ -69,22 +69,31 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final OneDoFJoint[] oneDoFJoints;
    private final boolean[] doIntegrateDesiredAccelerations;
 
+   private final DoubleYoVariable yoTime;
+   private final DoubleYoVariable initialTime;
+   private final DoubleYoVariable currentTimeInState;
+
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
-         RigidBody endEffector, double controlDT, YoPIDGains gains, YoVariableRegistry parentRegistry)
+         RigidBody endEffector, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, false, controlDT, gains, parentRegistry);
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, false, controlDT, gains, yoTime, parentRegistry);
    }
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix, RigidBody base,
-         RigidBody endEffector, double controlDT, YoPIDGains gains, YoVariableRegistry parentRegistry)
+         RigidBody endEffector, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, null, base, endEffector, true, controlDT, gains, parentRegistry);
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, null, base, endEffector, true, Double.NaN, null, yoTime, parentRegistry);
    }
 
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
-         RigidBody endEffector, boolean doPositionControl, double controlDT, YoPIDGains gains, YoVariableRegistry parentRegistry)
+         RigidBody endEffector, boolean doPositionControl, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, -1, base, endEffector, parentRegistry);
+
+      this.yoTime = yoTime;
+
+      initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
+      currentTimeInState = new DoubleYoVariable(namePrefix + "CurrentTimeInState", registry);
 
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
@@ -148,10 +157,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public void doAction()
    {
+      currentTimeInState.set(getTimeInCurrentState());
+
       if (poseTrajectoryGenerator.isDone())
          recordDoneTrajectoryTime();
 
-      poseTrajectoryGenerator.compute(getTimeInCurrentState());
+      poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 
       poseTrajectoryGenerator.get(desiredPose);
       poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
@@ -161,7 +172,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       desiredVelocity.changeFrame(controlFrame);
       desiredAngularVelocity.changeFrame(controlFrame);
 
-      decayAngularControl(getTimeInCurrentState());
+      decayAngularControl(currentTimeInState.getDoubleValue());
 
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
@@ -196,6 +207,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       }
    }
 
+   @Override
+   public double getTimeInCurrentState()
+   {
+      return yoTime.getDoubleValue() - initialTime.getDoubleValue();
+   }
+
    private void decayAngularControl(double time)
    {
       if (activeTrajectoryTime.isNaN() || percentOfTrajectoryWithOrientationBeingControlled.isNaN())
@@ -227,6 +244,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public void doTransitionIntoAction()
    {
+      initialTime.set(yoTime.getDoubleValue());
+      currentTimeInState.set(0.0);
+
       poseTrajectoryGenerator.showVisualization();
       poseTrajectoryGenerator.initialize();
       doneTrajectoryTime.set(Double.NaN);
