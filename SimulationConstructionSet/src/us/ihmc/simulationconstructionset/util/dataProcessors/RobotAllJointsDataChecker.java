@@ -19,12 +19,15 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
 
    public RobotAllJointsDataChecker(SimulationConstructionSet scs, Robot robot)
    {
+      this(scs, robot, getAllRobotJoints(robot));
+   }
+   
+   public RobotAllJointsDataChecker(SimulationConstructionSet scs, Robot robot, ArrayList<OneDegreeOfFreedomJoint> jointsToCheck)
+   {
       this.scs = scs;
       listOfCheckers = new HashMap<OneDegreeOfFreedomJoint, YoVariableValueDataChecker>();
       
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<>();
-      robot.getAllOneDegreeOfFreedomJoints(oneDegreeOfFreedomJoints);
-      for (OneDegreeOfFreedomJoint joint : oneDegreeOfFreedomJoints)
+      for (OneDegreeOfFreedomJoint joint : jointsToCheck)
       {
          ValueDataCheckerParameters valueDataCheckerParameters = new ValueDataCheckerParameters();
          
@@ -57,6 +60,13 @@ public class RobotAllJointsDataChecker implements DataProcessingFunction
          
          listOfCheckers.put(joint, yoVariableValueDataChecker);
       }
+   }
+   
+   private static ArrayList<OneDegreeOfFreedomJoint> getAllRobotJoints(Robot robot)
+   {
+      ArrayList<OneDegreeOfFreedomJoint> ret = new ArrayList<>();
+      robot.getAllOneDegreeOfFreedomJoints(ret);
+      return ret;
    }
    
    public void setMaximumDerivativeForAllJoints(double maximumDerivative)
