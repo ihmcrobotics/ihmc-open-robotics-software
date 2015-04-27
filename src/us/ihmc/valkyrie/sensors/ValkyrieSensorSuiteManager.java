@@ -8,12 +8,9 @@ import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraDataReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.CameraInfoReceiver;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraInfoReciever;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.RosCameraReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
@@ -82,9 +79,6 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       CameraDataReceiver cameraDataReceiver = new RosCameraReceiver(fullRobotModelFactory, sensorInformation.getCameraParameters(0), robotConfigurationDataBuffer, rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, null, sensorURI);
       cameraDataReceiver.start();
       
-      CameraInfoReceiver cameraInfoServer = new RosCameraInfoReciever(cameraParamaters, rosMainNode, sensorSuitePacketCommunicator, null);
-      sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, cameraInfoServer);
-
       if(pointCloudDataReceiver != null)
       {
          new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0).getSensorNameInSdf(),sensorInformation.getPointCloudParameters(0).getRosTopic(),
