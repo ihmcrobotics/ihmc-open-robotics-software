@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.robotSide.RobotSide;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<CalibrateArmPacket>
 {
@@ -23,7 +24,6 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
 
    private BufferedImage lastLeftEyeImage;
    private long imageTimestamp;
-   private double imageFov;
    private final DRCRobotJointMap jointMap;
 
    private RobotConfigurationData lastJointConfigurationData;
@@ -64,14 +64,13 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
    }
 
    @Override
-   public void newImageAvailable(RobotSide robotSide, BufferedImage image, long timestamp, double fov)
+   public void newImageAvailable(RobotSide robotSide, BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters)
    {
       if(robotSide == RobotSide.LEFT)
       {
          lock.lock();
          lastLeftEyeImage = image;
          imageTimestamp = timestamp;
-         imageFov = fov;
          lock.unlock();
       }
    }
@@ -113,7 +112,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
          imageDataWriter.print("timestamp = ");
          imageDataWriter.println(imageTimestamp);
          imageDataWriter.print("fov = ");
-         imageDataWriter.println(imageFov);
+         imageDataWriter.println("FIXME");
          imageDataWriter.close();
 
          PrintWriter qWriter = new PrintWriter(q);

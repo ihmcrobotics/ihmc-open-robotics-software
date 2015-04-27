@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
@@ -36,7 +37,7 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public void consumeObject(byte[] data, Point3d position, Quat4d orientation, double fov)
+   public void consumeObject(byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
       ByteBuffer buffer = byteBufferProvider.getOrCreateBuffer(data.length);
       buffer.put(data);
@@ -44,6 +45,6 @@ public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
       YUVPicture pic = decoder.decode(buffer);
       BufferedImage img = converter.toBufferedImage(pic);
       pic.delete();
-      videoStreamer.updateImage(img, position, orientation, fov);
+      videoStreamer.updateImage(img, position, orientation, intrinsicParameters);
    }
 }

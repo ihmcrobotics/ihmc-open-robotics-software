@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.RC_MODES;
@@ -68,7 +69,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
 
    @Override
    public synchronized void updateImage(RobotSide robotSide, BufferedImage bufferedImage, final long timeStamp, final Point3d cameraPosition, final Quat4d cameraOrientation,
-         final double fov)
+         IntrinsicParameters intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled)
       {
@@ -135,7 +136,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
             ByteBuffer nal = encoder.getNAL();
             byte[] data = new byte[nal.remaining()];
             nal.get(data);
-            handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, fov);
+            handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);
          }
       }
       catch (IOException e)

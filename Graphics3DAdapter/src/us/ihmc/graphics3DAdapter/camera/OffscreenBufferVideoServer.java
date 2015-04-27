@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.TimestampProvider;
@@ -51,7 +52,10 @@ public class OffscreenBufferVideoServer
 
       public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
       {
-         videoDataServer.updateImage(RobotSide.LEFT, bufferedImage, timeStamp, cameraPosition, cameraOrientation, fov);
+         double f = bufferedImage.getWidth() / 2 / Math.tan(fov / 2);
+         IntrinsicParameters intrinsicParameters = new IntrinsicParameters(f, f, 0, (bufferedImage.getWidth() - 1) / 2f, (bufferedImage.getHeight() - 1) / 2f, bufferedImage.getWidth(), bufferedImage.getHeight(), false, null);
+
+         videoDataServer.updateImage(RobotSide.LEFT, bufferedImage, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
       }
 
       public Point3d getCameraPosition()

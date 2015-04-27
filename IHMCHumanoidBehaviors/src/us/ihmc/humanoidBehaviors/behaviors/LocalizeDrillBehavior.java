@@ -20,6 +20,7 @@ import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStreamer
 {
@@ -56,7 +57,7 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
          //still empty the incoming queue
          if (!isPaused())
          {
-            compressedVideoDataClient.consumeObject(videoPacket.data, videoPacket.position, videoPacket.orientation, videoPacket.fieldOfView);
+            compressedVideoDataClient.consumeObject(videoPacket.data, videoPacket.position, videoPacket.orientation, videoPacket.intrinsicParameters);
          }
       }
 
@@ -120,7 +121,7 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
    }
 
    @Override
-   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       counter.increment();
    }

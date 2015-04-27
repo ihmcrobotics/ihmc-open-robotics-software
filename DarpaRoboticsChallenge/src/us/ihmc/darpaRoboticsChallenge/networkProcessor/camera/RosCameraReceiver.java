@@ -10,13 +10,13 @@ import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
+import sensor_msgs.CameraInfo;
 import transform_provider.TransformProvider;
 import transform_provider.TransformProviderRequest;
 import transform_provider.TransformProviderResponse;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.communication.util.DRCSensorParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -24,10 +24,14 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class RosCameraReceiver extends CameraDataReceiver
 {
+   private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+   
    
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
@@ -48,6 +52,15 @@ public class RosCameraReceiver extends CameraDataReceiver
          setCameraFrame(getHeadFrame());
       }
 
+      if(cameraParameters.useIntrinsicParametersFromRos())
+      {
+         rosMainNode.attachSubscriber(cameraParameters.getRosCameraInfoTopicName(), new RosCameraInfoSubscriber(cameraParameters.getRosCameraInfoTopicName()));
+      }
+      else
+      {
+         throw new RuntimeException("You really want to use intrinisic parameters from ROS");
+      }
+      
       RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
       {
          @Override
@@ -57,8 +70,12 @@ public class RosCameraReceiver extends CameraDataReceiver
             {
                logger.log(image, timeStamp);
             }
-
-            updateLeftEyeImage(image, timeStamp, DRCSensorParameters.DUMMY_FIELD_OF_VIEW);
+            IntrinsicParameters intrinsicParameters;
+            synchronized (RosCameraReceiver.this.intrinsicParameters)
+            {
+               intrinsicParameters = new IntrinsicParameters(RosCameraReceiver.this.intrinsicParameters);               
+            }
+            updateLeftEyeImage(image, timeStamp, intrinsicParameters);
 
          }
       };
@@ -114,6 +131,53 @@ public class RosCameraReceiver extends CameraDataReceiver
          {
             transformToParent.set(headToCameraTransform);
          }
+      }
+   }
+   
+   private class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo> {
+
+      public RosCameraInfoSubscriber( String which )
+      {
+         super(sensor_msgs.CameraInfo._TYPE);
+      }
+
+      @Override
+      public void onNewMessage(CameraInfo message)
+      {       
+         double[] P = message.getP();
+
+         // assume P is a 4x3 matrix which was not written by a CV person
+         
+         synchronized (intrinsicParameters)
+         {
+            intrinsicParameters.fx = P[0];
+            intrinsicParameters.skew = P[1];
+            intrinsicParameters.cx = P[2];
+            intrinsicParameters.fy = P[5];
+            intrinsicParameters.cy = P[6];
+            
+            // Use these parameters for Gazebo in the future.
+
+            //            double[] K = message.getK();
+            //
+            //            // assume K is a 3x3 matrix in row major format and is in the standard format
+            //            packet.param.fx = K[0];
+            //            packet.param.skew = K[1];
+            //            packet.param.cx = K[2];
+            //            packet.param.fy = K[4];
+            //            packet.param.cy = K[5];
+
+           intrinsicParameters.width = message.getWidth();
+           intrinsicParameters.height = message.getHeight();
+            //calc field of view
+//            double hfov;
+   //
+//            double theta0 = Math.atan(packet.param.cx / packet.param.fx);
+//            double theta1 = Math.atan((packet.param.width - packet.param.cx) / packet.param.fx);
+//            hfov = theta0 + theta1;
+         }
+         
+
       }
    }
 
