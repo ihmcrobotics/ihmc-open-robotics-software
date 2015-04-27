@@ -1,4 +1,4 @@
-package us.ihmc.acsell.logProcessor;
+package us.ihmc.steppr.logProcessor;
 
 import us.ihmc.darpaRoboticsChallenge.logProcessor.LogDataProcessorFunction;
 import us.ihmc.utilities.robotSide.RobotSide;
