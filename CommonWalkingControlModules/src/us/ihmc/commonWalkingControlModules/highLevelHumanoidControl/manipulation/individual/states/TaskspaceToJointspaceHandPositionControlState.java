@@ -60,6 +60,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
+   private final boolean doPositionControlFinal;
    private final BooleanYoVariable doPositionControl;
 
    private final DenseMatrix64F identityScaledWithOrientationControlFactor = CommonOps.identity(SpatialMotionVector.SIZE);
@@ -85,6 +86,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return new TaskspaceToJointspaceHandPositionControlState(namePrefix, null, base, endEffector, true, Double.NaN, null, yoTime, parentRegistry);
    }
 
+   public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
+         RigidBody endEffector, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   {
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, true, controlDT, gains, yoTime, parentRegistry);
+   }
+
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
          RigidBody endEffector, boolean doPositionControl, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
@@ -100,6 +107,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       this.doPositionControl = new BooleanYoVariable(namePrefix + "DoPositionControlForArmJointspaceController", registry);
       this.doPositionControl.set(doPositionControl);
+      doPositionControlFinal = doPositionControl;
 
       percentOfTrajectoryWithOrientationBeingControlled = new DoubleYoVariable(namePrefix + "PercentOfTrajectoryWithOrientationBeingControlled", registry);
       percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
@@ -129,7 +137,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
       }
 
-      if (!doPositionControl)
+      if (momentumBasedController != null)
       {
          maxAcceleration = gains.getYoMaximumAcceleration();
 
@@ -178,7 +186,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
       taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
 
-      if (!doPositionControl.getBooleanValue())
+      if (momentumBasedController != null)
       {
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
@@ -253,7 +261,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       saveDoAccelerationIntegration();
 
-      doPositionControl.set(momentumBasedController == null);
+      doPositionControl.set(doPositionControlFinal);
 
       if (doPositionControl.getBooleanValue())
          enablePositionControl();
@@ -317,7 +325,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    {
       holdPositionDuration.set(0.0);
 
-      doPositionControl.set(momentumBasedController == null);
+      doPositionControl.set(doPositionControlFinal);
 
       if (doPositionControl.getBooleanValue())
          disablePositionControl();
@@ -416,6 +424,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public FramePose getDesiredPose()
    {
+      taskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredPose, desiredPose.getReferenceFrame());
       return desiredPose;
    }
 

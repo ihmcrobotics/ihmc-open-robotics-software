@@ -114,6 +114,7 @@ public class HandControlModule
 
    private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
+   private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
    private final String name;
    private final RobotSide robotSide;
    private final TwistCalculator twistCalculator;
@@ -194,12 +195,14 @@ public class HandControlModule
       currentHandPosition = new CurrentPositionProvider(handFrame);
 
       quinticPolynomialTrajectoryGenerators = new LinkedHashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
+      areJointsEnabled = new LinkedHashMap<>();
 
       for (OneDoFJoint oneDoFJoint : oneDoFJoints)
       {
          OneDoFJointQuinticTrajectoryGenerator trajectoryGenerator = new OneDoFJointQuinticTrajectoryGenerator(oneDoFJoint.getName() + "Trajectory",
                                                                         oneDoFJoint, trajectoryTimeProvider, registry);
          quinticPolynomialTrajectoryGenerators.put(oneDoFJoint, trajectoryGenerator);
+         areJointsEnabled.put(oneDoFJoint, new BooleanYoVariable(namePrefix + oneDoFJoint.getName() + "IsEnabled", registry));
       }
 
       waypointsPolynomialTrajectoryGenerators = new LinkedHashMap<>();
@@ -259,11 +262,13 @@ public class HandControlModule
       {
          if (doPositionControl)
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, yoTime, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix,
+                  momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
          }
          else
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix,
+                  momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
          }
       }
       else
@@ -359,6 +364,7 @@ public class HandControlModule
    {
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
+         areJointsEnabled.get(oneDoFJoints[i]).set(oneDoFJoints[i].isEnabled());
          if (!oneDoFJoints[i].isEnabled())
             return true;
       }
