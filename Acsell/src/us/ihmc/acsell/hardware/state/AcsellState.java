@@ -9,7 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.steppr.parameters.StrainGaugeInformation;
+import us.ihmc.acsell.parameters.StrainGaugeInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;

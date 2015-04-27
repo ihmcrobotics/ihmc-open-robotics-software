@@ -1,4 +1,4 @@
-package us.ihmc.steppr.parameters;
+package us.ihmc.acsell.parameters;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
 
