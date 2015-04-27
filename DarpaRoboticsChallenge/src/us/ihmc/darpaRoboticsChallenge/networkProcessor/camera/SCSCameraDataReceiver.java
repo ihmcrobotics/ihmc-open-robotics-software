@@ -5,7 +5,6 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.LocalVideoPacket;
-import us.ihmc.communication.packets.sensing.CameraInformationPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -16,8 +15,6 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
  */
 public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {
-   private final SCSCameraInfoReceiver scsCameraInfoReceiver;
-
    public SCSCameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
          PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
@@ -27,8 +24,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
 
-      scsCameraInfoReceiver = new SCSCameraInfoReceiver(sensorSuitePacketCommunicator, logger);
-      sensorSuitePacketCommunicator.attachListener(CameraInformationPacket.class, scsCameraInfoReceiver);
    }
 
    public void consumeObject(LocalVideoPacket object)
@@ -37,7 +32,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       {
          System.out.println(getClass().getName() + ": received local video packet!");
       }
-      updateLeftEyeImage(object.getImage(), object.getTimeStamp(), object.getFieldOfView());
-      scsCameraInfoReceiver.setIntrinsicPacket(object);
+      updateLeftEyeImage(object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
    }
 }

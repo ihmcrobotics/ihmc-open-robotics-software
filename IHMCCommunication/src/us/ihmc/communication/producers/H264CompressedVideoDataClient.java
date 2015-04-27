@@ -10,6 +10,7 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.utilities.VideoStreamer;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class H264CompressedVideoDataClient implements CompressedVideoDataClient
 {
@@ -27,7 +28,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
    }
 
    @Override
-   public synchronized void consumeObject(byte[] data, Point3d position, Quat4d orientation, double fov)
+   public synchronized void consumeObject(byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
    {
       nalBuffer.clear();
       nalBuffer.put(data);
@@ -37,7 +38,7 @@ public class H264CompressedVideoDataClient implements CompressedVideoDataClient
       if(frame != null)
       {
          image = converter.toBufferedImage(frame, image);
-         videoStreamer.updateImage(image, position, orientation, fov);
+         videoStreamer.updateImage(image, position, orientation, intrinsicParameters);
          frame.delete();
       }
       

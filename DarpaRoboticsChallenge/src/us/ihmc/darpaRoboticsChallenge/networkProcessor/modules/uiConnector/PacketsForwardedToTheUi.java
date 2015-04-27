@@ -15,7 +15,6 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
-import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -54,7 +53,6 @@ public class PacketsForwardedToTheUi
       HandPosePacket.class,
       HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
-      IntrinsicCameraParametersPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,
       WholeBodyTrajectoryPacket.class,

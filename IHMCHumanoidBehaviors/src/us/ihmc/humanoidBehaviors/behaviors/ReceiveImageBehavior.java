@@ -2,41 +2,21 @@ package us.ihmc.humanoidBehaviors.behaviors;
 
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.communication.packets.sensing.VideoPacket;
-import us.ihmc.communication.packets.walking.FootstepData;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.packets.walking.FootstepPathPlanPacket;
-import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.communication.packets.walking.FootstepStatus;
-import us.ihmc.communication.packets.walking.FootstepStatus.Status;
-import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
 import us.ihmc.utilities.VideoStreamer;
-import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.math.geometry.RigidBodyTransform;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
-import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class ReceiveImageBehavior extends BehaviorInterface implements VideoStreamer{
 
@@ -74,12 +54,12 @@ public class ReceiveImageBehavior extends BehaviorInterface implements VideoStre
 	   while((packet=inputListeningQueue.getNewestPacket())!= null)
 	   {
 	      if(!isPaused())
-	         compressedVideoDataClient.consumeObject(packet.data, packet.position, packet.orientation, packet.fieldOfView);
+	         compressedVideoDataClient.consumeObject(packet.data, packet.position, packet.orientation, packet.getIntrinsicParameters());
 	   }
 	}	
 	
    @Override
-   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+   public void updateImage(BufferedImage bufferedImage, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParamaters)
    {
       counter.increment();
       if(frame!=null)

@@ -4,7 +4,7 @@ import org.ros.message.Time;
 
 import sensor_msgs.CameraInfo;
 import std_msgs.Header;
-import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
+import boofcv.struct.calib.IntrinsicParameters;
 
 public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
 {
@@ -25,7 +25,7 @@ public class RosCameraInfoPublisher extends RosTopicPublisher<CameraInfo>
    {
    }
 
-   public void publish(String frameID, IntrinsicCameraParametersPacket params, Time t)
+   public void publish(String frameID, IntrinsicParameters params, Time t)
    {
         CameraInfo message = getMessage();
         Header header = message.getHeader();

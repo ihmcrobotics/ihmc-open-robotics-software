@@ -1,13 +1,10 @@
 package us.ihmc.darpaRoboticsChallenge.ros;
 
-import java.awt.image.BufferedImage;
-
 import org.ros.message.Time;
 
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.LocalVideoPacket;
-import us.ihmc.communication.packets.sensing.IntrinsicCameraParametersPacket;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -73,11 +70,7 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
       {
          return;
       }
-
-      BufferedImage img = videoObject.getImage();
-      double f = videoObject.getImage().getWidth() / 2 / Math.tan(videoObject.getFieldOfView() / 2);
-      IntrinsicCameraParametersPacket packet = new IntrinsicCameraParametersPacket(f, f, 0, (img.getWidth() - 1) / 2f, (img.getHeight() - 1) / 2f,
-            img.getWidth(), img.getHeight());
-      cameraInfoPublishers[sensorId].publish(frameId, packet, time);
+      
+      cameraInfoPublishers[sensorId].publish(frameId, videoObject.getIntrinsicParameters(), time);
    }
 }

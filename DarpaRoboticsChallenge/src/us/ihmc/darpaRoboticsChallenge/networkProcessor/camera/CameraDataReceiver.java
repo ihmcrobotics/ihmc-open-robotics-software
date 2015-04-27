@@ -8,6 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.net.NetStateListener;
@@ -93,10 +94,10 @@ public abstract class CameraDataReceiver extends Thread
                }
                for (int i = 0; i < stereoListeners.size(); i++)
                {
-                  stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.fov);
+                  stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.intrinsicParameters);
                }
 
-               compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.fov);
+               compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
          }
@@ -108,11 +109,11 @@ public abstract class CameraDataReceiver extends Thread
 
    }
 
-   protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, double fov)
+   protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       try
       {
-         dataQueue.put(new CameraData(RobotSide.LEFT, bufferedImage, timeStamp, fov));
+         dataQueue.put(new CameraData(RobotSide.LEFT, bufferedImage, timeStamp, intrinsicParameters));
       }
       catch (InterruptedException e)
       {
@@ -129,14 +130,14 @@ public abstract class CameraDataReceiver extends Thread
       private final RobotSide robotSide;
       private final BufferedImage image;
       private final long timestamp;
-      private final double fov;
+      private final IntrinsicParameters intrinsicParameters;
 
-      public CameraData(RobotSide robotSide, BufferedImage image, long timestamp, double fov)
+      public CameraData(RobotSide robotSide, BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters)
       {
          this.robotSide = robotSide;
          this.image = image;
          this.timestamp = timestamp;
-         this.fov = fov;
+         this.intrinsicParameters = intrinsicParameters;
       }
 
    }
@@ -150,13 +151,13 @@ public abstract class CameraDataReceiver extends Thread
          this.packetCommunicator = sensorSuitePacketCommunicator;
       }
 
-      public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, double fieldOfView)
+      public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
       {
          if (DEBUG)
          {
             System.out.println(getClass().getName() + " sending new VideoPacket");
          }
-         packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, fieldOfView));
+         packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters));
       }
 
       public void addNetStateListener(NetStateListener compressedVideoDataServer)

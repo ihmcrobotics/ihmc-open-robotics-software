@@ -3,7 +3,7 @@
 	<Graph>
 		<Variables>root.atlas.t</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -29,15 +29,15 @@ Tab
 
 <Graph Array Window Size>2</Graph Array Window Size>
 <Graph Array Window1>
-<ScreenID>3</ScreenID>
-<WindowLocation>5758.0, -3.0</WindowLocation>
+<ScreenID>1</ScreenID>
+<WindowLocation>2876.0, 0.0</WindowLocation>
 <WindowSize>1924.0, 1207.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shzQDesired,root.atlas.q_l_arm_shz</Variables>
+		<Variables>root.atlas.q_l_arm_shz</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -47,9 +47,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shzQDesired,root.atlas.q_r_arm_shz</Variables>
+		<Variables>root.atlas.q_r_arm_shz</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -59,9 +59,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shxQDesired,root.atlas.q_l_arm_shx</Variables>
+		<Variables>root.atlas.q_l_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -71,9 +71,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shxQDesired,root.atlas.q_r_arm_shx</Variables>
+		<Variables>root.atlas.q_r_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -83,9 +83,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elyQDesired,root.atlas.q_l_arm_ely</Variables>
+		<Variables>root.atlas.q_l_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config34</Name>
+			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -95,9 +95,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elyQDesired,root.atlas.q_r_arm_ely</Variables>
+		<Variables>root.atlas.q_r_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config35</Name>
+			<Name>config7</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -107,9 +107,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elxQDesired,root.atlas.q_l_arm_elx</Variables>
+		<Variables>root.atlas.q_l_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config36</Name>
+			<Name>config8</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -119,9 +119,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elxQDesired,root.atlas.q_r_arm_elx</Variables>
+		<Variables>root.atlas.q_r_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config37</Name>
+			<Name>config9</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -131,9 +131,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wryQDesired,root.atlas.q_l_arm_wry</Variables>
+		<Variables>root.atlas.q_l_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config38</Name>
+			<Name>config10</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -143,9 +143,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wryQDesired,root.atlas.q_r_arm_wry</Variables>
+		<Variables>root.atlas.q_r_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config39</Name>
+			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -155,9 +155,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wrxQDesired,root.atlas.q_l_arm_wrx</Variables>
+		<Variables>root.atlas.q_l_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config40</Name>
+			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -167,9 +167,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wrxQDesired,root.atlas.q_r_arm_wrx</Variables>
+		<Variables>root.atlas.q_r_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config41</Name>
+			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -179,9 +179,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wry2QDesired,root.atlas.q_l_arm_wry2</Variables>
+		<Variables>root.atlas.q_l_arm_wry2</Variables>
 		<GraphConfiguration>
-			<Name>config42</Name>
+			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -191,9 +191,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wry2QDesired,root.atlas.q_r_arm_wry2</Variables>
+		<Variables>root.atlas.q_r_arm_wry2</Variables>
 		<GraphConfiguration>
-			<Name>config43</Name>
+			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -204,15 +204,15 @@ Tab
 	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
-<ScreenID>3</ScreenID>
-<WindowLocation>6063.0, 385.0</WindowLocation>
+<ScreenID>1</ScreenID>
+<WindowLocation>3996.0, 385.0</WindowLocation>
 <WindowSize>804.0, 533.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shzQdDesired,root.atlas.qd_l_arm_shz</Variables>
+		<Variables>root.atlas.qd_l_arm_shz</Variables>
 		<GraphConfiguration>
-			<Name>config44</Name>
+			<Name>config16</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -222,9 +222,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shzQdDesired,root.atlas.qd_r_arm_shz</Variables>
+		<Variables>root.atlas.qd_r_arm_shz</Variables>
 		<GraphConfiguration>
-			<Name>config45</Name>
+			<Name>config17</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -234,9 +234,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_shxQdDesired,root.atlas.qd_l_arm_shx</Variables>
+		<Variables>root.atlas.qd_l_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config46</Name>
+			<Name>config18</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -246,9 +246,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_shxQdDesired,root.atlas.qd_r_arm_shx</Variables>
+		<Variables>root.atlas.qd_r_arm_shx</Variables>
 		<GraphConfiguration>
-			<Name>config47</Name>
+			<Name>config19</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -258,9 +258,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elyQdDesired,root.atlas.qd_l_arm_ely</Variables>
+		<Variables>root.atlas.qd_l_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config48</Name>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -270,9 +270,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elyQdDesired,root.atlas.qd_r_arm_ely</Variables>
+		<Variables>root.atlas.qd_r_arm_ely</Variables>
 		<GraphConfiguration>
-			<Name>config49</Name>
+			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -282,9 +282,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_elxQdDesired,root.atlas.qd_l_arm_elx</Variables>
+		<Variables>root.atlas.qd_l_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -294,9 +294,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_elxQdDesired,root.atlas.qd_r_arm_elx</Variables>
+		<Variables>root.atlas.qd_r_arm_elx</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -306,9 +306,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wryQdDesired,root.atlas.qd_l_arm_wry</Variables>
+		<Variables>root.atlas.qd_l_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -318,9 +318,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wryQdDesired,root.atlas.qd_r_arm_wry</Variables>
+		<Variables>root.atlas.qd_r_arm_wry</Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -330,9 +330,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wrxQdDesired,root.atlas.qd_l_arm_wrx</Variables>
+		<Variables>root.atlas.qd_l_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -342,9 +342,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wrxQdDesired,root.atlas.qd_r_arm_wrx</Variables>
+		<Variables>root.atlas.qd_r_arm_wrx</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -354,9 +354,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.leftHandControlModule.leftJointSpaceHandControlState.l_arm_wry2QdDesired,root.atlas.qd_l_arm_wry2</Variables>
+		<Variables>root.atlas.qd_l_arm_wry2</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -366,9 +366,9 @@ Tab
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManipulationControlModule.rightHandControlModule.rightJointSpaceHandControlState.r_arm_wry2QdDesired,root.atlas.qd_r_arm_wry2</Variables>
+		<Variables>root.atlas.qd_r_arm_wry2</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -387,9 +387,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>6.0</Camera X>
- <Camera Y>-2.0</Camera Y>
- <Camera Z>4.5</Camera Z>
+ <Camera X>-5.083703655612453</Camera X>
+ <Camera Y>1.1495617530699977</Camera Y>
+ <Camera Z>-1.9540199857991771</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
