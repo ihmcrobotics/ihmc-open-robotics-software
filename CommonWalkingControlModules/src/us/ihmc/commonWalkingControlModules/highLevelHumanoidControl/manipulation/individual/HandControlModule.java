@@ -263,8 +263,14 @@ public class HandControlModule
 
       if (armControlParameters.useInverseKinematicsTaskspaceControl())
       {
-         taskSpacePositionControlState = new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController,
-               chest, hand, doPositionControl, controlDT, jointspaceGains, registry);
+         if (doPositionControl)
+         {
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, jacobianId, jointspaceGains, registry);
+         }
+         else
+         {
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, jacobianId, jointspaceGains, registry);
+         }
       }
       else
       {
