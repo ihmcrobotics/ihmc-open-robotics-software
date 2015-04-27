@@ -1,16 +1,16 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_lbx;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_mby;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.back_ubz;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.forcedSideDependentJointNames;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.jointNames;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_kny;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_lax;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_lhy;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_mhx;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_uay;
-import static us.ihmc.acsell.parameters.BonoOrderedJointNames.l_leg_uhz;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.back_lbx;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.back_mby;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.back_ubz;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.forcedSideDependentJointNames;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.jointNames;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_kny;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_lax;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_lhy;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_mhx;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_uay;
+import static us.ihmc.steppr.parameters.BonoOrderedJointNames.l_leg_uhz;
 
 import java.util.EnumMap;
 import java.util.HashSet;

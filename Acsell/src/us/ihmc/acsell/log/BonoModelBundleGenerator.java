@@ -8,7 +8,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 
-import us.ihmc.acsell.parameters.BonoRobotModel;
+import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 
 

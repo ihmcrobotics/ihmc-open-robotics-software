@@ -1,4 +1,4 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.steppr.parameters;
 
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;

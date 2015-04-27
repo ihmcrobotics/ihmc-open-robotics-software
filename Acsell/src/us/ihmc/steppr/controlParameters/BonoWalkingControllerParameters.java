@@ -2,7 +2,7 @@ package us.ihmc.steppr.controlParameters;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.acsell.parameters.BonoPhysicalProperties;
+import us.ihmc.steppr.parameters.BonoPhysicalProperties;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
