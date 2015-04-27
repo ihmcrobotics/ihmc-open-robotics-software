@@ -23,6 +23,8 @@ import com.martiansoftware.jsap.JSAPResult;
 
 class RobotiqControlThread extends HandControlThread
 {
+   private final boolean CALIBRATE_ON_CONNECT = false;
+   
    private final RobotSide robotSide;
    private final RobotiqHandInterface robotiqHand;
    private final FingerStateProvider fingerStateProvider;
@@ -122,7 +124,8 @@ class RobotiqControlThread extends HandControlThread
 
    public void run()
    {
-//      fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+      if(CALIBRATE_ON_CONNECT)
+         fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {
@@ -146,18 +149,6 @@ class RobotiqControlThread extends HandControlThread
             {
                FingerStatePacket packet = fingerStateProvider.pullPacket();
                FingerState state = packet.getFingerState();
-//               if (!robotiqHand.isConnected())
-//               {
-//                  if (state.equals(FingerState.CALIBRATE))
-//                  {
-//                     this.initialize();
-//                  }
-//                  else
-//                  {
-//                     System.out.println(robotSide.toString() + " Hand Not Connected");
-//                     continue;
-//                  }
-//               }
                
                switch (state)
                {
@@ -192,19 +183,19 @@ class RobotiqControlThread extends HandControlThread
                   robotiqHand.scissorGrip();
                   break;
                case HALF_CLOSE:
-                  robotiqHand.close(0.15);
+                  robotiqHand.halfClose();
                   break;
                case CLOSE_FINGERS:
-                  //TODO
+                  robotiqHand.closeFingers();
                   break;
                case CLOSE_THUMB:
-                  //TODO
+                  robotiqHand.closeThumb();
                   break;
                case OPEN_FINGERS:
-                  //TODO
+                  robotiqHand.openFingers();
                   break;
                case OPEN_THUMB:
-                  //TODO
+                  robotiqHand.openThumb();
                   break;
                case RESET:
                {

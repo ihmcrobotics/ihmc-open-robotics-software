@@ -530,62 +530,118 @@ public final class RobotiqHandInterface
 	   
 		sendMotionRequest();
 	}
+	
+	public void openFingers()
+	{
+	   //TODO
+	}
+	
+	public void openThumb()
+	{
+	   //TODO
+	}
 
 	public void close()
 	{
-	   close(1.0);
+	   close(1.0, new int[]{FINGER_A, FINGER_B, FINGER_C, SCISSOR});
 	}
 	
-	public void close(double percent)
+	public void halfClose()
 	{
-	   int operationMode = handData.getOperationMode();
-	   
-	   if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
-	   {
-	      position[FINGER_A] = PINCH_MODE_FULLY_CLOSED[FINGER_A];
-	      position[FINGER_B] = PINCH_MODE_FULLY_CLOSED[FINGER_B];
-	      position[FINGER_C] = PINCH_MODE_FULLY_CLOSED[FINGER_C];
-	      position[SCISSOR] = PINCH_MODE_FULLY_CLOSED[SCISSOR];
-	   }
-	   else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
-	   {
-	      position[FINGER_A] = BASIC_MODE_FULLY_CLOSED[FINGER_A];
-	      position[FINGER_B] = BASIC_MODE_FULLY_CLOSED[FINGER_B];
-	      position[FINGER_C] = BASIC_MODE_FULLY_CLOSED[FINGER_C];
-	      position[SCISSOR] = BASIC_MODE_FULLY_CLOSED[SCISSOR];
-	   }
-	   else if(operationMode == RobotiqGraspMode.WIDE_MODE.ordinal())
-	   {
-	      position[FINGER_A] = WIDE_MODE_FULLY_CLOSED[FINGER_A];
-	      position[FINGER_B] = WIDE_MODE_FULLY_CLOSED[FINGER_B];
-	      position[FINGER_C] = WIDE_MODE_FULLY_CLOSED[FINGER_C];
-	      position[SCISSOR] = WIDE_MODE_FULLY_CLOSED[SCISSOR];
-	   }
-	   else if(operationMode == RobotiqGraspMode.SCISSOR_MODE.ordinal())
-	   {
-	      position[FINGER_A] = SCISSOR_MODE_FULLY_CLOSED[FINGER_A];
-	      position[FINGER_B] = SCISSOR_MODE_FULLY_CLOSED[FINGER_B];
-	      position[FINGER_C] = SCISSOR_MODE_FULLY_CLOSED[FINGER_C];
-	      position[SCISSOR] = SCISSOR_MODE_FULLY_CLOSED[SCISSOR];
-	   }
+	   close(0.15, new int[]{FINGER_A, FINGER_B, FINGER_C});
+	}
+	
+	private void close(double percent, int[] fingersToClose)
+	{
+      int operationMode = handData.getOperationMode();
+      
+//      byte[] graspMode = null;
+//      if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
+//      {
+//         graspMode = PINCH_MODE_FULLY_CLOSED;
+//      }
+//      else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
+//      {
+//         graspMode = BASIC_MODE_FULLY_CLOSED;
+//      }
+//      else if(operationMode == RobotiqGraspMode.WIDE_MODE.ordinal())
+//      {
+//         graspMode = WIDE_MODE_FULLY_CLOSED;
+//      }
+//      else if(operationMode == RobotiqGraspMode.SCISSOR_MODE.ordinal())
+//      {
+//         graspMode = SCISSOR_MODE_FULLY_CLOSED;
+//      }
+//      
+//      if(graspMode != null)
+//      {
+//         for(int i = 0; i < fingersToClose.length; i++)
+//         {
+//            position[fingersToClose[i]] = graspMode[fingersToClose[i]];
+//            position[fingersToClose[i]] *= percent == 1.0 ? percent : (1.0 - percent) * 0xFF;
+//            speed[fingersToClose[i]] = MAX_SPEED;
+//            force[fingersToClose[i]] = DEFAULT_FORCE;
+//         }
+//         
+//         sendMotionRequest();
+//      }
+      
+      if(operationMode == RobotiqGraspMode.PINCH_MODE.ordinal())
+      {
+         position[FINGER_A] = PINCH_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = PINCH_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = PINCH_MODE_FULLY_CLOSED[FINGER_C];
+         position[SCISSOR] = PINCH_MODE_FULLY_CLOSED[SCISSOR];
+      }
+      else if(operationMode == RobotiqGraspMode.BASIC_MODE.ordinal())
+      {
+         position[FINGER_A] = BASIC_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = BASIC_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = BASIC_MODE_FULLY_CLOSED[FINGER_C];
+         position[SCISSOR] = BASIC_MODE_FULLY_CLOSED[SCISSOR];
+      }
+      else if(operationMode == RobotiqGraspMode.WIDE_MODE.ordinal())
+      {
+         position[FINGER_A] = WIDE_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = WIDE_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = WIDE_MODE_FULLY_CLOSED[FINGER_C];
+         position[SCISSOR] = WIDE_MODE_FULLY_CLOSED[SCISSOR];
+      }
+      else if(operationMode == RobotiqGraspMode.SCISSOR_MODE.ordinal())
+      {
+         position[FINGER_A] = SCISSOR_MODE_FULLY_CLOSED[FINGER_A];
+         position[FINGER_B] = SCISSOR_MODE_FULLY_CLOSED[FINGER_B];
+         position[FINGER_C] = SCISSOR_MODE_FULLY_CLOSED[FINGER_C];
+         position[SCISSOR] = SCISSOR_MODE_FULLY_CLOSED[SCISSOR];
+      }
 
-	   percent = percent == 1.0 ? percent : (1.0 - percent) * 0xFF;
-	   
-	   position[FINGER_A] *= percent;
-	   position[FINGER_B] *= percent;
-	   position[FINGER_C] *= percent;
-	   position[SCISSOR] *= percent;
-	   
-	   speed[FINGER_A] = MAX_SPEED;
-	   force[FINGER_A] = DEFAULT_FORCE;
-	   speed[FINGER_B] = MAX_SPEED;
-	   force[FINGER_B] = DEFAULT_FORCE;
-	   speed[FINGER_C] = MAX_SPEED;
-	   force[FINGER_C] = DEFAULT_FORCE;
-	   speed[SCISSOR] = MAX_SPEED;
-	   force[SCISSOR] = DEFAULT_FORCE;
-	   
-	   sendMotionRequest();
+      percent = percent == 1.0 ? percent : (1.0 - percent) * 0xFF;
+      
+      position[FINGER_A] *= percent;
+      position[FINGER_B] *= percent;
+      position[FINGER_C] *= percent;
+      position[SCISSOR] *= percent;
+      
+      speed[FINGER_A] = MAX_SPEED;
+      force[FINGER_A] = MAX_FORCE;
+      speed[FINGER_B] = MAX_SPEED;
+      force[FINGER_B] = MAX_FORCE;
+      speed[FINGER_C] = MAX_SPEED;
+      force[FINGER_C] = MAX_FORCE;
+      speed[SCISSOR] = MAX_SPEED;
+      force[SCISSOR] = MAX_FORCE;
+      
+      sendMotionRequest();
+	}
+	
+	public void closeFingers()
+	{
+	   //TODO
+	}
+	
+	public void closeThumb()
+	{
+	   //TODO
 	}
 	
 	public void crush()
