@@ -424,4 +424,10 @@ public class TaskspaceToJointspaceCalculator
    {
       return inverseJacobianSolver.getLastComputedDeterminant();
    }
+
+   public void getDesiredEndEffectorPoseFromQDesireds(FramePose desiredPose, ReferenceFrame desiredFrame)
+   {
+      desiredPose.setToZero(localControlFrame);
+      desiredPose.changeFrame(desiredFrame);
+   }
 }
