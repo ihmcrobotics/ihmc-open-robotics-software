@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
@@ -27,7 +26,6 @@ public class ScriptTools
       removeAllPauses(listToEdit);
       removeAllZeroStepLists(listToEdit);
       removeAllFootPosePackets(listToEdit);
-      removeAllVideoControlPackets(listToEdit);
    }
 
    private static void removePausesAndZeroStepLists(ArrayList<ScriptObject> listToEdit)
@@ -60,14 +58,6 @@ public class ScriptTools
       }
    }
 
-   private static void removeAllVideoControlPackets(ArrayList<ScriptObject> listToEdit)
-   {
-      for (int i = listToEdit.size() - 1; i >= 0; i--)
-      {
-         if (listToEdit.get(i).getScriptObject() instanceof VideoControlPacket)
-            listToEdit.remove(i);
-      }
-   }
 
    private static void removeAllPauses(ArrayList<ScriptObject> listToEdit)
    {

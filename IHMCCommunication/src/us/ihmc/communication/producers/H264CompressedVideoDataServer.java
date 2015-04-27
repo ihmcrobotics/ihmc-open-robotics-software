@@ -8,7 +8,6 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.FilterModeEnum;
 import us.ihmc.codecs.generated.RC_MODES;
@@ -17,13 +16,12 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.h264.OpenH264Encoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.sensing.VideoControlPacket;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
+import boofcv.struct.calib.IntrinsicParameters;
 
-public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer, PacketConsumer<VideoControlPacket>
+public class H264CompressedVideoDataServer implements NetStateListener, CompressedVideoDataServer
 {
    private OpenH264Encoder encoder;
 
@@ -187,10 +185,4 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
          videoEnabled = false;
       }
    }
-
-   public void receivedPacket(VideoControlPacket object)
-   {
-      setVideoControlSettings(object);
-   }
-
 }
