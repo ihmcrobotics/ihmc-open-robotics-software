@@ -3,7 +3,9 @@ package us.ihmc.darpaRoboticsChallenge.environment;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.darpaRoboticsChallenge.PolarisRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -69,6 +71,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       robots.add(wheelRobot);
       
       RigidBodyTransform polarisTransform = new RigidBodyTransform();
+      polarisTransform.setRotation(new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), 0.0));
       robots.add(new PolarisRobot("polaris", polarisTransform));
    }
 

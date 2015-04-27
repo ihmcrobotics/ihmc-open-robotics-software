@@ -51,7 +51,7 @@ public class PolarisRobot extends Robot
       checkerBoardLink.setLinkGraphics(checkerBoardGraphics);
       
       FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", new Vector3d(), this);
-      checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, 0.0, 1.2)));
+      checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, -0.5, 1.3)));
       checkerBoardJoint.setLink(checkerBoardLink);
       checkerBoardJoint.setDynamic(false);
       floatingJoint.addJoint(checkerBoardJoint);
