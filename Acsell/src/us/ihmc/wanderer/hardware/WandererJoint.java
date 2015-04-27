@@ -1,7 +1,7 @@
 package us.ihmc.wanderer.hardware;
 
 import us.ihmc.acsell.hardware.AcsellJoint;
-import us.ihmc.steppr.parameters.StrainGaugeInformation;
+import us.ihmc.acsell.parameters.StrainGaugeInformation;
 
 public enum WandererJoint implements AcsellJoint
 
