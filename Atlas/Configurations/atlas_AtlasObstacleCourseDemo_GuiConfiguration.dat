@@ -31,7 +31,7 @@ Tab
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
 <WindowLocation>2876.0, 0.0</WindowLocation>
-<WindowSize>1924.0, 1207.0</WindowSize>
+<WindowSize>1920.0, 1080.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -387,9 +387,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-5.083703655612453</Camera X>
- <Camera Y>1.1495617530699977</Camera Y>
- <Camera Z>-1.9540199857991771</Camera Z>
+ <Camera X>6.0</Camera X>
+ <Camera Y>-2.0</Camera Y>
+ <Camera Z>4.5</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
