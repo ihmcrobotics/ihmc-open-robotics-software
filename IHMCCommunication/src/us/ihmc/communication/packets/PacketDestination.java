@@ -18,7 +18,8 @@ public enum PacketDestination
    TRAFFIC_SHAPER,
    MULTISENSE_TEST_MODULE,
    GFE, 
-   AUXILIARY_ROBOT_DATA_PUBLISHER;
+   AUXILIARY_ROBOT_DATA_PUBLISHER, 
+   ZERO_POSE_PRODUCER;
 
    public static final PacketDestination[] values = values();
    
