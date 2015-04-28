@@ -97,7 +97,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
     * PointCloud Parameters
     */
    //Make pointCloudParameters null to not use point cloud in UI.
-   private final DRCRobotPointCloudParameters[] pointCloudParamaters = null;//new DRCRobotPointCloudParameters[1];
+   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
    public static final int POINT_CLOUD_SENSOR_ID = 0;
    private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
    private static final String pointCloudTopic = "/v1/Ensenso/Points";
@@ -113,6 +113,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String foreheadCameraName = "/v1/HeadWebcam___default__";
+   private static final String foreheadCameraInfo = "/head/image_raw/info";
    private static final String foreheadCameraTopic = "/head/image_raw/compressed";
    
    private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
@@ -143,14 +144,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      cameraParamaters[0] = new DRCRobotCameraParameters(foreheadCameraName,foreheadCameraTopic,headLinkName,foreheadCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(foreheadCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,foreheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
       if(pointCloudParamaters != null)
       {
          pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
       }
-      }
+   }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
    {
