@@ -5,7 +5,7 @@ import us.ihmc.acsell.springs.HystereticSpringProperties;
 public class WandererRightAnkleSpringProperties implements HystereticSpringProperties {
 
    public WandererRightAnkleSpringProperties() {
-
+      throw new RuntimeException("TODO: Change values for wanderer and remove this exception");
    }
    
    @Override
