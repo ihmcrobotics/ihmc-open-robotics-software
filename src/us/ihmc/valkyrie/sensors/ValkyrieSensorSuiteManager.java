@@ -20,7 +20,10 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLi
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -70,8 +73,12 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    @Override
    public void initializePhysicalSensors(URI sensorURI)
    {
+	   if(sensorURI == null)
+	   {
+		   throw new IllegalArgumentException("The ros uri was null, val's physical sensors require a ros uri to be set! Check your Network Parameters.ini file");
+	   }
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
-
+      
       RosMainNode rosMainNode = new RosMainNode(sensorURI, "darpaRoboticsChallange/networkProcessor");
 
       DRCRobotCameraParameters cameraParamaters = sensorInformation.getCameraParameters(0);
@@ -81,10 +88,22 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       
       if(pointCloudDataReceiver != null)
       {
-         new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0).getSensorNameInSdf(),sensorInformation.getPointCloudParameters(0).getRosTopic(),
-               rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN, PointCloudSource.QUADTREE);
+    	 ReferenceFrames referenceFrames = pointCloudDataReceiver.getReferenceFrames();
+          
+    	 ReferenceFrame neckFrame = referenceFrames.getNeckFrame(NeckJointName.UPPER_NECK_PITCH);
+    	 ReferenceFrame ensensoFrame = new ReferenceFrame("ensensoFrame", neckFrame) {
+			
+			@Override
+			protected void updateTransformToParent(RigidBodyTransform transformToParent) 
+			{
+				//<pose>-0.16 0.0065 -0.02325 -1.5708 2.11758e-22 3.14159</pose> a guess between the ibeo and forehead camera
+				transformToParent.setEuler(0,0,0);
+				transformToParent.setTranslation(0,0,0);
+			}
+		};
+		new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0).getSensorNameInSdf(),sensorInformation.getPointCloudParameters(0).getRosTopic(),
+               rosMainNode, ensensoFrame, pointCloudDataReceiver,PointCloudSource.NEARSCAN, PointCloudSource.QUADTREE);
       }
-      
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
       rosMainNode.execute();
@@ -95,7 +114,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    public void connect() throws IOException
    {
       sensorSuitePacketCommunicator.connect();
-      if (sensorInformation.getLidarParameters().length > 0)
+      if (sensorInformation.getLidarParameters().length > 0 || sensorInformation.getPointCloudParameters().length > 0)
       {
          if(pointCloudDataReceiver != null)
          {
