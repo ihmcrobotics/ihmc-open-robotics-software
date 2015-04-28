@@ -47,11 +47,18 @@ startScripts {
         simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
 
         def simUnixScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer")
-        simUnixScriptFinals.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
-        simUnixScriptFinals.setExecutable(true)
+        simUnixScriptVisualizer.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+        simUnixScriptVisualizer.setExecutable(true)
 
         def simWindowsScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer.bat")
-        simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+        simWindowsScriptVisualizer.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+
+        def simUnixScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger")
+        simUnixScriptLogger.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
+        simUnixScriptLogger.setExecutable(true)
+
+        def simWindowsScriptLogger = file(outputDir.canonicalPath + "/IHMCLogger.bat")
+        simWindowsScriptLogger.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCLogger").replace("us.ihmc.atlas.AtlasROSAPINetworkProcessor", "us.ihmc.robotDataCommunication.logger.YoVariableLoggerDispatcher")
     	
     }
 }
