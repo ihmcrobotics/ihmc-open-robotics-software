@@ -71,7 +71,7 @@ public class UDPAcsellStateReader
       receiveChannel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(receiveAddress);
       receiveChannel.socket().setReceiveBufferSize(65535);
       receiveChannel.socket().setSoTimeout(1000);
-      InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
+      InetAddress group = InetAddress.getByName(AcsellNetworkParameters.ACSELL_MULTICAST_GROUP);
       receiveKey = receiveChannel.join(group, iface);
    }
 

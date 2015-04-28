@@ -1,4 +1,6 @@
-package us.ihmc.acsell.springs;
+package us.ihmc.steppr.hardware.configuration;
+
+import us.ihmc.acsell.springs.HystereticSpringProperties;
 
 public class StepprRightAnkleSpringProperties implements HystereticSpringProperties {
 

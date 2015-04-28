@@ -1,4 +1,4 @@
-package us.ihmc.acsell.simulation;
+package us.ihmc.steppr.simulation;
 
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.darpaRoboticsChallenge.DRCSimulationStarter;

@@ -1,4 +1,4 @@
-package us.ihmc.acsell.parameters;
+package us.ihmc.acsell.hardware.configuration;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
 

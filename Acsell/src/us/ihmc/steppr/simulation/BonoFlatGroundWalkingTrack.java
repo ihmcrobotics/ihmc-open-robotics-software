@@ -1,4 +1,4 @@
-package us.ihmc.acsell.simulation;
+package us.ihmc.steppr.simulation;
 
 import net.java.games.input.Component;
 import us.ihmc.SdfLoader.SDFRobot;

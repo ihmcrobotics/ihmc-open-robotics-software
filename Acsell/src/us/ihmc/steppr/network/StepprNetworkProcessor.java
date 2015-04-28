@@ -1,4 +1,4 @@
-package us.ihmc.acsell.network;
+package us.ihmc.steppr.network;
 
 import java.net.URISyntaxException;
 

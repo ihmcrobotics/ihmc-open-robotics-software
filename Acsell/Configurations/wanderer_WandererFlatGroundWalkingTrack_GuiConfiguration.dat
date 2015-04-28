@@ -37,9 +37,15 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
+<<<<<<< .mine
+ <Camera X>5.9224762038916055</Camera X>
+ <Camera Y>0.9419119112562571</Camera Y>
+ <Camera Z>1.0439341908112445</Camera Z>
+=======
  <Camera X>-1.0907546134928494</Camera X>
  <Camera Y>9.651657995364664</Camera Y>
  <Camera Z>2.9036129289543435</Camera Z>
+>>>>>>> .r30030
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -63,8 +69,14 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
+<<<<<<< .mine
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
+=======
 <Fix X>2.9976306375699213</Fix X>
 <Fix Y>-0.36023272403668205</Fix Y>
 <Fix Z>-0.023376712959532586</Fix Z>
+>>>>>>> .r30030
 </Fix Position>
 </Canvas 1>

@@ -16,7 +16,7 @@ public abstract class AcsellNetworkParameters
    public static final int UDP_MULTICAST_POWER_BUS_PORT = 11302;
    
    
-   public static final String STEPPR_MULTICAST_GROUP = "224.0.0.123";
+   public static final String ACSELL_MULTICAST_GROUP = "224.0.0.123";
 
    public abstract String getMultiCastGroup();
 

@@ -8,7 +8,7 @@ public class WandererNetworkParameters extends AcsellNetworkParameters
    @Override
    public String getMultiCastGroup()
    {
-      return STEPPR_MULTICAST_GROUP;
+      return ACSELL_MULTICAST_GROUP;
    }
 
 
