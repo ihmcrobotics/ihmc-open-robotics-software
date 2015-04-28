@@ -5,23 +5,8 @@ import us.ihmc.acsell.springs.HystereticSpringProperties;
 public class WandererRightHipXSpringProperties implements HystereticSpringProperties {
 
 	public WandererRightHipXSpringProperties() {
-
+	   throw new RuntimeException("TODO: Change values for wanderer and remove this exception");
 	}
-	
-//	@Override
-//	public double getLoadingSpringConstant() {
-//		return 330;
-//	}
-//	
-//	@Override
-//	public double getLinearSpringConstant() {
-//		return 295;
-//	}
-//	
-//	@Override
-//	public double getUnloadingSpringConstant() {
-//		return 260;
-//	}
 	
 	@Override
 	public double getLoadingSpringConstant() {
@@ -37,21 +22,6 @@ public class WandererRightHipXSpringProperties implements HystereticSpringProper
 	public double getUnloadingSpringConstant() {
 		return 380; //290
 	}
-
-//	@Override
-//	public double getLoadingRestLength() {
-//		return -0.02;
-//	}
-//	
-//	@Override
-//	public double getLinearSpringRestLength() {
-//		return -0.028;
-//	}
-//	
-//	@Override
-//	public double getUnloadingRestLength() {
-//		return -0.037;
-//	}
 
 	@Override
 	public double getLoadingRestLength() {

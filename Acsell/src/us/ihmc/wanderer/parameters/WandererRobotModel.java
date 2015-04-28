@@ -45,7 +45,9 @@ import us.ihmc.wanderer.controlParameters.WandererArmControlParameters;
 import us.ihmc.wanderer.controlParameters.WandererCapturePointPlannerParameters;
 import us.ihmc.wanderer.controlParameters.WandererStateEstimatorParameters;
 import us.ihmc.wanderer.controlParameters.WandererWalkingControllerParameters;
+import us.ihmc.wanderer.hardware.controllers.WandererOutputProcessor;
 import us.ihmc.wanderer.initialSetup.WandererInitialSetup;
+import us.ihmc.wanderer.operatorInterface.WandererOperatorInterface;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
@@ -321,7 +323,7 @@ public class WandererRobotModel implements DRCRobotModel
    @Override
    public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel)
    {
-      return null;
+      return new WandererOutputProcessor(controllerFullRobotModel);
    }
 
    @Override
@@ -347,7 +349,8 @@ public class WandererRobotModel implements DRCRobotModel
    @Override
    public Pair<Class<?>, String[]> getOperatorInterfaceStarter()
    {
-      throw new RuntimeException("Die heathens");
+      String[] args = runningOnRealRobot ? new String[]{"--realRobot"} : null;
+      return new Pair<Class<?>, String[]>(WandererOperatorInterface.class, args);
    }
 
    @Override

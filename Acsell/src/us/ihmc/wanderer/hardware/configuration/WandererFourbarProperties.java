@@ -24,7 +24,7 @@ public class WandererFourbarProperties implements FourbarProperties
       this.Link3 = new FourbarLink(L3);
       this.Link4 = new FourbarLink(L4);
       
-      throw new RuntimeException("TODO: Fix me for wanderer and remove this exception");
+      throw new RuntimeException("TODO: Change value for wanderer and remove this exception");
    }
 
    @Override
