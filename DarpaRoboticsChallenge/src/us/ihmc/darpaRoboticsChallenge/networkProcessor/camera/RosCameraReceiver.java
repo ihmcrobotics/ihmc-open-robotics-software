@@ -19,6 +19,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -31,7 +32,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class RosCameraReceiver extends CameraDataReceiver
 {
    private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
-   
+   private static final boolean DEBUG = true;
    
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
@@ -74,6 +75,11 @@ public class RosCameraReceiver extends CameraDataReceiver
             synchronized (RosCameraReceiver.this.intrinsicParameters)
             {
                intrinsicParameters = new IntrinsicParameters(RosCameraReceiver.this.intrinsicParameters);               
+            }
+            if(DEBUG)
+            {
+               PrintTools.debug(this, "Sending intrinsicParameters");
+               intrinsicParameters.print();
             }
             updateLeftEyeImage(image, timeStamp, intrinsicParameters);
 
@@ -169,6 +175,11 @@ public class RosCameraReceiver extends CameraDataReceiver
 
            intrinsicParameters.width = message.getWidth();
            intrinsicParameters.height = message.getHeight();
+           if(DEBUG)
+           {
+              PrintTools.debug(this, "Receiving intrinsicParameters");
+              intrinsicParameters.print();
+           }
             //calc field of view
 //            double hfov;
    //
