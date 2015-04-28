@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
@@ -139,15 +138,18 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          break;
 
       case XYZRGB:
-         packet.pointColors = new Color[numberOfPoints];
-
-         break;
+    	  packet.pointColors = new Color[numberOfPoints];
+    	  break;
+    	  
+      case XYZ:
+    	  break;
       }
 
       int offset = pointCloud.getData().arrayOffset();
       int pointStep = pointCloud.getPointStep();
 
-      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud.getData().array(), offset, numberOfPoints * pointStep);
+      byte[] array = pointCloud.getData().array();
+	ByteBuffer byteBuffer = ByteBuffer.wrap(array, offset, numberOfPoints * pointStep);
 
       if (pointCloud.getIsBigendian())
          byteBuffer.order(ByteOrder.BIG_ENDIAN);
@@ -166,8 +168,6 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          {
          case XYZI:
             packet.intensities[i] = byteBuffer.getFloat();
-            ;
-
             break;
 
          case XYZRGB:
@@ -188,6 +188,8 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
             {
                System.out.println(g);
             }
+		case XYZ:
+			break;
          }
       }
 
