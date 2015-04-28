@@ -25,14 +25,13 @@ import dynamic_reconfigure.StrParameter;
 
 public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParameterPacket>
 {
-   private static double gain;
-   private static double motorSpeed;
-   private static boolean ledEnable;
-   private static boolean flashEnable;
-   private static double dutyCycle;
-   private static boolean autoExposure;
-   private static boolean autoWhitebalance;
-   private static String resolution = new String("2048x1088x64");
+   private double gain;
+   private double motorSpeed;
+   private boolean ledEnable;
+   private boolean flashEnable;
+   private double dutyCycle;
+   private boolean autoExposure;
+   private boolean autoWhitebalance;
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
    private PacketCommunicator packetCommunicator;
@@ -134,7 +133,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
   
    public void handleMultisenseParameters(MultisenseParameterPacket object)
    {
-      if (object.isFromUI())
+      if (object.isInitialize())
       {
          if (rosMainNode.isStarted())
          {
@@ -159,7 +158,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
 
       packetCommunicator.send(
             new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
-                  .getDouble("/multisense/led_duty_cycle"), params.getString("/multisense/resolution"), params.getBoolean("/multisense/lighting"), params
+                  .getDouble("/multisense/led_duty_cycle"), params.getBoolean("/multisense/lighting"), params
                   .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
    }
    
@@ -322,7 +321,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       
       
       multiSenseClient.waitTillConnected();
-      ReconfigureRequest request = multiSenseClient.getMessage();
+      final ReconfigureRequest request = multiSenseClient.getMessage();
       if(object.getGain() != gain){
       gain = object.getGain();
       DoubleParameter gainParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
@@ -378,28 +377,28 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
          autoWhiteBalanceParam.setValue(autoWhitebalance);
          request.getConfig().getBools().add(autoWhiteBalanceParam);
          }
-      
-      if(!resolution.equals(object.getResolution())){
-      resolution = object.getResolution();
-      StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
-      resolutionParam.setName("resolution");
-      resolutionParam.setValue(resolution);
-      request.getConfig().getStrs().add(resolutionParam);
-      }
-      
-//      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-//            {
-//
-//               public void onSuccess(ReconfigureResponse response)
-//               {
-//                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-//               }
-//
-//               public void onFailure(RemoteException e)
-//               {
-//                  e.printStackTrace();
-//               }
-//            });
+            
+      new Thread()
+      {
+         @Override
+         public void run()
+         {
+            multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
+            {
+
+               public void onSuccess(ReconfigureResponse response)
+               {
+                  System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
+               }
+
+               public void onFailure(RemoteException e)
+               {
+                  e.printStackTrace();
+               }
+            });
+         }
+
+      }.start();
    }
 
    public void receivedPacket(MultisenseParameterPacket object)
@@ -407,27 +406,4 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       handleMultisenseParameters(object);
    }
 
-   public void setLidarSpindleSpeed(double motorSpeed)
-   {
-      multiSenseClient.waitTillConnected();
-      ReconfigureRequest request = multiSenseClient.getMessage();
-      DoubleParameter motorSpeedParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
-      motorSpeedParam.setName("motor_speed");
-      motorSpeedParam.setValue(motorSpeed);
-      request.getConfig().getDoubles().add(motorSpeedParam);
-      
-//      multiSenseClient.call(request, new ServiceResponseListener<ReconfigureResponse>()
-//      {
-//
-//         public void onSuccess(ReconfigureResponse response)
-//         {
-//            System.out.println("successful" + response.getConfig().getDoubles().get(0).getValue());
-//         }
-//
-//         public void onFailure(RemoteException e)
-//         {
-//            e.printStackTrace();
-//         }
-//      });
-   }
 }
