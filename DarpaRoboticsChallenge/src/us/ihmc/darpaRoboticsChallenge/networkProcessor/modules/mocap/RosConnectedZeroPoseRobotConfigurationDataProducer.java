@@ -77,13 +77,16 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
    private void setUpListeners()
    {
-      jointSubscriber.addMessageListener(new MessageListener<JointState>()
-      {
-         public void onNewMessage(JointState message)
-         {
-            receivedClockMessage(message.getHeader().getStamp().totalNsecs());
-         }
-      });
+	   if(jointSubscriber != null)
+	   {
+		   jointSubscriber.addMessageListener(new MessageListener<JointState>()
+		   {
+			   public void onNewMessage(JointState message)
+			   {
+				   receivedClockMessage(message.getHeader().getStamp().totalNsecs());
+			   }
+		   });
+	   }
    }
 
    protected void setupSubscribers(ConnectedNode connectedNode)
@@ -96,7 +99,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       }
    }
 
-   private void receivedClockMessage(long totalNsecs)
+   public void receivedClockMessage(long totalNsecs)
    {
       RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.get();
       fullRobotModel.updateFrames();
@@ -121,7 +124,6 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          robotConfigurationData.setRootTranslation(translation);
          robotConfigurationData.setRootOrientation(orientation);
       }
-      
       packetCommunicator.send(robotConfigurationData);
    }
 
