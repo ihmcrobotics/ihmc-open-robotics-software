@@ -10,8 +10,7 @@ dependencies {
 	['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
 	['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
 	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
-	//compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.5.3'
-	compile fileTree(dir: "../ThirdParty/ThirdPartyJars/GeoRegression", include: "GeoRegression-georegression-0.8-SNAPSHOT.jar")
+	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
 	compile group: 'net.java.jinput', name: 'jinput', version: '2.0.5'
 	compile group: 'net.java.jinput', name: 'jinput-platform', version: '2.0.5'
 	compile group: 'us.ihmc', name: 'IHMCVideoCodecs', version: '2.0.7'
