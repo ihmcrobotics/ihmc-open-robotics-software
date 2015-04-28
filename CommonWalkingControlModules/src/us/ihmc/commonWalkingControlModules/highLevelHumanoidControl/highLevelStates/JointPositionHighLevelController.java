@@ -444,6 +444,37 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          }
       }      
    }
+   
+   private void controlSingleJoint(SingleJointAnglePacket packet)
+   {
+      trajectoryTimeProvider.set(packet.trajcetoryTime);
+      
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         if (packet.jointName.equals(joint.getName()))
+         {
+            if (joint.getName().contains("l_arm"))
+            {
+               areHandTaskspaceControlled.get(RobotSide.LEFT).set(false);
+            }
+            else if (joint.getName().contains("r_arm"))
+            {
+               areHandTaskspaceControlled.get(RobotSide.RIGHT).set(false);
+            }
+            
+            double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+         }
+         else
+         {
+            double desiredPosition = joint.getqDesired();
+            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+         }
+         
+         alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+         trajectoryGenerator.get(joint).initialize();
+      }
+   }
 
    @Override
    public void doAction()
@@ -455,18 +486,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       
       if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
       {
-         SingleJointAnglePacket packet = singleJointPositionProvider.getNewPacket();
-         for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
-         {
-            if (packet.jointName.equals(joint.getName()))
-            {
-               trajectoryTimeProvider.set(packet.trajcetoryTime);
-               double desiredPostion = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
-               trajectoryGenerator.get(joint).setFinalPosition(desiredPostion);
-               alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
-               trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
-            }
-         }
+         controlSingleJoint(singleJointPositionProvider.getNewPacket());
       }
       
       for( RobotSide side: RobotSide.values)
