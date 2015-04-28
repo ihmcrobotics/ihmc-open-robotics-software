@@ -205,7 +205,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       DoubleYoVariable chestAxisAngleErrorZ = (DoubleYoVariable) scs.getVariable("chestElevatorAxisAngleOrientationController", "chestElevatorAxisAngleErrorInBody" + "Z");
       YoFrameVector chestAxisAngleError = new YoFrameVector(chestAxisAngleErrorX, chestAxisAngleErrorY, chestAxisAngleErrorZ, worldFrame);
       
-      desiredChestFrameOrientation.setIncludingFrame(pelvisFrame, Math.toRadians(40.0), Math.toRadians(20.0), Math.toRadians(10.0));
+      desiredChestFrameOrientation.setIncludingFrame(pelvisFrame, Math.toRadians(35.0), Math.toRadians(20.0), Math.toRadians(10.0));
       desiredChestFrameOrientation.changeFrame(worldFrame);
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
