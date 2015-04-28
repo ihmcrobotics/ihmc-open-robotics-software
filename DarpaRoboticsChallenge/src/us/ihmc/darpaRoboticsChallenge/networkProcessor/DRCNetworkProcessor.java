@@ -63,6 +63,14 @@ public class DRCNetworkProcessor
          
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
+         try {
+			packetCommunicator.connect();
+		} 
+        catch (IOException e) 
+        {
+			e.printStackTrace();
+		}
+         printModuleConnectedDebugStatement(destinationId, "addRobotSpecificModuleCommunicators");
       }
    }
 
