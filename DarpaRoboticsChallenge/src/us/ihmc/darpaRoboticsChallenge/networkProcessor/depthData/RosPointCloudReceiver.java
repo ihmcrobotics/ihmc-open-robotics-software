@@ -6,7 +6,6 @@ import java.util.Arrays;
 import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
-import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
