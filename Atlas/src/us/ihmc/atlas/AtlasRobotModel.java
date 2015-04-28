@@ -444,15 +444,27 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public LogSettings getLogSettings()
    {
+      return getLogSettings(true);
+   }
+
+   public LogSettings getLogSettings(boolean useCameras)
+   {
       switch (target)
       {
-         case REAL_ROBOT :
+      case REAL_ROBOT :
+         if(useCameras)
+         {
             return LogSettings.ATLAS_IAN;
+         }
+         else
+         {
+            return LogSettings.ATLAS_NO_CAMERAS;
+         }
 
-         case GAZEBO :
-         case SIM :
-         default :
-            return LogSettings.SIMULATION;
+      case GAZEBO :
+      case SIM :
+      default :
+         return LogSettings.SIMULATION;
       }
    }
 

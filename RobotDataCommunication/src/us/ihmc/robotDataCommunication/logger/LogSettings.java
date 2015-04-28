@@ -7,6 +7,7 @@ import us.ihmc.multicastLogDataProtocol.LogUtils;
 public enum LogSettings
 {
    ATLAS_IAN(true, "239.255.25.1", 4, 5, 0),
+   ATLAS_NO_CAMERAS(true),
    VALKYRIE_IHMC(true, "239.255.25.2"),
    STEPPR_IHMC(true, "239.255.25.3", 2, 3),
    SIMULATION(false, "239.255.25.4"),
