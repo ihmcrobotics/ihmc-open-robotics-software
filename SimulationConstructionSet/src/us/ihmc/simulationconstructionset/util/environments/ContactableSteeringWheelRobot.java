@@ -137,9 +137,9 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    public void addCrossBar()
    {
       double height = 2.0 * steeringWheelRadius;
-      double radius = spokesThickness / 2.0;
+      double radius = 0.03;
       
-      Vector3d translation = new Vector3d(0.0, height/2.0, 0.1);
+      Vector3d translation = new Vector3d(0.0, height/2.0, 0.15);
       AxisAngle4d rotation = new AxisAngle4d(new Vector3d(1.0, 0.0, 0.0), Math.PI/2.0);
       RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
       
