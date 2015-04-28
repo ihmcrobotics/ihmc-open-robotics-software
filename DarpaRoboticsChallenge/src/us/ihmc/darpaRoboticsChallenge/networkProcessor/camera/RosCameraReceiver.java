@@ -32,7 +32,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 public class RosCameraReceiver extends CameraDataReceiver
 {
    private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
