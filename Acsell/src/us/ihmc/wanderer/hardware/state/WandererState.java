@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.EnumMap;
 
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
+import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.state.AcsellActuatorState;
 import us.ihmc.acsell.hardware.state.AcsellAnkleJointState;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
@@ -21,7 +22,7 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
 {
    public WandererState(double dt, YoVariableRegistry parentRegistry)
    {
-      super("Wanderer", dt, parentRegistry);
+      super("Wanderer", dt, AcsellRobot.WANDERER, parentRegistry);
    }
    
    @Override

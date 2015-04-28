@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.totalPredictedMotorPowerMovingAverage</Variables>
+		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.PelvisOrientationManager.RootJointAngularAccelerationControlModule.pelvisAxisAngleOrientationController.pelvisOrientationErrorMagnitude</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -72,37 +72,13 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footHeightVelocityCorrectedFilteredForSingularityAvoidance,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footHeightVelocityCorrectedFilteredForSingularityAvoidance</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footLegSingularityAndKneeCollapseAvoidanceControlModule.l_footAlphaSupportSingularityAvoidance,root.bono.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footLegSingularityAndKneeCollapseAvoidanceControlModule.r_footAlphaSupportSingularityAvoidance</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
 <EntryBoxTab>
 <Title>
 Tab
 </Title>
-<Entry Boxes>walk,desiredVelocityX,desiredHeading</Entry Boxes>
+<Entry Boxes>chestCoMOffsetX,pelvisCoMOffsetX</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -121,9 +97,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>7.244949846150859</Camera X>
+ <Camera Y>2.8006720241126724</Camera Y>
+ <Camera Z>1.8571949866728552</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -147,8 +123,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.0</Fix X>
-<Fix Y>0.0</Fix Y>
-<Fix Z>0.6</Fix Z>
+<Fix X>-0.08415882750316772</Fix X>
+<Fix Y>0.1811312407038297</Fix Y>
+<Fix Z>0.819956255975196</Fix Z>
 </Fix Position>
 </Canvas 1>

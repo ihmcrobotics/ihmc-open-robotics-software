@@ -9,10 +9,13 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
-import us.ihmc.acsell.parameters.StrainGaugeInformation;
+import us.ihmc.acsell.hardware.configuration.AcsellRobot;
+import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
+import us.ihmc.steppr.hardware.state.StepprPowerDistributionADCState;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.wanderer.hardware.state.WandererPowerDistributionADCState;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -37,7 +40,7 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
 
    protected final SideDependentList<DenseMatrix64F> footWrenches = new SideDependentList<>();
 
-   public AcsellState(String name, double dt, YoVariableRegistry parentRegistry)
+   public AcsellState(String name, double dt, AcsellRobot robot, YoVariableRegistry parentRegistry)
    {
       registry  = new YoVariableRegistry(name);
       lastReceivedTime = new LongYoVariable("lastReceivedTime", registry);
@@ -45,7 +48,10 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
       stateCollectionStartTime = new LongYoVariable("stateCollectionStartTime", registry);
       stateCollectionFinishTime = new LongYoVariable("stateCollectionFinishTime", registry);
 
-      powerDistributionState = new AcsellPowerDistributionADCState("powerDistribution", registry);
+      if(robot==AcsellRobot.WANDERER)
+         this.powerDistributionState = new WandererPowerDistributionADCState("powerDistribution", registry);
+      else
+         this.powerDistributionState = new StepprPowerDistributionADCState("powerDistribution", registry);
       totalMotorPower = new DoubleYoVariable("totalMotorPower", registry);
       xsens = new AcsellXSensState("xsens", registry);
       

@@ -73,7 +73,7 @@ public class AcsellSetup extends RealtimeThread
          NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
          System.out.println("Binding setup to interface: " + iface);
 
-         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
+         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.ACSELL_MULTICAST_GROUP);
          powerCommandAddress = new InetSocketAddress(group, AcsellNetworkParameters.UDP_MULTICAST_POWER_BUS_PORT);
 
          InetSocketAddress receiveAddress = new InetSocketAddress(AcsellNetworkParameters.UDP_MULTICAST_PARAMETER_REPLY_PORT);
@@ -269,7 +269,7 @@ public class AcsellSetup extends RealtimeThread
       {
          NetworkInterface iface = LogUtils.getMyInterface(NetworkParameters.getHost(NetworkParameterKeys.robotController));
 
-         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.STEPPR_MULTICAST_GROUP);
+         InetAddress group = InetAddress.getByName(AcsellNetworkParameters.ACSELL_MULTICAST_GROUP);
          InetSocketAddress streamAddress = new InetSocketAddress(group, AcsellNetworkParameters.UDP_MULTICAST_STREAM_COMMAND_PORT);
 
          DatagramChannel channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)

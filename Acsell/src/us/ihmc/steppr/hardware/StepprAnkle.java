@@ -1,7 +1,7 @@
 package us.ihmc.steppr.hardware;
 
 import us.ihmc.acsell.hardware.AcsellAnkle;
-import us.ihmc.acsell.parameters.StrainGaugeInformation;
+import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 
 public enum StepprAnkle implements AcsellAnkle
 {

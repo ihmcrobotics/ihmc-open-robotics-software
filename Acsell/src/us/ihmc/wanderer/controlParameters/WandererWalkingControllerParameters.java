@@ -256,13 +256,13 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getInPlaceWidth()
    {
-      return 0.35;
+      return 0.15;
    }
 
    @Override
    public double getDesiredStepForward()
    {
-      return 0.3; //0.5; //0.35;
+      return 0.15; //0.5; //0.35;
    }
 
    @Override

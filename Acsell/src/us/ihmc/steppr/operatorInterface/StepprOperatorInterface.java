@@ -1,4 +1,4 @@
-package us.ihmc.acsell.operatorInterface;
+package us.ihmc.steppr.operatorInterface;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,7 +37,6 @@ public class StepprOperatorInterface
             }
             catch (ClassNotFoundException e)
             {
-               // TODO insert Dennis Nedry troll here
                e.printStackTrace();
             }
             catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)

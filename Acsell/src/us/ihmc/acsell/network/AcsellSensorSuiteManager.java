@@ -10,12 +10,12 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 
-public class StepprSensorSuiteManager implements DRCSensorSuiteManager
+public class AcsellSensorSuiteManager implements DRCSensorSuiteManager
 {
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
    
-   public StepprSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
+   public AcsellSensorSuiteManager(SDFFullRobotModel sdfFullRobotModel, boolean useSimulatedSensors)
    {
    }
    

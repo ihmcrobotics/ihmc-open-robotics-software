@@ -1,6 +1,6 @@
 package us.ihmc.acsell.hardware;
 
-import us.ihmc.acsell.parameters.StrainGaugeInformation;
+import us.ihmc.acsell.hardware.configuration.StrainGaugeInformation;
 
 public interface AcsellAnkle
 {

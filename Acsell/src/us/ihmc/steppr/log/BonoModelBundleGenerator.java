@@ -1,4 +1,4 @@
-package us.ihmc.acsell.log;
+package us.ihmc.steppr.log;
 
 import java.io.File;
 import java.io.FileOutputStream;
