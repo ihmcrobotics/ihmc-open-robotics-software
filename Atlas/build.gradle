@@ -14,7 +14,7 @@ apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
 sourceCompatibility = 1.7
-version = '0.3.5-alpha'
+version = '0.4.0-alpha'
 
 setupDefaultDirectoryStructure()
 
@@ -45,6 +45,13 @@ startScripts {
 
         def simWindowsScriptFinals = file(outputDir.canonicalPath + "/${applicationName}SimulatorFinals.bat")
         simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCAtlasAPISimulator").replace("AtlasROSAPINetworkProcessor", "AtlasFinalsROSAPISimulator")
+
+        def simUnixScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer")
+        simUnixScriptFinals.text = unixScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
+        simUnixScriptFinals.setExecutable(true)
+
+        def simWindowsScriptVisualizer = file(outputDir.canonicalPath + "/IHMCRemoteAtlasVisualizer.bat")
+        simWindowsScriptFinals.text = windowsScript.text.replace("IHMCAtlasAPI", "IHMCRemoteAtlasVisualizer").replace("AtlasROSAPINetworkProcessor", "RemoteAtlasVisualizer")
     	
     }
 }
