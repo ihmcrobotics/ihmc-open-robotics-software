@@ -179,6 +179,11 @@ public:
         int i = 0;
         for (std::map< std::string, physics::JointPtr>::iterator J = jointsByName.begin(); J != jointsByName.end(); J++)
         {
+        	if(joints.at(i)->GetName() == "hokuyo_joint") {
+        		i++;
+        		continue;
+        	}
+
         	std::string keyRoot = "atlas/" + joints.at(i)->GetName();
             double initialAngle;
             std::string initAngleKey = keyRoot + "/initial_angle";
