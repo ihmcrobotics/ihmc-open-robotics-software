@@ -92,6 +92,13 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       return fullRobotModel.getLidarJoint(lidarName);
    }
    
+   /**
+    * These should only be used as feed ins for RosPointCloudReceiver. 
+    * These reference frames will change to the robot state at the time of the incoming point cloud
+    * Do not use for anything else! YOU HAVE BEEN WARNED.
+    * @return
+    */
+   @Deprecated
    public ReferenceFrames getReferenceFrames()
    {
 	   return referenceFrames;
