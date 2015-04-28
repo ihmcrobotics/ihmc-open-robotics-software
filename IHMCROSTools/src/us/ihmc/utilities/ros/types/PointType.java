@@ -11,22 +11,26 @@ import sensor_msgs.PointField;
 
 public enum PointType
 {
-   XYZI, XYZRGB;
+   XYZ, XYZI, XYZRGB;
 
    public static PointType fromFromFieldNames(List<sensor_msgs.PointField> fields)
    {
-      final String thirdFieldName =fields.get(3).getName();
-      switch (thirdFieldName)
-      {
-         case "luminance" :
-         case "intensity" :
-            return XYZI;
-
-         case "rgb" :
-         case "rgba" :
-            return XYZRGB;
-      }
-      throw new RuntimeException("unknown PointType: " + thirdFieldName);
+	   if(fields.size() == 3)
+	   {
+		   return XYZ;
+	   }
+	   final String thirdFieldName =fields.get(3).getName();
+	   switch (thirdFieldName)
+	   {
+	   case "luminance" :
+	   case "intensity" :
+		   return XYZI;
+		   
+	   case "rgb" :
+	   case "rgba" :
+		   return XYZRGB;
+	   }
+	   throw new RuntimeException("unknown PointType: " + thirdFieldName);
    }
 
    PointType()
@@ -35,6 +39,14 @@ public enum PointType
 
    public int getPointStep()
    {
+	   switch (this)
+	      {
+	         case XYZI :
+	         case XYZRGB:
+	        	 return 16;
+	         case XYZ:
+	        	 return 12;
+	      }
       return 16;
    }
 
@@ -56,6 +68,8 @@ public enum PointType
             fieldNames = new String[] {"x", "y", "z", "rgb"};
 
             break;
+         case XYZ :
+        	 fieldNames = new String[] {"x", "y", "z"};
       }
 
       int offset = 0;
