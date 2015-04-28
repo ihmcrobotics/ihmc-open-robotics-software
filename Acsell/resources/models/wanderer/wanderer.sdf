@@ -31,7 +31,7 @@
         	<ambient>0.1 .1 .1 1</ambient>
         	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>1 1 1 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -98,7 +98,7 @@
         	<ambient>0.2 0 0 1</ambient>
         	<diffuse>.9 0 0 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>1 1 1 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -157,7 +157,7 @@
         	<ambient>0.2 .1 .1 1</ambient>
         	<diffuse>0.9 0.1 0.1 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>1 1 1 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -217,7 +217,7 @@
         	<ambient>0.1 .1 .1 1</ambient>
         	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>1 1 1 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -274,10 +274,10 @@
       <visual name='l_uglut_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.2 1</ambient>
-        	<diffuse>0 0.3 1 1</diffuse>
+        	<ambient>.5 .5 .5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -334,10 +334,10 @@
       <visual name='l_lglut_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0.2 0.4 1</ambient>
-        	<diffuse>0 0.5 1 1</diffuse>
+        	<ambient>.3 .3 .3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -395,10 +395,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.2 1</ambient>
-        	<diffuse>0 0.3 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -455,10 +455,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0.2 0.4 1</ambient>
-        	<diffuse>0 0.5 1 1</diffuse>
+        	<ambient>.5 .5 .5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -514,10 +514,10 @@
       <visual name='l_talus_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0.2 0.2 0.2 1</ambient>
-        	<diffuse>0.8 0.8 0.8 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -574,10 +574,10 @@
       <visual name='l_foot_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -635,10 +635,10 @@
       <visual name='r_uglut_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.2 1</ambient>
-        	<diffuse>0 0.3 1 1</diffuse>
+        	<ambient>0.5 0.5 0.5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -695,10 +695,10 @@
       <visual name='r_lglut_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0.2 0.4 1</ambient>
-        	<diffuse>0 0.5 1 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -755,10 +755,10 @@
       <visual name='r_uleg_visual'>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.2 1</ambient>
-        	<diffuse>0 0.3 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -815,10 +815,10 @@
       <visual name='r_lleg_visual'>
         <material>
         	<lighting>1</lighting>
-		   	<ambient>0 0.2 0.4 1</ambient>
-        	<diffuse>0 0.5 1 1</diffuse> 
+        	<ambient>0.5 0.5 0.5 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -876,10 +876,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0.2 0.2 0.2 1</ambient>
-        	<diffuse>0.8 0.8 0.8 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -936,10 +936,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.7 .7 .7 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -997,10 +997,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1057,10 +1057,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1117,10 +1117,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.05 0.05 0.05 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1177,10 +1177,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1237,10 +1237,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1298,10 +1298,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1358,10 +1358,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1418,10 +1418,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1478,10 +1478,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.3 0.3 0.3 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
@@ -1538,10 +1538,10 @@
         <pose>0 0 0 0 -0 0</pose>
         <material>
         	<lighting>1</lighting>
-        	<ambient>0 0 0.1 1</ambient>
-        	<diffuse>0 0 1 1</diffuse>
+        	<ambient>0.03 0.03 0.03 1</ambient>
+        	<diffuse>.5 .5 .5 1</diffuse>
         	<specular>1 1 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
+        	<emmisive>0 0 0 1</emmisive>
         </material>
         <geometry>
           <mesh>
