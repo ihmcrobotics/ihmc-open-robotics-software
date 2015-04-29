@@ -275,9 +275,12 @@ public class DRCSimulationFactory
             OneDegreeOfFreedomJoint simulatedJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
             SDFFullRobotModel controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
             OneDoFJoint controllerJoint = controllerFullRobotModel.getOneDoFJointByName(jointName);
-            boolean isUpperBodyJoint = jointMap.getJointRole(jointName) != JointRole.LEG;
             
-            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, drcRobotModel.getSimulateDT());
+            JointRole jointRole = jointMap.getJointRole(jointName);
+            boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
+            boolean isBackJoint = jointRole == JointRole.SPINE;
+            
+            JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint, isUpperBodyJoint, isBackJoint, drcRobotModel.getSimulateDT());
             simulatedRobot.setController(positionControlSimulator);
          }
       }

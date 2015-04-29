@@ -199,6 +199,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    @Override
    public void doTransitionOutOfAction()
    {
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         joint.setUnderPositionControl(false);
+      }
    }
 
    public YoVariableRegistry getYoVariableRegistry()
