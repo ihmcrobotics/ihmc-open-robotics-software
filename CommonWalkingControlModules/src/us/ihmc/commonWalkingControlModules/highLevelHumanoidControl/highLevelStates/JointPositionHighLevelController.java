@@ -442,6 +442,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handCircularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
       handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+      
       if (!controlHandAngleAboutAxis)
       {
          selectionFrameMatrix.setToZero(handCircularPoseTrajectoryGenerator.getCircleFrame());
