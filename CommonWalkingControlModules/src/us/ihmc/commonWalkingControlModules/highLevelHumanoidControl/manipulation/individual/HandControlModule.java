@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.packetProviders.ControlStatusProducer
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
@@ -131,6 +132,8 @@ public class HandControlModule
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
    private final BooleanYoVariable areAllArmJointEnabled;
+
+   private final boolean doPositionControl;
 
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
                             YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains,
@@ -251,19 +254,21 @@ public class HandControlModule
       wayPointPositionAndOrientationTrajectoryGenerator = new WrapperForPositionAndOrientationTrajectoryGenerators(waypointPositionTrajectoryGenerator,
               waypointOrientationTrajectoryGenerator);
 
-      loadBearingControlState = new LoadBearingHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController,
-              fullRobotModel.getElevator(), hand, jacobianId, registry);
 
-      boolean doPositionControl = armControlParameters.doLowLevelPositionControl();
+      doPositionControl = armControlParameters.doLowLevelPositionControl();
       jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints, doPositionControl,
               momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
 
       if (doPositionControl)
       {
+         // TODO Not implemented for position control.
+         loadBearingControlState = null;
          taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
       }
       else
       {
+         loadBearingControlState = new LoadBearingHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController, fullRobotModel.getElevator(), hand, jacobianId, registry);
+
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
          {
             taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
@@ -291,20 +296,23 @@ public class HandControlModule
    {
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
 
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, jointSpaceHandControlState);
-      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
-
-      addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
-      addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
-
-      setupTransitionToSupport(taskSpacePositionControlState);
 
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
-      stateMachine.addState(loadBearingControlState);
+
+      if (!doPositionControl)
+      {
+         addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, loadBearingControlState);
+         addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
+         addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
+         addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
+
+         setupTransitionToSupport(taskSpacePositionControlState);
+         stateMachine.addState(loadBearingControlState);
+      }
 
       stateMachine.attachStateChangedListener(stateChangedlistener);
    }
@@ -511,7 +519,7 @@ public class HandControlModule
          }
       }
 
-      if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
+      if (!isLoadBearing())
       {
          FramePose pose = computeDesiredFramePose(trajectoryFrame);
          straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
@@ -530,10 +538,15 @@ public class HandControlModule
    private final FrameVector initialDirection = new FrameVector();
    private final FrameVector finalDirection = new FrameVector();
 
-
    public void moveTowardsObjectAndGoToSupport(FramePose finalDesiredPose, FrameVector surfaceNormal, double clearance, double time,
            ReferenceFrame trajectoryFrame, boolean goToSupportWhenDone, double holdPositionDuration)
    {
+      if (doPositionControl)
+      {
+         PrintTools.error("Cannot do load bearing when the arms are position controlled.");
+         return;
+      }
+
       finalDirection.setIncludingFrame(surfaceNormal);
       finalDirection.negate();
 
@@ -546,7 +559,7 @@ public class HandControlModule
 
    private void moveTowardsObject(FramePose finalDesiredPose, FrameVector finalDirection, double clearance, double time, ReferenceFrame trajectoryFrame)
    {
-      if (stateMachine.getCurrentStateEnum() != HandControlState.LOAD_BEARING)
+      if (!isLoadBearing())
       {
          FramePose pose = computeDesiredFramePose(trajectoryFrame);
          finalApproachPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
@@ -605,6 +618,11 @@ public class HandControlModule
 
    public void requestLoadBearing()
    {
+      if (doPositionControl)
+      {
+         PrintTools.error("Cannot do load bearing when the arms are position controlled.");
+         return;
+      }
       requestedState.set(loadBearingControlState.getStateEnum());
       loadBearingControlState.setControlModuleForForceControl(handSpatialAccelerationControlModule);
    }
@@ -818,6 +836,8 @@ public class HandControlModule
 
    public boolean isLoadBearing()
    {
+      if (doPositionControl)
+         return false;
       return stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING;
    }
 
