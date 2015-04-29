@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedDesiredFootstepCalculator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorFootstepProviderWrapper;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
@@ -101,12 +102,14 @@ public class ComponentBasedVariousWalkingProviderFactory implements VariousWalki
       DesiredJointsPositionProvider desiredJointsPositionProvider = null;
       SingleJointPositionProvider singleJointPositionProvider = null;
 
+      AbortWalkingProvider abortWalkingProvider = null;
+
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
                                                            handLoadBearingProvider, chestOrientationProvider, footPoseProvider, footLoadBearingProvider,
                                                            highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
                                                            controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider,
-                                                           desiredJointsPositionProvider, singleJointPositionProvider);
+                                                           desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider);
 
       return variousWalkingProviders;
    }

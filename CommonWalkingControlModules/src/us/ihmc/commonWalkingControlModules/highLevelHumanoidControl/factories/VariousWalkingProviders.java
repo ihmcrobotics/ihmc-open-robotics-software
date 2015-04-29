@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import java.util.HashMap;
 
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
@@ -30,7 +31,8 @@ public class VariousWalkingProviders
 {
    private final FootstepProvider footstepProvider;
    private final HandstepProvider handstepProvider;
-   
+   private final AbortWalkingProvider abortProvider;
+
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
    private final DesiredHighLevelStateProvider desiredHighLevelStateProvider;
@@ -40,7 +42,7 @@ public class VariousWalkingProviders
    private final HandPoseProvider desiredHandPoseProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
-  
+
    // TODO: Rename DesiredFootStateProvider to DesiredFootLoadBearingProvider, do the same for the packet, etc.
    private final DesiredFootStateProvider desiredFootLoadBearingProvider;
    private final HandLoadBearingProvider desiredHandLoadBearingProvider;
@@ -53,21 +55,22 @@ public class VariousWalkingProviders
    private final CapturabilityBasedStatusProducer capturabilityBasedStatusProducer;
 
    private final HandPoseStatusProducer handPoseStatusProducer;
-   
+
    private final ObjectWeightProvider objectWeightProvider;
    private final DesiredJointsPositionProvider desiredJointsPositionProvider;
    private final SingleJointPositionProvider singleJointPositionProvider;
-   
-   public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider, 
-         HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
-         HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
-         PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-         HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
-         FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
-         DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
-         ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
-         HandPoseStatusProducer handPoseStatusProducer, ObjectWeightProvider objectWeightProvider,
-         DesiredJointsPositionProvider desiredJointsPositionProvider, SingleJointPositionProvider singleJointPositionProvider)
+
+   public VariousWalkingProviders(FootstepProvider footstepProvider, HandstepProvider handstepProvider,
+                                  HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
+                                  HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
+                                  PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
+                                  HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
+                                  FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
+                                  DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
+                                  DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, ControlStatusProducer controlStatusProducer,
+                                  CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
+                                  ObjectWeightProvider objectWeightProvider, DesiredJointsPositionProvider desiredJointsPositionProvider,
+                                  SingleJointPositionProvider singleJointPositionProvider, AbortWalkingProvider abortProvider)
    {
       this.desiredHighLevelStateProvider = desiredHighLevelStateProvider;
       this.footstepProvider = footstepProvider;
@@ -79,7 +82,7 @@ public class VariousWalkingProviders
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
       this.footPoseProvider = footPoseProvider;
-   
+
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
       this.desiredFootLoadBearingProvider = footStateProvider;
       this.desiredThighLoadBearingProvider = thighLoadBearingProvider;
@@ -90,10 +93,20 @@ public class VariousWalkingProviders
       this.capturabilityBasedStatusProducer = capturabilityBasedStatusProducer;
       this.desiredJointsPositionProvider = desiredJointsPositionProvider;
       this.singleJointPositionProvider = singleJointPositionProvider;
-      
+
       this.handPoseStatusProducer = handPoseStatusProducer;
-      
+
       this.objectWeightProvider = objectWeightProvider;
+
+      if (abortProvider == null)
+      {
+         this.abortProvider = new AbortWalkingProvider();
+      }
+      else
+      {
+         this.abortProvider = abortProvider;
+      }
+
    }
 
    public void clearPoseProviders()
@@ -103,6 +116,7 @@ public class VariousWalkingProviders
          desiredPelvisPoseProvider.getDesiredPelvisPosition(ReferenceFrame.getWorldFrame());
          desiredPelvisPoseProvider.getDesiredPelvisOrientation(ReferenceFrame.getWorldFrame());
       }
+
       if (desiredChestOrientationProvider != null)
       {
          desiredChestOrientationProvider.getDesiredChestOrientation();
@@ -131,7 +145,7 @@ public class VariousWalkingProviders
    {
       return footstepProvider;
    }
-   
+
    public HandstepProvider getHandstepProvider()
    {
       return handstepProvider;
@@ -141,12 +155,12 @@ public class VariousWalkingProviders
    {
       return desiredHeadOrientationProvider;
    }
-   
+
    public DesiredJointsPositionProvider getDesiredJointsPositionProvider()
    {
       return desiredJointsPositionProvider;
    }
-   
+
    public SingleJointPositionProvider getSingleJointPositionProvider()
    {
       return singleJointPositionProvider;
@@ -202,7 +216,7 @@ public class VariousWalkingProviders
       return desiredThighLoadBearingProvider;
    }
 
-  
+
    public ControlStatusProducer getControlStatusProducer()
    {
       return controlStatusProducer;
@@ -212,15 +226,19 @@ public class VariousWalkingProviders
    {
       return capturabilityBasedStatusProducer;
    }
-   
+
    public HandPoseStatusProducer getHandPoseStatusProducer()
    {
       return handPoseStatusProducer;
    }
-   
+
    public ObjectWeightProvider getObjectWeightProvider()
    {
       return objectWeightProvider;
    }
-   
+
+   public AbortWalkingProvider getAbortProvider()
+   {
+      return abortProvider;
+   }
 }
