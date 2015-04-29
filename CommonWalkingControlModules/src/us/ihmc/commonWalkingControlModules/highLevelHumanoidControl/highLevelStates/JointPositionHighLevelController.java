@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPosition
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -28,6 +28,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
@@ -53,6 +54,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 {   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean VISUALIZE_TASKSPACE_TRAJECTORIES = true;
+   private static final boolean DEBUG = false;
    
    private final String name;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -168,6 +170,203 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
    }
    
+   @Override
+   public void doAction()
+   {
+      initializeFromVariousProviders();
+   
+      doJointPositionControl(timeProvider.getDoubleValue() - initialTrajectoryTime);
+   
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceControlled.get(robotSide).getBooleanValue())
+         {
+            handTaskspaceControllers.get(robotSide).doAction();
+         }
+      }
+   }
+
+   @Override
+   public void doTransitionIntoAction()
+   {
+      setJointTrajectoriesToCurrent();
+      trajectoryTimeProvider.set(0.1);
+   }
+
+   @Override
+   public void doTransitionOutOfAction()
+   {
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   @Override
+   public void stopExecution()
+   {
+      setJointTrajectoriesToCurrent();
+   }
+
+   private void doJointPositionControl(double time)
+   {
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
+   
+         if (generator.isDone() == false)
+         {
+            generator.compute(time);
+         }
+   
+         if (useAlternativeController.get(joint).getBooleanValue())
+         {
+            PIDController controller = alternativeController.get(joint);
+            double effort = controller.compute(joint.getQ(), generator.getValue(), joint.getQd(), generator.getVelocity(), 0.003);
+   
+            joint.setUnderPositionControl(false);
+            joint.setTau(effort);
+         }
+         else
+         {
+            joint.setUnderPositionControl(true);
+            joint.setqDesired(generator.getValue());
+            joint.setQdDesired(generator.getVelocity());
+         }
+   
+         previousPosition.put(joint, generator.getValue());
+      }
+   }
+
+   private void initializeFromVariousProviders()
+   {
+      if ((desiredJointsProvider != null) && desiredJointsProvider.checkForNewPacket())
+         initializeFromJointAnglesPacket(desiredJointsProvider.getNewPacket());
+   
+      if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
+         initializeFromSingleJointAnglePacket(singleJointPositionProvider.getNewPacket());
+      
+      for (RobotSide side : RobotSide.values)
+      {
+         if (handPoseProvider.checkForNewPose(side))
+         {
+            DataType dataType = handPoseProvider.checkHandPosePacketDataType(side);
+            switch (dataType)
+            {
+            case JOINT_ANGLES:
+               initializeFromJointMap(side, handPoseProvider.getFinalDesiredJointAngleMaps(side), handPoseProvider.getTrajectoryTime());
+               break;
+            case HAND_POSE:
+               initializeFromTaskSpaceHandPosePacket(side, handPoseProvider.getDesiredHandPose(side), handPoseProvider.getDesiredReferenceFrame(side));
+               break;
+            default:
+               PrintTools.error(this, "Specified packet type, " + dataType + ", is not supported!");
+               break;
+            }
+         }
+         else if (handPoseProvider.checkForNewRotateAboutAxisPacket(side))
+         {
+            initializeFromRotateAboutAxisPacket(side, handPoseProvider.getRotationAxisOriginInWorld(side), handPoseProvider.getRotationAxisInWorld(side),
+                  handPoseProvider.getRotationAngleRightHandRule(side), handPoseProvider.controlHandAngleAboutAxis(side));
+         }
+      }
+   }
+
+   private void initializeFromJointAnglesPacket(JointAnglesPacket packet)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         areHandTaskspaceControlled.get(robotSide).set(false);
+   
+      initialTrajectoryTime = timeProvider.getDoubleValue();
+      trajectoryTimeProvider.set(packet.getTrajectoryTime());
+   
+      if (armJointAngles == null)
+      {
+         armJointAngles = new SideDependentList<double[]>();
+   
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            double[] jointAngles = new double[packet.getNumberOfArmJoints(robotSide)];
+            armJointAngles.put(robotSide, jointAngles);
+         }
+      }
+   
+      if (this.legJointAngles == null)
+      {
+         legJointAngles = new SideDependentList<double[]>();
+   
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            double[] jointAngles = new double[packet.getNumberOfLegJoints(robotSide)];
+            legJointAngles.put(robotSide, jointAngles);
+         }
+      }
+   
+      if (spineJointAngles == null)
+      {
+         spineJointAngles = new double[packet.getNumberOfSpineJoints()];
+      }
+   
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setFinalPositionArms(robotSide, packet);
+         setFinalPositionLegs(robotSide, packet);
+      }
+   
+      setFinalPositionSpineJoints(packet);
+      setFinalPositionNeckJoint(packet);
+   
+      if (firstPacket)
+      {
+         firstPacket = false;
+   
+         for (OneDoFJoint joint : jointsBeingControlled)
+         {
+            trajectoryGenerator.get(joint).initialize();
+            previousPosition.put(joint, joint.getQ());
+         }
+      }
+      else
+      {
+         for (OneDoFJoint joint : jointsBeingControlled)
+         {
+            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+         }
+      }
+   }
+
+   private void initializeFromSingleJointAnglePacket(SingleJointAnglePacket packet)
+   {
+      trajectoryTimeProvider.set(packet.trajcetoryTime);
+      
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         if (packet.jointName.equals(joint.getName()))
+         {
+            if (joint.getName().contains("l_arm"))
+            {
+               areHandTaskspaceControlled.get(RobotSide.LEFT).set(false);
+            }
+            else if (joint.getName().contains("r_arm"))
+            {
+               areHandTaskspaceControlled.get(RobotSide.RIGHT).set(false);
+            }
+            
+            double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+         }
+         else
+         {
+            double desiredPosition = joint.getqDesired();
+            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+         }
+         
+         alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+         trajectoryGenerator.get(joint).initialize();
+      }
+   }
+
    private void initializeFromJointMap(RobotSide side, Map<OneDoFJoint, Double> jointTarget, double trajectoryTime)
    {
       areHandTaskspaceControlled.get(side).set(false);
@@ -201,67 +400,62 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }
    }
    
-   private void checkForTaskspaceCommandAndInitializeIfNeeded(RobotSide robotSide)
+   private void initializeFromTaskSpaceHandPosePacket(RobotSide robotSide, FramePose desiredHandPose, ReferenceFrame desiredReferenceFrame)
    {
-      if (handPoseProvider.checkForNewPose(robotSide))
+      if (DEBUG) PrintTools.debug(this, "Received Hand Pose Packet in Task Space");
+      
+      currentHandPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+      currentHandPose.changeFrame(desiredReferenceFrame);
+
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+
+      boolean[] controlledOrientationAxes = handPoseProvider.getControlledOrientationAxes(robotSide);
+      if (controlledOrientationAxes != null)
       {
-         FramePose desiredHandPose = handPoseProvider.getDesiredHandPose(robotSide);
-         currentHandPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
-         ReferenceFrame desiredReferenceFrame = handPoseProvider.getDesiredReferenceFrame(robotSide);
-         currentHandPose.changeFrame(desiredReferenceFrame);
+         for (int i = 2; i >= 0; i--)
+         {
+            if (!controlledOrientationAxes[i])
+               MatrixTools.removeRow(selectionMatrix, i);
+         }
+      }
+
+      StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = handStraightLinePoseTrajectoryGenerators.get(robotSide);
+      handStraightLinePoseTrajectoryGenerator.registerAndSwitchFrame(desiredReferenceFrame);
+      handStraightLinePoseTrajectoryGenerator.setInitialPose(currentHandPose);
+      handStraightLinePoseTrajectoryGenerator.setFinalPose(desiredHandPose);
+      handStraightLinePoseTrajectoryGenerator.setTrajectoryTime(handPoseProvider.getTrajectoryTime());
+
+      initializeTaskspaceHandTrajectory(robotSide, handStraightLinePoseTrajectoryGenerator, selectionMatrix);
+   }
+
+   private void initializeFromRotateAboutAxisPacket(RobotSide robotSide, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngleRightHandRule, boolean controlHandAngleAboutAxis)
+   {
+      if (DEBUG) PrintTools.debug(this, "Received Hand Rotate about Axis Packet");
+
+      CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = handCircularPoseTrajectoryGenerators.get(robotSide);
+      handCircularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngleRightHandRule);
+      handCircularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
+      handCircularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
+      handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
+
+      if (!controlHandAngleAboutAxis)
+      {
+         selectionFrameMatrix.setToZero(handCircularPoseTrajectoryGenerator.getCircleFrame());
+         selectionFrameMatrix.setElement(0, 0, 1.0);
+         selectionFrameMatrix.setElement(1, 1, 1.0);
+         selectionFrameMatrix.setElement(2, 2, 0.0);
+         selectionFrameMatrix.changeFrame(fullRobotModel.getHandControlFrame(robotSide));
 
          selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
          CommonOps.setIdentity(selectionMatrix);
-
-         boolean[] controlledOrientationAxes = handPoseProvider.getControlledOrientationAxes(robotSide);
-         if (controlledOrientationAxes != null)
-         {
-            for (int i = 2; i >= 0; i--)
-            {
-               if (!controlledOrientationAxes[i])
-                  MatrixTools.removeRow(selectionMatrix, i);
-            }
-         }
-
-         StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = handStraightLinePoseTrajectoryGenerators.get(robotSide);
-         handStraightLinePoseTrajectoryGenerator.registerAndSwitchFrame(desiredReferenceFrame);
-         handStraightLinePoseTrajectoryGenerator.setInitialPose(currentHandPose);
-         handStraightLinePoseTrajectoryGenerator.setFinalPose(desiredHandPose);
-         handStraightLinePoseTrajectoryGenerator.setTrajectoryTime(handPoseProvider.getTrajectoryTime());
-
-         executeTaskspaceHandTrajectory(robotSide, handStraightLinePoseTrajectoryGenerator, selectionMatrix);
+         selectionFrameMatrix.getDenseMatrix(selectionMatrix, 0, 0);
       }
-      else if (handPoseProvider.checkForNewRotateAboutAxisPacket(robotSide))
-      {
-         Point3d rotationAxisOriginInWorld = handPoseProvider.getRotationAxisOriginInWorld(robotSide);
-         Vector3d rotationAxisInWorld = handPoseProvider.getRotationAxisInWorld(robotSide);
-         double rotationAngleRightHandRule = handPoseProvider.getRotationAngleRightHandRule(robotSide);
-         boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
 
-         CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = handCircularPoseTrajectoryGenerators.get(robotSide);
-         handCircularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngleRightHandRule);
-         handCircularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
-         handCircularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
-         handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
-
-         if (!controlHandAngleAboutAxis)
-         {
-            selectionFrameMatrix.setToZero(handCircularPoseTrajectoryGenerator.getCircleFrame());
-            selectionFrameMatrix.setElement(0, 0, 1.0);
-            selectionFrameMatrix.setElement(1, 1, 1.0);
-            selectionFrameMatrix.setElement(2, 2, 0.0);
-            selectionFrameMatrix.changeFrame(fullRobotModel.getHandControlFrame(robotSide));
-
-            selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-            CommonOps.setIdentity(selectionMatrix);
-            selectionFrameMatrix.getDenseMatrix(selectionMatrix, 0, 0);
-         }
-
-         executeTaskspaceHandTrajectory(robotSide, handCircularPoseTrajectoryGenerator, selectionMatrix);
-      }
+      initializeTaskspaceHandTrajectory(robotSide, handCircularPoseTrajectoryGenerator, selectionMatrix);
    }
 
-   private void executeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)
+   private void initializeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)
    {
       areHandTaskspaceControlled.get(robotSide).set(true);
       TaskspaceToJointspaceHandPositionControlState handTaskspaceController = handTaskspaceControllers.get(robotSide);
@@ -270,69 +464,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceController.doTransitionIntoAction();
    }
 
-   private void initializeFromPacket(JointAnglesPacket packet)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         areHandTaskspaceControlled.get(robotSide).set(false);
-
-      initialTrajectoryTime = timeProvider.getDoubleValue();
-      trajectoryTimeProvider.set(packet.getTrajectoryTime());
-
-      if (armJointAngles == null)
-      {
-         armJointAngles = new SideDependentList<double[]>();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            double[] jointAngles = new double[packet.getNumberOfArmJoints(robotSide)];
-            armJointAngles.put(robotSide, jointAngles);
-         }
-      }
-
-      if (this.legJointAngles == null)
-      {
-         legJointAngles = new SideDependentList<double[]>();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            double[] jointAngles = new double[packet.getNumberOfLegJoints(robotSide)];
-            legJointAngles.put(robotSide, jointAngles);
-         }
-      }
-
-      if (spineJointAngles == null)
-      {
-         spineJointAngles = new double[packet.getNumberOfSpineJoints()];
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         setFinalPositionArms(robotSide, packet);
-         setFinalPositionLegs(robotSide, packet);
-      }
-
-      setFinalPositionSpineJoints(packet);
-      setFinalPositionNeckJoint(packet);
-
-      if (firstPacket)
-      {
-         firstPacket = false;
-
-         for (OneDoFJoint joint : jointsBeingControlled)
-         {
-            trajectoryGenerator.get(joint).initialize();
-            previousPosition.put(joint, joint.getQ());
-         }
-      }
-      else
-      {
-         for (OneDoFJoint joint : jointsBeingControlled)
-         {
-            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
-         }
-      }
-   }
-   
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)
    {
       if( packet.spineJointAngle == null ) return;
@@ -445,126 +576,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }      
    }
    
-   private void controlSingleJoint(SingleJointAnglePacket packet)
-   {
-      trajectoryTimeProvider.set(packet.trajcetoryTime);
-      
-      for (OneDoFJoint joint : jointsBeingControlled)
-      {
-         if (packet.jointName.equals(joint.getName()))
-         {
-            if (joint.getName().contains("l_arm"))
-            {
-               areHandTaskspaceControlled.get(RobotSide.LEFT).set(false);
-            }
-            else if (joint.getName().contains("r_arm"))
-            {
-               areHandTaskspaceControlled.get(RobotSide.RIGHT).set(false);
-            }
-            
-            double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
-            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
-         }
-         else
-         {
-            double desiredPosition = joint.getqDesired();
-            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
-         }
-         
-         alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
-         trajectoryGenerator.get(joint).initialize();
-      }
-   }
-
-   @Override
-   public void doAction()
-   {
-      if ((desiredJointsProvider != null) && desiredJointsProvider.checkForNewPacket())
-      {
-         initializeFromPacket(desiredJointsProvider.getNewPacket());
-      }
-      
-      if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
-      {
-         controlSingleJoint(singleJointPositionProvider.getNewPacket());
-      }
-      
-      for( RobotSide side: RobotSide.values)
-      {
-         if (handPoseProvider.checkForNewPose(side))
-         {
-            if (handPoseProvider.checkHandPosePacketDataType(side) == HandPosePacket.DataType.JOINT_ANGLES)
-            {
-               initializeFromJointMap(side, handPoseProvider.getFinalDesiredJointAngleMaps(side), handPoseProvider.getTrajectoryTime());
-            }
-            else
-            {            
-               checkForTaskspaceCommandAndInitializeIfNeeded(side);
-            }
-         }
-      }
-       
-      double time = timeProvider.getDoubleValue() - initialTrajectoryTime;
-
-      for (OneDoFJoint joint : jointsBeingControlled)
-      {
-         OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
-
-         if (generator.isDone() == false)
-         {
-            generator.compute(time);
-         }
-
-         if (useAlternativeController.get(joint).getBooleanValue())
-         {
-            PIDController controller = alternativeController.get(joint);
-            double effort = controller.compute(joint.getQ(), generator.getValue(), joint.getQd(), generator.getVelocity(), 0.003);
-
-            joint.setUnderPositionControl(false);
-            joint.setTau(effort);
-         }
-         else
-         {
-            joint.setUnderPositionControl(true);
-            joint.setqDesired(generator.getValue());
-            joint.setQdDesired(generator.getVelocity());
-         }
-
-         previousPosition.put(joint, generator.getValue());
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (areHandTaskspaceControlled.get(robotSide).getBooleanValue())
-         {
-            handTaskspaceControllers.get(robotSide).doAction();
-         }
-      }
-   }
-
-   @Override
-   public void doTransitionIntoAction()
-   {
-      setJointTrajectoriesToCurrent();
-      trajectoryTimeProvider.set(0.1);
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
-   {
-   }
-   
-   public YoVariableRegistry getYoVariableRegistry()
-   {
-      return registry;
-   }
-   
-   @Override
-   public void stopExecution()
-   {
-      setJointTrajectoriesToCurrent();
-   }
-
    private void setJointTrajectoriesToCurrent()
    {
       for (OneDoFJoint joint : jointsBeingControlled)
