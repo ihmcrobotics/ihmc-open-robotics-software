@@ -673,6 +673,13 @@
         </geometry>
       </visual>
       <visual name='utorso_crash_visual'>
+        <material>
+        	<lighting>1</lighting>
+        	<ambient>0.75686275 0 0.75686275 1</ambient>
+        	<diffuse>.7 0 .7 1</diffuse>
+        	<specular>1 0 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
