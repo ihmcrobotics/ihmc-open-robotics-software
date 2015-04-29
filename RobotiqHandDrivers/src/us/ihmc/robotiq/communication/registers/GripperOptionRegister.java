@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GipperOptionRegister implements RobotiqRegister
+public class GripperOptionRegister implements RobotiqRegister
 {
    @Override
    public byte getRegisterValue()
