@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
@@ -79,6 +80,8 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
+      if (CommonOps.trace(selectionMatrix) == 0.0)
+         throw new RuntimeException("Specified selection matrix, " + selectionMatrix + " is invalid!");
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
    }
