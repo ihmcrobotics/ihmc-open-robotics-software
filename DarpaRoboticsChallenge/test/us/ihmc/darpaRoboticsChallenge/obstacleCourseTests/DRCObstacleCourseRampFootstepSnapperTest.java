@@ -295,7 +295,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       Box bounds = new Box(minX, minY, maxX, maxY);
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise,
-            maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+            maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
       QuadTreeForGroundHeightMap heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
       for (Point3d point : listOfPoints)
