@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import net.wimpi.modbus.msg.ModbusResponse;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.communication.JamodTCPConnection;
 import us.ihmc.robotiq.communication.RobotiqReadRequestFactory;
 import us.ihmc.robotiq.communication.RobotiqWriteRequestFactory;
@@ -24,6 +25,9 @@ public class RobotiqHandCommunicator
    private RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
    private RobotiqReadRequestFactory readRequestFactory = new RobotiqReadRequestFactory();
    private ModbusResponse response;
+   
+   private RobotiqGraspMode graspMode;
+   private FingerState fingerState;
    
    public RobotiqHandCommunicator(RobotSide robotSide)
    {

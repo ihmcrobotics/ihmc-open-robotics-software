@@ -8,6 +8,7 @@ public class FingerForceRegister implements RobotiqRegister
    private final byte MIN_FORCE = (byte) 0x00;
    
    private final int index;
+   private byte force;
    
    public FingerForceRegister(Finger finger)
    {
@@ -28,13 +29,19 @@ public class FingerForceRegister implements RobotiqRegister
          default:
             throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
       }
+      
+      force = (byte)0x00;
+   }
+   
+   public void setForce(byte force)
+   {
+      this.force = force;
    }
    
    @Override
    public byte getRegisterValue()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return force;
    }
    @Override
    public int getRegisterIndex()
