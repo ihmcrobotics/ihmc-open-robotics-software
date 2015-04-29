@@ -461,7 +461,7 @@ public final class RobotiqHandInterface
 				e.printStackTrace();
 			}
 			errorCount++;
-		}while(status == null || (status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
+		} while(status == null || (status[GRIPPER_STATUS] & INITIALIZE) != RESET); //check until reset
 	}
 	
 	public void standby()
@@ -675,6 +675,11 @@ public final class RobotiqHandInterface
       force[FINGER_C] = MAX_FORCE;
       
       sendMotionRequest();
+	}
+	
+	private void commandFingers(double percent, int []fingersToControl, byte[] fingerPositions)
+	{
+	   
 	}
 
 	public void blockDuringMotion()
