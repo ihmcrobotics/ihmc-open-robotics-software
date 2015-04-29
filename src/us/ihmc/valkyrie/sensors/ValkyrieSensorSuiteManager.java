@@ -88,21 +88,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       
       if(pointCloudDataReceiver != null)
       {
-    	 ReferenceFrames referenceFrames = pointCloudDataReceiver.getReferenceFrames();
-          
-    	 ReferenceFrame neckFrame = referenceFrames.getNeckFrame(NeckJointName.UPPER_NECK_PITCH);
-    	 ReferenceFrame ensensoFrame = new ReferenceFrame("ensensoFrame", neckFrame) {
-			
-			@Override
-			protected void updateTransformToParent(RigidBodyTransform transformToParent) 
-			{
-				//<pose>-0.16 0.0065 -0.02325 -1.5708 2.11758e-22 3.14159</pose> a guess between the ibeo and forehead camera
-				transformToParent.setEuler(0,Math.PI/2,0);
-				transformToParent.setTranslation(0,0,0);
-			}
-		};
 		new RosPointCloudReceiver(sensorInformation.getPointCloudParameters(0).getSensorNameInSdf(),sensorInformation.getPointCloudParameters(0).getRosTopic(),
-               rosMainNode, ensensoFrame, pointCloudDataReceiver,PointCloudSource.NEARSCAN, PointCloudSource.QUADTREE);
+               rosMainNode, ReferenceFrame.getWorldFrame(), pointCloudDataReceiver,PointCloudSource.NEARSCAN, PointCloudSource.QUADTREE);
       }
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
