@@ -331,6 +331,24 @@
           <izz>0.577362</izz>
         </inertia>
       </inertial>
+      <collision name='utorso_left_shoulderpad_collision'>
+        <pose>0 0.18 0.4462 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.27</radius>
+          </cylinder>
+        </geometry>
+      </collision>
+      <collision name='utorso_right_shoulderpad_collision'>
+        <pose>0 -0.18 0.4462 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.27</radius>
+          </cylinder>
+        </geometry>
+      </collision>
       <collision name='utorso_collision'>
         <pose>-0.102 0 0.25 0 -0 0</pose>
         <geometry>
