@@ -53,6 +53,7 @@ public class FingerPositionRequestRegister implements RobotiqRegister
    
    private final Finger finger;
    private final int index;
+   private byte position;
 
    public FingerPositionRequestRegister(Finger finger)
    {
@@ -74,18 +75,19 @@ public class FingerPositionRequestRegister implements RobotiqRegister
          default:
             throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
       }
+      
+      position = (byte)0x00;
    }
    
-   public byte getFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
+   public void setFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
    {
-      return (byte)fingerPositionMap.get(graspMode, fingerState, finger);
+      position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
    }
-
+   
    @Override
    public byte getRegisterValue()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return position;
    }
 
    @Override

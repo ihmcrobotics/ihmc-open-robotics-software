@@ -2,11 +2,70 @@ package us.ihmc.robotiq.communication.registers;
 
 public class ActionRequestRegister implements RobotiqRegister
 {
+   private rACT ract;
+   private rMOD rmod;
+   private rGTO rgto;
+   private rATR ratr;
+   
+   public ActionRequestRegister(rACT ract, rMOD rmod, rGTO rgto, rATR ratr)
+   {
+      this.ract = ract;
+      this.rmod = rmod;
+      this.rgto = rgto;
+      this.ratr = ratr;
+   }
+   
+   public rACT getRact()
+   {
+      return ract;
+   }
+
+   public void setRact(rACT ract)
+   {
+      this.ract = ract;
+   }
+
+   public rMOD getRmod()
+   {
+      return rmod;
+   }
+
+   public void setRmod(rMOD rmod)
+   {
+      this.rmod = rmod;
+   }
+
+   public rGTO getRgto()
+   {
+      return rgto;
+   }
+
+   public void setRgto(rGTO rgto)
+   {
+      this.rgto = rgto;
+   }
+
+   public rATR getRatr()
+   {
+      return ratr;
+   }
+
+   public void setRatr(rATR ratr)
+   {
+      this.ratr = ratr;
+   }
+
    @Override
    public byte getRegisterValue()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      byte ret = (byte)0x00;
+      
+      ret |= ratr.getValue() << 4;
+      ret |= rgto.getValue() << 3;
+      ret |= rmod.getValue() << 2;
+      ret |= ract.getValue();
+      
+      return ret;
    }
    
    @Override

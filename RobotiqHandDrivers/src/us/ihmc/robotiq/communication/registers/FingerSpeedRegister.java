@@ -2,13 +2,13 @@ package us.ihmc.robotiq.communication.registers;
 
 import us.ihmc.robotiq.communication.Finger;
 
-
 public class FingerSpeedRegister implements RobotiqRegister
 {
    private final byte MAX_SPEED = (byte) 0xFF;
    private final byte MIN_SPEED = (byte) 0x00;
    
    private final int index;
+   private byte speed;
    
    public FingerSpeedRegister(Finger finger)
    {
@@ -29,13 +29,19 @@ public class FingerSpeedRegister implements RobotiqRegister
          default:
             throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
       }
+      
+      speed = (byte)0x00;
+   }
+   
+   public void setSpeed(byte speed)
+   {
+      this.speed = speed;
    }
    
    @Override
    public byte getRegisterValue()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      return speed;
    }
    @Override
    public int getRegisterIndex()
