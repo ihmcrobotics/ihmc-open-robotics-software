@@ -24,6 +24,9 @@ public class PolarisRobot extends Robot
    private final FloatingJoint floatingJoint;
    private final Link polarisLink;
    private final Graphics3DObject polarisLinkGraphics;
+   
+   private static final RigidBodyTransform carToWheelTransform = new RigidBodyTransform();
+   private static final double carToWheelX = 0.39, carToWheelY = 0.39, carToWheelZ = 1.27, steeringWheelPitchInDegrees = -32.0;
 
    public PolarisRobot(String name, RigidBodyTransform rootJointTransform)
    {
@@ -58,5 +61,18 @@ public class PolarisRobot extends Robot
       floatingJoint.addJoint(checkerBoardJoint);
       
       this.addRootJoint(floatingJoint);
+   }
+   
+   static
+   {
+      carToWheelTransform.setTranslation(carToWheelX, carToWheelY, carToWheelZ);
+      Matrix3d rotation = new Matrix3d();
+      rotation.rotY(Math.toRadians(steeringWheelPitchInDegrees));
+      carToWheelTransform.setRotation(rotation);
+   }
+   
+   public static RigidBodyTransform getCarToWheelTransform()
+   {
+      return carToWheelTransform;
    }
 }
