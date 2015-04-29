@@ -2,18 +2,11 @@ package us.ihmc.robotiq.communication;
 
 import net.wimpi.modbus.msg.WriteMultipleRegistersRequest;
 import net.wimpi.modbus.procimg.SimpleRegister;
-import us.ihmc.robotiq.communication.registers.ActionRequestRegister;
-import us.ihmc.robotiq.communication.registers.GripperOptionRegister;
-import us.ihmc.robotiq.communication.registers.RobotiqRegister;
 
 public class RobotiqWriteRequestFactory
 {
    private WriteMultipleRegistersRequest request;
    private SimpleRegister[] registers = new SimpleRegister[8];
-   private RobotiqRegister actionRequestRegister, gripperOptionRegister, fingerAPostionRequestRegister, fingerASpeedRegister,
-                           fingerAForceRegister, fingerBPositionRequestRegister, fingerBSpeedRegister, fingerBForceRegister,
-                           fingerCPositionRequestRegister, fingerCSpeedRegister, fingerCForceRegister, scissorPositionRequestRegister,
-                           scissorSpeedRegister, scissorForceRegister;
    
    public RobotiqWriteRequestFactory()
    {
@@ -26,12 +19,6 @@ public class RobotiqWriteRequestFactory
       {
          registers[i] = new SimpleRegister(0);
       }
-   }
-   
-   private void initialize()
-   {
-      actionRequestRegister = new ActionRequestRegister();
-      gripperOptionRegister = new GripperOptionRegister();
    }
    
    public WriteMultipleRegistersRequest createActivationRequest()
