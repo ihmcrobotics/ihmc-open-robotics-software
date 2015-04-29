@@ -24,8 +24,8 @@ import us.ihmc.utilities.screwTheory.SpatialMotionVector;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
@@ -45,10 +45,10 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
 
    private TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator;
-   private final DenseMatrix64F jointAngles;
 
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
+   private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredFeedForwardAccelerations;
    private final DoubleYoVariable maxAcceleration;
 
    private final DoubleYoVariable percentOfTrajectoryWithOrientationBeingControlled;
@@ -60,8 +60,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   private final boolean doPositionControlFinal;
-   private final BooleanYoVariable doPositionControl;
+   private final boolean doPositionControl;
 
    private final DenseMatrix64F identityScaledWithOrientationControlFactor = CommonOps.identity(SpatialMotionVector.SIZE);
    private final DenseMatrix64F selectionMatrixWithReducedAngularControl = CommonOps.identity(SpatialMotionVector.SIZE);
@@ -74,8 +73,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final DoubleYoVariable initialTime;
    private final DoubleYoVariable currentTimeInState;
 
-   public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
-         RigidBody endEffector, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix,
+         MomentumBasedController momentumBasedController, RigidBody base, RigidBody endEffector, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime,
+         YoVariableRegistry parentRegistry)
    {
       return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, false, controlDT, gains, yoTime, parentRegistry);
    }
@@ -86,10 +86,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return new TaskspaceToJointspaceHandPositionControlState(namePrefix, null, base, endEffector, true, Double.NaN, null, yoTime, parentRegistry);
    }
 
-   public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
-         RigidBody endEffector, double controlDT, YoPIDGains gains, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix,
+         MomentumBasedController momentumBasedController, RigidBody base, RigidBody endEffector, double controlDT, DoubleYoVariable yoTime,
+         YoVariableRegistry parentRegistry)
    {
-      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, true, controlDT, gains, yoTime, parentRegistry);
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, momentumBasedController, base, endEffector, true, controlDT, null, yoTime, parentRegistry);
    }
 
    private TaskspaceToJointspaceHandPositionControlState(String namePrefix, MomentumBasedController momentumBasedController, RigidBody base,
@@ -105,9 +106,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       doneTrajectoryTime = new DoubleYoVariable(namePrefix + "DoneTrajectoryTime", registry);
       holdPositionDuration = new DoubleYoVariable(namePrefix + "HoldPositionDuration", registry);
 
-      this.doPositionControl = new BooleanYoVariable(namePrefix + "DoPositionControlForArmJointspaceController", registry);
-      this.doPositionControl.set(doPositionControl);
-      doPositionControlFinal = doPositionControl;
+      this.doPositionControl = doPositionControl;
 
       percentOfTrajectoryWithOrientationBeingControlled = new DoubleYoVariable(namePrefix + "PercentOfTrajectoryWithOrientationBeingControlled", registry);
       percentOfTrajectoryWithOrientationBeingControlled.set(Double.NaN);
@@ -127,7 +126,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       dt = controlDT;
 
       oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
-      jointAngles = new DenseMatrix64F(oneDoFJoints.length, 1);
 
       doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
 
@@ -137,8 +135,32 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          doIntegrateDesiredAccelerations[i] = joint.getIntegrateDesiredAccelerations();
       }
 
-      if (momentumBasedController != null)
+      if (doPositionControl)
       {
+         maxAcceleration = null;
+         pidControllers = null;
+         rateLimitedAccelerations = null;
+
+         if (momentumBasedController != null)
+         {
+            filteredFeedForwardAccelerations = new LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable>();
+            double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, dt);
+
+            for (OneDoFJoint joint : oneDoFJoints)
+            {
+               AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry, alpha);
+               filteredFeedForwardAccelerations.put(joint, filteredFeedForwardAcceleration);
+            }
+         }
+         else
+         {
+            filteredFeedForwardAccelerations = null;
+         }
+      }
+      else // Force control at the joints
+      {
+         filteredFeedForwardAccelerations = null;
+
          maxAcceleration = gains.getYoMaximumAcceleration();
 
          pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
@@ -154,12 +176,20 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
          }
       }
-      else
-      {
-         maxAcceleration = null;
-         pidControllers = null;
-         rateLimitedAccelerations = null;
-      }
+   }
+
+   /** Either {@link #initializeWithCurrentJointAngles()} or {@link #initializeWithDesiredJointAngles()} needs to be called before {@link #doAction()} when this class is used as a standalone controller. */
+   public void initializeWithDesiredJointAngles()
+   {
+      taskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+      doTransitionIntoAction();
+   }
+
+   /** Either {@link #initializeWithCurrentJointAngles()} or {@link #initializeWithDesiredJointAngles()} needs to be called before {@link #doAction()} when this class is used as a standalone controller. */
+   public void initializeWithCurrentJointAngles()
+   {
+      taskspaceToJointspaceCalculator.initializeFromCurrentJointAngles();
+      doTransitionIntoAction();
    }
 
    @Override
@@ -185,32 +215,47 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
       taskspaceToJointspaceCalculator.packDesiredJointVelocitiesIntoOneDoFJoints(oneDoFJoints);
+      taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 
       if (momentumBasedController != null)
       {
-         for (int i = 0; i < oneDoFJoints.length; i++)
+         if (doPositionControl)
          {
-            OneDoFJoint joint = oneDoFJoints[i];
+            for (int i = 0; i < oneDoFJoints.length; i++)
+            {
+               OneDoFJoint joint = oneDoFJoints[i];
+               AlphaFilteredYoVariable filteredFeedForwardAcceleration = filteredFeedForwardAccelerations.get(joint);
+               filteredFeedForwardAcceleration.update(joint.getQddDesired());
+               double desiredAcceleration = filteredFeedForwardAcceleration.getDoubleValue();
 
-            double q = joint.getQ();
-            double qd = joint.getQd();
-            double qDesired = joint.getqDesired();
-            double qdDesired = joint.getQdDesired();
+               momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+            }
+         }
+         else
+         {
+            for (int i = 0; i < oneDoFJoints.length; i++)
+            {
+               OneDoFJoint joint = oneDoFJoints[i];
 
-            RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
+               double q = joint.getQ();
+               double qd = joint.getQd();
+               double qDesired = joint.getqDesired();
+               double qdDesired = joint.getQdDesired();
 
-            // TODO No feed-forward acceleration yet, needs to be implemented.
-            double feedforwardAcceleration = 0.0;
+               RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
 
-            PIDController pidController = pidControllers.get(joint);
-            double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(q, qDesired, qd, qdDesired, dt);
+               // TODO No feed-forward acceleration yet, needs to be implemented.
+               double feedforwardAcceleration = 0.0;
 
-            desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
+               PIDController pidController = pidControllers.get(joint);
+               double desiredAcceleration = feedforwardAcceleration + pidController.computeForAngles(q, qDesired, qd, qdDesired, dt);
 
-            rateLimitedAcceleration.update(desiredAcceleration);
-            desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
+               desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
+               rateLimitedAcceleration.update(desiredAcceleration);
+               desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
-            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+               momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
+            }
          }
       }
    }
@@ -261,17 +306,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       saveDoAccelerationIntegration();
 
-      doPositionControl.set(doPositionControlFinal);
-
-      if (doPositionControl.getBooleanValue())
+      if (doPositionControl)
          enablePositionControl();
 
-      if (getPreviousState() == this || getPreviousState() instanceof JointSpaceHandControlState)
-         ScrewTools.getJointDesiredPositions(oneDoFJoints, jointAngles);
-      else
-         ScrewTools.getJointPositions(oneDoFJoints, jointAngles);
-
-      taskspaceToJointspaceCalculator.initialize(jointAngles);
       taskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrix);
 
       selectionMatrixWithReducedAngularControl.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -325,9 +362,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    {
       holdPositionDuration.set(0.0);
 
-      doPositionControl.set(doPositionControlFinal);
-
-      if (doPositionControl.getBooleanValue())
+      if (doPositionControl)
          disablePositionControl();
 
       startTimeInStateToIgnoreOrientation.set(Double.NaN);

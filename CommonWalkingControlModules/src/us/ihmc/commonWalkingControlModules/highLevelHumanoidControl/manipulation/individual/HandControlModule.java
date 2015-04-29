@@ -262,7 +262,7 @@ public class HandControlModule
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
-         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
+         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, yoTime, registry);
       }
       else
       {
@@ -414,6 +414,15 @@ public class HandControlModule
       requestedState.set(taskSpacePositionControlState.getStateEnum());
       stateMachine.checkTransitionConditions();
       isExecutingHandStep.set(false);
+
+      if (stateMachine.getCurrentState() instanceof JointSpaceHandControlState)
+      {
+         handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+      }
+      else if (stateMachine.getCurrentStateEnum() == HandControlState.LOAD_BEARING)
+      {
+         handTaskspaceToJointspaceCalculator.initializeFromCurrentJointAngles();
+      }
 
       if (handPoseStatusProducer != null)
          handPoseStatusProducer.sendStartedStatus(robotSide);
@@ -597,6 +606,8 @@ public class HandControlModule
       executeTaskSpaceTrajectory(leadInOutPoseTrajectoryGenerator);
    }
 
+   private final FramePose currentDesiredPose = new FramePose();
+
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
    {
       FramePose pose;
@@ -604,10 +615,16 @@ public class HandControlModule
       {
          pose = taskSpacePositionControlState.getDesiredPose();
       }
+      else if (stateMachine.getCurrentState() instanceof JointSpaceHandControlState)
+      {
+         handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+         handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(currentDesiredPose, trajectoryFrame);
+         pose = currentDesiredPose;
+      }
       else
       {
-         // FIXME: make this be based on desired joint angles
-         pose = new FramePose(fullRobotModel.getHandControlFrame(robotSide));
+         currentDesiredPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+         pose = currentDesiredPose;
       }
 
       pose.changeFrame(trajectoryFrame);
