@@ -46,7 +46,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private final ReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame headFrame;
-   private final AtomicReference<RigidBodyTransform> atomicPelvisPoseInMocapFrame = new AtomicReference<RigidBodyTransform>(null);
+   private final AtomicReference<RigidBodyTransform> atomicPelvisPoseInMocapFrame = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
    private final Random random = new Random();
    
    public RosConnectedZeroPoseRobotConfigurationDataProducer(URI rosMasterURI, PacketCommunicator objectCommunicator, final DRCRobotModel robotModel)
