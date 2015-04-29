@@ -26,7 +26,6 @@ import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
 import us.ihmc.utilities.Pair;
-import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -41,7 +40,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final DepthDataFilter depthDataFilter;
    private final CollisionShapeTester collisionBoxNode;
-   private final ReferenceFrames referenceFrames;
 
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
 
@@ -58,7 +56,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          PacketCommunicator sensorSuitePacketCommunicator)
    {
       this.fullRobotModel = modelFactory.createFullRobotModel();
-      this.referenceFrames = new ReferenceFrames(fullRobotModel);
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.depthDataFilter = new RobotDepthDataFilter(handType, fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
@@ -90,18 +87,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    public InverseDynamicsJoint getLidarJoint(String lidarName)
    {
       return fullRobotModel.getLidarJoint(lidarName);
-   }
-   
-   /**
-    * These should only be used as feed ins for RosPointCloudReceiver. 
-    * These reference frames will change to the robot state at the time of the incoming point cloud
-    * Do not use for anything else! YOU HAVE BEEN WARNED.
-    * @return
-    */
-   @Deprecated
-   public ReferenceFrames getReferenceFrames()
-   {
-	   return referenceFrames;
    }
 
    @Override
@@ -157,8 +142,6 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                   Point3d pointInWorld;
                   if (!data.scanFrame.isWorldFrame())
                   {
-                	 referenceFrames.updateFrames();
-                	 data.scanFrame.update();
                      data.scanFrame.getTransformToDesiredFrame(scanFrameToWorld, ReferenceFrame.getWorldFrame());
 
                      pointInWorld = data.points.get(i);
