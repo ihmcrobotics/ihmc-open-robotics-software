@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.xpath.operations.Bool;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
@@ -13,10 +14,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
@@ -401,7 +399,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          State<WalkingState> transferState = new DoubleSupportState(robotSide);
          State<WalkingState> singleSupportState = new SingleSupportState(robotSide);
 
-         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide);
+         StopWalkingCondition stopWalkingCondition = new StopWalkingCondition(robotSide, variousWalkingProviders.getAbortProvider());
          DoneWithTransferCondition doneWithTransferCondition = new DoneWithTransferCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
@@ -548,6 +546,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       @Override
       public void doAction()
       {
+         //abort walk and clear if should abort
+         if (variousWalkingProviders.getAbortProvider().shouldAbortWalking()){
+            upcomingFootstepList.clearCurrentFootsteps();
+            upcomingFootstepList.requestCancelPlanToProvider();
+            variousWalkingProviders.getAbortProvider().walkingAborted();
+            readyToGrabNextFootstep.set(true);
+         }
+
          if (!alwaysIntegrateAnkleAcceleration.getBooleanValue())
             doNotIntegrateAnkleAccelerations();
 
@@ -1460,16 +1466,22 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private class StopWalkingCondition extends DoneWithSingleSupportCondition
    {
       private final RobotSide robotSide;
+      private final AbortWalkingProvider abortState;
 
-      public StopWalkingCondition(RobotSide robotSide)
+      public StopWalkingCondition(RobotSide robotSide, AbortWalkingProvider abortVariable)
       {
          super();
 
          this.robotSide = robotSide;
+         this.abortState = abortVariable;
       }
 
       public boolean checkCondition()
       {
+         if (abortState.shouldAbortWalking()){
+            return true;
+         }
+
          boolean isNotExploringFoothold = !footExplorationControlModule.isControllingSwingFoot();
          boolean isNextFootstepNull = upcomingFootstepList.getNextFootstep() == null;
          // This is to fix a bug occuring for instance when doing transfer to right side and receiving a right footstep the walking would do a left footstep instead.

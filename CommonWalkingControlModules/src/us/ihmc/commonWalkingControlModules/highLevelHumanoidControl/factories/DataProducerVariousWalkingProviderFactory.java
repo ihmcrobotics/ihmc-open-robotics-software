@@ -5,12 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseCommandConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -44,16 +39,7 @@ import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
-import us.ihmc.communication.packets.walking.BlindWalkingPacket;
-import us.ihmc.communication.packets.walking.ChestOrientationPacket;
-import us.ihmc.communication.packets.walking.ComHeightPacket;
-import us.ihmc.communication.packets.walking.FootPosePacket;
-import us.ihmc.communication.packets.walking.FootStatePacket;
-import us.ihmc.communication.packets.walking.FootstepDataList;
-import us.ihmc.communication.packets.walking.HeadOrientationPacket;
-import us.ihmc.communication.packets.walking.PauseCommand;
-import us.ihmc.communication.packets.walking.PelvisPosePacket;
-import us.ihmc.communication.packets.walking.ThighStatePacket;
+import us.ihmc.communication.packets.walking.*;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
@@ -123,6 +109,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider = new DesiredPelvisLoadBearingProvider();
       
       ObjectWeightProvider objectWeightProvider = new ObjectWeightProvider();
+      AbortWalkingProvider abortWalkingProvider = new AbortWalkingProvider();
 
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
@@ -160,6 +147,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
      
       objectCommunicator.attachListener( JointAnglesPacket.class , desiredJointsPositionProvider.getPacketConsumer() );
       objectCommunicator.attachListener(SingleJointAnglePacket.class, singleJointPositionProvider.getPacketConsumer());
+      objectCommunicator.attachListener(AbortWalkingPacket.class, abortWalkingProvider);
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 
@@ -168,7 +156,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
                                                            pelvisPoseProvider, handPoseProvider, handLoadBearingProvider, chestOrientationProvider,
                                                            footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
-                                                           objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider);
+                                                           objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider);
 
       return variousWalkingProviders;
    }
