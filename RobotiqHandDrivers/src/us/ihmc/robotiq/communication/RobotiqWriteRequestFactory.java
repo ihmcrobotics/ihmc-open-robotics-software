@@ -5,31 +5,37 @@ import net.wimpi.modbus.procimg.SimpleRegister;
 
 public class RobotiqWriteRequestFactory
 {
-   private WriteMultipleRegistersRequest request;
-   private SimpleRegister[] registers = new SimpleRegister[8];
+   private WriteMultipleRegistersRequest jamodRequest;
+   private RobotiqWriteRequest robotiqRequest;
    
    public RobotiqWriteRequestFactory()
    {
-      request = new WriteMultipleRegistersRequest();
-      request.setProtocolID(0);
-      request.setReference(0);
-      request.setDataLength(8);
+      jamodRequest = new WriteMultipleRegistersRequest();
+      jamodRequest.setProtocolID(0);
+      jamodRequest.setReference(0);
+      jamodRequest.setDataLength(8);
       
-      for(int i = 0; i < registers.length; i++)
-      {
-         registers[i] = new SimpleRegister(0);
-      }
+      robotiqRequest = new RobotiqWriteRequest();
    }
    
    public WriteMultipleRegistersRequest createActivationRequest()
    {
-      registers[0].setValue(new byte[]{0x01, 0x00});
+      // create appropriate Robotiq request
       
-      request.setRegisters(registers);
+      // stuff into Jamod object
       
-      return request;
+      //return Jamod object
+      return jamodRequest;
    }
    
-   
+   public WriteMultipleRegistersRequest createOpenRequest()
+   {
+      // create appropriate Robotiq request
+      
+      // stuff into Jamod object
+      
+      //return Jamod object
+      return jamodRequest;
+   }
    
 }
