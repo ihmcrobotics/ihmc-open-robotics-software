@@ -329,12 +329,14 @@ public class MomentumBasedControllerFactory
          if ( walkingBehavior!= null )
          {
             walkingBehavior.initializeDesiredHeightToCurrent();
-            walkingBehavior.requestICPPlannerToHoldCurrent();
-            variousWalkingManagers.getPelvisOrientationManager().setToHoldCurrent();
+            walkingBehavior.requestICPPlannerToHoldCurrentCoM();
+            walkingBehavior.reinitializePelvisOrientation(false);
          }
          
-         if( variousWalkingManagers != null)
-            variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent();
+         if( variousWalkingManagers != null){
+            variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent(); 
+            variousWalkingManagers.getPelvisOrientationManager().setToHoldCurrent();
+         }          
       }
    }
    

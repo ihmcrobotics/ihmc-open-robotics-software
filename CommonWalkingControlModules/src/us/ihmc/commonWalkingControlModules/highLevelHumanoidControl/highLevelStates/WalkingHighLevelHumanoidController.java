@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.xpath.operations.Bool;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
@@ -14,7 +13,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManage
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.roughTerrain.FootExplorationControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsDataVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.UpcomingFootstepList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingManagers;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
@@ -44,7 +47,6 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -482,6 +484,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())
       {
          pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
+         hasWalkingControllerBeenInitialized.set(true);
       }
 
       if(manipulationControlModule != null)
@@ -507,9 +510,11 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
    }
 
-   public void requestICPPlannerToHoldCurrent()
+   public void requestICPPlannerToHoldCurrentCoM()
    {
-      capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
+      tmpFramePoint.setToZero( referenceFrames.getCenterOfMassFrame() );  
+      tmpFramePoint.changeFrame(worldFrame);
+      
       capturePointPlannerAdapter.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
    }
 
@@ -1973,5 +1978,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          desiredICPToMove.add(stanceToSwingVector);
          desiredICPToMove.changeFrame(desiredICP.getReferenceFrame());
       }
+   }
+
+   public void reinitializePelvisOrientation(boolean reinitialize)
+   {
+      hasWalkingControllerBeenInitialized.set( !reinitialize );
    }
 }
