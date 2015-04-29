@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
@@ -297,6 +298,9 @@ public class TaskspaceToJointspaceCalculator
       inverseJacobianSolver.solveUsingNullspaceMethod(spatialDesiredVelocity, jacobian.getJacobianMatrix(), privilegedJointVelocities);
       desiredJointVelocities.set(inverseJacobianSolver.getJointspaceVelocity());
 
+      if ( Double.isNaN(desiredJointVelocities.get(0)) )
+         throw new RuntimeException("Invalid computed desired joint velocities: " + desiredJointVelocities.toString());
+      
       subspaceSpatialError.reshape(inverseJacobianSolver.getNumberOfConstraints(), 1);
       subspaceSpatialError.set(inverseJacobianSolver.getSubspaceSpatialVelocity());
       CommonOps.scale(controlDT, subspaceSpatialError);
