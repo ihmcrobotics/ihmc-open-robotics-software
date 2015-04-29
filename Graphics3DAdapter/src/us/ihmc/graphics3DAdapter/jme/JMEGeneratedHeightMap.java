@@ -34,8 +34,8 @@ public class JMEGeneratedHeightMap implements HeightMap
    private final BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
    private final JMERayCollisionAdapter jmeRayCollisionAdapter;
-   private final Node rootNode = new Node();
-   private final Node zUpNode = new Node("zUpNode");
+   private final Node rootNode = new Node("jmeGeneratedHeightMapRootNode");
+   private final Node zUpNode = new Node("jmeGeneratedHeightMapZUpNode");
 
    private final AssetManager assetManager;
    private final JMEAssetLocator assetLocator;
