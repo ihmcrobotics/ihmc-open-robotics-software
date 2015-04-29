@@ -464,7 +464,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       TaskspaceToJointspaceHandPositionControlState handTaskspaceController = handTaskspaceControllers.get(robotSide);
       handTaskspaceController.setTrajectory(trajectory);
       handTaskspaceController.setSelectionMatrix(selectionMatrix);
-      handTaskspaceController.doTransitionIntoAction();
+      handTaskspaceController.initializeWithDesiredJointAngles();
    }
 
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)
