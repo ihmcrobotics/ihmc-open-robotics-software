@@ -92,6 +92,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final FramePose currentHandPose = new FramePose();
    private final SideDependentList<StraightLinePoseTrajectoryGenerator> handStraightLinePoseTrajectoryGenerators;
    private final SideDependentList<CirclePoseTrajectoryGenerator> handCircularPoseTrajectoryGenerators;   
+   private final MomentumBasedController momentumBasedController;
    
    private final static double MAX_DELTA_TO_BELIEVE_DESIRED = 0.05;
 
@@ -105,7 +106,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.desiredJointsProvider = variousWalkingProviders.getDesiredJointsPositionProvider();
       this.handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       this.singleJointPositionProvider = variousWalkingProviders.getSingleJointPositionProvider();
-
+      this.momentumBasedController = momentumBasedController;
+      
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
       useAlternativeController = new HashMap<OneDoFJoint, BooleanYoVariable>();
@@ -184,6 +186,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             handTaskspaceControllers.get(robotSide).doAction();
          }
       }
+      momentumBasedController.callUpdatables();
    }
 
    @Override
