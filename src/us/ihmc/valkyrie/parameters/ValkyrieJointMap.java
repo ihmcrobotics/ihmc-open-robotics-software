@@ -48,6 +48,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 {
    public static final String chestName = "v1Trunk";
    public static final String pelvisName = "v1Pelvis";
+   public static final String fullPelvisNameInSdf = "v1/Pelvis";
    public static final String headName = "v1Head";
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
@@ -372,5 +373,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       };
       
       return ret;
+   }
+
+   @Override
+   public String getFullSdfPelvisName()
+   {
+      return fullPelvisNameInSdf;
    }
 }
