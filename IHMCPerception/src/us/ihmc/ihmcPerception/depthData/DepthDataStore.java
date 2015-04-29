@@ -34,7 +34,7 @@ public class DepthDataStore
       Box bounds = new Box(-QUAD_TREE_EXTENT, -QUAD_TREE_EXTENT, QUAD_TREE_EXTENT, QUAD_TREE_EXTENT);
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(DepthDataFilterParameters.GRID_RESOLUTION,
             parameters.quadtreeHeightThreshold, parameters.quadTreeMaxMultiLevelZChangeToFilterNoise, parameters.maxSameHeightPointsPerNode,
-            parameters.maxAllowableXYDistanceForAPointToBeConsideredClose);
+            parameters.maxAllowableXYDistanceForAPointToBeConsideredClose, parameters.maximumNumberOfPoints);
 
       return new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
    }

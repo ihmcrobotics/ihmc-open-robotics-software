@@ -238,8 +238,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.6111975580405975</Fix X>
-<Fix Y>-0.26015106090958584</Fix Y>
-<Fix Z>1.0143160617026683</Fix Z>
+<Fix X>-0.44</Fix X>
+<Fix Y>-0.17</Fix Y>
+<Fix Z>0.75</Fix Z>
 </Fix Position>
 </Canvas 1>

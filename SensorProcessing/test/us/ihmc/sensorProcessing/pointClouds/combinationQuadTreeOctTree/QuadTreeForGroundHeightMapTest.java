@@ -182,7 +182,7 @@ public class QuadTreeForGroundHeightMapTest
       double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       int maxNodes = 1000000;
 
-      QuadTreeForGroundParameters parameters = new QuadTreeForGroundParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+      QuadTreeForGroundParameters parameters = new QuadTreeForGroundParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
 
       QuadTreeTestHelper testHelper = new QuadTreeTestHelper(boundingBox, (int) ((halfWidth/resolution) * (halfWidth/resolution)), visualizeAndKeepUp);      
       testHelper.setResolutionParameters(resolution, heightThreshold, maxMultiLevelZChangeToFilterNoise, maxNodes);
@@ -520,7 +520,7 @@ public class QuadTreeForGroundHeightMapTest
          double maxY = rangeOfPointsToTest.getMaxPoint().getY();
 
          Box bounds = new Box(minX, minY, maxX, maxY);
-         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose);
+         QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
          heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
          
          int pointsPerBall = 0;

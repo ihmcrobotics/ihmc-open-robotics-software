@@ -67,7 +67,7 @@ public class QuadTreeHeightMapGeneratorTools
       Box bounds = new Box(minX, minY, maxX, maxY);
       QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold,
             quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
-            maxAllowableXYDistanceForAPointToBeConsideredClose);
+            maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
 
       QuadTreeForGroundHeightMap heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
