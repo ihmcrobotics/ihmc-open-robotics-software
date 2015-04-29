@@ -4,14 +4,10 @@ import org.apache.commons.collections.map.MultiKeyMap;
 
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
+import us.ihmc.robotiq.communication.Finger;
 
-public abstract class FingerPositionRequestRegister implements RobotiqRegister
+public class FingerPositionRequestRegister implements RobotiqRegister
 {
-   enum Finger
-   {
-      FINGER_A, FINGER_B, FINGER_C, SCISSOR;
-   }
-   
    private MultiKeyMap fingerPositionMap = new MultiKeyMap();
    {
       fingerPositionMap.put(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN, Finger.FINGER_A, 0x00);
@@ -56,15 +52,45 @@ public abstract class FingerPositionRequestRegister implements RobotiqRegister
    }
    
    private final Finger finger;
+   private final int index;
 
    public FingerPositionRequestRegister(Finger finger)
    {
       this.finger = finger;
-      
+      switch(finger)
+      {
+         case FINGER_A:
+            index = 3;
+            break;
+         case FINGER_B:
+            index = 6;
+            break;
+         case FINGER_C:
+            index = 9;
+            break;
+         case SCISSOR:
+            index = 12;
+            break;
+         default:
+            throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
+      }
    }
    
    public byte getFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
    {
       return (byte)fingerPositionMap.get(graspMode, fingerState, finger);
+   }
+
+   @Override
+   public byte getRegisterValue()
+   {
+      // TODO Auto-generated method stub
+      return 0;
+   }
+
+   @Override
+   public int getRegisterIndex()
+   {
+      return index;
    }
 }
