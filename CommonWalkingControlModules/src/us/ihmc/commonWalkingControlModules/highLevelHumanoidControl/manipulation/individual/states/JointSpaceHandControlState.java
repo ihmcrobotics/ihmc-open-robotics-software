@@ -3,12 +3,10 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
 import us.ihmc.utilities.math.MathTools;
-import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RevoluteJoint;
@@ -37,47 +35,51 @@ public class JointSpaceHandControlState extends State<HandControlState>
    private final MomentumBasedController momentumBasedController;
    private final BooleanYoVariable initialized;
 
-   private final BooleanYoVariable doPositionControl;
+   private final boolean doPositionControl;
 
    private final double dt;
    private final boolean[] doIntegrateDesiredAccelerations;
 
    private final boolean[] hasJointBeenDisabledAtLeastOnce;
 
-   public JointSpaceHandControlState(String namePrefix, HandControlState stateEnum, RobotSide robotSide, InverseDynamicsJoint[] controlledJoints,
-         boolean doPositionControl, MomentumBasedController momentumBasedController, ArmControllerParameters armControllerParameters, YoPIDGains gains,
-         double dt, YoVariableRegistry parentRegistry)
+   public JointSpaceHandControlState(String namePrefix, InverseDynamicsJoint[] controlledJoints, boolean doPositionControl,
+         MomentumBasedController momentumBasedController, YoPIDGains gains, double dt, YoVariableRegistry parentRegistry)
    {
-      super(stateEnum);
+      super(HandControlState.JOINT_SPACE);
 
       this.dt = dt;
+      this.doPositionControl = doPositionControl;
 
       String name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
 
-      maxAcceleration = gains.getYoMaximumAcceleration();
-
-      pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
-      rateLimitedAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
+      this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
       initialized = new BooleanYoVariable(name + "Initialized", registry);
       initialized.set(false);
-
-      this.oneDoFJoints = ScrewTools.filterJoints(controlledJoints, RevoluteJoint.class);
-
       hasJointBeenDisabledAtLeastOnce = new boolean[oneDoFJoints.length];
 
-      for (OneDoFJoint joint : oneDoFJoints)
+      if (!doPositionControl)
       {
-         String suffix = FormattingTools.lowerCaseFirstLetter(joint.getName());
-         PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
-         pidControllers.put(joint, pidController);
+         maxAcceleration = gains.getYoMaximumAcceleration();
+         pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
+         rateLimitedAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
 
-         RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "Acceleration", registry, gains.getYoMaximumJerk(), dt);
-         rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
+         for (OneDoFJoint joint : oneDoFJoints)
+         {
+            String suffix = FormattingTools.lowerCaseFirstLetter(joint.getName());
+            PIDController pidController = new PIDController(gains.getYoKp(), gains.getYoKi(), gains.getYoKd(), gains.getYoMaxIntegralError(), suffix, registry);
+            pidControllers.put(joint, pidController);
+
+            RateLimitedYoVariable rateLimitedAcceleration = new RateLimitedYoVariable(suffix + "Acceleration", registry, gains.getYoMaximumJerk(), dt);
+            rateLimitedAccelerations.put(joint, rateLimitedAcceleration);
+         }
       }
-
-      this.doPositionControl = new BooleanYoVariable("doPositionControlForArmJointspaceController", registry);
-      this.doPositionControl.set(doPositionControl);
+      else
+      {
+         maxAcceleration = null;
+         pidControllers = null;
+         rateLimitedAccelerations = null;
+      }
 
       this.momentumBasedController = momentumBasedController;
 
@@ -105,8 +107,6 @@ public class JointSpaceHandControlState extends State<HandControlState>
          double currentPosition = joint.getQ();
          double currentVelocity = joint.getQd();
 
-         RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
-
          if (!joint.isEnabled())
             hasJointBeenDisabledAtLeastOnce[i] = true;
 
@@ -115,8 +115,19 @@ public class JointSpaceHandControlState extends State<HandControlState>
          {
             joint.setqDesired(currentPosition);
             joint.setQdDesired(0.0);
-            rateLimitedAcceleration.set(0.0);
+            if (!doPositionControl)
+            {
+               RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
+               rateLimitedAcceleration.set(0.0);
+            }
             momentumBasedController.setOneDoFJointAcceleration(joint, 0.0);
+         }
+         else if (doPositionControl)
+         {
+            joint.setqDesired(trajectoryGenerator.getValue());
+            joint.setQdDesired(trajectoryGenerator.getVelocity());
+            double desiredAcceleration = trajectoryGenerator.getAcceleration();
+            momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
          }
          else
          {
@@ -130,6 +141,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
             desiredAcceleration = MathTools.clipToMinMax(desiredAcceleration, maxAcceleration.getDoubleValue());
 
+            RateLimitedYoVariable rateLimitedAcceleration = rateLimitedAccelerations.get(joint);
             rateLimitedAcceleration.update(desiredAcceleration);
             desiredAcceleration = rateLimitedAcceleration.getDoubleValue();
 
@@ -155,14 +167,16 @@ public class JointSpaceHandControlState extends State<HandControlState>
          {
             OneDoFJoint joint = oneDoFJoints[i];
             trajectories.get(joint).initialize();
-            pidControllers.get(joint).setCumulativeError(0.0);
+
+            if (!doPositionControl)
+               pidControllers.get(joint).setCumulativeError(0.0);
          }
          initialized.set(true);
       }
 
       saveDoAccelerationIntegration();
 
-      if (doPositionControl.getBooleanValue())
+      if (doPositionControl)
          enablePositionControl();
 
       for (int i = 0; i < oneDoFJoints.length; i++)

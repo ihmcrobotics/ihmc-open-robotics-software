@@ -256,8 +256,7 @@ public class HandControlModule
 
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
-      jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints, doPositionControl,
-              momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
+      jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
 
       if (doPositionControl)
       {
