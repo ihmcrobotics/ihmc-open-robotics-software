@@ -358,5 +358,11 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return getOrderedJointNames();
    }
+
+   @Override
+   public String getFullSdfPelvisName()
+   {
+      return pelvisName;
+   }
 }
 
