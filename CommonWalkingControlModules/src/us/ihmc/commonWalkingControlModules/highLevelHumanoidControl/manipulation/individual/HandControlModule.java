@@ -258,23 +258,20 @@ public class HandControlModule
       jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, HandControlState.JOINT_SPACE, robotSide, oneDoFJoints, doPositionControl,
               momentumBasedController, armControlParameters, jointspaceGains, controlDT, registry);
 
-      if (armControlParameters.useInverseKinematicsTaskspaceControl())
+      if (doPositionControl)
       {
-         if (doPositionControl)
-         {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix,
-                  momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
-         }
-         else
-         {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix,
-                  momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
-         }
+         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
       }
       else
       {
-         taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController,
-                 jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+         if (armControlParameters.useInverseKinematicsTaskspaceControl())
+         {
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
+         }
+         else
+         {
+            taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+         }
       }
 
       setupStateMachine();
