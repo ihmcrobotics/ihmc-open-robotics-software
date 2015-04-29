@@ -8,10 +8,10 @@ public class WandererFourbarProperties implements FourbarProperties
 
    private static final double LEFT_LINKAGE_BETA0 = 2.46;
    private static final double RIGHT_LINKAGE_BETA0 = 2.51;
-   private final double L1 = 3.57 * 0.0254;
-   private final double L2 = 5.2 * 0.0254;
-   private final double L3 = 5.3 * 0.0254;
-   private final double L4 = 5.25 * 0.0254;
+   private final double L1 = 2.2 * 0.0254;
+   private final double L2 = 3.85 * 0.0254;
+   private final double L3 = 3.6 * 0.0254;
+   private final double L4 = 3.4 * 0.0254;
    private final FourbarLink Link1;
    private final FourbarLink Link2;
    private final FourbarLink Link3;
