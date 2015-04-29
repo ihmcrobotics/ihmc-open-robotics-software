@@ -23,7 +23,7 @@ public enum WandererStandPrepSetpoints
    private final double damping;
    private final double reflectRight;
    private final WandererJoint[] joints;
-   public double motorScalingConstantFromDiagnostics = WandererActuator.values[0].motorScalingConstantFromDiagnostics;
+   public double motorScalingConstantFromDiagnostics = WandererActuator.motorScalingConstantFromDiagnostics;
 
    private WandererStandPrepSetpoints(double q, double kp, double kd, double damping, double reflectRight, WandererJoint... joints)
    {
