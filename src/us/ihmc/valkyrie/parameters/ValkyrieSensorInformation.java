@@ -97,7 +97,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
     * PointCloud Parameters
     */
    //Make pointCloudParameters null to not use point cloud in UI.
-   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[1];
+   private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[0];
    public static final int POINT_CLOUD_SENSOR_ID = 0;
    private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
    private static final String pointCloudTopic = "/v1/Ensenso/Points";
@@ -147,7 +147,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[0] = new DRCRobotCameraParameters(foreheadCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,foreheadCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
-      if(pointCloudParamaters != null)
+      if(pointCloudParamaters.length > 0)
       {
          pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
       }

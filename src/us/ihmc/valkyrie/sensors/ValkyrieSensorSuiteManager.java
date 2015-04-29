@@ -47,7 +47,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.fullRobotModelFactory = fullRobotModelFactory;
       this.sensorInformation = sensorInformation;
-      if(sensorInformation.getPointCloudParameters() != null)
+      if(sensorInformation.getPointCloudParameters().length>0)
       {
          this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       }
@@ -97,7 +97,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 			protected void updateTransformToParent(RigidBodyTransform transformToParent) 
 			{
 				//<pose>-0.16 0.0065 -0.02325 -1.5708 2.11758e-22 3.14159</pose> a guess between the ibeo and forehead camera
-				transformToParent.setEuler(0,0,0);
+				transformToParent.setEuler(0,Math.PI/2,0);
 				transformToParent.setTranslation(0,0,0);
 			}
 		};
