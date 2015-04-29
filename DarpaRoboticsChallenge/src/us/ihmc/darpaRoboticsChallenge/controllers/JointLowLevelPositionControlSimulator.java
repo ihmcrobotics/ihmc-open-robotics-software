@@ -17,7 +17,7 @@ public class JointLowLevelPositionControlSimulator implements RobotController
    private final OneDegreeOfFreedomJoint simulatedJoint;
    private final OneDoFJoint highLevelControllerOutputJoint;
 
-   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, boolean isUpperBodyJoint,
+   public JointLowLevelPositionControlSimulator(OneDegreeOfFreedomJoint simulatedJoint, OneDoFJoint highLevelControllerOutputJoint, boolean isUpperBodyJoint, boolean isBackJoint,
          double controlDT)
    {
       registry = new YoVariableRegistry(simulatedJoint.getName() + name);
@@ -33,14 +33,25 @@ public class JointLowLevelPositionControlSimulator implements RobotController
          jointController.setProportionalGain(50.0 * subtreeMass);
          jointController.setIntegralGain(35.0 * subtreeMass);
          jointController.setMaxIntegralError(0.3);
+         jointController.setIntegralLeakRatio(0.996);
          jointController.setDerivativeGain(7.0 * subtreeMass);
          jointController.setMaximumOutputLimit(40.0 * subtreeMass);
       }
-      else
+      else if (isBackJoint)
       {
-         jointController.setProportionalGain(5000.0);
+         jointController.setProportionalGain(16000.0);
          jointController.setIntegralGain(1000.0 * 50.0);
          jointController.setMaxIntegralError(0.2);
+         jointController.setIntegralLeakRatio(0.996);
+         jointController.setDerivativeGain(500.0);
+         jointController.setMaximumOutputLimit(400.0);
+      }
+      else
+      {
+         jointController.setProportionalGain(12000.0);
+         jointController.setIntegralGain(1000.0 * 50.0);
+         jointController.setMaxIntegralError(0.2);
+         jointController.setIntegralLeakRatio(0.996);
          jointController.setDerivativeGain(500.0);
          jointController.setMaximumOutputLimit(400.0);
       }

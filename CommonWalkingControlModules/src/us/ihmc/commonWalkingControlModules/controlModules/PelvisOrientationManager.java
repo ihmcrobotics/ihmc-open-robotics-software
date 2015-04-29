@@ -289,6 +289,16 @@ public class PelvisOrientationManager
       orientationTrajectoryData.set(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
    }
 
+   public void resetOrientationOffset()
+   {
+      tempOrientation.setToZero(desiredPelvisFrame);
+      initialPelvisOrientationOffset.set(tempOrientation);
+      finalPelvisOrientationOffset.set(tempOrientation);
+      pelvisOrientationOffsetTrajectoryGenerator.initialize();
+      isUsingWaypointTrajectory.set(false);
+      activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
+   }
+   
    public void setToHoldCurrent()
    {
       tempOrientation.setToZero(pelvisFrame);

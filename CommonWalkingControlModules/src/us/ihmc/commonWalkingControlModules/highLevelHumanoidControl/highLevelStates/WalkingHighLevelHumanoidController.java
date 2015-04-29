@@ -483,10 +483,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())
       {
+         pelvisOrientationManager.resetOrientationOffset();
          pelvisOrientationManager.setToZeroInSupportFoot(upcomingSupportLeg.getEnumValue());
          hasWalkingControllerBeenInitialized.set(true);
       }
-
+      else
+      {
+         pelvisOrientationManager.resetOrientationOffset();
+         pelvisOrientationManager.setToHoldCurrent();
+      }
+      
       if(manipulationControlModule != null)
       {
          manipulationControlModule.holdCurrentArmConfiguration();
@@ -495,6 +501,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       icpAndMomentumBasedController.initialize();
       desiredICP.setByProjectionOntoXYPlane(capturePoint);
+//      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
