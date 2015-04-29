@@ -40,6 +40,8 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
    public Pair<RobotSide, LimbName> getLimbName(String limbName);
 
    public String getPelvisName();
+   
+   public String getFullSdfPelvisName();
 
    public String getChestName();
 
