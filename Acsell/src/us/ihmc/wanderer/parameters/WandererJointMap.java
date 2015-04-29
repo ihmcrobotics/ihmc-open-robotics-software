@@ -314,4 +314,10 @@ public class WandererJointMap implements DRCRobotJointMap
    {
       return null;
    }
+
+   @Override
+   public String getFullSdfPelvisName()
+   {
+      return pelvisName;
+   }
 }
