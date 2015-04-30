@@ -15,8 +15,6 @@ public class RosLineModDetector extends LineModDetector
    public RosLineModDetector(String modelPathInResource)
    {
       super(modelPathInResource);
-      int posesForSynthesis = 24;
-      trainModelFromRenderedImages(posesForSynthesis);
       setupRosSubscriber();
    }
 
@@ -24,9 +22,7 @@ public class RosLineModDetector extends LineModDetector
    {
       OrganizedPointCloud organizedPointCloud = new OrganizedPointCloud(unpackedPointCloud.getWidth(), unpackedPointCloud.getHeight(),unpackedPointCloud.getXYZRGB());
       ArrayList<LineModDetection> detections=new ArrayList<>();
-      int bestDetectionIndex= detectObjectAndEstimatePose(organizedPointCloud, detections);
-      float estimatedAngle = detections.get(bestDetectionIndex).yaw;
-      System.out.println("Found drill of angle "+ estimatedAngle/UnitConversions.DEG_TO_RAD);
+      LineModDetection bestDetection = detectObjectAndEstimatePose(organizedPointCloud, detections);
    }
 
    private void setupRosSubscriber()

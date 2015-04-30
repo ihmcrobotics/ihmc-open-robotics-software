@@ -35,7 +35,7 @@
  *
  */
 
-//#define __SSE2__
+#undef __SSE2__
 
 #include <pcl/recognition/linemod.h>
 
@@ -1238,7 +1238,7 @@ pcl::LINEMOD::detectTemplatesSemiScaleInvariant (
             average_row /= sum;
 
             //std::cerr << mem_col_index << ", " << mem_row_index << " - " << average_col << ", " << average_row << std::endl;
-            std::cerr << mem_col_index*step_size << ", " << mem_row_index*step_size << " - " << average_col << ", " << average_row << std::endl;
+            //std::cerr << mem_col_index*step_size << ", " << mem_row_index*step_size << " - " << average_col << ", " << average_row << std::endl;
 
             const size_t detection_col_index = average_col;// * step_size;
             const size_t detection_row_index = average_row;// * step_size;
