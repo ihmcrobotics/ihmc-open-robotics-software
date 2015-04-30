@@ -15,6 +15,8 @@ public class LineModDetection
      
      float yaw=0;
      
+     LineModTemplate template;
+     
      public String toString()
      {
         return "x " + x + " y " + y + " template id " + template_id + " score " + score + " scale " + scale;

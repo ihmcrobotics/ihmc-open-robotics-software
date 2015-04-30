@@ -50,7 +50,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
    private ViewPort offView;
    private Camera offCamera;
 
-   private static final int width = 1024, height = 544;
+   private static final int width = 500, height = 500;
 
    private final ByteBuffer cpuBuf = BufferUtils.createByteBuffer(width * height * 4);
 
@@ -114,6 +114,23 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
 //      start(Type.OffscreenSurface);
    }
 
+   public void renderImage(float yaw, float pitch, float roll, float distance)
+   {
+      final Quaternion qX = new Quaternion();
+      qX.fromAngles(FastMath.PI / 2, 0.0f, 0.0f);
+      Quaternion qYaw = new Quaternion();
+      qYaw.fromAngles(0.0f, yaw,  0.0f);
+      Quaternion qPitch = new Quaternion();
+      qPitch.fromAngles(pitch, 0.0f, 0.0f);
+      Quaternion qRoll = new Quaternion();
+      qRoll.fromAngles(0.0f, 0.0f, roll);
+      
+      Transform transform = new Transform();
+      transform.setRotation(qRoll.mult(qPitch).mult(qYaw).mult(qX));
+      transform.setTranslation(0.0f, 0.0f, distance);
+      renderImage(transform);
+      
+   }
    public void renderImage(Transform transform)
    {
       start(Type.OffscreenSurface);
