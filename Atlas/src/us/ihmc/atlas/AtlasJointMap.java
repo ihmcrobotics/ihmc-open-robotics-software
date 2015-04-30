@@ -360,7 +360,7 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public String getFullSdfPelvisName()
+   public String getUnsanitizedRootJointInSdf()
    {
       return pelvisName;
    }
