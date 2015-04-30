@@ -83,7 +83,7 @@ public class LineModDetector
 
    ArrayList<Vector3d> generateTrainingCameraPoses(float maxLevel)
    {
-      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(new Comparator<Pair<Integer, int[]>>()
+      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(0,new Comparator<Pair<Integer, int[]>>()
       {
          @Override
          public int compare(Pair<Integer, int[]> o1, Pair<Integer, int[]> o2)
