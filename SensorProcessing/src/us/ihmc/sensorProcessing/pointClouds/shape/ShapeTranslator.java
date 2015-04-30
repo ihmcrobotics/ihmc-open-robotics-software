@@ -211,7 +211,7 @@ public class ShapeTranslator
       objectMaterial.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
       objectMaterial.setColor("Color", ColorRGBA.White);
       lineGeometry.setMaterial(objectMaterial);
-      lineGeometry.setQueueBucket(Bucket.Opaque);
+      lineGeometry.setQueueBucket(Bucket.Translucent);
 
       lineNode.attachChild(lineGeometry);
 

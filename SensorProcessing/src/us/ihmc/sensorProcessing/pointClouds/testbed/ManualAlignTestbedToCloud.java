@@ -143,7 +143,7 @@ public class ManualAlignTestbedToCloud extends SimpleApplication {
 
             Geometry g = new Geometry("Point Cloud", m);
             g.setShadowMode(RenderQueue.ShadowMode.Off);
-            g.setQueueBucket(RenderQueue.Bucket.Opaque);
+            g.setQueueBucket(RenderQueue.Bucket.Translucent);
             g.setMaterial(mat);
             getRootNode().attachChild(g);
             return null;
