@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.dataobjects.IMUPacket;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.Triplet;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -33,6 +34,7 @@ import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.utilities.ros.publisher.RosStringPublisher;
 import us.ihmc.utilities.ros.publisher.RosWrenchPublisher;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
 {
@@ -54,7 +56,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final RosMainNode rosMainNode;
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final ArrayBlockingQueue<RobotConfigurationData> availableRobotConfigurationData = new ArrayBlockingQueue<RobotConfigurationData>(30);
-   private final RigidBodyTransform transformFromHeadToMultisenseHeadRoot = new RigidBodyTransform();
+   private final DRCRobotJointMap jointMap;
    private final int jointNameHash;
    
    private final SideDependentList<Integer> feetForceSensorIndexes = new SideDependentList<Integer>();
@@ -64,9 +66,11 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final SideDependentList<float[]> footForceSensorWrenches = new SideDependentList<float[]>();
    private final SideDependentList<float[]> wristForceSensorWrenches = new SideDependentList<float[]>();
 
+   private final ArrayList<Triplet<String, String, RigidBodyTransform>> staticTransforms;
+
    public RosRobotConfigurationDataPublisher(SDFFullRobotModelFactory sdfFullRobotModelFactory, PacketCommunicator rosModulePacketCommunicator,
          final RosMainNode rosMainNode, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         String rosNameSpace, RosTfPublisher tfPublisher)
+         DRCRobotJointMap jointMap, String rosNameSpace, RosTfPublisher tfPublisher)
    {
       SDFFullRobotModel fullRobotModel = sdfFullRobotModelFactory.createFullRobotModel();
       this.forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
@@ -74,6 +78,8 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.rosMainNode = rosMainNode;
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.tfPublisher = tfPublisher;
+      this.jointMap = jointMap;
+      this.staticTransforms = sensorInformation.getStaticTransformsForRos();
 
       boolean latched = false;
       this.jointStatePublisher = new RosJointStatePublisher(latched);
@@ -231,13 +237,23 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             
             
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                  robotConfigurationData.getPelvisAngularVelocity(), "/pelvis");
+                  robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf());
 
             robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
             robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
 
-            tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, "pelvis");
-            tfPublisher.publish(transformFromHeadToMultisenseHeadRoot, timeStamp, "head", "multisense/head_root");
+            tfPublisher.publish(pelvisTransform, timeStamp, WORLD_FRAME, jointMap.getUnsanitizedRootJointInSdf());
+            if(staticTransforms != null)
+            {
+               for (int i = 0; i < staticTransforms.size(); i++)
+               {
+                  Triplet<String, String, RigidBodyTransform> staticTransformTriplet = staticTransforms.get(i);
+                  String from = staticTransformTriplet.first();
+                  String to = staticTransformTriplet.second();
+                  RigidBodyTransform staticTransform = staticTransformTriplet.third();
+                  tfPublisher.publish(staticTransform, timeStamp, from, to);
+               }
+            }
          }
       }
    }

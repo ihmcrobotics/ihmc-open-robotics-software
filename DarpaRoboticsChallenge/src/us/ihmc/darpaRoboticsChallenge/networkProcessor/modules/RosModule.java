@@ -21,6 +21,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 
 public class RosModule
@@ -52,8 +53,9 @@ public class RosModule
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, null);
 
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, rosModulePacketCommunicator,
-            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, rosTopicPrefix, tfPublisher);
+            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, rosTopicPrefix, tfPublisher);
       
       if(simulatedSensorCommunicator != null)
       {
