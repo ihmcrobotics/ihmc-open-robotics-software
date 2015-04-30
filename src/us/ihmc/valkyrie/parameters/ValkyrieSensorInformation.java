@@ -99,7 +99,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private final DRCRobotPointCloudParameters[] pointCloudParamaters = new DRCRobotPointCloudParameters[0];
    public static final int POINT_CLOUD_SENSOR_ID = 0;
    private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
-   private static final String pointCloudTopic = "/v1/Ensenso/Points";
+   private static final String pointCloudTopic = "/v1/Ensenso/Points_in_world";
    
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
    
