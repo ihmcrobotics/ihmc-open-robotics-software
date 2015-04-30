@@ -1,6 +1,10 @@
 package us.ihmc.sensorProcessing.parameters;
 
+import java.util.ArrayList;
+
+import us.ihmc.utilities.Triplet;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 public interface DRCRobotSensorInformation
@@ -38,4 +42,6 @@ public interface DRCRobotSensorInformation
    public boolean setupROSParameterSetters();
    
    public boolean isMultisenseHead();
+   
+   public ArrayList<Triplet<String, String, RigidBodyTransform>> getStaticTransformsForRos();
 }
