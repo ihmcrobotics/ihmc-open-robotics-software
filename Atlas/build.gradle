@@ -81,7 +81,7 @@ task awsDeploySim(type: S3Sync, dependsOn: distTar) {
     doFirst{
         if(!project.hasProperty("awsAccessKey") || !project.hasProperty("awsSecretKey"))
         {
-            throw new TaskExecutionException(tasks.awsDeploy, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
+            throw new TaskExecutionException(tasks.tasks.awsDeploySim, new StopActionException("AWS credentials not set, you should store them safely and locally in your user's gradle.properties (defaults to \$HOME/.gradle/gradle.properties)"));
         }
 
         accessKey awsAccessKey
