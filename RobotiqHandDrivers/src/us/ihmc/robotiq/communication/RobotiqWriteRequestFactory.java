@@ -1,8 +1,11 @@
 package us.ihmc.robotiq.communication;
 
 import net.wimpi.modbus.msg.WriteMultipleRegistersRequest;
-import net.wimpi.modbus.procimg.Register;
 import net.wimpi.modbus.procimg.SimpleRegister;
+import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.robotiq.RobotiqGraspMode;
+import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
+import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
 
 public class RobotiqWriteRequestFactory
 {
@@ -27,18 +30,31 @@ public class RobotiqWriteRequestFactory
    
    public WriteMultipleRegistersRequest createActivationRequest()
    {
-      // create appropriate Robotiq request
-      
-      // stuff into Jamod object
+      robotiqRequest.getActionRequest().setRact(rACT.ACTIVATE_GRIPPER);
+      robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
+
       packRequest();
       
-      //return Jamod object
       return jamodRequest;
    }
    
-   public WriteMultipleRegistersRequest createOpenRequest()
+   public WriteMultipleRegistersRequest createResetRequest()
+   {
+      robotiqRequest.getActionRequest().setRact(rACT.DEACTIVATE_GRIPPER);
+      robotiqRequest.getActionRequest().setRgto(rGTO.STOP);
+      
+      packRequest();
+      
+      return jamodRequest;
+   }
+   
+   public WriteMultipleRegistersRequest createFingerPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
    {
       // create appropriate Robotiq request
+      robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);
+      robotiqRequest.getFingerBPositionRequest().setFingerPosition(graspMode, fingerState);
+      robotiqRequest.getFingerCPositionRequest().setFingerPosition(graspMode, fingerState);
+      robotiqRequest.getScissorPositionRequest().setFingerPosition(graspMode, fingerState);
       
       // stuff into Jamod object
       packRequest();

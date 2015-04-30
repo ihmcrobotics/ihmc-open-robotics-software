@@ -6,7 +6,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import net.wimpi.modbus.msg.ModbusRequest;
 import net.wimpi.modbus.msg.ModbusResponse;
+import sun.awt.RepaintArea;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
@@ -26,8 +28,8 @@ public class RobotiqHandCommunicator
    private RobotiqReadRequestFactory readRequestFactory = new RobotiqReadRequestFactory();
    private ModbusResponse response;
    
-   private RobotiqGraspMode graspMode;
-   private FingerState fingerState;
+   private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
+   private FingerState fingerState = FingerState.OPEN;
    
    public RobotiqHandCommunicator(RobotSide robotSide)
    {
@@ -50,22 +52,28 @@ public class RobotiqHandCommunicator
    
    public void read()
    {
-      response = communicator.sendRequest(readRequestFactory.getReadRequest());
+      ModbusRequest request = readRequestFactory.getReadRequest();
+      response = communicator.sendRequest(request);
    }
    
    public void initialize()
    {
-      response = communicator.sendRequest(writeRequestFactory.createActivationRequest());
+      ModbusRequest request = writeRequestFactory.createActivationRequest();
+      response = communicator.sendRequest(request);
    }
    
    public void open()
    {
-      
+      ModbusRequest request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.OPEN);
+      response = communicator.sendRequest(request);
    }
    
    public void close()
    {
-      
+      ModbusRequest request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.CLOSE);
+      System.out.println("Close request: " + request.getHexMessage());
+      response = communicator.sendRequest(request);
+      System.out.println("Close response: " + response.getHexMessage());
    }
    
    public void crush()
@@ -90,13 +98,16 @@ public class RobotiqHandCommunicator
    
    public RobotiqHandSensorData updateHandStatus()
    {
-      //TODO
+      // TODO
+      // take stuff from ModbusResponse and put into something nice
+      // so other stuff doesn't need to see Modbus stuff
+      
       return null;
    }
    
    public static void main(String[] args)
    {
-      RobotSide robotSide = RobotSide.RIGHT;
+      RobotSide robotSide = RobotSide.LEFT;
       
       final RobotiqHandCommunicator hand = new RobotiqHandCommunicator(robotSide);
       
@@ -111,5 +122,15 @@ public class RobotiqHandCommunicator
             hand.read();
          }
       }, 0, 10, TimeUnit.MILLISECONDS);
+      
+      executor.schedule(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            System.out.println("Closing...");
+            hand.close();
+         }
+      }, 10, TimeUnit.SECONDS);
    }
 }

@@ -81,7 +81,9 @@ public class FingerPositionRequestRegister implements RobotiqRegister
    
    public void setFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
    {
-      position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
+      byte position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
+      System.out.println("Setting to " + position);
+      this.position = position;
    }
    
    @Override
