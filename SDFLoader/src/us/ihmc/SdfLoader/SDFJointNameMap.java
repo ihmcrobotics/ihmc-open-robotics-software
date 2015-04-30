@@ -41,7 +41,7 @@ public interface SDFJointNameMap extends RobotSpecificJointNames
 
    public String getPelvisName();
    
-   public String getFullSdfPelvisName();
+   public String getUnsanitizedRootJointInSdf();
 
    public String getChestName();
 
