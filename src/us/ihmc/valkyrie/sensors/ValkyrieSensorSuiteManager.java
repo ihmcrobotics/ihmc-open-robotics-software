@@ -49,7 +49,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
       this.sensorInformation = sensorInformation;
       if(sensorInformation.getPointCloudParameters().length>0)
       {
-         this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, DRCHandType.VALKYRIE, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+         this.pointCloudDataReceiver = new PointCloudDataReceiver(fullRobotModelFactory, null, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       }
       else
       {
