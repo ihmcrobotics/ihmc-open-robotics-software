@@ -316,7 +316,7 @@ public class BonoJointMap implements DRCRobotJointMap
    }
    
    @Override
-   public String getFullSdfPelvisName()
+   public String getUnsanitizedRootJointInSdf()
    {
       return pelvisName;
    }
