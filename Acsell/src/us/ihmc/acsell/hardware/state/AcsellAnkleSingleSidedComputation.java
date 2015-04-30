@@ -91,10 +91,11 @@ public class AcsellAnkleSingleSidedComputation
       CommonOps.mult(Rmat, sc1, R);
       
       CommonOps.subtract(R, P, PR);
-      CommonOps.multTransA(PR, PR, N2PR);
-      double LrCalc = N2PR.get(0);
-      if (Math.abs(Lr*Lr-LrCalc*LrCalc)>1e-6)
-          System.err.println("Contstrain equation violation: " + (Lr*Lr-LrCalc*LrCalc) );
+      CommonOps.transpose(PR,PRT);
+      CommonOps.mult(PRT, PR, N2PR);
+      double Lr2Calc = N2PR.get(0);
+      if (Math.abs(Lr-Math.sqrt(Lr2Calc))>1e-3)
+          System.err.println("Contstraint equation violation: " + Lr + " " + Math.sqrt(Lr2Calc));
    }
       
    private void computeJacobianRow()
@@ -108,7 +109,6 @@ public class AcsellAnkleSingleSidedComputation
       dRdq.set(0, -Rx*sq + (Rz-Kz)*cq);
       dRdq.set(2, -Rx*cq - (Rz-Kz)*sq);
 
-      CommonOps.transpose(PR,PRT);
       CommonOps.mult(PRT, dPdth, a);
       CommonOps.mult(PRT, dRdq, temp1by1);
       b = temp1by1.get(0);
