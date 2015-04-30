@@ -2,29 +2,21 @@ package us.ihmc.ihmcPerception.linemod;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
-import javax.imageio.ImageIO;
-import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3d;
-
-import org.apache.poi.ss.usermodel.PrintOrientation;
-
-import com.github.quickhull3d.Point3d;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
+import com.jme3.math.FastMath;
 
 public class LineModDetector
 {
@@ -91,7 +83,7 @@ public class LineModDetector
 
    ArrayList<Vector3d> generateTrainingCameraPoses(float maxLevel)
    {
-      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<>(new Comparator<Pair<Integer, int[]>>()
+      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(new Comparator<Pair<Integer, int[]>>()
       {
          @Override
          public int compare(Pair<Integer, int[]> o1, Pair<Integer, int[]> o2)
@@ -201,6 +193,7 @@ public class LineModDetector
       int[] mask = makeMaskByZThresholing(cloud, 1.5f);
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
       template.mask = mask;
+      template.cloud= cloud;
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setEuler(roll, pitch, yaw);
       transform.setTranslation(0, 0, distance);
