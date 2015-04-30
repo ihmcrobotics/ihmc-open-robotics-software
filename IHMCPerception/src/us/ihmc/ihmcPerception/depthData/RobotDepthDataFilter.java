@@ -14,7 +14,6 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCHandType;
 
 public class RobotDepthDataFilter extends DepthDataFilter
 {
@@ -22,7 +21,7 @@ public class RobotDepthDataFilter extends DepthDataFilter
    private final SideDependentList<ArrayList<Point2d>> contactPoints;
 
 
-   public RobotDepthDataFilter(DRCHandType drcHandType, SDFFullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
+   public RobotDepthDataFilter(SDFFullRobotModel fullRobotModel, SideDependentList<ArrayList<Point2d>> contactPoints)
    {
       super();
       this.fullRobotModel = fullRobotModel;

@@ -43,12 +43,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
    public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
          DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters,
-         DRCHandType handType, AtlasTarget targetDeployment)
+         AtlasTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, collisionBoxProvider, handType, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, collisionBoxProvider, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       this.modelFactory = modelFactory;
    }
 

@@ -1,6 +1,5 @@
 package us.ihmc.atlas;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
@@ -359,7 +358,7 @@ public class AtlasRobotModel implements DRCRobotModel
    public DRCSensorSuiteManager getSensorSuiteManager()
    {
       return new AtlasSensorSuiteManager(this, getCollisionBoxProvider(), getPPSTimestampOffsetProvider(), sensorInformation, getJointMap(), getPhysicalProperties(),
-                                         getFootstepParameters(), getDRCHandType(), target);
+                                         getFootstepParameters(), target);
    }
 
    @Override
