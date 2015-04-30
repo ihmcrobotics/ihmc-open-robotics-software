@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
@@ -83,7 +84,7 @@ public class LineModDetector
 
    ArrayList<Vector3d> generateTrainingCameraPoses(float maxLevel)
    {
-      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(0,new Comparator<Pair<Integer, int[]>>()
+      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(1,new Comparator<Pair<Integer, int[]>>()
       {
          @Override
          public int compare(Pair<Integer, int[]> o1, Pair<Integer, int[]> o2)
@@ -134,7 +135,7 @@ public class LineModDetector
 
       }
 
-      vertex.sort(new Comparator<Vector3d>()
+      Collections.sort(vertex, new Comparator<Vector3d>()
       {
 
          @Override
@@ -193,7 +194,6 @@ public class LineModDetector
       int[] mask = makeMaskByZThresholing(cloud, 1.5f);
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
       template.mask = mask;
-      template.cloud= cloud;
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setEuler(roll, pitch, yaw);
       transform.setTranslation(0, 0, distance);
