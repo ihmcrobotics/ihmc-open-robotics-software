@@ -12,6 +12,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
+import us.ihmc.utilities.Triplet;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -21,6 +22,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";
    private static final String multisenseHandoffFrame = "head";
+   private final ArrayList<Triplet<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<Triplet<String,String,RigidBodyTransform>>();
    
    /**
     * Force Sensor Parameters
@@ -156,9 +158,17 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       setupROSLocationService = target == AtlasTarget.REAL_ROBOT;
       setupROSParameterSetters = target == AtlasTarget.REAL_ROBOT;
       isMultisenseHead = target == AtlasTarget.REAL_ROBOT;
+      
+      setupStaticTransformsForRos();
 	}
 
-	private void setupHeadIMUFrames() {
+	private void setupStaticTransformsForRos()
+   {
+	   Triplet<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new Triplet<String, String, RigidBodyTransform>("head", "multisense/head_root", new RigidBodyTransform());
+      staticTranformsForRos.add(headToHeadRootStaticTransform);
+   }
+
+   private void setupHeadIMUFrames() {
 		for (AtlasTarget target : AtlasTarget.values()) {
 			Matrix3d headIMUBasisWhenLevel;
 			if (target == AtlasTarget.REAL_ROBOT) {
@@ -312,6 +322,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    public SideDependentList<String> getFeetContactSensorNames()
    {
       return new SideDependentList<String>();
+   }
+
+   @Override
+   public ArrayList<Triplet<String, String, RigidBodyTransform>> getStaticTransformsForRos()
+   {
+      return staticTranformsForRos;
    }
 
 }
