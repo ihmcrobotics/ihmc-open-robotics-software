@@ -38,8 +38,6 @@ public class PelvisOrientationManager
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION = 0.1;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoFrameQuaternion desiredPelvisOrientation = new YoFrameQuaternion("desiredPelvis", worldFrame, registry);
@@ -65,7 +63,6 @@ public class PelvisOrientationManager
    private OrientationTrajectoryGenerator activeOrientationOffsetTrajectoryGenerator;
    private final MultipleWaypointsOrientationTrajectoryGenerator pelvisWaypointsOrientationOffsetTrajectoryGenerator;
    private final OrientationTrajectoryGenerator pelvisOrientationOffsetTrajectoryGenerator;
-   private final BooleanYoVariable prepareForLocomotion = new BooleanYoVariable(getClass().getSimpleName() + "PrepareForLocomotion", registry);
 
    private final YoFrameQuaternion desiredPelvisOrientationWithOffset = new YoFrameQuaternion("desiredPelvisOrientationWithOffset", worldFrame, registry);
 
@@ -255,20 +252,6 @@ public class PelvisOrientationManager
          }
       }
 
-      if (prepareForLocomotion.getBooleanValue())
-      {
-         initialPelvisOrientationOffsetTime.set(yoTime.getDoubleValue());
-         offsetTrajectoryTime.set(TRAJECTORY_TIME_TO_PREPARE_FOR_LOCOMOTION);
-         activeOrientationOffsetTrajectoryGenerator.get(tempOrientation);
-         initialPelvisOrientationOffset.set(tempOrientation);
-         tempOrientation.setToZero(desiredPelvisFrame);
-         finalPelvisOrientationOffset.set(tempOrientation);
-         pelvisOrientationOffsetTrajectoryGenerator.initialize();
-         isUsingWaypointTrajectory.set(false);
-         activeOrientationOffsetTrajectoryGenerator = pelvisOrientationOffsetTrajectoryGenerator;
-         prepareForLocomotion.set(false);
-      }
-
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
       activeOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
       activeOrientationOffsetTrajectoryGenerator.packAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
@@ -312,7 +295,14 @@ public class PelvisOrientationManager
 
    public void prepareForLocomotion()
    {
-      prepareForLocomotion.set(true);
+      desiredPelvisOrientationWithOffset.getFrameOrientationIncludingFrame(tempOrientation);
+      tempOrientation.changeFrame(initialPelvisOrientation.getReferenceFrame());
+      initialPelvisOrientation.set(tempOrientation);
+      finalPelvisOrientation.set(tempOrientation);
+      desiredPelvisOrientation.set(tempOrientation);
+
+      resetOrientationOffset();
+      initialize();
    }
 
    public void setToHoldCurrentDesired()
@@ -324,6 +314,7 @@ public class PelvisOrientationManager
       initialize();
    }
 
+   /** Go instantly to zero, no smooth interpolation. */
    public void setToZeroInMidFeetZUp()
    {
       tempOrientation.setToZero(midFeetZUpFrame);
@@ -335,6 +326,7 @@ public class PelvisOrientationManager
       initialize();
    }
 
+   /** Go instantly to zero, no smooth interpolation. */
    public void setToZeroInSupportFoot(RobotSide supportSide)
    {
       ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
@@ -343,6 +335,20 @@ public class PelvisOrientationManager
       initialPelvisOrientation.set(tempOrientation);
       finalPelvisOrientation.set(tempOrientation);
       desiredPelvisOrientation.set(tempOrientation);
+
+      initialize();
+   }
+
+   /** Move towards zero smoothly within the given swing time */
+   public void moveToZeroInSupportFoot(RobotSide supportSide)
+   {
+      desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+      initialPelvisOrientation.set(tempOrientation);
+
+      ReferenceFrame supportAnkleZUp = ankleZUpFrames.get(supportSide);
+      tempOrientation.setToZero(supportAnkleZUp);
+      tempOrientation.changeFrame(worldFrame);
+      finalPelvisOrientation.set(tempOrientation);
 
       initialize();
    }

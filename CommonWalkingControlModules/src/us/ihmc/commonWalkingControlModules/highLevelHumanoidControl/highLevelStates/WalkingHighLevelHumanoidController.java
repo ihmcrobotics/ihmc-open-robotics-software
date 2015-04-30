@@ -823,7 +823,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doTransitionIntoAction()
       {
          preparingForLocomotion.set(false);
-         preparingForLocomotionStartTime.set(Double.NaN);
 
          pelvisICPBasedTranslationManager.enable();
          capturePointPlannerAdapter.clear();
@@ -891,7 +890,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
          }
 
-         pelvisOrientationManager.setToHoldCurrentDesired();
+         if (transferToSide == null || footPoseProvider.checkForNewPose() != null)
+            pelvisOrientationManager.setToHoldCurrentDesired();
+         else
+            pelvisOrientationManager.moveToZeroInSupportFoot(transferToSide);
 
          footExplorationControlModule.setSwingIsFinished(true);
       }
@@ -1248,7 +1250,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (shouldStartWalking)
          {
-            if (preparingForLocomotionStartTime.isNaN())
+            if (!preparingForLocomotion.getBooleanValue())
             {
                preparingForLocomotion.set(true);
                preparingForLocomotionStartTime.set(yoTime.getDoubleValue());
