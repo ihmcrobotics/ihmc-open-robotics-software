@@ -467,5 +467,11 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       return defaultHeightWhenNoPoints;
    }
 
+   @Override
+   public boolean hasPoints()
+   {
+      return true;
+   }
+
 
 }
