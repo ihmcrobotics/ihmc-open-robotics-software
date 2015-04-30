@@ -41,6 +41,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.utilities.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosArmJointTrajectorySubscriber;
+import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -105,11 +106,12 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      DRCRobotJointMap jointMap = robotModel.getJointMap();
 
       RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
 
       RosRobotConfigurationDataPublisher robotConfigurationPublisher = new RosRobotConfigurationDataPublisher(robotModel, controllerCommunicationBridge,
-            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, namespace, tfPublisher);
+            rosMainNode, ppsTimestampOffsetProvider, sensorInformation, jointMap, namespace, tfPublisher);
       if(scsSensorCommunicationBridge != null)
       {
          publishSimulatedCameraAndLidar(fullRobotModel, sensorInformation, robotConfigurationPublisher);
