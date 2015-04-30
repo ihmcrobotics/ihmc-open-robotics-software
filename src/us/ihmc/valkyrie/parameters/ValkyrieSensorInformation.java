@@ -112,7 +112,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
    private static final String foreheadCameraName = "/v1/HeadWebcam___default__";
-   private static final String foreheadCameraInfo = "/head/image_raw/info";
+   private static final String foreheadCameraInfo = "/head/camera_info";
    private static final String foreheadCameraTopic = "/head/image_raw/compressed";
    
    private static final String leftStereoCameraName = "/v1/LeftHazardCamera___default__";
