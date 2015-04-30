@@ -94,7 +94,7 @@ public class JMEPointCloudGenerator
 
       Geometry g = new Geometry("Point Cloud", m);
       g.setShadowMode(ShadowMode.CastAndReceive);
-      g.setQueueBucket(Bucket.Opaque);
+      g.setQueueBucket(Bucket.Translucent);
       g.setMaterial(mat);
       g.updateModelBound();
 
