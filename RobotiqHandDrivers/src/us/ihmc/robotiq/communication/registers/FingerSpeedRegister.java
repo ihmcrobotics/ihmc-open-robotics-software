@@ -30,7 +30,7 @@ public class FingerSpeedRegister implements RobotiqRegister
             throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
       }
       
-      speed = (byte)0x00;
+      speed = MAX_SPEED;
    }
    
    public void setSpeed(byte speed)

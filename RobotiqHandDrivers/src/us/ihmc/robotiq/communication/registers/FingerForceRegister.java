@@ -30,7 +30,7 @@ public class FingerForceRegister implements RobotiqRegister
             throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
       }
       
-      force = (byte)0x00;
+      force = MAX_FORCE;
    }
    
    public void setForce(byte force)
