@@ -179,4 +179,15 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       lock.unlock();
    }
 
+   @Override
+   public boolean hasPoints()
+   {
+      boolean hasPoints = false;
+      lock.lock();
+      hasPoints = getRootNode().hasChildren();
+      lock.unlock();
+      
+      return hasPoints;
+   }
+
 }

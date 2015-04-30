@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
@@ -25,8 +26,11 @@ import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.ihmcPerception.depthData.DepthDataFilter;
 import us.ihmc.ihmcPerception.depthData.PointCloudWorldPacketGenerator;
 import us.ihmc.ihmcPerception.depthData.RobotDepthDataFilter;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -40,6 +44,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
    private final CollisionShapeTester collisionBoxNode;
 
    private final PointCloudWorldPacketGenerator pointCloudWorldPacketGenerator;
+   private final SideDependentList<ArrayList<Point2d>> contactPoints;
 
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private final LinkedBlockingQueue<PointCloudData> dataQueue = new LinkedBlockingQueue<PointCloudData>();
@@ -56,7 +61,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       this.fullRobotModel = modelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
-      this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel, jointMap.getContactPointParameters().getFootContactPoints());
+      this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel);
+      this.contactPoints = jointMap.getContactPointParameters().getFootContactPoints();
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(sensorSuitePacketCommunicator, readWriteLock.readLock(), depthDataFilter);
 
       if (collisionBoxProvider != null)
@@ -87,6 +93,28 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       return fullRobotModel.getLidarJoint(lidarName);
    }
 
+   private void addPointsUnderFeet()
+   {
+//      final double QuadTreePointUnderFeetScaling = 1.1;
+      for (RobotSide side : RobotSide.values)
+      {
+         ReferenceFrame soleFrame = fullRobotModel.getFoot(side).getBodyFixedFrame();
+         for (Point2d point : contactPoints.get(side))
+         {
+            FramePoint footContactPoint = new FramePoint(soleFrame, point.getX(), point.getY(), 0.0);
+//            footContactPoint.scale(QuadTreePointUnderFeetScaling);
+            footContactPoint.changeFrame(ReferenceFrame.getWorldFrame());
+            depthDataFilter.getQuadTree().addPoint(footContactPoint.getX(), footContactPoint.getY(), footContactPoint.getZ());
+         }
+
+         FramePoint footCenter = new FramePoint(soleFrame, 0.0, 0.0, 0.0);
+         footCenter.changeFrame(ReferenceFrame.getWorldFrame());
+         depthDataFilter.getQuadTree().addPoint(footCenter.getX(), footCenter.getY(), footCenter.getZ());
+
+      }
+
+   }
+
    @Override
    public void run()
    {
@@ -113,6 +141,14 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                }
             }
 
+            if (!depthDataFilter.getQuadTree().hasPoints())
+            {
+               if (robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
+               {
+                  addPointsUnderFeet();
+               }
+            }
+
             if (data != null && sendData.get())
             {
                long prevTimestamp = -1;
@@ -127,9 +163,9 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
                      {
                         continue;
                      }
-                     if(collisionBoxNode != null)
+                     if (collisionBoxNode != null)
                      {
-                    	 collisionBoxNode.update();
+                        collisionBoxNode.update();
                      }
                      prevTimestamp = nextTimestamp;
                   }
@@ -196,7 +232,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
       try
       {
-            dataQueue.put(new PointCloudData(scanFrame, lidarFrame, timestamps, points, sources));
+         dataQueue.put(new PointCloudData(scanFrame, lidarFrame, timestamps, points, sources));
       }
       catch (InterruptedException e)
       {

@@ -32,4 +32,5 @@ public interface QuadTreeHeightMapInterface extends HeightMapWithPoints
    public abstract void lock();
 
    public abstract void unlock();
+   public abstract boolean hasPoints();
 }
