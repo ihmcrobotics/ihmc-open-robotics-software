@@ -49,12 +49,12 @@ public class StepprCommand extends AcsellCommand<StepprActuator, StepprJoint>
 
       AcsellAnkleKinematicParameters parameters = new StepprAnkleKinematicParameters();
 
-      AcsellAnkleActuatorCommand leftAnkle = new AcsellAnkleActuatorCommand(parameters, "leftAnkleCommand", jointCommands.get(StepprJoint.LEFT_ANKLE_Y),
+      AcsellAnkleActuatorCommand leftAnkle = new AcsellAnkleActuatorCommand(parameters, "leftAnkleCommand", RobotSide.LEFT, jointCommands.get(StepprJoint.LEFT_ANKLE_Y),
             jointCommands.get(StepprJoint.LEFT_ANKLE_X), StepprActuator.LEFT_ANKLE_RIGHT, StepprActuator.LEFT_ANKLE_LEFT, registry);
       actuatorCommands.put(StepprActuator.LEFT_ANKLE_LEFT, leftAnkle.leftActuatorCommand());
       actuatorCommands.put(StepprActuator.LEFT_ANKLE_RIGHT, leftAnkle.rightActuatorCommand());
 
-      AcsellAnkleActuatorCommand rightAnkle = new AcsellAnkleActuatorCommand(parameters, "rightAnkleCommand", jointCommands.get(StepprJoint.RIGHT_ANKLE_Y),
+      AcsellAnkleActuatorCommand rightAnkle = new AcsellAnkleActuatorCommand(parameters, "rightAnkleCommand", RobotSide.RIGHT, jointCommands.get(StepprJoint.RIGHT_ANKLE_Y),
             jointCommands.get(StepprJoint.RIGHT_ANKLE_X), StepprActuator.RIGHT_ANKLE_RIGHT, StepprActuator.RIGHT_ANKLE_LEFT, registry);
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_LEFT, rightAnkle.leftActuatorCommand());
       actuatorCommands.put(StepprActuator.RIGHT_ANKLE_RIGHT, rightAnkle.rightActuatorCommand());

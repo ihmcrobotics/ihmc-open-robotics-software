@@ -3,6 +3,7 @@ package us.ihmc.wanderer.hardware.controllers;
 import java.util.EnumMap;
 
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
+import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
 import us.ihmc.acsell.hardware.state.AcsellFourbarCalculator;
 import us.ihmc.simulationconstructionset.robotController.OutputProcessor;
@@ -27,7 +28,9 @@ public class WandererOutputProcessor implements OutputProcessor
    private final SimpleMovingAverageFilteredYoVariable totalPredictedRobotPowerAverage = new SimpleMovingAverageFilteredYoVariable(
          totalPredictedRobotPower.getName() + "MovingAverage", 1000, totalPredictedRobotPower, registry);
 
-   private final AcsellAnkleAngleCalculator ankleInterpolator = new AcsellAnkleInterpolator(new WandererAnkleKinematicParameters());
+   //private final AcsellAnkleAngleCalculator ankleInterpolator = new AcsellAnkleInterpolator(new WandererAnkleKinematicParameters());
+   private final AcsellAnkleAngleCalculator rightAnkleCalculator = new AcsellAnkleFullComputation(new WandererAnkleKinematicParameters(),RobotSide.RIGHT);
+   private final AcsellAnkleAngleCalculator leftAnkleCalculator = new AcsellAnkleFullComputation(new WandererAnkleKinematicParameters(),RobotSide.LEFT);
    private final AcsellFourbarCalculator leftFourbar;
    private final AcsellFourbarCalculator rightFourbar;
    private EnumMap<WandererJoint, OneDoFJoint> wholeBodyControlJoints;
@@ -84,8 +87,8 @@ public class WandererOutputProcessor implements OutputProcessor
       }
 
       updateKnees(WandererJoint.LEFT_KNEE_Y, WandererActuator.LEFT_KNEE, WandererJoint.RIGHT_KNEE_Y, WandererActuator.RIGHT_KNEE);
-      updateAnkle(WandererJoint.LEFT_ANKLE_X, WandererJoint.LEFT_ANKLE_Y, WandererActuator.LEFT_ANKLE_LEFT, WandererActuator.LEFT_ANKLE_RIGHT);
-      updateAnkle(WandererJoint.RIGHT_ANKLE_X, WandererJoint.RIGHT_ANKLE_Y, WandererActuator.RIGHT_ANKLE_LEFT, WandererActuator.RIGHT_ANKLE_RIGHT);
+      updateAnkle(rightAnkleCalculator, WandererJoint.RIGHT_ANKLE_X, WandererJoint.RIGHT_ANKLE_Y, WandererActuator.RIGHT_ANKLE_LEFT, WandererActuator.RIGHT_ANKLE_RIGHT);
+      updateAnkle(leftAnkleCalculator, WandererJoint.LEFT_ANKLE_X, WandererJoint.LEFT_ANKLE_Y, WandererActuator.LEFT_ANKLE_LEFT, WandererActuator.LEFT_ANKLE_RIGHT);
       
 
       double sumTotalMotorPower = 0;
@@ -114,19 +117,19 @@ public class WandererOutputProcessor implements OutputProcessor
 
    }
    
-   private void updateAnkle(WandererJoint ankleX, WandererJoint ankleY, WandererActuator ankleLeftActuator, WandererActuator ankleRightActuator)
+   private void updateAnkle(AcsellAnkleAngleCalculator ankleCalculator, WandererJoint ankleX, WandererJoint ankleY, WandererActuator ankleLeftActuator, WandererActuator ankleRightActuator)
    {
 
       OneDoFJoint oneDofAnkleX = wholeBodyControlJoints.get(ankleX);
       OneDoFJoint oneDofAnkleY = wholeBodyControlJoints.get(ankleY);
       
-      ankleInterpolator.updateAnkleState(oneDofAnkleX, oneDofAnkleY);
+      ankleCalculator.updateAnkleState(oneDofAnkleX, oneDofAnkleY);
 
       predictedMotorPower.get(ankleRightActuator).set(
-              calcPower(ankleInterpolator.getComputedTauRightActuator(), ankleRightActuator.getKm()));
+              calcPower(ankleCalculator.getComputedTauRightActuator(), ankleRightActuator.getKm()));
 
       predictedMotorPower.get(ankleLeftActuator).set(
-              calcPower(ankleInterpolator.getComputedTauLeftActuator(), ankleLeftActuator.getKm()));
+              calcPower(ankleCalculator.getComputedTauLeftActuator(), ankleLeftActuator.getKm()));
 
    }
   

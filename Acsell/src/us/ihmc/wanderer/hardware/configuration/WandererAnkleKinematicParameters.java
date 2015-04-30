@@ -1,25 +1,40 @@
 package us.ihmc.wanderer.hardware.configuration;
 
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
+import us.ihmc.acsell.hardware.configuration.AcsellAnklePhysicalParameters;
 
 public final class WandererAnkleKinematicParameters implements AcsellAnkleKinematicParameters
 {
-   public WandererAnkleKinematicParameters()
-   {
-      throw new RuntimeException("TODO: Set correct values and remove constructor");
-   }
    
    private static final double N = 6.0;
 
    //Wide bracket Spring linkage
-   private static final double px[] = { -0.0000, 0.8791, -0.8791, -0.0149, 0.0149, -0.0000, -0.0604, 0.0439, -0.0439, 0.0604 };
-   private static final double py[] = { 0.0009, 0.4611, 0.4611, 0.0283, 0.0283, 0.0005, -0.0681, 0.0575, 0.0575, -0.0681 };
-   private static final double pM1[] = { 0.0086, 3.3934, 6.4627, -0.2408, -0.5256, 0.0963, 0.1911, 1.7066, 0.8220, 0.3498 };
-   private static final double pM2[] = { 0.0086, -3.3934, 6.4627, -0.2408, -0.5256, -0.0963, -0.1911, 1.7066, -0.8220, 0.3498 };
-   private static final double p_m_JitX[] = { 0.8827, -0.0349, -0.0045, -0.1410, 0.0098, -0.0209, -0.0950, 0.2628, -0.1591, 0.0121 };
-   private static final double p_m_JitY[] = { 0.4619, 0.1085, -0.0576, -0.2250, 0.0451, 0.1548, -0.1208, 0.1888, -0.0829, 0.0507 };
-   private static final double p_j_JitX[] = { 0.8834, -0.0204, -0.0408, -0.0321, -0.1963, -0.2211, -0.0744, -0.1504, 0.0837, 0.0519 };
-   private static final double p_j_JitY[] = { 0.4637, 0.1027, 0.0539, -0.1251, -0.0482, -0.3714, -0.1127, -0.1165, -0.1780, 0.0591 };
+   private static final double px[] = null;
+   private static final double py[] = null;
+   private static final double pM1[] = null;
+   private static final double pM2[] = null;
+   private static final double p_m_JitX[] = null;
+   private static final double p_m_JitY[] = null;
+   private static final double p_j_JitX[] = null;
+   private static final double p_j_JitY[] = null;
+   
+   private static final double Px = 0.156401;
+   private static final double Py = 0.055563;
+   private static final double Pz = -0.026670;
+   private static final double Lr = 0.320370;
+   private static final double RyO = 0.039986;
+   private static final double RyI = 0.044164;
+   private static final double KzR = 0.317500;
+   private static final double KzL = 0.317437;   
+   
+   private static final AcsellAnklePhysicalParameters rightAnkleRightParams = new AcsellAnklePhysicalParameters(
+         new double[] {Px, -Py, Pz}, new double[] {0.124355, -RyO, 0.291713}, KzR, Lr);
+   private static final AcsellAnklePhysicalParameters rightAnkleLeftParams = new AcsellAnklePhysicalParameters(
+         new double[] {Px, Py, Pz}, new double[] {0.124392, RyI, 0.291893}, KzR, Lr);
+   private static final AcsellAnklePhysicalParameters leftAnkleRightParams = new AcsellAnklePhysicalParameters(
+         new double[] {Px, -Py, Pz}, new double[] {0.124406, -RyI, .291895}, KzL, Lr);
+   private static final AcsellAnklePhysicalParameters leftAnkleLeftParams = new AcsellAnklePhysicalParameters(
+         new double[] {Px, Py, Pz}, new double[] {0.124368, RyO, 0.291714}, KzL, Lr);
 
    @Override
    public double[] getXParams()
@@ -86,11 +101,36 @@ public final class WandererAnkleKinematicParameters implements AcsellAnkleKinema
    {
       return true;
    }
-
+   
    @Override
    public boolean isJacobianFromMotorAnglesComputationPerformed()
    {
-      return true;
+      return false;
+   }
+   
+   @Override
+   public AcsellAnklePhysicalParameters getRightAnkleRightParams()
+   {
+      return rightAnkleRightParams;
+   }
+   
+   @Override
+   public AcsellAnklePhysicalParameters getRightAnkleLeftParams()
+   {
+      return rightAnkleLeftParams;
+   }
+   
+   @Override
+   public AcsellAnklePhysicalParameters getLeftAnkleRightParams()
+   {
+      return leftAnkleRightParams;
+   }
+   
+   @Override
+   public AcsellAnklePhysicalParameters getLeftAnkleLeftParams()
+   {
+      return leftAnkleLeftParams;
    }
 
 }
+
