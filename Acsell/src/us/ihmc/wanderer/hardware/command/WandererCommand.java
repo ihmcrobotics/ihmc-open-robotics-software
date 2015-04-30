@@ -49,12 +49,12 @@ public class WandererCommand extends AcsellCommand<WandererActuator, WandererJoi
 
       AcsellAnkleKinematicParameters parameters = new WandererAnkleKinematicParameters();
 
-      AcsellAnkleActuatorCommand leftAnkle = new AcsellAnkleActuatorCommand(parameters, "leftAnkleCommand", jointCommands.get(WandererJoint.LEFT_ANKLE_Y),
+      AcsellAnkleActuatorCommand leftAnkle = new AcsellAnkleActuatorCommand(parameters, "leftAnkleCommand", RobotSide.LEFT, jointCommands.get(WandererJoint.LEFT_ANKLE_Y),
             jointCommands.get(WandererJoint.LEFT_ANKLE_X), WandererActuator.LEFT_ANKLE_RIGHT, WandererActuator.LEFT_ANKLE_LEFT, registry);
       actuatorCommands.put(WandererActuator.LEFT_ANKLE_LEFT, leftAnkle.leftActuatorCommand());
       actuatorCommands.put(WandererActuator.LEFT_ANKLE_RIGHT, leftAnkle.rightActuatorCommand());
 
-      AcsellAnkleActuatorCommand rightAnkle = new AcsellAnkleActuatorCommand(parameters, "rightAnkleCommand", jointCommands.get(WandererJoint.RIGHT_ANKLE_Y),
+      AcsellAnkleActuatorCommand rightAnkle = new AcsellAnkleActuatorCommand(parameters, "rightAnkleCommand", RobotSide.RIGHT, jointCommands.get(WandererJoint.RIGHT_ANKLE_Y),
             jointCommands.get(WandererJoint.RIGHT_ANKLE_X), WandererActuator.RIGHT_ANKLE_RIGHT, WandererActuator.RIGHT_ANKLE_LEFT, registry);
       actuatorCommands.put(WandererActuator.RIGHT_ANKLE_LEFT, rightAnkle.leftActuatorCommand());
       actuatorCommands.put(WandererActuator.RIGHT_ANKLE_RIGHT, rightAnkle.rightActuatorCommand());

@@ -1,6 +1,7 @@
 package us.ihmc.steppr.hardware.configuration;
 
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
+import us.ihmc.acsell.hardware.configuration.AcsellAnklePhysicalParameters;
 
 public final class StepprAnkleKinematicParameters implements AcsellAnkleKinematicParameters{
    
@@ -41,6 +42,19 @@ public final class StepprAnkleKinematicParameters implements AcsellAnkleKinemati
       private static final double p_j_JitX[] = { 0.8834, -0.0204, -0.0408, -0.0321, -0.1963, -0.2211, -0.0744, -0.1504,  0.0837,  0.0519};
       private static final double p_j_JitY[] = { 0.4637,  0.1027,  0.0539, -0.1251, -0.0482, -0.3714, -0.1127, -0.1165, -0.1780,  0.0591};
 
+      private static final double Px = 0.138810;
+      private static final double Py = 0.071438;
+      private static final double Pz = -0.025400;
+      private static final double Rx = 0.126832;
+      private static final double Ry = 0.098900;
+      private static final double Rz = 0.310962;
+      private static final double Kz = 0.317500;
+      private static final double Lr = 0.337694;
+      
+      private static final AcsellAnklePhysicalParameters ankleRightParams = new AcsellAnklePhysicalParameters(
+            new double[] {Px, -Py, Pz}, new double[] {Rx, -Ry, Rz}, Kz, Lr);
+      private static final AcsellAnklePhysicalParameters ankleLeftParams = new AcsellAnklePhysicalParameters(
+            new double[] {Px,  Py, Pz}, new double[] {Rx,  Ry, Rz}, Kz, Lr);
       
 	   @Override
       public double[] getXParams()
@@ -112,6 +126,30 @@ public final class StepprAnkleKinematicParameters implements AcsellAnkleKinemati
       public boolean isJacobianFromMotorAnglesComputationPerformed()
       {
          return true;
+      }
+
+      @Override
+      public AcsellAnklePhysicalParameters getRightAnkleRightParams()
+      {
+         return ankleRightParams;
+      }
+      
+      @Override
+      public AcsellAnklePhysicalParameters getRightAnkleLeftParams()
+      {
+         return ankleLeftParams;
+      }
+      
+      @Override
+      public AcsellAnklePhysicalParameters getLeftAnkleRightParams()
+      {
+         return ankleRightParams;
+      }
+      
+      @Override
+      public AcsellAnklePhysicalParameters getLeftAnkleLeftParams()
+      {
+         return ankleLeftParams;
       }
 	   
 }

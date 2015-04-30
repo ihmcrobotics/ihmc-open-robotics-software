@@ -10,7 +10,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 public class AcsellAnkleJointState
 {	
    
-   private final AcsellAnkleAngleCalculator interpolator;
+   private final AcsellAnkleAngleCalculator ankleCalculator;
 
    private final AcsellJointState ankleX = new AnkleX();
    private final AcsellJointState ankleY = new AnkleY();
@@ -56,7 +56,8 @@ public class AcsellAnkleJointState
       this.strainSensorRight = strainSensorRight;
       this.strainSensorLeft = strainSensorLeft;
       
-      this.interpolator = new AcsellAnkleInterpolator(parameters);
+      //this.ankleCalculator = new AcsellAnkleInterpolator(parameters);
+      this.ankleCalculator = new AcsellAnkleFullComputation(parameters, robotSide);
 
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Ankle";
       this.registry = new YoVariableRegistry(name);
@@ -99,28 +100,28 @@ public class AcsellAnkleJointState
 	   this.q_y.set(AngleTools.trimAngleMinusPiToPi(leftActuator.getJointPosition()));
 	   this.qd_y.set(leftActuator.getJointVelocity());
 	      
-	   interpolator.updateAnkleState(rightActuator,leftActuator);
+	   ankleCalculator.updateAnkleState(rightActuator,leftActuator);
 
-	   this.q_rightActuator_calc.set(interpolator.getComputedQrightActuator());
-	   this.q_leftActuator_calc.set(interpolator.getComputedQleftActuator());
+	   this.q_rightActuator_calc.set(ankleCalculator.getComputedQrightActuator());
+	   this.q_leftActuator_calc.set(ankleCalculator.getComputedQleftActuator());
 
-	   this.q_calc_x.set(interpolator.getComputedQAnkleX());
-	   this.q_calc_y.set(interpolator.getComputedQAnkleY());
+	   this.q_calc_x.set(ankleCalculator.getComputedQAnkleX());
+	   this.q_calc_y.set(ankleCalculator.getComputedQAnkleY());
 	   
-	   this.qd_rightActuator_calc.set(interpolator.getComputedQdRightActuator());
-	   this.qd_leftActuator_calc.set(interpolator.getComputedQdLeftActuator());
+	   this.qd_rightActuator_calc.set(ankleCalculator.getComputedQdRightActuator());
+	   this.qd_leftActuator_calc.set(ankleCalculator.getComputedQdLeftActuator());
 	   
-	   this.qd_calc_x.set(interpolator.getComputedQdAnkleX());
-	   this.qd_calc_y.set(interpolator.getComputedQdAnkleY());
+	   this.qd_calc_x.set(ankleCalculator.getComputedQdAnkleX());
+	   this.qd_calc_y.set(ankleCalculator.getComputedQdAnkleY());
 	       
-	   this.tau_x.set(interpolator.getComputedTauAnkleX());
-	   this.tau_y.set(interpolator.getComputedTauAnkleY());
+	   this.tau_x.set(ankleCalculator.getComputedTauAnkleX());
+	   this.tau_y.set(ankleCalculator.getComputedTauAnkleY());
 	   
 	   tau_rightActuator.set(rightActuator.getMotorTorque());
 	   tau_leftActuator.set(leftActuator.getMotorTorque());
 	   
 	   if(strainSensorRight!=null) tau_strain_Right.set(strainSensorRight.getCalibratedValue());
-       if(strainSensorLeft!=null) tau_strain_Left.set(strainSensorLeft.getCalibratedValue());
+      if(strainSensorLeft!=null) tau_strain_Left.set(strainSensorLeft.getCalibratedValue());
    }
 
    
@@ -241,3 +242,4 @@ public class AcsellAnkleJointState
 
    }
 }
+

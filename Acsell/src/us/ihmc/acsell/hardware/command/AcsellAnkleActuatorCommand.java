@@ -3,7 +3,9 @@ package us.ihmc.acsell.hardware.command;
 import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.configuration.AcsellAnkleKinematicParameters;
 import us.ihmc.acsell.hardware.state.AcsellAnkleAngleCalculator;
+import us.ihmc.acsell.hardware.state.AcsellAnkleFullComputation;
 import us.ihmc.acsell.hardware.state.AcsellAnkleInterpolator;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class AcsellAnkleActuatorCommand
@@ -18,9 +20,10 @@ public class AcsellAnkleActuatorCommand
    private final AcsellJointCommand ankleY;
    
 
-   public AcsellAnkleActuatorCommand(AcsellAnkleKinematicParameters parameters, String name, AcsellJointCommand ankleY, AcsellJointCommand ankleX, AcsellActuator rightActuator, AcsellActuator leftActuator, YoVariableRegistry parentRegistry)
+   public AcsellAnkleActuatorCommand(AcsellAnkleKinematicParameters parameters, String name, RobotSide side, AcsellJointCommand ankleY, AcsellJointCommand ankleX, AcsellActuator rightActuator, AcsellActuator leftActuator, YoVariableRegistry parentRegistry)
    {
-      this.ankleCalculator = new AcsellAnkleInterpolator(parameters);
+      //this.ankleCalculator = new AcsellAnkleInterpolator(parameters);
+      this.ankleCalculator = new AcsellAnkleFullComputation(parameters, side);
       this.registry = new YoVariableRegistry(name);
       this.ankleY = ankleY;
       this.ankleX = ankleX;
