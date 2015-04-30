@@ -6,6 +6,7 @@ import us.ihmc.acsell.fourbar.FourbarProperties;
 public class WandererFourbarProperties implements FourbarProperties
 {
 
+   //TODO: Find Linkage Offsets
    private static final double LEFT_LINKAGE_BETA0 = 2.46;
    private static final double RIGHT_LINKAGE_BETA0 = 2.51;
    private final double L1 = 2.2 * 0.0254;
@@ -23,8 +24,6 @@ public class WandererFourbarProperties implements FourbarProperties
       this.Link2 = new FourbarLink(L2);
       this.Link3 = new FourbarLink(L3);
       this.Link4 = new FourbarLink(L4);
-      
-      throw new RuntimeException("TODO: Change value for wanderer and remove this exception");
    }
 
    @Override

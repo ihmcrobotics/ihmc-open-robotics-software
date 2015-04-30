@@ -5,7 +5,7 @@
     <link name='pelvis'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
-		<pose>-0.074017 -0.000014 0.122080 0 0 0</pose>
+		<pose>0.074017 -0.000014 0.122080 0 0 0</pose>
         <mass>9.845143</mass>
         <inertia>
           <ixx> 0.126304</ixx>
@@ -672,7 +672,7 @@
     <link name='r_lglut'>
       <pose>-0.000002 -0.114300 0.0 0 0 0</pose>
       <inertial>
-        <pose>-0.071496 0.081716 0.060720 0 -0 0</pose>
+        <pose>-0.071496 -0.081716 0.060720 0 -0 0</pose>
         <mass>4.718065</mass>
         <inertia>
           <ixx> 0.020718</ixx>
