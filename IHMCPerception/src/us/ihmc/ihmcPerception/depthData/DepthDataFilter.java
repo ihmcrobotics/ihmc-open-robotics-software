@@ -1,11 +1,8 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import java.util.ArrayList;
-
 import javax.vecmath.Point3d;
 
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
-import us.ihmc.utilities.lidar.polarLidar.LidarScan;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DepthDataFilter extends DepthDataStore
