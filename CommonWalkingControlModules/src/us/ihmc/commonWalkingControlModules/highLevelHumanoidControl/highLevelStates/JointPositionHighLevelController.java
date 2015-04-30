@@ -338,7 +338,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       {
          for (OneDoFJoint joint : jointsBeingControlled)
          {
-            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+//            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+        	 trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
          }
       }
    }
@@ -396,6 +397,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          {
             trajectoryGenerator.get(joint).initialize();
             previousPosition.put(joint, joint.getQ());
+            joint.setqDesired(joint.getQ());
          }
       }
       else
