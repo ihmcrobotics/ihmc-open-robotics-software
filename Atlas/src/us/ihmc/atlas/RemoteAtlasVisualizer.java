@@ -77,14 +77,14 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 
       JSAPResult config = jsap.parse(args);
       
-      if (config.success())
+      try
       {
         AtlasTarget target = config.getBoolean(runningOnRealRobot.getID()) ? AtlasTarget.REAL_ROBOT : AtlasTarget.SIM;
         DRCRobotModel model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, false);
 
          new RemoteAtlasVisualizer(bufferSize, model);         
       }
-      else
+      catch(IllegalArgumentException e)
       {
          System.err.println();
          System.err.println("Usage: java " + RemoteAtlasVisualizer.class.getName());
