@@ -5,6 +5,7 @@ import org.apache.commons.collections.map.MultiKeyMap;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.Finger;
+import us.ihmc.robotiq.communication.InvalidFingerException;
 
 public class FingerPositionRequestRegister implements RobotiqRegister
 {
@@ -73,7 +74,7 @@ public class FingerPositionRequestRegister implements RobotiqRegister
             index = 12;
             break;
          default:
-            throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
+            throw new InvalidFingerException(finger);
       }
       
       position = (byte)0x00;
