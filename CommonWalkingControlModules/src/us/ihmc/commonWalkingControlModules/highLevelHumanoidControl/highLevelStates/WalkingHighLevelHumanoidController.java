@@ -558,7 +558,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       public void doAction()
       {
          //abort walk and clear if should abort
-         if (variousWalkingProviders.getAbortProvider().shouldAbortWalking()){
+         if (variousWalkingProviders.getAbortProvider().shouldAbortWalking())
+         {
             upcomingFootstepList.clearCurrentFootsteps();
             upcomingFootstepList.requestCancelPlanToProvider();
             variousWalkingProviders.getAbortProvider().walkingAborted();
@@ -652,6 +653,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
                desiredICPVelocity.scale(desiredICPVelocityRedutionFactor.getDoubleValue());
             }
+         }
+
+         if (pushRecoveryModule.isEnabled())
+         {
+            capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
+            pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getOmega0());
+            pushRecoveryModule.updateForDoubleSupport(getTimeInCurrentState());
          }
       }
 
@@ -911,7 +919,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
 
-            if (pushRecoveryModule == null || !pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+            if (!pushRecoveryModule.isRecoveringFromDoubleSupportFall())
             {
                swingTimeCalculationProvider.updateSwingTime();
                transferTimeCalculationProvider.updateTransferTime();
@@ -974,6 +982,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (pushRecoveryModule.isEnabled())
          {
+            capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
+            pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getOmega0());
+
             boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, nextFootstep, footPolygon);
 
             if (footstepHasBeenAdjusted)
@@ -1587,7 +1598,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
-   private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FrameVector2d desiredICPVelocityAsFrameVector = new FrameVector2d();
 
    // FIXME: don't override
@@ -1596,20 +1606,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint, desiredICP);
       if (failureDetectionControlModule.isRobotFalling())
       {
-         if (pushRecoveryModule == null || !pushRecoveryModule.isEnabled())
+         if (!pushRecoveryModule.isEnabled())
             momentumBasedController.reportControllerFailureToListeners();
       }
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();
 
       icpAndMomentumBasedController.update();
-
-      if (pushRecoveryModule != null && pushRecoveryModule.isEnabled())
-      {
-         capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
-         pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getBipedSupportPolygons().getSupportPolygonInMidFeetZUp(),
-               icpAndMomentumBasedController.getOmega0());
-      }
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
