@@ -575,6 +575,11 @@ public class ICPPlanner
       singleSupportDuration.set(time);
    }
 
+   public double getInitialTransferDuration()
+   {
+      return doubleSupportInitialTransferDuration.getDoubleValue();
+   }
+
    public void setDoubleSupportSplitFraction(double doubleSupportSplitFraction)
    {
       this.doubleSupportSplitFraction.set(doubleSupportSplitFraction);

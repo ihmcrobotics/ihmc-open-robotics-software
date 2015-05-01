@@ -480,6 +480,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       pelvisICPBasedTranslationManager.disable();
 
+      double stepTime = swingTimeCalculationProvider.getValue() + transferTimeCalculationProvider.getValue();
+      pelvisOrientationManager.setTrajectoryTime(stepTime);
+
       if (!hasWalkingControllerBeenInitialized.getBooleanValue())
       {
          pelvisOrientationManager.resetOrientationOffset();
@@ -897,12 +900,32 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
          }
 
+         double transferTime;
+
+         boolean isPreviousStateDoubleSupport = getPreviousState().getStateEnum() == WalkingState.DOUBLE_SUPPORT;
+         if (isPreviousStateDoubleSupport)
+         {
+            transferTime = capturePointPlannerAdapter.getInitialTransferDuration();
+         }
+         else
+         {
+            transferTime = transferTimeCalculationProvider.getValue();
+         }
+
+         pelvisOrientationManager.setTrajectoryTime(transferTime);
+
+         // Just standing in double support, do nothing
          if (transferToSide == null)
             pelvisOrientationManager.setToHoldCurrentDesiredInWorldFrame();
+         // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
          else if (footPoseProvider.checkForNewPose() != null)
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
+         // Transfer for taking the first step, need to ensure a safe pelvis orientation
+         else if (upcomingFootstepList.hasNextFootsteps() && isPreviousStateDoubleSupport)
+            pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
+         // In middle of walking or leaving foot pose, pelvis is good leave it like that.
          else
-            pelvisOrientationManager.moveToZeroInSupportFoot(transferToSide);
+            pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
          footExplorationControlModule.setSwingIsFinished(true);
       }
@@ -1176,7 +1199,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          transferToFootstep.set(nextFootstepPosition);
          RobotSide supportSide = swingSide.getOppositeSide();
 
-         pelvisOrientationManager.setWithUpcomingFootstep(nextFootstep, swingSide);
+         pelvisOrientationManager.setTrajectoryTime(swingTimeCalculationProvider.getValue());
+         pelvisOrientationManager.setWithUpcomingFootstep(nextFootstep);
 
          FramePoint centerOfMass = new FramePoint(referenceFrames.getCenterOfMassFrame());
          centerOfMass.changeFrame(worldFrame);
