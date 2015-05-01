@@ -1,6 +1,7 @@
 package us.ihmc.robotiq.communication.registers;
 
 import us.ihmc.robotiq.communication.Finger;
+import us.ihmc.robotiq.communication.InvalidFingerException;
 
 public class FingerForceRegister implements RobotiqRegister
 {
@@ -27,7 +28,7 @@ public class FingerForceRegister implements RobotiqRegister
             index = 14;
             break;
          default:
-            throw new RuntimeException(getClass().getSimpleName() + ": " + finger.name() + " is not recognized as a Robotiq finger");
+            throw new InvalidFingerException(finger);
       }
       
       force = MAX_FORCE;
