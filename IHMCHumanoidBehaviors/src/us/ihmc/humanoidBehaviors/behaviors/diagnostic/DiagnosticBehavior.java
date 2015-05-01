@@ -202,6 +202,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       HAND_SHAKE_SHAKE,
       GO_HOME,
       FLEX_UP,
+      FLEX_DOWN,
       FLEX_UP_FLEX_DOWN,
       REDO_LAST_TASK // Keep that one at the end.
    };
@@ -1451,16 +1452,38 @@ public class DiagnosticBehavior extends BehaviorInterface
    }
    
    private void sequenceFlexUp()
-   {
+   {  
       flexUp();
       sequenceGoHome();
    }
    
    private void sequenceFlexUpFlexDown()
    {
+      RobotSide robotSide = RobotSide.LEFT;
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+
+      //put the left foot forward
+      FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      Point3d position = new Point3d(0.2, robotSide.negateIfRightSide(0.12), 0.0);
+      Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.changeFrame(worldFrame);
+      submitFootstepPose(true, robotSide, desiredFootstepPosition);
+      pipeLine.requestNewStage();
+      
       flexUp();
-//      flexDown();
+      flexDown();
+      
       sequenceGoHome();
+      
+      desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      position = new Point3d(0., robotSide.negateIfRightSide(0.12), 0.0);
+      orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.changeFrame(worldFrame);
+      submitFootstepPose(false, robotSide, desiredFootstepPosition);
+      pipeLine.requestNewStage();
+      
    }
    
    private void flexUp()
@@ -1468,6 +1491,42 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_PALMS_UP);
       pipeLine.requestNewStage();
       submitSymmetricHumanoidArmPose(HumanoidArmPose.FLEX_UP);
+      pipeLine.requestNewStage();
+   }
+   
+   private void sequenceFlexDown()
+   {
+      RobotSide robotSide = RobotSide.LEFT;
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide);
+
+      //put the left foot forward
+      FramePose desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      Point3d position = new Point3d(0.2, robotSide.negateIfRightSide(0.12), 0.0);
+      Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.changeFrame(worldFrame);
+      submitFootstepPose(true, robotSide, desiredFootstepPosition);
+      pipeLine.requestNewStage();
+      
+      flexDown();
+      
+      sequenceGoHome(); 
+      
+      desiredFootstepPosition = new FramePose(ankleZUpFrame);
+      position = new Point3d(0., robotSide.negateIfRightSide(0.12), 0.0);
+      orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      desiredFootstepPosition.setPose(position, orientation);
+      desiredFootstepPosition.changeFrame(worldFrame);
+      submitFootstepPose(false, robotSide, desiredFootstepPosition);
+      pipeLine.requestNewStage();
+   }
+   
+   private void flexDown()
+   {
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_SUPPINATE_IN);
+      pipeLine.requestNewStage();
+      submitDesiredChestOrientation(true, 0.0, 0.7 * maxPitchForward, 0.0);
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLEX_DOWN);
       pipeLine.requestNewStage();
    }
 
@@ -2132,7 +2191,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FrameOrientation temporaryDesiredUpperArmOrientation = new FrameOrientation();
       temporaryDesiredUpperArmOrientation.setIncludingFrame(desiredUpperArmOrientation);
       
-      if (counterForUpperArmIK >= 50)
+      if (counterForUpperArmIK >= 15)
       {
          counterForUpperArmIK = 0;
          System.err.println("Could not find desired joint angles for the upper arm joints");
@@ -2473,6 +2532,10 @@ public class DiagnosticBehavior extends BehaviorInterface
          case FLEX_UP:
             lastDiagnosticTask.set(DiagnosticTask.FLEX_UP);
             sequenceFlexUp();
+            break;
+         case FLEX_DOWN:
+            lastDiagnosticTask.set(DiagnosticTask.FLEX_DOWN);
+            sequenceFlexDown();
             break;
          case FLEX_UP_FLEX_DOWN:
             lastDiagnosticTask.set(DiagnosticTask.FLEX_UP_FLEX_DOWN);
