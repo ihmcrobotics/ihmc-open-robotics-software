@@ -1,13 +1,13 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class ObjectStatusRegister implements RobotiqRegister
+public class ObjectDetectionRegister implements RobotiqRegister
 {
    private gDTA gdta;
    private gDTB gdtb;
    private gDTC gdtc;
    private gDTS gdts;
    
-   public ObjectStatusRegister(gDTA gdta, gDTB gdtb, gDTC gdtc, gDTS gdts)
+   public ObjectDetectionRegister(gDTA gdta, gDTB gdtb, gDTC gdtc, gDTS gdts)
    {
       this.gdta = gdta;
       this.gdtb = gdtb;
