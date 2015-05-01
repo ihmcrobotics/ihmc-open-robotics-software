@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
    us.ihmc.valkyrie.ValkyriePushRecoveryWalkingTest.class
 })
 
-public class ValkyrieHardwareDriversCSlowTestSuite
+public class ValkyrieHardwareDriversCInDevelopmentTestSuite
 {
    public static void main(String[] args)
    {

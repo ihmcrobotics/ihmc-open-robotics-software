@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoB})
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoB})
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {
    @Override
