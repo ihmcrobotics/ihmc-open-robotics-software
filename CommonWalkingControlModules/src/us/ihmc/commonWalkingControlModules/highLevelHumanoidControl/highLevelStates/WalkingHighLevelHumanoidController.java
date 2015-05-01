@@ -1609,7 +1609,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       if (failureDetectionControlModule.isRobotFalling())
       {
          if (!pushRecoveryModule.isEnabled())
-            momentumBasedController.reportControllerFailureToListeners();
+            momentumBasedController.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection());
       }
       momentumBasedController.doPrioritaryControl();
       super.callUpdatables();

@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 
 /**
  * <p>Title: </p>
@@ -204,7 +205,7 @@ public class BlockingSimulationRunner
       ControllerFailureListener controllerFailureListener = new ControllerFailureListener()
       {
          @Override
-         public void controllerFailed()
+         public void controllerFailed(FrameVector2d fallingDirection)
          {
             hasControllerFailed.set(true);
             scs.stop();

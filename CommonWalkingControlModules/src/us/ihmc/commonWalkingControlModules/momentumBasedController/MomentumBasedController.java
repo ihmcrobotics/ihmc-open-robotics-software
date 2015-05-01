@@ -1273,11 +1273,11 @@ public class MomentumBasedController
       this.controllerFailureListeners.add(listener);
    }
 
-   public void reportControllerFailureToListeners()
+   public void reportControllerFailureToListeners(FrameVector2d fallingDirection)
    {
       for (int i = 0; i < controllerFailureListeners.size(); i++)
       {
-         controllerFailureListeners.get(i).controllerFailed();
+         controllerFailureListeners.get(i).controllerFailed(fallingDirection);
       }
    }
 

@@ -14,6 +14,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailure
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -68,7 +69,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
-         public void controllerFailed()
+         public void controllerFailed(FrameVector2d fallingDirection)
          {
             HighLevelState fallbackController = fallbackControllerForFailureReference.get();
             if (fallbackController != null)

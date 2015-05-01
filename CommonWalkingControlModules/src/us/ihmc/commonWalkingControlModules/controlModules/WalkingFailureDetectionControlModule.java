@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
-import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.*;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -31,6 +28,7 @@ public class WalkingFailureDetectionControlModule
    private final DoubleYoVariable icpDistanceFromFootPolygon;
    private final DoubleYoVariable icpDistanceFromFootPolygonThreshold;
    private final BooleanYoVariable isRobotFalling;
+   private final FrameVector2d fallingDirection = new FrameVector2d();
 
    private final FramePoint2d capturePoint = new FramePoint2d();
 
@@ -94,6 +92,7 @@ public class WalkingFailureDetectionControlModule
       }
    }
 
+   private final FrameVector2d tempFallingDirection = new FrameVector2d();
    public void checkIfRobotIsFalling(YoFramePoint currentCapturePoint, YoFramePoint2d desiredCapturePoint)
    {
       updateCombinedPolygon();
@@ -108,6 +107,15 @@ public class WalkingFailureDetectionControlModule
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint.distance(capturePoint) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       isRobotFalling.set(!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);
+
+      if (isRobotFalling.getBooleanValue()){
+         tempFallingDirection.set(capturePoint);
+         FramePoint2d footCenter = combinedFootPolygon.getCentroid();
+         tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
+         footCenter.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFallingDirection.sub(footCenter);
+         fallingDirection.set(tempFallingDirection);
+      }
    }
 
    public boolean isRobotFalling()
@@ -116,5 +124,9 @@ public class WalkingFailureDetectionControlModule
          return false;
 
       return isRobotFalling.getBooleanValue();
+   }
+
+   public FrameVector2d getFallingDirection(){
+      return fallingDirection;
    }
 }
