@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.drcRobot;
 import java.util.List;
 
 import us.ihmc.darpaRoboticsChallenge.environment.CommonAvatarEnvironmentInterface;
+import us.ihmc.darpaRoboticsChallenge.environment.DRCDemo01NavigationEnvironment;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -15,8 +16,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 
    public FlatGroundEnvironment()
    {
-      flatGround = new CombinedTerrainObject3D("FlatGround");
-      flatGround.addBox(-20.0, -20.0, 20.0, 20.0, -0.03, 0.0);
+      flatGround = DRCDemo01NavigationEnvironment.setUpGround("Ground");
    }
    
    @Override
