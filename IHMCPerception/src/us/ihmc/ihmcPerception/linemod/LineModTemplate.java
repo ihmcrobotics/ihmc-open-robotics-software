@@ -22,9 +22,7 @@ public class LineModTemplate implements Serializable
    public Point2d[] features;
    public long[] modality;
    public Rectangle region;
-   public int[] mask;
    public RigidBodyTransform transform;
-   public OrganizedPointCloud cloud;
 
    public LineModTemplate(byte[] buf)
    {

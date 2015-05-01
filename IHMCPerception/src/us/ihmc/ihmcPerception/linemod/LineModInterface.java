@@ -29,7 +29,8 @@ class LineModInterface
 
       byte[] out=new byte[outlen];
       System.arraycopy(buf, 0, out, 0, outlen);
-      return new LineModTemplate(buf);
+      LineModTemplate template = new LineModTemplate(out);
+      return template;
    }
    public static ArrayList<LineModDetection> matchTemplatesBytes(OrganizedPointCloud testCloud, ArrayList<LineModTemplate> templates, boolean averaging, boolean nonMaximalSupression)
    {
