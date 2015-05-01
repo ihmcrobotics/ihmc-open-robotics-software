@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 public enum HumanoidArmPose
 {   
    STAND_PREP, SMALL_CHICKEN_WINGS, LARGE_CHICKEN_WINGS, STRAIGHTEN_ELBOWS, SUPPINATE_ARMS_IN_A_LITTLE, ARMS_BACK, LARGER_CHICKEN_WINGS,
-   ARMS_OUT_EXTENDED, SUPPINATE_ARMS_IN_MORE, SUPPINATE_ARMS_IN_A_LOT, SUPER_CHICKEN_WINGS, FLYING, FLYING_SUPPINATE_IN, FLYING_SUPPINATE_OUT,
-   REACH_BACK, REACH_WAY_BACK, ARMS_03, REACH_FORWARD, REACH_WAY_FORWARD, ARM_STRAIGHT_DOWN, ARM_NINETY_ELBOW_DOWN, ARM_NINETY_ELBOW_FORWARD,
+   ARMS_OUT_EXTENDED, SUPPINATE_ARMS_IN_MORE, SUPPINATE_ARMS_IN_A_LOT, SUPER_CHICKEN_WINGS, FLYING, FLYING_SUPPINATE_IN, FLYING_SUPPINATE_OUT, FLYING_PALMS_UP,
+   FLEX_UP,REACH_BACK, REACH_WAY_BACK, ARMS_03, REACH_FORWARD, REACH_WAY_FORWARD, ARM_STRAIGHT_DOWN, ARM_NINETY_ELBOW_DOWN, ARM_NINETY_ELBOW_FORWARD,
    ARM_NINETY_ELBOW_UP, ARM_FORTFIVE_ELBOW_UP, ARM_FORTFIVE_ELBOW_DOWN, ARM_OUT_TRICEP_EXERCISE, ARM_NINETY_ELBOW_DOWN2, ARM_NINETY_ELBOW_FORWARD2, ARM_NINETY_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP3, ARM_FORTFIVE_ELBOW_DOWN2, ARM_FORTFIVE_ELBOW_DOWN3, REACH_FAR_FORWARD, REACH_FAR_BACK;
  
    private static final double halfPi = Math.PI / 2.0;
@@ -41,6 +41,10 @@ public enum HumanoidArmPose
             return new double[]{0.3, -1.0, 0.05, -0.9};
          case FLYING:
             return new double[]{0.3, -1.2, 0.05, -0.4};
+         case FLYING_PALMS_UP:
+            return new double[]{0.3, -1.2, -1.0, -0.4};
+         case FLEX_UP:
+            return new double[]{0.0,0.0,0.0,-2};
          case FLYING_SUPPINATE_IN:
             return new double[]{0.3, -1.2, 1.0, -0.4};
          case FLYING_SUPPINATE_OUT:
@@ -137,6 +141,10 @@ public enum HumanoidArmPose
             return new double[]{-0.0286, 0.3419, 0.9909};
          case FLYING:
             return new double[]{-0.0192, 0.3465, 1.1938};
+         case FLYING_PALMS_UP:
+            return new double[]{Math.PI/4.0, -Math.PI/2.0, Math.PI/4.0};
+         case FLEX_UP:
+            return new double[]{Math.PI/4.0, -Math.PI/2.0, Math.PI/4.0};
          case FLYING_SUPPINATE_IN:
             return new double[]{-0.8201, 1.1406, 0.5912};
          case FLYING_SUPPINATE_OUT:
@@ -238,9 +246,13 @@ public enum HumanoidArmPose
       case SUPPINATE_ARMS_IN_A_LOT:
          return new double[]{0.0, 0.0, 0.0};
       case SUPER_CHICKEN_WINGS:
-         return new double[]{0.0, Math.PI/2.0, 0.0};
+         return new double[]{0.0, 0.0, 0.0};
       case FLYING:
          return new double[]{0.0, 0.0, 0.0};
+      case FLYING_PALMS_UP:
+         return new double[]{Math.PI/2, 0.0, 0.0};
+      case FLEX_UP:
+         return new double[]{Math.PI/2,0.0,-0.7};
       case FLYING_SUPPINATE_IN:
          return new double[]{Math.PI/2.0, 0.0, 0.0};
       case FLYING_SUPPINATE_OUT:
