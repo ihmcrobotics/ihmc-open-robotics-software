@@ -70,8 +70,15 @@ public class GripperStatusRegister implements RobotiqRegister
    @Override
    public byte getRegisterValue()
    {
-      // TODO Auto-generated method stub
-      return 0;
+      byte ret = (byte)0x0;
+      
+      ret |= gsta.getValue() << 7;
+      ret |= gimc.getValue() << 5;
+      ret |= ggto.getValue() << 3;
+      ret |= gmod.getValue() << 2;
+      ret |= gact.getValue();
+      
+      return ret;
    }
 
    @Override
