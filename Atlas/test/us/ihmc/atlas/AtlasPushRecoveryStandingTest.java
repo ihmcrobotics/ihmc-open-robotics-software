@@ -3,10 +3,10 @@ package us.ihmc.atlas;
 import us.ihmc.darpaRoboticsChallenge.DRCPushRecoveryStandingTest;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = {BambooPlanType.Fast, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.InDevelopment, BambooPlanType.VideoA})
 public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest {
 
 	@Override
