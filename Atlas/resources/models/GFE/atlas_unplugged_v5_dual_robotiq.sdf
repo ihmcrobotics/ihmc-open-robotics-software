@@ -642,7 +642,7 @@
         <geometry>
           <mesh>
             <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_1-0.STL</uri>
+            <uri>model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_NO_SHOULDER.stl</uri>
           </mesh>
         </geometry>
       </visual>
