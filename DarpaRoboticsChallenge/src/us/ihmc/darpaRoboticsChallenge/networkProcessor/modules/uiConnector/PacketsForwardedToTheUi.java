@@ -15,6 +15,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
+import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.communication.packets.sensing.RawIMUPacket;
@@ -59,7 +60,8 @@ public class PacketsForwardedToTheUi
       JointAnglesPacket.class,
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
-      DetectedObjectPacket.class
+      DetectedObjectPacket.class,
+      MultisenseMocapExperimentPacket.class
    };
    
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();
