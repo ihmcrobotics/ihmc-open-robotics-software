@@ -319,6 +319,14 @@ public class CapturePointPlannerAdapter
       }
    }
 
+   public double getInitialTransferDuration()
+   {
+      if (useNewICPPlanner)
+         return icpPlanner.getInitialTransferDuration();
+      else
+         return capturePointPlanner.getInitialTransferDuration();
+   }
+
    public double getEstimatedTimeRemainingForState(double time)
    {
       if (useNewICPPlanner)

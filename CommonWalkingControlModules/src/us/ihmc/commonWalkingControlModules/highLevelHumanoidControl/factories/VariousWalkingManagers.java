@@ -102,7 +102,7 @@ public class VariousWalkingManagers
       FeetManager feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, swingTimeProvider, registry);
 
       PelvisPoseProvider desiredPelvisPoseProvider = variousWalkingProviders.getDesiredPelvisPoseProvider();
-      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, swingTimeProvider, momentumBasedController, desiredPelvisPoseProvider, registry);
+      PelvisOrientationManager pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, desiredPelvisPoseProvider, registry);
       
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
       PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, desiredPelvisPoseProvider, pelvisXYControlGains, registry);
