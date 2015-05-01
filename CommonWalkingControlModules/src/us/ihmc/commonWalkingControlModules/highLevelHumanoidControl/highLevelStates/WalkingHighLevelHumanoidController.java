@@ -489,7 +489,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       else
       {
          pelvisOrientationManager.resetOrientationOffset();
-         pelvisOrientationManager.setToHoldCurrent();
+         pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       }
       
       if(manipulationControlModule != null)
@@ -897,8 +897,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
          }
 
-         if (transferToSide == null || footPoseProvider.checkForNewPose() != null)
-            pelvisOrientationManager.setToHoldCurrentDesired();
+         if (transferToSide == null)
+            pelvisOrientationManager.setToHoldCurrentDesiredInWorldFrame();
+         else if (footPoseProvider.checkForNewPose() != null)
+            pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
          else
             pelvisOrientationManager.moveToZeroInSupportFoot(transferToSide);
 
@@ -1156,7 +1158,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
          else
          {
-            pelvisOrientationManager.setToHoldCurrentDesired();
+            pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
             centerOfMassHeightTrajectoryGenerator.setSupportLeg(supportSide);
          }
          

@@ -101,7 +101,7 @@ public class MultiContactTestHumanoidController extends AbstractHighLevelHumanoi
       currentCoM.changeFrame(desiredCoMPosition.getReferenceFrame());
       desiredCoMPosition.set(currentCoM);
 
-      pelvisOrientationManager.setToHoldCurrent();
+      pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       
       for (RobotSide robotSide : RobotSide.values)
       {

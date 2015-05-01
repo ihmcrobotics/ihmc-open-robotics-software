@@ -335,7 +335,7 @@ public class MomentumBasedControllerFactory
          
          if( variousWalkingManagers != null){
             variousWalkingManagers.getManipulationControlModule().initializeDesiredToCurrent(); 
-            variousWalkingManagers.getPelvisOrientationManager().setToHoldCurrent();
+            variousWalkingManagers.getPelvisOrientationManager().setToHoldCurrentInWorldFrame();
          }          
       }
    }
