@@ -30,6 +30,8 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public abstract class HandPoseStatusTest implements MultiRobotTestInterface
@@ -176,34 +178,44 @@ public abstract class HandPoseStatusTest implements MultiRobotTestInterface
       testHelper.simulateAndBlockAndCatchExceptions(2.1);
       hasSimulationBeenInitialized = true;
       
-      Vector3d startTranslation = new Vector3d();
-      testHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(startTranslation);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      RobotSide handToMove = RobotSide.LEFT;
+
+      ReferenceFrame handControlFrame = testHelper.getDRCSimulationFactory().getControllerFullRobotModel().getHandControlFrame(handToMove);
+      FramePoint startLocation = new FramePoint(handControlFrame);
+      startLocation.changeFrame(worldFrame);
+      Vector3d startTranslation = new Vector3d(startLocation.getPoint());
 
       Vector3d desiredTranslation = new Vector3d(startTranslation);
       desiredTranslation.add(new Vector3d(0.3,0.3,0.8));
       
       HandPosePacket outgoingHandPosePacket = createRandomHandPosePacket();
+      outgoingHandPosePacket.referenceFrame = Frame.WORLD;
       outgoingHandPosePacket.position.x = desiredTranslation.getX();
       outgoingHandPosePacket.position.y = desiredTranslation.getY();
       outgoingHandPosePacket.position.z = desiredTranslation.getZ();
       double trajectoryTime = 3.0;
       outgoingHandPosePacket.trajectoryTime = trajectoryTime;
-      outgoingHandPosePacket.robotSide = RobotSide.LEFT;
+      outgoingHandPosePacket.robotSide = handToMove;
       testHelper.send(outgoingHandPosePacket);
       double timeToSimulateHandMotion = 1.0;
       testHelper.simulateAndBlockAndCatchExceptions(timeToSimulateHandMotion);
       testHelper.send(new StopMotionPacket());
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
-      Vector3d endTranslation = new Vector3d();
-      testHelper.getRobot().getJoint("l_arm_wrx").getTranslationToWorld(endTranslation);
-      
+      FramePoint endLocation = new FramePoint(handControlFrame);
+      endLocation.changeFrame(worldFrame);
+      Vector3d endTranslation = new Vector3d(endLocation.getPoint());
+
       Vector3d expectedTranslation = new Vector3d();
       expectedTranslation.interpolate(startTranslation, desiredTranslation, timeToSimulateHandMotion / trajectoryTime);
       
       PrintTools.debug(this, "statusStartedCounter: " + statusStartedCounter + " statusCompletedCounter: " + statusCompletedCounter);
-      
+
       assertTrue((statusStartedCounter == 3) && (statusCompletedCounter == 2));
+      Vector3d error = new Vector3d();
+      error.sub(endTranslation, expectedTranslation);
+      System.out.println("Error: " + error);
       assertTrue(Math.abs(endTranslation.getX() - expectedTranslation.getX()) < 0.1);
       assertTrue(Math.abs(endTranslation.getY() - expectedTranslation.getY()) < 0.1);
       assertTrue(Math.abs(endTranslation.getZ() - expectedTranslation.getZ()) < 0.1);
