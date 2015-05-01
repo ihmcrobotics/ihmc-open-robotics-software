@@ -20,6 +20,8 @@ import us.ihmc.communication.packets.sensing.DepthDataClearCommand.DepthDataTree
 import us.ihmc.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.communication.packets.sensing.DepthDataStateCommand.LidarState;
+import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
+import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
@@ -53,6 +55,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
    private volatile boolean clearQuadTree = false;
    private volatile boolean clearDecayingPointCloud = false;
+   private final PacketCommunicator sensorSuitePacketCommunicator;
+   private boolean DEBUG_WITH_MOCAP = false;
 
    public PointCloudDataReceiver(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotJointMap jointMap, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
@@ -64,7 +68,8 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
       this.depthDataFilter = new RobotDepthDataFilter(fullRobotModel);
       this.contactPoints = jointMap.getContactPointParameters().getFootContactPoints();
       this.pointCloudWorldPacketGenerator = new PointCloudWorldPacketGenerator(sensorSuitePacketCommunicator, readWriteLock.readLock(), depthDataFilter);
-
+      this.sensorSuitePacketCommunicator = sensorSuitePacketCommunicator;
+      
       if (collisionBoxProvider != null)
       {
          collisionBoxNode = new CollisionShapeTester(this.fullRobotModel, collisionBoxProvider);
@@ -124,6 +129,21 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          {
             PointCloudData data = dataQueue.take(); // Do this outside lock to avoid dead-locks
             readWriteLock.writeLock().lock();
+            if(DEBUG_WITH_MOCAP)
+            {
+               for (PointCloudSource cloudSource : data.sources)
+               {
+                  if(cloudSource == PointCloudSource.NEARSCAN)
+                  {
+                     Point3d[] points = new Point3d[data.points.size()];
+                     points = data.points.toArray(points);
+                     MultisenseMocapExperimentPacket packet = new MultisenseMocapExperimentPacket();
+                     packet.setPointCloud(points, MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER);
+                     sensorSuitePacketCommunicator.send(packet);
+                  }
+               }
+            }
+            
             if (clearDecayingPointCloud)
             {
                if (robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null))
