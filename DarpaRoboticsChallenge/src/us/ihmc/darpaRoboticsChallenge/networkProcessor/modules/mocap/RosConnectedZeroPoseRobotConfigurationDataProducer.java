@@ -46,7 +46,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
    private final ReferenceFrames referenceFrames;
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame headFrame;
-   private final AtomicReference<RigidBodyTransform> atomicPelvisPoseInMocapFrame = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
+   private final AtomicReference<RigidBodyTransform> atomicPelvisPose = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
    private final Random random = new Random();
    
    public RosConnectedZeroPoseRobotConfigurationDataProducer(URI rosMasterURI, PacketCommunicator objectCommunicator, final DRCRobotModel robotModel)
@@ -60,6 +60,8 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       headFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
+      
+      updateRobotLocationBasedOnMultisensePose(new RigidBodyTransform());
 
       if(rosMasterURI != null)
       {
@@ -101,8 +103,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
    public void receivedClockMessage(long totalNsecs)
    {
-      RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPoseInMocapFrame.get();
-      fullRobotModel.updateFrames();
+      RigidBodyTransform pelvisPoseInMocapFrame = atomicPelvisPose.get();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, imuDefinitions);
 
@@ -124,6 +125,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          robotConfigurationData.setRootTranslation(translation);
          robotConfigurationData.setRootOrientation(orientation);
       }
+      fullRobotModel.updateFrames();
       packetCommunicator.send(robotConfigurationData);
    }
 
@@ -132,11 +134,16 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
       return GraphName.of("darpaRoboticsChallenge/RosConnectedZeroPoseRobotConfigurationDataProducer");
    }
 
-   public void updateRobotLocationBasedOnMultisensePose(RigidBodyTransform headPoseInMocapFrame)
+   public void updateRobotLocationBasedOnMultisensePose(RigidBodyTransform headPose)
    {
-      RigidBodyTransform pelvisInMocapFrame = new RigidBodyTransform();
-      RigidBodyTransform transformFromHeadToPelvis = headFrame.getTransformToDesiredFrame(pelvisFrame);
-      pelvisInMocapFrame.multiply(headPoseInMocapFrame, transformFromHeadToPelvis);
-      atomicPelvisPoseInMocapFrame.set(pelvisInMocapFrame);
+      RigidBodyTransform pelvisPose = new RigidBodyTransform();
+      RigidBodyTransform transformFromHeadToPelvis = pelvisFrame.getTransformToDesiredFrame(headFrame);
+      pelvisPose.multiply(headPose, transformFromHeadToPelvis);
+      atomicPelvisPose.set(pelvisPose);
+   }
+
+   public ReferenceFrames getReferenceFrames()
+   {
+      return referenceFrames;
    }
 }
