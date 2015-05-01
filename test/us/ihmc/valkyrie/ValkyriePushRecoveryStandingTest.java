@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = BambooPlanType.Flaky)
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class ValkyriePushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 {
    @Override

@@ -5,7 +5,7 @@ import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
-@BambooPlan(planType = BambooPlanType.Flaky)
+@BambooPlan(planType = BambooPlanType.InDevelopment)
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
