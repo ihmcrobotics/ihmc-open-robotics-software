@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GripperStatus implements RobotiqRegister
+public class GripperStatusRegister implements RobotiqRegister
 {
    private gACT gact;
    private gMOD gmod;
@@ -8,7 +8,7 @@ public class GripperStatus implements RobotiqRegister
    private gIMC gimc;
    private gSTA gsta;
    
-   public GripperStatus(gACT gact, gMOD gmod, gGTO ggto, gIMC gimc, gSTA gsta)
+   public GripperStatusRegister(gACT gact, gMOD gmod, gGTO ggto, gIMC gimc, gSTA gsta)
    {
       this.gact = gact;
       this.gmod = gmod;
