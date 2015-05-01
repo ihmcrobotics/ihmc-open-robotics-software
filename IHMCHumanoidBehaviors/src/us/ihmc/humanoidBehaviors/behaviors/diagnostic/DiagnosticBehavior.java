@@ -201,6 +201,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       HAND_SHAKE_PREP,
       HAND_SHAKE_SHAKE,
       GO_HOME,
+      FLEX_UP,
+      FLEX_UP_FLEX_DOWN,
       REDO_LAST_TASK // Keep that one at the end.
    };
 
@@ -1447,6 +1449,27 @@ public class DiagnosticBehavior extends BehaviorInterface
          pipeLine.requestNewStage();
       }
    }
+   
+   private void sequenceFlexUp()
+   {
+      flexUp();
+      sequenceGoHome();
+   }
+   
+   private void sequenceFlexUpFlexDown()
+   {
+      flexUp();
+//      flexDown();
+      sequenceGoHome();
+   }
+   
+   private void flexUp()
+   {  
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_PALMS_UP);
+      pipeLine.requestNewStage();
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLEX_UP);
+      pipeLine.requestNewStage();
+   }
 
    private void sequenceCuteWave()
    {
@@ -2105,10 +2128,11 @@ public class DiagnosticBehavior extends BehaviorInterface
       if (desiredUpperArmOrientation == null)
          return new double[upperArmJointsClone.get(robotSide).length];
 
+      
       FrameOrientation temporaryDesiredUpperArmOrientation = new FrameOrientation();
       temporaryDesiredUpperArmOrientation.setIncludingFrame(desiredUpperArmOrientation);
       
-      if (counterForUpperArmIK >= 10)
+      if (counterForUpperArmIK >= 50)
       {
          counterForUpperArmIK = 0;
          System.err.println("Could not find desired joint angles for the upper arm joints");
@@ -2446,6 +2470,13 @@ public class DiagnosticBehavior extends BehaviorInterface
             lastDiagnosticTask.set(DiagnosticTask.HAND_SHAKE_SHAKE);
             sequenceHandShakeShake();
             break;
+         case FLEX_UP:
+            lastDiagnosticTask.set(DiagnosticTask.FLEX_UP);
+            sequenceFlexUp();
+            break;
+         case FLEX_UP_FLEX_DOWN:
+            lastDiagnosticTask.set(DiagnosticTask.FLEX_UP_FLEX_DOWN);
+            sequenceFlexUpFlexDown();
          default:
             break;
          }
