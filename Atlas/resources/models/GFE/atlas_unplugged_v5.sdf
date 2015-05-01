@@ -318,7 +318,7 @@
       </physics>
     </joint>
     <link name='utorso'>
-      <pose>-0.006795 0 0.212 0 -0 0</pose>
+      <pose>-0.0125 0 0.212 0 -0 0</pose>
       <inertial>
         <pose>-0.0616866 0.00229456 0.316809 0 -0 0</pose>
         <mass>84.609</mass>
@@ -1635,7 +1635,6 @@
       </physics>
     </joint>
     <link name='head'>
-      <!--pose>0.2821 0 0.7885 0 -0 0</pose-->
       <pose>0.2421 0 0.8335 0 -0 0</pose>
       <inertial>
         <pose>-0.0754942 3.38765e-05 0.0277411 0 -0 0</pose>
@@ -1816,7 +1815,7 @@
       </physics>
     </joint>
     <link name='hokuyo_link'>
-      <pose>0.2375 0 0.8765 0 -0 0</pose>
+      <pose>0.1975 0 0.9215 0 -0 0</pose>
       <inertial>
         <pose>0.0324349 0.0004084 -0.0041783 0 -0 0</pose>
         <mass>0.057664</mass>
