@@ -257,7 +257,7 @@ public class CarIngressEgressController extends AbstractHighLevelHumanoidControl
       chestTrajectoryStartTime = yoTime.getDoubleValue();
       chestOrientationTrajectoryGenerator.initialize();
 
-      pelvisOrientationManager.setToHoldCurrentDesired();
+      pelvisOrientationManager.setToHoldCurrentDesiredInWorldFrame();
    }
 
    private void initializeContacts()
