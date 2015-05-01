@@ -441,6 +441,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private void initializeFromRotateAboutAxisPacket(RobotSide robotSide, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngleRightHandRule, boolean controlHandAngleAboutAxis)
    {
       if (DEBUG) PrintTools.debug(this, "Received Hand Rotate about Axis Packet");
+      
+      trajectoryTimeProvider.set(handPoseProvider.getTrajectoryTime());
 
       CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = handCircularPoseTrajectoryGenerators.get(robotSide);
       handCircularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngleRightHandRule);
