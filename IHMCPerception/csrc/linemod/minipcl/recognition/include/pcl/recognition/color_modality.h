@@ -97,7 +97,13 @@ namespace pcl
       void
       extractFeatures (const MaskMap & mask, size_t nr_features, size_t modalityIndex,
                        std::vector<QuantizedMultiModFeature> & features) const;
-  
+      inline void
+      extractAllFeatures (const MaskMap & mask, size_t nr_features, size_t modalityIndex,
+                       std::vector<QuantizedMultiModFeature> & features) const
+      {
+          throw std::runtime_error("not implemented");
+      }
+
       /** \brief Provide a pointer to the input dataset (overwrites the PCLBase::setInputCloud method)
         * \param cloud the const boost shared pointer to a PointCloud message
         */

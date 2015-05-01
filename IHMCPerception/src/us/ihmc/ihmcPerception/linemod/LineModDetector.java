@@ -1,5 +1,9 @@
 package us.ihmc.ihmcPerception.linemod;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -11,11 +15,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import javax.swing.JFrame;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 
 import com.jme3.math.FastMath;
 
@@ -176,7 +183,7 @@ public class LineModDetector
          float pitch = (float) Math.asin(viewpoint.z);
          if (pitch > FastMath.PI / 3)
             continue;
-         for (float roll = -FastMath.PI / 12; roll <= FastMath.PI / 12; roll += FastMath.PI / 12)
+         for (float roll = -FastMath.PI / 24; roll <= FastMath.PI / 24; roll += FastMath.PI / 24)
          {
             System.out.println("ypr " + yaw + " " + pitch + " " + roll);
             trainSingleDetector(yaw, pitch, roll, 0.0);
@@ -193,7 +200,6 @@ public class LineModDetector
       OrganizedPointCloud cloud = renderCloud(yaw, pitch, roll, distance);
       int[] mask = makeMaskByZThresholing(cloud, 1.5f);
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
-      template.mask = mask;
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setEuler(roll, pitch, yaw);
       transform.setTranslation(0, 0, distance);
@@ -230,6 +236,58 @@ public class LineModDetector
          return detections.get(maxi);
    }
 
+   void drawDetectionOnImage(LineModDetection bestDetection, BufferedImage image)
+   {
+      Vector3d rollPatchYaw = new Vector3d();
+      bestDetection.template.transform.getEulerXYZ(rollPatchYaw);
+   
+      //draw border
+      Graphics2D g2 = image.createGraphics();
+      g2.setStroke(new BasicStroke(1));
+      g2.setColor(Color.WHITE);
+      g2.drawLine(bestDetection.x, bestDetection.y, (int) (bestDetection.x+bestDetection.getScaledWidth()), bestDetection.y);
+      g2.drawLine(bestDetection.x, bestDetection.y, bestDetection.x, (int)(bestDetection.getScaledHeight()+ bestDetection.y));
+   
+      //
+      Vector3d rollPitchYaw=  new Vector3d();
+      bestDetection.template.transform.getEulerXYZ(rollPatchYaw);
+      rollPatchYaw.scale(1/UnitConversions.DEG_TO_RAD);
+      System.out.println("orientation="+rollPatchYaw);
+   
+      //
+      Vector3d xAxis = new Vector3d(50.0, 0.0 ,0.0);
+      Vector3d yAxis = new Vector3d(0.0, 50.0 ,0.0);
+      Vector3d zAxis = new Vector3d(0.0, 0.0 ,50.0);
+      RigidBodyTransform transform = new RigidBodyTransform(bestDetection.template.transform);
+      RigidBodyTransform spaceToImage = new RigidBodyTransform(new double[]
+            {
+               0.0, 1.0,  0.0, 0.0,
+               0.0, 0.0, -1.0, 0.0,
+              -1.0, 0.0,  0.0, 0.0
+            });
+      transform.invert();
+      spaceToImage.multiply(spaceToImage,transform);
+      
+      
+      spaceToImage.transform(xAxis);
+      spaceToImage.transform(yAxis);
+      spaceToImage.transform(zAxis);
+      
+//      System.out.println("XAxis" + xAxis);
+//      System.out.println("YAxis" + yAxis);
+//      System.out.println("ZAxis" + zAxis);
+      int x0 = (int)(bestDetection.x + bestDetection.getScaledWidth()/2);
+      int y0 = (int)(bestDetection.y + bestDetection.getScaledHeight()/2);
+      g2.setColor(Color.RED);
+      g2.drawLine(x0, y0, (int)(x0+xAxis.x), (int)(y0+xAxis.y));
+      g2.setColor(Color.GREEN);
+      g2.drawLine(x0, y0, (int)(x0+yAxis.x), (int)(y0+yAxis.y));
+      g2.setColor(Color.BLUE);
+      g2.drawLine(x0, y0, (int)(x0+zAxis.x), (int)(y0+zAxis.y));
+      
+   }
+
+   
    public static void main(String[] arg)
    {
 
@@ -246,17 +304,24 @@ public class LineModDetector
          detector.trainModelFromRenderedImagesSphere(3);
          detector.saveFeatures(featureFile);
       }
+      
+      ImagePanel imagePanel = new ImagePanel(500,500);
+      ShowImages.showWindow(imagePanel, "Detection");
 
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 36; i++)
       {
-         float groundTruthAngle = 0.52f; 
-         float distancePerturbation = (float) Math.random() * 0.2f;
-         OrganizedPointCloud testCloud = detector.renderCloud(groundTruthAngle, 0.0f, 0.0f, distancePerturbation);
+         float groundTruthAngle = (float)(i/36.0*FastMath.TWO_PI); 
+         float distancePerturbation = 0.0f;//(float) Math.random() * 0.2f;
+         OrganizedPointCloud testCloud = detector.renderCloud(groundTruthAngle, FastMath.PI/4.0, 0.0f, distancePerturbation);
          ArrayList<LineModDetection> detections = new ArrayList<>();
          LineModDetection bestDetection = detector.detectObjectAndEstimatePose(testCloud, detections);
          Vector3d rollPitchYaw = new Vector3d();
          bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
          System.out.println("estimated " + rollPitchYaw.getZ()/UnitConversions.DEG_TO_RAD + " groundtruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD);
+         
+         BufferedImage image = testCloud.getRGBImage();
+         detector.drawDetectionOnImage(bestDetection, image);
+         imagePanel.setBufferedImageSafe(image);
       }
    }
 }

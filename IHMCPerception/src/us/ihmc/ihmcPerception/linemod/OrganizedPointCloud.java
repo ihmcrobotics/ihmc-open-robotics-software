@@ -1,9 +1,14 @@
 package us.ihmc.ihmcPerception.linemod;
 
 import java.awt.image.BufferedImage;
+import java.io.Serializable;
 
-public class OrganizedPointCloud
+public class OrganizedPointCloud implements Serializable
 {
+   /**
+    * 
+    */
+   private static final long serialVersionUID = 5582206379721483971L;
    public int width;
    public int height;
    public float[] xyzrgb;

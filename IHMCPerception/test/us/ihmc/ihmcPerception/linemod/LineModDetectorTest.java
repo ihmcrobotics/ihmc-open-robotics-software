@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import javax.imageio.ImageIO;
+import javax.swing.JFrame;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
+
+import boofcv.gui.image.ImagePanel;
+import boofcv.gui.image.ShowImages;
 
 import com.jme3.math.FastMath;
 
@@ -34,15 +38,27 @@ public class LineModDetectorTest
    public void trainOneTestOne() throws IOException
    {
       LineModDetector detector = new LineModDetector("/examples/drill/drill.obj");
-      detector.trainSingleDetector(0.0, 0.0, 0.0, 0.0);
+      double angle = Math.PI;
+      detector.trainSingleDetector(angle, 0.0, 0.0, 0.0);
 
-      OrganizedPointCloud cloud = detector.renderCloud(0.0, 0.0, 0.0, 0.1);
+      OrganizedPointCloud cloud = detector.renderCloud(angle, 0.0, 0.0, 0.1);
       ImageIO.write(cloud.getRGBImage(), "png", new File("testRGB.png"));
       LineModDetection bestDetection = detector.detectObjectAndEstimatePose(cloud, null);
+      
+      //ensure location is correct
       assertEquals(cloud.getRGBImage().getWidth() / 2, bestDetection.x + bestDetection.template.region.width/2, 20);
       assertEquals(cloud.getRGBImage().getHeight() / 2, bestDetection.y + bestDetection.template.region.height, 20);
-//      System.out.println("score:"+bestDetection.score);
-      assertTrue(bestDetection.score> 0.98);
+
+      //score is good
+      System.out.println("score:"+bestDetection.score);
+      assertTrue(bestDetection.score> 0.97);
+
+      //adverserial cloud should receive low score
+      OrganizedPointCloud cloudAdverse = detector.renderCloud(angle+Math.PI/2.0, 0.0, 0.0, 0.1);
+      ImageIO.write(cloudAdverse.getRGBImage(), "png", new File("testRGBadv.png"));
+      LineModDetection bestDetectionAdverse = detector.detectObjectAndEstimatePose(cloudAdverse, null);
+      System.out.println("adverse score:"+bestDetectionAdverse.score);
+      assertTrue(bestDetectionAdverse.score< 0.95);
    }
    
    @Test
@@ -74,26 +90,27 @@ public class LineModDetectorTest
    public void testYawAngles() 
    {
       LineModDetector detector = new LineModDetector("/examples/drill/drill.obj");
-      int nYaws = 24;
+      int nYaws = 36;
       for(int i=0;i<nYaws;i++)
       {
          detector.trainSingleDetector(2.0*Math.PI*i/nYaws, 0.0, 0.0, 0.0);
          System.out.print(".");
       }
+
       
       for(double groundTruthYaw=0;groundTruthYaw<FastMath.TWO_PI;groundTruthYaw+=Math.PI/60.0)
       {
-              OrganizedPointCloud cloud = detector.renderCloud(groundTruthYaw, 0.0, 0.0, 0.2);
-              LineModDetection bestDetection = detector.detectObjectAndEstimatePose(cloud, null,false,true);
+              OrganizedPointCloud cloud = detector.renderCloud(groundTruthYaw, 0.0, 0.0, 0.1);
+              LineModDetection bestDetection = detector.detectObjectAndEstimatePose(cloud, null,true,false);
               if(bestDetection!=null)
               {
-                      Vector3d yawPitchRoll = new Vector3d();
-                      bestDetection.template.transform.getEulerXYZ(yawPitchRoll);
-                      double estimatedYaw= yawPitchRoll.getZ();
+                      Vector3d rollPitchYaw = new Vector3d();
+                      bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
+                      double estimatedYaw= rollPitchYaw.getZ();
                       double yawError = Math.min(Math.abs(estimatedYaw-groundTruthYaw),Math.PI*2-Math.abs(estimatedYaw-groundTruthYaw));
-//                      System.out.println(yawError/UnitConversions.DEG_TO_RAD);
-                      assertTrue(yawError < 20.0*UnitConversions.DEG_TO_RAD);
-//                      System.out.println("groundTruth = " + groundTruthYaw/UnitConversions.DEG_TO_RAD + " estimated = "+estimatedYaw/UnitConversions.DEG_TO_RAD + " " + "confidence " + bestDetection.score);
+                      System.out.println(yawError/UnitConversions.DEG_TO_RAD);
+                      System.out.println("groundTruth = " + groundTruthYaw/UnitConversions.DEG_TO_RAD + " estimated = "+estimatedYaw/UnitConversions.DEG_TO_RAD + " " + "confidence " + bestDetection.score);
+                      assertTrue(yawError < 10.0*UnitConversions.DEG_TO_RAD);
               }
               else
               {
