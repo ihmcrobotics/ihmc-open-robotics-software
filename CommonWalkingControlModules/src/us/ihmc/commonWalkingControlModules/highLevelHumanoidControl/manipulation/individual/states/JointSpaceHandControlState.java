@@ -103,6 +103,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
          if (doPositionControl)
          {
+            enablePositionControl();
             joint.setqDesired(trajectoryGenerator.getValue());
             joint.setQdDesired(trajectoryGenerator.getVelocity());
             double desiredAcceleration = trajectoryGenerator.getAcceleration();

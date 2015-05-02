@@ -221,6 +221,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       {
          if (doPositionControl)
          {
+            enablePositionControl();
             for (int i = 0; i < oneDoFJoints.length; i++)
             {
                OneDoFJoint joint = oneDoFJoints[i];
