@@ -7,7 +7,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
-import us.ihmc.utilities.ArrayTools;
 import us.ihmc.utilities.kinematics.InverseJacobianSolver;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
@@ -28,6 +27,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class TaskspaceToJointspaceCalculator
@@ -65,6 +66,10 @@ public class TaskspaceToJointspaceCalculator
 
    private final YoFrameVector yoAngularVelocityFromError;
    private final YoFrameVector yoLinearVelocityFromError;
+
+   private final DoubleYoVariable alphaSpatialVelocityFromError;
+   private final AlphaFilteredYoFrameVector filteredAngularVelocityFromError;
+   private final AlphaFilteredYoFrameVector filteredLinearVelocityFromError;
 
    private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
    private final Vector3d errorRotationVector = new Vector3d();
@@ -146,6 +151,11 @@ public class TaskspaceToJointspaceCalculator
 
       yoAngularVelocityFromError = new YoFrameVector(namePrefix + "AngularVelocityFromError", localControlFrame, registry);
       yoLinearVelocityFromError = new YoFrameVector(namePrefix + "LinearVelocityFromError", localControlFrame, registry);
+
+      alphaSpatialVelocityFromError = new DoubleYoVariable(namePrefix + "AlphaSpatialVelocityFromError", registry);
+      alphaSpatialVelocityFromError.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
+      filteredAngularVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredAngularVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoAngularVelocityFromError);
+      filteredLinearVelocityFromError = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredLinearVelocityFromError", "", registry, alphaSpatialVelocityFromError, yoLinearVelocityFromError);
 
       parentRegistry.addChild(registry);
    }
@@ -338,6 +348,11 @@ public class TaskspaceToJointspaceCalculator
       // Update YoVariables for the velocity
       getAngularAndLinearPartsFromSpatialVector(yoAngularVelocityFromError, yoLinearVelocityFromError, spatialVelocityFromError);
 
+      filteredAngularVelocityFromError.update();
+      filteredLinearVelocityFromError.update();
+
+      setSpatialVectorFromAngularAndLinearParts(spatialVelocityFromError, filteredAngularVelocityFromError, filteredLinearVelocityFromError);
+
       desiredControlFrameTwist.packMatrix(spatialDesiredVelocityToPack, 0);
       CommonOps.add(spatialVelocityFromError, spatialDesiredVelocityToPack, spatialDesiredVelocityToPack);
    }
@@ -381,7 +396,6 @@ public class TaskspaceToJointspaceCalculator
       MatrixTools.extractFrameTupleFromEJMLVector(linearPartToPack, spatialVector, localControlFrame, 3);
    }
 
-   @SuppressWarnings("unused")
    private void setSpatialVectorFromAngularAndLinearParts(DenseMatrix64F spatialVectorToPack, YoFrameVector yoAngularPart, YoFrameVector yoLinearPart)
    {
       yoAngularPart.getFrameTupleIncludingFrame(angularPart);
