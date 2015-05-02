@@ -21,8 +21,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
-import us.ihmc.yoUtilities.stateMachines.TimeInCurrentStateProvider;
 
 public class PushRecoveryControlModule
 {
@@ -30,7 +28,6 @@ public class PushRecoveryControlModule
    private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
 
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE = 0.02;
-   private static final double TRUST_TIME_SCALE = 0.95;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
    private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
    private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.5;
@@ -65,7 +62,6 @@ public class PushRecoveryControlModule
 
    private boolean recoveringFromDoubleSupportFall;
    private boolean usingReducedSwingTime;
-   private double reducedSwingTime;
 
    private final FrameConvexPolygon2d tempFootPolygon;
    private final FramePoint2d initialDesiredICP, finalDesiredICP;
@@ -81,10 +77,10 @@ public class PushRecoveryControlModule
    private final FrameConvexPolygon2d reducedSupportPolygon = new FrameConvexPolygon2d();
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
 
-   private FramePoint projectedCapturePoint;
-   private FramePoint2d projectedCapturePoint2d;
+   private final FramePoint projectedCapturePoint = new FramePoint();
+   private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
    private Footstep currentFootstep;
-   private FrameConvexPolygon2d footPolygon;
+   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
    private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
    private final DoubleYoVariable doubleSupportInitialSwingTime;
    private final BooleanYoVariable isICPOutside;
@@ -142,77 +138,31 @@ public class PushRecoveryControlModule
       reset();
    }
 
-   public class IsFallingFromDoubleSupportCondition implements StateTransitionCondition
+   /**
+    * Return null if the robot is not falling.
+    * If the robot is falling, it returns the suggested swingSide to recover. 
+    * @param timeInState
+    */
+   public RobotSide isRobotFallingFromDoubleSupport(double timeInState)
    {
-      private final RobotSide transferToSide;
-
-      private final YoVariableRegistry registry;
-
-      private final TimeInCurrentStateProvider timeInCurrentStateProvider;
-
-      public IsFallingFromDoubleSupportCondition(RobotSide robotSide, TimeInCurrentStateProvider timeInCurrentStateProvider)
-      {
-         transferToSide = robotSide;
-         this.timeInCurrentStateProvider = timeInCurrentStateProvider;
-
-         projectedCapturePoint = new FramePoint(worldFrame, 0.0, 0.0, 0.0);
-         projectedCapturePoint2d = new FramePoint2d(worldFrame, 0.0, 0.0);
-         footPolygon = new FrameConvexPolygon2d(worldFrame);
-
-         String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
-
-         PushRecoveryControlModule.this.registry.addChild(registry);
-      }
-
-      /**
-       * To check if the robot is falling from double support we check if the ICP is outside of a polygon which is the current support polygon (reduced in order to have a safe margin).
-       * Subsequently the supporting leg is selected having a look to the distance of the ICP from each edge of the feet, the closest foot to the icp is used as supporting, while the opposite side is used to swing.
-       * This because we know that moving the CoP close to the ICP decreases the ICP velocity.
-       * If left foot has been selected, we check if the ICP is to too far on the left side (like ICP is outside the reduced support polygon, but since is too on the left side the capture region will be on the left side as well
-       * and when stepping with the right foot the legs will cross each other), and in this case we select the right foot even if in not the closest to the ICP. The same check is done for the right foot. For both checks
-       * is used a line at a fixed distance from the feet center to detect if the ICP is too left or too right.
-       * Subsequently the swing time is computed based on the area of the area of the capture region and a fake next foot step is generated at the current location of the selected swing leg. In this way the
-       * walking high level state machine switches to single support with a desired foot step outside of the capture region and the normal push recovery will perform the recover adjusting the fake foot step inside of the capture region.
-       *
-       * Note. since the double support push recovery takes a step even if the capture region area is very small, we have been able to achieve a multi-step push recovery continuously recovering from double support.
-       *
-       */
-      @Override
-      public boolean checkCondition()
-      {
-         if (!enablePushRecovery.getBooleanValue() || !isEnabledInDoubleSupport())
-            return false;
-
-         return isRobotFallingFromDoubleSupport(timeInCurrentStateProvider.timeInCurrentState());
-      }
-
-      private boolean isRobotFallingFromDoubleSupport(double timeInState)
-      {
-         if (!isICPOutside.getBooleanValue() || recoverFromDoubleSupportFallFootstep != null)
-            return false;
-
-         RobotSide swingSide = swingSideForDoubleSupportRecovery.getEnumValue();
-
-         if (transferToSide == swingSide)
-            return false;
-
-         if (Double.isNaN(captureRegionAreaWithDoubleSupportMinimumSwingTime.getDoubleValue()) && !existsAMinimumSwingTimeCaptureRegion.getBooleanValue())
-            return false;
-
-         initializeParametersForDoubleSupportPushRecovery();
-
-         return true;
-      }
-
-      private void initializeParametersForDoubleSupportPushRecovery()
-      {
-         swingTimeCalculationProvider.setSwingTime(MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY);
-         usingReducedSwingTime = true;
-         recoverFromDoubleSupportFallFootstep = currentFootstep;
-         recoveringFromDoubleSupportFall = true;
-         reducedSwingTime = doubleSupportInitialSwingTime.getDoubleValue();
-      }
+      if (!isICPOutside.getBooleanValue() || recoverFromDoubleSupportFallFootstep != null)
+         return null;
+      
+      RobotSide swingSide = swingSideForDoubleSupportRecovery.getEnumValue();
+      
+      // Actually falling pretty hard there. Nothing to do for now.
+      if (Double.isNaN(captureRegionAreaWithDoubleSupportMinimumSwingTime.getDoubleValue()) && !existsAMinimumSwingTimeCaptureRegion.getBooleanValue())
+         return null;
+      
+      return swingSide;
+   }
+   
+   public void initializeParametersForDoubleSupportPushRecovery()
+   {
+      swingTimeCalculationProvider.setSwingTime(MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY);
+      usingReducedSwingTime = true;
+      recoverFromDoubleSupportFallFootstep = currentFootstep;
+      recoveringFromDoubleSupportFall = true;
    }
 
    public void updateForDoubleSupport(double timeInState)
@@ -378,7 +328,7 @@ public class PushRecoveryControlModule
       captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
 
       // If the capture region is too small we reduce the swing time.
-      while (captureRegionCalculator.getCaptureRegionArea() < PushRecoveryControlModule.MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA * footPolygon.getArea()
+      while (captureRegionCalculator.getCaptureRegionArea() < MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA * footPolygon.getArea()
             || Double.isNaN(captureRegionCalculator.getCaptureRegionArea()))
       {
          reducedSwingTime = reducedSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
@@ -435,17 +385,6 @@ public class PushRecoveryControlModule
       return recoverFromDoubleSupportFallFootstep;
    }
 
-   /**
-    * This method returns the swing time that is used to perform the double support push recovery swing, but reduced by a small amount.
-    * This is required to activate the transition between single support and double support as soon as the swing is finished.
-    *
-    * @return reduced swing time
-    */
-   public double getTrustTimeToConsiderSwingFinished()
-   {
-      return reducedSwingTime * TRUST_TIME_SCALE;
-   }
-
    public double getSwingTimeRemaining()
    {
       return swingTimeRemaining.getDoubleValue();
@@ -459,6 +398,16 @@ public class PushRecoveryControlModule
    public boolean isEnabledInDoubleSupport()
    {
       return enablePushRecoveryFromDoubleSupport.getBooleanValue();
+   }
+
+   public void setIsEnabled(boolean enable)
+   {
+      enablePushRecovery.set(enable);
+   }
+
+   public void setIsEnabledInDoubleSupport(boolean enable)
+   {
+      enablePushRecoveryFromDoubleSupport.set(enable);
    }
 
    public boolean isRecoveringFromDoubleSupportFall()
