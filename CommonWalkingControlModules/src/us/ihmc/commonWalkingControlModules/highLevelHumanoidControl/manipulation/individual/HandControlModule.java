@@ -91,6 +91,8 @@ public class HandControlModule
    private final Map<OneDoFJoint, OneDoFJointWayPointTrajectoryGenerator> waypointsPolynomialTrajectoryGenerators;
    private final Map<OneDoFJoint, MultipleWaypointsOneDoFJointTrajectoryGenerator> wholeBodyWaypointsPolynomialTrajectoryGenerators;
 
+   private final Map<OneDoFJoint, DoubleYoVariable> desiredArmJointAngles;
+
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final CirclePoseTrajectoryGenerator circularPoseTrajectoryGenerator;
@@ -190,6 +192,13 @@ public class HandControlModule
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
+
+      desiredArmJointAngles = new LinkedHashMap<>();
+
+      for (OneDoFJoint oneDoFJoint : oneDoFJoints)
+      {
+         desiredArmJointAngles.put(oneDoFJoint, new DoubleYoVariable(name + "_q_d_" + oneDoFJoint.getName(), registry));
+      }
 
       requestedState = new EnumYoVariable<HandControlState>(name + "RequestedState", "", registry, HandControlState.class, true);
       requestedState.set(null);
@@ -360,6 +369,9 @@ public class HandControlModule
 
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+         desiredArmJointAngles.get(oneDoFJoints[i]).set(oneDoFJoints[i].getqDesired());
 
       checkAndSendHandPoseStatusIsCompleted();
    }
