@@ -273,15 +273,9 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
 
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecoveryFromDoubleSupport");
-      BooleanYoVariable usePushRecoveryICPPlanner = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "usePushRecoveryICPPlanner");
 
       // enable push recovery
       enable.set(true);
-      enableDS.set(true);
-
-      // enable ICP push recovery planner and disable projection planner
-      usePushRecoveryICPPlanner.set(true);
    }
 
    private void setupTrack(boolean runMultiThreaded, DRCRobotModel robotModel)
