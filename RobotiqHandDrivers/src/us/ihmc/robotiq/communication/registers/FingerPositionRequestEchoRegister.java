@@ -3,7 +3,7 @@ package us.ihmc.robotiq.communication.registers;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerPositionRequestEchoRegister implements RobotiqRegister
+public class FingerPositionRequestEchoRegister implements RobotiqInputRegister
 {
    private final int index;
    private byte positionEcho;
@@ -29,15 +29,16 @@ public class FingerPositionRequestEchoRegister implements RobotiqRegister
       }
    }
    
-   public void setPosition(byte positionEcho)
-   {
-      this.positionEcho = positionEcho;
-   }
-
    @Override
    public byte getRegisterValue()
    {
       return positionEcho;
+   }
+   
+   @Override
+   public void setRegisterValue(byte value)
+   {
+      positionEcho = value;
    }
 
    @Override

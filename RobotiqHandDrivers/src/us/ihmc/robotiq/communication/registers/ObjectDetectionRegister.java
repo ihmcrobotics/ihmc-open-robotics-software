@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class ObjectDetectionRegister implements RobotiqRegister
+public class ObjectDetectionRegister implements RobotiqInputRegister
 {
    private gDTA gdta;
    private gDTB gdtb;
@@ -66,6 +66,39 @@ public class ObjectDetectionRegister implements RobotiqRegister
       ret |= gdta.getValue() << 1;
       
       return ret;
+   }
+   
+   @Override
+   public void setRegisterValue(byte value)
+   {
+      byte gdts = (byte) ((value >>> 6) & 0x3);
+      byte gdtc = (byte) ((value >>> 4) & 0x3);
+      byte gdtb = (byte) ((value >>> 2) & 0x3);
+      byte gdta = (byte) (value & 0x3);
+      
+      for(gDTA g : gDTA.values())
+      {
+         if(g.getValue() == gdta)
+            this.gdta = g;
+      }
+      
+      for(gDTB g : gDTB.values())
+      {
+         if(g.getValue() == gdtb)
+            this.gdtb = g;
+      }
+      
+      for(gDTC g : gDTC.values())
+      {
+         if(g.getValue() == gdtc)
+            this.gdtc = g;
+      }
+      
+      for(gDTS g : gDTS.values())
+      {
+         if(g.getValue() == gdts)
+            this.gdts = g;
+      }
    }
 
    @Override

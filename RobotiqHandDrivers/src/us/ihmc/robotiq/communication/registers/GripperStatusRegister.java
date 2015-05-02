@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GripperStatusRegister implements RobotiqRegister
+public class GripperStatusRegister implements RobotiqInputRegister
 {
    private gACT gact;
    private gMOD gmod;
@@ -79,6 +79,52 @@ public class GripperStatusRegister implements RobotiqRegister
       ret |= gact.getValue();
       
       return ret;
+   }
+   
+   @Override
+   public void setRegisterValue(byte value)
+   {
+      byte gsta = (byte) ((value >>> 6) & 0x3);
+      byte gimc = (byte) ((value >>> 4) & 0x3);
+      byte ggto = (byte) ((value >>> 3) & 0x1);
+      byte gmod = (byte) ((value >>> 1) & 0x3);
+      byte gact = (byte) (value & 0x1);
+      
+      for(gACT g : gACT.values())
+      {
+         if(g.getValue() == gact)
+            this.gact = g;
+      }
+      
+      for(gMOD g : gMOD.values())
+      {
+         if(g.getValue() == gmod)
+            this.gmod = g;
+      }
+      
+      for(gGTO g : gGTO.values())
+      {
+         if(g.getValue() == ggto)
+            this.ggto = g;
+      }
+      
+      for(gIMC g : gIMC.values())
+      {
+         if(g.getValue() == gimc)
+            this.gimc = g;
+      }
+      
+      for(gSTA g : gSTA.values())
+      {
+         if(g.getValue() == gsta)
+            this.gsta = g;
+      }
+   }
+   
+   public static void main(String[] args)
+   {
+      GripperStatusRegister gsr = new GripperStatusRegister(gACT.GRIPPER_RESET, gMOD.BASIC_MODE, gGTO.STOPPED, gIMC.ACTIVATION_AND_MODE_CHANGE_COMPLETE, gSTA.ALL_FINGERS_STOPPED);
+      gsr.setRegisterValue((byte)242);
    }
 
    @Override
