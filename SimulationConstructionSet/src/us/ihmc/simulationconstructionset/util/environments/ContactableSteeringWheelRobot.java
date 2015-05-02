@@ -2,7 +2,6 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -12,6 +11,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.utilities.Axis;
 import us.ihmc.utilities.math.RotationalInertiaCalculator;
 import us.ihmc.utilities.math.geometry.FrameCylinder3d;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -108,10 +108,11 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
    public void addSpinnerHandle(double percentOfSteeringWheelRadius)
    {
-      addSpinnerHandle(0.0, percentOfSteeringWheelRadius, 0.15, spokesThickness / 2.0);
+      addSpinnerHandle(0.0, percentOfSteeringWheelRadius, 0.15, spokesThickness / 2.0, 0.0);
    }
 
-   public void addSpinnerHandle(double angleOnSteeringWheelingInDegrees, double percentOfSteeringWheelRadius, double handleLength, double handleRadius)
+   public void addSpinnerHandle(double angleOnSteeringWheelingInDegrees, double percentOfSteeringWheelRadius, double handleLength, double handleRadius,
+         double distanceFromWheel)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
 
@@ -120,14 +121,16 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double xHandle = distanceFromCenter * Math.cos(angleOnSteeringWheel);
       double yHandle = distanceFromCenter * Math.sin(angleOnSteeringWheel);
 
-      transform.setTranslation(xHandle, yHandle, 0.0);
-
+      Vector3d translation = new Vector3d(xHandle, yHandle, distanceFromWheel);
+      transform.setTranslation(translation);
+      
       FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, handleLength, handleRadius);
       spokesCylinders.add(spinnerHandleCylinder);
 
-      steeringWheelLinkGraphics.translate(xHandle, yHandle, 0.0);
+      steeringWheelLinkGraphics.translate(translation);
       steeringWheelLinkGraphics.addCylinder(handleLength, handleRadius, YoAppearance.IndianRed());
-      steeringWheelLinkGraphics.translate(-xHandle, -yHandle, 0.0);
+      translation.negate();
+      steeringWheelLinkGraphics.translate(translation);
 
       steeringWheelLink.setLinkGraphics(steeringWheelLinkGraphics);
 
@@ -137,11 +140,15 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    public void addCrossBar()
    {
       double height = 2.0 * steeringWheelRadius;
-      double radius = 0.03;
+      double radius = 0.015;
       
-      Vector3d translation = new Vector3d(0.0, height/2.0, 0.15);
-      AxisAngle4d rotation = new AxisAngle4d(new Vector3d(1.0, 0.0, 0.0), Math.PI/2.0);
-      RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
+      FramePose crossBar = new FramePose(steeringWheelFrame);
+      crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0);
+      crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0);
+      crossBar.setPosition(new Vector3d(-height/2.0, 0.0, 0.15));
+      
+      RigidBodyTransform transform = new RigidBodyTransform();
+      crossBar.getPose(transform);
       
       FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, height, radius);
       spokesCylinders.add(spinnerHandleCylinder);
