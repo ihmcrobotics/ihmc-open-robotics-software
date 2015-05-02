@@ -183,7 +183,8 @@ public class TaskspaceToJointspaceCalculator
       setJointAngleRegularizationWeight(5.0);
       setMaximumJointVelocity(5.0);
       setMaximumJointAcceleration(50.0);
-      setMaximumTaskspaceVelocity(1.5, 0.5);
+      setMaximumTaskspaceVelocity(0.087, 0.05);
+      setTaskspaceVelocityFromErrorFilterBreakFrequency(10.0);
    }
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
@@ -262,6 +263,11 @@ public class TaskspaceToJointspaceCalculator
    {
       this.maximumTaskspaceAngularVelocityMagnitude.set(maximumAngularVelocity);
       this.maximumTaskspaceLinearVelocityMagnitude.set(maximumLinearVelocity);
+   }
+
+   public void setTaskspaceVelocityFromErrorFilterBreakFrequency(double breakFrequency)
+   {
+      alphaSpatialVelocityFromError.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency, controlDT));
    }
 
    public void compute(FramePoint desiredPosition, FrameOrientation desiredOrientation, FrameVector desiredLinearVelocity, FrameVector desiredAngularVelocity)
