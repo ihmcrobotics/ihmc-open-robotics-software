@@ -44,6 +44,7 @@ public class PushRecoveryControlModule
    private final BooleanYoVariable enablePushRecovery;
 
    private final BooleanYoVariable recovering;
+   private final BooleanYoVariable recoveringFromDoubleSupportFall;
    private final BooleanYoVariable tryingUncertainRecover;
    private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
@@ -58,13 +59,8 @@ public class PushRecoveryControlModule
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> soleFrames;
 
-   private boolean recoveringFromDoubleSupportFall;
-   private boolean usingReducedSwingTime;
-
    private final FrameConvexPolygon2d tempFootPolygon;
-   private final FramePoint2d initialDesiredICP, finalDesiredICP;
 
-   private final DoubleYoVariable swingTimeRemaining;
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
 
    private Footstep recoverFromDoubleSupportFallFootstep;
@@ -99,7 +95,6 @@ public class PushRecoveryControlModule
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE);
 
-      usingReducedSwingTime = false;
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(registry, yoGraphicsListRegistry);
@@ -107,13 +102,11 @@ public class PushRecoveryControlModule
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
+      recoveringFromDoubleSupportFall = new BooleanYoVariable("recoveringFromDoubleSupportFall", registry);
       tryingUncertainRecover = new BooleanYoVariable("tryingUncertainRecover", registry);
       existsAMinimumSwingTimeCaptureRegion = new BooleanYoVariable("existsAMinimumSwingTimeCaptureRegion", registry);
-      initialDesiredICP = new FramePoint2d(worldFrame);
-      finalDesiredICP = new FramePoint2d(worldFrame);
 
       tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
-      swingTimeRemaining = new DoubleYoVariable("pushRecoverySwingTimeRemaining", registry);
       captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
       isICPOutside = new BooleanYoVariable("isICPOutside", registry);
@@ -155,10 +148,9 @@ public class PushRecoveryControlModule
    
    public void initializeParametersForDoubleSupportPushRecovery()
    {
-      swingTimeCalculationProvider.setSwingTime(MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY);
-      usingReducedSwingTime = true;
+      swingTimeCalculationProvider.setSwingTime(doubleSupportInitialSwingTime.getDoubleValue());
       recoverFromDoubleSupportFallFootstep = currentFootstep;
-      recoveringFromDoubleSupportFall = true;
+      recoveringFromDoubleSupportFall.set(true);
    }
 
    public void updateForDoubleSupport(double timeInState)
@@ -251,8 +243,6 @@ public class PushRecoveryControlModule
     */
    public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep, FrameConvexPolygon2d footPolygon)
    {
-      this.swingTimeRemaining.set(swingTimeRemaining);
-
       if (enablePushRecovery.getBooleanValue())
       {
          if (tryingUncertainRecover.getBooleanValue())
@@ -290,17 +280,9 @@ public class PushRecoveryControlModule
       recoverFromDoubleSupportFallFootstep = null;
       captureRegionCalculator.hideCaptureRegion();
 
-      if (recoveringFromDoubleSupportFall)
-      {
-         if (usingReducedSwingTime)
-         {
-            swingTimeCalculationProvider.updateSwingTime();
-            usingReducedSwingTime = false;
-         }
-         recoveringFromDoubleSupportFall = false;
-         tryingUncertainRecover.set(false);
-         existsAMinimumSwingTimeCaptureRegion.set(false);
-      }
+      recoveringFromDoubleSupportFall.set(false);
+      tryingUncertainRecover.set(false);
+      existsAMinimumSwingTimeCaptureRegion.set(false);
    }
 
    /**
@@ -381,11 +363,6 @@ public class PushRecoveryControlModule
       return recoverFromDoubleSupportFallFootstep;
    }
 
-   public double getSwingTimeRemaining()
-   {
-      return swingTimeRemaining.getDoubleValue();
-   }
-
    public boolean isEnabled()
    {
       return enablePushRecovery.getBooleanValue();
@@ -398,34 +375,7 @@ public class PushRecoveryControlModule
 
    public boolean isRecoveringFromDoubleSupportFall()
    {
-      return recoveringFromDoubleSupportFall;
-   }
-
-   public void setSwingTimeRemaining(double value)
-   {
-      swingTimeRemaining.set(value);
-   }
-
-   public void setRecoveringFromDoubleSupportState(boolean value)
-   {
-      recoveringFromDoubleSupportFall = value;
-   }
-
-   public void setRecoverFromDoubleSupportFootStep(Footstep recoverFootStep)
-   {
-      recoverFromDoubleSupportFallFootstep = recoverFootStep;
-   }
-
-   public void setFinalDesiredICP(FramePoint2d tempPoint)
-   {
-      tempPoint.changeFrame(worldFrame);
-      finalDesiredICP.setIncludingFrame(worldFrame, tempPoint.getX(), tempPoint.getY());
-   }
-
-   public void setInitialDesiredICP(FramePoint2d tempPoint)
-   {
-      tempPoint.changeFrame(worldFrame);
-      initialDesiredICP.setIncludingFrame(worldFrame, tempPoint.getX(), tempPoint.getY());
+      return recoveringFromDoubleSupportFall.getBooleanValue();
    }
 
    public boolean isRecovering()

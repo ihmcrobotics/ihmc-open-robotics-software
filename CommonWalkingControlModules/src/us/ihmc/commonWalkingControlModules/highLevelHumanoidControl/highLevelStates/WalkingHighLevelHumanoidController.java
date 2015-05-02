@@ -895,8 +895,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (pushRecoveryModule.isEnabled())
          {
-            pushRecoveryModule.setRecoverFromDoubleSupportFootStep(null);
-            pushRecoveryModule.setRecoveringFromDoubleSupportState(false);
+            pushRecoveryModule.reset();
          }
 
          double transferTime;
