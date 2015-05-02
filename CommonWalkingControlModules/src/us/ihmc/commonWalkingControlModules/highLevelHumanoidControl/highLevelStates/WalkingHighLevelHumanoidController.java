@@ -1123,8 +1123,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
-            nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
-            pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeCalculationProvider.getValue(), nextFootstep);
+            nextFootstep = pushRecoveryModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeCalculationProvider.getValue());
             squareUpFootstepForPushRecovery = createSquareUpFootstep(nextFootstep.getRobotSide());
 
             upcomingFootstepList.requestCancelPlanToProvider();
@@ -1732,7 +1731,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       Footstep nextFootstep;
       if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
       {
-         nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
+         nextFootstep = null;
       }
       else
       {
