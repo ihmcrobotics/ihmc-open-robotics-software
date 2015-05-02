@@ -46,5 +46,4 @@ public class ActualFingerPositionRegister implements RobotiqRegister
    {
       return index;
    }
-
 }

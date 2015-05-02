@@ -3,7 +3,7 @@ package us.ihmc.robotiq.communication.registers;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerSpeedRegister implements RobotiqRegister
+public class FingerSpeedRegister implements RobotiqOutputRegister
 {
    private final byte MAX_SPEED = (byte) 0xFF;
    private final byte MIN_SPEED = (byte) 0x00;
@@ -44,10 +44,16 @@ public class FingerSpeedRegister implements RobotiqRegister
    {
       return speed;
    }
+
    @Override
    public int getRegisterIndex()
    {
       return index;
    }
-
+   
+   @Override
+   public void resetRegister()
+   {
+      speed = MAX_SPEED;
+   }
 }

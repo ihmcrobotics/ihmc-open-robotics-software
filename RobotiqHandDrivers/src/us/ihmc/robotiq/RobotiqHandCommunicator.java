@@ -1,19 +1,16 @@
 package us.ihmc.robotiq;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import net.wimpi.modbus.msg.ModbusRequest;
-import net.wimpi.modbus.msg.ModbusResponse;
-import sun.awt.RepaintArea;
+import net.wimpi.modbus.ModbusException;
+import net.wimpi.modbus.facade.ModbusTCPMaster;
+import net.wimpi.modbus.procimg.InputRegister;
+import net.wimpi.modbus.procimg.Register;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
-import us.ihmc.robotiq.communication.JamodTCPConnection;
-import us.ihmc.robotiq.communication.RobotiqReadRequestFactory;
 import us.ihmc.robotiq.communication.RobotiqWriteRequestFactory;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -22,58 +19,55 @@ public class RobotiqHandCommunicator
 {
    private final int PORT = 502;
 
-   private JamodTCPConnection communicator;
+   private ModbusTCPMaster communicator;
    
    private RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
-   private RobotiqReadRequestFactory readRequestFactory = new RobotiqReadRequestFactory();
-   private ModbusResponse response;
+   private InputRegister[] response = new InputRegister[8];
    
    private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
-   private FingerState fingerState = FingerState.OPEN;
    
    public RobotiqHandCommunicator(RobotSide robotSide)
    {
       NetworkParameterKeys key = robotSide.equals(RobotSide.LEFT) ? NetworkParameterKeys.leftHand : NetworkParameterKeys.rightHand;
       try
       {
-         communicator = new JamodTCPConnection(InetAddress.getByName(NetworkParameters.getHost(key)), PORT);
+         communicator = new ModbusTCPMaster(NetworkParameters.getHost(key), PORT);
          communicator.connect();
       }
-      catch (UnknownHostException e)
+      catch (Exception e)
       {
          e.printStackTrace();
       }
    }
    
-   public boolean isConnected()
+   public void read() throws ModbusException
    {
-      return communicator.isConnected();
+      response = communicator.readInputRegisters(0, 8);
+      
    }
    
-   public void read()
+   public void initialize() throws ModbusException
    {
-      ModbusRequest request = readRequestFactory.getReadRequest();
-      response = communicator.sendRequest(request);
+      Register[] request = writeRequestFactory.createActivationRequest();
+      communicator.writeMultipleRegisters(0, request);
    }
    
-   public void initialize()
+   public void reset() throws ModbusException
    {
-      ModbusRequest request = writeRequestFactory.createActivationRequest();
-      response = communicator.sendRequest(request);
+      Register[] request = writeRequestFactory.createDeactivationRequest();
+      communicator.writeMultipleRegisters(0, request);
    }
    
-   public void open()
+   public void open() throws ModbusException
    {
-      ModbusRequest request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.OPEN);
-      response = communicator.sendRequest(request);
+      Register[] request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.OPEN);
+      communicator.writeMultipleRegisters(0, request);
    }
    
-   public void close()
+   public void close() throws ModbusException
    {
-      ModbusRequest request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.CLOSE);
-      System.out.println("Close request: " + request.getHexMessage());
-      response = communicator.sendRequest(request);
-      System.out.println("Close response: " + response.getHexMessage());
+      Register[] request = writeRequestFactory.createFingerPositionRequest(graspMode, FingerState.CLOSE);
+      communicator.writeMultipleRegisters(0, request);
    }
    
    public void crush()
@@ -111,17 +105,34 @@ public class RobotiqHandCommunicator
       
       final RobotiqHandCommunicator hand = new RobotiqHandCommunicator(robotSide);
       
-      hand.initialize();
-      
+      try
+      {
+//         hand.reset();
+         hand.initialize();
+         
+      }
+      catch (ModbusException e)
+      {
+         e.printStackTrace();
+      }
+
       ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
       executor.scheduleAtFixedRate(new Runnable()
       {
          @Override
          public void run()
          {
-            hand.read();
+            try
+            {
+               hand.read();
+            }
+            catch (ModbusException e)
+            {
+               e.printStackTrace();
+            }
          }
       }, 0, 10, TimeUnit.MILLISECONDS);
+      
       
       executor.schedule(new Runnable()
       {
@@ -129,8 +140,32 @@ public class RobotiqHandCommunicator
          public void run()
          {
             System.out.println("Closing...");
-            hand.close();
+            try
+            {
+               hand.close();
+            }
+            catch (ModbusException e)
+            {
+               e.printStackTrace();
+            }
          }
-      }, 10, TimeUnit.SECONDS);
+      }, 20, TimeUnit.SECONDS);
+      
+      executor.schedule(new Runnable()
+      {
+         @Override
+         public void run()
+         {
+            System.out.println("Opening...");
+            try
+            {
+               hand.open();
+            }
+            catch (ModbusException e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }, 25, TimeUnit.SECONDS);
    }
 }

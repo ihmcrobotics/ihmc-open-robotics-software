@@ -46,6 +46,24 @@ public class RobotiqWriteRequest
       scissorSpeed = new FingerSpeedRegister(Finger.SCISSOR);
       scissorForce = new FingerForceRegister(Finger.SCISSOR);
    }
+   
+   public void resetRequestFields()
+   {
+      actionRequest.resetRegister();
+      gripperOption.resetRegister();
+      fingerAPositionRequest.resetRegister();
+      fingerASpeed.resetRegister();
+      fingerAForce.resetRegister();
+      fingerBPositionRequest.resetRegister();
+      fingerBSpeed.resetRegister();
+      fingerBForce.resetRegister();
+      fingerCPositionRequest.resetRegister();
+      fingerCSpeed.resetRegister();
+      fingerCForce.resetRegister();
+      scissorPositionRequest.resetRegister();
+      scissorSpeed.resetRegister();
+      scissorForce.resetRegister();
+   }
 
    public ActionRequestRegister getActionRequest()
    {
