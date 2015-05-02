@@ -1,11 +1,16 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class ActionRequestRegister implements RobotiqRegister
+public class ActionRequestRegister implements RobotiqOutputRegister
 {
    private rACT ract;
    private rMOD rmod;
    private rGTO rgto;
    private rATR ratr;
+
+   private rACT ractInitial;
+   private rMOD rmodInitial;
+   private rGTO rgtoInitial;
+   private rATR ratrInitial;
    
    public ActionRequestRegister(rACT ract, rMOD rmod, rGTO rgto, rATR ratr)
    {
@@ -13,6 +18,11 @@ public class ActionRequestRegister implements RobotiqRegister
       this.rmod = rmod;
       this.rgto = rgto;
       this.ratr = ratr;
+
+      this.ractInitial = ract;
+      this.rmodInitial = rmod;
+      this.rgtoInitial = rgto;
+      this.ratrInitial = ratr;
    }
    
    public rACT getRact()
@@ -72,6 +82,15 @@ public class ActionRequestRegister implements RobotiqRegister
    public int getRegisterIndex()
    {
       return 0;
+   }
+   
+   @Override
+   public void resetRegister()
+   {
+      ract = ractInitial;
+      rmod = rmodInitial;
+      rgto = rgtoInitial;
+      ratr = ratrInitial;
    }
    
    public enum rACT implements RobotiqRegisterComponent

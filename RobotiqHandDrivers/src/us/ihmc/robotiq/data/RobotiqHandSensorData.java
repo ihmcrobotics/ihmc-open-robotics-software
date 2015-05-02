@@ -31,33 +31,6 @@ public class RobotiqHandSensorData implements HandSensorData
 	static final int CHANGING_MODE = 2;
 	static final int CHANGE_COMPLETE = 3;
 	
-//	private static enum GripperStatus
-//	{
-//		IN_MOTION (0),
-//		STOPPED_SOME_SHORT (1),
-//		STOPPED_ALL_SHORT (2),
-//		STOPPED_AT_REQUESTED (3);
-//		
-//		private int value;
-//		GripperStatus(int value)
-//		{
-//			this.value = value;
-//		}
-//	}
-//	
-//	private static enum OperationMode
-//	{
-//		IN_MOTION (0),
-//		STOPPED_SOME_SHORT (1),
-//		STOPPED_ALL_SHORT (2),
-//		STOPPED_AT_REQUESTED (3);
-//		
-//		private int value;
-//		OperationMode(int value)
-//		{
-//			this.value = value;
-//		}
-//	}
 	private boolean activated;
 	private int operationMode;
 	private boolean motionRequests;

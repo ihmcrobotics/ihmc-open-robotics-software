@@ -7,7 +7,7 @@ import us.ihmc.robotiq.communication.registers.FingerPositionRequestEchoRegister
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister;
 
-public class RobotiqWriteResponse
+public class RobotiqReadResponse
 {
    private GripperStatusRegister gripperStatus;
    private ObjectDetectionRegister objectDetection;

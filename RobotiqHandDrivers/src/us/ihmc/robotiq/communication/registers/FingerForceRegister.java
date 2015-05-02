@@ -3,7 +3,7 @@ package us.ihmc.robotiq.communication.registers;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerForceRegister implements RobotiqRegister
+public class FingerForceRegister implements RobotiqOutputRegister
 {
    private final byte MAX_FORCE = (byte) 0xFF;
    private final byte MIN_FORCE = (byte) 0x00;
@@ -44,9 +44,16 @@ public class FingerForceRegister implements RobotiqRegister
    {
       return force;
    }
+   
    @Override
    public int getRegisterIndex()
    {
       return index;
+   }
+   
+   @Override
+   public void resetRegister()
+   {
+      force = MAX_FORCE;
    }
 }

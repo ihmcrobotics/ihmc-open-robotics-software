@@ -1,14 +1,20 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GripperOptionRegister implements RobotiqRegister
+public class GripperOptionRegister implements RobotiqOutputRegister
 {
    private rICF ricf;
    private rICS rics;
+   
+   private final rICF ricfInitial;
+   private final rICS ricsInitial;
    
    public GripperOptionRegister(rICF ricf, rICS rics)
    {
       this.ricf = ricf;
       this.rics = rics;
+      
+      this.ricfInitial = ricf;
+      this.ricsInitial = rics;
    }
    
    public rICF getRicf()
@@ -46,6 +52,13 @@ public class GripperOptionRegister implements RobotiqRegister
    public int getRegisterIndex()
    {
       return 1;
+   }
+   
+   @Override
+   public void resetRegister()
+   {
+      ricf = ricfInitial;
+      rics = ricsInitial;
    }
    
    public enum rICF implements RobotiqRegisterComponent

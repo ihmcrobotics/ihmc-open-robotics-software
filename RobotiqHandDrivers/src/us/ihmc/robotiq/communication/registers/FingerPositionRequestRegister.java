@@ -7,7 +7,7 @@ import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerPositionRequestRegister implements RobotiqRegister
+public class FingerPositionRequestRegister implements RobotiqOutputRegister
 {
    private MultiKeyMap fingerPositionMap = new MultiKeyMap();
    {
@@ -83,7 +83,6 @@ public class FingerPositionRequestRegister implements RobotiqRegister
    public void setFingerPosition(RobotiqGraspMode graspMode, FingerState fingerState)
    {
       byte position = (byte)fingerPositionMap.get(graspMode, fingerState, finger);
-      System.out.println("Setting to " + position);
       this.position = position;
    }
    
@@ -97,5 +96,11 @@ public class FingerPositionRequestRegister implements RobotiqRegister
    public int getRegisterIndex()
    {
       return index;
+   }
+   
+   @Override
+   public void resetRegister()
+   {
+      position = (byte)0x0;
    }
 }
