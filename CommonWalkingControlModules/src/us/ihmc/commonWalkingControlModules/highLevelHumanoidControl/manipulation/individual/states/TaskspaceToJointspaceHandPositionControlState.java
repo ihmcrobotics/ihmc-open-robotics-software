@@ -48,6 +48,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
    private final LinkedHashMap<OneDoFJoint, PIDController> pidControllers;
    private final LinkedHashMap<OneDoFJoint, RateLimitedYoVariable> rateLimitedAccelerations;
+   private final DoubleYoVariable feedForwardAccelerationScaleFactor;
+   private final DoubleYoVariable feedForwardAccelerationAlpha;
    private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> filteredFeedForwardAccelerations;
    private final DoubleYoVariable maxAcceleration;
 
@@ -143,22 +145,29 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
          if (momentumBasedController != null)
          {
+            feedForwardAccelerationAlpha = new DoubleYoVariable(namePrefix + "FeedForwardAccelerationAlpha", registry);
+            feedForwardAccelerationScaleFactor = new DoubleYoVariable(namePrefix + "FeedForwardAccelerationScaleFactor", registry);
             filteredFeedForwardAccelerations = new LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable>();
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(5.0, dt);
+            feedForwardAccelerationAlpha.set(alpha);
 
             for (OneDoFJoint joint : oneDoFJoints)
             {
-               AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry, alpha);
+               AlphaFilteredYoVariable filteredFeedForwardAcceleration = new AlphaFilteredYoVariable("qdd_ff_filt_" + joint.getName(), registry, feedForwardAccelerationAlpha);
                filteredFeedForwardAccelerations.put(joint, filteredFeedForwardAcceleration);
             }
          }
          else
          {
+            feedForwardAccelerationAlpha = null;
+            feedForwardAccelerationScaleFactor = null;
             filteredFeedForwardAccelerations = null;
          }
       }
       else // Force control at the joints
       {
+         feedForwardAccelerationAlpha = null;
+         feedForwardAccelerationScaleFactor = null;
          filteredFeedForwardAccelerations = null;
 
          maxAcceleration = gains.getYoMaximumAcceleration();
@@ -225,10 +234,11 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             for (int i = 0; i < oneDoFJoints.length; i++)
             {
                OneDoFJoint joint = oneDoFJoints[i];
+               // The feed forward is really messy when controlling w.r.t. world frame, it's better to leave it to zero for now.
                AlphaFilteredYoVariable filteredFeedForwardAcceleration = filteredFeedForwardAccelerations.get(joint);
                filteredFeedForwardAcceleration.update(joint.getQddDesired());
                double desiredAcceleration = filteredFeedForwardAcceleration.getDoubleValue();
-
+               desiredAcceleration *= feedForwardAccelerationScaleFactor.getDoubleValue();
                momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
             }
          }
