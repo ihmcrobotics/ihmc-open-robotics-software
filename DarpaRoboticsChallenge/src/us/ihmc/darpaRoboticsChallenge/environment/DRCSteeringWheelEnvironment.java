@@ -24,7 +24,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
 {
    public enum SteeringWheelAttachment
    {
-      SPINNER, CROSS_BAR, NONE
+      SPINNER, CROSS_BAR, NONE, BOTH
    }
    
    private final List<Robot> robots = new ArrayList<Robot>();
@@ -62,6 +62,10 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
             wheelRobot.addSpinnerHandle(percentOfSteeringWheelRadius);
             break;
          case CROSS_BAR:
+            wheelRobot.addCrossBar();
+            break;
+         case BOTH:
+            wheelRobot.addSpinnerHandle(0.0, 14.0/18.0, 0.15, 0.015, 0.15);
             wheelRobot.addCrossBar();
             break;
          default:
