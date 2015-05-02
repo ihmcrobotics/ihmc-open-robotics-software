@@ -735,8 +735,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                centerOfMassHeightTrajectoryGenerator.setSupportLeg(transferToSide);
             else
                centerOfMassHeightTrajectoryGenerator.setSupportLeg(lastPlantedLeg.getEnumValue());
-
-
          }
       }
 
@@ -1001,14 +999,13 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          RobotSide supportSide = swingSide.getOppositeSide();
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
-         FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
 
          if (pushRecoveryModule.isEnabled())
          {
             capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
             pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getOmega0());
 
-            boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, nextFootstep, footPolygon);
+            boolean footstepHasBeenAdjusted = pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeRemaining, nextFootstep);
 
             if (footstepHasBeenAdjusted)
             {
@@ -1126,9 +1123,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
-            FrameConvexPolygon2d footPolygon = computeFootPolygon(supportSide, referenceFrames.getAnkleZUpFrame(supportSide));
             nextFootstep = pushRecoveryModule.getRecoverFromDoubleSupportFootStep();
-            pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeCalculationProvider.getValue(), nextFootstep, footPolygon);
+            pushRecoveryModule.checkAndUpdateFootstep(swingSide, swingTimeCalculationProvider.getValue(), nextFootstep);
             squareUpFootstepForPushRecovery = createSquareUpFootstep(nextFootstep.getRobotSide());
 
             upcomingFootstepList.requestCancelPlanToProvider();
