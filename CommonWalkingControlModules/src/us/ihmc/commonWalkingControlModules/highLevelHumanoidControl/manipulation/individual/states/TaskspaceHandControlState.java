@@ -80,8 +80,6 @@ public abstract class TaskspaceHandControlState extends State<HandControlState>
 
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      if (CommonOps.trace(selectionMatrix) == 0.0)
-         throw new RuntimeException("Specified selection matrix, " + selectionMatrix + " is invalid!");
       this.selectionMatrix.reshape(selectionMatrix.getNumRows(), selectionMatrix.getNumCols());
       this.selectionMatrix.set(selectionMatrix);
    }
