@@ -8,10 +8,12 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class RobotiqWriteRequestFactoryTest
 {
-   @Test
+   @EstimatedDuration(duration = 0.05)
+   @Test(timeout = 300)
    public void testOpenMessage()
    {
       Register[] request = new Register[8];
