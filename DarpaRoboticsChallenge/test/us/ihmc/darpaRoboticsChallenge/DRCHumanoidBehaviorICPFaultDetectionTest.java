@@ -295,7 +295,6 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       // get YoVariables
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecoveryFromDoubleSupport");
 
       for (RobotSide robotSide : RobotSide.values)
       {

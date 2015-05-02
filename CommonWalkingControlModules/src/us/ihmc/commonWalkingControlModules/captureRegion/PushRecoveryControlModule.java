@@ -25,7 +25,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
-   private static final boolean ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY = false;
 
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE = 0.02;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
@@ -43,7 +42,6 @@ public class PushRecoveryControlModule
    private final OrientationStateVisualizer orientationStateVisualizer;
 
    private final BooleanYoVariable enablePushRecovery;
-   private final BooleanYoVariable enablePushRecoveryFromDoubleSupport;
 
    private final BooleanYoVariable recovering;
    private final BooleanYoVariable tryingUncertainRecover;
@@ -100,8 +98,6 @@ public class PushRecoveryControlModule
 
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE);
-      enablePushRecoveryFromDoubleSupport = new BooleanYoVariable("enablePushRecoveryFromDoubleSupport", registry);
-      enablePushRecoveryFromDoubleSupport.set(ENABLE_DOUBLE_SUPPORT_PUSH_RECOVERY);
 
       usingReducedSwingTime = false;
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
@@ -395,19 +391,9 @@ public class PushRecoveryControlModule
       return enablePushRecovery.getBooleanValue();
    }
 
-   public boolean isEnabledInDoubleSupport()
-   {
-      return enablePushRecoveryFromDoubleSupport.getBooleanValue();
-   }
-
    public void setIsEnabled(boolean enable)
    {
       enablePushRecovery.set(enable);
-   }
-
-   public void setIsEnabledInDoubleSupport(boolean enable)
-   {
-      enablePushRecoveryFromDoubleSupport.set(enable);
    }
 
    public boolean isRecoveringFromDoubleSupportFall()

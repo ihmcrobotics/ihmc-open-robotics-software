@@ -332,7 +332,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       // get YoVariables
       BooleanYoVariable walk = (BooleanYoVariable) scs.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule","enablePushRecoveryFromDoubleSupport");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -348,7 +347,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
       // simulate for a while
       enable.set(true);
-      enableDS.set(true);
       walk.set(false);
       blockingSimulationRunner.simulateAndBlock(1.0);
       walk.set(true);

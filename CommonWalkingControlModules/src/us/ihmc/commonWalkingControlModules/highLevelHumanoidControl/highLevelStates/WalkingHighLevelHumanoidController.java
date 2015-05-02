@@ -1278,9 +1278,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (!pushRecoveryModule.isEnabled())
             return false;
 
-         if (!pushRecoveryModule.isEnabledInDoubleSupport())
-            return false;
-
          RobotSide suggestedSwingSide = pushRecoveryModule.isRobotFallingFromDoubleSupport(stateMachine.timeInCurrentState());
          boolean isRobotFalling = suggestedSwingSide != null;
 

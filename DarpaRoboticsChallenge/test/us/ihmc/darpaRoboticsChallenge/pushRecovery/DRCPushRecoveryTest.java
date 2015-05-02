@@ -161,9 +161,7 @@ public abstract class DRCPushRecoveryTest
       
       // get rid of this once push recovery is enabled by default
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule","enablePushRecoveryFromDoubleSupport");
       enable.set(true);
-      enableDS.set(true);
       
       for (RobotSide robotSide : RobotSide.values)
       {
