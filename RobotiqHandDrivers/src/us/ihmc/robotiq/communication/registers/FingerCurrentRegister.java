@@ -3,7 +3,7 @@ package us.ihmc.robotiq.communication.registers;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerCurrentRegister implements RobotiqRegister
+public class FingerCurrentRegister implements RobotiqInputRegister
 {
    private final int index;
    private byte current;
@@ -28,16 +28,17 @@ public class FingerCurrentRegister implements RobotiqRegister
             throw new InvalidFingerException(finger);
       }
    }
-   
-   public void setCurrent(byte current)
-   {
-      this.current = current;
-   }
 
    @Override
    public byte getRegisterValue()
    {
       return current;
+   }
+   
+   @Override
+   public void setRegisterValue(byte value)
+   {
+      current = value;
    }
 
    @Override

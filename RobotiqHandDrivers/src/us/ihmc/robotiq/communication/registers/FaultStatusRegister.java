@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class FaultStatusRegister implements RobotiqRegister
+public class FaultStatusRegister implements RobotiqInputRegister
 {
    private gFLT gflt;
    
@@ -23,6 +23,16 @@ public class FaultStatusRegister implements RobotiqRegister
    public byte getRegisterValue()
    {
       return gflt.getValue();
+   }
+   
+   @Override
+   public void setRegisterValue(byte value)
+   {
+      for(gFLT g : gFLT.values())
+      {
+         if(g.getValue() == value)
+            this.gflt = g;
+      }
    }
 
    @Override

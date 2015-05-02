@@ -11,6 +11,7 @@ import net.wimpi.modbus.procimg.Register;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
+import us.ihmc.robotiq.communication.RobotiqReadResponseFactory;
 import us.ihmc.robotiq.communication.RobotiqWriteRequestFactory;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -22,7 +23,7 @@ public class RobotiqHandCommunicator
    private ModbusTCPMaster communicator;
    
    private RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
-   private InputRegister[] response = new InputRegister[8];
+   private RobotiqReadResponseFactory readResponseFactory = new RobotiqReadResponseFactory();
    
    private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
    
@@ -42,8 +43,8 @@ public class RobotiqHandCommunicator
    
    public void read() throws ModbusException
    {
-      response = communicator.readInputRegisters(0, 8);
-      
+      InputRegister[] response = communicator.readInputRegisters(0, 8);
+      readResponseFactory.updateRobotiqResponse(response);
    }
    
    public void initialize() throws ModbusException
