@@ -45,7 +45,6 @@ public class PushRecoveryControlModule
 
    private final BooleanYoVariable recovering;
    private final BooleanYoVariable recoveringFromDoubleSupportFall;
-   private final BooleanYoVariable tryingUncertainRecover;
    private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
 
@@ -63,7 +62,9 @@ public class PushRecoveryControlModule
 
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
 
+   private Footstep currentFootstep;
    private Footstep recoverFromDoubleSupportFallFootstep;
+
    private double omega0;
    private final FramePoint2d capturePoint2d = new FramePoint2d();
 
@@ -73,7 +74,6 @@ public class PushRecoveryControlModule
 
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
-   private Footstep currentFootstep;
    private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
    private final DoubleYoVariable doubleSupportInitialSwingTime;
    private final BooleanYoVariable isICPOutside;
@@ -102,7 +102,6 @@ public class PushRecoveryControlModule
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
       recoveringFromDoubleSupportFall = new BooleanYoVariable("recoveringFromDoubleSupportFall", registry);
-      tryingUncertainRecover = new BooleanYoVariable("tryingUncertainRecover", registry);
       existsAMinimumSwingTimeCaptureRegion = new BooleanYoVariable("existsAMinimumSwingTimeCaptureRegion", registry);
 
       captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
@@ -245,23 +244,18 @@ public class PushRecoveryControlModule
 
       if (enablePushRecovery.getBooleanValue())
       {
-         if (tryingUncertainRecover.getBooleanValue())
-         {
-            captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_TIME_TO_REPLAN, capturePoint2d, omega0, footPolygon);
-         }
-         else
-         {
-            captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-         }
-
          if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
          {
             // do not re-plan if we are almost at touch-down
             return false;
          }
 
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, feet.get(nextFootstep.getRobotSide()),
-               footPolygon.getCentroid(), captureRegionCalculator.getCaptureRegion(), isRecoveringFromDoubleSupportFall()));
+         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+
+         ContactablePlaneBody swingingFoot = feet.get(swingSide);
+         FramePoint2d footCentroid = footPolygon.getCentroid();
+         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, swingingFoot, footCentroid, captureRegion));
 
          if (footstepWasProjectedInCaptureRegion.getBooleanValue())
          {
@@ -281,7 +275,6 @@ public class PushRecoveryControlModule
       captureRegionCalculator.hideCaptureRegion();
 
       recoveringFromDoubleSupportFall.set(false);
-      tryingUncertainRecover.set(false);
       existsAMinimumSwingTimeCaptureRegion.set(false);
    }
 

@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import java.util.List;
 
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
+import us.ihmc.utilities.humanoidRobot.footstep.FootstepUtils;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -10,9 +13,6 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.FootstepUtils;
 
 /**
  * Provides the function adjustFootstep which takes a footstep and a capture region
@@ -28,8 +28,6 @@ public class FootstepAdjustor
 {
    private static final boolean VISUALIZE = true;
    private static final double SHRINK_TOUCHDOWN_POLYGON_FACTOR = 0.5;
-   private static final double DISTANCE_FROM_KINEMATIC_LIMIT = 0.05;
-   private static final double DISTANCE_FROM_KINEMATIC_LIMIT_FOR_EXTREME_BORDER = 0.0; 
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
 
@@ -53,7 +51,7 @@ public class FootstepAdjustor
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
+   public boolean adjustFootstep(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
    {
       boolean footstepChanged = false;
 
@@ -89,7 +87,7 @@ public class FootstepAdjustor
       }
 
       // No overlap between touch-down polygon and capture region.
-      projectFootstepInCaptureRegion(footstep, contactablePlaneBody, supportCentroid, desiredSteppingRegion, moveToExtremeBorder);
+      projectFootstepInCaptureRegion(footstep, contactablePlaneBody, supportCentroid, desiredSteppingRegion);
       updateVisualizer();
       return footstepChanged;
    }
@@ -104,7 +102,7 @@ public class FootstepAdjustor
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion, boolean moveToExtremeBorder)
+   private void projectFootstepInCaptureRegion(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
    {
       projection.setIncludingFrame(projectionPoint);
       projection.changeFrame(footstep.getParentFrame());
@@ -124,16 +122,6 @@ public class FootstepAdjustor
       captureRegion.orthogonalProjection(nextStep2d);
       nextStep2d.changeFrame(footstep.getParentFrame());
       
-      direction.normalize();
-      if(moveToExtremeBorder)
-      {
-         direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT_FOR_EXTREME_BORDER);
-      }
-      else
-      {
-         direction.scale(DISTANCE_FROM_KINEMATIC_LIMIT);
-      }
-      nextStep2d.sub(direction);
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
       calculateTouchdownFootPolygon(footstep, contactablePlaneBody, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
