@@ -62,9 +62,6 @@ public class PushRecoveryControlModule
 
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
 
-   private Footstep currentFootstep;
-   private Footstep recoverFromDoubleSupportFallFootstep;
-
    private double omega0;
    private final FramePoint2d capturePoint2d = new FramePoint2d();
 
@@ -131,7 +128,7 @@ public class PushRecoveryControlModule
     */
    public RobotSide isRobotFallingFromDoubleSupport(double timeInState)
    {
-      if (!isICPOutside.getBooleanValue() || recoverFromDoubleSupportFallFootstep != null)
+      if (!isICPOutside.getBooleanValue())
          return null;
       
       RobotSide swingSide = swingSideForDoubleSupportRecovery.getEnumValue();
@@ -146,7 +143,6 @@ public class PushRecoveryControlModule
    public void initializeParametersForDoubleSupportPushRecovery()
    {
       swingTimeCalculationProvider.setSwingTime(doubleSupportInitialSwingTime.getDoubleValue());
-      recoverFromDoubleSupportFallFootstep = currentFootstep;
       recoveringFromDoubleSupportFall.set(true);
    }
 
@@ -166,7 +162,7 @@ public class PushRecoveryControlModule
       else
          isICPOutside.set(!reducedSupportPolygon.isPointInside(capturePoint2d));
 
-      if (!isICPOutside.getBooleanValue() || recoverFromDoubleSupportFallFootstep != null)
+      if (!isICPOutside.getBooleanValue())
          return;
 
       projectedCapturePoint.setXYIncludingFrame(capturePoint2d);
@@ -175,7 +171,6 @@ public class PushRecoveryControlModule
       {
          ReferenceFrame soleFrame = soleFrames.get(robotSide);
          projectedCapturePoint.changeFrame(soleFrame);
-         currentFootstep = createFootstepAtCurrentLocation(robotSide);
          footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
          projectedCapturePoint2d.setByProjectionOntoXYPlaneIncludingFrame(projectedCapturePoint);
 
@@ -197,7 +192,6 @@ public class PushRecoveryControlModule
          // Normal case: it is better to swing the foot that is the farthest from the ICP so the ICP will move slower in the upcoming single support.
          swingSide = closestFootToICP.getEnumValue().getOppositeSide();
 
-      currentFootstep = createFootstepAtCurrentLocation(swingSide);
       capturePoint2d.changeFrame(worldFrame);
 
       doubleSupportInitialSwingTime.set(computeInitialSwingTimeForDoubleSupportRecovery(swingSide, swingTimeCalculationProvider.getValue(), capturePoint2d));
@@ -267,11 +261,35 @@ public class PushRecoveryControlModule
       return false;
    }
 
+   public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
+   {
+      RobotSide supportSide = swingSide.getOppositeSide();
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+
+      if (enablePushRecovery.getBooleanValue())
+      {
+         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
+
+         ContactablePlaneBody swingingFoot = feet.get(swingSide);
+         FramePoint2d footCentroid = footPolygon.getCentroid();
+         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+         Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
+
+         footstepWasProjectedInCaptureRegion.set(true);
+         footstepAdjustor.adjustFootstep(footstepForPushRecovery, swingingFoot, footCentroid, captureRegion);
+
+         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
+            recovering.set(true);
+
+         return footstepForPushRecovery;
+      }
+      return null;
+   }
+
    public void reset()
    {
       footstepWasProjectedInCaptureRegion.set(false);
       recovering.set(false);
-      recoverFromDoubleSupportFallFootstep = null;
       captureRegionCalculator.hideCaptureRegion();
 
       recoveringFromDoubleSupportFall.set(false);
@@ -349,11 +367,6 @@ public class PushRecoveryControlModule
       Footstep footstep = new Footstep(foot.getRigidBody(), robotSide, foot.getSoleFrame(), poseReferenceFrame, trustHeight);
 
       return footstep;
-   }
-
-   public Footstep getRecoverFromDoubleSupportFootStep()
-   {
-      return recoverFromDoubleSupportFallFootstep;
    }
 
    public boolean isEnabled()
