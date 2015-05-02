@@ -59,7 +59,7 @@ public class PushRecoveryControlModule
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> soleFrames;
 
-   private final FrameConvexPolygon2d tempFootPolygon;
+   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
 
@@ -74,7 +74,6 @@ public class PushRecoveryControlModule
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
    private Footstep currentFootstep;
-   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
    private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
    private final DoubleYoVariable doubleSupportInitialSwingTime;
    private final BooleanYoVariable isICPOutside;
@@ -106,7 +105,6 @@ public class PushRecoveryControlModule
       tryingUncertainRecover = new BooleanYoVariable("tryingUncertainRecover", registry);
       existsAMinimumSwingTimeCaptureRegion = new BooleanYoVariable("existsAMinimumSwingTimeCaptureRegion", registry);
 
-      tempFootPolygon = new FrameConvexPolygon2d(worldFrame);
       captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
       isICPOutside = new BooleanYoVariable("isICPOutside", registry);
@@ -238,11 +236,13 @@ public class PushRecoveryControlModule
     * @param swingSide
     * @param swingTimeRemaining
     * @param nextFootstep
-    * @param footPolygon
     * @return
     */
-   public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep, FrameConvexPolygon2d footPolygon)
+   public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep)
    {
+      RobotSide supportSide = swingSide.getOppositeSide();
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+
       if (enablePushRecovery.getBooleanValue())
       {
          if (tryingUncertainRecover.getBooleanValue())
@@ -336,11 +336,11 @@ public class PushRecoveryControlModule
     */
    private double computeInitialSwingTimeForDoubleSupportRecovery(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d)
    {
-      tempFootPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
-      captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY, capturePoint2d, omega0, tempFootPolygon);
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
+      captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY, capturePoint2d, omega0, footPolygon);
       captureRegionAreaWithDoubleSupportMinimumSwingTime.set(captureRegionCalculator.getCaptureRegionArea());
 
-      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, omega0, tempFootPolygon);
+      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
    }
 
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
