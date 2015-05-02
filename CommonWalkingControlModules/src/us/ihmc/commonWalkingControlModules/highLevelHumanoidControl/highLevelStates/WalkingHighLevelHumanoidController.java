@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoFramePoint2dInPolygonCoordinate;
 import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
-import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule.IsFallingFromDoubleSupportCondition;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ChestOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -405,7 +404,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          SingleSupportToTransferToCondition singleSupportToTransferToOppositeSideCondition = new SingleSupportToTransferToCondition(robotSide);
          SingleSupportToTransferToCondition singleSupportToTransferToSameSideCondition = new SingleSupportToTransferToCondition(robotSide.getOppositeSide());
          StartWalkingCondition startWalkingCondition = new StartWalkingCondition(robotSide);
-         IsFallingFromDoubleSupportCondition isFallingFromDoubleSupportCondition = pushRecoveryModule.new IsFallingFromDoubleSupportCondition(robotSide, stateMachine);
+         DoubleSupportToSingleSupportConditionForDisturbanceRecovery isFallingFromDoubleSupportCondition = new DoubleSupportToSingleSupportConditionForDisturbanceRecovery(robotSide);
          FlamingoStanceCondition flamingoStanceCondition = new FlamingoStanceCondition(robotSide);
 
          StateTransition<WalkingState> toDoubleSupport = new StateTransition<WalkingState>(doubleSupportStateEnum, stopWalkingCondition,
@@ -1264,6 +1263,39 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private class DoubleSupportToSingleSupportConditionForDisturbanceRecovery implements StateTransitionCondition
+   {
+      private final RobotSide transferToSide;
+
+      public DoubleSupportToSingleSupportConditionForDisturbanceRecovery(RobotSide robotSide)
+      {
+         this.transferToSide = robotSide;
+      }
+
+      @Override
+      public boolean checkCondition()
+      {
+         if (!pushRecoveryModule.isEnabled())
+            return false;
+
+         if (!pushRecoveryModule.isEnabledInDoubleSupport())
+            return false;
+
+         RobotSide suggestedSwingSide = pushRecoveryModule.isRobotFallingFromDoubleSupport(stateMachine.timeInCurrentState());
+         boolean isRobotFalling = suggestedSwingSide != null;
+
+         if (!isRobotFalling)
+            return false;
+
+         boolean switchToSingleSupport = transferToSide != suggestedSwingSide;
+
+         if (switchToSingleSupport)
+            pushRecoveryModule.initializeParametersForDoubleSupportPushRecovery();
+
+         return switchToSingleSupport;
+      }
+   }
+
    public class StartWalkingCondition implements StateTransitionCondition
    {
       private final RobotSide transferToSide;
@@ -1461,14 +1493,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          if (hasMinimumTimePassed.getBooleanValue() && justFall.getBooleanValue() && !footExplorationControlModule.isControllingSwingFoot())
             return true;
-
-         // Just switch states if icp is done, plus a little bit more. You had enough time and more isn't going to do any good.
-
-         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
-         {
-            if (stateMachine.timeInCurrentState() > pushRecoveryModule.getTrustTimeToConsiderSwingFinished())
-               return true;
-         }
 
          if (walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone() && !isInFlamingoStance.getBooleanValue())
          {
