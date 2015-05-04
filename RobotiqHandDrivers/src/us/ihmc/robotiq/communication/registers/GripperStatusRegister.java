@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GripperStatusRegister implements RobotiqInputRegister
+public class GripperStatusRegister extends RobotiqInputRegister
 {
    private gACT gact;
    private gMOD gmod;

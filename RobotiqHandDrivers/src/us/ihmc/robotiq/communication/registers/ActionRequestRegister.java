@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class ActionRequestRegister implements RobotiqOutputRegister
+public class ActionRequestRegister extends RobotiqOutputRegister
 {
    private rACT ract;
    private rMOD rmod;
@@ -72,7 +72,7 @@ public class ActionRequestRegister implements RobotiqOutputRegister
       
       ret |= ratr.getValue() << 4;
       ret |= rgto.getValue() << 3;
-      ret |= rmod.getValue() << 2;
+      ret |= rmod.getValue() << 1;
       ret |= ract.getValue();
       
       return ret;

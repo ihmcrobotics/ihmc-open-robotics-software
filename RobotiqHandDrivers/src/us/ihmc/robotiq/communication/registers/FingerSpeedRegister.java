@@ -3,7 +3,7 @@ package us.ihmc.robotiq.communication.registers;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerSpeedRegister implements RobotiqOutputRegister
+public class FingerSpeedRegister extends RobotiqOutputRegister
 {
    private final byte MAX_SPEED = (byte) 0xFF;
    private final byte MIN_SPEED = (byte) 0x00;

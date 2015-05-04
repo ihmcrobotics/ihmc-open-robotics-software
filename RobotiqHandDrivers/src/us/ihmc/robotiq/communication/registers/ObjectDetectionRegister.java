@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class ObjectDetectionRegister implements RobotiqInputRegister
+public class ObjectDetectionRegister extends RobotiqInputRegister
 {
    private gDTA gdta;
    private gDTB gdtb;
