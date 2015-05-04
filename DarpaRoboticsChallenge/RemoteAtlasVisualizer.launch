@@ -9,4 +9,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="us.ihmc.atlas.RemoteAtlasVisualizer"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-m ATLAS_UNPLUGGED_V5_NO_HANDS --realRobot"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Atlas"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx16g"/>
 </launchConfiguration>
