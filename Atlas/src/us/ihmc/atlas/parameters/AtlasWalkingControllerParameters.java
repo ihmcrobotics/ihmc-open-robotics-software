@@ -154,7 +154,8 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public boolean allowShrinkingSingleSupportFootPolygon()
    {
-      return target == AtlasTarget.REAL_ROBOT;
+//    return target == AtlasTarget.REAL_ROBOT;
+    return false; // Does more bad than good
    }
 
    @Override
@@ -565,11 +566,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
 
       double kpXY = 100.0;
       double kpZ = 200.0;
-      double zetaXYZ = realRobot ? 0.25 : 0.7;
+      double zetaXYZ = realRobot ? 0.7 : 0.7;
       double kpOrientation = 200.0;
       double zetaOrientation = 0.7;
-      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
-      double maxPositionJerk = realRobot ? 450.0 : Double.POSITIVE_INFINITY;
+      // Reduce maxPositionAcceleration from 30 to 6 to prevent too high acceleration when hitting joint limits.
+      double maxPositionAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
+//      double maxPositionAcceleration = realRobot ? 30.0 : Double.POSITIVE_INFINITY;
+      double maxPositionJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxOrientationJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
 
@@ -596,7 +599,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double kpXYOrientation = realRobot ? 100.0 : 200.0;
       double kpZOrientation = realRobot ? 100.0 : 200.0;
       double zetaOrientation = realRobot ? 0.2 : 1.0;
-      double maxLinearAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
+      double maxLinearAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
+//      double maxLinearAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
@@ -624,7 +629,9 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double kpXYOrientation = realRobot ? 200.0 : 200.0;
       double kpZOrientation = realRobot ? 200.0 : 200.0;
       double zetaOrientation = realRobot ? 0.4 : 0.4;
-      double maxLinearAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      // Reduce maxPositionAcceleration from 10 to 6 to prevent too high acceleration when hitting joint limits.
+      double maxLinearAcceleration = realRobot ? 6.0 : Double.POSITIVE_INFINITY;
+//      double maxLinearAcceleration = realRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxLinearJerk = realRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxAngularAcceleration = realRobot ? 100.0 : Double.POSITIVE_INFINITY;
       double maxAngularJerk = realRobot ? 1500.0 : Double.POSITIVE_INFINITY;
@@ -705,13 +712,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    @Override
    public double getDefaultTransferTime()
    {
-      return (target == AtlasTarget.REAL_ROBOT) ? 1.5 : 0.25;
+      return (target == AtlasTarget.REAL_ROBOT) ? 0.8 : 0.25;
    }
 
    @Override
    public double getDefaultSwingTime()
    {
-      return (target == AtlasTarget.REAL_ROBOT) ? 1.5 : 0.60;
+      return (target == AtlasTarget.REAL_ROBOT) ? 1.2 : 0.60;
    }
 
    /** @inheritDoc */
