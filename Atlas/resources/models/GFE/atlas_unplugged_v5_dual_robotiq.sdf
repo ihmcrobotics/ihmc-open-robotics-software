@@ -318,7 +318,7 @@
     <link name='utorso'>
       <pose>-0.0125 0 0.212 0 -0 0</pose>
       <inertial>
-        <pose>-0.0616866 0.00229456 0.316809 0 -0 0</pose>
+        <pose>-0.045 0.00229456 0.316809 0 -0 0</pose>
         <mass>84.609</mass>
         <inertia>
           <ixx>1.62389</ixx>
@@ -1548,7 +1548,7 @@
       <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
       <inertial>
         <pose>-0.00118561 0.141218 6.19884e-06 0 -0 0</pose>
-        <mass>1.8839</mass>
+        <mass>3.0</mass>
         <inertia>
           <ixx>0.00689651</ixx>
           <ixy>6.78926e-05</ixy>
@@ -3637,7 +3637,7 @@
       <pose>0.1281 -0.94115 0.42859 0 -0 0</pose>
       <inertial>
         <pose>-0.00118561 -0.141218 6.19884e-06 0 -0 0</pose>
-        <mass>1.8839</mass>
+        <mass>3.0</mass>
         <inertia>
           <ixx>0.00689651</ixx>
           <ixy>-6.78926e-05</ixy>
