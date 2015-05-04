@@ -31,6 +31,7 @@ public class RobotiqHandSensorData implements HandSensorData
 	static final int CHANGING_MODE = 2;
 	static final int CHANGE_COMPLETE = 3;
 	
+	private boolean connected;
 	private boolean activated;
 	private int operationMode;
 	private boolean motionRequests;
@@ -42,7 +43,7 @@ public class RobotiqHandSensorData implements HandSensorData
 	private int[] requestedPosition = new int[4];
 	private int[] current = new int[4];
 	
-	public void update(byte[] data)
+	public void update(byte[] data, boolean connected)
 	{
 		activated = (data[0] == 0) ? false : true;
 		operationMode = (int) data[1];
@@ -66,6 +67,13 @@ public class RobotiqHandSensorData implements HandSensorData
 		{
 			current[counter] = (int) (0xFF & data[12 + counter * 3]);
 		}
+		
+		this.connected = connected;
+	}
+	
+	public void setConnected(boolean connected)
+	{
+	   this.connected = connected;
 	}
 	
 	public boolean isActivated()
@@ -190,5 +198,17 @@ public class RobotiqHandSensorData implements HandSensorData
 		
 		return fingerJointAngles;
 	}
-
+	
+	@Override
+	public boolean isCalibrated()
+	{
+	   return activated;
+	}
+	
+	@Override
+	public boolean isConnected()
+	{
+	   return connected;
+	}
+	
 }

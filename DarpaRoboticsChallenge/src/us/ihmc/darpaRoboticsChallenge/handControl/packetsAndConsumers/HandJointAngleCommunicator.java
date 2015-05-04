@@ -22,6 +22,7 @@ public class HandJointAngleCommunicator
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[][] fingers = new double[3][];
    private final AtomicBoolean connected = new AtomicBoolean();
+   private final AtomicBoolean calibrated = new AtomicBoolean();
    private final RobotSide side;
 
    public HandJointAngleCommunicator(RobotSide side, PacketCommunicator packetCommunicator)
@@ -80,8 +81,8 @@ public class HandJointAngleCommunicator
    public void updateHandAngles(HandSensorData sensorDataFromHand)
    {
       fingers = sensorDataFromHand.getFingerJointAngles(side);
-
-      connected.set(true);
+      calibrated.set(sensorDataFromHand.isCalibrated());
+      connected.set(sensorDataFromHand.isConnected());
    }
 
    public void write()
@@ -91,7 +92,7 @@ public class HandJointAngleCommunicator
       {
          return;
       }
-      packet.setAll(side, connected.get(), fingers[0], fingers[1], fingers[2]);
+      packet.setAll(side, connected.get(), calibrated.get(), fingers[0], fingers[1], fingers[2]);
       packetCopier.commit();
    }
 

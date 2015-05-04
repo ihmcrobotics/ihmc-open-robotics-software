@@ -81,15 +81,7 @@ class RobotiqControlThread extends HandControlThread
             do
             {
                ThreadTools.sleep(100);
-               try
-               {
-                  updateHandData();
-               }
-               catch (IOException e)
-               {
-                  e.printStackTrace();
-                  initialized = false;
-               }
+               updateHandData();
             }
             while (handStatus.isInitializing() && !handStatus.hasError() && !initialized);
 
@@ -115,10 +107,18 @@ class RobotiqControlThread extends HandControlThread
       System.out.println(robotSide.toString() + " Hand Set Up");
    }
 
-   private void updateHandData() throws IOException
+   private void updateHandData()
    {
-      handStatus = robotiqHand.getHandStatus();
-      jointAngleCommunicator.updateHandAngles(handStatus);
+      try
+      {
+         handStatus = robotiqHand.getHandStatus();
+         jointAngleCommunicator.updateHandAngles(handStatus);
+      }
+      catch (IOException e)
+      {
+         handStatus.setConnected(robotiqHand.isConnected());
+         e.printStackTrace();
+      }
       jointAngleCommunicator.write();
    }
 
@@ -133,14 +133,7 @@ class RobotiqControlThread extends HandControlThread
          {
             robotiqHand.doControl();
 
-            try
-            {
-               updateHandData();
-            }
-            catch (IOException e)
-            {
-               continue;
-            }
+            updateHandData();
 
             if (handStatus.hasError())
                handStatus.printError();

@@ -906,7 +906,7 @@ public final class RobotiqHandInterface
 		dataFromHand[20] = status[SCISSOR_POSITION];
 		dataFromHand[21] = status[SCISSOR_CURRENT];
 		
-		handData.update(dataFromHand);
+		handData.update(dataFromHand, isConnected());
 		
 		return handData;
 	}

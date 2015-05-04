@@ -85,6 +85,18 @@ public class SimulatedRobotiqHandJointAngleProducer
                {
                   return new double[][]{indexJoints, middleJoints, thumbJoints};
                }
+
+               @Override
+               public boolean isCalibrated()
+               {
+                  return true;
+               }
+
+               @Override
+               public boolean isConnected()
+               {
+                  return true;
+               }
             });
             jointAngleCommunicators.get(robotSide).write();
          }
