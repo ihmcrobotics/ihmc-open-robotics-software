@@ -1,7 +1,16 @@
 package us.ihmc.robotiq.communication.registers;
 
-public interface RobotiqRegister
+public abstract class RobotiqRegister
 {
-   public byte getRegisterValue();
-   public int getRegisterIndex();
+   public abstract byte getRegisterValue();
+   public abstract int getRegisterIndex();
+   
+   @Override
+   public boolean equals(Object other)
+   {
+      if(!this.getClass().equals(other.getClass()))
+         return false;
+      
+      return this.getRegisterValue() == ((RobotiqRegister)other).getRegisterValue();
+   }
 }

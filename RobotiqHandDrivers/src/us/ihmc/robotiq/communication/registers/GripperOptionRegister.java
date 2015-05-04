@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class GripperOptionRegister implements RobotiqOutputRegister
+public class GripperOptionRegister extends RobotiqOutputRegister
 {
    private rICF ricf;
    private rICS rics;

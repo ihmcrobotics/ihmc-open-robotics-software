@@ -7,7 +7,7 @@ import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.Finger;
 import us.ihmc.robotiq.communication.InvalidFingerException;
 
-public class FingerPositionRequestRegister implements RobotiqOutputRegister
+public class FingerPositionRequestRegister extends RobotiqOutputRegister
 {
    private MultiKeyMap fingerPositionMap = new MultiKeyMap();
    {

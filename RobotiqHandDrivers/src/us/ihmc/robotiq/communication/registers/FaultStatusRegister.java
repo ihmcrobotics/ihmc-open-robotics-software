@@ -1,6 +1,6 @@
 package us.ihmc.robotiq.communication.registers;
 
-public class FaultStatusRegister implements RobotiqInputRegister
+public class FaultStatusRegister extends RobotiqInputRegister
 {
    private gFLT gflt;
    

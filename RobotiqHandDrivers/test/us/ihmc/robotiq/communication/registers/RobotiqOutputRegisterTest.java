@@ -1,19 +1,20 @@
 package us.ihmc.robotiq.communication.registers;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import us.ihmc.utilities.test.AbstractUnitTest;
-
-public abstract class RobotiqOutputRegisterTest implements AbstractUnitTest<RobotiqOutputRegister>
+public abstract class RobotiqOutputRegisterTest
 {
-   protected abstract RobotiqRegister getRegister();
    protected abstract byte getExpectedByteValue();
+   protected abstract RobotiqOutputRegister getOutputRegister();
    
    @Test
    public void testGetRegisterValue()
    {
-      RobotiqOutputRegister outputRegister = getImplementingType();
+      byte expectedValue = getExpectedByteValue();
+      RobotiqOutputRegister outputRegister = getOutputRegister();
       
-      
+      assertEquals(expectedValue, outputRegister.getRegisterValue());
    }
 }
