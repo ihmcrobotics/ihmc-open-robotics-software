@@ -82,7 +82,6 @@ public enum AtlasRobotVersion
 
    public String[] getResourceDirectories()
    {
-
       if (resourceDirectories == null)
       {
          resourceDirectories = new String[] { "models/GFE/" };
