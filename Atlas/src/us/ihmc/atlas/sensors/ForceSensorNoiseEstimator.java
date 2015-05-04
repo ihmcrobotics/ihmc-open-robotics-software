@@ -6,26 +6,29 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jtransforms.fft.FloatFFT_1D;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.utilities.screwTheory.Wrench;
 
 public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurationData>
 {
-
    final private boolean DEBUG = false;
    final private static int NUM_SAMPLES = 256; // 128 is probably enough
 
    final private FloatFFT_1D fftCalculator = new FloatFFT_1D(NUM_SAMPLES); 
    private PacketCommunicator packetCommunicator;
 
-   Timer timer = new Timer();
+   private Timer timer = new Timer();
 
    private class Channel
    {
       // data is passed between threads using a concurrent queue.
       public ConcurrentLinkedQueue<Float> dataFifo = new ConcurrentLinkedQueue<Float>();
 
+      public float lastSample;
+      
       public float[] circularBuffer = new float[NUM_SAMPLES];
       public int circularBufferIndex = 0;
       public float noiseIndicator;
@@ -38,12 +41,14 @@ public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurat
    {
       this.packetCommunicator = sensorSuitePacketCommunicator;
 
-      for (int i=0; i<12; i++)
+      for (int i=0; i<Wrench.SIZE*2; i++)
       {
          channels.add( new Channel() );
       }
 
-      timer.schedule( new NoiseCalculatorTimerTask(), 1000,1000);
+      timer.schedule( new NoiseCalculatorTimerTask(), 1000, 1000);
+      
+      System.out.println( "ForceSensorNoiseEstimator constructor ");
    }
 
 
@@ -53,11 +58,11 @@ public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurat
       // push all the data into the lock free fifo and notify the consumer
       for (int s=0; s<2; s++)
       {
-         float [] force = packet.getMomentAndForceVectorForSensor(s+2);
-         for (int f=0;f<6; f++)
+         float [] force = packet.getMomentAndForceVectorForSensor(s);
+         for (int f=0; f < Wrench.SIZE; f++)
          {
-            channels.get(s*6 + f).dataFifo.add( force[f] );
-         }
+            channels.get(s* Wrench.SIZE + f).dataFifo.add( force[f] );
+         }  
       }
    }
 
@@ -67,6 +72,8 @@ public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurat
       @Override
       public void run()
       { 
+         if (DEBUG) System.out.println( "ForceSensorNoiseEstimator run ");
+         
          Channel channel; 
 
          for( int c = 0; c < channels.size(); c++)
@@ -103,7 +110,7 @@ public class ForceSensorNoiseEstimator implements PacketConsumer<RobotConfigurat
             {
                channel.noiseIndicator += Math.abs( orderedDataSamples[s*2] ); // + Math.abs( orderedDataSamples[s*2+1] );
             }
-            if (DEBUG) System.out.print( channel.noiseIndicator + "\t");
+            if (DEBUG) System.out.format( "%.2f\t", channel.noiseIndicator );
          }
          if (DEBUG)  System.out.println();
          
