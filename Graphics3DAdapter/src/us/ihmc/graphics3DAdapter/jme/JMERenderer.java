@@ -255,7 +255,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       appSettings.setWidth(1200);
       appSettings.setHeight(600);
       appSettings.setAudioRenderer(null);
-      appSettings.setVSync(false);
+      appSettings.setVSync(true);
       setSettings(appSettings);
 
       setPauseOnLostFocus(false);
