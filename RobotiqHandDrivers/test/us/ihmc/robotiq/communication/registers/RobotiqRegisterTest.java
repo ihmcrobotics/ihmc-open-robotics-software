@@ -10,10 +10,12 @@ import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rATR;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rMOD;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public class RobotiqRegisterTest
 {
-   @Test
+   @Test(timeout = 3000)
+   @EstimatedDuration(duration = 1000)
    public void testEquals()
    {
       ActionRequestRegister arr = new ActionRequestRegister(rACT.ACTIVATE_GRIPPER, rMOD.BASIC_MODE, rGTO.GO_TO, rATR.NORMAL);
