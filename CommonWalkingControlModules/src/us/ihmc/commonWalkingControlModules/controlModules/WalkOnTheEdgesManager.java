@@ -205,6 +205,10 @@ public class WalkOnTheEdgesManager
          FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
          doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
       }
+      else
+      {
+         doToeOff.set(true);
+      }
    }
 
    private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
