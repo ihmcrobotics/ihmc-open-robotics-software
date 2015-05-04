@@ -549,7 +549,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    {
       // Set x to have the CMP slightly inside the support polygon
       exitCMPToPack.setToZero(tempSupportPolygon.getReferenceFrame());
-      exitCMPToPack.setX(tempSupportPolygon.getMaxX() - 1.0e-4);
+      exitCMPToPack.setX(tempSupportPolygon.getMaxX() - 1.6e-2);
       exitCMPToPack.setY(tempSupportPolygon.getCentroid().getY());
 
       // Then constrain the computed CMP to be inside a safe support region
