@@ -4,12 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+
 public abstract class RobotiqOutputRegisterTest
 {
    protected abstract byte getExpectedByteValue();
    protected abstract RobotiqOutputRegister getOutputRegister();
    
-   @Test
+   @Test(timeout = 3000)
+   @EstimatedDuration(duration = 1000)
    public void testGetRegisterValue()
    {
       byte expectedValue = getExpectedByteValue();
