@@ -33,6 +33,7 @@ public class RosCameraReceiver extends CameraDataReceiver
 {
    private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
    private static final boolean DEBUG = false;
+   private final RigidBodyTransform staticTransform = new RigidBodyTransform();
    
    public RosCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, final RosMainNode rosMainNode, final PacketCommunicator packetCommunicator,
@@ -47,6 +48,19 @@ public class RosCameraReceiver extends CameraDataReceiver
          setCameraFrame(cameraFrame);
          new Thread(cameraFrame).start();
          
+      }
+      else if(cameraParameters.useStaticTransformFromHeadFrameToSensor())
+      {
+         staticTransform.set(cameraParameters.getStaticTransformFromHeadFrameToCameraFrame());
+         ReferenceFrame headFrame = new ReferenceFrame("headToCamera", getHeadFrame())
+         {
+            @Override
+            protected void updateTransformToParent(RigidBodyTransform transformToParent)
+            {
+               transformToParent.set(staticTransform);
+            }
+         };
+         setCameraFrame(headFrame);
       }
       else
       {
