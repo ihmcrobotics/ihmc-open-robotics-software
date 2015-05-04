@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.parameters;
 
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DRCRobotCameraParameters implements DRCRobotSensorParameters
 {
@@ -10,7 +11,14 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    private final String rosBaseFrameName;
    private final String sdfPoseFrameName;
    private final int cameraId;
+   private RigidBodyTransform staticTransform;
 
+   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic,RigidBodyTransform staticTransform, int cameraId)
+   {
+      this(cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
+      this.staticTransform = staticTransform;
+   }
+   
    public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, int cameraId)
    {
       this(cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
@@ -89,5 +97,15 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    public DRCRobotSensorType getSensorType()
    {
       return DRCRobotSensorType.CAMERA;
+   }
+
+   public boolean useStaticTransformFromHeadFrameToSensor()
+   {
+      return staticTransform != null;
+   }
+
+   public RigidBodyTransform getStaticTransformFromHeadFrameToCameraFrame()
+   {
+      return staticTransform;
    }
 }
