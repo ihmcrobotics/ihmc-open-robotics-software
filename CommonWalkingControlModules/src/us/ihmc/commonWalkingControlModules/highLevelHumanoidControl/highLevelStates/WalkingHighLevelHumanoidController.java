@@ -210,6 +210,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable loadFootDuration = new DoubleYoVariable("loadFootDuration", registry);
    private final DoubleYoVariable loadFootTransferDuration = new DoubleYoVariable("loadFootTransferDuration", registry);
    
+   private final BooleanYoVariable hasICPPlannerBeenInitializedAtStart = new BooleanYoVariable("hasICPPlannerBeenInitializedAtStart", registry);
    
    @Deprecated
    private final BooleanYoVariable useICPPlannerHackN13 = new BooleanYoVariable("useICPPlannerHackN13", registry);
@@ -511,6 +512,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       desiredICP.setByProjectionOntoXYPlane(capturePoint);
 //      requestICPPlannerToHoldCurrent(); // Not sure if we want to do this. Might cause robot to fall. Might just be better to recenter ICP whenever switching to walking.
 
+      // Need to reset it so the planner will be initialized even when restarting the walking controller.
+      hasICPPlannerBeenInitializedAtStart.set(false);
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
       hasWalkingControllerBeenInitialized.set(true);
@@ -679,8 +682,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
-      boolean initializedAtStart = false;
-
       public void initializeICPPlannerIfNecessary()
       {
          if (!icpTrajectoryHasBeenInitialized.getBooleanValue() && capturePointPlannerAdapter.isDone(yoTime.getDoubleValue()))
@@ -689,7 +690,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
             Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime = computeFinalDesiredICPAndTrajectoryTime();
 
-            if (transferToSide == null && !initializedAtStart)
+            if (transferToSide == null && !hasICPPlannerBeenInitializedAtStart.getBooleanValue())
             {
                FramePoint2d finalDesiredICP = finalDesiredICPAndTrajectoryTime.first();
                finalDesiredICP.changeFrame(desiredICP.getReferenceFrame());
@@ -706,7 +707,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                   upcomingTransferToside = nextNextFootstep.getRobotSide().getOppositeSide();
                capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, yoTime.getDoubleValue(), upcomingTransferToside);
 
-               initializedAtStart = true;
+               hasICPPlannerBeenInitializedAtStart.set(true);
             }
 
             icpAndMomentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
