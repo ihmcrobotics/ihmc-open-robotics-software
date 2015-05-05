@@ -234,6 +234,10 @@ public class WalkOnTheEdgesManager
       if (isNextStepHighEnough)
          return true;
 
+      boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
+      if (!isForwardOrSideStepping)
+         return false;
+
       if (ENABLE_TOE_OFF_FOR_STEP_DOWN)
       {
           boolean isNextStepLowEnough = stepHeight < -minStepHeightForToeOff.getDoubleValue();
@@ -246,10 +250,6 @@ public class WalkOnTheEdgesManager
          if (isNextStepTooLow)
             return false;
       }
-
-      boolean isForwardOrSideStepping = tempLeadingFootPosition.getX() > -0.05;
-      if (!isForwardOrSideStepping)
-         return false;
 
       boolean isSideStepping = Math.abs(Math.atan2(tempLeadingFootPosition.getY(), tempLeadingFootPosition.getX())) > Math.toRadians(45.0);
       if (isSideStepping && !DO_TOEOFF_FOR_SIDE_STEPS)
