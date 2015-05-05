@@ -136,11 +136,11 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
 
    }
 
-   protected void updateImage(BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
+   protected void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       try
       {
-         dataQueue.put(new CameraData(RobotSide.LEFT, bufferedImage, timeStamp, intrinsicParameters));
+         dataQueue.put(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
       }
       catch (InterruptedException e)
       {

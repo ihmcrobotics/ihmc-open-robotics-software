@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.sensing.FisheyePacket;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -20,6 +21,7 @@ import boofcv.struct.calib.IntrinsicParameters;
 
 public class FisheyeCameraReceiver extends CameraDataReceiver
 {
+   private static final boolean DEBUG = false;
    public FisheyeCameraReceiver(SDFFullRobotModelFactory fullRobotModelFactory, final DRCRobotCameraParameters cameraParameters,
          RobotConfigurationDataBuffer robotConfigurationDataBuffer, PacketCommunicator packetCommunicator,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, final RosMainNode rosMainNode)
@@ -36,13 +38,18 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       final RosCameraInfoSubscriber imageInfoSubscriber = new RosCameraInfoSubscriber(cameraParameters.getRosCameraInfoTopicName());
       rosMainNode.attachSubscriber(cameraParameters.getRosCameraInfoTopicName(), imageInfoSubscriber);
 
+      final RobotSide robotSide = cameraParameters.getRobotSide();
       RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
       {
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
          {
             IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
-            updateImage(image, timeStamp, intrinsicParameters);
+            if(DEBUG)
+            {
+               PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
+            }
+            updateImage(robotSide, image, timeStamp, intrinsicParameters);
 
          }
       };
@@ -64,6 +71,10 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation,
             IntrinsicParameters intrinsicParameters)
       {
+         if(DEBUG)
+         {
+            PrintTools.debug(this, robotSide.getCamelCaseNameForStartOfExpression() + " fisheye data size size is " + data.length);
+         }
          packetCommunicator.send(new FisheyePacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters));
       }
 

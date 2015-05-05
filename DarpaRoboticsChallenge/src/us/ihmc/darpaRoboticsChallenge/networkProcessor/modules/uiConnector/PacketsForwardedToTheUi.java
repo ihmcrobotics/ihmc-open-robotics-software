@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.sensing.DepthDataClearCommand;
+import us.ihmc.communication.packets.sensing.FisheyePacket;
 import us.ihmc.communication.packets.sensing.HeadPosePacket;
 import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -30,6 +31,7 @@ import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.FisheyeCameraReceiver;
 
 public class PacketsForwardedToTheUi
 {
@@ -61,7 +63,8 @@ public class PacketsForwardedToTheUi
       ControllerCrashNotificationPacket.class,
       InvalidPacketNotificationPacket.class,
       DetectedObjectPacket.class,
-      MultisenseMocapExperimentPacket.class
+      MultisenseMocapExperimentPacket.class,
+      FisheyePacket.class
    };
    
    public static final HashMap<Class<?>, Long> PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE_WITH_MINIMAL_INTERVALS = new HashMap<Class<?>, Long>();

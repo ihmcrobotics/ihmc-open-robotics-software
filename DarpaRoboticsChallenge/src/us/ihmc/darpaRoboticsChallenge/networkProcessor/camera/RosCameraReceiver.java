@@ -22,6 +22,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -72,6 +73,7 @@ public class RosCameraReceiver extends CameraDataReceiver
          throw new RuntimeException("You really want to use intrinisic parameters from ROS");
       }
 
+      final RobotSide robotSide = cameraParameters.getRobotSide();
       RosCompressedImageSubscriber imageSubscriberSubscriber = new RosCompressedImageSubscriber()
       {
          @Override
@@ -87,7 +89,7 @@ public class RosCameraReceiver extends CameraDataReceiver
                PrintTools.debug(this, "Sending intrinsicParameters");
                intrinsicParameters.print();
             }
-            updateImage(image, timeStamp, intrinsicParameters);
+            updateImage(robotSide, image, timeStamp, intrinsicParameters);
 
          }
       };
