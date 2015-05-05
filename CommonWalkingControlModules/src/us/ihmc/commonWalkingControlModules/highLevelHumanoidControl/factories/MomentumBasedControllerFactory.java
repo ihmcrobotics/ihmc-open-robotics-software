@@ -74,6 +74,7 @@ public class MomentumBasedControllerFactory
    private MomentumBasedController momentumBasedController = null;
    private ICPAndMomentumBasedController icpAndMomentumBasedController = null;
 
+   private boolean isListeningToHighLevelStatePackets = true;
    private HighLevelHumanoidControllerManager highLevelHumanoidControllerManager = null;
    private final ArrayList<HighLevelBehavior> highLevelBehaviors = new ArrayList<>();
 
@@ -246,6 +247,7 @@ public class MomentumBasedControllerFactory
             variousWalkingProviders, centerOfPressureDataHolderForEstimator);
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
+      highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
 
       createRegisteredControllers();
 
@@ -352,7 +354,10 @@ public class MomentumBasedControllerFactory
 
    public void setListenToHighLevelStatePackets(boolean isListening)
    {
-      highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListening);
+      if (highLevelHumanoidControllerManager != null)
+         highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListening);
+      else
+         isListeningToHighLevelStatePackets = isListening;
    }
 
    public void addHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
