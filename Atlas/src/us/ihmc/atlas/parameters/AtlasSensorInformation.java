@@ -57,13 +57,13 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    
    private static final String fisheye_pose_source = "utorso";
-   private static final String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
-   private static final String fisheye_left_camera_info = "/left/info";
+   private static final String fisheye_left_camera_topic = "/left/camera/image_color/compressed";
+   private static final String fisheye_left_camera_info = "/left/camera/camera_info";
    private static final String leftFisheyeCameraName = "l_situational_awareness_camera_sensor_l_situational_awareness_camera";
                         
-   private static final String fisheye_right_camera_topic = "/blackfly/camera/right/compressed";
+   private static final String fisheye_right_camera_topic = "/right/camera/image_color/compressed";
    private static final String right_fisheye_camera_name = "r_situational_awareness_camera_sensor_r_situational_awareness_camera";
-   private static final String fisheye_right_camera_info = "/left/info";
+   private static final String fisheye_right_camera_info = "/right/camera/camera_info";
    
    public static final String head_imu_acceleration_topic = "/multisense/imu/accelerometer";
    

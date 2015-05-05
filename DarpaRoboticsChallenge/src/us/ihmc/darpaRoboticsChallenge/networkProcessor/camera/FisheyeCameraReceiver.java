@@ -11,7 +11,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.FisheyePacket;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.darpaRoboticsChallenge.sensors.blackfly.BlackFlyParameterSetter;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
@@ -28,7 +27,6 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(packetCommunicator),
             ppsTimestampOffsetProvider);
 
-      BlackFlyParameterSetter blackFlyParameterSetter = new BlackFlyParameterSetter(rosMainNode, packetCommunicator);
 
       if (!cameraParameters.useIntrinsicParametersFromRos())
       {
@@ -50,7 +48,6 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       };
       rosMainNode.attachSubscriber(cameraParameters.getRosTopic(), imageSubscriberSubscriber);
 
-      blackFlyParameterSetter.initializeParameterListeners();
 
    }
 
