@@ -896,7 +896,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (transferToSideToUseInFootstepData == null)
             transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
 
-         if (!centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
+         if (footPoseProvider.checkForNewPose() == null && !centerOfMassHeightTrajectoryGenerator.hasBeenInitializedWithNextStep())
          {
             boolean inInitialize = true;
             TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = createTransferToAndNextFootstepDataForDoubleSupport(
