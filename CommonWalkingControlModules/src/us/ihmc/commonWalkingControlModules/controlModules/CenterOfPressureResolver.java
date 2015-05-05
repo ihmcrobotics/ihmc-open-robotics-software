@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -26,7 +27,7 @@ public class CenterOfPressureResolver
    private final SpatialForceVector wrenchResolvedOnPlane = new SpatialForceVector();
    private final Vector3d torqueAtZeroInPlaneFrame = new Vector3d();
    private final Vector3d forceInPlaneFrame = new Vector3d();
-   
+
    public double resolveCenterOfPressureAndNormalTorque(FramePoint2d centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:
@@ -58,5 +59,36 @@ public class CenterOfPressureResolver
       centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y);
       return normalTorqueAtCenterOfPressure;
    }
-  
+
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint centerOfPressureToPack, SpatialForceVector spatialForceVector, ReferenceFrame centerOfPressurePlaneFrame)
+   {
+      // First resolve the wrench at the plane origin:
+      wrenchResolvedOnPlane.set(spatialForceVector);
+      wrenchResolvedOnPlane.changeFrame(centerOfPressurePlaneFrame);
+      
+      wrenchResolvedOnPlane.packAngularPart(torqueAtZeroInPlaneFrame);
+      wrenchResolvedOnPlane.packLinearPart(forceInPlaneFrame);
+            
+      double fz = forceInPlaneFrame.getZ();
+      
+      double vector12x = Double.NaN;
+      double vector12y = Double.NaN;
+      
+      double normalTorqueAtCenterOfPressure;
+      if (fz > 1e-7)
+      {
+         //with sufficient normal force
+         vector12x = -1.0/fz * torqueAtZeroInPlaneFrame.getY();
+         vector12y = 1.0/fz * torqueAtZeroInPlaneFrame.getX();
+         normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ() - vector12x * forceInPlaneFrame.getY() + vector12y * forceInPlaneFrame.getX();
+      }
+      else
+      {
+        //without normal force
+         normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
+      }
+      
+      centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y, 0.0);
+      return normalTorqueAtCenterOfPressure;
+   }
 }
