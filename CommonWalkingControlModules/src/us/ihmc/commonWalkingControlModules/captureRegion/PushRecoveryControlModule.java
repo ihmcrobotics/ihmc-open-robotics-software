@@ -263,27 +263,12 @@ public class PushRecoveryControlModule
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
    {
-      RobotSide supportSide = swingSide.getOppositeSide();
-      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
-
-      if (enablePushRecovery.getBooleanValue())
-      {
-         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-
-         ContactablePlaneBody swingingFoot = feet.get(swingSide);
-         FramePoint2d footCentroid = footPolygon.getCentroid();
-         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
-         Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
-
-         footstepWasProjectedInCaptureRegion.set(true);
-         footstepAdjustor.adjustFootstep(footstepForPushRecovery, swingingFoot, footCentroid, captureRegion);
-
-         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
-            recovering.set(true);
-
-         return footstepForPushRecovery;
-      }
-      return null;
+      if (!enablePushRecovery.getBooleanValue())
+         return null;
+      
+      Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
+      checkAndUpdateFootstep(swingSide, swingTimeRemaining, footstepForPushRecovery);
+      return footstepForPushRecovery;
    }
 
    public void reset()
