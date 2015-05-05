@@ -17,6 +17,7 @@ import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.stateMachines.State;
@@ -35,6 +36,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry, HighLevelState.class, true);
 
    private final DesiredHighLevelStateProvider highLevelStateProvider;
+   private final BooleanYoVariable isListeningToHighLevelStatePacket = new BooleanYoVariable("isListeningToHighLevelStatePacket", registry);
 
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
@@ -49,9 +51,15 @@ public class HighLevelHumanoidControllerManager implements RobotController
       requestedHighLevelState.set(initialBehavior);
 
       if (variousWalkingProviders != null)
+      {
          this.highLevelStateProvider = variousWalkingProviders.getDesiredHighLevelStateProvider();
+         isListeningToHighLevelStatePacket.set(true);
+      }
       else
+      {
          this.highLevelStateProvider = null;
+         isListeningToHighLevelStatePacket.set(false);
+      }
 
       for (int i = 0; i < highLevelBehaviors.size(); i++)
       {
@@ -114,7 +122,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
    {
       this.requestedHighLevelState.set(requestedHighLevelState);
    }
-   
+
+   public void setListenToHighLevelStatePackets(boolean isListening)
+   {
+      isListeningToHighLevelStatePacket.set(isListening);
+   }
+
    public void initialize()
    {
       momentumBasedController.initialize();
@@ -123,11 +136,14 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public void doControl()
    {
-      if (highLevelStateProvider != null && highLevelStateProvider.checkForNewState())
+      if (isListeningToHighLevelStatePacket.getBooleanValue())
       {
-         requestedHighLevelState.set(highLevelStateProvider.getDesiredHighLevelState());
+         if (highLevelStateProvider != null && highLevelStateProvider.checkForNewState())
+         {
+            requestedHighLevelState.set(highLevelStateProvider.getDesiredHighLevelState());
+         }
       }
-      
+
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       reportDesiredCenterOfPressureForEstimator();

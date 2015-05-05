@@ -345,6 +345,16 @@ public class MomentumBasedControllerFactory
       highLevelHumanoidControllerManager.requestHighLevelState(HighLevelState.JOINT_POSITION_CONTROL);
    }
 
+   public VariousWalkingProviders getVariousWalkingProviders()
+   {
+      return variousWalkingProviders;
+   }
+
+   public void setListenToHighLevelStatePackets(boolean isListening)
+   {
+      highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListening);
+   }
+
    public void addHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
    {
       if (momentumBasedController == null)
