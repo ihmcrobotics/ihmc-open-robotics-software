@@ -16,6 +16,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 {
+   private static final Object hackyLockBecauseJPEGEncoderIsNotThreadsafe = new Object();
+   
    private final YUVPictureConverter converter = new YUVPictureConverter();
    private final JPEGEncoder encoder = new JPEGEncoder();
    private final CompressedVideoHandler handler;
@@ -31,7 +33,11 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVSubsamplingType.YUV420);
       try
       {
-         ByteBuffer buffer = encoder.encode(picture, 90);
+         ByteBuffer buffer;
+         synchronized (hackyLockBecauseJPEGEncoderIsNotThreadsafe)
+         {
+            buffer = encoder.encode(picture, 90);
+         }
          byte[] data =  new byte[buffer.remaining()];
          buffer.get(data);
          handler.newVideoPacketAvailable(robotSide, timeStamp, data, cameraPosition, cameraOrientation, intrinsicParameters);

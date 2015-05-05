@@ -57,7 +57,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
-      SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(modelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
+      SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
             ppsTimestampOffsetProvider);
       cameraDataReceiver.start();
       
@@ -106,12 +106,12 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
       
-      new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
-      new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
       
-//      FishEyeDataReceiver fishEyeDataReceiver = new FishEyeDataReceiver(robotPoseBuffer, rosMainNode, sensorSuitePacketCommunicator,
-//            DRCSensorParameters.DEFAULT_FIELD_OF_VIEW, ppsTimestampOffsetProvider, sensorInformation.setupROSParameterSetters());
-
+      leftFishEyeCameraReceiver.start();
+      rightFishEyeCameraReceiver.start();
+      
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
