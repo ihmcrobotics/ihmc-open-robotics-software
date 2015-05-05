@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.parameters;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.robotSide.RobotSide;
 
 public class DRCRobotCameraParameters implements DRCRobotSensorParameters
 {
@@ -10,26 +11,27 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    private final String rosEndFrameName;
    private final String rosBaseFrameName;
    private final String sdfPoseFrameName;
+   private final RobotSide robotSide;
    private final int cameraId;
    private RigidBodyTransform staticTransform;
 
-   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic,RigidBodyTransform staticTransform, int cameraId)
+   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic,RigidBodyTransform staticTransform, int cameraId)
    {
-      this(cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
+      this(robotSide, cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
       this.staticTransform = staticTransform;
    }
    
-   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, int cameraId)
+   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, int cameraId)
    {
-      this(cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
+      this(robotSide, cameraName,rosTopic,null,poseFrameName,null,null,cameraId);
    }
 
-   public DRCRobotCameraParameters(String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, int cameraId)
+   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosTopic, String poseFrameName, String rosCameraInfoTopic, int cameraId)
    {
-      this(cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
+      this(robotSide, cameraName, rosTopic, rosCameraInfoTopic, poseFrameName, null, null, cameraId);
    }
 
-   public DRCRobotCameraParameters(String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
+   public DRCRobotCameraParameters(RobotSide robotSide, String cameraName, String rosCameraTopic, String rosInfoTopic, String handOffFrameName, String rosBaseFrameName,
          String rosEndFrameName, int cameraId)
    {
       this.rosCompressedTopicName = rosCameraTopic;
@@ -39,6 +41,7 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
       this.rosBaseFrameName = rosBaseFrameName;
       this.rosEndFrameName = rosEndFrameName;
       this.cameraId = cameraId;
+      this.robotSide = robotSide;
    }
    
    @Override
@@ -107,5 +110,10 @@ public class DRCRobotCameraParameters implements DRCRobotSensorParameters
    public RigidBodyTransform getStaticTransformFromHeadFrameToCameraFrame()
    {
       return staticTransform;
+   }
+
+   public RobotSide getRobotSide()
+   {
+      return robotSide;
    }
 }
