@@ -46,6 +46,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -168,7 +169,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final YoFrameVector2d desiredICPVelocity;
 
    private final FramePoint tmpFramePoint = new FramePoint(worldFrame);
-
+   private final FramePoint2d tempFramePoint2d = new FramePoint2d();
 
    private final DoubleYoVariable controlledCoMHeightAcceleration;
 
@@ -230,6 +231,10 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final DoubleYoVariable timeICPPlannerFinishedAt;
    private final DoubleYoVariable desiredICPVelocityReductionDuration;
    private final DoubleYoVariable desiredICPVelocityRedutionFactor;
+
+   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
+   private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
+   private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -380,6 +385,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       resetIntegratorsAfterSwing.set(true);
       alwaysIntegrateAnkleAcceleration.set(true);
+
+      distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
    }
 
    private void setupStateMachine()
@@ -506,8 +513,6 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       stateMachine.setCurrentState(WalkingState.DOUBLE_SUPPORT);
 
-      capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, 0.1, null);
-
       hasWalkingControllerBeenInitialized.set(true);
    }
 
@@ -520,9 +525,18 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    public void requestICPPlannerToHoldCurrentCoM()
    {
-      tmpFramePoint.setToZero( referenceFrames.getCenterOfMassFrame() );  
+      tmpFramePoint.setToZero(referenceFrames.getCenterOfMassFrame());
+
+      icpAndMomentumBasedController.updateBipedSupportPolygons();
+      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygons.getSupportPolygonInMidFeetZUp();
+      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, distanceToShrinkSupportPolygonWhenHoldingCurrent.getDoubleValue(), shrunkSupportPolygon);
+
+      tmpFramePoint.changeFrame(shrunkSupportPolygon.getReferenceFrame());
+      tempFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
+      shrunkSupportPolygon.orthogonalProjection(tempFramePoint2d);
+      tmpFramePoint.setXY(tempFramePoint2d);
+
       tmpFramePoint.changeFrame(worldFrame);
-      
       capturePointPlannerAdapter.holdCurrentICP(yoTime.getDoubleValue(), tmpFramePoint);
    }
 
@@ -690,7 +704,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                RobotSide upcomingTransferToside = null;
                if (nextNextFootstep != null)
                   upcomingTransferToside = nextNextFootstep.getRobotSide().getOppositeSide();
-               capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, 0.1, upcomingTransferToside);
+               capturePointPlannerAdapter.initializeDoubleSupport(desiredICP, desiredICPVelocity, yoTime.getDoubleValue(), upcomingTransferToside);
 
                initializedAtStart = true;
             }
