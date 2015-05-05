@@ -163,6 +163,7 @@ public class ICPAndMomentumBasedController
       computeOmega0();
       computeCapturePoint();
       updateBipedSupportPolygons();
+      icpBasedLinearMomentumRateOfChangeControlModule.updateCenterOfMassViz();
    }
 
    private void computeCapturePoint()

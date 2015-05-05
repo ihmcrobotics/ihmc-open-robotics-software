@@ -100,8 +100,6 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       visualizer.setDesiredCapturePoint(desiredCapturePoint);
       visualizer.setDesiredCMP(desiredCMP);
       visualizer.setFinalDesiredCapturePoint(finalDesiredCapturePoint);
-      centerOfMass.setToZero(centerOfMassFrame);
-      visualizer.setCenterOfMass(centerOfMass);
 
       supportLegPreviousTick.set(supportSide);
 
@@ -116,6 +114,12 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule
       controlledCoMAcceleration.set(linearMomentumRateOfChange);
       controlledCoMAcceleration.scale(1.0 / totalMass);
       momentumRateOfChangeData.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+   }
+
+   public void updateCenterOfMassViz()
+   {
+      centerOfMass.setToZero(centerOfMassFrame);
+      visualizer.setCenterOfMass(centerOfMass);
    }
 
    private final FramePoint cmp3d = new FramePoint();
