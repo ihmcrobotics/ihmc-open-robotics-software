@@ -680,4 +680,14 @@ public class TaskspaceToJointspaceCalculator
       desiredPose.setToZero(localControlFrame);
       desiredPose.changeFrame(desiredFrame);
    }
+   
+   public FrameVector getInitialHandPoseVelocity(ReferenceFrame referenceFrame)
+   {
+      return  new FrameVector(referenceFrame);
+   }
+   
+   public FrameVector getInitialHandPoseAngularVelocity(ReferenceFrame referenceFrame)
+   {
+      return  new FrameVector(referenceFrame);
+   }
 }

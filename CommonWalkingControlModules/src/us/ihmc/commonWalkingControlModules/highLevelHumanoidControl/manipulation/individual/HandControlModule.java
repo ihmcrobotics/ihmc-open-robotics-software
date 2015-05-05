@@ -62,6 +62,7 @@ import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerat
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointWayPointTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.VelocityConstrainedPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.WrapperForPositionAndOrientationTrajectoryGenerators;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoUtilities.stateMachines.State;
@@ -78,6 +79,8 @@ public class HandControlModule
    // JPratt. February 27, 2015: Added this since new Atlas was having trouble with network stuff.
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
    private static final boolean REGISTER_YOVARIABLES = true;
+   
+   private static final boolean USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE = false;
 
    private final YoVariableRegistry registry;
 
@@ -94,6 +97,7 @@ public class HandControlModule
    private final ConstantPoseTrajectoryGenerator holdPoseTrajectoryGenerator;
    private final StraightLinePoseTrajectoryGenerator straightLinePoseTrajectoryGenerator;
    private final CirclePoseTrajectoryGenerator circularPoseTrajectoryGenerator;
+   private final VelocityConstrainedPoseTrajectoryGenerator velocityConstrainedPoseTrajectoryGenerator;
    private final FinalApproachPoseTrajectoryGenerator finalApproachPoseTrajectoryGenerator;
    private final InitialClearancePoseTrajectoryGenerator initialClearancePoseTrajectoryGenerator;
    private final LeadInOutPoseTrajectoryGenerator leadInOutPoseTrajectoryGenerator;
@@ -240,6 +244,11 @@ public class HandControlModule
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
       straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
               yoGraphicsListRegistry);
+      
+      velocityConstrainedPoseTrajectoryGenerator = new VelocityConstrainedPoseTrajectoryGenerator(name + "velocityConstrained", true, worldFrame, registry, visualize,
+            yoGraphicsListRegistry);
+      
+      
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
       initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize,
               yoGraphicsListRegistry);
@@ -530,16 +539,39 @@ public class HandControlModule
       if (!isLoadBearing())
       {
          FramePose pose = computeDesiredFramePose(trajectoryFrame);
-         straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
-         straightLinePoseTrajectoryGenerator.setInitialPose(pose);
-         straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
-         straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
-         executeTaskSpaceTrajectory(straightLinePoseTrajectoryGenerator, selectionMatrix, percentOfTrajectoryWithOrientationBeingControlled, time);
+         PoseTrajectoryGenerator straightLineTrajectoryToUse = setupStraightLinePoseTrajectory(finalDesiredPose, time, trajectoryFrame, pose);
+         executeTaskSpaceTrajectory(straightLineTrajectoryToUse, selectionMatrix, percentOfTrajectoryWithOrientationBeingControlled, time);
       }
       else
       {
          loadBearingControlState.getContactNormalVector(initialDirection);
          moveAwayObject(finalDesiredPose, initialDirection, swingClearance, time, trajectoryFrame);
+      }
+   }
+
+   private PoseTrajectoryGenerator setupStraightLinePoseTrajectory(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, FramePose pose)
+   {
+      if (USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE)
+      {
+
+         FrameVector initialHandPoseVelocity = handTaskspaceToJointspaceCalculator.getInitialHandPoseVelocity(trajectoryFrame);
+         FrameVector initialHandPoseAngularVelocity = handTaskspaceToJointspaceCalculator.getInitialHandPoseAngularVelocity(trajectoryFrame);
+
+         velocityConstrainedPoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+         velocityConstrainedPoseTrajectoryGenerator.setInitialPoseWithInitialVelocity(pose, initialHandPoseVelocity, initialHandPoseAngularVelocity);
+         velocityConstrainedPoseTrajectoryGenerator.setFinalPoseWithoutFinalVelocity(finalDesiredPose);
+         velocityConstrainedPoseTrajectoryGenerator.setTrajectoryTime(time);
+
+         return velocityConstrainedPoseTrajectoryGenerator;
+      }
+      else
+      {
+         straightLinePoseTrajectoryGenerator.registerAndSwitchFrame(trajectoryFrame);
+         straightLinePoseTrajectoryGenerator.setInitialPose(pose);
+         straightLinePoseTrajectoryGenerator.setFinalPose(finalDesiredPose);
+         straightLinePoseTrajectoryGenerator.setTrajectoryTime(time);
+
+         return straightLinePoseTrajectoryGenerator;
       }
    }
 
