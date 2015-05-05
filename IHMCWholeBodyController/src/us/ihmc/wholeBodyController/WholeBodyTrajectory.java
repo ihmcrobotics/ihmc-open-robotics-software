@@ -57,6 +57,11 @@ public class WholeBodyTrajectory
    {
       minimumExecutionTime = minTime;
    }
+   
+   public double getMinimumExecutionTime()
+   {
+      return minimumExecutionTime;
+   }
 
    public TrajectoryND createTaskSpaceTrajectory(
          final WholeBodyIkSolver wbSolver,  
