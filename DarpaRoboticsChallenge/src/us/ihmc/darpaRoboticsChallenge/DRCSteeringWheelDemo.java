@@ -36,7 +36,6 @@ public class DRCSteeringWheelDemo
       robot.setController(controller);
       controller.initialize();
       
-      simStarter.startOpertorInterfaceUsingProcessSpawner();
    }
 
    public SimulationConstructionSet getSimulationConstructionSet()
