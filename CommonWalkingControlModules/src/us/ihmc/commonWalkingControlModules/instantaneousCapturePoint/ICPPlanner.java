@@ -282,7 +282,7 @@ public class ICPPlanner
       }
       ReferenceFrame finalFrame = isDoneWalking ? midFeetZUpFrame : transferToSoleFrame;
 
-      if (!actualICPToHold.containsNaN())
+      if (requestedHoldPosition.getBooleanValue())
       {
          desiredCapturePointPosition.set(actualICPToHold);
          desiredCapturePointVelocity.setToZero();
@@ -292,6 +292,7 @@ public class ICPPlanner
          setCornerPointsToNaN();
          actualICPToHold.setToNaN();
          isDoneWalking = true;
+         requestedHoldPosition.set(false);
          isHoldingPosition.set(true);
       }
       else if (isDoneWalking)
