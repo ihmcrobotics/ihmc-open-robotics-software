@@ -58,10 +58,12 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    
    private static final String fisheye_pose_source = "utorso";
    private static final String fisheye_left_camera_topic = "/blackfly/camera/left/compressed";
+   private static final String fisheye_left_camera_info = "/left/info";
    private static final String leftFisheyeCameraName = "l_situational_awareness_camera_sensor_l_situational_awareness_camera";
                         
    private static final String fisheye_right_camera_topic = "/blackfly/camera/right/compressed";
    private static final String right_fisheye_camera_name = "r_situational_awareness_camera_sensor_r_situational_awareness_camera";
+   private static final String fisheye_right_camera_info = "/left/info";
    
    public static final String head_imu_acceleration_topic = "/multisense/imu/accelerometer";
    
@@ -152,8 +154,8 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       }
 
       setupHeadIMUFrames();
-      cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, BLACKFLY_LEFT_CAMERA_ID);
-      cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, BLACKFLY_RIGHT_CAMERA_ID);
+      cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
+      cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
       
       setupROSLocationService = target == AtlasTarget.REAL_ROBOT;
       setupROSParameterSetters = target == AtlasTarget.REAL_ROBOT;

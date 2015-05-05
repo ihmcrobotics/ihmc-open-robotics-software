@@ -12,11 +12,8 @@ import javax.vecmath.Quat4d;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
-import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.CropVideoPacket;
-import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
@@ -29,7 +26,7 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 public abstract class CameraDataReceiver extends Thread implements PacketConsumer<CropVideoPacket>
 {
-   protected final boolean DEBUG = false;
+   protected static final boolean DEBUG = false;
    private final VideoDataServer compressedVideoDataServer;
    private final ArrayList<DRCStereoListener> stereoListeners = new ArrayList<DRCStereoListener>();
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
@@ -51,16 +48,15 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
    private int cropY;
 
    public CameraDataReceiver(SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer,
-         final PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
+         CompressedVideoHandler compressedVideoHandler, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       this.fullRobotModel = fullRobotModelFactory.createFullRobotModel();
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.robotConfigurationDataBuffer = robotConfigurationDataBuffer;
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
 
-      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new VideoPacketHandler(sensorSuitePacketCommunicator));
+      compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
       
-      sensorSuitePacketCommunicator.attachListener(CropVideoPacket.class, this);
    }
 
    public void setCameraFrame(ReferenceFrame cameraFrame)
@@ -140,7 +136,7 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
 
    }
 
-   protected void updateLeftEyeImage(BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
+   protected void updateImage(BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       try
       {
@@ -173,36 +169,6 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
 
    }
 
-   private class VideoPacketHandler implements CompressedVideoHandler
-   {
-      private final PacketCommunicator packetCommunicator;
-
-      public VideoPacketHandler(PacketCommunicator sensorSuitePacketCommunicator)
-      {
-         this.packetCommunicator = sensorSuitePacketCommunicator;
-      }
-
-      public void newVideoPacketAvailable(RobotSide robotSide, long timeStamp, byte[] data, Point3d position, Quat4d orientation, IntrinsicParameters intrinsicParameters)
-      {
-         if (DEBUG)
-         {
-            System.out.println(getClass().getName() + " sending new VideoPacket");
-         }
-         packetCommunicator.send(new VideoPacket(robotSide, timeStamp, data, position, orientation, intrinsicParameters));
-      }
-
-      public void addNetStateListener(NetStateListener compressedVideoDataServer)
-      {
-         packetCommunicator.attachStateListener(compressedVideoDataServer);
-      }
-
-      public boolean isConnected()
-      {
-         return packetCommunicator.isConnected();
-      }
-
-   }
-   
    public void receivedPacket(CropVideoPacket packet)
    {
       cropX = MathTools.clipToMinMax(packet.cropX(), 0, 100);
