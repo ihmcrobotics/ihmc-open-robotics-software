@@ -79,6 +79,7 @@ task deploy(dependsOn: assemble) {
 		}	
 		
 		wagon.put(jar.archivePath, "StepprController.jar")
+		wagon.put(jar.archivePath, "WandererController.jar")
 	}
 	 
 }

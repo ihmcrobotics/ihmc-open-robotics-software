@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./runStepprController.sh us.ihmc.wanderer.hardware.controllers.WandererPDJointController
+./runWandererController.sh us.ihmc.wanderer.hardware.controllers.WandererPDJointController
