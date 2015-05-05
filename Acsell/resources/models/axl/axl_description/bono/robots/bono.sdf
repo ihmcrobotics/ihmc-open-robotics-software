@@ -19,15 +19,15 @@
  -->
 <!-- Includes Hip X Springs  -->
       <inertial>
-        <pose>-0.05257 -0.00002 0.11366 0 0 0</pose>
-        <mass>12.866</mass>
+        <pose>-0.05399 -0.00002 0.11154 0 0 0</pose>
+        <mass>13.10583</mass>
         <inertia>
-          <ixx> 0.16409</ixx>
+          <ixx> 0.16763</ixx>
           <ixy> 0.00002</ixy>
-          <ixz>-0.02319</ixz>
-          <iyy> 0.11943</iyy>
+          <ixz>-0.02529</ixz>
+          <iyy> 0.12404</iyy>
           <iyz> 0.00005</iyz>
-          <izz> 0.16461</izz>
+          <izz> 0.16643</izz>
         </inertia>
       </inertial>
 
