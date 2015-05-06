@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./runStepprController.sh us.ihmc.steppr.hardware.controllers.StepprPDJointController
+./runAcsellController.sh us.ihmc.steppr.hardware.controllers.StepprPDJointController

@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./runStepprController.sh us.ihmc.steppr.hardware.controllers.StepprStandPrep
+./runAcsellController.sh us.ihmc.steppr.hardware.controllers.StepprStandPrep

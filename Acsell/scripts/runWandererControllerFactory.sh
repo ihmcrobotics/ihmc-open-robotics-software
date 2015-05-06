@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./runWandererController.sh us.ihmc.wanderer.hardware.controllers.WandererControllerFactory
+./runAcsellController.sh us.ihmc.wanderer.hardware.controllers.WandererControllerFactory
