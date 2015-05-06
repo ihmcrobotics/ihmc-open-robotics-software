@@ -188,6 +188,15 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          if (areHandTaskspaceControlled.get(robotSide).getBooleanValue())
          {
             handTaskspaceControllers.get(robotSide).doAction();
+            
+            for (ArmJointName jointName : ArmJointName.values())
+            {
+               OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, jointName);
+               if (joint == null) continue;
+
+               trajectoryGenerator.get(joint).setFinalPosition(joint.getqDesired());
+               previousPosition.put(joint, joint.getqDesired());
+            }
          }
       }
 
@@ -352,6 +361,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
    private void initializeFromSingleJointAnglePacket(SingleJointAnglePacket packet)
    {
+      initialTrajectoryTime = timeProvider.getDoubleValue();
       trajectoryTimeProvider.set(packet.trajcetoryTime);
       
       for (OneDoFJoint joint : jointsBeingControlled)
@@ -369,15 +379,15 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             
             double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
             trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+
+            alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+            trajectoryGenerator.get(joint).initialize();
          }
          else
          {
-            double desiredPosition = joint.getqDesired();
-            trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+            trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
          }
          
-         alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
-         trajectoryGenerator.get(joint).initialize();
       }
    }
 
