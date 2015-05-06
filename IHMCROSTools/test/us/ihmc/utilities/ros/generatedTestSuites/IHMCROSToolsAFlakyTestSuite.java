@@ -8,6 +8,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses
 ({
    us.ihmc.utilities.ros.AddTwoIntsServiceTest.class,
+   us.ihmc.utilities.ros.msgToPacket.converter.GenericROSMessageConverterTest.class,
    us.ihmc.utilities.ros.RosPointCloudPublisherSubscriberTest.class,
    us.ihmc.utilities.ros.RosTopicPublisherSubscriberTest.class
 })
