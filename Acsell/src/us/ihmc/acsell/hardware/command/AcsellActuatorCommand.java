@@ -42,9 +42,9 @@ public abstract class AcsellActuatorCommand
       this.rawCurrentDesired = new DoubleYoVariable(name+"CurrentDesired", registry);
       
       if(actuator==StepprActuator.LEFT_HIP_Z || actuator==StepprActuator.RIGHT_HIP_Z)
-         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 0.95, rawCurrentDesired);
+         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 0.90, rawCurrentDesired);
       else
-         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 1.0, rawCurrentDesired);
+         this.filteredCurrentDesired = new AlphaFilteredYoVariable(name+"CurrentDesired_filt", registry, 0.0, rawCurrentDesired);
       
       rawCurrentDesired.addVariableChangedListener(new VariableChangedListener()
       {
@@ -102,6 +102,7 @@ public abstract class AcsellActuatorCommand
    {
       tauDesired.set(tau);
       this.rawCurrentDesired.set(tau/actuator.getKt());
+      this.filteredCurrentDesired.update();
    }
    
    protected void setDamping(double damping)
