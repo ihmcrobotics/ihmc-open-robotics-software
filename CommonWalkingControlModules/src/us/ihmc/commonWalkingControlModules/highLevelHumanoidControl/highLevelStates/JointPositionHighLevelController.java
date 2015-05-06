@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
@@ -32,6 +33,7 @@ import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
+import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -39,6 +41,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
+import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -83,6 +86,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private double[] spineJointAngles;
    private double neckJointAngle;
    
+   private final DoubleYoVariable proportionalGain;
+   private final DoubleYoVariable derivativeGain;
+   
    private final SideDependentList<BooleanYoVariable> areHandTaskspaceControlled;
    
    // Fields used for taskspace commands
@@ -115,7 +121,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
       useAlternativeController = new HashMap<OneDoFJoint, BooleanYoVariable>();
-
+      
+      proportionalGain = new DoubleYoVariable("flatFeetProportionalGain", registry);
+      derivativeGain   = new DoubleYoVariable("flatFeetDerivativeGain", registry);
+      
+      proportionalGain.set(0.01);
+      
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
       
@@ -176,6 +187,63 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
    }
    
+   private FramePoint2d cop = new FramePoint2d();
+   private Wrench footWrench = new Wrench();
+   
+   private void controlOrientationOfFeet()
+   {
+      if (!flattenFeet){
+         return;
+      }
+      SideDependentList<FootSwitchInterface> feetSensors = momentumBasedController.getFootSwitches();
+           
+      double minimumZForce = 100; // Nextons ??
+      
+      boolean feetFlattened = true;
+      for (RobotSide side: RobotSide.values)
+      {
+         feetSensors.get(side).computeAndPackCoP(cop);
+         feetSensors.get(side).computeAndPackFootWrench(footWrench);
+         
+         OneDoFJoint ankleRoll = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL);
+         OneDoFJoint anklePitch = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH);
+         
+         cop.changeFrame( fullRobotModel.getSoleFrame( side) );
+         
+         if(footWrench.getLinearPartZ() > minimumZForce )
+         {
+            {
+               double errorRoll = 0;
+               double Ymax = 0.0375;
+               double Ymin = -0.0375;
+               if( cop.getY() > Ymax) errorRoll = Ymax - cop.getY();
+               if( cop.getY() < Ymin) errorRoll = Ymin - cop.getY();
+               
+               double deltaQ = errorRoll * proportionalGain.getDoubleValue();
+               ankleRoll.setqDesired( deltaQ + ankleRoll.getqDesired() );
+               if (Math.abs(errorRoll) > 0){
+                  feetFlattened = false;
+               }
+            }  
+            {
+               double errorPitch = 0;
+               double Xmax = 0.10;
+               double Xmin = -0.10;
+               if( cop.getY() > Xmax) errorPitch = Xmax - cop.getY();
+               if( cop.getY() < Xmin) errorPitch = Xmin - cop.getY();
+               
+               double deltaQ = errorPitch * proportionalGain.getDoubleValue();
+               anklePitch.setqDesired( deltaQ + ankleRoll.getqDesired() );
+               if (Math.abs(errorPitch) > 0){
+                  feetFlattened = false;
+               }
+            }
+         }
+      }
+      
+      flattenFeet = !feetFlattened;
+   }
+   
    @Override
    public void doAction()
    {
@@ -230,9 +298,13 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    {
       setJointTrajectoriesToCurrent();
    }
+   
+   private boolean flattenFeet = false;
 
    private void doJointPositionControl(double time)
    {
+      boolean trajectoriesAreDone = true;
+      
       for (OneDoFJoint joint : jointsBeingControlled)
       {
          OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
@@ -240,6 +312,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          if (generator.isDone() == false)
          {
             generator.compute(time);
+            trajectoriesAreDone = false;
          }
    
          if (useAlternativeController.get(joint).getBooleanValue())
@@ -255,6 +328,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             joint.setUnderPositionControl(true);
             joint.setqDesired(generator.getValue());
             joint.setQdDesired(generator.getVelocity());
+         }
+         
+         if( flattenFeet && trajectoriesAreDone)
+         {
+            controlOrientationOfFeet();
          }
    
          previousPosition.put(joint, generator.getValue());
@@ -357,6 +435,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
         	 trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
          }
       }
+      
+      flattenFeet = packet.flattenFeetAtTheEnd;
    }
 
    private void initializeFromSingleJointAnglePacket(SingleJointAnglePacket packet)
