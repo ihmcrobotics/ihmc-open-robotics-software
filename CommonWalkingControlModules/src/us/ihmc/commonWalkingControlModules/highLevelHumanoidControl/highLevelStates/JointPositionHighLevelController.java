@@ -88,6 +88,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private final DoubleYoVariable proportionalGain;
    private final DoubleYoVariable derivativeGain;
+   private final SideDependentList<DoubleYoVariable> offsetRoll = new SideDependentList<DoubleYoVariable>();
+   private final SideDependentList<DoubleYoVariable> offsetPitch = new SideDependentList<DoubleYoVariable>();
    
    private final SideDependentList<BooleanYoVariable> areHandTaskspaceControlled;
    
@@ -126,6 +128,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       derivativeGain   = new DoubleYoVariable("flatFeetDerivativeGain", registry);
       
       proportionalGain.set(0.01);
+      
+      offsetRoll.set(RobotSide.LEFT, new DoubleYoVariable("flatFeetLeftOffsetRoll", registry) );
+      offsetRoll.set(RobotSide.RIGHT, new DoubleYoVariable("flatFeetRightOffsetRoll", registry) );
+      
+      offsetPitch.set(RobotSide.LEFT, new DoubleYoVariable("flatFeetLeftOffsetpitch", registry) );
+      offsetPitch.set(RobotSide.RIGHT, new DoubleYoVariable("flatFeetRightOffsetpitch", registry) );
       
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
@@ -189,6 +197,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private FramePoint2d cop = new FramePoint2d();
    private Wrench footWrench = new Wrench();
+
    
    private void controlOrientationOfFeet()
    {
@@ -205,42 +214,51 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          feetSensors.get(side).computeAndPackCoP(cop);
          feetSensors.get(side).computeAndPackFootWrench(footWrench);
          
-         OneDoFJoint ankleRoll = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL);
-         OneDoFJoint anklePitch = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH);
+        // OneDoFJoint ankleRoll = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL);
+        // OneDoFJoint anklePitch = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH);
          
          cop.changeFrame( fullRobotModel.getSoleFrame( side) );
          
+ 
          if(footWrench.getLinearPartZ() > minimumZForce )
          {
             {
                double errorRoll = 0;
-               double Ymax = 0.0375;
-               double Ymin = -0.0375;
-               if( cop.getY() > Ymax) errorRoll = Ymax - cop.getY();
-               if( cop.getY() < Ymin) errorRoll = Ymin - cop.getY();
+               double Ymax = 0.03;
+               double Ymin = -0.03;
+               if( cop.getY() > Ymax) errorRoll = cop.getY() - Ymax;
+               if( cop.getY() < Ymin) errorRoll = cop.getY() - Ymin;
                
                double deltaQ = errorRoll * proportionalGain.getDoubleValue();
-               ankleRoll.setqDesired( deltaQ + ankleRoll.getqDesired() );
+                
+               double offset = offsetRoll.get(side).getDoubleValue(); 
+               offset += deltaQ;  
+               offsetRoll.get(side).set( offset ); 
+    
                if (Math.abs(errorRoll) > 0){
                   feetFlattened = false;
                }
             }  
             {
                double errorPitch = 0;
-               double Xmax = 0.10;
-               double Xmin = -0.10;
-               if( cop.getY() > Xmax) errorPitch = Xmax - cop.getY();
-               if( cop.getY() < Xmin) errorPitch = Xmin - cop.getY();
+               double Xmax = 0.08;
+               double Xmin = -0.08;
+               if( cop.getY() > Xmax) errorPitch = cop.getY() - Xmax;
+               if( cop.getY() < Xmin) errorPitch = cop.getY() - Xmin;
                
                double deltaQ = errorPitch * proportionalGain.getDoubleValue();
-               anklePitch.setqDesired( deltaQ + ankleRoll.getqDesired() );
+               
+               double offset = offsetPitch.get(side).getDoubleValue(); 
+               offset += deltaQ;  
+               offsetPitch.get(side).set( offset ); 
+               
                if (Math.abs(errorPitch) > 0){
                   feetFlattened = false;
                }
             }
          }
       }
-      
+
       flattenFeet = !feetFlattened;
    }
    
@@ -305,6 +323,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    {
       boolean trajectoriesAreDone = true;
       
+      if( flattenFeet && trajectoriesAreDone)
+      {
+        //TODO  controlOrientationOfFeet();
+      }
+      
       for (OneDoFJoint joint : jointsBeingControlled)
       {
          OneDoFJointQuinticTrajectoryGenerator generator = trajectoryGenerator.get(joint);
@@ -329,14 +352,21 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             joint.setqDesired(generator.getValue());
             joint.setQdDesired(generator.getVelocity());
          }
-         
-         if( flattenFeet && trajectoriesAreDone)
-         {
-            controlOrientationOfFeet();
-         }
-   
          previousPosition.put(joint, generator.getValue());
       }
+      
+      for (RobotSide side : RobotSide.values)
+      {
+         OneDoFJoint ankleRoll = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL);
+         OneDoFJoint anklePitch = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_PITCH);
+
+         double Q = ankleRoll.getqDesired() + offsetRoll.get(side).getDoubleValue();
+         ankleRoll.setqDesired( Q );
+         
+         Q = anklePitch.getqDesired() + offsetPitch.get(side).getDoubleValue();
+         anklePitch.setqDesired( Q );
+      }
+      
    }
 
    private void initializeFromVariousProviders()
@@ -431,8 +461,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       {
          for (OneDoFJoint joint : jointsBeingControlled)
          {
-//            trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
-        	 trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
+           trajectoryGenerator.get(joint).initialize(previousPosition.get(joint), 0.0);
+  //       	 trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
          }
       }
       
