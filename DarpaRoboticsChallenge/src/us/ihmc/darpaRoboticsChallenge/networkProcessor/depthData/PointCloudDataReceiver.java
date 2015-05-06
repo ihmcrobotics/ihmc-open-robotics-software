@@ -250,15 +250,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
          throw new RuntimeException("Number of timestamps does not match number of points");
       }
 
-      try
-      {
-         dataQueue.put(new PointCloudData(scanFrame, lidarFrame, timestamps, points, sources));
-      }
-      catch (InterruptedException e)
-      {
-         e.printStackTrace();
-      }
-
+      dataQueue.offer(new PointCloudData(scanFrame, lidarFrame, timestamps, points, sources));
    }
 
    @Override
