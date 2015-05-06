@@ -146,8 +146,18 @@ public class PushRecoveryControlModule
       recoveringFromDoubleSupportFall.set(true);
    }
 
-   public void updateForDoubleSupport(double timeInState)
+   public void updateForDoubleSupport(FramePoint2d capturePoint2d, double omega0, double timeInState)
    {
+      this.capturePoint2d.setIncludingFrame(capturePoint2d);
+      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
+      this.supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
+      this.omega0 = omega0;
+
+      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE, reducedSupportPolygon);
+
+      orientationStateVisualizer.updatePelvisVisualization();
+      orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
+
       // Initialize variables
       icpIsTooFarOnSide.set(null);
       closestFootToICP.set(null);
@@ -178,7 +188,7 @@ public class PushRecoveryControlModule
          if (isICPTooFarOutside)
             icpIsTooFarOnSide.set(robotSide);
 
-         distanceICPToFeet.get(robotSide).set(footPolygon.distance(projectedCapturePoint2d));
+         distanceICPToFeet.get(robotSide).set(projectedCapturePoint2d.distance(footPolygon.getCentroid()));
       }
 
       boolean isLeftFootCloser = distanceICPToFeet.get(RobotSide.LEFT).getDoubleValue() <= distanceICPToFeet.get(RobotSide.RIGHT).getDoubleValue();

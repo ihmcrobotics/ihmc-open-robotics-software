@@ -677,8 +677,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (pushRecoveryModule.isEnabled())
          {
             capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
-            pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getOmega0());
-            pushRecoveryModule.updateForDoubleSupport(getTimeInCurrentState());
+            pushRecoveryModule.updateForDoubleSupport(capturePoint2d, icpAndMomentumBasedController.getOmega0(), getTimeInCurrentState());
          }
       }
 
@@ -1036,7 +1035,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                {
                   upcomingFootstepList.requestCancelPlanToProvider();
                   upcomingFootstepList.clearCurrentFootsteps();
-                  squareUpFootstepForPushRecovery = createSquareUpFootstep(nextFootstep.getRobotSide());
+                  squareUpFootstepForPushRecovery = createSquareUpFootstep(swingSide);
                   upcomingFootstepList.insertNewNextFootstep(squareUpFootstepForPushRecovery);
                }
 
@@ -1139,12 +1138,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
             nextFootstep = pushRecoveryModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeCalculationProvider.getValue());
-            squareUpFootstepForPushRecovery = createSquareUpFootstep(nextFootstep.getRobotSide());
-
             upcomingFootstepList.requestCancelPlanToProvider();
             upcomingFootstepList.clearCurrentFootsteps();
-            // Submit a footstep to square up to reach a stable double support stance.
-            upcomingFootstepList.insertNewNextFootstep(squareUpFootstepForPushRecovery);
          }
          else
          {
