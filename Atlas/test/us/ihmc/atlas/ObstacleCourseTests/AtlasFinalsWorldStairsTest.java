@@ -11,6 +11,7 @@ import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -119,7 +120,7 @@ public class AtlasFinalsWorldStairsTest
       BambooTools.reportTestFinishedMessage();
    }
 
-//   @Ignore
+   @Ignore
    @EstimatedDuration(duration = 30.4)
    @Test(timeout = 151825)
    public void testFastWalkingUpStaris() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
@@ -222,13 +223,13 @@ public class AtlasFinalsWorldStairsTest
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.18, startingLocation.z + 0.30),
               new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.36, startingLocation.z + 0.55),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.35, startingLocation.z + 0.55),
               new Quat4d(orientation), leftFootPoint2ds));
 
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.45, startingLocation.z + 0.55),
               new Quat4d(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.66, startingLocation.z + 0.75),
+      footstepDataList.add(new FootstepData(RobotSide.LEFT, new Point3d(startingLocation.x + 0.15, startingLocation.y - 1.68, startingLocation.z + 0.75),
               new Quat4d(orientation), leftFootPoint2ds));
 
       footstepDataList.add(new FootstepData(RobotSide.RIGHT, new Point3d(startingLocation.x - 0.15, startingLocation.y - 1.74, startingLocation.z + 0.75),
