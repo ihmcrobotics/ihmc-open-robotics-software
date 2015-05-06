@@ -141,6 +141,11 @@ public class FeetManager
       footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
    }
 
+   public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
+   {
+      footControlModules.get(swingSide).requestMoveStraightTouchdownForDisturbanceRecovery();
+   }
+
    public boolean isInSingularityNeighborhood(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).isInSingularityNeighborhood();

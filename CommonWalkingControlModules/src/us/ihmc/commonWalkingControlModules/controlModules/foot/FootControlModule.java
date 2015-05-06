@@ -211,6 +211,13 @@ public class FootControlModule
       swingState.replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
    }
 
+   public void requestMoveStraightTouchdownForDisturbanceRecovery()
+   {
+      if (stateMachine.getCurrentState() != moveStraightState)
+         return;
+      moveStraightState.requestTouchdownForDisturbanceRecovery();
+   }
+
    public void doSingularityEscape(boolean doSingularityEscape)
    {
       footControlHelper.doSingularityEscape(doSingularityEscape);

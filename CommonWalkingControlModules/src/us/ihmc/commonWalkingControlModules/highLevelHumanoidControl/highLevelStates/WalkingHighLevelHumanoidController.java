@@ -236,6 +236,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
    private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
    private final FrameConvexPolygon2d shrunkSupportPolygon = new FrameConvexPolygon2d();
    private final DoubleYoVariable distanceToShrinkSupportPolygonWhenHoldingCurrent = new DoubleYoVariable("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
+   private final BooleanYoVariable holdICPToCurrentCoMLocationInNextDoubleSupport = new BooleanYoVariable("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
 
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
@@ -891,6 +892,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             doubleSupportDesiredICP.updatePointAndPolygon(bipedSupportPolygons.getSupportPolygonInMidFeetZUp(), desiredICP.getFramePoint2dCopy());
          }
 
+         if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+         {
+            requestICPPlannerToHoldCurrentCoM();
+            holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+         }
+
          RobotSide transferToSideToUseInFootstepData = transferToSide;
          if (transferToSideToUseInFootstepData == null)
             transferToSideToUseInFootstepData = lastPlantedLeg.getEnumValue();
@@ -1014,7 +1021,20 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          double swingTimeRemaining = swingTimeCalculationProvider.getValue() - stateMachine.timeInCurrentState();
          FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
 
-         if (pushRecoveryModule.isEnabled())
+         if (isInFlamingoStance.getBooleanValue())
+         {
+            if (capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue())
+            {
+               FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
+               if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2))
+               {
+                  feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
+                  initiateFootLoadingProcedure(swingSide);
+                  holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
+               }
+            }
+         }
+         else if (pushRecoveryModule.isEnabled())
          {
             capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
             pushRecoveryModule.updatePushRecoveryInputs(capturePoint2d, icpAndMomentumBasedController.getOmega0());
@@ -1267,6 +1287,19 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       }
    }
 
+   private void initiateFootLoadingProcedure(RobotSide swingSide)
+   {
+      loadFoot.set(true);
+      loadFootStartTime.set(yoTime.getDoubleValue());
+      capturePointPlannerAdapter.setSingleSupportTime(loadFootDuration.getDoubleValue());
+      capturePointPlannerAdapter.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
+      capturePointPlannerAdapter.clear();
+      capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(swingSide));
+      capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
+      
+      pelvisICPBasedTranslationManager.freeze();
+   }
+
    private class DoubleSupportToSingleSupportConditionForDisturbanceRecovery implements StateTransitionCondition
    {
       private final RobotSide transferToSide;
@@ -1509,15 +1542,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             if (isInFlamingoStance.getBooleanValue() && desiredFootStateProvider.checkForNewLoadBearingRequest(swingSide))
             {
-               loadFoot.set(true);
-               loadFootStartTime.set(yoTime.getDoubleValue());
-               capturePointPlannerAdapter.setSingleSupportTime(loadFootDuration.getDoubleValue());
-               capturePointPlannerAdapter.setDoubleSupportTime(loadFootTransferDuration.getDoubleValue());
-               capturePointPlannerAdapter.clear();
-               capturePointPlannerAdapter.addFootstep(createFootstepAtCurrentLocation(swingSide));
-               capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportLeg.getEnumValue());
-               
-               pelvisICPBasedTranslationManager.freeze();
+               initiateFootLoadingProcedure(swingSide);
             }
             
             if (loadFoot.getBooleanValue() && (yoTime.getDoubleValue() > loadFootStartTime.getDoubleValue() + loadFootDuration.getDoubleValue()))
