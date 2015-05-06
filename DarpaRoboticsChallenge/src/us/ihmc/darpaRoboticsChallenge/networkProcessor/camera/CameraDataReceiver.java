@@ -39,7 +39,7 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
 
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 
-   private final LinkedBlockingQueue<CameraData> dataQueue = new LinkedBlockingQueue<>();
+   private final LinkedBlockingQueue<CameraData> dataQueue = new LinkedBlockingQueue<>(2);
    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
    private volatile boolean running = true;
    
@@ -138,13 +138,7 @@ public abstract class CameraDataReceiver extends Thread implements PacketConsume
 
    protected void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
-      try
-      {
-         dataQueue.put(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
-      }
-      catch (InterruptedException e)
-      {
-      }
+      dataQueue.offer(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
    }
 
    public void registerCameraListener(DRCStereoListener drcStereoListener)
