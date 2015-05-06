@@ -66,13 +66,9 @@ public class AtlasPushRecoveryTrack
       
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
       
-      @SuppressWarnings("deprecation")
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("enablePushRecovery");
-      @SuppressWarnings("deprecation")
-      BooleanYoVariable enableDS = (BooleanYoVariable) scs.getVariable("enablePushRecoveryFromDoubleSupport");
       // enable push recovery
       enable.set(true);
-      enableDS.set(true);
       
       if(VISUALIZE_FORCE)
       {
