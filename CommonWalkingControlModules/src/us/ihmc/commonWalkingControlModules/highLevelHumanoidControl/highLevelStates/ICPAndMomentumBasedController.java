@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedSta
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
-import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -190,21 +189,7 @@ public class ICPAndMomentumBasedController
       if (capturabilityBasedStatusProducer != null)
       {
          yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
-         FrameConvexPolygon2d supportPolygon = bipedSupportPolygons.getSupportPolygonInWorld();
-
-         // Checking if we are in double support or transfer state
-         boolean inDoubleSupport = true;
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            if (!momentumBasedController.getContactState(contactableFeet.get(robotSide)).inContact())
-            {
-               inDoubleSupport = false;
-               break;
-            }
-         }
-         RobotSide supportLeg = inDoubleSupport ? null : this.supportLeg.getEnumValue();
-         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, supportPolygon, supportLeg);
+         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, bipedSupportPolygons.getFootPolygonsInWorldFrame());
       }
    }
 
