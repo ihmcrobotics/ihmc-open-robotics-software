@@ -129,4 +129,9 @@ public class WalkingFailureDetectionControlModule
    public FrameVector2d getFallingDirection(){
       return fallingDirection;
    }
+
+   public FrameConvexPolygon2d getCombinedFootPolygon()
+   {
+      return combinedFootPolygon;
+   }
 }
