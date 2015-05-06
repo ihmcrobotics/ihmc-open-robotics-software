@@ -78,7 +78,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       //         cameraReceiver.registerCameraListener(armCalibrationHelper);
       //      }
 
-      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
+//      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
    }
 
    @Override
@@ -122,7 +122,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       multiSenseSensorManager.initializeParameterListeners();
 
-      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
+//      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
       rosMainNode.execute();
    }
 
