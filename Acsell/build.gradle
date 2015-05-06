@@ -76,10 +76,11 @@ task deploy(dependsOn: assemble) {
 				System.out.println(it.name)
 				wagon.put(it, "Configurations/" + it.name)
 			}
-		}	
+		}
+		def networkParams = new File("IHMCNetworkParameters.ini")
+		wagon.put(networkParams, networkParams.name)
 		
-		wagon.put(jar.archivePath, "StepprController.jar")
-		wagon.put(jar.archivePath, "WandererController.jar")
+		wagon.put(jar.archivePath, "AcsellController.jar")
 	}
 	 
 }

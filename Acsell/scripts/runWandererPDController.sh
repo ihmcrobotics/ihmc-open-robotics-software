@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./runWandererController.sh us.ihmc.wanderer.hardware.controllers.WandererPDJointController
+./runAcsellController.sh us.ihmc.wanderer.hardware.controllers.WandererPDJointController
