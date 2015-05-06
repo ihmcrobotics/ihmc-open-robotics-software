@@ -5,7 +5,6 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.LocalVideoPacket;
-import us.ihmc.communication.packets.sensing.CropVideoPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -24,7 +23,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
          PacketCommunicator sensorSuitePacketCommunicator, PPSTimestampOffsetProvider ppsTimestampOffsetProvider)
    {
       super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(sensorSuitePacketCommunicator), ppsTimestampOffsetProvider);
-      sensorSuitePacketCommunicator.attachListener(CropVideoPacket.class, this);
       
       this.robotSide = robotSide;
 
