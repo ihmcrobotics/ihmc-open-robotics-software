@@ -1026,7 +1026,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             if (capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue())
             {
                FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-               if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2))
+               FrameConvexPolygon2d combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
+               if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
                {
                   feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
                   initiateFootLoadingProcedure(swingSide);
