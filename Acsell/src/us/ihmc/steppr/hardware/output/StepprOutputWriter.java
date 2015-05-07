@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 //import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.steppr.hardware.StepprJoint;
@@ -32,7 +33,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
+public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
@@ -355,6 +356,15 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
          currentWalkingState = (WalkingState)newState;
          yoWalkingState.set(currentWalkingState);
       }
+   }
+
+   @Override
+   public void controllerFailed()
+   {
+      enableOutput.set(false);
+      yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
+      ((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      ((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
    
 

@@ -95,6 +95,7 @@ public class StepprControllerFactory
 
       StepprOutputWriter stepprOutputWriter = new StepprOutputWriter(robotModel);
       controllerFactory.attachControllerStateChangedListener(stepprOutputWriter);
+      controllerFactory.attachControllerFailureListener(stepprOutputWriter);
       DRCOutputWriter drcOutputWriter = stepprOutputWriter;
       
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
