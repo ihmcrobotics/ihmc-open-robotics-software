@@ -26,6 +26,7 @@ import us.ihmc.steppr.hardware.command.StepprCommand;
 import us.ihmc.steppr.hardware.configuration.StepprNetworkParameters;
 import us.ihmc.steppr.hardware.controllers.StepprStandPrep;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -359,7 +360,7 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void controllerFailed()
+   public void controllerFailed(FrameVector2d fallingDirection)
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
