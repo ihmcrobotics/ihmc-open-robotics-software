@@ -75,12 +75,12 @@ public abstract class DRCPushRecoveryTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-	@EstimatedDuration(duration = 34.5)
-	@Test(timeout = 172343)
+   @EstimatedDuration(duration = 34.5)
+   @Test(timeout = 172343)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      setupTest(script);
+      setupTest(script, true);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       // push timing:
@@ -99,12 +99,36 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
 
+   @EstimatedDuration(duration = 34.5)
+   @Test(timeout = 172343)
+   public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage();
+      setupTest(script, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      
+      // push timing:
+      StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
+      double delay = 0.25 * swingTime;
+      
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
+      double magnitude = 500.0;
+      double duration = 0.1;
+      
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      assertTrue(success);
+      
+      BambooTools.reportTestFinishedMessage();
+   }
+
 	@EstimatedDuration(duration = 32.9)
 	@Test(timeout = 164603)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      setupTest(script);
+      setupTest(script, true);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       // push timing:
@@ -128,7 +152,7 @@ public abstract class DRCPushRecoveryTest
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage();
-      setupTest(null);
+      setupTest(null, true);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       
       // push timing:
@@ -147,7 +171,7 @@ public abstract class DRCPushRecoveryTest
       BambooTools.reportTestFinishedMessage();
    }
    
-   private void setupTest(String scriptName)
+   private void setupTest(String scriptName, boolean enablePushRecoveryControlModule)
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
@@ -161,12 +185,14 @@ public abstract class DRCPushRecoveryTest
       
       // get rid of this once push recovery is enabled by default
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
-      enable.set(true);
+      enable.set(enablePushRecoveryControlModule);
       
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
+         @SuppressWarnings("unchecked")
          final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix + "State");
+         @SuppressWarnings("unchecked")
          final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));

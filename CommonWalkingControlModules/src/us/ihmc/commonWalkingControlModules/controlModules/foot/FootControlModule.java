@@ -206,9 +206,9 @@ public class FootControlModule
       stateMachine.setCurrentState(ConstraintType.FULL);
    }
 
-   public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
+   public void replanTrajectory(Footstep footstep)
    {
-      swingState.replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
+      swingState.replanTrajectory(footstep);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery()
@@ -368,7 +368,7 @@ public class FootControlModule
          onToesState.getDesireds(initialOrientation, initialAngularVelocity);
          swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
       }
-      swingState.setFootstep(footstep, false);
+      swingState.setFootstep(footstep);
       footControlHelper.updateWithPredictedContactPoints(footstep);
    }
 

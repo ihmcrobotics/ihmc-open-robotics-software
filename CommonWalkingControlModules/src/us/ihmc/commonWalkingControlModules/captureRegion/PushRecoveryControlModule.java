@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingTimeCalculationProvider;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -28,8 +27,6 @@ public class PushRecoveryControlModule
 
    private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE = 0.02;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
-   private static final double MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY = 0.3;
-   private static final double MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA = 2.5;
    private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
    private static final double ICP_TOO_FAR_DISTANCE_THRESHOLD = 0.01;
    private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 0.3;
@@ -53,12 +50,12 @@ public class PushRecoveryControlModule
 
    private final BipedSupportPolygons bipedSupportPolygon;
    private final SideDependentList<? extends ContactablePlaneBody> feet;
-   private final SwingTimeCalculationProvider swingTimeCalculationProvider;
 
    private final ReferenceFrame midFeetZUp;
    private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+   private final double footArea;
 
    private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
 
@@ -72,17 +69,16 @@ public class PushRecoveryControlModule
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
    private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
-   private final DoubleYoVariable doubleSupportInitialSwingTime;
    private final BooleanYoVariable isICPOutside;
    private final EnumYoVariable<RobotSide> closestFootToICP;
    private final EnumYoVariable<RobotSide> icpIsTooFarOnSide;
    private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
+   private final DoubleYoVariable preferredSwingTimeRemainingForRecovering;
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, MomentumBasedController momentumBasedController,
-         WalkingControllerParameters walkingControllerParameters, SwingTimeCalculationProvider swingTimeCalculationProvider, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygon = bipedSupportPolygons;
-      this.swingTimeCalculationProvider = swingTimeCalculationProvider;
       CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
       feet = momentumBasedController.getContactableFeet();
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
@@ -93,7 +89,7 @@ public class PushRecoveryControlModule
 
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
-      footstepAdjustor = new FootstepAdjustor(registry, yoGraphicsListRegistry);
+      footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
       orientationStateVisualizer = new OrientationStateVisualizer(momentumBasedController.getPelvisZUpFrame(), yoGraphicsListRegistry, registry);
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
@@ -107,7 +103,7 @@ public class PushRecoveryControlModule
       icpIsTooFarOnSide = new EnumYoVariable<>("ICPIsTooFarOnSide", registry, RobotSide.class, true);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
-      doubleSupportInitialSwingTime = new DoubleYoVariable("SwingTimeForDoubleSupportRecovery", registry);
+      preferredSwingTimeRemainingForRecovering = new DoubleYoVariable("preferredSwingTimeRemainingForRecovering", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -115,6 +111,9 @@ public class PushRecoveryControlModule
          DoubleYoVariable distanceICPToFoot = new DoubleYoVariable("DistanceICPTo" + side + "Foot", registry);
          distanceICPToFeet.put(robotSide, distanceICPToFoot);
       }
+
+      footPolygon.setIncludingFrameAndUpdate(feet.get(RobotSide.LEFT).getContactPoints2d());
+      footArea = footPolygon.getArea();
 
       parentRegistry.addChild(registry);
 
@@ -142,7 +141,6 @@ public class PushRecoveryControlModule
    
    public void initializeParametersForDoubleSupportPushRecovery()
    {
-      swingTimeCalculationProvider.setSwingTime(doubleSupportInitialSwingTime.getDoubleValue());
       recoveringFromDoubleSupportFall.set(true);
    }
 
@@ -204,17 +202,6 @@ public class PushRecoveryControlModule
 
       capturePoint2d.changeFrame(worldFrame);
 
-      doubleSupportInitialSwingTime.set(computeInitialSwingTimeForDoubleSupportRecovery(swingSide, swingTimeCalculationProvider.getValue(), capturePoint2d));
-      doubleSupportInitialSwingTime.set(Math.max(doubleSupportInitialSwingTime.getDoubleValue(), MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY));
-
-      if (Double.isNaN(captureRegionAreaWithDoubleSupportMinimumSwingTime.getDoubleValue()))
-      {
-         if (existsAMinimumSwingTimeCaptureRegion.getBooleanValue())
-         {
-            doubleSupportInitialSwingTime.set(MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY);
-         }
-      }
-
       swingSideForDoubleSupportRecovery.set(swingSide);
    }
 
@@ -231,44 +218,75 @@ public class PushRecoveryControlModule
       orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
    }
 
+   public double computePreferredSwingTimeForRecovering(double swingTimeRemaining, RobotSide swingSide)
+   {
+      if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
+      {
+         // do not re-plan if we are almost at touch-down
+         preferredSwingTimeRemainingForRecovering.set(MINIMUM_TIME_TO_REPLAN);
+         return MINIMUM_TIME_TO_REPLAN;
+      }
+
+      double preferredSwingTime = swingTimeRemaining;
+      RobotSide supportSide = swingSide.getOppositeSide();
+      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
+      captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
+      double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
+
+      // If the capture region is too small we reduce the swing time.
+      while (captureRegionArea < footArea || Double.isNaN(captureRegionArea))
+      {
+         preferredSwingTime = preferredSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
+         captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
+         captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
+
+         // avoid infinite loops
+         if (preferredSwingTime < MINIMUM_TIME_TO_REPLAN)
+         {
+            preferredSwingTime = MINIMUM_TIME_TO_REPLAN;
+            break;
+         }
+      }
+
+      preferredSwingTimeRemainingForRecovering.set(MINIMUM_TIME_TO_REPLAN);
+      return preferredSwingTime;
+   }
+
    /**
     * This method checks if the next footstep is inside of the capture region. If is outside it will be re-projected inside of the capture region.
     * The method can also handle the capture region calculation for "uncertain recover". In this case the capture region is calculated with the
     * MINIMUM_TIME_TO_REPLAN even if we are performing the step with the MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY.
-    *
-    * @param swingSide
     * @param swingTimeRemaining
     * @param nextFootstep
+    *
     * @return
     */
-   public boolean checkAndUpdateFootstep(RobotSide swingSide, double swingTimeRemaining, Footstep nextFootstep)
+   public boolean checkAndUpdateFootstep(double swingTimeRemaining, Footstep nextFootstep)
    {
+      RobotSide swingSide = nextFootstep.getRobotSide();
       RobotSide supportSide = swingSide.getOppositeSide();
       footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
 
-      if (enablePushRecovery.getBooleanValue())
+      if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
       {
-         if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
-         {
-            // do not re-plan if we are almost at touch-down
-            return false;
-         }
-
-         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-
-         ContactablePlaneBody swingingFoot = feet.get(swingSide);
-         FramePoint2d footCentroid = footPolygon.getCentroid();
-         FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
-         footstepWasProjectedInCaptureRegion.set(footstepAdjustor.adjustFootstep(nextFootstep, swingingFoot, footCentroid, captureRegion));
-
-         if (footstepWasProjectedInCaptureRegion.getBooleanValue())
-         {
-            recovering.set(true);
-         }
-
-         return footstepWasProjectedInCaptureRegion.getBooleanValue();
+         // do not re-plan if we are almost at touch-down
+         return false;
       }
-      return false;
+
+      double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);
+
+      FramePoint2d footCentroid = footPolygon.getCentroid();
+      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
+      footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
+
+      if (footstepWasProjectedInCaptureRegion.getBooleanValue())
+      {
+         recovering.set(true);
+      }
+
+      return footstepWasProjectedInCaptureRegion.getBooleanValue();
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -277,7 +295,7 @@ public class PushRecoveryControlModule
          return null;
       
       Footstep footstepForPushRecovery = createFootstepAtCurrentLocation(swingSide);
-      checkAndUpdateFootstep(swingSide, swingTimeRemaining, footstepForPushRecovery);
+      checkAndUpdateFootstep(swingTimeRemaining, footstepForPushRecovery);
       return footstepForPushRecovery;
    }
 
@@ -289,64 +307,6 @@ public class PushRecoveryControlModule
 
       recoveringFromDoubleSupportFall.set(false);
       existsAMinimumSwingTimeCaptureRegion.set(false);
-   }
-
-   /**
-    * This method computes the minimum swing time based on the area of the capture region. In particular starting from the input swingTimeRemaining the swing time is reduced if the area of the capture region is less than
-    * a percentage of the foot area. This is required to guarantee that the capture region is large enough to safely recover from a push.
-    * The swing time is reduced up to a MINIMUM_TIME_TO_REPLAN (defined as a simple variable to exit from the loop, will not be used to perform the swing).
-    * In case the swing time is less than MINIMUM_TIME_TO_REPLAN we check if for this swing time exist a capture region, if exist we will try to perform a step with the MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY anyway,
-    * if doesn't exist we should prepare to fall(see description inside of the state transition condition 'isFallingFromDoubleSupport').
-    *
-    * @param swingSide
-    * @param swingTimeRemaining
-    * @param capturePoint2d
-    * @param omega0
-    * @param footPolygon
-    * @return
-    */
-   private double computeMinimumSwingTime(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d, double omega0,
-         FrameConvexPolygon2d footPolygon)
-   {
-      double reducedSwingTime = swingTimeRemaining;
-      captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
-
-      // If the capture region is too small we reduce the swing time.
-      while (captureRegionCalculator.getCaptureRegionArea() < MINIMUN_CAPTURE_REGION_PERCENTAGE_OF_FOOT_AREA * footPolygon.getArea()
-            || Double.isNaN(captureRegionCalculator.getCaptureRegionArea()))
-      {
-         reducedSwingTime = reducedSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
-         captureRegionCalculator.calculateCaptureRegion(swingSide, reducedSwingTime, capturePoint2d, omega0, footPolygon);
-
-         // avoid infinite loops
-         if (reducedSwingTime < MINIMUM_TIME_TO_REPLAN)
-         {
-            if (!Double.isNaN(captureRegionCalculator.getCaptureRegionArea()))
-            {
-               existsAMinimumSwingTimeCaptureRegion.set(true);
-            }
-            break;
-         }
-      }
-
-      return reducedSwingTime;
-   }
-
-   /**
-    * This method computes the minimum swing time based on the area of the capture region.
-    *
-    * @param swingSide
-    * @param swingTimeRemaining
-    * @param capturePoint2d
-    * @return
-    */
-   private double computeInitialSwingTimeForDoubleSupportRecovery(RobotSide swingSide, double swingTimeRemaining, FramePoint2d capturePoint2d)
-   {
-      footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(swingSide.getOppositeSide()));
-      captureRegionCalculator.calculateCaptureRegion(swingSide, MINIMUM_SWING_TIME_FOR_DOUBLE_SUPPORT_RECOVERY, capturePoint2d, omega0, footPolygon);
-      captureRegionAreaWithDoubleSupportMinimumSwingTime.set(captureRegionCalculator.getCaptureRegionArea());
-
-      return computeMinimumSwingTime(swingSide, swingTimeRemaining, capturePoint2d, omega0, footPolygon);
    }
 
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)

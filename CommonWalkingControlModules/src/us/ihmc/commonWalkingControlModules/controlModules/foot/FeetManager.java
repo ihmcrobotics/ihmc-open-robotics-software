@@ -136,9 +136,9 @@ public class FeetManager
       return footControlModules.get(robotSide).getCurrentConstraintType();
    }
 
-   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
+   public void replanSwingTrajectory(RobotSide swingSide, Footstep footstep)
    {
-      footControlModules.get(swingSide).replanTrajectory(footstep, swingTimeRemaining, useLowHeightTrajectory);
+      footControlModules.get(swingSide).replanTrajectory(footstep);
    }
 
    public void requestMoveStraightTouchdownForDisturbanceRecovery(RobotSide swingSide)
