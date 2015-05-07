@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -17,7 +18,6 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.CurrentConfigurationProvider;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
-import us.ihmc.utilities.math.trajectories.providers.TrajectoryParameters;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -26,7 +26,6 @@ import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.controllers.YoSE3PIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.trajectories.OrientationInterpolationTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePositionTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.YoPolynomial;
@@ -127,7 +126,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    }
 
    @Override
-   public void setFootstep(Footstep footstep, boolean useLowHeightTrajectory)
+   public void setFootstep(Footstep footstep)
    {
       footstep.getPose(footPose);
       footPose.changeFrame(worldFrame);
@@ -145,7 +144,7 @@ public class HeuristicSwingState extends AbstractFootControlState implements Swi
    }
 
    @Override
-   public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
+   public void replanTrajectory(Footstep footstep)
    {
       // TODO Auto-generated method stub
 

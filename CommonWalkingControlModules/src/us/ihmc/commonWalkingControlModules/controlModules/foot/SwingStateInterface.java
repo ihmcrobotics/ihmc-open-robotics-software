@@ -7,9 +7,9 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 public interface SwingStateInterface
 {
 
-   public abstract void setFootstep(Footstep footstep, boolean useLowHeightTrajectory);
+   public abstract void setFootstep(Footstep footstep);
 
-   public abstract void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory);
+   public abstract void replanTrajectory(Footstep footstep);
 
    public abstract void requestSwingSpeedUp(double speedUpFactor);
 

@@ -225,7 +225,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    private final FramePose newFootstepPose = new FramePose();
    private final FramePoint oldFootstepPosition = new FramePoint();
    @Override
-   public void setFootstep(Footstep footstep, boolean usePushRecoveryTrajectory)
+   public void setFootstep(Footstep footstep)
    {
       footstep.getPose(newFootstepPose);
       newFootstepPose.changeFrame(worldFrame);
@@ -239,7 +239,7 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
 
       boolean worldFrameDeltaZAboveThreshold = Math.abs(newFootstepPose.getZ() - oldFootstepPosition.getZ()) > TwoWaypointTrajectoryGeneratorParameters.getMinimumHeightDifferenceForStepOnOrOff();
 
-      if (usePushRecoveryTrajectory)
+      if (footstep.getTrajectoryType() == TrajectoryType.PUSH_RECOVERY)
       {
          trajectoryParametersProvider.set(new TrajectoryParameters(TrajectoryType.PUSH_RECOVERY));
       }
@@ -254,10 +254,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    }
 
    @Override
-   public void replanTrajectory(Footstep footstep, double swingTimeRemaining, boolean useLowHeightTrajectory)
+   public void replanTrajectory(Footstep newFootstep)
    {
-      setFootstep(footstep, useLowHeightTrajectory);
-      this.swingTimeRemaining.set(swingTimeRemaining);
+      setFootstep(newFootstep);
+      this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
       this.replanTrajectory.set(true);
    }
 

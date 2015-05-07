@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import java.util.List;
-
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
-import us.ihmc.utilities.humanoidRobot.footstep.FootstepUtils;
+import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -31,27 +31,34 @@ public class FootstepAdjustor
 
    private final YoVariableRegistry registry = new YoVariableRegistry("FootstepAdjustor");
 
+   private final SideDependentList<ConvexPolygon2d> defaultSupportPolygons;
+
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
    private SteppingStones steppingStones = null;
 
-   public FootstepAdjustor(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       parentRegistry.addChild(registry);
       if (yoGraphicsListRegistry != null && VISUALIZE)
       {
          footstepAdjusterVisualizer = new FootstepAdjusterVisualizer(this, yoGraphicsListRegistry, registry);
       }
+
+      defaultSupportPolygons = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         defaultSupportPolygons.put(robotSide, new FrameConvexPolygon2d(contactableFeet.get(robotSide).getContactPoints2d()).getConvexPolygon2d());
+      }
    }
 
    private final FrameConvexPolygon2d touchdownFootPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d desiredSteppingRegion = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d intersection = new FrameConvexPolygon2d();
 
    /**
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
     * into the capture region. Returns true if the footstep was changed.
     */
-   public boolean adjustFootstep(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
+   public boolean adjustFootstep(Footstep footstep, FramePoint2d supportCentroid, FrameConvexPolygon2d captureRegion)
    {
       boolean footstepChanged = false;
 
@@ -73,8 +80,8 @@ public class FootstepAdjustor
       }
 
       // Check if the desired footstep intersects the capture region.
-      calculateTouchdownFootPolygon(footstep, contactablePlaneBody, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
-      boolean nextStepInside = desiredSteppingRegion.intersectionWith(touchdownFootPolygon, intersection);
+      calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
+      boolean nextStepInside = desiredSteppingRegion.isPolygonIntersecting(touchdownFootPolygon);
 
       if (nextStepInside)
       {
@@ -87,7 +94,7 @@ public class FootstepAdjustor
       }
 
       // No overlap between touch-down polygon and capture region.
-      projectFootstepInCaptureRegion(footstep, contactablePlaneBody, supportCentroid, desiredSteppingRegion);
+      projectFootstepInCaptureRegion(footstep, supportCentroid, desiredSteppingRegion);
       updateVisualizer();
       return footstepChanged;
    }
@@ -95,14 +102,13 @@ public class FootstepAdjustor
    private final FramePoint2d nextStep2d = new FramePoint2d();
    private final FramePoint2d projection = new FramePoint2d();
    private final FrameVector2d direction = new FrameVector2d();
-   private final FrameConvexPolygon2d adjustedTouchdownFootPolygon = new FrameConvexPolygon2d();
 
    /** 
     * This function projects the footstep midpoint in the capture region.
     * Might be a bit conservative it should be sufficient to slightly overlap the capture region
     * and the touch-down polygon.
     */
-   private void projectFootstepInCaptureRegion(Footstep footstep, ContactablePlaneBody contactablePlaneBody, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
+   private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
    {
       projection.setIncludingFrame(projectionPoint);
       projection.changeFrame(footstep.getParentFrame());
@@ -124,7 +130,7 @@ public class FootstepAdjustor
       
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
-      calculateTouchdownFootPolygon(footstep, contactablePlaneBody, captureRegion.getReferenceFrame(), adjustedTouchdownFootPolygon);
+      calculateTouchdownFootPolygon(footstep, captureRegion.getReferenceFrame(), touchdownFootPolygon);
    }
 
    private final FramePoint2d centroid2d = new FramePoint2d();
@@ -134,14 +140,14 @@ public class FootstepAdjustor
     * This function takes a footstep and calculates the touch-down polygon in the
     * desired reference frame
     */
-   private void calculateTouchdownFootPolygon(Footstep footstep, ContactablePlaneBody contactablePlaneBody, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
+   private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
       footstep.getPositionIncludingFrame(centroid3d);
       centroid3d.getFramePoint2d(centroid2d);
       centroid2d.changeFrame(desiredFrame);
 
-      List<FramePoint> expectedContactPoints = FootstepUtils.calculateExpectedContactPoints(footstep, contactablePlaneBody);
-      polygonToPack.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(desiredFrame, expectedContactPoints);
+      polygonToPack.setIncludingFrameAndUpdate(footstep.getSoleReferenceFrame(), defaultSupportPolygons.get(footstep.getRobotSide()));
+      polygonToPack.changeFrameAndProjectToXYPlane(desiredFrame);
       // shrink the polygon for safety by pulling all the corner points towards the center
       polygonToPack.scale(centroid2d, SHRINK_TOUCHDOWN_POLYGON_FACTOR);
    }
@@ -166,11 +172,6 @@ public class FootstepAdjustor
    public FrameConvexPolygon2d getTouchdownFootPolygon()
    {
       return touchdownFootPolygon;
-   }
-
-   public FrameConvexPolygon2d getAdjustedFootPolygon()
-   {
-      return adjustedTouchdownFootPolygon;
    }
 
    public void updateVisualizer()
