@@ -35,7 +35,7 @@ public class NetworkPorts
    public static final NetworkPorts ZERO_POSE_PRODUCER = new NetworkPorts(6011);
 
    // Mission control ports
-   public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(7001);
+   public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);
    public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(7101);
    public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(7102);
    public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(7103);
