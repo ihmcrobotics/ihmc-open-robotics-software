@@ -448,6 +448,9 @@ public class ICPPlanner
    {
       initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
 
+      if (isDone(time))
+         return;
+
       double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
 
       // Ensure that we don't shift the time by more than what's remaining
@@ -460,6 +463,9 @@ public class ICPPlanner
 
    public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualCapturePointPosition)
    {
+      if (isDone(time))
+         return 0.0;
+
       double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
 
       double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
