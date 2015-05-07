@@ -2,10 +2,20 @@ package us.ihmc.robotiq.communication;
 
 import us.ihmc.robotiq.communication.registers.ActualFingerPositionRegister;
 import us.ihmc.robotiq.communication.registers.FaultStatusRegister;
+import us.ihmc.robotiq.communication.registers.FaultStatusRegister.gFLT;
 import us.ihmc.robotiq.communication.registers.FingerCurrentRegister;
 import us.ihmc.robotiq.communication.registers.FingerPositionRequestEchoRegister;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gIMC;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gMOD;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gSTA;
 import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister;
+import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTA;
+import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTB;
+import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTC;
+import us.ihmc.robotiq.communication.registers.ObjectDetectionRegister.gDTS;
 
 public class RobotiqReadResponse
 {
@@ -24,6 +34,25 @@ public class RobotiqReadResponse
    private FingerPositionRequestEchoRegister scissorPositionEcho;
    private ActualFingerPositionRegister scissorPosition;
    private FingerCurrentRegister scissorCurrent;
+   
+   public RobotiqReadResponse()
+   {
+      gripperStatus = new GripperStatusRegister(gACT.GRIPPER_RESET, gMOD.BASIC_MODE, gGTO.STOPPED, gIMC.GRIPPER_IN_RESET, gSTA.ALL_FINGERS_STOPPED);
+      objectDetection = new ObjectDetectionRegister(gDTA.FINGER_A_AT_REQUESTED_POSITION, gDTB.FINGER_B_AT_REQUESTED_POSITION, gDTC.FINGER_C_AT_REQUESTED_POSITION, gDTS.SCISSOR_AT_REQUESTED_POSITION);
+      faultStatus = new FaultStatusRegister(gFLT.NO_FAULT);
+      fingerAPositionEcho = new FingerPositionRequestEchoRegister(Finger.FINGER_A);
+      fingerAPosition = new ActualFingerPositionRegister(Finger.FINGER_A);
+      fingerACurrent = new FingerCurrentRegister(Finger.FINGER_A);
+      fingerBPositionEcho = new FingerPositionRequestEchoRegister(Finger.FINGER_B);
+      fingerBPosition = new ActualFingerPositionRegister(Finger.FINGER_B);
+      fingerBCurrent = new FingerCurrentRegister(Finger.FINGER_B);
+      fingerCPositionEcho = new FingerPositionRequestEchoRegister(Finger.FINGER_C);
+      fingerCPosition = new ActualFingerPositionRegister(Finger.FINGER_C);
+      fingerCCurrent = new FingerCurrentRegister(Finger.FINGER_C);
+      scissorPositionEcho = new FingerPositionRequestEchoRegister(Finger.SCISSOR);
+      scissorPosition = new ActualFingerPositionRegister(Finger.SCISSOR);
+      scissorCurrent = new FingerCurrentRegister(Finger.SCISSOR);
+   }
    
    public GripperStatusRegister getGripperStatus()
    {
