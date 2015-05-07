@@ -72,8 +72,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
 
       velocitySources[0] = initialVelocityProvider;
 
-      xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 3, registry);
-      yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 3, registry);
+      xPolynomial = new YoPolynomial(namePrefix + "PolynomialX", 5, registry);
+      yPolynomial = new YoPolynomial(namePrefix + "PolynomialY", 5, registry);
 
       swingTime = new DoubleYoVariable(namePrefix + "SwingTime", registry);
       swingTime.set(swingTimeProvider.getValue());
@@ -116,8 +116,8 @@ public class PushRecoveryTrajectoryGenerator implements PositionTrajectoryGenera
       double xFinal = tempPosition.getX();
       double yFinal = tempPosition.getY();
       
-      xPolynomial.setQuadratic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xFinal);
-      yPolynomial.setQuadratic(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, yFinal);
+      xPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), x0, xd0, xFinal, 0.0, 0.0);
+      yPolynomial.setQuarticUsingFinalAcceleration(timeIntoStep.getDoubleValue(), swingTime.getDoubleValue(), y0, yd0, yFinal, 0.0, 0.0);
 
       if (VISUALIZE)
       {
