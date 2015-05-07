@@ -242,12 +242,19 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
-      straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
-              yoGraphicsListRegistry);
       
-      velocityConstrainedPoseTrajectoryGenerator = new VelocityConstrainedPoseTrajectoryGenerator(name + "velocityConstrained", true, worldFrame, registry, visualize,
-            yoGraphicsListRegistry);
-      
+      if (USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE)
+      {
+         straightLinePoseTrajectoryGenerator = null;
+         velocityConstrainedPoseTrajectoryGenerator = new VelocityConstrainedPoseTrajectoryGenerator(name + "VelocityConstrained", true, worldFrame, registry,
+               visualize, yoGraphicsListRegistry);
+      }
+      else
+      {
+         straightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(name + "StraightLine", true, worldFrame, registry, visualize,
+               yoGraphicsListRegistry);
+         velocityConstrainedPoseTrajectoryGenerator = null;
+      }
       
       finalApproachPoseTrajectoryGenerator = new FinalApproachPoseTrajectoryGenerator(name, true, worldFrame, registry, visualize, yoGraphicsListRegistry);
       initialClearancePoseTrajectoryGenerator = new InitialClearancePoseTrajectoryGenerator(name + "MoveAway", true, worldFrame, registry, visualize,
