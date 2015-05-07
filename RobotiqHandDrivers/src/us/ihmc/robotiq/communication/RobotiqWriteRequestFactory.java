@@ -33,7 +33,8 @@ public class RobotiqWriteRequestFactory
    
    public Register[] createDeactivationRequest()
    {
-      robotiqRequest.resetRequestFields();
+      robotiqRequest.getActionRequest().setRact(rACT.DEACTIVATE_GRIPPER);
+      robotiqRequest.getActionRequest().setRgto(rGTO.STOP);
       
       packRequest();
       
@@ -42,9 +43,7 @@ public class RobotiqWriteRequestFactory
    
    public Register[] createFingerPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
    {
-      if(!robotiqRequest.getActionRequest().getRgto().equals(rGTO.GO_TO))
-         robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
-         
+      robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
       robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);
       robotiqRequest.getFingerBPositionRequest().setFingerPosition(graspMode, fingerState);
       robotiqRequest.getFingerCPositionRequest().setFingerPosition(graspMode, fingerState);

@@ -3,6 +3,9 @@ package us.ihmc.robotiq.data;
 import java.util.Arrays;
 
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.robotiq.communication.RobotiqReadResponse;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gACT;
+import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandSensorData implements HandSensorData
@@ -43,6 +46,8 @@ public class RobotiqHandSensorData implements HandSensorData
 	private int[] requestedPosition = new int[4];
 	private int[] current = new int[4];
 	
+	private RobotiqReadResponse response;
+	
 	public void update(byte[] data, boolean connected)
 	{
 		activated = (data[0] == 0) ? false : true;
@@ -69,6 +74,12 @@ public class RobotiqHandSensorData implements HandSensorData
 		}
 		
 		this.connected = connected;
+	}
+	
+	public void update(RobotiqReadResponse response, boolean connected)
+	{
+	   this.response = response;
+	   this.connected = connected;
 	}
 	
 	public void setConnected(boolean connected)
