@@ -9,6 +9,7 @@ import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.FrameLineSegment2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -50,7 +51,6 @@ public class ICPPlanner
    private final DoubleYoVariable doubleSupportDuration = new DoubleYoVariable(namePrefix + "DoubleSupportTime", registry);
    private final DoubleYoVariable singleSupportDuration = new DoubleYoVariable(namePrefix + "SingleSupportTime", registry);
    private final DoubleYoVariable minSingleSupportDuration = new DoubleYoVariable(namePrefix + "MinSingleSupportTime", registry);
-   private final DoubleYoVariable timeCorrectionFactor = new DoubleYoVariable(namePrefix + "TimeCorrectionFactor", registry);
    private final DoubleYoVariable doubleSupportInitialTransferDuration = new DoubleYoVariable(namePrefix + "InitialTransferDuration", registry);
    private final DoubleYoVariable doubleSupportSplitFraction = new DoubleYoVariable(namePrefix + "DoubleSupportSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
@@ -91,8 +91,8 @@ public class ICPPlanner
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
 
-   public ICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+         CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       isStanding.set(true);
       hasBeenWokenUp.set(false);
@@ -113,7 +113,6 @@ public class ICPPlanner
       omega0.set(Double.NaN);
 
       minSingleSupportDuration.set(0.3); // TODO Need to be extracted
-      timeCorrectionFactor.set(0.5); // TODO Need to be extracted
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet, numberFootstepsToConsider.getIntegerValue(), registry);
       referenceCMPsCalculator.initializeParameters(icpPlannerParameters);
@@ -349,6 +348,11 @@ public class ICPPlanner
 
    public void initializeSingleSupport(double initialTime, RobotSide supportSide)
    {
+      initializeSingleSupport(initialTime, supportSide, true);
+   }
+
+   public void initializeSingleSupport(double initialTime, RobotSide supportSide, boolean startFromCurrentDesiredICP)
+   {
       this.transferToSide.set(null);
       this.supportSide.set(supportSide);
       isHoldingPosition.set(false);
@@ -380,8 +384,16 @@ public class ICPPlanner
          double timeToSpendOnFinalCMPBeforeDoubleSupport = totalTimeSpentOnExitCMP - doubleSupportTimeSpentAfterEntryCornerPoint;
 
          CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, entryCMPs, exitCMPs, steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0.getDoubleValue());
-         singleSupportInitialICP.setIncludingFrame(desiredCapturePointPosition);
-         singleSupportInitialICPVelocity.set(desiredCapturePointVelocity);
+         if (startFromCurrentDesiredICP)
+         {
+            singleSupportInitialICP.setIncludingFrame(desiredCapturePointPosition);
+            singleSupportInitialICPVelocity.set(desiredCapturePointVelocity);
+         }
+         else
+         {
+            CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
+            CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), doubleSupportTimeSpentBeforeEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICPVelocity);
+         }
 
          CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICP);
          CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), timeToSpendOnFinalCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICPVelocity);
@@ -434,39 +446,53 @@ public class ICPPlanner
 
    public void updatePlanForSingleSupportDisturbances(double time, FramePoint actualCapturePointPosition)
    {
-      initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue());
+      initializeSingleSupport(initialTime.getDoubleValue(), supportSide.getEnumValue(), false);
 
-      computeDesiredCentroidalMomentumPivot();
-      double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualCapturePointPosition);
-      double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
+      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
 
-      double correctedTimeInCurrentState = Math.log(actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan) / omega0.getDoubleValue();
+      // Ensure that we don't shift the time by more than what's remaining
+      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, computeAndReturnTimeRemaining(time));
+      // Ensure the time shift won't imply a single support that's crazy short
+      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, singleSupportDuration.getDoubleValue() - minSingleSupportDuration.getDoubleValue());
 
-      computeTimeInCurrentState(time);
-      double deltaTimeToBeAccounted = correctedTimeInCurrentState - timeInCurrentState.getDoubleValue();
-
-      if (!Double.isNaN(deltaTimeToBeAccounted))
-      {
-         deltaTimeToBeAccounted *= timeCorrectionFactor.getDoubleValue();
-         deltaTimeToBeAccounted = MathTools.clipToMinMax(deltaTimeToBeAccounted, 0.0, Math.max(0.0, computeAndReturnTimeRemaining(time) - minSingleSupportDuration.getDoubleValue()));
-         
-         initialTime.sub(deltaTimeToBeAccounted);
-      }
+      initialTime.sub(deltaTimeToBeAccounted);
    }
 
    public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint actualCapturePointPosition)
    {
-      computeDesiredCentroidalMomentumPivot();
-      double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualCapturePointPosition);
-      double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
-
-      computeTimeInCurrentState(time);
-      double deltaTimeToBeAccounted = Math.log(actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan) / omega0.getDoubleValue();
+      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
 
       double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
       estimatedTimeRemaining = MathTools.clipToMinMax(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       return estimatedTimeRemaining;
+   }
+
+   private final FramePoint2d desiredICP2d = new FramePoint2d();
+   private final FramePoint2d finalICP2d = new FramePoint2d();
+   private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
+   private final FramePoint2d actualICP2d = new FramePoint2d();
+
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint actualCapturePointPosition)
+   {
+      computeDesiredCapturePoint(computeAndReturnTimeInCurrentState(time));
+      computeDesiredCentroidalMomentumPivot();
+      desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
+      singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
+      desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
+      actualICP2d.setByProjectionOntoXYPlaneIncludingFrame(actualCapturePointPosition);
+      desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
+
+      double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualICP2d);
+      double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
+
+      computeTimeInCurrentState(time);
+      double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
+
+      if (distanceRatio < 1.0)
+         return 0.0;
+      else
+         return Math.log(distanceRatio) / omega0.getDoubleValue();
    }
 
    private void computeDesiredCapturePoint(double timeInCurrentState)
@@ -574,6 +600,11 @@ public class ICPPlanner
    public void setSingleSupportTime(double time)
    {
       singleSupportDuration.set(time);
+   }
+
+   public void setMinimumSingleSupportTimeForDisturbanceRecovery(double minTime)
+   {
+      minSingleSupportDuration.set(minTime);
    }
 
    public double getInitialTransferDuration()

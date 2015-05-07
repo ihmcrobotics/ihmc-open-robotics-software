@@ -6,6 +6,7 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
@@ -58,7 +59,7 @@ public class CapturePointPlannerAdapter
 
    private double omega0;
 
-   public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry registry,
+   public CapturePointPlannerAdapter(CapturePointPlannerParameters capturePointPlannerParameters, WalkingControllerParameters walkingControllerParameters, YoVariableRegistry registry,
          YoGraphicsListRegistry yoGraphicsListRegistry, double controlDT, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
          BipedSupportPolygons bipedSupportPolygons)
    {
@@ -72,6 +73,7 @@ public class CapturePointPlannerAdapter
       {
          capturePointPlanner = null;
          icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
+         icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
       }
       else
       {
