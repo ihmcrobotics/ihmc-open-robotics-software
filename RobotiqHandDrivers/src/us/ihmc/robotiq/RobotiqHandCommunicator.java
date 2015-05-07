@@ -94,27 +94,12 @@ public class RobotiqHandCommunicator
    public void reset() throws ModbusException
    {
       Register[] request = writeRequestFactory.createDeactivationRequest();
-//      Register[] request = new SimpleRegister[]{new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0),
-//                                                new SimpleRegister((byte)0, (byte)0)};
       System.out.println("Before reset:");
-      read();
       do
       {
-         System.out.println("Writing:");
-         for(Register register : request)
-         {
-            for(byte b : register.toBytes())
-               System.out.print(b + " ");
-         }
-         System.out.println();
-         communicator.writeMultipleRegisters(0, request);
          read();
+         ThreadTools.sleep(100);
+         communicator.writeMultipleRegisters(0, request);
       }
       while(!readResponseFactory.getResponse().getGripperStatus().getGact().equals(gACT.GRIPPER_RESET));
       initialize();
@@ -168,6 +153,11 @@ public class RobotiqHandCommunicator
       // so other stuff doesn't need to see Modbus stuff
       
       return null;
+   }
+   
+   private void printRegisters(Register[] registers)
+   {
+      
    }
    
    public static void main(String[] args)
