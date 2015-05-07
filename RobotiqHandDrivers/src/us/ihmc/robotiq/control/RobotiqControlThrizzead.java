@@ -1,12 +1,10 @@
 package us.ihmc.robotiq.control;
 
 import java.io.IOException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-import net.wimpi.modbus.ModbusException;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
@@ -14,6 +12,9 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
+import us.ihmc.robotiq.RobotiqHandInterface;
+import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 import com.martiansoftware.jsap.FlaggedOption;
@@ -21,23 +22,23 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-public class RobotiqControlThrizzead extends HandControlThread
+class RobotiqControlThrizzead extends HandControlThread
 {
    private final boolean CALIBRATE_ON_CONNECT = false;
    
    private final RobotSide robotSide;
-   private final RobotiqHandCommunicator handCommunicator;
-   
+   private final RobotiqHandCommunicator robotiqHand;
    private final FingerStateProvider fingerStateProvider;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
-   
+   private int errorCount = 0;
+   private RobotiqHandSensorData handStatus;
+
    public RobotiqControlThrizzead(RobotSide robotSide)
    {
       super(robotSide);
-      
       this.robotSide = robotSide;
-      handCommunicator = new RobotiqHandCommunicator(robotSide);
+      robotiqHand = new RobotiqHandCommunicator(robotSide);
       fingerStateProvider = new FingerStateProvider(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, packetCommunicator);
@@ -45,8 +46,7 @@ public class RobotiqControlThrizzead extends HandControlThread
       packetCommunicator.attachListener(FingerStatePacket.class, fingerStateProvider);
       packetCommunicator.attachListener(ManualHandControlPacket.class, manualHandControlProvider);
    }
-   
-   @Override
+
    public void connect()
    {
       try
@@ -57,85 +57,101 @@ public class RobotiqControlThrizzead extends HandControlThread
       {
          e.printStackTrace();
       }
+      
+      while(!packetCommunicator.isConnected())
+      {
+         ThreadTools.sleep(100);
+      }
    }
 
-   @Override
+   private void updateHandData()
+   {
+      handStatus = robotiqHand.getHandSensorData();
+      jointAngleCommunicator.updateHandAngles(handStatus);
+      jointAngleCommunicator.write();
+   }
+
    public void run()
    {
-      System.out.println("DEBUG0");
-      if(handCommunicator.isConnected())
+      if(CALIBRATE_ON_CONNECT)
+         fingerStateProvider.receivedPacket(new FingerStatePacket(robotSide, FingerState.CALIBRATE));
+
+      while (packetCommunicator.isConnected())
       {
-         System.out.println("Hand is connected");
-         if(fingerStateProvider.isNewFingerStateAvailable())
+         if (robotiqHand.isConnected()) //status to UI and keep alive packet
          {
-            System.out.println("New FingerState available");
-            FingerState fingerState = fingerStateProvider.pullPacket().getFingerState();
-            
-            try
+            updateHandData();
+
+            if (handStatus.hasError())
+               handStatus.printError();
+
+            if (fingerStateProvider.isNewFingerStateAvailable())
             {
-               switch(fingerState)
+               FingerStatePacket packet = fingerStateProvider.pullPacket();
+               FingerState state = packet.getFingerState();
+               
+               switch (state)
                {
-               case BASIC_GRIP:
-                  handCommunicator.basicGrip();
-                  break;
                case CALIBRATE:
-                  handCommunicator.initialize();
-                  break;
-               case CLOSE:
-                  handCommunicator.close();
-                  break;
-               case CLOSE_FINGERS:
-                  break;
-               case CLOSE_THUMB:
-                  break;
-               case CONNECT:
-                  break;
-               case CRUSH:
-                  handCommunicator.crush();
-                  break;
-               case HALF_CLOSE:
-                  break;
-               case HOOK:
+                  robotiqHand.initialize();
                   break;
                case OPEN:
-                  handCommunicator.open();
+                  robotiqHand.open();
                   break;
-               case OPEN_FINGERS:
+               case CLOSE:
+                  robotiqHand.close();
                   break;
-               case OPEN_THUMB:
+               case CRUSH:
+                  robotiqHand.crush();
+                  break;
+               case HOOK:
+                  //TODO
+                  break;
+               case BASIC_GRIP:
+                  robotiqHand.basicGrip();
                   break;
                case PINCH_GRIP:
-                  handCommunicator.pinchGrip();
-                  break;
-               case RESET:
-                  handCommunicator.reset();
-                  break;
-               case SCISSOR_GRIP:
-                  break;
-               case STOP:
+                  robotiqHand.pinchGrip();
                   break;
                case WIDE_GRIP:
-                  handCommunicator.wideGrip();
+                  robotiqHand.wideGrip();
+                  break;
+               case SCISSOR_GRIP:
+                  //TODO
+                  break;
+               case HALF_CLOSE:
+                  //TODO
+                  break;
+               case CLOSE_FINGERS:
+                  //TODO
+                  break;
+               case CLOSE_THUMB:
+                  //TODO
+                  break;
+               case OPEN_FINGERS:
+                  //TODO
+                  break;
+               case OPEN_THUMB:
+                  //TODO
+                  break;
+               case RESET:
+                  robotiqHand.reset();
+                  break;
+               default:
                   break;
                }
             }
-            catch(ModbusException e)
+            
+            if (manualHandControlProvider.isNewPacketAvailable()) // send manual hand control packet to hand
             {
-               e.printStackTrace();
+               //TODO
             }
          }
          
-         if(manualHandControlProvider.isNewPacketAvailable())
-         {
-            //TODO
-         }
-      }
-      else
-      {
-//         handCommunicator.reconnect();
+         ThreadTools.sleep(100);
       }
    }
-
+   
    public static void main(String[] args)
    {
       JSAP jsap = new JSAP();
@@ -151,8 +167,7 @@ public class RobotiqControlThrizzead extends HandControlThread
          {
             RobotiqControlThrizzead controlThread = new RobotiqControlThrizzead(RobotSide.valueOf(config.getString("robotSide").toUpperCase()));
             controlThread.connect();
-            ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleWithFixedDelay(controlThread, 0, 50, TimeUnit.MILLISECONDS);
+            controlThread.run();
          }
       }
       catch (JSAPException e)

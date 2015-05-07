@@ -48,6 +48,7 @@ public class RobotiqHandSensorData implements HandSensorData
 	
 	private RobotiqReadResponse response;
 	
+	@Deprecated
 	public void update(byte[] data, boolean connected)
 	{
 		activated = (data[0] == 0) ? false : true;
@@ -76,6 +77,61 @@ public class RobotiqHandSensorData implements HandSensorData
 		this.connected = connected;
 	}
 	
+	@Deprecated
+	public boolean isInitializing()
+	{
+		return (modeStatus == ACTIVATING);
+	}
+	
+	@Deprecated
+	public boolean hasCompletedAction()
+	{
+		return (modeStatus == CHANGE_COMPLETE);
+	}
+	
+	@Deprecated
+	public int getOperationMode()
+	{
+	   return operationMode;
+	}
+	
+	@Deprecated
+	public boolean objectDetected()
+	{
+	   boolean ret = true;
+	   
+	   for(int i : objectDetection)
+	   {
+	      ret &= i == 1 || i == 2;
+	   }
+	   
+	   return ret;
+	}
+	
+	@Deprecated
+	public boolean hasError()
+	{
+	   return error != 0x00;
+	}
+	
+	@Deprecated
+	public void printError()
+	{
+	   switch(error)
+	   {
+	   case 0x00: System.err.println("No Error");
+	   case 0x05: System.err.println("Priority Fault: Action delayed, activation must be completed prior to action."); break;
+	   case 0x06: System.err.println("Priority Fault: Action delayed, mode change must be completed prior to action."); break;
+	   case 0x07: System.err.println("Priority Fault: The activation bit must be set prior to action."); break;
+	   case 0x09: System.err.println("Minor Fault: Communication is not ready (may be booting)."); break;
+	   case 0x0A: System.err.println("Minor Fault: Changing mode fault, interferences detected on scissor axis (less then 20s)."); break;
+	   case 0x0B: System.err.println("Minor Fault: Automatic release in progress."); break;
+	   case 0x0D: System.err.println("Major Fault: Action fault, verify that no interference or other error occurred."); break;
+	   case 0x0E: System.err.println("Major Fault: Changing mode fault, interferences detected on scissor axis (more then 20s)."); break;
+	   case 0x0F: System.err.println("Major Fault: Automatic release completed. Reset and activation required."); break;
+	   }
+	}
+	
 	public void update(RobotiqReadResponse response, boolean connected)
 	{
 	   this.response = response;
@@ -85,105 +141,6 @@ public class RobotiqHandSensorData implements HandSensorData
 	public void setConnected(boolean connected)
 	{
 	   this.connected = connected;
-	}
-	
-	public boolean isActivated()
-	{
-		return activated;
-	}
-	
-	public int getOperationMode()
-	{
-		return operationMode;
-	}
-	
-	public boolean isRequestingMotion()
-	{
-		return motionRequests;
-	}
-	
-	public byte getModeStatus()
-	{
-		return modeStatus;
-	}
-	
-	public byte getGripperStatus()
-	{
-		return gripperStatus;
-	}
-	
-	public boolean isInMotion()
-	{
-		return !(gripperStatus == IN_MOTION);
-	}
-	
-	public boolean hasStoppedShort()
-	{
-		return !(gripperStatus == IN_MOTION) && !(gripperStatus == STOPPED_AT_REQUESTED);
-	}
-	
-	public boolean objectDetected()
-	{
-		boolean ret = true;
-		
-		for(int i : objectDetection)
-		{
-			ret &= i == 1 || i == 2;
-		}
-		
-		return ret;
-	}
-	
-	public boolean isInitializing()
-	{
-		return (modeStatus == ACTIVATING);
-	}
-	
-	public boolean hasCompletedAction()
-	{
-		return (modeStatus == CHANGE_COMPLETE);
-	}
-	
-	public boolean hasError()
-	{
-		return error != 0x00;
-	}
-	
-	public void printError()
-	{
-		switch(error)
-		{
-		case 0x00: System.err.println("No Error");
-		case 0x05: System.err.println("Priority Fault: Action delayed, activation must be completed prior to action."); break;
-		case 0x06: System.err.println("Priority Fault: Action delayed, mode change must be completed prior to action."); break;
-		case 0x07: System.err.println("Priority Fault: The activation bit must be set prior to action."); break;
-		case 0x09: System.err.println("Minor Fault: Communication is not ready (may be booting)."); break;
-		case 0x0A: System.err.println("Minor Fault: Changing mode fault, interferences detected on scissor axis (less then 20s)."); break;
-		case 0x0B: System.err.println("Minor Fault: Automatic release in progress."); break;
-		case 0x0D: System.err.println("Major Fault: Action fault, verify that no interference or other error occurred."); break;
-		case 0x0E: System.err.println("Major Fault: Changing mode fault, interferences detected on scissor axis (more then 20s)."); break;
-		case 0x0F: System.err.println("Major Fault: Automatic release completed. Reset and activation required."); break;
-		}
-	}
-	
-	public int[] getFingerStatus()
-	{
-		return objectDetection;
-	}
-	
-	public int[] getFingerCurrents()
-	{
-		return current;
-	}
-	
-	public int[] getRequestedFingerPositions()
-	{
-		return requestedPosition;
-	}
-	
-	public int[] getFingerPositions()
-	{
-		return position;
 	}
 	
 	double[] temp = new double[4];
