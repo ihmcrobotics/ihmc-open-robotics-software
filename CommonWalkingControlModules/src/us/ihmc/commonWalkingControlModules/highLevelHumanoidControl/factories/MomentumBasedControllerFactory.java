@@ -193,7 +193,7 @@ public class MomentumBasedControllerFactory
             minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround, doubleSupportPercentageIn, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassHeightTrajectoryGenerator.setCoMHeightDriftCompensation(walkingControllerParameters.getCoMHeightDriftCompensation());
 
-      CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, registry,
+      CapturePointPlannerAdapter instantaneousCapturePointPlanner = new CapturePointPlannerAdapter(capturePointPlannerParameters, walkingControllerParameters, registry,
             yoGraphicsListRegistry, controlDT, feet, bipedSupportPolygons);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
