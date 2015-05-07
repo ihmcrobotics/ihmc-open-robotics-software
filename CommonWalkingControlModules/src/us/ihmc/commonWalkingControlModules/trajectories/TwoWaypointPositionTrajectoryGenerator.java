@@ -477,7 +477,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
    private List<FramePoint> getWaypointsFromTrajectoryParameters(TrajectoryParameters trajectoryParameters)
    {
       double swingHeight = trajectoryParameters.getSwingHeight();
-      swingHeight = Math.max(swingHeight, TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+      swingHeight = Math.max(swingHeight, TwoWaypointTrajectoryGeneratorParameters.getDefaultGroundClearance());
 
       double initialHeight = allPositions[0].getZ();
       if (stancePositionSource != null)
@@ -503,7 +503,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
          case DEFAULT :
          default :
-            return getWaypointsAtGroundClearance(TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+            return getWaypointsAtGroundClearance(TwoWaypointTrajectoryGeneratorParameters.getDefaultGroundClearance());
       }
    }
 
@@ -516,7 +516,7 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
       double zSwingHeight = waypoints.get(0).getZ() + swingHeight;
 
       // safety, should always clear the ground for the other end foot
-      zSwingHeight = Math.max(zSwingHeight, waypoints.get(1).getZ() + TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+      zSwingHeight = Math.max(zSwingHeight, waypoints.get(1).getZ() + TwoWaypointTrajectoryGeneratorParameters.getDefaultGroundClearance());
 
       for (FramePoint waypoint : waypoints)
       {
