@@ -6,10 +6,11 @@ import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rACT;
 import us.ihmc.robotiq.communication.registers.ActionRequestRegister.rGTO;
+import us.ihmc.robotiq.communication.registers.ByteSettableSimpleRegister;
 
 public class RobotiqWriteRequestFactory
 {
-   private SimpleRegister[] registers = new SimpleRegister[8];
+   private ByteSettableSimpleRegister[] registers = new ByteSettableSimpleRegister[8];
    private RobotiqWriteRequest robotiqRequest;
    
    public RobotiqWriteRequestFactory()
@@ -18,7 +19,7 @@ public class RobotiqWriteRequestFactory
       
       for(int i = 0; i < registers.length; i++)
       {
-         registers[i] = new SimpleRegister(0);
+         registers[i] = new ByteSettableSimpleRegister(0);
       }
    }
    
@@ -56,13 +57,13 @@ public class RobotiqWriteRequestFactory
    
    private void packRequest()
    {
-      registers[0].setValue((robotiqRequest.getActionRequest().getRegisterValue() << 8) | (robotiqRequest.getGripperOption().getRegisterValue() & 0xFF));
-      registers[1].setValue((0x00 << 8) | (robotiqRequest.getFingerAPositionRequest().getRegisterValue() & 0xFF));
-      registers[2].setValue((robotiqRequest.getFingerASpeed().getRegisterValue() << 8) | (robotiqRequest.getFingerAForce().getRegisterValue() & 0xFF));
-      registers[3].setValue((robotiqRequest.getFingerBPositionRequest().getRegisterValue() << 8) | (robotiqRequest.getFingerBSpeed().getRegisterValue() & 0xFF));
-      registers[4].setValue((robotiqRequest.getFingerBForce().getRegisterValue() << 8) | (robotiqRequest.getFingerCPositionRequest().getRegisterValue() & 0xFF));
-      registers[5].setValue((robotiqRequest.getFingerCSpeed().getRegisterValue() << 8) | (robotiqRequest.getFingerCForce().getRegisterValue() & 0xFF));
-      registers[6].setValue((robotiqRequest.getScissorPositionRequest().getRegisterValue() << 8) | (robotiqRequest.getScissorSpeed().getRegisterValue() & 0xFF));
-      registers[7].setValue((robotiqRequest.getScissorForce().getRegisterValue() << 8) | 0x00);
+      registers[0].setValue(robotiqRequest.getActionRequest().getRegisterValue(), robotiqRequest.getGripperOption().getRegisterValue());
+      registers[1].setValue((byte)0x00, robotiqRequest.getFingerAPositionRequest().getRegisterValue());
+      registers[2].setValue(robotiqRequest.getFingerASpeed().getRegisterValue(), robotiqRequest.getFingerAForce().getRegisterValue());
+      registers[3].setValue(robotiqRequest.getFingerBPositionRequest().getRegisterValue(), robotiqRequest.getFingerBSpeed().getRegisterValue());
+      registers[4].setValue(robotiqRequest.getFingerBForce().getRegisterValue(), robotiqRequest.getFingerCPositionRequest().getRegisterValue());
+      registers[5].setValue(robotiqRequest.getFingerCSpeed().getRegisterValue(), robotiqRequest.getFingerCForce().getRegisterValue());
+      registers[6].setValue(robotiqRequest.getScissorPositionRequest().getRegisterValue(), robotiqRequest.getScissorSpeed().getRegisterValue());
+      registers[7].setValue(robotiqRequest.getScissorForce().getRegisterValue(), (byte)0x00);
    }
 }
