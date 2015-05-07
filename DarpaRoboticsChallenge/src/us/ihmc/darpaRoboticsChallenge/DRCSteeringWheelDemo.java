@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class DRCSteeringWheelDemo
 {
-   private static final SteeringWheelAttachment wheelAttachment = SteeringWheelAttachment.SPINNER;
+   private static final SteeringWheelAttachment wheelAttachment = SteeringWheelAttachment.BOTH;
    private final DRCSimulationFactory drcSimulationFactory;
 
    public DRCSteeringWheelDemo(DRCRobotModel model, DRCNetworkModuleParameters networkParameters, DRCRobotInitialSetup<SDFRobot> initialSetup, double
