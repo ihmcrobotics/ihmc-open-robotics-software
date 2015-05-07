@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
+import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
@@ -79,6 +80,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final HandPoseProvider handPoseProvider;
    private final SingleJointPositionProvider singleJointPositionProvider;
    private boolean firstPacket = true;
+   private final HandPoseStatusProducer handPoseStatusProducer;
+   private boolean handTrajectoryDoneHasBeenSent;
+
 
    private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
 
@@ -92,6 +96,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final SideDependentList<DoubleYoVariable> offsetPitch = new SideDependentList<DoubleYoVariable>();
    
    private final SideDependentList<BooleanYoVariable> areHandTaskspaceControlled;
+   private final SideDependentList<BooleanYoVariable> areHandJointspaceControlled;
    
    // Fields used for taskspace commands
    private final SideDependentList<TaskspaceToJointspaceHandPositionControlState> handTaskspaceControllers;
@@ -119,6 +124,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.singleJointPositionProvider = variousWalkingProviders.getSingleJointPositionProvider();
       this.momentumBasedController = momentumBasedController;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
+      this.handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
       
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
@@ -164,6 +170,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       handTaskspaceControllers = new SideDependentList<>();
       areHandTaskspaceControlled = new SideDependentList<>();
+      areHandJointspaceControlled = new SideDependentList<>();
       handStraightLinePoseTrajectoryGenerators = new SideDependentList<>();
       handCircularPoseTrajectoryGenerators = new SideDependentList<>();
 
@@ -173,6 +180,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          
          BooleanYoVariable isHandTaskspaceControlled = new BooleanYoVariable(namePrefix + "TaskspaceControl", registry);
          areHandTaskspaceControlled.put(robotSide, isHandTaskspaceControlled);
+         BooleanYoVariable isHandJointspaceControlled = new BooleanYoVariable(namePrefix + "JointspaceControl", registry);
+         areHandJointspaceControlled.put(robotSide, isHandJointspaceControlled);
 
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
@@ -275,6 +284,16 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          {
             handTaskspaceControllers.get(robotSide).doAction();
             
+            if (handTaskspaceControllers.get(robotSide).isDone() && !handTrajectoryDoneHasBeenSent)
+            {
+               handPoseStatusProducer.sendCompletedStatus(robotSide);
+               handTrajectoryDoneHasBeenSent = true;
+            }
+            else if (!handTaskspaceControllers.get(robotSide).isDone())
+            {
+               handTrajectoryDoneHasBeenSent = false;
+            }
+            
             for (ArmJointName jointName : ArmJointName.values())
             {
                OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, jointName);
@@ -355,6 +374,18 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          previousPosition.put(joint, generator.getValue());
       }
       
+      if (trajectoriesAreDone)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            if (areHandJointspaceControlled.get(side).getBooleanValue())
+            {
+               handPoseStatusProducer.sendCompletedStatus(side);
+               areHandJointspaceControlled.get(side).set(false);
+            }
+         }
+      }
+      
       for (RobotSide side : RobotSide.values)
       {
          OneDoFJoint ankleRoll = fullRobotModel.getLegJoint(side, LegJointName.ANKLE_ROLL);
@@ -406,7 +437,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private void initializeFromJointAnglesPacket(JointAnglesPacket packet)
    {
       for (RobotSide robotSide : RobotSide.values)
+      {
          areHandTaskspaceControlled.get(robotSide).set(false);
+         areHandJointspaceControlled.get(robotSide).set(false);
+      }
    
       initialTrajectoryTime = timeProvider.getDoubleValue();
       trajectoryTimeProvider.set(packet.getTrajectoryTime());
@@ -481,10 +515,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             if (joint.getName().contains("l_arm"))
             {
                areHandTaskspaceControlled.get(RobotSide.LEFT).set(false);
+               areHandJointspaceControlled.get(RobotSide.LEFT).set(false);
             }
             else if (joint.getName().contains("r_arm"))
             {
                areHandTaskspaceControlled.get(RobotSide.RIGHT).set(false);
+               areHandJointspaceControlled.get(RobotSide.RIGHT).set(false);
             }
             
             double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
@@ -504,6 +540,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private void initializeFromJointMap(RobotSide side, Map<OneDoFJoint, Double> jointTarget, double trajectoryTime)
    {
       areHandTaskspaceControlled.get(side).set(false);
+      areHandJointspaceControlled.get(side).set(true);
 
       initialTrajectoryTime = timeProvider.getDoubleValue();
       trajectoryTimeProvider.set( trajectoryTime );
@@ -598,6 +635,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private void initializeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)
    {
       areHandTaskspaceControlled.get(robotSide).set(true);
+      areHandJointspaceControlled.get(robotSide).set(false);
       TaskspaceToJointspaceHandPositionControlState handTaskspaceController = handTaskspaceControllers.get(robotSide);
       handTaskspaceController.setTrajectory(trajectory);
       handTaskspaceController.setSelectionMatrix(selectionMatrix);
