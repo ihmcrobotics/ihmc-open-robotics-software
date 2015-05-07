@@ -46,7 +46,7 @@ public class CapturePointUpdatable implements Updatable
    private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
 
    private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-   private final SideDependentList<FrameConvexPolygon2d> footSupportPolygons = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2d> footSupportPolygons = new SideDependentList<>(new FrameConvexPolygon2d(), new FrameConvexPolygon2d());
 
    private final CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber;
 
