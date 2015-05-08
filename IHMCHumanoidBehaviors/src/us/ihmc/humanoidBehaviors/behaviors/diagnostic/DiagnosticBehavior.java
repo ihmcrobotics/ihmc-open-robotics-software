@@ -1476,12 +1476,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       sequenceGoHome();
       
-      desiredFootstepPosition = new FramePose(ankleZUpFrame);
-      position = new Point3d(0., robotSide.negateIfRightSide(0.12), 0.0);
-      orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
-      desiredFootstepPosition.changeFrame(worldFrame);
-      submitFootstepPose(false, robotSide, desiredFootstepPosition);
+      sequenceSquareUp();
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
       pipeLine.requestNewStage();
       
    }
@@ -1491,6 +1488,8 @@ public class DiagnosticBehavior extends BehaviorInterface
       submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_PALMS_UP);
       pipeLine.requestNewStage();
       submitSymmetricHumanoidArmPose(HumanoidArmPose.FLEX_UP);
+      pipeLine.requestNewStage();
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.FLYING_PALMS_UP);
       pipeLine.requestNewStage();
    }
    
@@ -1512,12 +1511,9 @@ public class DiagnosticBehavior extends BehaviorInterface
       
       sequenceGoHome(); 
       
-      desiredFootstepPosition = new FramePose(ankleZUpFrame);
-      position = new Point3d(0., robotSide.negateIfRightSide(0.12), 0.0);
-      orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
-      desiredFootstepPosition.setPose(position, orientation);
-      desiredFootstepPosition.changeFrame(worldFrame);
-      submitFootstepPose(false, robotSide, desiredFootstepPosition);
+      sequenceSquareUp();
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
       pipeLine.requestNewStage();
    }
    
