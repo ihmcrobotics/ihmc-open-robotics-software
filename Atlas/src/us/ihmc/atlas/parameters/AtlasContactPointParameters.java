@@ -575,7 +575,7 @@ public class AtlasContactPointParameters extends DRCRobotContactPointParameters
    {
       if (useSoftGroundContactParameters)
       {
-         linearGroundContactModel.setZStiffness(1000.0);
+         linearGroundContactModel.setZStiffness(4000.0);
          linearGroundContactModel.setZDamping(750.0);
          linearGroundContactModel.setXYStiffness(50000.0);
          linearGroundContactModel.setXYDamping(1000.0);
