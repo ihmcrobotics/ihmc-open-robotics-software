@@ -12,6 +12,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-ip', version: '0.19-internal'
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-visualize', version: '0.19-internal'
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-sfm', version: '0.19-internal'
+    compile group: 'nu.pattern', name: 'opencv', version: '2.4.9-4'
     
     //ejml core, complex, and equation
     ['core','complex','equation'].each{
