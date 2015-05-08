@@ -3,9 +3,12 @@ package us.ihmc.atlas.sensors;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.collisions.SDFCollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
+import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
+import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -33,7 +36,28 @@ public class AtlasCollisionBoxProvider extends SDFCollisionBoxProvider
          kneePose.setTranslation(0.05, 0, 0.03);
          CollisionCylinder knee = new CollisionCylinder(kneePose, 0.11, 0.15 + 2.0 * extent);
          addCollisionShape(kneeJoint, knee);
+         
+         // Add boxes for the stupid hose
+         
+         String elbowJoint = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
+         RigidBodyTransform elbowBoxTransform = new RigidBodyTransform();
+         elbowBoxTransform.setTranslation(0, robotSide.negateIfLeftSide(0.1), -0.2);
+         CollisionBox stupidHoseBox = new CollisionBox(elbowBoxTransform, 0.15, 0.3, 0.15);
+         addCollisionShape(elbowJoint, stupidHoseBox);
       }
+      
+      // Add wide backpack for hose
+      
+      String backRollJoint = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
+      RigidBodyTransform backPackTransform = new RigidBodyTransform();
+      backPackTransform.setTranslation(-0.2, 0, 0.2);
+      CollisionBox backPackHoseBox = new CollisionBox(backPackTransform, 0.2, 0.5, 0.3);
+      addCollisionShape(backRollJoint, backPackHoseBox);
+      
+      RigidBodyTransform haloTransform = new RigidBodyTransform();
+      haloTransform.setTranslation(0, 0, 1);
+      CollisionCylinder halo = new CollisionCylinder(haloTransform, 0.35, 1.0);
+      addCollisionShape(backRollJoint, halo);
 
    }
 

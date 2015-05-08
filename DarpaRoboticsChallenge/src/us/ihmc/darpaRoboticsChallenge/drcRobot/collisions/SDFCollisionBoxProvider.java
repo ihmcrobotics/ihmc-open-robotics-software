@@ -23,7 +23,7 @@ public class SDFCollisionBoxProvider implements CollisionBoxProvider
 {
    private final HashMap<String, List<CollisionShape>> collissionMeshes = new HashMap<>();
 
-   protected final float extent = 0.03f;
+   protected final float extent = 0.04f;
 
    public SDFCollisionBoxProvider(JaxbSDFLoader loader, String modelName)
    {
