@@ -36,6 +36,7 @@ import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameMatrix3D;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -104,7 +105,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final FrameMatrix3D selectionFrameMatrix = new FrameMatrix3D();
    private final FramePose currentHandPose = new FramePose();
    private final SideDependentList<StraightLinePoseTrajectoryGenerator> handStraightLinePoseTrajectoryGenerators;
-   private final SideDependentList<CirclePoseTrajectoryGenerator> handCircularPoseTrajectoryGenerators;   
+   private final SideDependentList<CirclePoseTrajectoryGenerator> handCircularPoseTrajectoryGenerators;
+   private final SideDependentList<TaskspaceToJointspaceCalculator> handTaskspaceToJointspaceCalculators;
+   private final SideDependentList<PoseReferenceFrame> optionalHandControlFrames;
 
    private final MomentumBasedController momentumBasedController;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
@@ -173,6 +176,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       areHandJointspaceControlled = new SideDependentList<>();
       handStraightLinePoseTrajectoryGenerators = new SideDependentList<>();
       handCircularPoseTrajectoryGenerators = new SideDependentList<>();
+      handTaskspaceToJointspaceCalculators = new SideDependentList<>();
+      optionalHandControlFrames = new SideDependentList<PoseReferenceFrame>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -188,8 +193,10 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          double controlDT = momentumBasedController.getControlDT();
 
          TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
-         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
+         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
          handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
+         handTaskspaceToJointspaceCalculators.put(robotSide, handTaskspaceToJointspaceCalculator);
 
          TaskspaceToJointspaceHandPositionControlState handTaskspaceController = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, timeProvider, registry);
          handTaskspaceController.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
@@ -200,6 +207,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          
          handStraightLinePoseTrajectoryGenerators.put(robotSide, handStraightLinePoseTrajectoryGenerator);
          handCircularPoseTrajectoryGenerators.put(robotSide, handCircularPoseTrajectoryGenerator);
+
+         optionalHandControlFrames.put(robotSide, new PoseReferenceFrame("optional" + robotSide.getCamelCaseNameForMiddleOfExpression() + "HandControlFrame", handControlFrame));
       }
 
    }
@@ -429,7 +438,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          else if (handPoseProvider.checkForNewRotateAboutAxisPacket(side))
          {
             initializeFromRotateAboutAxisPacket(side, handPoseProvider.getRotationAxisOriginInWorld(side), handPoseProvider.getRotationAxisInWorld(side),
-                  handPoseProvider.getRotationAngleRightHandRule(side), handPoseProvider.controlHandAngleAboutAxis(side));
+                  handPoseProvider.getRotationAngleRightHandRule(side), handPoseProvider.getGraspOffsetFromControlFrame(side), handPoseProvider.controlHandAngleAboutAxis(side));
          }
       }
    }
@@ -601,16 +610,20 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       initializeTaskspaceHandTrajectory(robotSide, handStraightLinePoseTrajectoryGenerator, selectionMatrix);
    }
 
-   private void initializeFromRotateAboutAxisPacket(RobotSide robotSide, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngleRightHandRule, boolean controlHandAngleAboutAxis)
+   private void initializeFromRotateAboutAxisPacket(RobotSide robotSide, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngleRightHandRule, double graspOffsetFromControlFrame, boolean controlHandAngleAboutAxis)
    {
       if (DEBUG) PrintTools.debug(this, "Received Hand Rotate about Axis Packet");
       
       trajectoryTimeProvider.set(handPoseProvider.getTrajectoryTime());
 
+      PoseReferenceFrame optionalHandControlFrame = optionalHandControlFrames.get(robotSide);
+      optionalHandControlFrame.setX(graspOffsetFromControlFrame);
+      optionalHandControlFrame.update();
+
       CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = handCircularPoseTrajectoryGenerators.get(robotSide);
       handCircularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngleRightHandRule);
       handCircularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
-      handCircularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
+      handCircularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(optionalHandControlFrame);
       handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -630,6 +643,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }
 
       initializeTaskspaceHandTrajectory(robotSide, handCircularPoseTrajectoryGenerator, selectionMatrix);
+      handTaskspaceToJointspaceCalculators.get(robotSide).setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
 
    private void initializeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)
@@ -640,6 +654,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceController.setTrajectory(trajectory);
       handTaskspaceController.setSelectionMatrix(selectionMatrix);
       handTaskspaceController.initializeWithDesiredJointAngles();
+      handTaskspaceToJointspaceCalculators.get(robotSide).setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
    }
 
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)

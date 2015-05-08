@@ -34,7 +34,9 @@ public interface HandPoseProvider
    
    public abstract double getRotationAngleRightHandRule(RobotSide robotSide);
 
-   boolean controlHandAngleAboutAxis(RobotSide robotSide);
+   public abstract boolean controlHandAngleAboutAxis(RobotSide robotSide);
+   
+   public abstract double getGraspOffsetFromControlFrame(RobotSide robotSide);
    
    public abstract boolean checkAndResetStopCommand(RobotSide robotSide);
 
