@@ -33,6 +33,7 @@ import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.trajectories.providers.CurrentPositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
@@ -139,6 +140,9 @@ public class HandControlModule
 
    private final boolean doPositionControl;
 
+   private final ReferenceFrame handControlFrame;
+   private final PoseReferenceFrame optionalHandControlFrame;
+
    public HandControlModule(RobotSide robotSide, MomentumBasedController momentumBasedController, ArmControllerParameters armControlParameters,
                             YoPIDGains jointspaceGains, YoSE3PIDGains taskspaceGains, YoSE3PIDGains taskspaceLoadBearingGains,
                             ControlStatusProducer controlStatusProducer, HandPoseStatusProducer handPoseStatusProducer, YoVariableRegistry parentRegistry)
@@ -190,6 +194,9 @@ public class HandControlModule
       ReferenceFrame handFrame = hand.getBodyFixedFrame();
       int jacobianId = momentumBasedController.getOrCreateGeometricJacobian(chest, hand, handFrame);
 
+      handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+      optionalHandControlFrame = new PoseReferenceFrame("optionalHandControlFrame", handControlFrame);
+
       this.robotSide = robotSide;
       twistCalculator = momentumBasedController.getTwistCalculator();
 
@@ -234,11 +241,11 @@ public class HandControlModule
       stateMachine = new StateMachine<HandControlState>(name, name + "SwitchTime", HandControlState.class, yoTime, registry);
 
       handSpatialAccelerationControlModule = new RigidBodySpatialAccelerationControlModule(name, twistCalculator, hand,
-              fullRobotModel.getHandControlFrame(robotSide), controlDT, registry);
+              handControlFrame, controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
       handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
-      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
       handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
 
       holdPoseTrajectoryGenerator = new ConstantPoseTrajectoryGenerator(name + "Hold", true, worldFrame, parentRegistry);
@@ -442,6 +449,8 @@ public class HandControlModule
 
       if (handPoseStatusProducer != null)
          handPoseStatusProducer.sendStartedStatus(robotSide);
+
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
    }
 
    private final FramePoint tempPosition = new FramePoint();
@@ -498,13 +507,16 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
-   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double time)
+   public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time)
    {
       // Limit arm joint motor speed based on Boston Dynamics Limit
       // of 700 rad/s input to the transmission.
       // For now, just set move time to at least 2 seconds
       if (time < 2.0)
          time = 2.0;
+
+      optionalHandControlFrame.setX(graspOffsetFromControlFrame);
+      optionalHandControlFrame.update();
 
       trajectoryTimeProvider.set(time);
 
@@ -527,6 +539,7 @@ public class HandControlModule
       }
 
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes, double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
