@@ -224,7 +224,7 @@ public class ManipulationControlModule
          Vector3d rotationAxisInWorld = handPoseProvider.getRotationAxisInWorld(robotSide);
          double rotationAngleRightHandRule = handPoseProvider.getRotationAngleRightHandRule(robotSide);
          boolean controlHandAngleAboutAxis = handPoseProvider.controlHandAngleAboutAxis(robotSide);
-         double graspOffsetFromControlFrame = 0.0; //handPoseProvider.getGraspOffsetFromControlFrame(robotSide);
+         double graspOffsetFromControlFrame = handPoseProvider.getGraspOffsetFromControlFrame(robotSide);
          double trajectoryTime = handPoseProvider.getTrajectoryTime();
 
          handControlModules.get(robotSide).moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis, graspOffsetFromControlFrame, trajectoryTime);

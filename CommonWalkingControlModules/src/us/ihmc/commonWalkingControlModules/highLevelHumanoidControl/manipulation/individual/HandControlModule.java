@@ -522,7 +522,7 @@ public class HandControlModule
 
       circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
       circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
-      circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(fullRobotModel.getHandControlFrame(robotSide));
+      circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(optionalHandControlFrame);
       circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
       if (!controlHandAngleAboutAxis)

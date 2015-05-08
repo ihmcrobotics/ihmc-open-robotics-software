@@ -254,4 +254,11 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return false;
    }
 
+   @Override
+   public double getGraspOffsetFromControlFrame(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return 0.0;
+   }
+
 }

@@ -46,6 +46,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    private final SideDependentList<Vector3d> rotationAxesInWorld = new SideDependentList<Vector3d>();
    private final SideDependentList<Double> rotationAnglesRightHandRules = new SideDependentList<>();
    private final SideDependentList<Boolean> controlHandAngleAboutAxis = new SideDependentList<>();
+   private final SideDependentList<Double> graspOffsetsFromControlFrame = new SideDependentList<Double>();
 
    private final SideDependentList<AtomicReference<boolean[]>> controlledAxes = new SideDependentList<>();
    private final SideDependentList<Double> percentOfTrajectoryWithOrientationControlled = new SideDependentList<Double>(1.0, 1.0);
@@ -257,6 +258,7 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
          rotationAxesInWorld.get(robotSide).set(object.getRotationAxisInWorld());
          rotationAnglesRightHandRules.put(robotSide, object.getRotationAngleRightHandRule());
          controlHandAngleAboutAxis.put(robotSide, object.controlHandAngleAboutAxis());
+         graspOffsetsFromControlFrame.put(robotSide, object.getGraspOffsetFromControlFrame());
       }
    }
 
@@ -404,6 +406,13 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    {
       updateFromNewestHandRotateAboutAxisPacket(robotSide);
       return rotationAnglesRightHandRules.get(robotSide);
+   }
+   
+   @Override
+   public double getGraspOffsetFromControlFrame(RobotSide robotSide)
+   {
+      updateFromNewestHandRotateAboutAxisPacket(robotSide);
+      return graspOffsetsFromControlFrame.get(robotSide);
    }
    
    @Override
