@@ -5,17 +5,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import javax.imageio.ImageIO;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
-
-import nu.pattern.OpenCV;
 
 import org.opencv.calib3d.Calib3d;
 import org.opencv.core.CvType;
@@ -29,12 +24,13 @@ import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class OpenCVChessboardPoseEstimator
 {
    static
    {
-      OpenCV.loadLibrary();
+      NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
    final boolean DEBUG = false;
 
