@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -23,8 +24,9 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class ChessboardPoseEstimatorTest
 {
    
-   static final boolean DEBUG=true;
-   @Test
+   static final boolean DEBUG=false;
+   @EstimatedDuration
+   @Test(timeout=10000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
 
