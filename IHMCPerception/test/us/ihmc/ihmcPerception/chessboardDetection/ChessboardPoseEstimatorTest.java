@@ -34,10 +34,21 @@ public class ChessboardPoseEstimatorTest
       final int squareNumCol = 6;
       final int squareNumRow = 5;
       BufferedImage image = ImageIO.read(new File("testImages/simple5x6Chessboard.jpg"));
-      testSingleImage(image, squareNumRow, squareNumCol, gridWidth);
+      testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-3);
    }
 
-   
+   @EstimatedDuration
+   @Test(timeout=10000)
+   public void testDrivingSimCheckerBoard() throws IOException
+   {
+
+      final double gridWidth = 0.0335;
+      final int squareNumCol = 6;
+      final int squareNumRow = 5;
+      BufferedImage image = ImageIO.read(new File("testImages/drivingSim2.png"));
+      testSingleImage(image, squareNumRow, squareNumCol, gridWidth,1e-1);
+   }
+
    //boofCV can't find checker board
    @Ignore
    @Test
@@ -48,12 +59,11 @@ public class ChessboardPoseEstimatorTest
       final int squareNumCol = 9;
       final int squareNumRow = 6;
       BufferedImage image = ImageIO.read(new File("testImages/polarisHood7x4.jpg"));
-      testSingleImage(image, squareNumRow, squareNumCol, gridWidth);
+      testSingleImage(image, squareNumRow, squareNumCol, gridWidth,1e-1);
    }
 
    //boofcv found checkerboard but pose estimated poorly
    @Test
-   @Ignore
    public void testImage1() throws IOException
    {
 
@@ -61,7 +71,7 @@ public class ChessboardPoseEstimatorTest
       final int squareNumCol = 9;
       final int squareNumRow = 6;
       BufferedImage image = ImageIO.read(new File("testImages/polarisHood9x6.jpg"));
-      testSingleImage(image, squareNumRow, squareNumCol, gridWidth);
+      testSingleImage(image, squareNumRow, squareNumCol, gridWidth,1e-1);
    }
 
    static BufferedImage cloneImage(BufferedImage bi)
@@ -73,12 +83,12 @@ public class ChessboardPoseEstimatorTest
    }
    
 
-   public void testSingleImage(BufferedImage image, int squareNumRow, int squareNumCol, double gridWidth) throws IOException
+   public void testSingleImage(BufferedImage image, int squareNumRow, int squareNumCol, double gridWidth, double comparisonEps) throws IOException
    {
       BoofCVChessboardPoseEstimator boofCVDetector = new BoofCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
       RigidBodyTransform boofCVTransform = boofCVDetector.detect(image);
 
-      OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow - 1, squareNumCol - 1, gridWidth);
+      OpenCVChessboardPoseEstimator openCVDetector = new OpenCVChessboardPoseEstimator(squareNumRow, squareNumCol, gridWidth);
       RigidBodyTransform openCVTransform = openCVDetector.detect(image);
 
 
@@ -88,7 +98,7 @@ public class ChessboardPoseEstimatorTest
          if (boofCVTransform != null)
          {
             BufferedImage tempImage = cloneImage(image);
-            openCVDetector.drawAxis(tempImage, boofCVTransform, gridWidth * 2);
+            openCVDetector.drawAxis(tempImage, boofCVTransform, gridWidth * 3);
             openCVDetector.drawReprojectedPoints(tempImage, boofCVTransform, Color.RED);
             boofCVDetector.drawBox(tempImage, boofCVTransform, gridWidth * 2);
             ImageIO.write(tempImage, "png", new File("boofCVout.png"));
@@ -98,7 +108,7 @@ public class ChessboardPoseEstimatorTest
          if (openCVTransform != null)
          {
             BufferedImage tempImage = cloneImage(image);
-            openCVDetector.drawAxis(tempImage, openCVTransform, gridWidth * 2);
+            openCVDetector.drawAxis(tempImage, openCVTransform, gridWidth * 3);
             openCVDetector.drawReprojectedPoints(tempImage, openCVTransform, Color.GREEN);
             boofCVDetector.drawBox(tempImage, openCVTransform, gridWidth * 2);
             ImageIO.write(tempImage, "png", new File("openCVout.png"));
@@ -107,13 +117,17 @@ public class ChessboardPoseEstimatorTest
 
       }
 
-      if(boofCVTransform!=null && openCVTransform!=null)
+      if(boofCVTransform==null) 
       {
-         assertTrue(boofCVTransform.epsilonEquals(openCVTransform, 1e-3));
+         fail("boofcv detector can't find chessboard, can't compare");
+      }
+      else if(openCVTransform==null)
+      {
+         fail("opencv detector can't find chessboard, can't compare");
       }
       else
       {
-         fail("one of the detector can't find chessboard, can't compare");
+         assertTrue(boofCVTransform.epsilonEquals(openCVTransform, comparisonEps));
       }
 
    }
