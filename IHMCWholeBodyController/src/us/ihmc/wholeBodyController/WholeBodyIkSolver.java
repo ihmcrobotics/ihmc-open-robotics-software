@@ -503,6 +503,11 @@ abstract public class WholeBodyIkSolver
       {
          pelvisTarget.setPose( pelvisPose );
       }
+      
+      public FramePose getPelvisTarget()
+      {
+         return pelvisTarget;
+      }
 
       private void controlPelvis(SDFFullRobotModel actualSdfModel)
       {
@@ -1188,6 +1193,11 @@ abstract public class WholeBodyIkSolver
       public void setFootTarget(RobotSide side, FramePose footPose)
       {
          feetTarget.set(side, footPose);  
+      }
+      
+      public FramePose getFootTarget(RobotSide side)
+      {
+         return feetTarget.get(side);  
       }
 
       public WholeBodyConfiguration cloneConfiguration()
