@@ -7,30 +7,27 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
 
 import nu.pattern.OpenCV;
 
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
-import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
-import sun.java2d.loops.DrawPolygons;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class OpenCVChessboardPoseEstimator
@@ -46,12 +43,12 @@ public class OpenCVChessboardPoseEstimator
    Point3[] boardPoints;
    MatOfPoint2f corners = new MatOfPoint2f();
    TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER, 30, 0.001);
-   Mat cameraMatrix = Mat.zeros(3, 3, CvType.CV_32F);
+   Mat cameraMatrix = null;
    MatOfDouble distCoeffs = new MatOfDouble();
 
-   public OpenCVChessboardPoseEstimator(int rows, int cols, double gridWidth)
+   public OpenCVChessboardPoseEstimator(int rowsOfSquare, int colsOfSquare, double gridWidth)
    {
-      boardInnerCrossPattern = new Size(cols, rows);
+      boardInnerCrossPattern = new Size(colsOfSquare-1, rowsOfSquare-1);
       this.gridWidth = gridWidth;
       generateBoardPoints();
    }
@@ -66,25 +63,31 @@ public class OpenCVChessboardPoseEstimator
             double x = gridWidth * (i - boardInnerCrossPattern.width / 2 + 0.5);
             double y = -gridWidth * (j - boardInnerCrossPattern.height / 2 + 0.5);
             boardPoints[count++] = new Point3(x, y, 0.0);
-            //            System.out.println("x " +x + " y"+y);
          }
    }
 
    static public Mat convertBufferedImageToMat(BufferedImage image)
    {
       Mat imageMat;
+      byte[] pixel;
       switch (image.getType())
       {
       case BufferedImage.TYPE_3BYTE_BGR:
          imageMat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC3);
+         pixel = ((DataBufferByte) (image.getRaster().getDataBuffer())).getData();
          break;
       case BufferedImage.TYPE_4BYTE_ABGR:
+      case BufferedImage.TYPE_INT_ARGB:
+         //need to double check endianess
          imageMat = new Mat(image.getHeight(), image.getWidth(), CvType.CV_8UC4);
+         pixel = new byte[image.getHeight() * image.getWidth() * 4];
+         ByteBuffer pixelBuf = ByteBuffer.wrap(pixel);
+         int[] intBuf = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+         pixelBuf.asIntBuffer().put(intBuf);
          break;
       default:
-         throw new RuntimeException("unknown type");
+         throw new RuntimeException("unknown type " + image.getType());
       }
-      byte[] pixel = ((DataBufferByte) (image.getRaster().getDataBuffer())).getData();
       imageMat.put(0, 0, pixel);
       return imageMat;
 
@@ -92,17 +95,18 @@ public class OpenCVChessboardPoseEstimator
 
    public void setCameraMatrix(double fx, double fy, double cx, double cy)
    {
-      cameraMatrix=Mat.zeros(3, 3, cameraMatrix.type());
+      cameraMatrix = Mat.zeros(3, 3, CvType.CV_32F);
       cameraMatrix.put(0, 0, fx); //fx
       cameraMatrix.put(1, 1, fy); //fy
       cameraMatrix.put(0, 2, cx); //cx
       cameraMatrix.put(1, 2, cy); //cy
       cameraMatrix.put(2, 2, 1);
    }
+
    public void setDefaultCameraMatrix(int rows, int cols, double fovY)
    {
       double f = rows / 2.0 / Math.tan(fovY / 2.0);
-      cameraMatrix=Mat.zeros(3, 3, cameraMatrix.type());
+      cameraMatrix = Mat.zeros(3, 3, CvType.CV_32F);
       cameraMatrix.put(0, 0, f); //fx
       cameraMatrix.put(1, 1, f); //fy
       cameraMatrix.put(0, 2, cols / 2.0); //cx
@@ -112,32 +116,28 @@ public class OpenCVChessboardPoseEstimator
 
    public RigidBodyTransform detect(BufferedImage image)
    {
-      setDefaultCameraMatrix(image.getHeight(), image.getWidth(), Math.PI / 4);
+      if(cameraMatrix==null)
+         setDefaultCameraMatrix(image.getHeight(), image.getWidth(), Math.PI / 4);
       Mat imageMat = convertBufferedImageToMat(image);
       if (Calib3d.findChessboardCorners(imageMat, boardInnerCrossPattern, corners))
       {
-         Mat rvec = new Mat(), tvec = new Mat();
-
          Mat imageGray = new Mat(imageMat.rows(), imageMat.cols(), CvType.CV_8UC1);
          Imgproc.cvtColor(imageMat, imageGray, Imgproc.COLOR_BGRA2GRAY);
+         Mat rvec = new Mat(), tvec = new Mat();
+
          Imgproc.cornerSubPix(imageGray, corners, new Size(11, 11), new Size(-1, -1), termCriteria);
          //         Calib3d.drawChessboardCorners(imageGray, boardInnerCrossPattern, corners, true);
 
          Calib3d.solvePnPRansac(new MatOfPoint3f(boardPoints), corners, cameraMatrix, distCoeffs, rvec, tvec);
 
-         Vector3d translation = new Vector3d(tvec.get(0, 0)[0], tvec.get(1, 0)[0], tvec.get(2, 0)[0]);
-         Vector3d axis = new Vector3d(rvec.get(0, 0)[0], rvec.get(1, 0)[0], rvec.get(2, 0)[0]);
-         double angle = axis.length();
-         axis.normalize();
-         AxisAngle4d rotation = new AxisAngle4d(axis, angle);
-         RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
+         RigidBodyTransform transform = opencvTRtoRigidBodyTransform(rvec, tvec);
 
          if (DEBUG)
          {
             printMat(cameraMatrix);
             drawImagePoints(image, corners, Color.GREEN);
             drawReprojectedPoints(image, rvec, tvec, Color.RED);
-            drawAxis(image, transform,0.2);
+            drawAxis(image, transform, 0.2);
          }
          return transform;
       }
@@ -148,7 +148,17 @@ public class OpenCVChessboardPoseEstimator
 
    }
 
-   
+   public static RigidBodyTransform opencvTRtoRigidBodyTransform(Mat rvec, Mat tvec)
+   {
+      Vector3d translation = new Vector3d(tvec.get(0, 0)[0], tvec.get(1, 0)[0], tvec.get(2, 0)[0]);
+      Vector3d axis = new Vector3d(rvec.get(0, 0)[0], rvec.get(1, 0)[0], rvec.get(2, 0)[0]);
+      double angle = axis.length();
+      axis.normalize();
+      AxisAngle4d rotation = new AxisAngle4d(axis, angle);
+      RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
+      return transform;
+   }
+
    public static void rigidBodyTransformToOpenCVTR(RigidBodyTransform transform, Mat tvec, Mat rvec)
    {
       Point3d translation = new Point3d();
@@ -212,8 +222,9 @@ public class OpenCVChessboardPoseEstimator
       Mat tvec = new Mat(3, 1, CvType.CV_32F);
       Mat rvec = new Mat(3, 1, CvType.CV_32F);
       rigidBodyTransformToOpenCVTR(transform, tvec, rvec);
-      drawReprojectedPoints(image, rvec, tvec,color);
+      drawReprojectedPoints(image, rvec, tvec, color);
    }
+
    private void drawReprojectedPoints(BufferedImage image, Mat rvec, Mat tvec, Color color)
    {
       MatOfPoint2f imagePoints = new MatOfPoint2f();
@@ -244,14 +255,14 @@ public class OpenCVChessboardPoseEstimator
       {
          if (i > 0)
          {
-            int radius=2;
-            g2.drawOval((int) imagePoints[i].x-radius, (int) imagePoints[i].y-radius, 2*radius, 2*radius);
+            int radius = 2;
+            g2.drawOval((int) imagePoints[i].x - radius, (int) imagePoints[i].y - radius, 2 * radius, 2 * radius);
             g2.drawLine((int) imagePoints[i - 1].x, (int) imagePoints[i - 1].y, (int) imagePoints[i].x, (int) imagePoints[i].y);
          }
          else
          {
-            int radius=12;
-            g2.drawOval((int) imagePoints[i].x-radius, (int) imagePoints[i].y-radius, 2*radius, 2*radius);
+            int radius = 12;
+            g2.drawOval((int) imagePoints[i].x - radius, (int) imagePoints[i].y - radius, 2 * radius, 2 * radius);
          }
 
       }
@@ -259,13 +270,4 @@ public class OpenCVChessboardPoseEstimator
       //      Highgui.imwrite("/tmp/testCv.png", imageGray);
    }
 
-   public static void main(String[] arg) throws IOException
-   {
-      BufferedImage image = ImageIO.read(new File("/media/LogData/Atlas/2015_04_Driving/checkerboard/2_success"));
-      OpenCVChessboardPoseEstimator estimator = new OpenCVChessboardPoseEstimator(8, 5, 0.049);
-      RigidBodyTransform transform = estimator.detect(image);
-      ImageIO.write(image, "png", new File("/tmp/out.png"));
-      System.out.println(transform);
-
-   }
 }
