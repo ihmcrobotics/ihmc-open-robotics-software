@@ -141,11 +141,12 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    {
       double height = 2.0 * steeringWheelRadius;
       double radius = 0.015;
+      double heightAboveWheel = 0.1;
       
       FramePose crossBar = new FramePose(steeringWheelFrame);
       crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0);
       crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0);
-      crossBar.setPosition(new Vector3d(-height/2.0, 0.0, 0.15));
+      crossBar.setPosition(new Vector3d(-height/2.0, 0.0, heightAboveWheel));
       
       RigidBodyTransform transform = new RigidBodyTransform();
       crossBar.getPose(transform);
