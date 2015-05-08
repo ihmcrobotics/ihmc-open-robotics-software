@@ -65,7 +65,7 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
             wheelRobot.addCrossBar();
             break;
          case BOTH:
-            wheelRobot.addSpinnerHandle(0.0, 14.0/18.0, 0.15, 0.015, 0.15);
+            wheelRobot.addSpinnerHandle(0.0, 14.0/17.5, 0.15, 0.015, 0.1);
             wheelRobot.addCrossBar();
             break;
          default:
