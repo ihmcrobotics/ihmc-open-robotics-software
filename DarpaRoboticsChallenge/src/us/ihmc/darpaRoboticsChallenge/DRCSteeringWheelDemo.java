@@ -25,6 +25,7 @@ public class DRCSteeringWheelDemo
       simStarter.registerHighLevelController(new JointPositionControllerFactory(true));
 
       simStarter.setRunMultiThreaded(true);      
+      simStarter.setUsePerfectSensors(true);
       simStarter.setRobotInitialSetup(initialSetup);
       simStarter.setInitializeEstimatorToActual(true);
       simStarter.startSimulation(networkParameters, true);
