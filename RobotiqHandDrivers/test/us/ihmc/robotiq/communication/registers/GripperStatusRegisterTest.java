@@ -5,7 +5,10 @@ import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gGTO;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gIMC;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gMOD;
 import us.ihmc.robotiq.communication.registers.GripperStatusRegister.gSTA;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 
+@BambooPlan(planType = BambooPlanType.Fast)
 public class GripperStatusRegisterTest extends RobotiqInputRegisterTest
 {
    @Override

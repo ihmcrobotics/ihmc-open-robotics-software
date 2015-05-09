@@ -46,8 +46,6 @@ public class RobotiqHandSensorData implements HandSensorData
 	private int[] requestedPosition = new int[4];
 	private int[] current = new int[4];
 	
-	private RobotiqReadResponse response;
-	
 	@Deprecated
 	public void update(byte[] data, boolean connected)
 	{
@@ -130,12 +128,6 @@ public class RobotiqHandSensorData implements HandSensorData
 	   case 0x0E: System.err.println("Major Fault: Changing mode fault, interferences detected on scissor axis (more then 20s)."); break;
 	   case 0x0F: System.err.println("Major Fault: Automatic release completed. Reset and activation required."); break;
 	   }
-	}
-	
-	public void update(RobotiqReadResponse response, boolean connected)
-	{
-	   this.response = response;
-	   this.connected = connected;
 	}
 	
 	public void setConnected(boolean connected)

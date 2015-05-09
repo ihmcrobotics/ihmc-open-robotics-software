@@ -54,6 +54,25 @@ public class RobotiqReadResponse
       scissorCurrent = new FingerCurrentRegister(Finger.SCISSOR);
    }
    
+   public void setAll(RobotiqReadResponse response)
+   {
+      this.gripperStatus.setRegisterValue(response.getGripperStatus().getRegisterValue());
+      this.objectDetection.setRegisterValue(response.getObjectDetection().getRegisterValue());
+      this.faultStatus.setRegisterValue(response.getFaultStatus().getRegisterValue());
+      this.fingerAPositionEcho.setRegisterValue(response.getFingerAPositionEcho().getRegisterValue());
+      this.fingerAPosition.setRegisterValue(response.getFingerAPosition().getRegisterValue());
+      this.fingerACurrent.setRegisterValue(response.getFingerACurrent().getRegisterValue());
+      this.fingerBPositionEcho.setRegisterValue(response.getFingerBPositionEcho().getRegisterValue());
+      this.fingerBPosition.setRegisterValue(response.getFingerBPosition().getRegisterValue());
+      this.fingerBCurrent.setRegisterValue(response.getFingerBCurrent().getRegisterValue());
+      this.fingerCPositionEcho.setRegisterValue(response.getFingerCPositionEcho().getRegisterValue());
+      this.fingerCPosition.setRegisterValue(response.getFingerCPosition().getRegisterValue());
+      this.fingerCCurrent.setRegisterValue(response.getFingerCCurrent().getRegisterValue());
+      this.scissorPositionEcho.setRegisterValue(response.getScissorPositionEcho().getRegisterValue());
+      this.scissorPosition.setRegisterValue(response.getScissorPosition().getRegisterValue());
+      this.scissorCurrent.setRegisterValue(response.getScissorCurrent().getRegisterValue());
+   }
+   
    public GripperStatusRegister getGripperStatus()
    {
       return gripperStatus;
