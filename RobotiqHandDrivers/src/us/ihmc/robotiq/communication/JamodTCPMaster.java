@@ -18,8 +18,6 @@ import us.ihmc.utilities.ThreadTools;
 
 public class JamodTCPMaster
 {
-   private final int RECONNECT_ATTEMPTS = 5;
-   
    private InetAddress slaveAddress;
    private TCPMasterConnection connection;
    private ModbusTCPTransaction transaction;
@@ -56,27 +54,16 @@ public class JamodTCPMaster
    {
       if(!connection.isConnected())
       {
-         int counter = 0;
-         do
+         try
          {
-            try
-            {
-               connection.connect();
-               transaction = new ModbusTCPTransaction(connection);
-            }
-            catch (Exception e)
-            {
-               if(counter < RECONNECT_ATTEMPTS)
-               {
-                  System.out.println("Unable to connect to " + slaveAddress.getHostAddress() + ". Retrying...");
-               }
-               else
-               {
-                  System.out.println("Address " + slaveAddress.getHostAddress() + " is unresponse. Connection failed.");
-               }
-            }
+            connection.connect();
+            transaction = new ModbusTCPTransaction(connection);
+            System.out.println("Successfully connected at " + connection.getAddress().getHostAddress());
          }
-         while(!connection.isConnected() && counter <= RECONNECT_ATTEMPTS);
+         catch (Exception e)
+         {
+            System.out.println("Unable to connect to " + slaveAddress.getHostAddress() + ". Retrying...");
+         }
       }
    }
    
