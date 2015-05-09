@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
@@ -33,22 +34,23 @@ import us.ihmc.yoUtilities.stateMachines.StateTransitionCondition;
 public abstract class DRCPushRecoveryTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   
+
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
    private static double simulationTime = 6.0;
-   
+
    private DRCPushRobotController pushRobotController;
-   
+
    private double swingTime, transferTime;
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
-   
+
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      BambooTools.reportTestStartedMessage();
    }
 
    @After
@@ -71,142 +73,243 @@ public abstract class DRCPushRecoveryTest
       pushRobotController = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+      BambooTools.reportTestFinishedMessage();
    }
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @EstimatedDuration(duration = 34.5)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 172343)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      setupTest(script, true);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
+      setupTest(script, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
       // push timing:
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * swingTime;
-      
+
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
       double magnitude = 600.0;
       double duration = 0.1;
-      
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
-      
-      BambooTools.reportTestFinishedMessage();
    }
 
-   @EstimatedDuration(duration = 34.5)
+   @EstimatedDuration(duration = 30.0)
    @Test(timeout = 172343)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      setupTest(script, false);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
+      setupTest(script, false, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
       // push timing:
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.25 * swingTime;
-      
+
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, -1.0, 0.0);
       double magnitude = 500.0;
       double duration = 0.1;
-      
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
-      
-      BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 32.9)
-	@Test(timeout = 164603)
+   @EstimatedDuration(duration = 30.0)
+   @Test(timeout = 164603)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      setupTest(script, true);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
+      setupTest(script, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
       // push timing:
       StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.RIGHT);
       double delay = 0.5 * transferTime;
-      
+
       // push parameters:
       Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
       double magnitude = 500.0;
       double duration = 0.1;
-      
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
-      
-      BambooTools.reportTestFinishedMessage();
    }
 
-	@EstimatedDuration(duration = 32.7)
-	@Test(timeout = 163619)
+   @EstimatedDuration(duration = 30.0)
+   @Test(timeout = 163619)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage();
-      setupTest(null, true);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      
+      setupTest(null, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
       // push timing:
       StateTransitionCondition pushCondition = null;
       double delay = 1.0;
-      
+
       // push parameters:
       Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
       double magnitude = 400.0;
       double duration = 0.15;
-      
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration); 
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       assertTrue(success);
-      
-      BambooTools.reportTestFinishedMessage();
    }
-   
-   private void setupTest(String scriptName, boolean enablePushRecoveryControlModule)
+
+   @EstimatedDuration(duration = 25.0)
+   @Test(timeout = 163619)
+   public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, false, true);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 1.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      double magnitude = 400.0;
+      double duration = 0.15;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+      assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 35.0)
+   @Test(timeout = 163619)
+   public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      forceDirection.normalize();
+      double magnitude = 100.0;
+      double duration = 2.0;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
+      assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 45.0)
+   @Test(timeout = 163619)
+   public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, true, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      double magnitude = 100.0;
+      double duration = 2.0;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
+      assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 25.0)
+   @Test(timeout = 163619)
+   public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, false, true);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      forceDirection.normalize();
+      double magnitude = 100.0;
+      double duration = 2.0;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
+      assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 35.0)
+   @Test(timeout = 163619)
+   public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, false, true);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      double magnitude = 100.0;
+      double duration = 2.0;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
+      assertTrue(success);
+   }
+
+   private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure)
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      
-      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation, simulationTestingParameters, getRobotModel());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", scriptName, selectedLocation,
+            simulationTestingParameters, getRobotModel());
       SDFFullRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       pushRobotController = new DRCPushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
-      
+
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
-      
+
       // get rid of this once push recovery is enabled by default
       BooleanYoVariable enable = (BooleanYoVariable) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
       enable.set(enablePushRecoveryControlModule);
-      
+      BooleanYoVariable enableOnFailure = (BooleanYoVariable) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+            "enablePushRecoveryOnFailure");
+      enableOnFailure.set(enablePushRecoveryOnFailure);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          @SuppressWarnings("unchecked")
-         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix + "State");
+         final EnumYoVariable<ConstraintType> footConstraintType = (EnumYoVariable<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
+               + "State");
          @SuppressWarnings("unchecked")
          final EnumYoVariable<WalkingState> walkingState = (EnumYoVariable<WalkingState>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
-         
+
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
-      
+
       setupCamera(scs);
-      
+
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       ThreadTools.sleep(1000);
    }
-   
+
    private void setupCamera(SimulationConstructionSet scs)
    {
       Point3d cameraFix = new Point3d(0.0, 0.0, 0.89);
@@ -214,8 +317,7 @@ public abstract class DRCPushRecoveryTest
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-   
-   
+
    private class SingleSupportStartCondition implements StateTransitionCondition
    {
       private final EnumYoVariable<ConstraintType> footConstraintType;
@@ -231,7 +333,7 @@ public abstract class DRCPushRecoveryTest
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
    }
-   
+
    private class DoubleSupportStartCondition implements StateTransitionCondition
    {
       private final EnumYoVariable<WalkingState> walkingState;
