@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Scanner;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.KryoStreamSerializer;
 import us.ihmc.communication.net.NetStateListener;
@@ -40,7 +42,7 @@ public class AtlasUIPacketRecorder
       final KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(netClassList);
       
-      PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient("localhost", NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
+      PacketCommunicator packetClient = PacketCommunicator.createTCPPacketCommunicatorClient(NetworkParameters.getHost(NetworkParameterKeys.networkManagerForUI), NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, netClassList);
       packetClient.attachStateListener(new NetStateListener()
       {
          @Override
@@ -123,7 +125,7 @@ public class AtlasUIPacketRecorder
    
    public static String getPrefixFileName()
    {
-      return PACKET_RECORDING_FILENAME;
+      return "PacketRecording_" + DateTools.getDateString() + "_real5";
    }
    
    public static void main(String[] args) throws IOException
