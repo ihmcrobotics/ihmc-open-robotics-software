@@ -453,6 +453,9 @@ public class ICPPlanner
 
       double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
 
+      if (Double.isNaN(deltaTimeToBeAccounted))
+         return;
+
       // Ensure that we don't shift the time by more than what's remaining
       deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, computeAndReturnTimeRemaining(time));
       // Ensure the time shift won't imply a single support that's crazy short
@@ -467,6 +470,9 @@ public class ICPPlanner
          return 0.0;
 
       double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
+
+      if (Double.isNaN(deltaTimeToBeAccounted))
+         return 0.0;
 
       double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
       estimatedTimeRemaining = MathTools.clipToMinMax(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
@@ -485,6 +491,10 @@ public class ICPPlanner
       computeDesiredCentroidalMomentumPivot();
       desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
       singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
+
+      if (desiredICP2d.distance(finalICP2d) < 1.0e-10)
+         return Double.NaN;
+
       desiredICPToFinalICPLineSegment.set(desiredICP2d, finalICP2d);
       actualICP2d.setByProjectionOntoXYPlaneIncludingFrame(actualCapturePointPosition);
       desiredICPToFinalICPLineSegment.orthogonalProjection(actualICP2d);
