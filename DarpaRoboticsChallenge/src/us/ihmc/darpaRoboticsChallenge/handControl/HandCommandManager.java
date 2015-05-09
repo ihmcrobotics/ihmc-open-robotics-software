@@ -2,6 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.handControl;
 
 import java.io.IOException;
 
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -21,7 +22,9 @@ public abstract class HandCommandManager
 
    public HandCommandManager(Class<? extends Object> clazz, RobotSide robotSide)
    {
-      spawner.spawn(clazz, new String[] { "-r", robotSide.getLowerCaseName() });
+      String networkParamProperty = System.getProperty("networkParameterFile", NetworkParameters.defaultParameterFile);
+      
+      spawner.spawn(clazz, new String[] {"-DnetworkParameterFile=" + networkParamProperty}, new String[] { "-r", robotSide.getLowerCaseName() });
 
       NetworkPorts managerPort = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
       handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
