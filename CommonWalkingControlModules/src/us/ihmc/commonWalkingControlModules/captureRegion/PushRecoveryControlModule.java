@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBased
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.utilities.math.geometry.ConvexPolygonShrinker;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -20,30 +19,35 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 
 public class PushRecoveryControlModule
 {
    private static final boolean ENABLE = false;
 
-   private static final double DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE = 0.02;
    private static final double MINIMUM_TIME_TO_REPLAN = 0.1;
-   private static final double REDUCE_SWING_TIME_MULTIPLIER = 0.9;
-   private static final double ICP_TOO_FAR_DISTANCE_THRESHOLD = 0.01;
-   private static final double MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON = 0.3;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
-   private final OrientationStateVisualizer orientationStateVisualizer;
 
    private final BooleanYoVariable enablePushRecovery;
 
    private final BooleanYoVariable recovering;
    private final BooleanYoVariable recoveringFromDoubleSupportFall;
-   private final BooleanYoVariable existsAMinimumSwingTimeCaptureRegion;
    private final BooleanYoVariable footstepWasProjectedInCaptureRegion;
+
+   private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
+   private final BooleanYoVariable isICPOutside;
+   private final BooleanYoVariable isICPErrorTooLarge;
+   private final DoubleYoVariable icpErrorThreshold;
+   private final EnumYoVariable<RobotSide> closestFootToICP;
+   private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
+
+   private final GlitchFilteredBooleanYoVariable isRobotBackToSafeState;
+   private final BooleanYoVariable isCaptureRegionEmpty;
 
    private final FootstepAdjustor footstepAdjustor;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -57,23 +61,12 @@ public class PushRecoveryControlModule
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
    private final double footArea;
 
-   private final DoubleYoVariable captureRegionAreaWithDoubleSupportMinimumSwingTime;
-
    private double omega0;
+   private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
-
-   private final FrameConvexPolygon2d supportPolygonInMidFeetZUp = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d reducedSupportPolygon = new FrameConvexPolygon2d();
-   private final ConvexPolygonShrinker convexPolygonShrinker = new ConvexPolygonShrinker();
 
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
-   private final SideDependentList<DoubleYoVariable> distanceICPToFeet = new SideDependentList<>();
-   private final BooleanYoVariable isICPOutside;
-   private final EnumYoVariable<RobotSide> closestFootToICP;
-   private final EnumYoVariable<RobotSide> icpIsTooFarOnSide;
-   private final EnumYoVariable<RobotSide> swingSideForDoubleSupportRecovery;
-   private final DoubleYoVariable preferredSwingTimeRemainingForRecovering;
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, MomentumBasedController momentumBasedController,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
@@ -90,20 +83,20 @@ public class PushRecoveryControlModule
       yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
-      orientationStateVisualizer = new OrientationStateVisualizer(momentumBasedController.getPelvisZUpFrame(), yoGraphicsListRegistry, registry);
 
       footstepWasProjectedInCaptureRegion = new BooleanYoVariable("footstepWasProjectedInCaptureRegion", registry);
       recovering = new BooleanYoVariable("recovering", registry);
       recoveringFromDoubleSupportFall = new BooleanYoVariable("recoveringFromDoubleSupportFall", registry);
-      existsAMinimumSwingTimeCaptureRegion = new BooleanYoVariable("existsAMinimumSwingTimeCaptureRegion", registry);
-
-      captureRegionAreaWithDoubleSupportMinimumSwingTime = new DoubleYoVariable("captureRegionAreaWithMinimumSwingTime", registry);
 
       isICPOutside = new BooleanYoVariable("isICPOutside", registry);
-      icpIsTooFarOnSide = new EnumYoVariable<>("ICPIsTooFarOnSide", registry, RobotSide.class, true);
+      isICPErrorTooLarge = new BooleanYoVariable("isICPErrorTooLarge", registry);
+      icpErrorThreshold = new DoubleYoVariable("icpErrorThreshold", registry);
+      icpErrorThreshold.set(0.05);
       closestFootToICP = new EnumYoVariable<>("ClosestFootToICP", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery = new EnumYoVariable<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
-      preferredSwingTimeRemainingForRecovering = new DoubleYoVariable("preferredSwingTimeRemainingForRecovering", registry);
+
+      isRobotBackToSafeState = new GlitchFilteredBooleanYoVariable("isRobotBackToSafeState", registry, 100);
+      isCaptureRegionEmpty = new BooleanYoVariable("isCaptureRegionEmpty", registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -130,13 +123,7 @@ public class PushRecoveryControlModule
       if (!isICPOutside.getBooleanValue())
          return null;
       
-      RobotSide swingSide = swingSideForDoubleSupportRecovery.getEnumValue();
-      
-      // Actually falling pretty hard there. Nothing to do for now.
-      if (Double.isNaN(captureRegionAreaWithDoubleSupportMinimumSwingTime.getDoubleValue()) && !existsAMinimumSwingTimeCaptureRegion.getBooleanValue())
-         return null;
-      
-      return swingSide;
+      return swingSideForDoubleSupportRecovery.getEnumValue();
    }
    
    public void initializeParametersForDoubleSupportPushRecovery()
@@ -144,36 +131,33 @@ public class PushRecoveryControlModule
       recoveringFromDoubleSupportFall.set(true);
    }
 
-   public void updateForDoubleSupport(FramePoint2d capturePoint2d, double omega0, double timeInState)
+   public void updateForDoubleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
-      this.capturePoint2d.setIncludingFrame(capturePoint2d);
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
-      this.supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
       this.omega0 = omega0;
-
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE, reducedSupportPolygon);
-
-      orientationStateVisualizer.updatePelvisVisualization();
-      orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
+      this.capturePoint2d.setIncludingFrame(capturePoint2d);
+      this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
+      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
 
       // Initialize variables
-      icpIsTooFarOnSide.set(null);
       closestFootToICP.set(null);
 
       for (RobotSide robotSide : RobotSide.values)
          distanceICPToFeet.get(robotSide).set(Double.NaN);
 
-      capturePoint2d.changeFrame(midFeetZUp);
+      this.capturePoint2d.changeFrame(midFeetZUp);
+      this.desiredCapturePoint2d.changeFrame(midFeetZUp);
 
-      if (timeInState < MINIMUM_TIME_BEFORE_RECOVER_WITH_REDUCED_POLYGON)
-         isICPOutside.set(!supportPolygonInMidFeetZUp.isPointInside(capturePoint2d));
-      else
-         isICPOutside.set(!reducedSupportPolygon.isPointInside(capturePoint2d));
+      isICPErrorTooLarge.set(this.desiredCapturePoint2d.distance(this.capturePoint2d) > icpErrorThreshold.getDoubleValue());
 
-      if (!isICPOutside.getBooleanValue())
+      isICPOutside.set(!supportPolygonInMidFeetZUp.isPointInside(this.capturePoint2d));
+
+      if (!isICPOutside.getBooleanValue() || !isICPErrorTooLarge.getBooleanValue())
+      {
+         isRobotBackToSafeState.update(true);
          return;
+      }
 
-      projectedCapturePoint.setXYIncludingFrame(capturePoint2d);
+      projectedCapturePoint.setXYIncludingFrame(this.capturePoint2d);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -182,73 +166,43 @@ public class PushRecoveryControlModule
          footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInSoleFrame(robotSide));
          projectedCapturePoint2d.setByProjectionOntoXYPlaneIncludingFrame(projectedCapturePoint);
 
-         boolean isICPTooFarOutside = robotSide.negateIfRightSide(projectedCapturePoint2d.getY()) > ICP_TOO_FAR_DISTANCE_THRESHOLD;
-         if (isICPTooFarOutside)
-            icpIsTooFarOnSide.set(robotSide);
-
          distanceICPToFeet.get(robotSide).set(projectedCapturePoint2d.distance(footPolygon.getCentroid()));
+         isRobotBackToSafeState.set(false);
       }
 
       boolean isLeftFootCloser = distanceICPToFeet.get(RobotSide.LEFT).getDoubleValue() <= distanceICPToFeet.get(RobotSide.RIGHT).getDoubleValue();
       closestFootToICP.set(isLeftFootCloser ? RobotSide.LEFT : RobotSide.RIGHT);
-
-      RobotSide swingSide;
-      // Edge case: the ICP is really far out such that it is preferable to swing the loaded foot to prevent doing a crossover step or simply falling on the outside.
-      if (icpIsTooFarOnSide.getEnumValue() != null && icpIsTooFarOnSide.getEnumValue() == closestFootToICP.getEnumValue())
-         swingSide = closestFootToICP.getEnumValue();
-      else
-         // Normal case: it is better to swing the foot that is the farthest from the ICP so the ICP will move slower in the upcoming single support.
-         swingSide = closestFootToICP.getEnumValue().getOppositeSide();
-
-      capturePoint2d.changeFrame(worldFrame);
-
-      swingSideForDoubleSupportRecovery.set(swingSide);
+      swingSideForDoubleSupportRecovery.set(closestFootToICP.getEnumValue().getOppositeSide());
    }
 
-   public void updatePushRecoveryInputs(FramePoint2d capturePoint2d, double omega0)
+   public void updateForSingleSupport(FramePoint2d desiredCapturePoint2d, FramePoint2d capturePoint2d, double omega0)
    {
-      this.capturePoint2d.setIncludingFrame(capturePoint2d);
-      FrameConvexPolygon2d supportPolygonInMidFeetZUp = bipedSupportPolygon.getSupportPolygonInMidFeetZUp();
-      this.supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
       this.omega0 = omega0;
+      this.capturePoint2d.setIncludingFrame(capturePoint2d);
+      this.desiredCapturePoint2d.setIncludingFrame(desiredCapturePoint2d);
 
-      convexPolygonShrinker.shrinkConstantDistanceInto(supportPolygonInMidFeetZUp, DOUBLESUPPORT_SUPPORT_POLYGON_SHRINK_DISTANCE, reducedSupportPolygon);
-
-      orientationStateVisualizer.updatePelvisVisualization();
-      orientationStateVisualizer.updateReducedSupportPolygon(reducedSupportPolygon);
+      isICPErrorTooLarge.set(this.desiredCapturePoint2d.distance(this.capturePoint2d) > icpErrorThreshold.getDoubleValue());
    }
 
    public double computePreferredSwingTimeForRecovering(double swingTimeRemaining, RobotSide swingSide)
    {
-      if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
-      {
-         // do not re-plan if we are almost at touch-down
-         preferredSwingTimeRemainingForRecovering.set(MINIMUM_TIME_TO_REPLAN);
-         return MINIMUM_TIME_TO_REPLAN;
-      }
-
-      double preferredSwingTime = swingTimeRemaining;
       RobotSide supportSide = swingSide.getOppositeSide();
+      double preferredSwingTime = swingTimeRemaining;
       footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
       // If the capture region is too small we reduce the swing time.
-      while (captureRegionArea < footArea || Double.isNaN(captureRegionArea))
+      for (; preferredSwingTime >= 0.0; preferredSwingTime -= swingTimeRemaining / 10.0)
       {
-         preferredSwingTime = preferredSwingTime * REDUCE_SWING_TIME_MULTIPLIER;
          captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
+
          captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
-         // avoid infinite loops
-         if (preferredSwingTime < MINIMUM_TIME_TO_REPLAN)
-         {
-            preferredSwingTime = MINIMUM_TIME_TO_REPLAN;
+         if (!Double.isNaN(captureRegionArea) && captureRegionArea >= footArea)
             break;
-         }
       }
 
-      preferredSwingTimeRemainingForRecovering.set(MINIMUM_TIME_TO_REPLAN);
       return preferredSwingTime;
    }
 
@@ -267,6 +221,12 @@ public class PushRecoveryControlModule
       RobotSide supportSide = swingSide.getOppositeSide();
       footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
 
+      if (!isICPErrorTooLarge.getBooleanValue())
+      {
+         isRobotBackToSafeState.update(true);
+         return false;
+      }
+
       if (swingTimeRemaining < MINIMUM_TIME_TO_REPLAN)
       {
          // do not re-plan if we are almost at touch-down
@@ -278,11 +238,13 @@ public class PushRecoveryControlModule
 
       FramePoint2d footCentroid = footPolygon.getCentroid();
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      isCaptureRegionEmpty.set(captureRegion.isEmpty());
       boolean hasFootstepBeenAdjusted = footstepAdjustor.adjustFootstep(nextFootstep, footCentroid, captureRegion);
       footstepWasProjectedInCaptureRegion.set(hasFootstepBeenAdjusted);
 
       if (footstepWasProjectedInCaptureRegion.getBooleanValue())
       {
+         isRobotBackToSafeState.set(false);
          recovering.set(true);
       }
 
@@ -306,7 +268,6 @@ public class PushRecoveryControlModule
       captureRegionCalculator.hideCaptureRegion();
 
       recoveringFromDoubleSupportFall.set(false);
-      existsAMinimumSwingTimeCaptureRegion.set(false);
    }
 
    private Footstep createFootstepAtCurrentLocation(RobotSide robotSide)
@@ -342,5 +303,15 @@ public class PushRecoveryControlModule
    public boolean isRecovering()
    {
       return recovering.getBooleanValue();
+   }
+
+   public boolean isRobotBackToSafeState()
+   {
+      return isRobotBackToSafeState.getBooleanValue();
+   }
+
+   public boolean isCaptureRegionEmpty()
+   {
+      return isCaptureRegionEmpty.getBooleanValue();
    }
 }

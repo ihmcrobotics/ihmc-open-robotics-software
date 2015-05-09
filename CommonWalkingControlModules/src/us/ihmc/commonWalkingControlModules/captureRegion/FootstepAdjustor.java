@@ -53,6 +53,7 @@ public class FootstepAdjustor
 
    private final FrameConvexPolygon2d touchdownFootPolygon = new FrameConvexPolygon2d();
    private final FrameConvexPolygon2d desiredSteppingRegion = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d intersection = new FrameConvexPolygon2d();
 
    /**
     * This function takes a footstep and a captureRegion and if necessary projects the footstep
@@ -81,7 +82,7 @@ public class FootstepAdjustor
 
       // Check if the desired footstep intersects the capture region.
       calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
-      boolean nextStepInside = desiredSteppingRegion.isPolygonIntersecting(touchdownFootPolygon);
+      boolean nextStepInside = desiredSteppingRegion.intersectionWith(touchdownFootPolygon, intersection);
 
       if (nextStepInside)
       {
