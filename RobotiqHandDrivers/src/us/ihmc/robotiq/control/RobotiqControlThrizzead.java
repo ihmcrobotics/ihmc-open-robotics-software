@@ -3,8 +3,6 @@ package us.ihmc.robotiq.control;
 import java.io.IOException;
 
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
 import us.ihmc.communication.packets.manipulation.ManualHandControlPacket;
@@ -12,8 +10,7 @@ import us.ihmc.darpaRoboticsChallenge.handControl.HandControlThread;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
-import us.ihmc.robotiq.RobotiqHandInterface;
-import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
@@ -31,8 +28,7 @@ class RobotiqControlThrizzead extends HandControlThread
    private final FingerStateProvider fingerStateProvider;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
-   private int errorCount = 0;
-   private RobotiqHandSensorData handStatus;
+   private RobotiqHandSensorDizzata handStatus;
 
    public RobotiqControlThrizzead(RobotSide robotSide)
    {
@@ -78,12 +74,16 @@ class RobotiqControlThrizzead extends HandControlThread
 
       while (packetCommunicator.isConnected())
       {
+         robotiqHand.read();
+         
          if (robotiqHand.isConnected()) //status to UI and keep alive packet
          {
             updateHandData();
 
             if (handStatus.hasError())
-               handStatus.printError();
+            {
+               //TODO
+            }
 
             if (fingerStateProvider.isNewFingerStateAvailable())
             {
@@ -96,27 +96,15 @@ class RobotiqControlThrizzead extends HandControlThread
                   robotiqHand.initialize();
                   break;
                case OPEN:
-                  robotiqHand.open();
-                  break;
                case CLOSE:
-                  robotiqHand.close();
-                  break;
                case CRUSH:
-                  robotiqHand.crush();
+               case BASIC_GRIP:
+               case PINCH_GRIP:
+               case WIDE_GRIP:
+               case SCISSOR_GRIP:
+                  robotiqHand.sendFingerState(state);
                   break;
                case HOOK:
-                  //TODO
-                  break;
-               case BASIC_GRIP:
-                  robotiqHand.basicGrip();
-                  break;
-               case PINCH_GRIP:
-                  robotiqHand.pinchGrip();
-                  break;
-               case WIDE_GRIP:
-                  robotiqHand.wideGrip();
-                  break;
-               case SCISSOR_GRIP:
                   //TODO
                   break;
                case HALF_CLOSE:

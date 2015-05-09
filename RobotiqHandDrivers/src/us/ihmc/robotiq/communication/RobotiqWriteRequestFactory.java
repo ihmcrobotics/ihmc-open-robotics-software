@@ -25,6 +25,7 @@ public class RobotiqWriteRequestFactory
    
    public Register[] createActivationRequest()
    {
+      robotiqRequest.resetRequestFields();
       robotiqRequest.getActionRequest().setRact(rACT.ACTIVATE_GRIPPER);
 
       packRequest();
