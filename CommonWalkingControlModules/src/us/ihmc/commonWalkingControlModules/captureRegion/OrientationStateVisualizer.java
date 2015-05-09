@@ -29,7 +29,7 @@ public class OrientationStateVisualizer
    private final ReferenceFrame pelvisZUpFrame;
 
    private final YoArtifactPolygon reducedSupportPolygonArtifact;
-   private YoFrameConvexPolygon2d yoreducedSupportPolygon;
+   private YoFrameConvexPolygon2d yoReducedSupportPolygon;
    private FrameConvexPolygon2d reducedSupportPolygon;
 
    private final YoFrameLineSegment2d yoPelvisXAxisLineSegment;
@@ -43,9 +43,9 @@ public class OrientationStateVisualizer
    {
       this.pelvisZUpFrame = pelvisZUpFrame;
       String reducedSupportPolygonCaption = "ReducedSupportPolygon";
-      yoreducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
+      yoReducedSupportPolygon = new YoFrameConvexPolygon2d(reducedSupportPolygonCaption, "", worldFrame, 8, registry);
       reducedSupportPolygon = new FrameConvexPolygon2d(worldFrame);
-      reducedSupportPolygonArtifact = new YoArtifactPolygon(reducedSupportPolygonCaption, yoreducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR, false);
+      reducedSupportPolygonArtifact = new YoArtifactPolygon(reducedSupportPolygonCaption, yoReducedSupportPolygon, REDUCED_SUPPORT_POLYGON_COLOR, false);
 
       yoPelvisXAxisLineSegment = new YoFrameLineSegment2d("pelvisXAxis", "", worldFrame, registry);
       yoPelvisYAxisLineSegment = new YoFrameLineSegment2d("pelvisYAxis", "", worldFrame, registry);
@@ -67,12 +67,17 @@ public class OrientationStateVisualizer
 
       try
       {
-         yoreducedSupportPolygon.setFrameConvexPolygon2d(reducedSupportPolygon);
+         yoReducedSupportPolygon.setFrameConvexPolygon2d(reducedSupportPolygon);
       }
       catch (Exception e)
       {
          e.printStackTrace();
       }
+   }
+
+   public void hideReducedSupportPolygon()
+   {
+      yoReducedSupportPolygon.hide();
    }
 
    public void updatePelvisVisualization()
