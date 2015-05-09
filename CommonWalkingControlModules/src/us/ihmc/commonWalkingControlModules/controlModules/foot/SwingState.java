@@ -257,7 +257,10 @@ public class SwingState extends AbstractUnconstrainedState implements SwingState
    public void replanTrajectory(Footstep newFootstep)
    {
       setFootstep(newFootstep);
-      this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+      if (!currentTimeWithSwingSpeedUp.isNaN())
+         this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
+      else
+         this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
       this.replanTrajectory.set(true);
    }
 
