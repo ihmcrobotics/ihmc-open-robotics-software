@@ -8,7 +8,6 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
-@BambooPlan(planType = BambooPlanType.Fast)
 public abstract class RobotiqOutputRegisterTest
 {
    protected abstract byte getExpectedByteValue();
