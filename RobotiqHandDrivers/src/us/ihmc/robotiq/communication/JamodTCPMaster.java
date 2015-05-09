@@ -32,7 +32,6 @@ public class JamodTCPMaster
       {
          slaveAddress = InetAddress.getByName(address);
          connection = new TCPMasterConnection(slaveAddress);
-         connection.setTimeout(100);
          writeMultipleRegistersRequest = new WriteMultipleRegistersRequest();
          readInputRegistersRequest = new ReadInputRegistersRequest();
       }
@@ -62,7 +61,7 @@ public class JamodTCPMaster
          }
          catch (Exception e)
          {
-            System.out.println("Unable to connect to " + slaveAddress.getHostAddress() + ". Retrying...");
+            System.out.println(getClass().getSimpleName() + ": Unable to connect to " + slaveAddress.getHostAddress());
          }
       }
    }

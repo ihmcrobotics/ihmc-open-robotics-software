@@ -37,7 +37,6 @@ public class RobotiqHandCommunicator
       NetworkParameterKeys key = robotSide.equals(RobotSide.LEFT) ? NetworkParameterKeys.leftHand : NetworkParameterKeys.rightHand;
       communicator = new JamodTCPMaster(NetworkParameters.getHost(key), PORT);
       communicator.setAutoReconnect(true);
-      System.out.println(getClass().getSimpleName() + ": Successfully connected to Robotiq hand at " + NetworkParameters.getHost(key));
    }
    
    public void read()
