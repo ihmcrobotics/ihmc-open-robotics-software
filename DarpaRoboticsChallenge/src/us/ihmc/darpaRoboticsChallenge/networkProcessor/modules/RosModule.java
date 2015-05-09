@@ -43,7 +43,7 @@ public class RosModule
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator)
    {
       rosMainNode = new RosMainNode(rosCoreURI, ROS_NODE_NAME, true);
-      String rosTopicPrefix = robotModel.getSimpleRobotName().toLowerCase();
+      String rosTopicPrefix = "/ihmc_ros/" + robotModel.getSimpleRobotName().toLowerCase();
       
       ppsTimestampOffsetProvider = robotModel.getPPSTimestampOffsetProvider();
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
