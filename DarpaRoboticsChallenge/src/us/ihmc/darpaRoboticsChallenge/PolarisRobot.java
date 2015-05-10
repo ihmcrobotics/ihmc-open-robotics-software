@@ -33,10 +33,17 @@ public class PolarisRobot extends Robot
    private static final RigidBodyTransform wheelToCarTransform = new RigidBodyTransform(), carToWheelTransform = new RigidBodyTransform();   
    private static final double wheelToCarX = 0.39, wheelToCarY = 0.39, wheelToCarZ = 1.27, steeringWheelPitchInDegrees = -33.0;
    
-   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(0.7036, -0.7743, -0.1496);
-   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(-0.8361, 0.0033, 0.5486,
-                                                                            -0.0022, -1.0000, 0.0025,
-                                                                            0.5486, 0.0009, 0.8361);
+   // in sim:
+//   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(0.7036, -0.7743, -0.1496);
+//   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(-0.8361, 0.0033, 0.5486,
+//                                                                            -0.0022, -1.0000, 0.0025,
+//                                                                            0.5486, 0.0009, 0.8361);
+   // on real robot with big 7x4 board on hood:
+   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.0332, 0.4245, 0.6712);
+   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(0.7681, -0.0046, 0.6403,
+                                                                            0.0105, 0.9999, -0.0053,
+                                                                            -0.6402, 0.0108, 0.7681);
+   
    private static final RigidBodyTransform checkerBoardToWheel = new RigidBodyTransform(checkerBoardToWheelRotation, checkerBoardToWheelTranslation);
    private static final RigidBodyTransform wheelToCheckerBoard = new RigidBodyTransform();
 
