@@ -678,7 +678,6 @@ public class SDFFullRobotModel implements FullRobotModel
       return sensorFrames.get(linkName);
    }
 
-   
    public void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
    {
       HashMap<String, Double> newJointAngles = new HashMap<String, Double>();     
@@ -686,6 +685,16 @@ public class SDFFullRobotModel implements FullRobotModel
 
       for (int i=0; i<numJoints; i++)  {
          newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() ); 
+      }
+      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
+   }
+   
+   public void copyAllJointsButKeepOneFootFixed( ArrayList<OneDoFJoint> jointsToCopyFrom, RobotSide sideOfSole )
+   {
+      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();     
+
+      for (int i=0; i<jointsToCopyFrom.size(); i++)  {
+         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() ); 
       }
       updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
    }
