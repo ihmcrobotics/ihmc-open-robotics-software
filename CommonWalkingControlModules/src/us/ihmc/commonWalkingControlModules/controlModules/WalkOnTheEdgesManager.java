@@ -40,12 +40,12 @@ public class WalkOnTheEdgesManager
    private static final boolean DO_TOE_TOUCHDOWN_ONLY_WHEN_STEPPING_DOWN = true;
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
-   private static final boolean CHECK_REAR_LEG_JACOBIAN_DETERMINANT = true;
 
    private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
    private final DoubleYoVariable jacobianDeterminantThresholdForToeOff = new DoubleYoVariable("jacobianDeterminantThresholdForToeOff", registry);
+   private final BooleanYoVariable checkRearLegJacobianDeterminant = new BooleanYoVariable("checkRearLegJacobianDeterminant", registry);
 
    private final BooleanYoVariable doToeTouchdownIfPossible = new BooleanYoVariable("doToeTouchdownIfPossible", registry);
    private final BooleanYoVariable doToeTouchdown = new BooleanYoVariable("doToeTouchdown", registry);
@@ -102,6 +102,7 @@ public class WalkOnTheEdgesManager
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
       this.doToeTouchdownIfPossible.set(walkingControllerParameters.doToeTouchdownIfPossible());
       this.doHeelTouchdownIfPossible.set(walkingControllerParameters.doHeelTouchdownIfPossible());
+      this.checkRearLegJacobianDeterminant.set(walkingControllerParameters.checkTrailingLegJacobianDeterminantToTriggerToeOff());
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -200,7 +201,7 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      if(CHECK_REAR_LEG_JACOBIAN_DETERMINANT)
+      if(checkRearLegJacobianDeterminant.getBooleanValue())
       {
          FootControlModule rearFootControlModule = footEndEffectorControlModules.get(trailingLeg);
          doToeOff.set(Math.abs(rearFootControlModule.getJacobianDeterminant()) < jacobianDeterminantThresholdForToeOff.getDoubleValue());
