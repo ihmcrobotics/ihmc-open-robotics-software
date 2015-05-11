@@ -101,6 +101,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
+   {
+      boolean realRobot = target == AtlasTarget.REAL_ROBOT;
+      return !realRobot;
+   }
+
+  @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return true;
