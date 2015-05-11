@@ -19,6 +19,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 public class PolarisRobot extends Robot
 {
    private final static String polarisModelFile = "models/polarisModel.obj";
+   private final static String wheelModelFile = "models/steeringWheel.obj";
    private final static String checkerBoardModelFile = "models/GFE/ihmc/calibration_cube.dae";
    
    private final FloatingJoint floatingJoint;
@@ -66,6 +67,22 @@ public class PolarisRobot extends Robot
       floatingJoint.setLink(polarisLink);
       floatingJoint.setDynamic(false);
       
+      // add wheel:
+      Link wheelLink = new Link(name + "Wheel");
+      Graphics3DObject wheelGraphics = new Graphics3DObject();
+      wheelGraphics.addModelFile(wheelModelFile);
+      wheelLink.setLinkGraphics(wheelGraphics);
+
+      wheelLink.setMass(1.0);
+      wheelLink.setComOffset(new Vector3d());
+      wheelLink.setMomentOfInertia(inertia);
+      
+      FloatingJoint wheelJoint = new FloatingJoint(name + "WheelJoint", "wheelJoint", new Vector3d(), this);
+      wheelJoint.setRotationAndTranslation(PolarisRobot.wheelToCarTransform);
+      wheelJoint.setLink(wheelLink);
+      wheelJoint.setDynamic(false);
+      floatingJoint.addJoint(wheelJoint);
+      
       Link checkerBoardLink = new Link(name + "CheckerBoardLink");
       Graphics3DObject checkerBoardGraphics = new Graphics3DObject();
       // value of 2.68 corresponds to real board with grid size of 3.35cm
@@ -73,7 +90,7 @@ public class PolarisRobot extends Robot
       checkerBoardGraphics.addModelFile(checkerBoardModelFile);
       checkerBoardLink.setLinkGraphics(checkerBoardGraphics);
       
-      FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", new Vector3d(), this);
+      FloatingJoint checkerBoardJoint = new FloatingJoint(name + "CheckerBoardJoint", "checkerboardJoint" , new Vector3d(), this);
       checkerBoardJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, -0.5, 1.3)));
       checkerBoardJoint.setLink(checkerBoardLink);
       checkerBoardJoint.setDynamic(false);
