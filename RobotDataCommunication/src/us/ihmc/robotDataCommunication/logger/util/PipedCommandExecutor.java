@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.operatingSystem.OperatingSystem;
 import us.ihmc.utilities.processManagement.ProcessStreamGobbler;
+import us.ihmc.utilities.processManagement.UnixProcessKiller;
 
 public class PipedCommandExecutor
 {
@@ -108,7 +109,7 @@ public class PipedCommandExecutor
       {
          if(process != null)
          {
-            UnixProcessKiller.killUnixProcess(process);
+            UnixProcessKiller.killSigTermUnixProcess(process);
          }
       }
    }
