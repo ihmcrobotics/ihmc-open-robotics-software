@@ -31,7 +31,7 @@ public class PolarisRobot extends Robot
     * Inverses are included so callers won't call invert() on the object
     */
    private static final RigidBodyTransform wheelToCarTransform = new RigidBodyTransform(), carToWheelTransform = new RigidBodyTransform();   
-   private static final double wheelToCarX = 0.39, wheelToCarY = 0.39, wheelToCarZ = 1.27, steeringWheelPitchInDegrees = -33.0;
+   private static final double wheelToCarX = 0.44207, wheelToCarY = 0.36251, wheelToCarZ = 1.14204, steeringWheelPitchInDegrees = -30.0;
    
    // in sim:
 //   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(0.7036, -0.7743, -0.1496);
