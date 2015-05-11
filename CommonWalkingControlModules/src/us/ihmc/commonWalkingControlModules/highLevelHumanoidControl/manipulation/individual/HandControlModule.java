@@ -268,7 +268,8 @@ public class HandControlModule
               yoGraphicsListRegistry);
       leadInOutPoseTrajectoryGenerator = new LeadInOutPoseTrajectoryGenerator(name + "Swing", true, worldFrame, registry, visualize, yoGraphicsListRegistry);
 
-      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", worldFrame, trajectoryTimeProvider, registry,
+      ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      circularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(name + "Circular", chestFrame, trajectoryTimeProvider, registry,
             yoGraphicsListRegistry);
 
       boolean doVelocityAtWaypoints = false;
@@ -507,6 +508,9 @@ public class HandControlModule
       executeTaskSpaceTrajectory(wayPointPositionAndOrientationTrajectoryGenerator);
    }
 
+   private final FramePoint rotationAxisOrigin = new FramePoint();
+   private final FrameVector rotationAxis = new FrameVector();
+   
    public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time)
    {
       // Limit arm joint motor speed based on Boston Dynamics Limit
@@ -520,8 +524,11 @@ public class HandControlModule
 
       trajectoryTimeProvider.set(time);
 
+      rotationAxisOrigin.setIncludingFrame(worldFrame, rotationAxisOriginInWorld);
+      rotationAxis.setIncludingFrame(worldFrame, rotationAxisInWorld);
+
       circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
-      circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOriginInWorld, rotationAxisInWorld);
+      circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
       circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(optionalHandControlFrame);
       circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
