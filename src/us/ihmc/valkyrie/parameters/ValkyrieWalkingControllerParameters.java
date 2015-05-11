@@ -111,6 +111,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public boolean checkTrailingLegJacobianDeterminantToTriggerToeOff()
+   {
+      return true;
+   }
+
+   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return true;
