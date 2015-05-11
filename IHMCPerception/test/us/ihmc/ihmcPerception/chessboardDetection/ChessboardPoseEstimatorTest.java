@@ -25,8 +25,8 @@ public class ChessboardPoseEstimatorTest
 {
    
    static final boolean DEBUG=false;
-   @EstimatedDuration
-   @Test(timeout=10000)
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void testSimpleAlmostFrontChessboard() throws IOException
    {
 
@@ -37,8 +37,8 @@ public class ChessboardPoseEstimatorTest
       testSingleImage(image, squareNumRow, squareNumCol, gridWidth, 1e-3);
    }
 
-   @EstimatedDuration
-   @Test(timeout=10000)
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void testDrivingSimCheckerBoard() throws IOException
    {
 
@@ -51,7 +51,8 @@ public class ChessboardPoseEstimatorTest
 
    //boofCV can't find checker board
    @Ignore
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout = 3000)
    public void testImage3() throws IOException
    {
 
@@ -63,7 +64,8 @@ public class ChessboardPoseEstimatorTest
    }
 
    //boofcv found checkerboard but pose estimated poorly
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void testImage1() throws IOException
    {
 
