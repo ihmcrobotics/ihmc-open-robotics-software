@@ -1572,15 +1572,16 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
 
-         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecovering())
-            return footSwitchActivated;
-
          return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
       }
 
       private boolean hasMinimumTimePassed()
       {
-         double minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction.getDoubleValue();
+         double minimumSwingTime;
+         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
+            minimumSwingTime = 0.15;
+         else
+            minimumSwingTime = swingTimeCalculationProvider.getValue() * minimumSwingFraction.getDoubleValue();
 
          return stateMachine.timeInCurrentState() > minimumSwingTime;
       }
