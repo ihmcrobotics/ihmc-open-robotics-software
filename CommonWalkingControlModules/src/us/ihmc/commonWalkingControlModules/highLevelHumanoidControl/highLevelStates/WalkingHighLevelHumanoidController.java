@@ -1572,6 +1572,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             }
          }
 
+         if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecovering())
+            return footSwitchActivated;
+
          return hasMinimumTimePassed.getBooleanValue() && footSwitchActivated;
       }
 
