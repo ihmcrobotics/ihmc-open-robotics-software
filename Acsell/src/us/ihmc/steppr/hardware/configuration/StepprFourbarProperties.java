@@ -5,8 +5,8 @@ import us.ihmc.acsell.fourbar.FourbarProperties;
 
 public class StepprFourbarProperties implements FourbarProperties {
 
-	private static final double LEFT_LINKAGE_BETA0 = 2.46;
-	private static final double RIGHT_LINKAGE_BETA0 = 2.51;
+	private static final double LEFT_LINKAGE_BETA0 = 2.40;
+	private static final double RIGHT_LINKAGE_BETA0 = 2.56;
 	private final double L1 = 3.57*0.0254;
 	private final double L2 = 5.2*0.0254;
 	private final double L3 = 5.3*0.0254;
