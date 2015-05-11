@@ -28,7 +28,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    /**
     * Force Sensor Parameters
     */
-   public static final String[] forceSensorNames = { "l_leg_akx", "r_leg_akx", "l_arm_wrx", "r_arm_wrx" };
+   public static final String[] forceSensorNames = { "l_leg_akx", "r_leg_akx", "l_arm_wry2", "r_arm_wry2" };
    public static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("l_leg_akx", "r_leg_akx");
    public static final SideDependentList<String> handForceSensorNames = new SideDependentList<String>("l_arm_wry2", "r_arm_wry2");
    
