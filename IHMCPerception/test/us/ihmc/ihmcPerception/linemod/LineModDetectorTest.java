@@ -1,30 +1,27 @@
 package us.ihmc.ihmcPerception.linemod;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFrame;
 import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
-import boofcv.gui.image.ImagePanel;
-import boofcv.gui.image.ShowImages;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.math.UnitConversions;
 
 import com.jme3.math.FastMath;
 
-import us.ihmc.utilities.math.UnitConversions;
-import us.ihmc.utilities.math.geometry.RotationFunctions;
-
 public class LineModDetectorTest
 {
-
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void testGenerateVertexes()
    {
       LineModDetector detector = new LineModDetector(null);
@@ -34,7 +31,8 @@ public class LineModDetectorTest
       org.junit.Assert.assertEquals(257,vertexes.size());
    }
 
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void trainOneTestOne() throws IOException
    {
       LineModDetector detector = new LineModDetector("/examples/drill/drill.obj");
@@ -61,7 +59,8 @@ public class LineModDetectorTest
       assertTrue(bestDetectionAdverse.score< 0.95);
    }
    
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout = 3000)
    public void testFeatureSaveLoad()
    {
       LineModDetector detector = new LineModDetector("/examples/drill/drill.obj");
@@ -86,7 +85,8 @@ public class LineModDetectorTest
       System.out.println("score:"+bestDetection.score);
    }
 
-   @Test
+   @EstimatedDuration(duration = 1000)
+   @Test(timeout=3000)
    public void testYawAngles() 
    {
       LineModDetector detector = new LineModDetector("/examples/drill/drill.obj");
