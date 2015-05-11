@@ -174,7 +174,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    public double getMinimumSwingTimeForDisturbanceRecovery()
    {
       if (target == AtlasTarget.REAL_ROBOT)
-         return 0.5;
+         return 0.4;
       else
          return 0.3;
    }
