@@ -34,10 +34,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
-   boolean USE_LEFT_HIP_X_SPRING = true;
-   boolean USE_RIGHT_HIP_X_SPRING = true;
-   boolean USE_LEFT_ANKLE_SPRING = true;
-   boolean USE_RIGHT_ANKLE_SPRING = true;
+   boolean USE_LEFT_HIP_X_SPRING = false;
+   boolean USE_RIGHT_HIP_X_SPRING = false;
+   boolean USE_LEFT_ANKLE_SPRING = false;
+   boolean USE_RIGHT_ANKLE_SPRING = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererOutputWriter");
 

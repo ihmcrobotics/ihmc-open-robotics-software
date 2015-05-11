@@ -136,9 +136,9 @@ public class StepprUpperBodyOffsetCalculator
 
    public void updateOffsets()
    {
-      torsoX.updateCanonicalAngle(q_calc_torso_x.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_X_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI);
-      torsoY.updateCanonicalAngle(q_calc_torso_y.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_Y_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI);
-      torsoZ.updateCanonicalAngle(q_calc_torso_z.getDoubleValue() * 120.0 + StepprCalibrationOffset.TORSO_Z_MOTOR_ANGLE_OFFSET, 2.0 * Math.PI);
+      torsoX.updateCanonicalAngle(q_calc_torso_x.getDoubleValue() * 120.0, 2.0 * Math.PI, StepprCalibrationOffset.TORSO_X_MOTOR_ANGLE_OFFSET);
+      torsoY.updateCanonicalAngle(q_calc_torso_y.getDoubleValue() * 120.0, 2.0 * Math.PI, StepprCalibrationOffset.TORSO_Y_MOTOR_ANGLE_OFFSET);
+      torsoZ.updateCanonicalAngle(q_calc_torso_z.getDoubleValue() * 120.0, 2.0 * Math.PI, StepprCalibrationOffset.TORSO_Z_MOTOR_ANGLE_OFFSET);
    }
 
    private void read()

@@ -89,6 +89,24 @@ public enum StepprActuator implements AcsellActuator
    {
       return currentLimit;
    }
+
+   @Override
+   public double getJointEncoderScale()
+   {
+      return 1.0;
+   }
+
+   @Override
+   public double getMotorEncoderScale()
+   {
+      return 1.0;
+   }
+
+   @Override
+   public double getJointEncoderOffset()
+   {
+      return 0.0;
+   }
    
    
 }

@@ -95,7 +95,7 @@ public class AcsellAnkleSingleSidedComputation
       CommonOps.mult(PRT, PR, N2PR);
       double Lr2Calc = N2PR.get(0);
       if (Math.abs(Lr-Math.sqrt(Lr2Calc))>1e-3)
-          System.err.println("Contstraint equation violation: " + Lr + " " + Math.sqrt(Lr2Calc));
+          ;//System.err.println("Contstraint equation violation: " + Lr + " " + Math.sqrt(Lr2Calc));
    }
       
    private void computeJacobianRow()

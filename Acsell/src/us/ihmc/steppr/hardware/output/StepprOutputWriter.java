@@ -360,12 +360,12 @@ public class StepprOutputWriter implements DRCOutputWriter, ControllerStateChang
    }
 
    @Override
-   public void controllerFailed(FrameVector2d fallingDirection)
+   public void controllerFailed(FrameVector2d framevector)
    {
       enableOutput.set(false);
       yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
-      ((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
-      ((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
+      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
    }
    
 

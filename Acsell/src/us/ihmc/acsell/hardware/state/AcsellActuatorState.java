@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 
 import javax.vecmath.Vector3d;
 
+import us.ihmc.acsell.hardware.AcsellActuator;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensorConstants;
 import us.ihmc.acsell.hardware.state.slowSensors.BusVoltage;
@@ -67,13 +68,18 @@ public class AcsellActuatorState
    private final LongYoVariable consecutivePacketDropCount;
    private final LongYoVariable totalPacketDropCount;
    private final AcsellSlowSensorConstants slowSensorConstants;
+   
+   private final double motorEncoderScale;
+   private final double jointEncoderScale;
+   private final DoubleYoVariable jointEncoderOffset;
 
-   public AcsellActuatorState(String name, AcsellSlowSensorConstants slowSensorConstants, double motorKt, int SensedCurrentToTorqueDirection, YoVariableRegistry parentRegistry)
+   public AcsellActuatorState(AcsellActuator actuator, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry parentRegistry)
    {
+      final String name = actuator.getName();
       this.registry = new YoVariableRegistry(name);
-      this.motorKt = motorKt;
+      this.motorKt = actuator.getKt();
       this.slowSensorConstants = slowSensorConstants;
-      this.SensedCurrentToTorqueDirection = SensedCurrentToTorqueDirection;
+      this.SensedCurrentToTorqueDirection = actuator.getSensedCurrentToTorqueDirection();
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
 
       this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
@@ -82,9 +88,13 @@ public class AcsellActuatorState
 
       this.motorEncoderPosition = new DoubleYoVariable(name + "MotorEncoderPosition", registry);
       this.motorVelocityEstimate = new DoubleYoVariable(name + "MotorVelocityEstimate", registry);
+      this.motorEncoderScale = actuator.getMotorEncoderScale();
 
       this.jointEncoderPosition = new DoubleYoVariable(name + "JointEncoderPosition", registry);
       this.jointEncoderVelocity = new DoubleYoVariable(name + "JointEncoderVelocity", registry);
+      this.jointEncoderScale = actuator.getJointEncoderScale();
+      this.jointEncoderOffset = new DoubleYoVariable(name + "JointEncoderOffset", registry);
+      this.jointEncoderOffset.set(actuator.getJointEncoderOffset());
 
       this.motorPower = new DoubleYoVariable(name + "MotorPower", registry);
 
@@ -221,11 +231,11 @@ public class AcsellActuatorState
       inphaseCompositeStatorCurrent.set(buffer.getFloat());
       quadratureCompositeStatorCurrent.set(buffer.getFloat());
       controlTarget.set(buffer.getFloat());
-      motorEncoderPosition.set(buffer.getFloat() + motorAngleOffset.getDoubleValue());
-      motorVelocityEstimate.set(buffer.getFloat());
+      motorEncoderPosition.set((buffer.getFloat() + motorAngleOffset.getDoubleValue())*motorEncoderScale);
+      motorVelocityEstimate.set(buffer.getFloat()*motorEncoderScale);
 
-      jointEncoderPosition.set(buffer.getFloat());
-      jointEncoderVelocity.set(buffer.getFloat());
+      jointEncoderPosition.set((buffer.getFloat() - jointEncoderOffset.getDoubleValue())*jointEncoderScale);
+      jointEncoderVelocity.set(buffer.getFloat()*jointEncoderScale);
 
       lastReceivedControlID.set(buffer.getInt() & 0xFFFFFFFFl);
 
@@ -269,7 +279,13 @@ public class AcsellActuatorState
       double delta = angle - (motorEncoderPosition.getDoubleValue() - motorAngleOffset.getDoubleValue());
       double offset = Math.round(delta / clocking) * clocking;
       motorAngleOffset.set(offset);
-
+   }
+   
+   public void updateCanonicalAngle(double angle, double clocking, double additionalOffset)
+   {
+      double delta = angle - (motorEncoderPosition.getDoubleValue() - motorAngleOffset.getDoubleValue());
+      double offset = Math.round(delta / clocking) * clocking;
+      motorAngleOffset.set(offset + additionalOffset);
    }
 
    public double getMotorPosition()

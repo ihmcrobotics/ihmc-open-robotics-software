@@ -141,14 +141,14 @@ public class BonoCapturePointPlannerParameters implements CapturePointPlannerPar
    @Override
    public double getEntryCMPForwardOffset()
    {
-      return -0.04;//0.00;//0.02-.025/2;
+      return -0.00;//0.00;//0.02-.025/2;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getExitCMPForwardOffset()
    {
-      return -0.04;//0.00;//0.02-.025/2;
+      return -0.00;//0.00;//0.02-.025/2;
    }
 
    /** {@inheritDoc} */
