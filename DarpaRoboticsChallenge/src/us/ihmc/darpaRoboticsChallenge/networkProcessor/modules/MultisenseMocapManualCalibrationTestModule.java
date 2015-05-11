@@ -2,7 +2,6 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import optitrack.IHMCMocapDataClient;
@@ -11,81 +10,68 @@ import optitrack.MocapRigidbodiesListener;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapToStateEstimatorFrameConverter;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.RosConnectedZeroPoseRobotConfigurationDataProducer;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.ros.RosMainNode;
 
 public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbodiesListener
 {
-   private static final boolean ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER = true;
+   private static final boolean ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER = false;
+   private static final boolean USE_ROBOT_FRAME = true;
    
    private static final int MULTISENSE_MOCAP_ID = 0;
    private static final NetClassList NETCLASSLIST = new IHMCCommunicationKryoNetClassList();
 
-   private final PacketCommunicator packetCommunicator;
+   private final PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NETCLASSLIST);
    private final ArrayList<MultisensePointCloudReceiver> multisensePointCloudReceivers = new ArrayList<MultisensePointCloudReceiver>();
    private final RosConnectedZeroPoseRobotConfigurationDataProducer zeroPoseProducer;
-   private IHMCMocapDataClient mocapDataClient;
-   private final RigidBodyTransform mocapCalibrationTransform = new RigidBodyTransform();
-   private final RigidBodyTransform transformFromMocapCentroidToHeadRoot = new RigidBodyTransform();
+   private final MocapToStateEstimatorFrameConverter mocapToStateEstimatorFrameConverter;
    
-
-   public MultisenseMocapManualCalibrationTestModule(URI rosMasterURI)
+   private final IHMCMocapDataClient mocapDataClient = new IHMCMocapDataClient();
+   
+   private final RigidBodyTransform mocapCalibrationTransform = new RigidBodyTransform();
+   private static final RigidBodyTransform transformFromMocapCentroidToHeadRoot = new RigidBodyTransform();
+   static 
    {
-	   packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.NETWORK_PROCESSOR_TO_UI_TCP_PORT, NETCLASSLIST);
-	   zeroPoseProducer = null;
-	   setupRosConnections(rosMasterURI);
-	   setupMocap();
-	   connect();
+      transformFromMocapCentroidToHeadRoot.setTranslation(0, -0.035, 0.002);
    }
    
    /**
     * Used to inspect the lidar at each stage on the route from multisense to the DRCOperatorInterface
-    * @param rosMasterURI
-    * @param robotModel
     */
    public MultisenseMocapManualCalibrationTestModule(DRCRobotModel robotModel, URI rosMasterURI)
    {
-	   packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MULTISENSE_MOCAP_MANUAL_CALIBRATION_TEST_MODULE, NETCLASSLIST);
-
+      RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "atlas/MultisenseMocapManualCalibrationTest", true);
+      mocapToStateEstimatorFrameConverter = new MocapToStateEstimatorFrameConverter(robotModel, packetCommunicator);
+      
       if (ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER)
       {
          zeroPoseProducer = new RosConnectedZeroPoseRobotConfigurationDataProducer(rosMasterURI, packetCommunicator, robotModel);
-      }
-      else
-      {
+      } else {
          zeroPoseProducer = null;
       }
-      setupRosConnections(rosMasterURI);
-      setupMocap();
+      
+      mocapToStateEstimatorFrameConverter.setTransformFromMocapCentroidToHeadRoot(transformFromMocapCentroidToHeadRoot);
+      
+      // for each of the MultisenseTests send a point cloud to the ui
+      for (MultisenseTest topicToTest : MultisenseTest.values())
+      {
+         if(topicToTest != MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER)
+         {
+            MultisensePointCloudReceiver lidarReceiver = new MultisensePointCloudReceiver(packetCommunicator, topicToTest, robotModel);
+            rosMainNode.attachSubscriber(topicToTest.getRosTopic(), lidarReceiver);
+            multisensePointCloudReceivers.add(lidarReceiver);
+         }
+      }
+      
+      mocapDataClient.registerRigidBodiesListener(this);
+      rosMainNode.execute();
       connect();
-   }
-
-	private void setupMocap() 
-	{
-	   transformFromMocapCentroidToHeadRoot.setTranslation(0, -0.035, 0.002);
-		mocapDataClient = new IHMCMocapDataClient();
-		mocapDataClient.registerRigidBodiesListener(this);
-	}
-   
-   public void setupRosConnections(URI rosMasterURI)
-   {
-	   RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "atlas/MultisenseMocapManualCalibrationTest", true);
-	   
-	   // for each of the MultisenseTests send a point cloud to the ui
-	   for (MultisenseTest topicToTest : MultisenseTest.values())
-	   {
-		   if(topicToTest != MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER)
-		   {
-			   MultisensePointCloudReceiver lidarReceiver = new MultisensePointCloudReceiver(packetCommunicator, topicToTest, zeroPoseProducer.getReferenceFrames());
-			   rosMainNode.attachSubscriber(topicToTest.getRosTopic(), lidarReceiver);
-			   multisensePointCloudReceivers.add(lidarReceiver);
-		   }
-	   }
-	   rosMainNode.execute();
    }
 
 	private void connect() {
@@ -110,26 +96,35 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       for (int rigidBodyIndex = 0; rigidBodyIndex < listOfRigidbodies.size(); rigidBodyIndex++)
       {
          MocapRigidBody mocapObject = listOfRigidbodies.get(rigidBodyIndex);
+         RigidBodyTransform pose = new RigidBodyTransform();
+         mocapObject.getPose(pose);
+         int id = mocapObject.getId();
 
-         if (mocapObject.getId() == MULTISENSE_MOCAP_ID)
+         if (id == MULTISENSE_MOCAP_ID)
          {
-            RigidBodyTransform pose = new RigidBodyTransform();
-            mocapObject.getPose(pose);
-            
-            //manual calibration offsets from mocap jig misalignment
-            mocapCalibrationTransform.setEuler(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-0.95));
-            mocapCalibrationTransform.setTranslation(0.0, 0.0, 0.0);
-          
-            pose.multiply(mocapCalibrationTransform);
-            pose.multiply(transformFromMocapCentroidToHeadRoot);
-            
             //Set this to false to pause mocap updates. Remember to turn it back on before restarting
             boolean UPDATE_LOCATION_IN_WORLD_USING_MOCAP = true;
-            if(UPDATE_LOCATION_IN_WORLD_USING_MOCAP )
+            mocapToStateEstimatorFrameConverter.freezeMocapUpdates(UPDATE_LOCATION_IN_WORLD_USING_MOCAP);
+            
+            //manual calibration offsets from mocap jig misalignment
+            //had to make pitch and roll negative to match frames of ui tool
+            mocapCalibrationTransform.setEuler(Math.toRadians(-1.83), Math.toRadians(-0.98), Math.toRadians(1.08));
+            mocapToStateEstimatorFrameConverter.setMocapJigCalibrationTransform(mocapCalibrationTransform);
+            mocapToStateEstimatorFrameConverter.update(mocapObject);
+            
+            RigidBodyTransform poseInStateEstimatorFrame = new RigidBodyTransform(pose);
+            if(USE_ROBOT_FRAME)
             {
-               updateReceiversWithMocapPose(pose);
+               mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(poseInStateEstimatorFrame);
             }
+            if (zeroPoseProducer != null)
+            {
+               zeroPoseProducer.updateRobotLocationBasedOnMultisensePose(poseInStateEstimatorFrame);
+            }
+            
+            updateReceiversWithMocapPose(poseInStateEstimatorFrame);
          }
+         sendDetectedObjectPacketToUi(pose, id);
       }
    }
 
@@ -138,11 +133,6 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
     */
    private void updateReceiversWithMocapPose(RigidBodyTransform headPose)
    {
-      if (zeroPoseProducer != null)
-      {
-         zeroPoseProducer.updateRobotLocationBasedOnMultisensePose(headPose);
-      }
-
  	  for (int i = 0; i < multisensePointCloudReceivers.size(); i++)
  	  {
  		  MultisensePointCloudReceiver pointCloudReceiver = multisensePointCloudReceivers.get(i);
@@ -150,11 +140,15 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       }
    }
    
-   public static void main(String[] args) throws URISyntaxException
+   private void sendDetectedObjectPacketToUi(RigidBodyTransform pose, int id)
    {
-	   new MultisenseMocapManualCalibrationTestModule(new URI("http://localhost:11311"));
+      if(USE_ROBOT_FRAME)
+      {
+         mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(pose);
+      }
+      DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, id);
+      packetCommunicator.send(detectedMocapObject);
    }
-   
 }
 
 

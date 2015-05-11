@@ -1,0 +1,45 @@
+package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
+
+import java.util.ArrayList;
+
+import optitrack.MocapDataClient;
+import optitrack.MocapRigidBody;
+import optitrack.MocapRigidbodiesListener;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.DetectedObjectPacket;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+
+
+/**
+ * This module converts MocapRigidBodies to robot world and sends them as packets the UI understands
+ */
+public class MocapDetectedObjectModule implements MocapRigidbodiesListener
+{
+   private final PacketCommunicator mocapModulePacketCommunicator;
+   private final MocapToStateEstimatorFrameConverter frameConverter;
+   
+   public MocapDetectedObjectModule(MocapDataClient mocapDataClient, MocapToStateEstimatorFrameConverter frameConverter, PacketCommunicator packetCommunicator)
+   {
+      mocapModulePacketCommunicator = packetCommunicator;
+      this.frameConverter = frameConverter;
+      mocapDataClient.registerRigidBodiesListener(this);
+   }
+   
+   @Override
+   public void updateRigidbodies(ArrayList<MocapRigidBody> listOfRigidbodies)
+   {
+      for(int i = 0; i < listOfRigidbodies.size(); i++)
+      {
+         MocapRigidBody mocapObject = listOfRigidbodies.get(i);
+         int id = mocapObject.getId();
+         
+         RigidBodyTransform pose = new RigidBodyTransform();
+         mocapObject.getPose(pose);
+         
+         frameConverter.convertMocapPoseToRobotFrame(pose);
+         
+         DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, id);
+         mocapModulePacketCommunicator.send(detectedMocapObject);
+      }
+   }
+}

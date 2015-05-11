@@ -15,7 +15,6 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
-import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap.MocapModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -100,7 +99,7 @@ public class DRCNetworkProcessor
    {
      if (params.isMocapModuleEnabled())
      {
-        new MocapModule(robotModel, params.getRosUri());
+//        new MocapDetectedObjectModule(null, null, null);
 
         PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
         packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);

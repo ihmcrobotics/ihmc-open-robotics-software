@@ -5,11 +5,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
+import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.sensing.MultisenseMocapExperimentPacket;
 import us.ihmc.communication.packets.sensing.MultisenseTest;
 import us.ihmc.communication.packets.sensing.MultisenseTest.MultisenseFrameName;
+import us.ihmc.communication.subscribers.RobotDataReceiver;
+import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -25,12 +28,18 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
    private final AtomicReference<RigidBodyTransform> headInMocapFrame = new AtomicReference<RigidBodyTransform>(new RigidBodyTransform());
    private ReferenceFrame pointCloudReferenceFrame;
    private final ReferenceFrame headRootReferenceFrame;
+   private final RobotDataReceiver robotDataReceiver;
    
-   public MultisensePointCloudReceiver(PacketCommunicator packetCommunicator, MultisenseTest testInfo, ReferenceFrames referenceFrames)
+   public MultisensePointCloudReceiver(PacketCommunicator packetCommunicator, MultisenseTest testInfo, DRCRobotModel robotModel)
    {
       this.packetCommunicator = packetCommunicator;
       this.testInfo = testInfo;
       this.frame = testInfo.getFrame();
+      
+      SDFFullRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
+      ReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
+      
       this.headRootReferenceFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       setupReferenceFrames(referenceFrames);
    }
@@ -47,6 +56,7 @@ public class MultisensePointCloudReceiver extends RosPointCloudSubscriber
    @Override
    public void onNewMessage(PointCloud2 pointCloud)
    {
+      robotDataReceiver.updateRobotModel();
       pointCloudReferenceFrame.update();
       UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
       Point3d[] points = pointCloudData.getPoints();
