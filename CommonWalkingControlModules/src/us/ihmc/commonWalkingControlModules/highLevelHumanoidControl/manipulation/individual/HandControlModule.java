@@ -35,6 +35,7 @@ import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.trajectories.providers.CurrentPositionProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -529,7 +530,8 @@ public class HandControlModule
 
       circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
       circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
-      circularPoseTrajectoryGenerator.setInitialPoseToMatchReferenceFrame(optionalHandControlFrame);
+      FramePose desiredFramePose = computeDesiredFramePose(worldFrame, optionalHandControlFrame);
+      circularPoseTrajectoryGenerator.setInitialPose(desiredFramePose);
       circularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
       if (!controlHandAngleAboutAxis)
@@ -669,20 +671,49 @@ public class HandControlModule
 
    private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame)
    {
+      return computeDesiredFramePose(trajectoryFrame, handControlFrame);
+   }
+
+   private final RigidBodyTransform oldTrackingFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform newTrackingFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform transformFromNewTrackingFrameToOldTrackingFrame = new RigidBodyTransform();
+
+   private FramePose computeDesiredFramePose(ReferenceFrame trajectoryFrame, ReferenceFrame newControlFrame)
+   {
       FramePose pose;
-      if (stateMachine.getCurrentState() instanceof TrajectoryBasedTaskspaceHandControlState)
+
+      if (stateMachine.getCurrentState() instanceof TaskspaceHandPositionControlState)
       {
          pose = taskSpacePositionControlState.getDesiredPose();
+         ReferenceFrame oldControlFrame = handSpatialAccelerationControlModule.getTrackingFrame();
+         if (newControlFrame != oldControlFrame)
+         {
+            pose.getPose(oldTrackingFrameTransform);
+            newControlFrame.getTransformToDesiredFrame(transformFromNewTrackingFrameToOldTrackingFrame, oldControlFrame);
+            newTrackingFrameTransform.multiply(oldTrackingFrameTransform, transformFromNewTrackingFrameToOldTrackingFrame);
+            pose.setPose(newTrackingFrameTransform);
+         }
+      }
+      else if (stateMachine.getCurrentState() instanceof TaskspaceToJointspaceHandPositionControlState)
+      {
+         pose = taskSpacePositionControlState.getDesiredPose();
+         ReferenceFrame oldControlFrame = handTaskspaceToJointspaceCalculator.getControlFrame();
+         if (oldControlFrame != newControlFrame)
+         {
+            handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
+            handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(currentDesiredPose, trajectoryFrame);
+         }
       }
       else if (stateMachine.getCurrentState() instanceof JointSpaceHandControlState)
       {
+         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
          handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
          handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(currentDesiredPose, trajectoryFrame);
          pose = currentDesiredPose;
       }
       else
       {
-         currentDesiredPose.setToZero(fullRobotModel.getHandControlFrame(robotSide));
+         currentDesiredPose.setToZero(newControlFrame);
          pose = currentDesiredPose;
       }
 
