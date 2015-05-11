@@ -30,7 +30,7 @@ public class WandererCommand extends AcsellCommand<WandererActuator, WandererJoi
       
       for (WandererJoint joint : WandererJoint.values)
       {
-         if (joint.isLinear())
+         if (joint.isLinear() && !joint.hasNonlinearTransmission())
          {
             WandererActuator actuator = joint.getActuators()[0];
             AcsellLinearTransmissionActuatorCommand actuatorCommand = new AcsellLinearTransmissionActuatorCommand(actuator.getName(), actuator,

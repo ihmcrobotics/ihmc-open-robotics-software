@@ -121,7 +121,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.actualEstimatorDT</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -133,7 +133,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables></Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.powerDistribution.robotWork</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityX</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.DesiredFootstepCalculatorFootstepProviderWrapper.walk</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -157,7 +157,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityY</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.timestamp</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -169,7 +169,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.estimatedRootJointVelocityZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.ManualDesiredVelocityControlModule.desiredVelocityX,root.StepprStandPrepSliderBoard.DesiredVelocityX_setpoint,root.StepprStandPrepSliderBoard.DesiredVelocityX_adjustment</Variables>
 		<GraphConfiguration>
 			<Name>config15</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -222,7 +222,7 @@ ToeOff
 <Title>
 Tab6
 </Title>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>torsoXActuatorMotorAngleOffset,torsoYActuatorMotorAngleOffset,chestCoMOffsetY,walkingState,sow_walkingState,requestedHighLevelState,highLevelState,enableOutput</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -237,11 +237,11 @@ Tab7
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>9</Graph Array Window Size>
+<Graph Array Window Size>11</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
 <WindowLocation>1920.0, 0.0</WindowLocation>
-<WindowSize>1918.0, 1165.0</WindowSize>
+<WindowSize>1918.0, 1163.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -388,18 +388,6 @@ Tab7
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedController.admissibleDesiredGroundReactionTorqueZ</Variables>
-		<GraphConfiguration>
-			<Name>config28</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>1</ScreenID>
@@ -410,7 +398,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.SlowSensors.leftHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config29</Name>
+			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -422,7 +410,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.SlowSensors.rightHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config30</Name>
+			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -434,7 +422,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.SlowSensors.leftHipZActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config31</Name>
+			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -446,7 +434,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.SlowSensors.rightHipZActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config32</Name>
+			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -458,7 +446,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.SlowSensors.leftHipYActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config33</Name>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -470,7 +458,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.SlowSensors.rightHipYActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config34</Name>
+			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -482,7 +470,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.SlowSensors.leftKneeActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config35</Name>
+			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -494,7 +482,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config36</Name>
+			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -506,7 +494,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config37</Name>
+			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -518,7 +506,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config38</Name>
+			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -530,7 +518,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config39</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -542,19 +530,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
-			<Name>config40</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.WalkingHighLevelHumanoidController.walkingState</Variables>
-		<GraphConfiguration>
-			<Name>config41</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -571,9 +547,9 @@ Tab7
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionX</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerFinalDesiredCapturePointPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config42</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -585,7 +561,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config43</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -597,7 +573,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config44</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -609,7 +585,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config45</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -621,7 +597,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config46</Name>
+			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -633,7 +609,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config47</Name>
+			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -652,7 +628,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_q_r_leg_kny,bono.qd_r_leg_kny</Variables>
 		<GraphConfiguration>
-			<Name>config48</Name>
+			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -664,7 +640,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.raw_qd_r_leg_kny,root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.fd_qd_r_leg_kny_sp0,root.remotemain.DRCEstimatorThread.StepprSensorReader.SensorProcessing.filt_qd_r_leg_kny_sp1</Variables>
 		<GraphConfiguration>
-			<Name>config49</Name>
+			<Name>config47</Name>
 			<ScalingMethod>2</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -676,7 +652,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorConsecutivePacketDropCount,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config48</Name>
 			<ScalingMethod>2</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -695,7 +671,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -707,7 +683,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -719,7 +695,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.leftHipZActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -731,7 +707,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.rightHipZActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -743,7 +719,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.leftHipYActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -755,7 +731,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.rightHipYActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -767,7 +743,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config55</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -779,7 +755,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config56</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -791,7 +767,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -803,7 +779,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -815,7 +791,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
+			<Name>config59</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -827,7 +803,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorTotalPacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config60</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -846,7 +822,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipXActuator.leftHipXActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -858,7 +834,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipXActuator.rightHipXActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -870,7 +846,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipZActuator.leftHipZActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -882,7 +858,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipZActuator.rightHipZActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -894,7 +870,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftHipYActuator.leftHipYActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -906,7 +882,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightHipYActuator.rightHipYActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -918,7 +894,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftKneeActuator.leftKneeActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -930,7 +906,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightKneeActuator.rightKneeActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config68</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -942,7 +918,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleLeftActuator.leftAnkleLeftActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config71</Name>
+			<Name>config69</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -954,7 +930,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleLeftActuator.rightAnkleLeftActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config72</Name>
+			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -966,7 +942,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.leftAnkleRightActuator.leftAnkleRightActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
-			<Name>config73</Name>
+			<Name>config71</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -978,7 +954,43 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.rightAnkleRightActuator.rightAnkleRightActuatorConsecutivePacketDropCount</Variables>
 		<GraphConfiguration>
+			<Name>config72</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoXActuator.torsoXActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config73</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
 			<Name>config74</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoZActuator.torsoZActuatorConsecutivePacketDropCount</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -997,7 +1009,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config75</Name>
+			<Name>config76</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1009,7 +1021,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionX,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionX</Variables>
 		<GraphConfiguration>
-			<Name>config76</Name>
+			<Name>config77</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1021,7 +1033,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config77</Name>
+			<Name>config78</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1033,7 +1045,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionY,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionY</Variables>
 		<GraphConfiguration>
-			<Name>config78</Name>
+			<Name>config79</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1045,7 +1057,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footDesiredPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footEuclideanPositionController.l_footCurrentPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config79</Name>
+			<Name>config80</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1057,7 +1069,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footDesiredPositionZ,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footEuclideanPositionController.r_footCurrentPositionZ</Variables>
 		<GraphConfiguration>
-			<Name>config80</Name>
+			<Name>config81</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1069,7 +1081,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footDesiredOrientationYaw,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footCurrentOrientationYaw</Variables>
 		<GraphConfiguration>
-			<Name>config81</Name>
+			<Name>config82</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1081,7 +1093,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footDesiredOrientationYaw,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footCurrentOrientationYaw</Variables>
 		<GraphConfiguration>
-			<Name>config82</Name>
+			<Name>config83</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1093,7 +1105,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footDesiredOrientationPitch,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footCurrentOrientationPitch</Variables>
 		<GraphConfiguration>
-			<Name>config83</Name>
+			<Name>config84</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1105,7 +1117,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footDesiredOrientationPitch,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footCurrentOrientationPitch</Variables>
 		<GraphConfiguration>
-			<Name>config84</Name>
+			<Name>config85</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1117,7 +1129,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footDesiredOrientationRoll,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAxisAngleOrientationController.l_footCurrentOrientationRoll</Variables>
 		<GraphConfiguration>
-			<Name>config85</Name>
+			<Name>config86</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1129,7 +1141,7 @@ Tab7
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footDesiredOrientationRoll,root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAxisAngleOrientationController.r_footCurrentOrientationRoll</Variables>
 		<GraphConfiguration>
-			<Name>config86</Name>
+			<Name>config87</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1141,7 +1153,7 @@ Tab7
 	<Graph>
 		<Variables>bono.qd_l_leg_kny</Variables>
 		<GraphConfiguration>
-			<Name>config87</Name>
+			<Name>config88</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1153,7 +1165,7 @@ Tab7
 	<Graph>
 		<Variables>bono.qd_r_leg_kny</Variables>
 		<GraphConfiguration>
-			<Name>config88</Name>
+			<Name>config89</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1165,24 +1177,12 @@ Tab7
 </GraphGroup>
 </Graph Array Window7><Graph Array Window8>
 <ScreenID>1</ScreenID>
-<WindowLocation>4606.0, 132.0</WindowLocation>
+<WindowLocation>2560.0, 132.0</WindowLocation>
 <WindowSize>1280.0, 800.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footLinearAccelVizX</Variables>
-		<GraphConfiguration>
-			<Name>config89</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizX</Variables>
 		<GraphConfiguration>
 			<Name>config90</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1194,7 +1194,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footLinearAccelVizY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizX</Variables>
 		<GraphConfiguration>
 			<Name>config91</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1206,7 +1206,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footLinearAccelVizY</Variables>
 		<GraphConfiguration>
 			<Name>config92</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1218,7 +1218,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footLinearAccelVizZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizY</Variables>
 		<GraphConfiguration>
 			<Name>config93</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1230,7 +1230,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footLinearAccelVizZ</Variables>
 		<GraphConfiguration>
 			<Name>config94</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1242,7 +1242,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizX</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footLinearAccelVizZ</Variables>
 		<GraphConfiguration>
 			<Name>config95</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1254,7 +1254,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizX</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizX</Variables>
 		<GraphConfiguration>
 			<Name>config96</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1266,7 +1266,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizX</Variables>
 		<GraphConfiguration>
 			<Name>config97</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1278,7 +1278,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizY</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizY</Variables>
 		<GraphConfiguration>
 			<Name>config98</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1290,7 +1290,7 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizY</Variables>
 		<GraphConfiguration>
 			<Name>config99</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -1302,9 +1302,21 @@ Tab7
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizZ</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.l_footFootControlModule.l_footRigidBodySpatialAccelerationControlModule.l_footAngularAccelVizZ</Variables>
 		<GraphConfiguration>
 			<Name>config100</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.FeetManager.r_footFootControlModule.r_footRigidBodySpatialAccelerationControlModule.r_footAngularAccelVizZ</Variables>
+		<GraphConfiguration>
+			<Name>config101</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1316,24 +1328,122 @@ Tab7
 </GraphGroup>
 </Graph Array Window8><Graph Array Window9>
 <ScreenID>1</ScreenID>
-<WindowLocation>1920.0, 0.0</WindowLocation>
-<WindowSize>1920.0, 1172.0</WindowSize>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.NewInstantaneousCapturePointPlannerWithTimeFreezerAndFootSlipCompensation.icpPlannerTimeDelayFromeFreezer</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_q_Spring,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_mhx.l_leg_mhx_tauCurrentStrainError</Variables>
 		<GraphConfiguration>
-			<Name>config101</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<Name>config102</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>101</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_q_Spring,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauCurrentStrainError</Variables>
+		<GraphConfiguration>
+			<Name>config103</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>101</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.l_leg_mhx.l_leg_mhx_tauCurrentStrainError,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_tauSpringCorrection,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhxSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config104</Name>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>0.2</MaxScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauCurrentStrainError,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_tauSpringCorrection,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.r_leg_mhx.r_leg_mhx_tauMeasuredStrain,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhxSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config105</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhx_q_Spring,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.l_leg_mhxFilteredSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config106</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhx_q_Spring,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.r_leg_mhxFilteredSpringLoadingState</Variables>
+		<GraphConfiguration>
+			<Name>config107</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window9>
+</Graph Array Window9><Graph Array Window10>
+<ScreenID>1</ScreenID>
+<WindowLocation>2267.0, 293.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorControlTarget,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorMotorEncoderPosition,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.torsoYActuator.torsoYActuatorCurrentDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.torsoYActuator.torsoYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config108</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window10><Graph Array Window11>
+<ScreenID>1</ScreenID>
+<WindowLocation>2239.0, 291.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.leftOutputProcessorFourbar.leftOutputProcessorFourbar_TransmissionRatio,root.remotemain.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.rightOutputProcessorFourbar.rightOutputProcessorFourbar_TransmissionRatio</Variables>
+		<GraphConfiguration>
+			<Name>config109</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window11>
 
 <Extra Panels>
 <Main Viewport>
@@ -1342,9 +1452,9 @@ Dashboard,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>5.522484727355365</Camera X>
- <Camera Y>2.346986087606829</Camera Y>
- <Camera Z>0.2078026763137174</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

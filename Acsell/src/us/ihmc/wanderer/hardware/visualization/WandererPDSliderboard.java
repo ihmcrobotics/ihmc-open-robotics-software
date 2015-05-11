@@ -13,6 +13,7 @@ import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurat
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererDashboard;
 import us.ihmc.wanderer.hardware.WandererJoint;
+import us.ihmc.wanderer.hardware.controllers.WandererStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -66,7 +67,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
          sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 10 * joint.getRatio() * joint.getRatio());
-         sliderBoardConfigurationManager.setSlider(4, variables.kd, -.1 * joint.getRatio() * joint.getRatio(), .1 * joint.getRatio() * joint.getRatio());
+         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 5 * joint.getRatio() * joint.getRatio()*WandererStandPrepSetpoints.VELOCITY_SCALE);
 
          if (Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
          {

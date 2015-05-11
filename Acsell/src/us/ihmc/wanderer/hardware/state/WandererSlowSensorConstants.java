@@ -88,5 +88,5 @@ public class WandererSlowSensorConstants implements AcsellSlowSensorConstants
    {
       return 5.0 / 65535.0;
    }
-
+   
 }

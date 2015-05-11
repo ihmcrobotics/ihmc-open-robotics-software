@@ -145,7 +145,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.StepprPDJointController.FuncGenYoFunGen.FuncGenValue</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -162,7 +162,7 @@
 <Title>
 Tab0
 </Title>
-<Entry Boxes>selectedJoint_enabled,selectedJoint,funcGenJoint,FuncGenMode,FuncGenAmp,FuncGenFreq</Entry Boxes>
+<Entry Boxes>selectedJoint_enabled,selectedJoint</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -325,7 +325,7 @@ Tab0
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>1</ScreenID>
-<WindowLocation>5963.0, 142.0</WindowLocation>
+<WindowLocation>2560.0, 142.0</WindowLocation>
 <WindowSize>1280.0, 720.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -476,8 +476,8 @@ Tab0
 </GraphGroup>
 </Graph Array Window2><Graph Array Window3>
 <ScreenID>1</ScreenID>
-<WindowLocation>5758.0, 57.0</WindowLocation>
-<WindowSize>1924.0, 1087.0</WindowSize>
+<WindowLocation>1920.0, 0.0</WindowLocation>
+<WindowSize>1920.0, 1089.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -529,7 +529,7 @@ Tab0
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.steppr.Steppr.r_leg_kny.r_leg_kny_q,root.remotemain.steppr.Steppr.r_leg_kny.r_leg_kny_qFromMotor</Variables>
+		<Variables>root.remotemain.steppr.Steppr.r_leg_kny.r_leg_kny_q</Variables>
 		<GraphConfiguration>
 			<Name>config42</Name>
 			<ScalingMethod>0</ScalingMethod>

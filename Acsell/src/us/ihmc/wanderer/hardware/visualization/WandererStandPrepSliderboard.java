@@ -98,8 +98,8 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
          OneDegreeOfFreedomJoint oneDoFJoint = ((SDFRobot)robot).getOneDegreeOfFreedomJoint(aJoint.getSdfName());
          sliderBoardConfigurationManager.setKnob(1, selectedJointPair, 0, WandererJoint.values.length);
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
-         sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 100 * aJoint.getRatio() * aJoint.getRatio());
-         sliderBoardConfigurationManager.setSlider(3, variables.damping, 0, 5 * aJoint.getRatio() * aJoint.getRatio());
+         sliderBoardConfigurationManager.setSlider(2, variables.kp, 0, 10 * aJoint.getRatio() * aJoint.getRatio());
+         sliderBoardConfigurationManager.setSlider(3, variables.kd, 0, 5 * aJoint.getRatio() * aJoint.getRatio() *WandererStandPrepSetpoints.VELOCITY_SCALE);
          sliderBoardConfigurationManager.setSlider(4, crouch, 0, 1);
          sliderBoardConfigurationManager.setSlider(5, controlRatio, 0, 1);
          sliderBoardConfigurationManager.setSlider(6, height, -0.3, 0.3);

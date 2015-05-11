@@ -6,6 +6,9 @@ public interface AcsellActuator
    public double getKt();
    public double getKm();
    public double getCurrentLimit();
+   public double getJointEncoderScale();
+   public double getMotorEncoderScale();
+   public double getJointEncoderOffset();
    public int getBus();
    public int getIndex();
    public int getSensedCurrentToTorqueDirection();

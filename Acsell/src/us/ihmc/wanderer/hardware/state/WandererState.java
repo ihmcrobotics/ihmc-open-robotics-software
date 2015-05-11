@@ -11,6 +11,7 @@ import us.ihmc.acsell.hardware.state.AcsellAnkleJointState;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.AcsellLinearTransmissionJointState;
 import us.ihmc.acsell.hardware.state.AcsellState;
+import us.ihmc.acsell.hardware.state.slowSensors.PressureSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.wanderer.hardware.WandererActuator;
@@ -30,18 +31,49 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
    {
       super.update(buffer, timestamp);
       
-      throw new RuntimeException("TODO: Add foot force sensors and set super.footWrenches");
-      /*
-       * 
-       * for(RobotSide robotSide : RobotSide.values)
-       * {
-       *    footWrenches.get(robotSide).set();
-       * }
-       * 
-       * 
-       */
+      //TODO: Add foot force sensors and set super.footWrenches
+      updateFootForceSensor();//TODO: Fix this!
+      
+   }
+   
+   private void updateFootForceSensor()
+   {
+
+      double leftFootForce = 0;
+      double rightFootForce = 0;
+
+      AcsellActuatorState leftFootSensorState = actuatorStates.get(WandererActuator.LEFT_ANKLE_RIGHT);
+      AcsellActuatorState rightFootSensorState = actuatorStates.get(WandererActuator.RIGHT_ANKLE_RIGHT);
+
+
+         double leftHeelForce = 0.0, rightHeelForce = 0.0;
+         for (int sensor=0; sensor<4; sensor++)
+         {
+            leftHeelForce += ((PressureSensor) leftFootSensorState.getPressureSensor(sensor)).getValue();
+         }
+
+         for (int sensor=0; sensor<4; sensor++)
+         {
+            rightHeelForce += ((PressureSensor) rightFootSensorState.getPressureSensor(sensor)).getValue();
+         }
+
+         //calculate toe Z force based on ankle
+         final double distHeelFromAnkle = 0.035 + 2.0 * 0.0254 - 0.001;
+         final double distToeFromAnkle = 0.16 + 0.001;
+         double leftAnkleYTau = jointStates.get(WandererJoint.LEFT_ANKLE_Y).getTau();
+         double leftToeForce = leftHeelForce * distHeelFromAnkle + leftAnkleYTau / distToeFromAnkle;
+         double rightAnkleYTau = jointStates.get(WandererJoint.RIGHT_ANKLE_Y).getTau();
+         double rightToeForce = rightHeelForce * distHeelFromAnkle + rightAnkleYTau / distToeFromAnkle;
+
+         leftFootForce = leftHeelForce + leftToeForce;
+         rightFootForce = rightHeelForce + rightToeForce;
+
+
+      footWrenches.get(RobotSide.LEFT).set(5, leftFootForce);
+      footWrenches.get(RobotSide.RIGHT).set(5, rightFootForce);
 
    }
+      
    protected EnumMap<WandererJoint, AcsellJointState> createJoints()
    {
       EnumMap<WandererJoint, AcsellJointState> jointStates = new EnumMap<>(WandererJoint.class);
@@ -76,10 +108,10 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
    protected EnumMap<WandererActuator, AcsellActuatorState> createActuators()
    {
       EnumMap<WandererActuator, AcsellActuatorState> actuatorStates = new EnumMap<>(WandererActuator.class);
-      for (WandererActuator actuatorName : WandererActuator.values)
+      for (WandererActuator actuator : WandererActuator.values)
       {
-         actuatorStates.put(actuatorName,
-               new AcsellActuatorState(actuatorName.getName(), new WandererSlowSensorConstants(), actuatorName.getKt(), actuatorName.getSensedCurrentToTorqueDirection(), registry));
+         actuatorStates.put(actuator,
+               new AcsellActuatorState(actuator, new WandererSlowSensorConstants(), registry));
       }
       return actuatorStates;
    }

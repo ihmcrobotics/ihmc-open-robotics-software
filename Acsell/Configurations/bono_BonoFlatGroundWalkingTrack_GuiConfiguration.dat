@@ -78,7 +78,7 @@
 <Title>
 Tab
 </Title>
-<Entry Boxes>chestCoMOffsetX,pelvisCoMOffsetX</Entry Boxes>
+<Entry Boxes>chestCoMOffsetX,pelvisCoMOffsetX,kpPelvisOrientation</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -97,9 +97,9 @@ Plotter,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>7.244949846150859</Camera X>
- <Camera Y>2.8006720241126724</Camera Y>
- <Camera Z>1.8571949866728552</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-6.0</Camera Y>
+ <Camera Z>1.0</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -123,8 +123,8 @@ Plotter,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-0.08415882750316772</Fix X>
-<Fix Y>0.1811312407038297</Fix Y>
-<Fix Z>0.819956255975196</Fix Z>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.6</Fix Z>
 </Fix Position>
 </Canvas 1>

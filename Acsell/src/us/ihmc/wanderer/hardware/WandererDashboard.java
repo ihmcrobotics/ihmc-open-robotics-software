@@ -182,8 +182,8 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       };
       try
       {
-      	leftFootForce.addVariableChangedListener(robotOnGroundChecker);
-      	rightFootForce.addVariableChangedListener(robotOnGroundChecker);
+      	//leftFootForce.addVariableChangedListener(robotOnGroundChecker);
+      	//rightFootForce.addVariableChangedListener(robotOnGroundChecker);
       }
       catch (Exception e)
       {
