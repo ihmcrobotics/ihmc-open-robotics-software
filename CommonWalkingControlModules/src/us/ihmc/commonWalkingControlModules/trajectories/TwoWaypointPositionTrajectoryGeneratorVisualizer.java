@@ -180,8 +180,7 @@ public class TwoWaypointPositionTrajectoryGeneratorVisualizer
       YoVelocityProvider initialVelocityProvider = new YoVelocityProvider(initialVelocity);
       YoVelocityProvider finalDesiredVelocityProvider = new YoVelocityProvider(finalVelocity);
 
-      YoTwoWaypointTrajectoryParameters trajectoryParameters = null;
-      TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider(trajectoryParameters);
+      TrajectoryParametersProvider trajectoryParametersProvider = new TrajectoryParametersProvider();
       
       int arcLengthCalculatorDivisionsPerPolynomial = 20;
 
