@@ -7,6 +7,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;
+import us.ihmc.darpaRoboticsChallenge.DRCConfigParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
@@ -158,7 +159,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
       cameraParamaters[BLACKFLY_LEFT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.LEFT, leftFisheyeCameraName, fisheye_left_camera_topic, fisheye_pose_source, fisheye_left_camera_info, BLACKFLY_LEFT_CAMERA_ID);
       cameraParamaters[BLACKFLY_RIGHT_CAMERA_ID] = new DRCRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic, fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
       
-      setupROSLocationService = target == AtlasTarget.REAL_ROBOT;
+      setupROSLocationService = target == AtlasTarget.REAL_ROBOT || (target == AtlasTarget.SIM && DRCConfigParameters.SEND_ROBOT_DATA_TO_ROS);
       setupROSParameterSetters = target == AtlasTarget.REAL_ROBOT;
       isMultisenseHead = target == AtlasTarget.REAL_ROBOT;
       
