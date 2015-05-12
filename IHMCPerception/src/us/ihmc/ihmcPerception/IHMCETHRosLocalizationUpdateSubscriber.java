@@ -1,16 +1,21 @@
 package us.ihmc.ihmcPerception;
 
+import javax.vecmath.Point3d;
+
 import org.ros.node.NodeConfiguration;
 
+import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 
 public class IHMCETHRosLocalizationUpdateSubscriber
@@ -64,7 +69,26 @@ public class IHMCETHRosLocalizationUpdateSubscriber
          }
 
       };
-
+      
       rosMainNode.attachSubscriber(RosLocalizationConstants.STATUS_UPDATE_TOPIC, statusSubscriber);
+      
+      RosPointCloudSubscriber pointMapSubscriber = new RosPointCloudSubscriber()
+      {
+         
+         @Override
+         public void onNewMessage(PointCloud2 pointCloud)
+         {
+            System.out.println(pointCloud.getWidth());
+            
+            UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
+            Point3d[] points = pointCloudData.getPoints();
+            
+            LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
+            localizationMapPacket.setLocalizationPointMap(points);
+            rosModulePacketCommunicator.send(localizationMapPacket);
+         }
+      };
+      rosMainNode.attachSubscriber(RosLocalizationConstants.NAV_POSE_MAP, pointMapSubscriber);
+      
    }
 }
