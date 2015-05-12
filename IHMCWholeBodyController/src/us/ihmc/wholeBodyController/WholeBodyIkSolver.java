@@ -177,6 +177,14 @@ abstract public class WholeBodyIkSolver
          {
             return jointPreferedAngle;
          }
+         
+         public void setAllPreferedJointAngle(HashMap<String,Double> jointPreferedAngle)
+         {
+            for(String string : jointPreferedAngle.keySet())
+            {
+               setPreferedJointAngle(string, jointPreferedAngle.get(string));
+            }
+         }
       }
       
       protected final WholeBodyConfiguration parameters = new WholeBodyConfiguration();
