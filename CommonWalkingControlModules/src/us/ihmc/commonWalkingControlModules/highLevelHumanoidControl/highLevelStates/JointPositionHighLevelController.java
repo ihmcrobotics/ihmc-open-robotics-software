@@ -183,9 +183,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceToJointspaceCalculators = new SideDependentList<>();
       optionalHandControlFrames = new SideDependentList<PoseReferenceFrame>();
 
+      String shortControllerNamePrefix = "JPCtrl";
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         String namePrefix = name + robotSide.getCamelCaseNameForMiddleOfExpression() + "Hand";
+         String namePrefix = shortControllerNamePrefix + robotSide.getCamelCaseNameForMiddleOfExpression() + "Hand";
          
          BooleanYoVariable isHandTaskspaceControlled = new BooleanYoVariable(namePrefix + "TaskspaceControl", registry);
          areHandTaskspaceControlled.put(robotSide, isHandTaskspaceControlled);
