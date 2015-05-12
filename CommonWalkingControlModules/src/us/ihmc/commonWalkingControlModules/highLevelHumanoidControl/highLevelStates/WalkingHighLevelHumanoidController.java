@@ -55,6 +55,7 @@ import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassJacobian;
@@ -1070,7 +1071,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
                capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
 
                capturePointPlannerAdapter.updatePlanForSingleSupportDisturbances(tmpFramePoint, yoTime.getDoubleValue(), supportSide);
-               finalDesiredICPInWorld.set(capturePointPlannerAdapter.getFinalDesiredICP());
+               // Force the final ICP to be in the planned footstep so the smart CMP projection will be way more effective
+               finalDesiredCapturePoint2d.setToZero(nextFootstep.getSoleReferenceFrame());
+               finalDesiredICPInWorld.setAndMatchFrame(finalDesiredCapturePoint2d);
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
             }
          }
@@ -1167,7 +1170,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
          {
             nextFootstep = pushRecoveryModule.createFootstepForRecoveringFromDisturbance(swingSide, swingTimeCalculationProvider.getValue());
-//            nextFootstep.setTrajectoryType(TrajectoryType.PUSH_RECOVERY);
+            nextFootstep.setTrajectoryType(TrajectoryType.PUSH_RECOVERY);
             upcomingFootstepList.requestCancelPlanToProvider();
             upcomingFootstepList.clearCurrentFootsteps();
          }
@@ -1211,14 +1214,17 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextFootstep());
             capturePointPlannerAdapter.addFootstep(upcomingFootstepList.getNextNextNextFootstep());
             capturePointPlannerAdapter.initializeSingleSupport(yoTime.getDoubleValue(), supportSide);
+            finalDesiredICPInWorld.setAndMatchFrame(capturePointPlannerAdapter.getFinalDesiredICP());
 
             if (pushRecoveryModule.isEnabled() && pushRecoveryModule.isRecoveringFromDoubleSupportFall())
             {
                capturePoint.getFrameTupleIncludingFrame(tmpFramePoint);
                capturePointPlannerAdapter.updatePlanForSingleSupportDisturbances(tmpFramePoint, yoTime.getDoubleValue(), supportSide);
                holdICPToCurrentCoMLocationInNextDoubleSupport.set(true);
+               // Force the final ICP to be in the planned footstep so the smart CMP projection will be way more effective
+               finalDesiredCapturePoint2d.setToZero(nextFootstep.getSoleReferenceFrame());
+               finalDesiredICPInWorld.setAndMatchFrame(finalDesiredCapturePoint2d);
             }
-            finalDesiredICPInWorld.setAndMatchFrame(capturePointPlannerAdapter.getFinalDesiredICP());
          }
          else
          {

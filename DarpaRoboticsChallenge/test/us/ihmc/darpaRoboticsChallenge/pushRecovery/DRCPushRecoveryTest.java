@@ -3,6 +3,7 @@ package us.ihmc.darpaRoboticsChallenge.pushRecovery;
 import static org.junit.Assert.assertTrue;
 
 import javax.vecmath.Point3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import org.junit.After;
@@ -13,6 +14,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
+import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.darpaRoboticsChallenge.DRCObstacleCourseStartingLocation;
 import us.ihmc.darpaRoboticsChallenge.controllers.DRCPushRobotController;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
@@ -25,6 +27,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
+import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -266,6 +271,39 @@ public abstract class DRCPushRecoveryTest
 
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
+      assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 30.0)
+   @Test(timeout = 163619)
+   public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, false, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      RobotSide footSide = RobotSide.LEFT;
+      FramePose footPose = new FramePose(drcSimulationTestHelper.getDRCSimulationFactory().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+      footPose.translate(0.0, 0.0, 0.2);
+      Point3d desiredFootPosition = new Point3d();
+      Quat4d desiredFootOrientation = new Quat4d();
+      footPose.getPose(desiredFootPosition, desiredFootOrientation);
+      FootPosePacket footPosePacket = new FootPosePacket(footSide, desiredFootPosition, desiredFootOrientation, 0.6);
+      drcSimulationTestHelper.send(footPosePacket);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(0.0, 1.0, 0.0);
+      double magnitude = 200.0;
+      double duration = 0.2;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
    }
 
