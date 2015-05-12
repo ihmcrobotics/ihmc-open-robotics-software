@@ -43,13 +43,35 @@ public class RobotiqWriteRequestFactory
       return registers;
    }
    
-   public Register[] createFingerPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   public Register[] createWholeHandPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
    {
       robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
       robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);
       robotiqRequest.getFingerBPositionRequest().setFingerPosition(graspMode, fingerState);
       robotiqRequest.getFingerCPositionRequest().setFingerPosition(graspMode, fingerState);
       robotiqRequest.getScissorPositionRequest().setFingerPosition(graspMode, fingerState);
+      
+      packRequest();
+      
+      return registers;
+   }
+   
+   public Register[] createFingersPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   {
+      robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
+      robotiqRequest.getFingerBPositionRequest().setFingerPosition(graspMode, fingerState);
+      robotiqRequest.getFingerCPositionRequest().setFingerPosition(graspMode, fingerState);
+      robotiqRequest.getScissorPositionRequest().setFingerPosition(graspMode, fingerState);
+      
+      packRequest();
+      
+      return registers;
+   }
+   
+   public Register[] createThumbPositionRequest(RobotiqGraspMode graspMode, FingerState fingerState)
+   {
+      robotiqRequest.getActionRequest().setRgto(rGTO.GO_TO);
+      robotiqRequest.getFingerAPositionRequest().setFingerPosition(graspMode, fingerState);
       
       packRequest();
       

@@ -56,7 +56,7 @@ class RobotiqControlThrizzead extends HandControlThread
       
       while(!packetCommunicator.isConnected())
       {
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(10);
       }
    }
 
@@ -76,15 +76,15 @@ class RobotiqControlThrizzead extends HandControlThread
       {
          robotiqHand.read();
          
-         if (robotiqHand.isConnected()) //status to UI and keep alive packet
+         if (robotiqHand.isConnected())
          {
             updateHandData();
 
             if (handStatus.hasError())
             {
-               //TODO
+               System.out.println(handStatus.getFaultStatus().name());
             }
-
+            
             if (fingerStateProvider.isNewFingerStateAvailable())
             {
                FingerStatePacket packet = fingerStateProvider.pullPacket();
@@ -102,41 +102,36 @@ class RobotiqControlThrizzead extends HandControlThread
                case PINCH_GRIP:
                case WIDE_GRIP:
                case SCISSOR_GRIP:
-                  robotiqHand.sendFingerState(state);
+                  robotiqHand.sendHandCommand(state);
                   break;
+               case OPEN_FINGERS:
+               case CLOSE_FINGERS:
+                  robotiqHand.sendFingersCommand(state);
+                  break;
+               case CLOSE_THUMB:
+               case OPEN_THUMB:
+                  robotiqHand.sendThumbCommand(state);
+                  break;
+               case RESET:
+                  robotiqHand.reset();
                case HOOK:
                   //TODO
                   break;
                case HALF_CLOSE:
                   //TODO
                   break;
-               case CLOSE_FINGERS:
-                  //TODO
-                  break;
-               case CLOSE_THUMB:
-                  //TODO
-                  break;
-               case OPEN_FINGERS:
-                  //TODO
-                  break;
-               case OPEN_THUMB:
-                  //TODO
-                  break;
-               case RESET:
-                  robotiqHand.reset();
-                  break;
                default:
                   break;
                }
             }
             
-            if (manualHandControlProvider.isNewPacketAvailable()) // send manual hand control packet to hand
+            if (manualHandControlProvider.isNewPacketAvailable())
             {
                //TODO
             }
          }
          
-         ThreadTools.sleep(100);
+         ThreadTools.sleep(10);
       }
    }
    

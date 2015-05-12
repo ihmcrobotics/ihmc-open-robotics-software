@@ -28,7 +28,7 @@ public class RobotiqWriteRequestFactoryTest
       
       RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
       writeRequestFactory.createActivationRequest();
-      Register[] factoryRequest = writeRequestFactory.createFingerPositionRequest(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN);
+      Register[] factoryRequest = writeRequestFactory.createWholeHandPositionRequest(RobotiqGraspMode.BASIC_MODE, FingerState.OPEN);
       
       assertEquals(request.length, factoryRequest.length);
       

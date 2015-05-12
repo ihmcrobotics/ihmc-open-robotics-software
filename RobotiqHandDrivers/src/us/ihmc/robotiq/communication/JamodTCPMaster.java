@@ -18,6 +18,8 @@ import us.ihmc.utilities.ThreadTools;
 
 public class JamodTCPMaster
 {
+   private final boolean DEBUG = false;
+   
    private InetAddress slaveAddress;
    private TCPMasterConnection connection;
    private ModbusTCPTransaction transaction;
@@ -34,6 +36,7 @@ public class JamodTCPMaster
          connection = new TCPMasterConnection(slaveAddress);
          writeMultipleRegistersRequest = new WriteMultipleRegistersRequest();
          readInputRegistersRequest = new ReadInputRegistersRequest();
+         readInputRegistersRequest.setUnitID(2);
       }
       catch (UnknownHostException e)
       {
@@ -98,6 +101,14 @@ public class JamodTCPMaster
       readInputRegistersRequest.setWordCount(numberOfRegistersToRead);
       transaction.setRequest(readInputRegistersRequest);
       transaction.execute();
+      
+      if(DEBUG)
+      {
+         System.out.println("Request:");
+         System.out.println(readInputRegistersRequest.getHexMessage());
+         System.out.println("Response:");
+         System.out.println(((ReadInputRegistersResponse)transaction.getResponse()).getHexMessage());
+      }
       
       return ((ReadInputRegistersResponse)transaction.getResponse()).getRegisters();
    }
