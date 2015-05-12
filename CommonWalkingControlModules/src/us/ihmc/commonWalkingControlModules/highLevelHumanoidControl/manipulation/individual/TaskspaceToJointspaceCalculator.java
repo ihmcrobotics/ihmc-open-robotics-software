@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
@@ -80,6 +81,8 @@ public class TaskspaceToJointspaceCalculator
 
    private final DoubleYoVariable maximumTaskspaceAngularVelocityMagnitude;
    private final DoubleYoVariable maximumTaskspaceLinearVelocityMagnitude;
+
+   private final YoFramePose yoDesiredControlFramePose;
 
    private final YoFrameVector yoErrorRotation;
    private final YoFrameVector yoErrorTranslation;
@@ -190,6 +193,8 @@ public class TaskspaceToJointspaceCalculator
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
          jointAnlgesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
       }
+
+      yoDesiredControlFramePose = new YoFramePose(namePrefix + "Desired", worldFrame, registry);
 
       yoErrorRotation = new YoFrameVector(namePrefix + "ErrorRotation", localControlFrame, registry);
       yoErrorTranslation = new YoFrameVector(namePrefix + "ErrorTranslation", localControlFrame, registry);
@@ -401,6 +406,8 @@ public class TaskspaceToJointspaceCalculator
       updateLocalBaseFrame();
 
       desiredControlFrameTwist.checkReferenceFramesMatch(originalEndEffectorFrame, originalBaseFrame, originalControlFrame);
+
+      yoDesiredControlFramePose.setAndMatchFrame(desiredControlFramePose);
 
       ReferenceFrame originalControlledWithRespectToFrame = desiredControlFramePose.getReferenceFrame();
       ReferenceFrame localControlledWithRespectToFrame = originalToLocalFramesMap.get(originalControlledWithRespectToFrame);
