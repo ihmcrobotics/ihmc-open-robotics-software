@@ -59,7 +59,6 @@ public class PushRecoveryControlModule
    private final SideDependentList<ReferenceFrame> soleFrames;
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
-   private final double footArea;
 
    private double omega0;
    private final FramePoint2d desiredCapturePoint2d = new FramePoint2d();
@@ -106,7 +105,6 @@ public class PushRecoveryControlModule
       }
 
       footPolygon.setIncludingFrameAndUpdate(feet.get(RobotSide.LEFT).getContactPoints2d());
-      footArea = footPolygon.getArea();
 
       parentRegistry.addChild(registry);
 
@@ -192,14 +190,14 @@ public class PushRecoveryControlModule
       captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
       double captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
-      // If the capture region is too small we reduce the swing time.
+      // If there is no capture region for the given swing time we reduce it.
       for (; preferredSwingTime >= 0.0; preferredSwingTime -= swingTimeRemaining / 10.0)
       {
          captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTime, capturePoint2d, omega0, footPolygon);
 
          captureRegionArea = captureRegionCalculator.getCaptureRegionArea();
 
-         if (!Double.isNaN(captureRegionArea) && captureRegionArea >= footArea)
+         if (!Double.isNaN(captureRegionArea))
             break;
       }
 
@@ -221,6 +219,9 @@ public class PushRecoveryControlModule
       RobotSide supportSide = swingSide.getOppositeSide();
       footPolygon.setIncludingFrameAndUpdate(bipedSupportPolygon.getFootPolygonInAnkleZUp(supportSide));
 
+      double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
+      captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);
+
       if (!isICPErrorTooLarge.getBooleanValue())
       {
          isRobotBackToSafeState.update(true);
@@ -232,9 +233,6 @@ public class PushRecoveryControlModule
          // do not re-plan if we are almost at touch-down
          return false;
       }
-
-      double preferredSwingTimeForRecovering = computePreferredSwingTimeForRecovering(swingTimeRemaining, swingSide);
-      captureRegionCalculator.calculateCaptureRegion(swingSide, preferredSwingTimeForRecovering, capturePoint2d, omega0, footPolygon);
 
       FramePoint2d footCentroid = footPolygon.getCentroid();
       FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();

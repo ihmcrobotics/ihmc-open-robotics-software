@@ -9,6 +9,7 @@ import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.math.trajectories.TrajectoryType;
 import us.ihmc.utilities.math.trajectories.TwoWaypointTrajectoryGeneratorParameters;
 import us.ihmc.utilities.math.trajectories.providers.DoubleProvider;
 import us.ihmc.utilities.math.trajectories.providers.PositionProvider;
@@ -419,7 +420,8 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          positionSources[i].get(tempPosition);
          velocitySources[i].get(tempVelocity);
 
-         if ((i == 0) && setInitialSwingVelocityToZero.getBooleanValue())
+         boolean setInitialVelocityToZero = setInitialSwingVelocityToZero.getBooleanValue() || trajectoryParameters.getTrajectoryType() == TrajectoryType.PUSH_RECOVERY;
+         if ((i == 0) && setInitialVelocityToZero)
          {
             tempVelocity.set(0.0, 0.0, 0.0);
          }
@@ -496,7 +498,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
             return getWaypointsForObstacleClearance(swingHeight);
 
          case PUSH_RECOVERY :
-            return getWaypointsAtGroundClearance(TwoWaypointTrajectoryGeneratorParameters.getMinimumGroundClearance());
+            double[] pushRecoveryProportionsThroughTrajectoryForGroundClearance = TwoWaypointTrajectoryGeneratorParameters.getPushRecoveryProportionsThroughTrajectoryForGroundClearance();
+            double[] pushRecoveryGroundClearances = TwoWaypointTrajectoryGeneratorParameters.getPushRecoveryGroundClearances();
+            return getWaypointsAtGroundClearances(pushRecoveryGroundClearances, pushRecoveryProportionsThroughTrajectoryForGroundClearance);
 
          case BASIC :
             return getWaypointsAtGroundClearance(swingHeight);
@@ -589,6 +593,36 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
 
          waypoint.add(offsetFromInitial);
          waypoint.setZ(waypoints.get(i).getZ() + groundClearance);
+      }
+
+      return waypoints;
+   }
+
+   private List<FramePoint> getWaypointsAtGroundClearances(double[] groundClearances, double[] proportionsThroughTrajectoryForGroundClearance)
+   {
+      FramePoint initialPosition = allPositions[0].getFramePointCopy();
+      FramePoint finalPosition = allPositions[3].getFramePointCopy();
+      positionSources[0].get(initialPosition);
+      positionSources[1].get(finalPosition);
+      initialPosition.changeFrame(referenceFrame);
+      finalPosition.changeFrame(referenceFrame);
+
+      List<FramePoint> waypoints = new ArrayList<FramePoint>();
+      waypoints.add(new FramePoint(initialPosition.getReferenceFrame()));
+      waypoints.add(new FramePoint(initialPosition.getReferenceFrame()));
+
+      for (int i = 0; i < 2; i++)
+      {
+         FramePoint waypoint = waypoints.get(i);
+         waypoint.set(initialPosition);
+
+         FrameVector offsetFromInitial = new FrameVector(waypoint.getReferenceFrame());
+         offsetFromInitial.set(finalPosition);
+         offsetFromInitial.sub(initialPosition);
+         offsetFromInitial.scale(proportionsThroughTrajectoryForGroundClearance[i]);
+
+         waypoint.add(offsetFromInitial);
+         waypoint.setZ(waypoints.get(i).getZ() + groundClearances[i]);
       }
 
       return waypoints;
