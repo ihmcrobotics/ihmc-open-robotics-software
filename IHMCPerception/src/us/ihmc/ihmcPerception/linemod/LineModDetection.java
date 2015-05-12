@@ -1,5 +1,8 @@
 package us.ihmc.ihmcPerception.linemod;
 
+import javax.vecmath.Point2d;
+import javax.vecmath.Point2i;
+
 public class LineModDetection implements Comparable<LineModDetection>
 {
      /** \brief x-position of the detection. */
@@ -23,6 +26,11 @@ public class LineModDetection implements Comparable<LineModDetection>
      public float getScaledHeight()
      {
         return template.region.height*scale;
+     }
+     
+     public Point2i getCenter()
+     {
+        return new Point2i((int)(x + getScaledWidth()/2.0), (int)(y+getScaledHeight()/2.0));
      }
      
      public String toString()

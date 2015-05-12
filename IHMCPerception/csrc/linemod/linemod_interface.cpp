@@ -77,7 +77,7 @@ matchTemplates (const PointCloudXYZRGBA::ConstPtr & input, const pcl::LINEMOD & 
 }
 
 void trainTemplate (const PointCloudXYZRGBA::ConstPtr & input, 
-const std::vector<bool> &foreground_mask, pcl::LINEMOD & linemod)
+const std::vector<bool> &foreground_mask, pcl::LINEMOD & linemod, int numberOfPointsPerFeature)
 {
   pcl::ColorGradientModality<pcl::PointXYZRGBA> color_grad_mod;
   color_grad_mod.setInputCloud (input);
@@ -118,7 +118,7 @@ const std::vector<bool> &foreground_mask, pcl::LINEMOD & linemod)
   std::vector<pcl::MaskMap*> masks (3);
   masks[0] = &mask_map;
   masks[1] = &mask_map;
-  masks[2] = &mask_map;
+//  masks[2] = &mask_map;
 
   pcl::RegionXY region;
   region.x = static_cast<int> (min_x);
@@ -129,32 +129,32 @@ const std::vector<bool> &foreground_mask, pcl::LINEMOD & linemod)
   //std::cerr << "x1="<<region.x << std::endl;
   //printf ("%d %d %d %d\n", region.x, region.y, region.width, region.height);
 
-  linemod.createAndAddTemplate (modalities, masks, region);
+  linemod.createAndAddTemplate (modalities, masks, region, numberOfPointsPerFeature);
 }
 
 
 extern "C"
 {
-    int trainTemplateBytes (int w, int h, float* xyzrgb, int* mask, char*outbuf, int outlen)
-	{ 
-		PointCloudXYZRGBA::ConstPtr input = xyzrgb2cloud(w,h, xyzrgb);
+    int trainTemplateBytes (int w, int h, float* xyzrgb, int* mask, char*outbuf, int outlen, int numberOfPointsPerFeature)
+    {
+        PointCloudXYZRGBA::ConstPtr input = xyzrgb2cloud(w,h, xyzrgb);
 
-		std::vector<bool> foreground_mask;
-		foreground_mask.reserve(w*h);
+        std::vector<bool> foreground_mask;
+        foreground_mask.reserve(w*h);
 
-		for(int i=0;i<w*h;i++)
-			foreground_mask.push_back(mask[i]==1);
+        for(int i=0;i<w*h;i++)
+            foreground_mask.push_back(mask[i]==1);
 
-		pcl::LINEMOD linemod;
-		trainTemplate(input, foreground_mask, linemod);
-			
-		std::stringstream ss;
+        pcl::LINEMOD linemod;
+        trainTemplate(input, foreground_mask, linemod, numberOfPointsPerFeature);
+
+        std::stringstream ss;
         linemod.getTemplate(0).serialize(ss);
         int readlen = std::min<int>(outlen, ss.tellp());
-		ss.read(outbuf, readlen);
-		return readlen;
-		
-	}
+        ss.read(outbuf, readlen);
+        return readlen;
+
+    }
 
 
     int matchTemplatesBytes(int w, int h, float* xyzrgb, int nr_templates, char*buf, int buflen, int averaging, int non_maximal_supression)
@@ -268,7 +268,7 @@ int main(int argc, char** argv)
 
     const int buflen = 1024*1024;
     char buf[buflen];
-    trainTemplateBytes(cloud->width, cloud->height, xyzrgb, mask, buf, buflen);
+    trainTemplateBytes(cloud->width, cloud->height, xyzrgb, mask, buf, buflen,63);
     int nr_detection = matchTemplatesBytes(cloud->width, cloud->height, xyzrgb, nr_templates,  buf, buflen, false, false);
     std::cout << nr_detection << " detections\n";
 

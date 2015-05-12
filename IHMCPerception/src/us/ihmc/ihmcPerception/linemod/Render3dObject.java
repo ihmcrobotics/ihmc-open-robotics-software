@@ -22,6 +22,7 @@ import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Matrix4f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
@@ -31,7 +32,10 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.debug.Arrow;
 import com.jme3.scene.shape.Box;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext.Type;
@@ -42,18 +46,19 @@ import com.jme3.util.BufferUtils;
 public class Render3dObject extends SimpleApplication implements SceneProcessor
 {
 
-   static final boolean DEBUG = false;
-   private static double fovY = Math.PI / 4;
+   static boolean DEBUG = false;
+   private static double fovY = 0.90;//Math.PI / 4; //0.90 is closer to multisense SL
    private Spatial offObject;
 
    private FrameBuffer offBuffer;
    private ViewPort offView;
    private Camera offCamera;
 
-   private static final int width = 500, height = 500;
+   private static final int width = 544, height = 544;
+//   private static final int width = 1024, height = 544;
 
    private final ByteBuffer cpuBuf = BufferUtils.createByteBuffer(width * height * 4);
-
+   
    private final BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
    private final float[][] depthImage = new float[height][];
    private Object syncObj = new Object();
@@ -66,24 +71,19 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
 
    public static void main(String[] args)
    {
-      Render3dObject app = new Render3dObject(new File("/examples/drill/drill.obj"));
+//      Render3dObject app = new Render3dObject(new File("/examples/drill/drill.obj"));
+      Render3dObject app = new Render3dObject(new File("drill_DCS551/drillUI.obj"));
+      app.DEBUG=true;
 
       //rotation in camera frame - Xright Ydown Zforward
-      final Quaternion qX = new Quaternion();
-      qX.fromAngles(FastMath.PI / 2, 0.0f, 0.0f);
-      final Quaternion qTilt = new Quaternion();
-      qTilt.fromAngles(FastMath.PI / 4, 0.0f, 0.0f);
-      Quaternion q = new Quaternion();
-
       float angle = 0;
-      for (int i = 0; i < 20; i++)
+      for (int i = 0; i < 1; i++)
       {
-         angle = (angle + FastMath.TWO_PI / 8) % FastMath.TWO_PI;
-         q.fromAngles(0, angle, 0);
-         app.renderImage(new Transform(qTilt.mult(q.mult(qX))));
+         angle = (i * FastMath.TWO_PI / 8) % FastMath.TWO_PI;
+         app.renderImage(angle, 0.0f, 0.0f, +1.0f);
          Render3dObject.writeDepthImage(app.getDepthImage(), "test_depth" + i + ".png");
          Render3dObject.writeImage(app.getRGBImage(), "test_rgb" + i + ".png");
-         Render3dObject.writePcd(app.getRGBImage(), app.getDepthImage(), app.getCamera(), "test_cloud" + i + ".pcd");
+         Render3dObject.writePcd(app.getPointcloud().xyzrgb, app.getCamera(), "test_cloud" + i + ".pcd");
       }
 
    }
@@ -109,6 +109,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
       this.model = model;
       setPauseOnLostFocus(false);
       AppSettings settings = new AppSettings(true);
+      settings.setAudioRenderer(null);
       settings.setResolution(1, 1);
       setSettings(settings);
 //      start(Type.OffscreenSurface);
@@ -117,16 +118,16 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
    public void renderImage(float yaw, float pitch, float roll, float distance)
    {
       final Quaternion qX = new Quaternion();
-      qX.fromAngles(FastMath.PI / 2, 0.0f, 0.0f);
+      qX.fromAngles(FastMath.PI/2, 0.0f, 0.0f);
       Quaternion qYaw = new Quaternion();
-      qYaw.fromAngles(0.0f, yaw,  0.0f);
+      qYaw.fromAngles(0.0f, 0.0f, yaw);
       Quaternion qPitch = new Quaternion();
-      qPitch.fromAngles(pitch, 0.0f, 0.0f);
+      qPitch.fromAngles(0.0f, pitch, 0.0f);
       Quaternion qRoll = new Quaternion();
-      qRoll.fromAngles(0.0f, 0.0f, roll);
+      qRoll.fromAngles(roll, 0.0f, 0.0f);
       
       Transform transform = new Transform();
-      transform.setRotation(qRoll.mult(qPitch).mult(qYaw).mult(qX));
+      transform.setRotation(qX.mult(qYaw).mult(qPitch).mult(qRoll));
       transform.setTranslation(0.0f, 0.0f, distance);
       renderImage(transform);
       
@@ -149,7 +150,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
             e.printStackTrace();
          }
       }
-      stop();
+      stop(true);
    }
 
    public void setupOffscreenView()
@@ -158,7 +159,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
 
       // create a pre-view. a view that is rendered before the main view
       offView = renderManager.createPreView("Offscreen View", offCamera);
-      offView.setBackgroundColor(ColorRGBA.DarkGray);
+      offView.setBackgroundColor(ColorRGBA.Black);
       offView.setClearFlags(true, true, true);
 
       // this will let us know when the scene has been rendered to the 
@@ -169,10 +170,10 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
       offBuffer = new FrameBuffer(width, height, 1);
 
       //setup framebuffer's cam
-      offCamera.setFrustumPerspective((float) (fovY * 180 / Math.PI), (float) width / (float) height, 0.5f, 100f);
+      offCamera.setFrustumPerspective((float) (fovY * 180 / Math.PI), (float) width / (float) height, 0.1f, 2f);
 
-      offCamera.setLocation(new Vector3f(0f, 0f, -1.3f));
-      offCamera.lookAt(new Vector3f(0f, 0f, 0f), Vector3f.UNIT_Y);
+      offCamera.setLocation(new Vector3f(0f, 0f, 0f));
+      offCamera.lookAt(new Vector3f(0f, 0f, 1.0f), Vector3f.UNIT_Y.negate());
 
       //setup framebuffer's texture
       //        offTex = new Texture2D(width, height, Format.RGBA8);
@@ -199,27 +200,62 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
          assetManager.registerLocator(model.getParent(), ClasspathLocator.class);
          offObject = assetManager.loadModel(model.getName());
          AmbientLight al = new AmbientLight();
-         al.setColor(ColorRGBA.White.mult(1.0f));
+         al.setColor(ColorRGBA.White.mult(1.2f));
          offObject.addLight(al);
       }
 
       // attach the scene to the viewport to be rendered
-      offView.attachScene(offObject);
+      rootNode.attachChild(offObject);
+      if(DEBUG)
+      {
+         attachCoordinateAxes(rootNode,new Vector3f());
+      }
+      offView.attachScene(rootNode);
 
    }
+   
+   private void attachCoordinateAxes(Node node, Vector3f pos){
+      Arrow arrow = new Arrow(Vector3f.UNIT_X);
+      arrow.setLineWidth(4); // make arrow thicker
+      putShape(node, arrow, ColorRGBA.Red).setLocalTranslation(pos);
+     
+      arrow = new Arrow(Vector3f.UNIT_Y);
+      arrow.setLineWidth(4); // make arrow thicker
+      putShape(node, arrow, ColorRGBA.Green).setLocalTranslation(pos);
+     
+      arrow = new Arrow(Vector3f.UNIT_Z);
+      arrow.setLineWidth(4); // make arrow thicker
+      putShape(node, arrow, ColorRGBA.Blue).setLocalTranslation(pos);
+    }
+     
+    private Geometry putShape(Node node, Mesh shape, ColorRGBA color){
+      Geometry g = new Geometry("coordinate axis", shape);
+      Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+      mat.getAdditionalRenderState().setWireframe(true);
+      mat.setColor("Color", color);
+      g.setMaterial(mat);
+      g.rotate(0.0f,0.0f,0.0f);
+      g.scale(0.25f);
+      node.attachChild(g);
+      return g;
+    }
 
+    
    @Override
    public void simpleInitApp()
    {
-      setupOffscreenView();
+         setupOffscreenView();
    }
 
    @Override
    public void simpleUpdate(float tpf)
    {
-      offObject.setLocalTransform(objectTransform);
-      offObject.updateLogicalState(tpf);
-      offObject.updateGeometricState();
+//      offObject.setLocalTransform(objectTransform);
+//      offObject.updateLogicalState(tpf);
+//      offObject.updateGeometricState();
+      rootNode.setLocalTransform(objectTransform);
+      rootNode.updateLogicalState(tpf);
+      rootNode.updateGeometricState();
       objectTransformUpdated.set(true);
    }
 
@@ -250,26 +286,30 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
 
          writeDepthImage(depthImage, prefix + "_depth.png");
 
-         writePcd(image, depthImage, offCamera, prefix + "_cloud.pcd");
+         writePcd(getPointcloud().xyzrgb, offCamera, prefix + "_cloud.pcd");
          System.out.println("prefix=" + prefix);
       }
 
    }
 
    //Static Methods
-   static private void readDepthBuffer(float[][] outDepthImage)
+   private void readDepthBuffer(float[][] outDepthImage)
    {
 
       ByteBuffer depthBuf = BufferUtils.createByteBuffer(width * height * 4);
-      GL11.glReadPixels(0, 0, width, height, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, depthBuf);
+      GL11.glReadPixels(0, 0, width, height, GL11.GL_DEPTH_COMPONENT, GL11.GL_FLOAT, depthBuf); //output [0 1];
 
       FloatBuffer fb = depthBuf.asFloatBuffer();
-      for (int i = 0; i < outDepthImage.length; i++)
+      int heigh = outDepthImage.length;
+      for (int i = 0; i < heigh; i++)
       {
-         outDepthImage[i] = new float[width];
-         fb.get(outDepthImage[i]);
+         outDepthImage[height-i-1] = new float[width];
+         fb.get(outDepthImage[height-i-1]);
       }
-
+      
+      Matrix4f projectionMatrix = offCamera.getProjectionMatrix();
+      float A = projectionMatrix.m22;
+      float B = projectionMatrix.m23;
       for (int h = 0; h < height; h++)
          for (int w = 0; w < width; w++)
          {
@@ -279,7 +319,10 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
             }
             else
             {
-               outDepthImage[h][w] = (float) (1 / (2 - 2.0 * outDepthImage[h][w]));
+                  float rawDepth=outDepthImage[h][w];
+                  rawDepth = 2*rawDepth-1;
+//               outDepthImage[h][w] = (float) (1 / (outDepthImage[h][w])-1);
+               outDepthImage[h][w] = (float) (B / (A + rawDepth));
                //               depthImage[h][w] = 1 / (1 - depthImage[h][w]);
                //               depthImage[h][w] = zDeviceToZEye(depthImage[h][w]);
                //               System.out.println("w" + w + "h" + h + " " + depthImage[h][w]);
@@ -291,22 +334,24 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
    {
       float xyzrgb[] = new float[width * height * 4];
       int ptr = 0;
-      float f = (float) (height / 2.0 / Math.tan(fovY / 2.0));
+      float n = offCamera.getFrustumNear();
+      float frustrumWidthToImageWidth = (offCamera.getFrustumRight() - offCamera.getFrustumLeft()) / width;
+      float frustrumHeightToImageHeight = (offCamera.getFrustumTop() - offCamera.getFrustumBottom()) / height;
       for (int h = 0; h < height; h++)
          for (int w = 0; w < width; w++)
          {
             float x = 0, y = 0, z = 0;
             if (Float.isNaN(depthImage[h][w]))
             {
-               z = 2;//Float.NaN;
-               x = (float) ((w - width / 2) * z / f);
-               y = (float) ((h - height / 2) * z / f);
+               z = Float.NaN;//Float.NaN;
+               x = (float) ((w - width / 2) * frustrumWidthToImageWidth * z / n);
+               y = (float) ((h - height / 2) * frustrumHeightToImageHeight * z / n);
             }
             else
             {
                z = depthImage[h][w];
-               x = (float) ((w - width / 2) * z / f);
-               y = (float) ((h - height / 2) * z / f);
+               x = (float) ((w - width / 2) * frustrumWidthToImageWidth * z / n);
+               y = (float) ((h - height / 2) * frustrumHeightToImageHeight * z / n);
             }
 
             xyzrgb[ptr++] = x;
@@ -318,7 +363,7 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
       return new OrganizedPointCloud(width, height, xyzrgb);
    }
 
-   private static void writePcd(BufferedImage image, float[][] depthImage, Camera camera, String fileName)
+   private static void writePcd(float xyzrgb[], Camera camera, String fileName)
    {
 
       float f = (float) (height / 2.0 / Math.tan(fovY / 2.0));
@@ -341,30 +386,19 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
          writer.println("COUNT 1 1 1 1");
          writer.println("WIDTH " + width);
          writer.println("HEIGHT " + height);
-         writer.println("VIEWPOINT 0 0 -1 1 0 0 0");
+         writer.println("VIEWPOINT 0 0 0 1 0 0 0");
          writer.println("POINTS " + width * height);
          writer.println("DATA ascii");
+         int counter=0;
          for (int h = 0; h < height; h++)
             for (int w = 0; w < width; w++)
             {
-               float x = 0, y = 0, z = 0;
-               if (Float.isNaN(depthImage[h][w]))
-               {
-                  z = 2;//Float.NaN;
-                  x = (float) ((w - width / 2) * z / f);
-                  y = (float) ((h - height / 2) * z / f);
-               }
-               else
-               {
-                  z = depthImage[h][w];
-                  x = (float) ((w - width / 2) * z / f);
-                  y = (float) ((h - height / 2) * z / f);
-               }
+               float x = xyzrgb[counter++];
+               float y = xyzrgb[counter++];
+               float z = xyzrgb[counter++];
+               float rgb = xyzrgb[counter++];
                writer.print((x + " " + y + " " + (z) + " ").toLowerCase());
-
-               int c = image.getRGB(w, h);
-               writer.println(integerToUnsignedLong(c));
-               //               writer.println(c);
+               writer.println(Float.floatToRawIntBits(rgb));
             }
 
          writer.close();
@@ -374,11 +408,6 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
          System.out.println("file open failed");
          e.printStackTrace();
       }
-   }
-
-   private static long integerToUnsignedLong(int x)
-   {
-      return x & 0x00000000ffffffffL;
    }
 
    private static void writeDepthImage(float[][] depthImage, String fileName)
@@ -397,10 +426,13 @@ public class Render3dObject extends SimpleApplication implements SceneProcessor
             if (depth > maxDepth)
                maxDepth = depth;
          }
+      if(DEBUG)
+      {
+               System.out.println("Overal Depth - max " + maxDepth + " min " + minDepth);
+      }
 
       //fill image
       BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-      int rgb;
       for (int h = 0; h < height; h++)
       {
          for (int w = 0; w < width; w++)
