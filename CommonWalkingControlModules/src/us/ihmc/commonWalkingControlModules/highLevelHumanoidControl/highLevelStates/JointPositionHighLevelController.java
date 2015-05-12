@@ -593,6 +593,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
+      handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
 
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
@@ -627,6 +628,18 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       optionalHandControlFrame.setX(graspOffsetFromControlFrame);
       optionalHandControlFrame.update();
 
+      TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
+      handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
+
+      // Hack for driving to get away from the shz limit
+      if (robotSide == RobotSide.LEFT)
+      {
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(2, 1.0); // ely
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(4, -2.5); // wry
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(5, -0.8); // wrx
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(6, 0.0); // wry2
+      }
+
       CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = handCircularPoseTrajectoryGenerators.get(robotSide);
       handCircularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngleRightHandRule);
 
@@ -656,7 +669,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       }
 
       initializeTaskspaceHandTrajectory(robotSide, handCircularPoseTrajectoryGenerator, selectionMatrix);
-      handTaskspaceToJointspaceCalculators.get(robotSide).setControlFrameFixedInEndEffector(optionalHandControlFrame);
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
 
    private void initializeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)

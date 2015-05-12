@@ -339,6 +339,11 @@ public class TaskspaceToJointspaceCalculator
          yoPrivilegedJointPositions[i].set(jointAnlgesAtMidRangeOfMotion.get(i, 0));
    }
 
+   public void setPrivilegedJointPosition(int jointIndex, double qPrivileged)
+   {
+      yoPrivilegedJointPositions[jointIndex].set(qPrivileged);
+   }
+
    public void setMaximumJointVelocity(double maximumJointVelocity)
    {
       this.maximumJointVelocity.set(maximumJointVelocity);
