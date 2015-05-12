@@ -1,6 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge.pushRecovery;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -24,6 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
@@ -208,6 +209,34 @@ public abstract class DRCPushRecoveryTest
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0);
       assertTrue(success);
+   }
+
+   @EstimatedDuration(duration = 25.0)
+   @Test(timeout = 163619)
+   public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, false, false);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3d forceDirection = new Vector3d(-1.0, 0.0, 0.0);
+      double magnitude = 100.0;
+      double duration = 2.0;
+
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      try
+      {
+         drcSimulationTestHelper.simulateAndBlock(duration + 2.0);
+         fail("Robot fall has not been detected");
+      }
+      catch (ControllerFailureException e)
+      {
+         // Good
+      }
    }
 
    @EstimatedDuration(duration = 45.0)
