@@ -202,7 +202,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
          handTaskspaceToJointspaceCalculators.put(robotSide, handTaskspaceToJointspaceCalculator);
 
-         TaskspaceToJointspaceHandPositionControlState handTaskspaceController = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, chest, hand, timeProvider, registry);
+         TaskspaceToJointspaceHandPositionControlState handTaskspaceController = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, robotSide, momentumBasedController, chest, hand, registry);
          handTaskspaceController.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
          handTaskspaceControllers.put(robotSide, handTaskspaceController);
 

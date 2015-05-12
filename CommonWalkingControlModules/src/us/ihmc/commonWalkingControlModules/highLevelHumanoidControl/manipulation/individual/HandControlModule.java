@@ -245,7 +245,7 @@ public class HandControlModule
               handControlFrame, controlDT, registry);
       handSpatialAccelerationControlModule.setGains(taskspaceGains);
 
-      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix, chest, hand, controlDT, registry);
+      handTaskspaceToJointspaceCalculator = new TaskspaceToJointspaceCalculator(namePrefix + "Hand", chest, hand, controlDT, registry);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
       handTaskspaceToJointspaceCalculator.setupWithDefaultParameters();
 
@@ -281,25 +281,26 @@ public class HandControlModule
 
 
       doPositionControl = armControlParameters.doLowLevelPositionControl();
-      jointSpaceHandControlState = new JointSpaceHandControlState(namePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
+      String stateNamePrefix = namePrefix + "Hand";
+      jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
 
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
          loadBearingControlState = null;
-         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, yoTime, registry);
+         taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForPositionControlledJoints(stateNamePrefix, robotSide, momentumBasedController, chest, hand, registry);
       }
       else
       {
-         loadBearingControlState = new LoadBearingHandControlState(namePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController, fullRobotModel.getElevator(), hand, jacobianId, registry);
+         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlState.LOAD_BEARING, robotSide, momentumBasedController, fullRobotModel.getElevator(), hand, jacobianId, registry);
 
          if (armControlParameters.useInverseKinematicsTaskspaceControl())
          {
-            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(namePrefix, momentumBasedController, chest, hand, controlDT, jointspaceGains, yoTime, registry);
+            taskSpacePositionControlState = TaskspaceToJointspaceHandPositionControlState.createControlStateForForceControlledJoints(stateNamePrefix, robotSide, momentumBasedController, chest, hand, jointspaceGains, registry);
          }
          else
          {
-            taskSpacePositionControlState = new TaskspaceHandPositionControlState(namePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
+            taskSpacePositionControlState = new TaskspaceHandPositionControlState(stateNamePrefix, HandControlState.TASK_SPACE_POSITION, momentumBasedController, jacobianId, chest, hand, yoGraphicsListRegistry, registry);
          }
       }
 
