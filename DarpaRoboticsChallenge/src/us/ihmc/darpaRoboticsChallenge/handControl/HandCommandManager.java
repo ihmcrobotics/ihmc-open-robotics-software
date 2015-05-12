@@ -26,7 +26,7 @@ public abstract class HandCommandManager
       
       spawner.spawn(clazz, new String[] {"-DnetworkParameterFile=" + networkParamProperty}, new String[] { "-r", robotSide.getLowerCaseName() });
 
-      NetworkPorts managerPort = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
+      NetworkPorts managerPort = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
       handManagerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(managerPort, new IHMCCommunicationKryoNetClassList());
 
       NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;

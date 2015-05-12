@@ -3,8 +3,10 @@ package us.ihmc.robotiq;
 import java.net.SocketTimeoutException;
 
 import net.wimpi.modbus.ModbusException;
+import net.wimpi.modbus.facade.ModbusTCPMaster;
 import net.wimpi.modbus.procimg.InputRegister;
 import net.wimpi.modbus.procimg.Register;
+import net.wimpi.modbus.procimg.SimpleRegister;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
@@ -98,15 +100,28 @@ public class RobotiqHandCommunicator
       initialize();
    }
    
-   public void sendFingerState(FingerState fingerState)
+   public void sendHandCommand(FingerState fingerState)
    {
       handleGraspModes(fingerState);
-      sendCommand();
+      sendCommand(writeRequestFactory.createWholeHandPositionRequest(graspMode, this.fingerState));
    }
    
-   private void sendCommand()
+   public void sendFingersCommand(FingerState fingerState)
    {
-      Register[] request = writeRequestFactory.createFingerPositionRequest(graspMode, fingerState);
+      handleGraspModes(fingerState);
+      sendCommand(writeRequestFactory.createFingersPositionRequest(graspMode, this.fingerState));
+   }
+   
+   public void sendThumbCommand(FingerState fingerState)
+   {
+      handleGraspModes(fingerState);
+      sendCommand(writeRequestFactory.createThumbPositionRequest(graspMode, this.fingerState));
+   }
+   
+   private void sendCommand(Register[] request)
+   {
+      System.out.println("Write:");
+      printRegisters(request);
       try
       {
          communicator.writeMultipleRegisters(0, request);
@@ -133,8 +148,15 @@ public class RobotiqHandCommunicator
          case SCISSOR_GRIP:
             graspMode = RobotiqGraspMode.SCISSOR_MODE;
             break;
+         case CLOSE_FINGERS:
+         case CLOSE_THUMB:
          case CRUSH:
-            fingerState = FingerState.CLOSE;
+            this.fingerState = FingerState.CLOSE;
+            break;
+         case OPEN_FINGERS:
+         case OPEN_THUMB:
+            this.fingerState = FingerState.OPEN;
+            break;
          default:
             this.fingerState = fingerState;
       }
@@ -143,5 +165,46 @@ public class RobotiqHandCommunicator
    public RobotiqHandSensorDizzata getHandSensorData()
    {
       return handSensorData;
+   }
+   
+   private void printRegisters(InputRegister[] registers)
+   {
+      for(InputRegister reg : registers)
+      {
+         for(byte b : reg.toBytes())
+         {
+            System.out.print(b + " ");
+         }
+      }
+      System.out.println();
+   }
+   
+   public static void main(String[] args)
+   {
+      ModbusTCPMaster master = new ModbusTCPMaster("10.7.4.140", 502);
+      try
+      {
+         master.connect();
+         
+         ThreadTools.sleep(50);
+         master.writeMultipleRegisters(0, new Register[]{new SimpleRegister((byte)1, (byte)0)});
+         ThreadTools.sleep(100);
+         
+         while(true)
+         {
+            InputRegister[] response = master.readInputRegisters(0, 8);
+            for(InputRegister register : response)
+            {
+               System.out.print(register.toBytes()[0] + " " + register.toBytes()[1] + " ");
+            }
+            System.out.println();
+            
+            ThreadTools.sleep(100);
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 }
