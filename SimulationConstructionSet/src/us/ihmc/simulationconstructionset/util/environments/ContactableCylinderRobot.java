@@ -24,7 +24,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 public class ContactableCylinderRobot extends ContactableRobot
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   public static final double DEFAULT_RADIUS = 0.2;
+   public static final double DEFAULT_RADIUS = 0.15;
    public static final double DEFAULT_THICKNESS = 0.05;
    private static final double DEFAULT_MASS = 1.0;
 
@@ -74,7 +74,7 @@ public class ContactableCylinderRobot extends ContactableRobot
 
       linkGraphics = new Graphics3DObject();
       //linkGraphics.addCoordinateSystem(0.2);
-      linkGraphics.addCylinder(frameCylinder.getHeight(), frameCylinder.getRadius(), YoAppearance.Gold());
+      linkGraphics.addCylinder(frameCylinder.getHeight(), frameCylinder.getRadius(), YoAppearance.Transparent());
       if(modelName!=null)
          linkGraphics.addModelFile(modelName);
       link.setLinkGraphics(linkGraphics);
