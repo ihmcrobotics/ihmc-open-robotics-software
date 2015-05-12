@@ -375,7 +375,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             try
             {
-               videoDataLoggers.add(new NetworkStreamVideoDataLogger(request, tempDirectory, logProperties, options, videoStreamAddress));
+               videoDataLoggers.add(new NetworkStreamVideoDataLogger(request.getControlIP(), tempDirectory, logProperties, videoStreamAddress));
             }
             catch (IOException e)
             {

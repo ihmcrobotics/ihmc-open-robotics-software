@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.robotDataCommunication.LogDataHeader;
 import us.ihmc.robotDataCommunication.gui.GUICaptureReceiver;
 
@@ -32,11 +31,11 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    
    private volatile long timestamp = 0;
    
-   public NetworkStreamVideoDataLogger(AnnounceRequest request, File logPath, LogProperties logProperties, YoVariableLoggerOptions options, InetSocketAddress address) throws SocketException, UnknownHostException
+   public NetworkStreamVideoDataLogger(byte[] controlIP, File logPath, LogProperties logProperties, InetSocketAddress address) throws SocketException, UnknownHostException
    {
       super(logPath, logProperties, description, false);
       
-      NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(request.getControlIP()));
+      NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(controlIP));
       
       
       client = new GUICaptureReceiver(iface, address.getAddress(), this);
