@@ -1,5 +1,6 @@
 package us.ihmc.graphics3DAdapter;
 
+import java.awt.Container;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JFrame;
@@ -186,5 +187,10 @@ public class Graphics3DWorld implements Graphics3DFrameListener
       {
          graphics3dAdapter.addRootNode(graphics3DNodesToAddPostFrame.poll());
       }
+   }
+   
+   public Container getContentPane()
+   {
+      return jFrame.getContentPane();
    }
 }
