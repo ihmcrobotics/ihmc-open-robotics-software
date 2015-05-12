@@ -591,8 +591,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
       handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
-      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(fullRobotModel.getHandControlFrame(robotSide));
-      handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(currentDesiredHandPose, desiredReferenceFrame);
+      ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
 
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
@@ -609,6 +609,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = handStraightLinePoseTrajectoryGenerators.get(robotSide);
       handStraightLinePoseTrajectoryGenerator.registerAndSwitchFrame(desiredReferenceFrame);
+      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, handControlFrame);
       handStraightLinePoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
       handStraightLinePoseTrajectoryGenerator.setFinalPose(desiredHandPose);
       handStraightLinePoseTrajectoryGenerator.setTrajectoryTime(handPoseProvider.getTrajectoryTime());
@@ -634,11 +635,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       handCircularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
 
-      TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
-      handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
-      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
-      handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(currentDesiredHandPose, worldFrame);
-
+      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, optionalHandControlFrame);
       handCircularPoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
       handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
@@ -651,7 +648,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          selectionFrameMatrix.setElement(0, 0, 1.0);
          selectionFrameMatrix.setElement(1, 1, 1.0);
          selectionFrameMatrix.setElement(2, 2, 0.0);
-         selectionFrameMatrix.changeFrame(fullRobotModel.getHandControlFrame(robotSide));
+         selectionFrameMatrix.changeFrame(optionalHandControlFrame);
 
          selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
          CommonOps.setIdentity(selectionMatrix);
@@ -670,6 +667,29 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceController.setTrajectory(trajectory);
       handTaskspaceController.setSelectionMatrix(selectionMatrix);
       handTaskspaceController.initializeWithDesiredJointAngles();
+   }
+
+   private void computeHandCurrentDesiredFramePose(FramePose desiredHandPoseToPack, RobotSide robotSide, ReferenceFrame trajectoryFrame, ReferenceFrame newControlFrame)
+   {
+      TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
+      if (areHandTaskspaceControlled.get(robotSide).getBooleanValue())
+      {
+         desiredHandPoseToPack.setPoseIncludingFrame(handTaskspaceControllers.get(robotSide).getDesiredPose());
+         ReferenceFrame oldControlFrame = handTaskspaceToJointspaceCalculator.getControlFrame();
+         if (oldControlFrame != newControlFrame)
+         {
+            handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
+            handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredHandPoseToPack, trajectoryFrame);
+         }
+      }
+      else
+      {
+         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
+         handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+         handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredHandPoseToPack, trajectoryFrame);
+      }
+
+      desiredHandPoseToPack.changeFrame(trajectoryFrame);
    }
 
    private void setFinalPositionSpineJoints(JointAnglesPacket packet)

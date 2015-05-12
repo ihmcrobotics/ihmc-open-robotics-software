@@ -303,50 +303,53 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
    private void doCompliantControl(FramePoint desiredPosition)
    {
-      if (enableCompliantControl.getBooleanValue())
+      if (!enableCompliantControl.getBooleanValue())
       {
-         if (wristForceSensor == null)
-         {
-            enableCompliantControl.set(false);
-            return;
-         }
-
-         wristForceSensor.packWrench(measuredWrench);
-         measuredWrench.packLinearPartIncludingFrame(tempForceVector);
-         rawMeasuredForce.setAndMatchFrame(tempForceVector);
-         deadzoneMeasuredForce.update();
-         filteredMeasuredForce.update();
-         filteredMeasuredForce.getFrameTupleIncludingFrame(tempForceVector);
-
-         yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(compliantControlLinearDisplacement);
-
-         tempForceVector.changeFrame(worldFrame);
-         compliantControlLinearDisplacement.changeFrame(worldFrame);
-
-         compliantControlCorrection.scale(-compliantControlLinearGain.getDoubleValue(), tempForceVector);
-
-         double correctionMagnitude = compliantControlCorrection.length();
-         if (correctionMagnitude > compliantControlMaxCorrectionPerTick.getDoubleValue())
-         {
-            compliantControlCorrection.scale(compliantControlMaxCorrectionPerTick.getDoubleValue() / correctionMagnitude);
-         }
-
-         compliantControlLinearDisplacement.scale(compliantControlLeakRatio.getDoubleValue());
-         compliantControlLinearDisplacement.add(compliantControlCorrection);
-         compliantControlLinearDisplacement.clipToMinMax(-compliantControlMaxLinearDisplacement.getDoubleValue(), compliantControlMaxLinearDisplacement.getDoubleValue());
-
-         if (!doCompliantControlLinear[0].getBooleanValue())
-            compliantControlLinearDisplacement.setX(0.0);
-         if (!doCompliantControlLinear[1].getBooleanValue())
-            compliantControlLinearDisplacement.setY(0.0);
-         if (!doCompliantControlLinear[2].getBooleanValue())
-            compliantControlLinearDisplacement.setZ(0.0);
-
-         yoCompliantControlLinearDisplacement.setAndMatchFrame(compliantControlLinearDisplacement);
-
-         compliantControlLinearDisplacement.changeFrame(desiredPosition.getReferenceFrame());
-         desiredPosition.add(compliantControlLinearDisplacement);
+         yoCompliantControlLinearDisplacement.setToZero();
+         return;
       }
+
+      if (wristForceSensor == null)
+      {
+         enableCompliantControl.set(false);
+         return;
+      }
+
+      wristForceSensor.packWrench(measuredWrench);
+      measuredWrench.packLinearPartIncludingFrame(tempForceVector);
+      rawMeasuredForce.setAndMatchFrame(tempForceVector);
+      deadzoneMeasuredForce.update();
+      filteredMeasuredForce.update();
+      filteredMeasuredForce.getFrameTupleIncludingFrame(tempForceVector);
+
+      yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(compliantControlLinearDisplacement);
+
+      tempForceVector.changeFrame(worldFrame);
+      compliantControlLinearDisplacement.changeFrame(worldFrame);
+
+      compliantControlCorrection.scale(-compliantControlLinearGain.getDoubleValue(), tempForceVector);
+
+      double correctionMagnitude = compliantControlCorrection.length();
+      if (correctionMagnitude > compliantControlMaxCorrectionPerTick.getDoubleValue())
+      {
+         compliantControlCorrection.scale(compliantControlMaxCorrectionPerTick.getDoubleValue() / correctionMagnitude);
+      }
+
+      compliantControlLinearDisplacement.scale(compliantControlLeakRatio.getDoubleValue());
+      compliantControlLinearDisplacement.add(compliantControlCorrection);
+      compliantControlLinearDisplacement.clipToMinMax(-compliantControlMaxLinearDisplacement.getDoubleValue(), compliantControlMaxLinearDisplacement.getDoubleValue());
+
+      if (!doCompliantControlLinear[0].getBooleanValue())
+         compliantControlLinearDisplacement.setX(0.0);
+      if (!doCompliantControlLinear[1].getBooleanValue())
+         compliantControlLinearDisplacement.setY(0.0);
+      if (!doCompliantControlLinear[2].getBooleanValue())
+         compliantControlLinearDisplacement.setZ(0.0);
+
+      yoCompliantControlLinearDisplacement.setAndMatchFrame(compliantControlLinearDisplacement);
+
+      compliantControlLinearDisplacement.changeFrame(desiredPosition.getReferenceFrame());
+      desiredPosition.add(compliantControlLinearDisplacement);
    }
 
    @Override
@@ -425,8 +428,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          startTimeInStateToIgnoreOrientation.set(timeToDecayOrientationControl);
          endTimeInStateToIgnoreOrientation.set(activeTrajectoryTime.getDoubleValue() - timeToDecayOrientationControl);
       }
-
-      yoCompliantControlLinearDisplacement.setToZero();
    }
 
    private void setupSelectionMatrixForLinearControlOnly()
@@ -550,7 +551,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    @Override
    public FramePose getDesiredPose()
    {
-      taskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredPose, desiredPose.getReferenceFrame());
       return desiredPose;
    }
 
