@@ -23,6 +23,7 @@ import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.utilities.compression.SnappyUtils;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
@@ -75,32 +76,43 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       logProperties.setLogName(request.getName());
       logProperties.setTimestamp(timestamp);
-      try
+      
+      if(!options.getDisableVideo())
       {
-         FileInputStream configuration = new FileInputStream(options.getConfigurationFile());
-         List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
-
-         System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
-         for (int camera : request.getCameras())
+         File configurationFile = new File(options.getConfigurationFile());
+         try
          {
-            cameras.add(cameraSettings.get(camera));
+            FileInputStream configuration = new FileInputStream(configurationFile);
+            List<VideoSettings> cameraSettings = VideoSettings.loadCameraSettings(configuration);
+            
+            System.out.println("Cameras: " + Arrays.toString(request.getCameras()));
+            for (int camera : request.getCameras())
+            {
+               cameras.add(cameraSettings.get(camera));
+            }
+            
+            if (request.hasVideoStream())
+            {
+               videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
+               System.out.println("Video stream: " + videoStreamAddress);
+            }
+            else
+            {
+               videoStreamAddress = null;
+            }
+            
+            configuration.close();
          }
-
-         if (request.hasVideoStream())
+         catch (IOException e)
          {
-            videoStreamAddress = new InetSocketAddress(LogUtils.getByAddress(request.getVideoStream()), request.getVideoPort());
-            System.out.println("Video stream: " + videoStreamAddress);
+            throw new RuntimeException("Cannot load camera configuration file " + configurationFile.getAbsolutePath(), e);
          }
-         else
-         {
-            videoStreamAddress = null;
-         }
-
-         configuration.close();
+         
       }
-      catch (IOException e)
+      else
       {
-         throw new RuntimeException("Cannot load " + options.getConfigurationFile(), e);
+         PrintTools.warn(this, "cameras.yaml not found, disabling video");
+         videoStreamAddress = null;
       }
 
    }
