@@ -65,7 +65,7 @@ pcl::LINEMOD::~LINEMOD()
 int 
 pcl::LINEMOD::createAndAddTemplate (const std::vector<pcl::QuantizableModality*> & modalities,
                       const std::vector<pcl::MaskMap*> & masks,
-                      const pcl::RegionXY & region)
+                      const pcl::RegionXY & region, const size_t nr_features_per_modality)
 {
   // assuming width and height is same for all modalities; should we check this??
   //const int width = modalities[0]->getQuantizedMap().getWidth ();
@@ -74,7 +74,6 @@ pcl::LINEMOD::createAndAddTemplate (const std::vector<pcl::QuantizableModality*>
   SparseQuantizedMultiModTemplate linemod_template;
 
   // select N features from every modality (N = 50, hardcoded; CHANGE this to a parameter!!!)
-  const size_t nr_features_per_modality = 63;
   const size_t nr_modalities = modalities.size();
   for (size_t modality_index = 0; modality_index < nr_modalities; ++modality_index)
   {

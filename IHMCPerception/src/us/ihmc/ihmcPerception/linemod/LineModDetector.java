@@ -15,7 +15,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.vecmath.Point2d;
+import javax.vecmath.Point2i;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.utilities.Pair;
@@ -33,8 +36,11 @@ public class LineModDetector
    ArrayList<LineModTemplate> byteFeatures = new ArrayList<>();
    String modelPathInResource;
 
+   Render3dObject renderer;
    public LineModDetector(String modelPathInResource)
    {
+      if(modelPathInResource!=null)
+         renderer = new Render3dObject(new File(modelPathInResource));
       this.modelPathInResource = modelPathInResource;
 
    }
@@ -70,7 +76,6 @@ public class LineModDetector
 
    public OrganizedPointCloud renderCloud(double yaw, double pitch, double roll, double distance)
    {
-      Render3dObject renderer = new Render3dObject(new File(modelPathInResource));
 
       renderer.renderImage((float) yaw, (float) pitch, (float) roll, (float) distance);
 
@@ -84,7 +89,8 @@ public class LineModDetector
       final int stepSize = 4;
       for (int i = 0; i < mask.length; i++)
       {
-         mask[i] = pointCloud.xyzrgb[i * stepSize + zFieldOffset] < minDepth ? 1 : 0;
+         float depth=pointCloud.xyzrgb[i * stepSize + zFieldOffset];
+         mask[i] =  depth < minDepth ? 1 : 0;
       }
       return mask;
    }
@@ -186,7 +192,7 @@ public class LineModDetector
          for (float roll = -FastMath.PI / 24; roll <= FastMath.PI / 24; roll += FastMath.PI / 24)
          {
             System.out.println("ypr " + yaw + " " + pitch + " " + roll);
-            trainSingleDetector(yaw, pitch, roll, 0.0);
+            trainSingleDetector(yaw, pitch, roll, 1.0);
          }
 
       }
@@ -199,12 +205,34 @@ public class LineModDetector
    {
       OrganizedPointCloud cloud = renderCloud(yaw, pitch, roll, distance);
       int[] mask = makeMaskByZThresholing(cloud, 1.5f);
+      writeMask(mask, cloud.width, cloud.height);
+      
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setEuler(roll, pitch, yaw);
       transform.setTranslation(0, 0, distance);
       template.transform = transform;
       byteFeatures.add(template);
+   }
+   
+   private void writeMask(int[] mask, int width, int height)
+   {
+      BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+      for(int i=0;i<image.getHeight();i++)
+         for(int j=0;j<image.getWidth();j++)
+         {
+            boolean bw = mask[i*image.getWidth()+j]==0;
+            image.setRGB(j, i, (bw?Color.BLACK:Color.WHITE).getRGB());
+         }
+      try
+      {
+         ImageIO.write(image, "png", new File("testMask.png"));
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
    }
 
    public LineModDetection detectObjectAndEstimatePose(OrganizedPointCloud testCloud, ArrayList<LineModDetection> detectionsToPack)
@@ -276,15 +304,14 @@ public class LineModDetector
 //      System.out.println("XAxis" + xAxis);
 //      System.out.println("YAxis" + yAxis);
 //      System.out.println("ZAxis" + zAxis);
-      int x0 = (int)(bestDetection.x + bestDetection.getScaledWidth()/2);
-      int y0 = (int)(bestDetection.y + bestDetection.getScaledHeight()/2);
+      Point2i c= bestDetection.getCenter();
       g2.setColor(Color.RED);
-      g2.drawLine(x0, y0, (int)(x0+xAxis.x), (int)(y0+xAxis.y));
+      g2.drawLine(c.x, c.y, (int)(c.x+xAxis.x), (int)(c.y+xAxis.y));
       g2.setColor(Color.GREEN);
-      g2.drawLine(x0, y0, (int)(x0+yAxis.x), (int)(y0+yAxis.y));
+      g2.drawLine(c.x, c.y, (int)(c.x+yAxis.x), (int)(c.y+yAxis.y));
       g2.setColor(Color.BLUE);
-      g2.drawLine(x0, y0, (int)(x0+zAxis.x), (int)(y0+zAxis.y));
-      
+      g2.drawLine(c.x, c.y, (int)(c.x+zAxis.x), (int)(c.y+zAxis.y));
+      g2.dispose();
    }
 
    
@@ -311,17 +338,24 @@ public class LineModDetector
       for (int i = 0; i < 36; i++)
       {
          float groundTruthAngle = (float)(i/36.0*FastMath.TWO_PI); 
-         float distancePerturbation = 0.0f;//(float) Math.random() * 0.2f;
-         OrganizedPointCloud testCloud = detector.renderCloud(groundTruthAngle, FastMath.PI/4.0, 0.0f, distancePerturbation);
+         float distancePerturbation = 1.0f;//(float) Math.random() * 0.2f;
+         OrganizedPointCloud testCloud = detector.renderCloud(0.0, 0.0, 0.0f, distancePerturbation);
          ArrayList<LineModDetection> detections = new ArrayList<>();
          LineModDetection bestDetection = detector.detectObjectAndEstimatePose(testCloud, detections);
-         Vector3d rollPitchYaw = new Vector3d();
-         bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
-         System.out.println("estimated " + rollPitchYaw.getZ()/UnitConversions.DEG_TO_RAD + " groundtruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD);
-         
-         BufferedImage image = testCloud.getRGBImage();
-         detector.drawDetectionOnImage(bestDetection, image);
-         imagePanel.setBufferedImageSafe(image);
+         if(bestDetection!=null)
+         {
+            Vector3d rollPitchYaw = new Vector3d();
+            bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
+            System.out.println("estimated " + rollPitchYaw.getZ()/UnitConversions.DEG_TO_RAD + " groundtruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD);
+            
+            BufferedImage image = testCloud.getRGBImage();
+            detector.drawDetectionOnImage(bestDetection, image);
+            imagePanel.setBufferedImageSafe(image);
+         }
+         else
+         {
+            System.out.println("no detection");
+         }
       }
    }
 }

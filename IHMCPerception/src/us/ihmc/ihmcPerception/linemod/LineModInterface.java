@@ -17,15 +17,15 @@ class LineModInterface
    }
    
 
-   private static native int trainTemplateBytes (int w, int h, float[] xyzrgb, int[] mask, byte[] outbuf, int outlen);
+   private static native int trainTemplateBytes (int w, int h, float[] xyzrgb, int[] mask, byte[] outbuf, int outlen, int numberOfPointPerFeatureModality);
    private static native int matchTemplatesBytes(int w, int h, float[] xyzrgb, int nr_templates, byte[]buf, int buflen, int averaging, int nonMaximalSupression);
 
    
 
    public static LineModTemplate trainTemplateBytes(OrganizedPointCloud pointCloud, int[] mask)
    {
-      byte[] buf = new byte[8192];
-      int outlen=trainTemplateBytes(pointCloud.width, pointCloud.height, pointCloud.xyzrgb, mask, buf, buf.length);
+      byte[] buf = new byte[16384];
+      int outlen=trainTemplateBytes(pointCloud.width, pointCloud.height, pointCloud.xyzrgb, mask, buf, buf.length, 300);
 
       byte[] out=new byte[outlen];
       System.arraycopy(buf, 0, out, 0, outlen);
