@@ -314,6 +314,23 @@ public class PelvisLinearStateUpdater
       }
    }
 
+   public void updateForFrozenState()
+   {
+      // Keep setting the position so the localization updater works properly.
+      yoRootJointPosition.get(tempRootJointTranslation);
+      rootJoint.setPosition(tempRootJointTranslation);
+
+      // Set the rootJoint twist to zero.
+      rootJoint.packJointTwist(rootJointTwist);
+      rootJointTwist.setToZero();
+      rootJoint.setJointTwist(rootJointTwist);
+
+      rootJointFrame.update();
+      twistCalculator.compute();
+
+      updateCoMState();
+   }
+
    public void updateRootJointPositionAndLinearVelocity()
    {
 	   if (requestStopEstimationOfPelvisLinearState.getBooleanValue())

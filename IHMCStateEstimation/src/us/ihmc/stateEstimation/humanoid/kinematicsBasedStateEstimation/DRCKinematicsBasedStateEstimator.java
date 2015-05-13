@@ -10,7 +10,9 @@ import javax.vecmath.Quat4d;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
+import us.ihmc.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -28,6 +30,7 @@ import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -41,6 +44,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final DoubleYoVariable yoTime = new DoubleYoVariable("t_stateEstimator", registry);
+   private final EnumYoVariable<StateEstimatorMode> operatingMode = new EnumYoVariable<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
 
    private final FusedIMUSensor fusedIMUSensor;
    private final JointStateUpdater jointStateUpdater;
@@ -58,6 +62,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
    private final BooleanYoVariable usePelvisCorrector;
    private final SensorOutputMapReadOnly sensorOutputMapReadOnly;
+
+   private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
@@ -148,6 +154,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
 
+      operatingMode.set(StateEstimatorMode.NORMAL);
+
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
       pelvisLinearStateUpdater.initialize();
@@ -161,9 +169,26 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
 
+      if (stateEstimatorModeSubscriber != null && stateEstimatorModeSubscriber.checkForNewOperatingModeRequest())
+      {
+         operatingMode.set(stateEstimatorModeSubscriber.getRequestedOperatingMode());
+      }
+
       jointStateUpdater.updateJointState();
-      pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
-      pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+
+      switch (operatingMode.getEnumValue())
+      {
+         case FROZEN:
+            pelvisRotationalStateUpdater.updateForFrozenState();
+            pelvisLinearStateUpdater.updateForFrozenState();
+            break;
+
+         case NORMAL:
+         default:
+            pelvisRotationalStateUpdater.updateRootJointOrientationAndAngularVelocity();
+            pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
+            break;
+      }
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
@@ -295,5 +320,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
+   }
+
+   public void setOperatingModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
+   {
+      this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
    }
 }
