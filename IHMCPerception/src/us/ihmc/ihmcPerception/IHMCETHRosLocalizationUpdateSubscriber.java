@@ -78,8 +78,6 @@ public class IHMCETHRosLocalizationUpdateSubscriber
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            System.out.println(pointCloud.getWidth());
-            
             UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
             Point3d[] points = pointCloudData.getPoints();
             
