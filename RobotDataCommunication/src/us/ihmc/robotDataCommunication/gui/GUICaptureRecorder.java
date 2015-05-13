@@ -26,6 +26,7 @@ import us.ihmc.robotDataCommunication.logger.NetworkStreamVideoDataLogger;
 
 public class GUICaptureRecorder extends JFrame
 {
+   private static final long serialVersionUID = -5900895574333786847L;
    public final JButton start = new JButton("start");
    public final JButton stop = new JButton("stop");
    private final JComboBox<LogSettings> gui = new JComboBox<>();
@@ -79,6 +80,7 @@ public class GUICaptureRecorder extends JFrame
       getContentPane().add(stop);
       
       setLocationByPlatform(true);
+      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       pack();
       setVisible(true);

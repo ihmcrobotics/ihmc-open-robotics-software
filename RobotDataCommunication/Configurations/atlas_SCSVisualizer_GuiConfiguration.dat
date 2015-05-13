@@ -14,6 +14,12 @@
 	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>requestedHighLevelState</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -26,14 +32,14 @@
 
 <Extra Panels>
 <Main Viewport>
-
+Plotter,
 </Main Viewport></Extra Panels>
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>13.822164212867266</Camera X>
- <Camera Y>2.755611069547569</Camera Y>
- <Camera Z>1.8858689250810816</Camera Z>
+ <Camera X>0.0</Camera X>
+ <Camera Y>-2.667367787313481</Camera Y>
+ <Camera Z>0.7778245191542319</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

@@ -100,8 +100,7 @@ public class DRCSimulationFactory
 
       if(drcRobotModel.getLogSettings().isLog())
       {
-         PeriodicThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler("DRCSimulationYoVariableServer");
-         yoVariableServer = new YoVariableServer(getClass(), scheduler, drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
+         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler("DRCSimulationYoVariableServer"), drcRobotModel.getLogModelProvider(), drcRobotModel.getLogSettings(), drcRobotModel.getEstimatorDT());
       }
       else
       {
@@ -210,7 +209,7 @@ public class DRCSimulationFactory
       
       
       drcEstimatorThread = new DRCEstimatorThread(drcRobotModel.getSensorInformation(), drcRobotModel.getContactPointParameters(), drcRobotModel.getStateEstimatorParameters(),
-    		  sensorReaderFactory, threadDataSynchronizer, globalDataProducer, yoVariableServer, gravity);
+    		  sensorReaderFactory, threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), globalDataProducer, yoVariableServer, gravity);
       
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator = null;
       

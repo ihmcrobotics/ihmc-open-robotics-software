@@ -45,6 +45,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.AbstractThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
@@ -316,7 +317,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   DRCPerfectSensorReaderFactory sensorReaderFactory = new DRCPerfectSensorReaderFactory(sdfRobot, robotModel.getEstimatorDT());
 	   
 	   DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(), robotModel.getStateEstimatorParameters(),
-	    		  sensorReaderFactory, threadDataSynchronizer, dataProducer, null, gravity);
+	    		  sensorReaderFactory, threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), dataProducer, null, gravity);
 	   
 	   DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer, outputWriter, dataProducer,
 			   robotVisualizer, gravity, robotModel.getEstimatorDT());
