@@ -1218,12 +1218,15 @@ abstract public class WholeBodyIkSolver
       
       private void adjustPreferedJointAngles()
       {
+         Vector64F preferredAngles = new Vector64F( cachedAnglesQ.getNumElements() );
+         preferredAngles.setZero();
+         
          for (Entry<String, Double> entry: parameters.getPreferedJointAngle().entrySet()  )
          {
             int index = jointNamesToIndex.get( entry.getKey() );
-            cachedAnglesQ.set(index,  entry.getValue() );
+            preferredAngles.set(index,  entry.getValue() );
          }
-         taskJointsPose.setTarget(cachedAnglesQ);
+         taskJointsPose.setTarget(preferredAngles);
       }
       
       public void setSeedAngles(HashMap<String, Double> seedAngles)
