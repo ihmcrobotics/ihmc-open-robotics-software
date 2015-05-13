@@ -7,7 +7,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetProviders.DesiredHighLevelStateProvider;
+import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.simulationconstructionset.robotController.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
@@ -21,6 +23,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.stateMachines.State;
+import us.ihmc.yoUtilities.stateMachines.StateChangedListener;
 import us.ihmc.yoUtilities.stateMachines.StateMachine;
 import us.ihmc.yoUtilities.stateMachines.StateMachineTools;
 
@@ -41,13 +44,13 @@ public class HighLevelHumanoidControllerManager implements RobotController
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
    private final AtomicReference<HighLevelState> fallbackControllerForFailureReference = new AtomicReference<>();
-
+   
    public HighLevelHumanoidControllerManager(HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
          MomentumBasedController momentumBasedController, VariousWalkingProviders variousWalkingProviders,
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator)
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer)
    {
       DoubleYoVariable yoTime = momentumBasedController.getYoTime();
-      this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry);
+      this.stateMachine = setUpStateMachine(highLevelBehaviors, yoTime, registry, dataProducer);
       requestedHighLevelState.set(initialBehavior);
 
       if (variousWalkingProviders != null)
@@ -87,7 +90,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       fallbackControllerForFailureReference.set(fallbackController);
    }
 
-   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry)
+   private StateMachine<HighLevelState> setUpStateMachine(ArrayList<HighLevelBehavior> highLevelBehaviors, DoubleYoVariable yoTime, YoVariableRegistry registry, final GlobalDataProducer dataProducer)
    {
       StateMachine<HighLevelState> highLevelStateMachine = new StateMachine<HighLevelState>("highLevelState", "switchTimeName", HighLevelState.class, yoTime, registry);
 
@@ -109,7 +112,16 @@ public class HighLevelHumanoidControllerManager implements RobotController
       {
          highLevelStateMachine.addState(highLevelBehaviors.get(i));
       }
-
+      
+      highLevelStateMachine.attachStateChangedListener(new StateChangedListener<HighLevelState>()
+      {
+         @Override
+         public void stateChanged(State<HighLevelState> oldState, State<HighLevelState> newState, double time)
+         {
+            dataProducer.queueDataToSend(new HighLevelStateChangePacket(oldState.getStateEnum(), newState.getStateEnum()));
+         }
+      });
+      
       return highLevelStateMachine;
    }
 
