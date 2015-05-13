@@ -40,10 +40,10 @@ public class PolarisRobot extends Robot
 //                                                                            -0.0022, -1.0000, 0.0025,
 //                                                                            0.5486, 0.0009, 0.8361);
    // on real robot with big 7x4 board on hood:
-   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.0332, 0.4245, 0.6712);
-   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(0.7681, -0.0046, 0.6403,
-                                                                            0.0105, 0.9999, -0.0053,
-                                                                            -0.6402, 0.0108, 0.7681);
+   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.1227, 0.3695, 0.6134);
+   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(0.7143, -0.0061, 0.6998,
+                                                                            0.0042, 1.0000, 0.0045,
+                                                                            -0.6998, -0.0003, 0.7144);
    
    private static final RigidBodyTransform checkerBoardToWheel = new RigidBodyTransform(checkerBoardToWheelRotation, checkerBoardToWheelTranslation);
    private static final RigidBodyTransform wheelToCheckerBoard = new RigidBodyTransform();
