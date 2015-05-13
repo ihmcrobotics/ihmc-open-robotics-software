@@ -12,8 +12,10 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
@@ -115,6 +117,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          drcStateEstimator = createStateEstimator(estimatorFullRobotModel, sensorInformation, sensorOutputMapReadOnly, gravity, stateEstimatorParameters,
                contactPointParameters, forceSensorDataHolderForEstimator, contactSensorHolder, centerOfPressureDataHolderFromController, robotMotionStatusFromController,
                yoGraphicsListRegistry, estimatorRegistry);
+
+         if (globalDataProducer != null)
+         {
+            StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
+            globalDataProducer.attachListener(StateEstimatorModePacket.class, stateEstimatorModeSubscriber);
+            drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
+         }
+
          estimatorController.addRobotController(drcStateEstimator);
       }
       else
