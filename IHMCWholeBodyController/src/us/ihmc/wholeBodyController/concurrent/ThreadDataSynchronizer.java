@@ -196,7 +196,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForWriting();
       if (holder != null)
       {
-         holder.parseControllerDataToEstimator();
+         holder.writeControllerDataFromController();
          controllerStateCopier.commit();
       }
    }
@@ -207,7 +207,7 @@ public class ThreadDataSynchronizer implements ThreadDataSynchronizerInterface
       ControllerDataForEstimatorHolder holder = controllerStateCopier.getCopyForReading();
       if (holder != null)
       {
-         holder.copyControllerData();
+         holder.readControllerDataIntoEstimator();
          return true;
       }
       else

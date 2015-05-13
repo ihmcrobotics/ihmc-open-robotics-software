@@ -45,17 +45,7 @@ public class ControllerDataForEstimatorHolder
       this.intermediateDesiredJointDataHolder = new IntermediateDesiredJointDataHolder(estimatorJointDataHolder, controllerJointDataHolder);
    }
 
-   public void copyControllerData()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         controllerCenterOfPressureDataHolder.getCenterOfPressure(centerOfPressure.get(robotSide), robotSide);
-      }
-      robotMotionStatus.set(controllerRobotMotionStatusHolder.getCurrentRobotMotionStatus());
-      intermediateDesiredJointDataHolder.copyFromController();
-   }
-
-   public void parseControllerDataToEstimator()
+   public void readControllerDataIntoEstimator()
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -64,8 +54,20 @@ public class ControllerDataForEstimatorHolder
 
       if (robotMotionStatus.get() != null)
          estimatorRobotMotionStatusHolder.setCurrentRobotMotionStatus(robotMotionStatus.getAndSet(null));
-
+      
       intermediateDesiredJointDataHolder.readIntoEstimator();
+   }
+
+   public void writeControllerDataFromController()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         controllerCenterOfPressureDataHolder.getCenterOfPressure(centerOfPressure.get(robotSide), robotSide);
+      }
+
+      robotMotionStatus.set(controllerRobotMotionStatusHolder.getCurrentRobotMotionStatus());
+
+      intermediateDesiredJointDataHolder.copyFromController();
    }
 
    public static class Builder implements us.ihmc.concurrent.Builder<ControllerDataForEstimatorHolder>
