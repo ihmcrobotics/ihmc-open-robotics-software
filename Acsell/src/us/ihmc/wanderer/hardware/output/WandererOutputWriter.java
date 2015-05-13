@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
+import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 //import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.wanderer.hardware.WandererJoint;
@@ -25,6 +26,7 @@ import us.ihmc.wanderer.hardware.command.WandererCommand;
 import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrep;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -32,7 +34,7 @@ import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
-public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
+public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener,  ControllerFailureListener
 {
    boolean USE_LEFT_HIP_X_SPRING = true;
    boolean USE_RIGHT_HIP_X_SPRING = true;
@@ -358,5 +360,13 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       }
    }
    
+   @Override
+   public void controllerFailed(FrameVector2d fallingDirection)
+   {
+      enableOutput.set(false);
+      yoWalkingState.set(WalkingState.DOUBLE_SUPPORT);
+      //((EnumYoVariable<WalkingState>)registry.getVariable("WalkingHighLevelHumanoidController", "walkingState")).setValue(yoWalkingState,true);
+      //((BooleanYoVariable)registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk")).set(false);
+   }
 
 }
