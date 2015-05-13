@@ -17,6 +17,7 @@ import us.ihmc.steppr.hardware.StepprUtil;
 import us.ihmc.steppr.hardware.state.StepprState;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -41,7 +42,7 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
 
    @Override
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
+         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
@@ -69,7 +70,7 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
       List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       EnumMap<StepprJoint, OneDoFJoint> stepprJoints = StepprUtil.createJointMap(jointList);
       sensorReader = new AcsellSensorReader<StepprJoint>(state, StepprJoint.values, stepprJoints, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
-            stateEstimatorParameters, sensorReaderRegistry);
+            stateEstimatorParameters, estimatorDesiredJointDataHolder, sensorReaderRegistry);
       
       
       parentRegistry.addChild(sensorReaderRegistry);

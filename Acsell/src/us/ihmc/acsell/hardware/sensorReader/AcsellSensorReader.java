@@ -23,6 +23,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -53,10 +54,12 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
    private final Vector3d linearAcceleration = new Vector3d();
 
    private final LongYoVariable corruptedPackets;
+   
+   private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
    public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator,
          RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DRCRobotSensorInformation sensorInformation,
-         StateEstimatorParameters stateEstimatorParameters, YoVariableRegistry sensorReaderRegistry)
+         StateEstimatorParameters stateEstimatorParameters, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
    {
       this.state = state;
       reader = new UDPAcsellStateReader(state);
@@ -68,6 +71,8 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 
       this.jointNames = jointNames;
       this.acsellJoints = acsellJoints;
+      
+      this.estimatorDesiredJointDataHolder = estimatorDesiredJointDataHolder;
 
       List<IMUDefinition> imuList = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
       IMUDefinition pelvisIMU = null;
@@ -113,7 +118,11 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
             state.updateRawSensorData(jointId, rawJoint);
 
             sensorProcessing.setJointPositionSensorValue(joint, jointState.getQ());
-            sensorProcessing.setJointTauSensorValue(joint, jointState.getTau());
+//            sensorProcessing.setJointTauSensorValue(joint, jointState.getTau());
+            
+            // TODO: Test me!!!!
+            sensorProcessing.setJointTauSensorValue(joint, estimatorDesiredJointDataHolder.get(joint).getTauDesired());
+            
             sensorProcessing.setJointVelocitySensorValue(joint, jointState.getQd());
          }
 
