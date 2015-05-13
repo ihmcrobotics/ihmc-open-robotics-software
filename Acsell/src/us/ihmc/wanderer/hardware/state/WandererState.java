@@ -111,7 +111,7 @@ public class WandererState extends AcsellState<WandererActuator, WandererJoint>
       for (WandererActuator actuator : WandererActuator.values)
       {
          actuatorStates.put(actuator,
-               new AcsellActuatorState(actuator, new WandererSlowSensorConstants(), registry));
+               new AcsellActuatorState(actuator, AcsellRobot.WANDERER, new WandererSlowSensorConstants(), registry));
       }
       return actuatorStates;
    }
