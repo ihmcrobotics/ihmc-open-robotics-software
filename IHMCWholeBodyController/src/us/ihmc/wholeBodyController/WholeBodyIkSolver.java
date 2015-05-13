@@ -107,7 +107,6 @@ abstract public class WholeBodyIkSolver
       // ------------- Parameters that change the overall behavior ----------------------
 
       protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
-     
 
       static public enum LockLevel{
          USE_WHOLE_BODY,           // can move the entire body
@@ -707,15 +706,15 @@ abstract public class WholeBodyIkSolver
       }
 
 
-      public void setPreferedJointPose(String joint_name, double preferedQ, double weight)
+      public void setPreferedJointAngle(String joint_name, double preferedQ, double weight)
       {
          getConfiguration().setPreferedJointAngle(joint_name, preferedQ);
 
          int index = jointNamesToIndex.get(joint_name);
          taskJointsPose.getWeightMatrixTaskSpace().set(index, index, weight);
       }
-      
-      public void setPreferedJointPose(String joint_name, double q)
+
+      public void setPreferedJointAngle(String joint_name, double q)
       {
          getConfiguration().setPreferedJointAngle(joint_name, q);
       }
@@ -921,10 +920,8 @@ abstract public class WholeBodyIkSolver
             break;
 
          case USE_JOINTS_CACHE:
-            //do nothing, the cache is used by default.
-            break;
          case RELAX:
-            // 
+            adjustPreferedJointAngles(); 
             break;
          }
          
@@ -936,7 +933,7 @@ abstract public class WholeBodyIkSolver
          for(RobotSide side: RobotSide.values)
          {
             if( ( taskEndEffectorPosition.get(side).isErrorLessThanTolerance() || taskEndEffectorPosition.get(side).isEnabled() == false) && 
-                ( taskEndEffectorRotation.get(side).isErrorLessThanTolerance() || taskEndEffectorRotation.get(side).isEnabled() == false) )
+                  ( taskEndEffectorRotation.get(side).isErrorLessThanTolerance() || taskEndEffectorRotation.get(side).isEnabled() == false) )
             {
                keepArmQuiet.get( side ).setValue( true );
             }
@@ -1033,18 +1030,6 @@ abstract public class WholeBodyIkSolver
          followerModel.getRootJoint().setPositionAndRotation(pelvisTransform);
          followerModel.updateFrames();
       }
-      
-      private void adjustPreferedJointAngles()
-      {
-         Vector64F preferedJointPose = new Vector64F(numOfJoints);
-         preferedJointPose.zero();
-         for (Entry<String, Double> entry: parameters.getPreferedJointAngle().entrySet()  )
-         {
-            int index = jointNamesToIndex.get( entry.getKey() );
-            preferedJointPose.set(index,  entry.getValue() );
-         }
-         taskJointsPose.setTarget(preferedJointPose);
-      }
 
 
       synchronized private ComputeResult computeImpl(SDFFullRobotModel actualSdfModel, SDFFullRobotModel desiredRobotModelToPack, boolean continueUntilPoseConverged)
@@ -1060,8 +1045,7 @@ abstract public class WholeBodyIkSolver
             controlPelvis( actualSdfModel );
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
-            checkIfArmShallStayQuiet(actualSdfModel);   
-            adjustPreferedJointAngles();
+            checkIfArmShallStayQuiet(actualSdfModel);
 
             q_out.set(cachedAnglesQ);
             ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
@@ -1229,6 +1213,26 @@ abstract public class WholeBodyIkSolver
          for (Entry<String,Double> entry: other.jointPreferedAngle.entrySet() )
          {
             parameters.jointPreferedAngle.put( entry.getKey(), entry.getValue() );
+         }
+      }
+      
+      private void adjustPreferedJointAngles()
+      {
+         for (Entry<String, Double> entry: parameters.getPreferedJointAngle().entrySet()  )
+         {
+            int index = jointNamesToIndex.get( entry.getKey() );
+            cachedAnglesQ.set(index,  entry.getValue() );
+         }
+         taskJointsPose.setTarget(cachedAnglesQ);
+      }
+      
+      public void setSeedAngles(HashMap<String, Double> seedAngles)
+      {
+         for (Entry<String, Double> entry: seedAngles.entrySet()  )
+         {
+            int index = jointNamesToIndex.get( entry.getKey() );
+            double Q = entry.getValue();
+            cachedAnglesQ.set(index,  Q );
          }
       }
 
