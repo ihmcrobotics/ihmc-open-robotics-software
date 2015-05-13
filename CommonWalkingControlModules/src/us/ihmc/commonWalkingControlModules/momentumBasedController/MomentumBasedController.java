@@ -44,6 +44,7 @@ import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.MathTools;
+import us.ihmc.utilities.math.geometry.CenterOfMassReferenceFrame;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -87,6 +88,7 @@ public class MomentumBasedController
    private static final boolean VISUALIZE_ANTI_GRAVITY_JOINT_TORQUES = false;
 
    public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -117,9 +119,26 @@ public class MomentumBasedController
    private final double controlDT;
    private final double gravity;
 
+   private final SideDependentList<BooleanYoVariable> calibrateWristForceSensors;
+   
+   private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
+   private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
+
+   private final SideDependentList<CenterOfMassReferenceFrame> handCenterOfMassFrames;
+   private final SideDependentList<YoFrameVector> wristRawMeasuredForces;
+   private final SideDependentList<YoFrameVector> wristRawMeasuredTorques;
+   private final SideDependentList<YoFrameVector> wristForcesHandWeightCancelled;
+   private final SideDependentList<YoFrameVector> wristTorquesHandWeightCancelled;
+   private final SideDependentList<ReferenceFrame> wristForceSensorMeasurementFrames;
+   private final Wrench wristWrenchDueToGravity = new Wrench();
+   private final Wrench wristTempWrench = new Wrench();
+   private final FrameVector tempWristForce = new FrameVector();
+   private final FrameVector tempWristTorque = new FrameVector();
+
+   private final SideDependentList<DoubleYoVariable> handsMass;
+
    private final FrameVector centroidalMomentumRateSolutionLinearPart;
    private final YoFrameVector qpOutputCoMAcceleration;
-
 
    private final YoFrameVector admissibleDesiredGroundReactionTorque;
    private final YoFrameVector admissibleDesiredGroundReactionForce;
@@ -442,6 +461,58 @@ public class MomentumBasedController
 
       yoFeetDesiredLinearAccelerations = new SideDependentList<YoFrameVector>(leftFootDesiredLinearAcceleration, rightFootDesiredLinearAcceleration);
       yoFeetDesiredAngularAccelerations = new SideDependentList<YoFrameVector>(leftFootDesiredAngularAcceleration, rightFootDesiredAngularAcceleration);
+
+      if (wristForceSensors == null)
+      {
+         wristForceSensorMeasurementFrames = null;
+         wristRawMeasuredForces = null;
+         wristRawMeasuredTorques = null;
+         wristForcesHandWeightCancelled = null;
+         wristTorquesHandWeightCancelled = null;
+         calibrateWristForceSensors = null;
+         wristForceCalibrationOffsets = null;
+         wristTorqueCalibrationOffsets = null;
+         handCenterOfMassFrames = null;
+         handsMass = null;
+      }
+      else
+      {
+         wristForceSensorMeasurementFrames = new SideDependentList<>();
+         wristRawMeasuredForces = new SideDependentList<>();
+         wristRawMeasuredTorques = new SideDependentList<>();
+         wristForcesHandWeightCancelled = new SideDependentList<>();
+         wristTorquesHandWeightCancelled = new SideDependentList<>();
+         calibrateWristForceSensors = new SideDependentList<>();
+         wristForceCalibrationOffsets = new SideDependentList<>();
+         wristTorqueCalibrationOffsets = new SideDependentList<>();
+         handCenterOfMassFrames = new SideDependentList<>();
+         handsMass = new SideDependentList<>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
+            ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
+            RigidBody measurementLink = wristForceSensor.getMeasurementLink();
+            wristForceSensorMeasurementFrames.put(robotSide, measurementFrame);
+
+            String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+            String namePrefix = sidePrefix + "WristSensor";
+            wristRawMeasuredForces.put(robotSide, new YoFrameVector(namePrefix + "Force", measurementFrame, registry));
+            wristRawMeasuredTorques.put(robotSide, new YoFrameVector(namePrefix + "Torque", measurementFrame, registry));
+            wristForcesHandWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "ForceHandWeightCancelled", measurementFrame, registry));
+            wristTorquesHandWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "TorqueHandWeightCancelled", measurementFrame, registry));
+            calibrateWristForceSensors.put(robotSide, new BooleanYoVariable(namePrefix + "Calibrate", registry));
+            wristForceCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
+            wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
+
+            RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
+            CenterOfMassReferenceFrame handCoMFrame = new CenterOfMassReferenceFrame(sidePrefix + "HandCoMFrame", measurementFrame, handBodies);
+            handCenterOfMassFrames.put(robotSide, handCoMFrame);
+            DoubleYoVariable handMass = new DoubleYoVariable(sidePrefix + "HandTotalMass", registry);
+            handsMass.put(robotSide, handMass);
+            handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
+         }
+      }
    }
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
@@ -482,6 +553,8 @@ public class MomentumBasedController
 
       inverseDynamicsCalculator.reset();
       momentumControlModuleBridge.reset();
+
+      readWristSensorData();
    }
 
    private final Wrench admissibleGroundReactionWrench = new Wrench();
@@ -895,6 +968,72 @@ public class MomentumBasedController
       momentumControlModuleBridge.initialize();
       planeContactWrenchProcessor.initialize();
       callUpdatables();
+   }
+
+   private void readWristSensorData()
+   {
+      if (wristForceSensors == null)
+         return;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (calibrateWristForceSensors.get(robotSide).getBooleanValue())
+            calibrateWristForceSensor(robotSide);
+
+         ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
+         ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
+         wristForceSensor.packWrench(wristTempWrench);
+
+         wristForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
+         wristTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+
+         wristTempWrench.subLinearPart(tempWristForce);
+         wristTempWrench.subAngularPart(tempWristTorque);
+
+         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
+         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+
+         wristRawMeasuredForces.get(robotSide).setAndMatchFrame(tempWristForce);
+         wristRawMeasuredTorques.get(robotSide).setAndMatchFrame(tempWristTorque);
+
+         cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
+
+         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
+         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+
+         wristForcesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristForce);
+         wristTorquesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristTorque);
+      }
+   }
+
+   private void calibrateWristForceSensor(RobotSide robotSide)
+   {
+      ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
+      ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
+
+      wristForceSensor.packWrench(wristTempWrench);
+      cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
+
+      wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
+      wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
+
+      wristForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristForce);
+      wristTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristTorque);
+
+      calibrateWristForceSensors.get(robotSide).set(false);
+   }
+
+   private void cancelHandWeight(RobotSide robotSide, Wrench wrenchToSubstractHandWeightTo, ReferenceFrame measurementFrame)
+   {
+      CenterOfMassReferenceFrame handCoMFrame = handCenterOfMassFrames.get(robotSide);
+      handCoMFrame.update();
+      tempWristForce.setIncludingFrame(worldFrame, 0.0, 0.0, -handsMass.get(robotSide).getDoubleValue() * gravity);
+      tempWristForce.changeFrame(handCoMFrame);
+      wristWrenchDueToGravity.setToZero(measurementFrame, handCoMFrame);
+      wristWrenchDueToGravity.setLinearPart(tempWristForce);
+      wristWrenchDueToGravity.changeFrame(measurementFrame);
+
+      wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -1318,5 +1457,36 @@ public class MomentumBasedController
    public SideDependentList<ProvidedMassMatrixToolRigidBody> getToolRigitBodies()
    {
       return toolRigidBodies;
+   }
+
+   public void requestWristForceSensorsCalibration()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         requestWristForceSensorCalibration(robotSide);
+   }
+
+   public void requestWristForceSensorCalibration(RobotSide robotSide)
+   {
+      calibrateWristForceSensors.get(robotSide).set(true);
+   }
+
+   public void getWristRawMeasuredWrench(Wrench wrenchToPack, RobotSide robotSide)
+   {
+      wristRawMeasuredForces.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
+      wristRawMeasuredTorques.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
+      wrenchToPack.setToZero(measurementFrames, measurementFrames);
+      wrenchToPack.setLinearPart(tempWristForce);
+      wrenchToPack.setAngularPart(tempWristTorque);
+   }
+
+   public void getWristMeasuredWrenchHandWeightCancelled(Wrench wrenchToPack, RobotSide robotSide)
+   {
+      wristForcesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
+      wristTorquesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
+      ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
+      wrenchToPack.setToZero(measurementFrames, measurementFrames);
+      wrenchToPack.setLinearPart(tempWristForce);
+      wrenchToPack.setAngularPart(tempWristTorque);
    }
 }
