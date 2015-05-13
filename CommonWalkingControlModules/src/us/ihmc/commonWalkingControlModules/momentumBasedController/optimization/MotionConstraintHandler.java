@@ -197,6 +197,22 @@ public class MotionConstraintHandler
    private final DenseMatrix64F tempPVector = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempCTransposeP = new DenseMatrix64F(1, 1);
    private final DenseMatrix64F tempNullSpaceMatrixNTranspose = new DenseMatrix64F(1, 1);
+
+   private int svdRows = -1;
+   private int svdCols = -1;
+   private SingularValueDecomposition<DenseMatrix64F> svd;
+
+   private SingularValueDecomposition<DenseMatrix64F> getCachedSVD(int rows, int cols)
+   {
+      if (rows != svdRows || cols != svdCols)
+      {
+         svd = DecompositionFactory.svd(rows, cols, true, true, false);
+         svdRows = rows;
+         svdCols = cols;
+      }
+
+      return svd;
+   }
    
    public void setDesiredSpatialAccelerationNew(DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand) 
    {
@@ -234,8 +250,7 @@ public class MotionConstraintHandler
          if (nullity > 0)
          {
             // Take the singular value decomposition of the leg Jacobian to find the approximate nullspace.
-            
-            SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(tempJacobianMatrix.getNumRows(), tempJacobianMatrix.getNumCols(), true, true, false);
+            SingularValueDecomposition<DenseMatrix64F> svd = getCachedSVD(tempJacobianMatrix.getNumRows(), tempJacobianMatrix.getNumCols());
             svd.decompose(tempJacobianMatrix);
             
             tempMatrixUTranspose.reshape(tempJacobianMatrix.getNumRows(), tempJacobianMatrix.getNumRows());
