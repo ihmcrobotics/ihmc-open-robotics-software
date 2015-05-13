@@ -10,16 +10,37 @@ uint8 LEFT=0 # refers to the LEFT side of a robot
 uint8 RIGHT=1 # refers to the RIGHT side of a robot
 uint8 robot_side
 
-# toHomePosition can be used to move the arm end effectors back to their starting
+# data_type specifies whether or not the IHMC Controller should use the pose fields
+# or the joint angles array for computing control output for the arms
+# Options for dataType
+uint8 HAND_POSE=0 # the hand pose will be represented by a hand position and a hand orientation (joint angles will be ignored)
+uint8 JOINT_ANGLES=1 # the joint angles contained in this package will be used for control (position and orientation will be ignored)
+uint8 data_type
+
+# when using HAND_POSE datatype commands, specify whether the pose is in world or chest frame.
+# Options for referenceFrame
+uint8 CHEST=0 # frame attached to the chest of the robot
+uint8 WORLD=1 # world frame
+uint8 reference_frame
+
+# to_home_position can be used to move the arm end effectors back to their starting
 # position, defined as down and beside the robot with slightly bent elbows
 bool to_home_position
 
-# trajectoryTime specifies how fast or how slow to move to the desired pose
+# the position component of a HAND_POSE type message. See the data_type field.
+geometry_msgs/Vector3 position
+
+# the orientation component of a HAND_POSE type message. See the data_type field.
+geometry_msgs/Quaternion orientation
+
+# trajectory_time specifies how fast or how slow to move to the desired pose
 float64 trajectory_time
 
-# jointAngles specifies the desired arm joint angles in order. For Atlas the
-# controller assumes joint angles will be given in the follow order: shoulder
-# pitch, shoulder roll, elbow pitch, elbow roll, wrist pitch, wrist roll
+# joint_angles specifies the desired arm joint angles in order for a JOINT_ANGLES type messages.For Atlas V5 the controller assumes joint angles will be given in the following order:
+# shoulder yaw, shoulder roll, elbow pitch, elbow roll, upper wrist pitch, wrist roll, lower wrist pitch
 float64[] joint_angles
+
+# Specifies whether or not the orientation of the hand should be controller during HAND_POSE commands.
+bool control_orientation
 
 
