@@ -24,6 +24,8 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
 {
+   private final BooleanYoVariable enableProcessNewPackets;
+   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean ENABLE_ROTATION_CORRECTION = false;
    
@@ -101,6 +103,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    public NewPelvisPoseHistoryCorrection(SixDoFJoint sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
+      
       this.estimatorDT = estimatorDT;
 
       this.rootJoint = sixDofJoint;
@@ -108,6 +111,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
       this.registry = new YoVariableRegistry("newPelvisPoseHistoryCorrection");
       parentRegistry.addChild(registry);
+      
+      enableProcessNewPackets = new BooleanYoVariable("enableProcessNewPackets", registry);
+      enableProcessNewPackets.set(true);
       
       this.pelvisBufferSize = new IntegerYoVariable("pelvisBufferSize", registry);
       this.pelvisBufferSize.set(pelvisBufferSize);
@@ -209,21 +215,24 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private void processNewPacket()
    {
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
-      TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
+      if (enableProcessNewPackets.getBooleanValue())
+      {
+         TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
 
-      if (outdatedPoseUpdater.upToDateTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
-      {
-         if(!hasOneIcpPacketEverBeenReceived.getBooleanValue())
-            hasOneIcpPacketEverBeenReceived.set(true);
-         double confidence = newPacket.getConfidenceFactor();
-         confidence = MathTools.clipToMinMax(confidence, 0.0, 1.0);
-         confidenceFactor.set(confidence);
-         addNewExternalPose(timeStampedExternalPose);
-      }
-      else
-      {
-         System.err.println("Error in NewPelvisPoseHistoryCorrection: pelvisPoseBuffer is out of range.");
-         System.err.println("consider increasing the size of the buffer");
+         if (outdatedPoseUpdater.upToDateTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
+         {
+            if (!hasOneIcpPacketEverBeenReceived.getBooleanValue())
+               hasOneIcpPacketEverBeenReceived.set(true);
+            double confidence = newPacket.getConfidenceFactor();
+            confidence = MathTools.clipToMinMax(confidence, 0.0, 1.0);
+            confidenceFactor.set(confidence);
+            addNewExternalPose(timeStampedExternalPose);
+         }
+         else
+         {
+            System.err.println("Error in NewPelvisPoseHistoryCorrection: pelvisPoseBuffer is out of range.");
+            System.err.println("consider increasing the size of the buffer");
+         }
       }
    }
 
