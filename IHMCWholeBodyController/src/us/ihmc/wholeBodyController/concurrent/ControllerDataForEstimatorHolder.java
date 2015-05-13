@@ -6,6 +6,8 @@ import javax.vecmath.Point2d;
 
 import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.IntermediateDesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -22,9 +24,12 @@ public class ControllerDataForEstimatorHolder
    private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
    private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
 
+   private final IntermediateDesiredJointDataHolder intermediateDesiredJointDataHolder;
+
    public ControllerDataForEstimatorHolder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder,
          CenterOfPressureDataHolder controllerCenterOfPressureDataHolder, RobotMotionStatusHolder estimatorRobotMotionStatusHolder,
-         RobotMotionStatusHolder controllerRobotMotionStatusHolder)
+         RobotMotionStatusHolder controllerRobotMotionStatusHolder, DesiredJointDataHolder estimatorJointDataHolder,
+         DesiredJointDataHolder controllerJointDataHolder)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -36,6 +41,8 @@ public class ControllerDataForEstimatorHolder
 
       this.estimatorRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
       this.controllerRobotMotionStatusHolder = controllerRobotMotionStatusHolder;
+
+      this.intermediateDesiredJointDataHolder = new IntermediateDesiredJointDataHolder(estimatorJointDataHolder, controllerJointDataHolder);
    }
 
    public void copyControllerData()
@@ -45,6 +52,7 @@ public class ControllerDataForEstimatorHolder
          controllerCenterOfPressureDataHolder.getCenterOfPressure(centerOfPressure.get(robotSide), robotSide);
       }
       robotMotionStatus.set(controllerRobotMotionStatusHolder.getCurrentRobotMotionStatus());
+      intermediateDesiredJointDataHolder.copyFromController();
    }
 
    public void parseControllerDataToEstimator()
@@ -56,30 +64,40 @@ public class ControllerDataForEstimatorHolder
 
       if (robotMotionStatus.get() != null)
          estimatorRobotMotionStatusHolder.setCurrentRobotMotionStatus(robotMotionStatus.getAndSet(null));
+
+      intermediateDesiredJointDataHolder.readIntoEstimator();
    }
 
    public static class Builder implements us.ihmc.concurrent.Builder<ControllerDataForEstimatorHolder>
    {
-      private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
       private final CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder;
+      private final CenterOfPressureDataHolder controllerCenterOfPressureDataHolder;
 
-      private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
       private final RobotMotionStatusHolder estimatorRobotMotionStatusHolder;
+      private final RobotMotionStatusHolder controllerRobotMotionStatusHolder;
+
+      private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
+      private final DesiredJointDataHolder controllerDesiredJointDataHolder;
 
       public Builder(CenterOfPressureDataHolder estimatorCenterOfPressureDataHolder, CenterOfPressureDataHolder controllerCenterOfPressureDataHolder,
-            RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder)
+            RobotMotionStatusHolder estimatorRobotMotionStatusHolder, RobotMotionStatusHolder controllerRobotMotionStatusHolder,
+            DesiredJointDataHolder estimatorDesiredJointDataHolder, DesiredJointDataHolder controllerDesiredJointDataHolder)
       {
          this.estimatorCenterOfPressureDataHolder = estimatorCenterOfPressureDataHolder;
          this.controllerCenterOfPressureDataHolder = controllerCenterOfPressureDataHolder;
 
          this.estimatorRobotMotionStatusHolder = estimatorRobotMotionStatusHolder;
          this.controllerRobotMotionStatusHolder = controllerRobotMotionStatusHolder;
+
+         this.estimatorDesiredJointDataHolder = estimatorDesiredJointDataHolder;
+         this.controllerDesiredJointDataHolder = controllerDesiredJointDataHolder;
       }
 
       @Override
       public ControllerDataForEstimatorHolder newInstance()
       {
-         return new ControllerDataForEstimatorHolder(estimatorCenterOfPressureDataHolder, controllerCenterOfPressureDataHolder, estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder);
+         return new ControllerDataForEstimatorHolder(estimatorCenterOfPressureDataHolder, controllerCenterOfPressureDataHolder,
+               estimatorRobotMotionStatusHolder, controllerRobotMotionStatusHolder, estimatorDesiredJointDataHolder, controllerDesiredJointDataHolder);
       }
 
    }

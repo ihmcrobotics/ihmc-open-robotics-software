@@ -102,7 +102,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       sensorReaderFactory
             .build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
-                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorContactSensorHolder(), threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), estimatorRegistry);
+                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorContactSensorHolder(), threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), threadDataSynchronizer.getEstimatorDesiredJointDataHolder(), estimatorRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");
@@ -194,9 +194,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          actualEstimatorDT.set(currentClockTime - startClockTime.getLongValue());
          startClockTime.set(currentClockTime);
+
+         threadDataSynchronizer.receiveControllerDataForEstimator();
          sensorReader.read();
          
-         threadDataSynchronizer.receiveControllerDataForEstimator();
          estimatorTime.set(sensorOutputMapReadOnly.getTimestamp());
       }
       catch(Throwable e)

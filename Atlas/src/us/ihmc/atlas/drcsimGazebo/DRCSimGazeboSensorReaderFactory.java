@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJoint;
@@ -32,7 +33,7 @@ public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
    }
 
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry registry)
+         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry registry)
    {
       stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
 
