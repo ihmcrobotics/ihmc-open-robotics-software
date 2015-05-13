@@ -43,7 +43,7 @@ public class MocapToStateEstimatorFrameConverter
    /** used to pack the mocap pose and multiply the calibration and transform to headroot */
    private final RigidBodyTransform workingRigidBodyTransform = new RigidBodyTransform();
 
-   private boolean freezeMocapUpdates = false;
+   private boolean enableMocapUpdates = false;
    
    public MocapToStateEstimatorFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
    {
@@ -75,39 +75,29 @@ public class MocapToStateEstimatorFrameConverter
       this.mocapJigCalibrationTransform.set(headJigCalibrationTransform);
    }
    
-   public RigidBodyTransform getTransformFromMocapHeadToRobotHead()
-   {
-      robotDataReceiver.updateRobotModel();
-      mocapHeadFrame.getTransformToDesiredFrame(transformFromMocapHeadToRobotHead , robotHeadFrame);
-      return transformFromMocapHeadToRobotHead;
-   }
-   
-   public ReferenceFrame getMocapHeadFrame()
-   {
-      return mocapHeadFrame;
-   }
-
    public void update(MocapRigidBody mocapObject)
    {
-      if(freezeMocapUpdates)
+      if(enableMocapUpdates)
       {
          mocapObject.getPose(workingRigidBodyTransform);
          workingRigidBodyTransform.multiply(mocapJigCalibrationTransform);
          workingRigidBodyTransform.multiply(transformFromMocapHeadCentroidToHeadRoot);
          mocapHeadPoseInZUp.set(workingRigidBodyTransform);
+         
          mocapHeadFrame.update();
+         robotDataReceiver.updateRobotModel();
+         robotHeadFrame.getTransformToDesiredFrame(transformFromMocapHeadToRobotHead , mocapHeadFrame);
       }
    }
 
    public void convertMocapPoseToRobotFrame(RigidBodyTransform pose)
    {
-      pose.multiply(getTransformFromMocapHeadToRobotHead(), pose);
-      
+      pose.multiply(transformFromMocapHeadToRobotHead);
    }
 
-   public void freezeMocapUpdates(boolean freezeMocapUpdates)
+   public void enableMocapUpdates(boolean freezeMocapUpdates)
    {
-      this.freezeMocapUpdates  = freezeMocapUpdates;
+      this.enableMocapUpdates  = freezeMocapUpdates;
       
    }
 }
