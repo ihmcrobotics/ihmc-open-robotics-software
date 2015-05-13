@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSelectorAndDataConverter;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.OrientationStateRobotModelUpdater;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.utilities.math.geometry.AngleTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -19,6 +20,7 @@ import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.Twist;
 import us.ihmc.utilities.screwTheory.TwistCalculator;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 import us.ihmc.yoUtilities.math.frames.YoFrameQuaternion;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
@@ -40,6 +42,7 @@ public class PelvisRotationalStateUpdater
 
    private final YoFrameVector measurementFrameAngularVelocity;
    private final YoFrameVector measurementFrameAngularVelocityInWorld;
+   private final DoubleYoVariable rootJointYawOffsetFromFrozenState;
    
    private final SixDoFJoint rootJoint;
    private final ReferenceFrame rootJointFrame;
@@ -68,6 +71,7 @@ public class PelvisRotationalStateUpdater
       yoRootJointFrameQuaternion = new YoFrameQuaternion("estimatedRootJointFrame", worldFrame, registry);
       measurementFrameAngularVelocity = new YoFrameVector("measFrameAngularVelocity", measurementFrame, registry);
       measurementFrameAngularVelocityInWorld = new YoFrameVector("measFrameAngularVelocityWorld", worldFrame, registry);
+      rootJointYawOffsetFromFrozenState = new DoubleYoVariable("rootJointYawOffsetFromFrozenState", registry);
       
       parentRegistry.addChild(registry);
       
@@ -104,16 +108,15 @@ public class PelvisRotationalStateUpdater
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
       transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
-      transformFromRootJointFrameToWorld.get(rotationFrozenOffset);
+      transformFromRootJointFrameToWorld.get(rotationFromRootJointFrameToWorld);
 
-      rotationFrozenOffset.transpose();
 
       yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
+      double currentYaw = RotationFunctions.getYaw(rotationFromRootJointFrameToWorld);
 
-      lastComputedYawPitchRoll[1] = 0.0;
-      lastComputedYawPitchRoll[2] = 0.0;
-      RotationFunctions.setMatrixBasedOnYawPitchAndRoll(rotationFromRootJointFrameToWorld, lastComputedYawPitchRoll);
-      rotationFrozenOffset.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
+      double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(lastComputedYawPitchRoll[0], currentYaw);
+      rootJointYawOffsetFromFrozenState.set(yawDifference);
+      rotationFrozenOffset.rotZ(yawDifference);
 
       // Keep setting the orientation so that the localization updater works properly.
       yoRootJointFrameQuaternion.get(rotationFromRootJointFrameToWorld);
