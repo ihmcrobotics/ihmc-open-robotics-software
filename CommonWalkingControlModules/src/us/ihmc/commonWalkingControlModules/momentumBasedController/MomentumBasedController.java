@@ -1472,6 +1472,9 @@ public class MomentumBasedController
 
    public void getWristRawMeasuredWrench(Wrench wrenchToPack, RobotSide robotSide)
    {
+      if (wristRawMeasuredForces == null || wristRawMeasuredTorques == null)
+         return;
+
       wristRawMeasuredForces.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
       wristRawMeasuredTorques.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
@@ -1482,6 +1485,9 @@ public class MomentumBasedController
 
    public void getWristMeasuredWrenchHandWeightCancelled(Wrench wrenchToPack, RobotSide robotSide)
    {
+      if (wristForcesHandWeightCancelled == null || wristTorquesHandWeightCancelled == null)
+         return;
+
       wristForcesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
       wristTorquesHandWeightCancelled.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
       ReferenceFrame measurementFrames = wristForceSensorMeasurementFrames.get(robotSide);
