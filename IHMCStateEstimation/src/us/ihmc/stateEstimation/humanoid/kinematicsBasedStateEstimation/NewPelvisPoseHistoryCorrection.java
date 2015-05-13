@@ -46,6 +46,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final DoubleYoVariable confidenceFactor;
    
    private final RigidBodyTransform stateEstimatorPelvisTransformInWorld = new RigidBodyTransform();
+   private final RigidBodyTransform stateEstimatorPelvisTransformInWorldForUI = new RigidBodyTransform();
+   private final RigidBodyTransform localizationTransformInWorld = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisTransformInWorldFrame = new RigidBodyTransform();
    
    private final RigidBodyTransform totalErrorBetweenPelvisAndLocalizationTransform = new RigidBodyTransform();
@@ -231,6 +233,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame.update();
       iterativeClosestPointInWorldFramePose.setToZero(iterativeClosestPointReferenceFrame);
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
+      iterativeClosestPointInWorldFramePose.getPose(localizationTransformInWorld);
 
       //for feedback in the UI
       outdatedPoseUpdater.getTotalErrorTransform(totalErrorBetweenPelvisAndLocalizationTransform);
@@ -276,7 +279,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    private void sendCorrectionUpdatePacket()
    {
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCorrectedAndLocalizationTransform);
+      stateEstimatorPelvisTransformInWorldForUI.set(stateEstimatorPelvisTransformInWorld);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCorrectedAndLocalizationTransform, stateEstimatorPelvisTransformInWorldForUI, localizationTransformInWorld);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    
