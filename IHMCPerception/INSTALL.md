@@ -20,7 +20,7 @@
 > make -j8
 > sudo make install
 
-### Kindr
+### Kindr (for elevation_mapping)
 
 > cd ~/<WORKSPACE NAME>/IHMCPerception/third-party/kindr/
 > mkdir build
@@ -28,6 +28,11 @@
 > cmake ..
 > make
 > sudo make install
+
+### moveit_ros_perception (for lidar_to_point_cloud_transformer)
+
+> sudo apt-get install ros-indigo-moveit-ros-perception
+> sudo apt-get install ros-indigo-moveit-ros-planning
 
 ## 2. Setup Catkin Workspace
 
