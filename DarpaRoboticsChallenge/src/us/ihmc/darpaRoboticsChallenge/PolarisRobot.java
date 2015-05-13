@@ -35,10 +35,10 @@ public class PolarisRobot extends Robot
    private static final double wheelToCarX = 0.44207, wheelToCarY = 0.36251, wheelToCarZ = 1.14204, steeringWheelPitchInDegrees = -30.0;
    
    // in sim:
-//   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(0.7036, -0.7743, -0.1496);
-//   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(-0.8361, 0.0033, 0.5486,
-//                                                                            -0.0022, -1.0000, 0.0025,
-//                                                                            0.5486, 0.0009, 0.8361);
+//   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(0.6462, -0.7392, -0.2793);
+//   private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(-0.8637, 0.0042, 0.5040,
+//                                                                            -0.0028, -1.0000, 0.0035,
+//                                                                            0.5040, 0.0016, 0.8637);
    // on real robot with big 7x4 board on hood:
    private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.1227, 0.3695, 0.6134);
    private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(0.7143, -0.0061, 0.6998,
