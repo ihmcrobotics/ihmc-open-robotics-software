@@ -460,7 +460,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected, null, null);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 
