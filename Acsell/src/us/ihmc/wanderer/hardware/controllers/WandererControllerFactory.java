@@ -32,7 +32,6 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
-import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -65,7 +64,8 @@ public class WandererControllerFactory
       AcsellAffinity wandererAffinity = new AcsellAffinity();
       PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
       PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
-      PriorityParameters loggerPriority = new PriorityParameters(45);
+      PriorityParameters loggerPriority = new PriorityParameters(40);
+      PriorityParameters poseCommunicatorPriority = new PriorityParameters(45);
       WandererRobotModel robotModel = new WandererRobotModel(true, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
@@ -73,8 +73,7 @@ public class WandererControllerFactory
        * Create network servers/clients
        */
       PacketCommunicator drcNetworkProcessorServer = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, new IHMCCommunicationKryoNetClassList());
-      PeriodicThreadScheduler scheduler = new PeriodicRealtimeThreadScheduler(loggerPriority);
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), scheduler, robotModel.getLogModelProvider(), robotModel.getLogSettings(),
+      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicRealtimeThreadScheduler(loggerPriority), robotModel.getLogModelProvider(), robotModel.getLogSettings(),
             robotModel.getEstimatorDT());
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
@@ -121,7 +120,7 @@ public class WandererControllerFactory
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
-            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, dataProducer, yoVariableServer, gravity);
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, yoVariableServer, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());
