@@ -94,6 +94,7 @@ public class MomentumBasedControllerFactory
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
 
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
+   private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters, ArmControllerParameters armControllerParameters,
@@ -202,6 +203,7 @@ public class MomentumBasedControllerFactory
             twistCalculator, feet, handContactableBodies, thighs, pelvisContactablePlaneBody, pelvisBackContactablePlaneBody, controlDT,
             oldMomentumControlModule, updatables, armControllerParameters, walkingControllerParameters, yoGraphicsListRegistry, jointsToIgnore);
       momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
+      attachControllerFailureListeners(controllerFailureListenersToAttach);
 
       TransferTimeCalculationProvider transferTimeCalculationProvider = new TransferTimeCalculationProvider("providedTransferTime", registry,
             transferTimeCalculator, transferTime);
@@ -383,7 +385,10 @@ public class MomentumBasedControllerFactory
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      momentumBasedController.attachControllerFailureListener(listener);
+      if (momentumBasedController != null)
+         momentumBasedController.attachControllerFailureListener(listener);
+      else
+         controllerFailureListenersToAttach.add(listener);
    }
 
    public void attachControllerStateChangedListeners(List<ControllerStateChangedListener> listeners)
