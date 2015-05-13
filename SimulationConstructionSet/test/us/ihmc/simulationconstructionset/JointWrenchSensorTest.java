@@ -44,11 +44,11 @@ public class JointWrenchSensorTest
 
       robot.doDynamicsButDoNotIntegrate();
 
-      Vector3d expectedJointForce = new Vector3d(0.0, 0.0, -(massOne + massTwo) * robot.getGravityZ());
+      Vector3d expectedJointForce = new Vector3d(0.0, 0.0, (massOne + massTwo) * robot.getGravityZ());
       Vector3d expectedJointTorque = new Vector3d();
       assertJointWrenchEquals(jointWrenchSensorOne, expectedJointForce, expectedJointTorque);
 
-      expectedJointForce = new Vector3d(0.0, 0.0, -(massTwo) * robot.getGravityZ());
+      expectedJointForce = new Vector3d(0.0, 0.0, (massTwo) * robot.getGravityZ());
       expectedJointTorque = new Vector3d();
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
 
@@ -58,11 +58,11 @@ public class JointWrenchSensorTest
       pinJointOne.setQ(Math.PI);
       robot.doDynamicsButDoNotIntegrate();
 
-      expectedJointForce = new Vector3d(0.0, 0.0, (massOne + massTwo) * robot.getGravityZ());
+      expectedJointForce = new Vector3d(0.0, 0.0, -(massOne + massTwo) * robot.getGravityZ());
       expectedJointTorque = new Vector3d();
       assertJointWrenchEquals(jointWrenchSensorOne, expectedJointForce, expectedJointTorque);
 
-      expectedJointForce = new Vector3d(0.0, 0.0, (massTwo) * robot.getGravityZ());
+      expectedJointForce = new Vector3d(0.0, 0.0, -(massTwo) * robot.getGravityZ());
       expectedJointTorque = new Vector3d();
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
@@ -107,10 +107,10 @@ public class JointWrenchSensorTest
          robot.doDynamicsAndIntegrate(0.0001);
          
          jointWrenchSensorOne.getJointTorque(jointTorque);
-         assertEquals(pinJointOne.getTau().getDoubleValue(), jointTorque.getY(), 1e-7);
+         assertEquals(pinJointOne.getTau().getDoubleValue(), -jointTorque.getY(), 1e-7);
          
          jointWrenchSensorTwo.getJointTorque(jointTorque);
-         assertEquals(pinJointTwo.getTau().getDoubleValue(), jointTorque.getX(), 1e-7);
+         assertEquals(pinJointTwo.getTau().getDoubleValue(), -jointTorque.getX(), 1e-7);
       }
    }
 
@@ -140,7 +140,7 @@ public class JointWrenchSensorTest
       double jointAcceleration = pinJointOne.getQDD().getDoubleValue();
       assertEquals(0.0, jointAcceleration, 1e-7);
       
-      Vector3d expectedJointForce = new Vector3d(massOne * robot.getGravityZ(), 0.0, 0.0);
+      Vector3d expectedJointForce = new Vector3d(-massOne * robot.getGravityZ(), 0.0, 0.0);
       Vector3d expectedJointTorque = new Vector3d();
       assertJointWrenchEquals(jointWrenchSensorOne, expectedJointForce, expectedJointTorque);
    }

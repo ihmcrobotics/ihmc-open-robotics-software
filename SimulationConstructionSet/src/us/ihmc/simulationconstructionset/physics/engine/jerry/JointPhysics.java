@@ -1962,6 +1962,9 @@ public abstract class JointPhysics< J extends Joint>
       tempVectorForWrenchTranslation.cross(tempOffsetForWrenchTranslation, tempJointWrenchVector.top);
       tempJointWrenchVector.bottom.add(tempVectorForWrenchTranslation);
       
+      // Negate since we want to measure the reaction wrench, not the applied wrench.
+      tempJointWrenchVector.scale(-1.0);
+      
       this.jointWrenchSensor.setWrench(tempJointWrenchVector);
    }
 
