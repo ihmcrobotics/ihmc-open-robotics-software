@@ -1,8 +1,6 @@
 package us.ihmc.darpaRoboticsChallenge;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.vecmath.Matrix3d;
@@ -22,8 +20,8 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawOutputWriter;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -38,7 +36,8 @@ public class DRCPoseCommunicator implements RawOutputWriter
 {
    private final int WORKER_SLEEP_TIME_MILLIS = 1;
 
-   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
+//   private final ScheduledExecutorService writeExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("DRCPoseCommunicator"));
+   private final PeriodicThreadScheduler scheduler;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final GlobalDataProducer dataProducer;
@@ -60,7 +59,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
 
    public DRCPoseCommunicator(SDFFullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer, SensorReader sensorReader,
-         GlobalDataProducer dataProducer, SensorOutputMapReadOnly sensorOutputMapReadOnly, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation)
+         GlobalDataProducer dataProducer, SensorOutputMapReadOnly sensorOutputMapReadOnly, SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly, RobotMotionStatusHolder robotMotionStatusFromController, DRCRobotSensorInformation sensorInformation, PeriodicThreadScheduler scheduler)
    {
       this.dataProducer = dataProducer;
       this.jointConfigurationGathererAndProducer = jointConfigurationGathererAndProducer;
@@ -68,6 +67,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
       this.sensorRawOutputMapReadOnly = sensorRawOutputMapReadOnly;
       this.robotMotionStatusFromController = robotMotionStatusFromController;
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+      this.scheduler = scheduler;
       
       setupForceSensorMassCompensators(estimatorModel);
 
@@ -118,7 +118,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    // this thread reads from the stateRingBuffer and pushes the data out to the objectConsumer
    private void startWriterThread()
    {
-      writeExecutor.scheduleAtFixedRate(new Runnable()
+      scheduler.schedule(new Runnable()
       {
          @Override
          public void run()
@@ -142,7 +142,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
          }
 
-      }, 0, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
+      }, WORKER_SLEEP_TIME_MILLIS, TimeUnit.MILLISECONDS);
 
    }
 
@@ -230,6 +230,6 @@ public class DRCPoseCommunicator implements RawOutputWriter
    }
    public void stop()
    {
-      writeExecutor.shutdown();
+      scheduler.shutdown();
    }
 }
