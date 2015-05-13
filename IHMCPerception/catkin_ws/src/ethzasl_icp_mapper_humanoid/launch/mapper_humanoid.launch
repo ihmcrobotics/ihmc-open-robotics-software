@@ -32,4 +32,27 @@
         <param name="localizing" value="false" /> 
         <param name="mapping" value="false" />
     </node>
+    
+    <node pkg="nodelet" type="nodelet" name="point_map_no_ground" args="load pcl/PassThrough eth_pcl_manager" output="screen">
+        <remap from="~input" to="/point_map" />
+        <remap from="~output" to="/point_map_no_ground" />
+        <rosparam>
+          filter_field_name: z
+          filter_limit_min: 0.05  
+          filter_limit_max: +.inf
+          input_frame: world
+          output_frame: world
+        </rosparam>
+     </node>
+  
+  <node pkg="nodelet" type="nodelet" name="voxel_grid_z" args="load pcl/VoxelGrid eth_pcl_manager" output="screen">
+    <remap from="~input" to="/point_map_no_ground" />
+    <remap from="~output" to="/point_map_filtered_z" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.02
+      filter_limit_max: +.inf
+      leaf_size: 0.05
+    </rosparam>
+    
 </launch>
