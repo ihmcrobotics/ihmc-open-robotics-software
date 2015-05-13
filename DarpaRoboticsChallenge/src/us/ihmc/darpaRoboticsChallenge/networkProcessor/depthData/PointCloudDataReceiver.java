@@ -205,7 +205,7 @@ public class PointCloudDataReceiver extends Thread implements NetStateListener
 
                   Point3d origin = new Point3d();
                   data.lidarFrame.getTransformToWorldFrame().transform(origin);
-                  if (collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld))
+                  if (collisionBoxNode == null || !collisionBoxNode.contains(pointInWorld) || depthDataFilter.getParameters().boundingBoxScale<=0)                  
                   {
                      for (PointCloudSource cloudSource : data.sources)
                      {
