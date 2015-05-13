@@ -118,7 +118,8 @@ public class HighLevelHumanoidControllerManager implements RobotController
          @Override
          public void stateChanged(State<HighLevelState> oldState, State<HighLevelState> newState, double time)
          {
-            dataProducer.queueDataToSend(new HighLevelStateChangePacket(oldState.getStateEnum(), newState.getStateEnum()));
+            if (dataProducer != null)
+               dataProducer.queueDataToSend(new HighLevelStateChangePacket(oldState.getStateEnum(), newState.getStateEnum()));
          }
       });
       
