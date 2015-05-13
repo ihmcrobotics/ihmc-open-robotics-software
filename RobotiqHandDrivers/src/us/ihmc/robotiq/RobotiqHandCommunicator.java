@@ -83,21 +83,21 @@ public class RobotiqHandCommunicator
    public void reset()
    {
       Register[] request = writeRequestFactory.createDeactivationRequest();
-      do
+      try
       {
-         ThreadTools.sleep(100);
-         try
+         do
          {
+            ThreadTools.sleep(100);
             read();
             communicator.writeMultipleRegisters(0, request);
          }
-         catch (Exception e)
-         {
-            System.err.println(getClass().getSimpleName() + ": Unable to reset. Consider reconnecting to hand.");
-         }
+         while(!readResponseFactory.getResponse().getGripperStatus().getGact().equals(gACT.GRIPPER_RESET));
+         initialize();
       }
-      while(!readResponseFactory.getResponse().getGripperStatus().getGact().equals(gACT.GRIPPER_RESET));
-      initialize();
+      catch (Exception e)
+      {
+         System.err.println(getClass().getSimpleName() + ": Unable to reset. Consider reconnecting to hand.");
+      }
    }
    
    public void sendHandCommand(FingerState fingerState)
@@ -177,34 +177,5 @@ public class RobotiqHandCommunicator
          }
       }
       System.out.println();
-   }
-   
-   public static void main(String[] args)
-   {
-      ModbusTCPMaster master = new ModbusTCPMaster("10.7.4.140", 502);
-      try
-      {
-         master.connect();
-         
-         ThreadTools.sleep(50);
-         master.writeMultipleRegisters(0, new Register[]{new SimpleRegister((byte)1, (byte)0)});
-         ThreadTools.sleep(100);
-         
-         while(true)
-         {
-            InputRegister[] response = master.readInputRegisters(0, 8);
-            for(InputRegister register : response)
-            {
-               System.out.print(register.toBytes()[0] + " " + register.toBytes()[1] + " ");
-            }
-            System.out.println();
-            
-            ThreadTools.sleep(100);
-         }
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-      }
    }
 }
