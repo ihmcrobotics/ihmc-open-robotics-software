@@ -103,12 +103,12 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
          if (id == MULTISENSE_MOCAP_ID)
          {
             //Set this to false to pause mocap updates. Remember to turn it back on before restarting
-            boolean UPDATE_LOCATION_IN_WORLD_USING_MOCAP = true;
-            mocapToStateEstimatorFrameConverter.freezeMocapUpdates(UPDATE_LOCATION_IN_WORLD_USING_MOCAP);
+            boolean enableMocapUpdates = true;
+            mocapToStateEstimatorFrameConverter.enableMocapUpdates(enableMocapUpdates);
             
             //manual calibration offsets from mocap jig misalignment
             //had to make pitch and roll negative to match frames of ui tool
-            mocapCalibrationTransform.setEuler(Math.toRadians(-1.83), Math.toRadians(-0.98), Math.toRadians(1.08));
+            mocapCalibrationTransform.setEuler(Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(0.0));
             mocapToStateEstimatorFrameConverter.setMocapJigCalibrationTransform(mocapCalibrationTransform);
             mocapToStateEstimatorFrameConverter.update(mocapObject);
             
@@ -147,7 +147,10 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
          mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(pose);
       }
       DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, id);
-      packetCommunicator.send(detectedMocapObject);
+      if(packetCommunicator.isConnected())
+      {
+         packetCommunicator.send(detectedMocapObject);
+      }
    }
 }
 
