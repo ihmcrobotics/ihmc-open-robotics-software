@@ -95,6 +95,7 @@ public class WandererControllerFactory
 
       WandererOutputWriter wandererOutputWriter = new WandererOutputWriter(robotModel);
       controllerFactory.attachControllerStateChangedListener(wandererOutputWriter);
+      controllerFactory.attachControllerFailureListener(wandererOutputWriter);
       DRCOutputWriter drcOutputWriter = wandererOutputWriter;
       
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
