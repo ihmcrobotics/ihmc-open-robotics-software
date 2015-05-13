@@ -3,10 +3,8 @@ package us.ihmc.robotiq;
 import java.net.SocketTimeoutException;
 
 import net.wimpi.modbus.ModbusException;
-import net.wimpi.modbus.facade.ModbusTCPMaster;
 import net.wimpi.modbus.procimg.InputRegister;
 import net.wimpi.modbus.procimg.Register;
-import net.wimpi.modbus.procimg.SimpleRegister;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.dataobjects.FingerState;
@@ -20,6 +18,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 
 public class RobotiqHandCommunicator
 {
+   private final boolean DEBUG = false;
+   
    private final int PORT = 502;
    
    private boolean connected = false;
@@ -120,8 +120,12 @@ public class RobotiqHandCommunicator
    
    private void sendCommand(Register[] request)
    {
-      System.out.println("Write:");
-      printRegisters(request);
+      if(DEBUG)
+      {
+         System.out.println("Write:");
+         printRegisters(request);
+      }
+      
       try
       {
          communicator.writeMultipleRegisters(0, request);
