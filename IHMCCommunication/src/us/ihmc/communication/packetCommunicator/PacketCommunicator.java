@@ -31,8 +31,13 @@ public class PacketCommunicator
    
    public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList)
    {
+      return createTCPPacketCommunicatorClient(host, port, netClassList, true);
+   }
+
+   public static PacketCommunicator createTCPPacketCommunicatorClient(String host, NetworkPorts port, NetClassList netClassList, boolean reconnectAutomatically)
+   {
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
-      objectCommunicator.setReconnectAutomatically(true);
+      objectCommunicator.setReconnectAutomatically(reconnectAutomatically);
       return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList.getPacketClassList());
    }
 
