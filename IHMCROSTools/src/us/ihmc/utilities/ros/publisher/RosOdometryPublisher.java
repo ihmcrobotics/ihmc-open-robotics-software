@@ -26,11 +26,12 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       super(nav_msgs.Odometry._TYPE,latched);
    }
    
-   public void publish(long timestamp, RigidBodyTransform transform, Vector3f linearVelocity, Vector3f angularVelocity, String childFrame)
+   public void publish(long timestamp, RigidBodyTransform transform, Vector3f linearVelocity, Vector3f angularVelocity, String childFrame, String frameId)
    {
       Odometry message = getMessage();
 
       Header header = createHeaderMsg(timestamp);
+      header.setFrameId(frameId);
       message.setHeader(header);
       
       PoseWithCovariance poseWithCovariance = createPoseWithCovarianceMsg(transform);

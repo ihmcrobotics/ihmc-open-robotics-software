@@ -237,7 +237,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             
             
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
-                  robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf());
+                  robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(), WORLD_FRAME);
 
             robotMotionStatusPublisher.publish(robotConfigurationData.getRobotMotionStatus().name());
             robotBehaviorPublisher.publish(robotConfigurationData.getRobotMotionStatus().getBehaviorId());
