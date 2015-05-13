@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.simulationconstructionset.JointWrenchSensor;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -42,6 +43,7 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
 
       wrenchMatrix.zero();
 
+      // Get the action wrench from the joint sensor.
       wrenchMatrix.set(0, 0, tau.x);
       wrenchMatrix.set(1, 0, tau.y);
       wrenchMatrix.set(2, 0, tau.z);
@@ -49,6 +51,9 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
       wrenchMatrix.set(3, 0, force.x);
       wrenchMatrix.set(4, 0, force.y);
       wrenchMatrix.set(5, 0, force.z);
+
+      // Get the opposite to obtain the reaction wrench.
+      CommonOps.scale(-1.0, wrenchMatrix);
       
       if(doWrenchCorruption)
       {
