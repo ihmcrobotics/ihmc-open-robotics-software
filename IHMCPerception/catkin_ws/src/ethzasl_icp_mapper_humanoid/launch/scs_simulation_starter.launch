@@ -1,0 +1,15 @@
+<launch>
+	
+ 	<arg name="atlas_urdf" default="$(find ihmc_models)/urdf/atlas_unplugged_v5_dual_robotiq_with_head.urdf" />
+	<arg name="robot_namespace" default="atlas" />
+        <param name="/atlas/robot_description" textfile="$(arg atlas_urdf)" />
+	<param name="use_sim_time" value="true" />
+	
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" output="log">
+              <remap from="joint_states" to="/ihmc_ros/$(arg robot_namespace)/output/joint_states" />
+              <remap from="robot_description" to="/$(arg robot_namespace)/robot_description" />
+        </node>
+
+        <include file="$(find lidar_to_point_cloud_transformer)/launch/atlas_simulation_lidar_to_point_cloud_transformer.launch" />
+        <include file="$(find ethzasl_icp_mapper_humanoid)/launch/mapper_outdoor_simulation.launch" />
+</launch>
