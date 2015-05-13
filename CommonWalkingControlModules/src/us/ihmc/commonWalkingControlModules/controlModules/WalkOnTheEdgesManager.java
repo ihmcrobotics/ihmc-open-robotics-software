@@ -1,21 +1,18 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -24,8 +21,6 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFrameOrientation;
 
@@ -62,6 +57,8 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable minStepLengthForToeTouchdown = new DoubleYoVariable("minStepLengthForToeTouchdown", registry);
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
+   private final SideDependentList<FrameConvexPolygon2d> footDefaultPolygons;
+   private final FrameConvexPolygon2d leadingFootSupportPolygon = new FrameConvexPolygon2d();
    private final SideDependentList<FootControlModule> footEndEffectorControlModules;
 
    private final DoubleYoVariable extraCoMMaxHeightWithToes = new DoubleYoVariable("extraCoMMaxHeightWithToes", registry);
@@ -125,6 +122,12 @@ public class WalkOnTheEdgesManager
       isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
       isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
 
+      footDefaultPolygons = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footDefaultPolygons.put(robotSide, new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d()));
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -137,11 +140,9 @@ public class WalkOnTheEdgesManager
          return;
       }
 
-      ContactablePlaneBody trailingFoot = feet.get(trailingLeg);
-      ContactablePlaneBody leadingFoot = feet.get(trailingLeg.getOppositeSide());
       if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
       {
-         FrameConvexPolygon2d onToesSupportPolygon = getOnToesSupportPolygonCopy(trailingFoot, leadingFoot);
+         updateOnToesSupportPolygon(trailingLeg);
          isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
       }
       else
@@ -149,7 +150,8 @@ public class WalkOnTheEdgesManager
          isDesiredECMPOKForToeOff.set(true);
       }
 
-      FrameConvexPolygon2d leadingFootSupportPolygon = getFootSupportPolygonCopy(leadingFoot);
+      leadingFootSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(trailingLeg.getOppositeSide()));
+      leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
       isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
 
@@ -455,46 +457,44 @@ public class WalkOnTheEdgesManager
       doToeOff.set(false);
    }
 
-   private List<FramePoint> getToePointsCopy(ContactablePlaneBody supportFoot)
-   {
-      FrameVector forward = new FrameVector(supportFoot.getSoleFrame(), 1.0, 0.0, 0.0);
-      int nToePoints = 2;
-      List<FramePoint> toePoints = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(supportFoot.getContactPointsCopy(), forward, nToePoints);
+   private final FramePoint[] toePoints = new FramePoint[]{new FramePoint(), new FramePoint()};
+   private final FramePoint middleToePoint = new FramePoint();
 
-      return toePoints;
+   private void computeToePoints(RobotSide supportSide)
+   {
+      FrameConvexPolygon2d footDefaultPolygon = footDefaultPolygons.get(supportSide);
+      toePoints[0].setIncludingFrame(footDefaultPolygon.getReferenceFrame(), Double.NEGATIVE_INFINITY, 0.0, 0.0);
+      toePoints[1].setIncludingFrame(footDefaultPolygon.getReferenceFrame(), Double.NEGATIVE_INFINITY, 0.0, 0.0);
+      
+      for (int i = 0; i < footDefaultPolygon.getNumberOfVertices(); i++)
+      {
+         FramePoint2d footPoint = footDefaultPolygon.getFrameVertex(i);
+         if (footPoint.getX() > toePoints[0].getX())
+         {
+            toePoints[1].set(toePoints[0]);
+            toePoints[0].setXY(footPoint);
+         }
+         else if (footPoint.getX() > toePoints[1].getX())
+         {
+            toePoints[1].setXY(footPoint);
+         }
+      }
+
+      middleToePoint.setToZero(footDefaultPolygon.getReferenceFrame());
+      middleToePoint.interpolate(toePoints[0], toePoints[1], 0.5);
    }
 
-   private FrameConvexPolygon2d getOnToesSupportPolygonCopy(ContactablePlaneBody trailingFoot, ContactablePlaneBody leadingFoot)
+   private final FrameConvexPolygon2d onToesSupportPolygon = new FrameConvexPolygon2d();
+
+   private void updateOnToesSupportPolygon(RobotSide trailingSide)
    {
-      List<FramePoint> toePoints = getToePointsCopy(trailingFoot);
-      FramePoint singleToePoint = FramePoint.average(toePoints);
-      singleToePoint.changeFrame(worldFrame);
-      List<FramePoint> leadingFootPoints = leadingFoot.getContactPointsCopy();
+      computeToePoints(trailingSide);
+      middleToePoint.changeFrame(worldFrame);
 
-      List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-      allPoints.add(singleToePoint.toFramePoint2d());
-
-      for (int i = 0; i < leadingFootPoints.size(); i++)
-      {
-         FramePoint framePoint = leadingFootPoints.get(i);
-         framePoint.changeFrame(worldFrame);
-         allPoints.add(framePoint.toFramePoint2d());
-      }
-      return new FrameConvexPolygon2d(allPoints);
-   }
-
-   private FrameConvexPolygon2d getFootSupportPolygonCopy(ContactablePlaneBody foot)
-   {
-      List<FramePoint> footPoints = foot.getContactPointsCopy();
-
-      List<FramePoint2d> allPoints = new ArrayList<FramePoint2d>();
-      for (int i = 0; i < footPoints.size(); i++)
-      {
-         FramePoint framePoint = footPoints.get(i);
-         framePoint.changeFrame(worldFrame);
-         allPoints.add(framePoint.toFramePoint2d());
-      }
-      return new FrameConvexPolygon2d(allPoints);
+      onToesSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(trailingSide.getOppositeSide()));
+      onToesSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+      onToesSupportPolygon.addVertexByProjectionOntoXYPlane(middleToePoint);
+      onToesSupportPolygon.update();
    }
 
    public boolean isEdgeTouchDownDone(RobotSide robotSide)
