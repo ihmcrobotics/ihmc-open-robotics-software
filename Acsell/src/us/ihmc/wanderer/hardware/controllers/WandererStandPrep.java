@@ -45,6 +45,11 @@ public class WandererStandPrep implements WandererController
    private final DoubleYoVariable crouch = new DoubleYoVariable("crouch", registry);
 
    private final BooleanYoVariable enableOutput = new BooleanYoVariable("enableStandPrepOutput", registry);
+   
+   private double springCalibration_t0;
+   private final BooleanYoVariable springCalibration_wasEnabled = new BooleanYoVariable("springCalibrationEnabled",registry);
+   private final BooleanYoVariable springCalibration_isEnabled = new BooleanYoVariable("startSpringCalibration", registry);
+   private final DoubleYoVariable springTime = new DoubleYoVariable("springTime",registry);
 
    @Override
    public void setFullRobotModel(SDFFullRobotModel fullRobotModel)
@@ -153,6 +158,8 @@ public class WandererStandPrep implements WandererController
                case ANKLE_Y:
                   qDesired -= 0.5 * crouch.getDoubleValue();
                   break;
+               case HIP_X:
+                  qDesired += springCalibrationScript(TimeTools.nanoSecondstoSeconds(timestamp));
                default:
                   break;
                }
@@ -169,6 +176,42 @@ public class WandererStandPrep implements WandererController
          break;
       }
 
+   }
+   
+   private double springCalibrationScript(double time)
+   {      
+      if(WandererStandPrepSetpoints.HIP_X.getReflectRight()!=1.0)
+         return 0.0;
+      
+      if (springCalibration_isEnabled.getBooleanValue())
+      {
+         if(!springCalibration_wasEnabled.getBooleanValue())
+         {
+            springCalibration_t0 = time;
+            springCalibration_wasEnabled.set(true);
+            return 0.0;
+         }
+         else
+         {
+            springTime.set(time-springCalibration_t0);
+            if(springTime.getDoubleValue()<20.0)
+               return 0.03*(Math.abs(Math.IEEEremainder(springTime.getDoubleValue()+5.0, 20.0))-5.0); //Triangle wave with T=20.0, A=0.15
+            else
+            {
+               springCalibration_isEnabled.set(false);
+               return 0.0;
+            }
+         }
+         
+      }
+      else
+      {
+         springCalibration_wasEnabled.set(false);
+         return 0.0; 
+      }
+         
+
+         
    }
    
    public StandPrepState getStandPrepState()

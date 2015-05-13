@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.acsell.hardware.AcsellActuator;
+import us.ihmc.acsell.hardware.configuration.AcsellRobot;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.AcsellSlowSensorConstants;
 import us.ihmc.acsell.hardware.state.slowSensors.BusVoltage;
@@ -25,6 +26,8 @@ import us.ihmc.acsell.hardware.state.slowSensors.RawPhaseCurrentADTicks;
 import us.ihmc.acsell.hardware.state.slowSensors.SensorMCUTime;
 import us.ihmc.acsell.hardware.state.slowSensors.StatorHallSwitches;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
+import us.ihmc.wanderer.hardware.WandererActuator;
+import us.ihmc.wanderer.hardware.controllers.WandererStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -72,11 +75,14 @@ public class AcsellActuatorState
    private final double motorEncoderScale;
    private final double jointEncoderScale;
    private final DoubleYoVariable jointEncoderOffset;
+   private final double voltageSign;
+   private final double velocityScale;
 
-   public AcsellActuatorState(AcsellActuator actuator, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry parentRegistry)
+   public AcsellActuatorState(AcsellActuator actuator, AcsellRobot robot, AcsellSlowSensorConstants slowSensorConstants, YoVariableRegistry parentRegistry)
    {
       final String name = actuator.getName();
       this.registry = new YoVariableRegistry(name);
+      this.voltageSign = (robot==AcsellRobot.WANDERER) ? -1.0 : 1.0;
       this.motorKt = actuator.getKt();
       this.slowSensorConstants = slowSensorConstants;
       this.SensedCurrentToTorqueDirection = actuator.getSensedCurrentToTorqueDirection();
@@ -89,6 +95,7 @@ public class AcsellActuatorState
       this.motorEncoderPosition = new DoubleYoVariable(name + "MotorEncoderPosition", registry);
       this.motorVelocityEstimate = new DoubleYoVariable(name + "MotorVelocityEstimate", registry);
       this.motorEncoderScale = actuator.getMotorEncoderScale();
+      this.velocityScale = (robot==AcsellRobot.WANDERER) ? WandererActuator.VELOCITY_SCALE : 1.0;
 
       this.jointEncoderPosition = new DoubleYoVariable(name + "JointEncoderPosition", registry);
       this.jointEncoderVelocity = new DoubleYoVariable(name + "JointEncoderVelocity", registry);
@@ -232,10 +239,10 @@ public class AcsellActuatorState
       quadratureCompositeStatorCurrent.set(buffer.getFloat());
       controlTarget.set(buffer.getFloat());
       motorEncoderPosition.set((buffer.getFloat() + motorAngleOffset.getDoubleValue())*motorEncoderScale);
-      motorVelocityEstimate.set(buffer.getFloat()*motorEncoderScale);
+      motorVelocityEstimate.set(buffer.getFloat()*motorEncoderScale*velocityScale);
 
       jointEncoderPosition.set((buffer.getFloat() - jointEncoderOffset.getDoubleValue())*jointEncoderScale);
-      jointEncoderVelocity.set(buffer.getFloat()*jointEncoderScale);
+      jointEncoderVelocity.set(buffer.getFloat()*jointEncoderScale*velocityScale);
 
       lastReceivedControlID.set(buffer.getInt() & 0xFFFFFFFFl);
 
@@ -257,7 +264,7 @@ public class AcsellActuatorState
 
       unused = buffer.get();
 
-      motorPower.set(3.0 / 4.0 * (quadratureCompositeStatorCurrent.getDoubleValue() * getQuadratureControlEffort() + inphaseCompositeStatorCurrent
+      motorPower.set(voltageSign * 3.0 / 4.0 * (quadratureCompositeStatorCurrent.getDoubleValue() * getQuadratureControlEffort() + inphaseCompositeStatorCurrent
             .getDoubleValue() * getInphaseControlEffort()));
       
       updatePacketDropStatistics();

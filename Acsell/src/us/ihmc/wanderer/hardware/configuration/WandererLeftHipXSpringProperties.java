@@ -10,32 +10,32 @@ public class WandererLeftHipXSpringProperties implements HystereticSpringPropert
 	
 	@Override
 	public double getLoadingSpringConstant() {
-		return 330;
+		return 0;
 	}
 	
 	@Override
 	public double getLinearSpringConstant() {
-		return 385;
+		return 950;
 	}
 	
 	@Override
 	public double getUnloadingSpringConstant() {
-		return 300;
+		return 0;
 	}
 	
 	@Override
 	public double getLoadingRestLength() {
-		return 0.04;//0.02;
+		return 0.0;//0.02;
 	}
 	
 	@Override
 	public double getLinearSpringRestLength() {
-		return 0.015;
+		return 0.04;
 	}
 	
 	@Override
 	public double getUnloadingRestLength() {
-		return 0.02;//0.00 //Loading -0.03
+		return 0.00;//0.00 //Loading -0.03
 	}
 	
 	@Override

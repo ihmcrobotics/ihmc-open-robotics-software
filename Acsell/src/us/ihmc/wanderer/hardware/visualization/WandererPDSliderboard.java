@@ -67,7 +67,7 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
          sliderBoardConfigurationManager.setSlider(1, variables.q_d, oneDoFJoint.getJointLowerLimit(), oneDoFJoint.getJointUpperLimit());
          sliderBoardConfigurationManager.setSlider(2, variables.qd_d, -1, 1);
          sliderBoardConfigurationManager.setSlider(3, variables.kp, 0, 10 * joint.getRatio() * joint.getRatio());
-         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 5 * joint.getRatio() * joint.getRatio()*WandererStandPrepSetpoints.VELOCITY_SCALE);
+         sliderBoardConfigurationManager.setSlider(4, variables.kd, 0, 5 * joint.getRatio() * joint.getRatio());
 
          if (Double.isNaN(oneDoFJoint.getTorqueLimit()) || Double.isInfinite(oneDoFJoint.getTorqueLimit()))
          {

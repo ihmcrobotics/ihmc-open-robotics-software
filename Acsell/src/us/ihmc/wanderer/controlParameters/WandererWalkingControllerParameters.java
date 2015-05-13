@@ -170,7 +170,7 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    private final double minimumHeightAboveGround = 0.695;
-   private double nominalHeightAboveGround = 0.770 + 0.020;//+0.010;//+0.020;
+   private double nominalHeightAboveGround = 0.89;
    private final double maximumHeightAboveGround = 0.89;//Hip height fully upright//0.735;
    //private final double additionalOffsetHeightWanderer = 0.15;
 

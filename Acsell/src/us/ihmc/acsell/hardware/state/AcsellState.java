@@ -53,7 +53,7 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
       else
          this.powerDistributionState = new StepprPowerDistributionADCState("powerDistribution", registry);
       totalMotorPower = new DoubleYoVariable("totalMotorPower", registry);
-      xsens = new AcsellXSensState("xsens", registry);
+      xsens = new AcsellXSensState("xsens", robot, registry);
       
       actuatorStates = createActuators();
       jointStates = createJoints();

@@ -190,6 +190,7 @@
     </joint>
     <link name='utorso'>
       <pose>-0.011968 0.0 0.215900 0.0 0.0 0.0</pose>
+<!--
       <inertial>
         <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
         <mass>19.086895</mass>
@@ -202,6 +203,19 @@
           <izz> 0.365770</izz>
         </inertia>
       </inertial>
+-->
+      <inertial>
+        <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
+        <mass>1</mass>
+        <inertia>
+          <ixx> 0.001</ixx>
+          <ixy> 0</ixy>
+          <ixz>-0</ixz>
+          <iyy> 0.001</iyy>
+          <iyz>-0</iyz>
+          <izz> 0.001</izz>
+        </inertia>
+      </inertial>      
       <collision name='utorso_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
@@ -970,6 +984,7 @@
       </axis>
     </joint>
 	
+<!--
 	<link name='l_arm_ugh'>
       <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
       <inertial>
@@ -1571,5 +1586,6 @@
         </dynamics>
       </axis>
     </joint>
+-->
   </model>
 </sdf>

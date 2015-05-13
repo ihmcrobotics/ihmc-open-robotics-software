@@ -34,10 +34,10 @@ import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
 public class WandererOutputWriter implements DRCOutputWriter, ControllerStateChangedListener
 {
-   boolean USE_LEFT_HIP_X_SPRING = false;
-   boolean USE_RIGHT_HIP_X_SPRING = false;
-   boolean USE_LEFT_ANKLE_SPRING = false;
-   boolean USE_RIGHT_ANKLE_SPRING = false;
+   boolean USE_LEFT_HIP_X_SPRING = true;
+   boolean USE_RIGHT_HIP_X_SPRING = true;
+   boolean USE_LEFT_ANKLE_SPRING = true;
+   boolean USE_RIGHT_ANKLE_SPRING = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("WandererOutputWriter");
 
@@ -122,8 +122,8 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       yoAngleSpring.put(WandererJoint.LEFT_ANKLE_Y, new DoubleYoVariable(WandererJoint.LEFT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
       yoAngleSpring.put(WandererJoint.RIGHT_ANKLE_Y, new DoubleYoVariable(WandererJoint.RIGHT_ANKLE_Y.getSdfName() + "_q_Spring", registry));
       
-      leftHipXSpringCalculator = new HystereticSpringCalculator(leftHipXSpringProperties,WandererJoint.LEFT_HIP_X.getSdfName(),registry);
-      rightHipXSpringCalculator = new HystereticSpringCalculator(rightHipXSpringProperties,WandererJoint.RIGHT_HIP_X.getSdfName(),registry);
+      leftHipXSpringCalculator = new LinearSpringCalculator(leftHipXSpringProperties);
+      rightHipXSpringCalculator = new LinearSpringCalculator(rightHipXSpringProperties);
       leftAnkleSpringCalculator = new LinearSpringCalculator(leftAnkleSpringProperties);
       rightAnkleSpringCalculator = new LinearSpringCalculator(rightAnkleSpringProperties);
             
@@ -143,11 +143,11 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private void initializeMotorDamping()
    {
       //TODO: Update For Wanderer
-      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_X).set(5.0);
+      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_X).set(5.0);//0.14
       yoMotorDamping.get(WandererJoint.LEFT_ANKLE_Y).set(5.0);
-      yoMotorDamping.get(WandererJoint.LEFT_KNEE_Y).set(1.0);
-      yoMotorDamping.get(WandererJoint.LEFT_HIP_Y).set(1.0);
-      yoMotorDamping.get(WandererJoint.LEFT_HIP_X).set(10.0);
+      yoMotorDamping.get(WandererJoint.LEFT_KNEE_Y).set(1.0);//0.01
+      yoMotorDamping.get(WandererJoint.LEFT_HIP_Y).set(1.0);//0.01
+      yoMotorDamping.get(WandererJoint.LEFT_HIP_X).set(10.0);//0.1
       yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_X).set(5.0);
       yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_Y).set(5.0);
       yoMotorDamping.get(WandererJoint.RIGHT_KNEE_Y).set(1.0);

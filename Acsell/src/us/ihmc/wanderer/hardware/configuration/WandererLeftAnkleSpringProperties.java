@@ -30,7 +30,7 @@ public class WandererLeftAnkleSpringProperties implements HystereticSpringProper
 	
 	@Override
 	public double getLinearSpringRestLength() {
-		return -0.228;
+		return -0.182;
 	}
 	
 	@Override

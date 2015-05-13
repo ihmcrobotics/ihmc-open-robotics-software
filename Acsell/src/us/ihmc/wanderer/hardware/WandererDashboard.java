@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.wanderer.hardware.visualization.WandererExpoFrame;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -38,12 +39,17 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    private final EnumMap<WandererActuator, YoVariable<?>> mcbTemperatures1 = new EnumMap<>(WandererActuator.class);
    private final EnumMap<WandererActuator, YoVariable<?>> mcbTemperatures2 = new EnumMap<>(WandererActuator.class);
    private final EnumMap<WandererActuator, YoVariable<?>> motorEncoders = new EnumMap<>(WandererActuator.class);
+   
 
    public static void createDashboard(final SimulationConstructionSet scs, YoVariableHolder registry)
    {
-      WandererDashboard WandererDashboard = new WandererDashboard(registry);
-      scs.addExtraJpanel(WandererDashboard, "Dashboard");
-      scs.attachPlaybackListener(WandererDashboard);
+      final WandererDashboard wandererDashboard = new WandererDashboard(registry);
+      scs.addExtraJpanel(wandererDashboard, "Dashboard");
+      scs.attachPlaybackListener(wandererDashboard);
+      
+      final WandererExpoFrame wandererExpoFrame = new WandererExpoFrame(registry,false);
+      wandererExpoFrame.setVisible(true);
+      scs.attachPlaybackListener(wandererExpoFrame);
       
       JButton showDashboard = new JButton("Show dashboard");
       showDashboard.addActionListener(new ActionListener()
@@ -58,6 +64,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       
       scs.addButton(showDashboard);
       scs.getStandardSimulationGUI().selectPanel("Dashboard");
+      
    }
    
    private WandererDashboard(YoVariableHolder yoVariableHolder)
@@ -164,7 +171,6 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       
       VariableChangedListener robotOnGroundChecker = new VariableChangedListener()
       {
-
          @Override
          public void variableChanged(YoVariable<?> v)
          {
@@ -182,6 +188,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       };
       try
       {
+         //TODO: Fix Me!
       	//leftFootForce.addVariableChangedListener(robotOnGroundChecker);
       	//rightFootForce.addVariableChangedListener(robotOnGroundChecker);
       }
@@ -209,7 +216,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
          @Override
          public void actionPerformed(ActionEvent e)
          {
-        	btnPowerOn.setEnabled(false);
+            btnPowerOn.setEnabled(false);
             logicPowerStateRequest.setValueFromDouble(1.0);
             ThreadTools.sleep(250);
             motorPowerStateRequest.setValueFromDouble(1.0);

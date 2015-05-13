@@ -188,7 +188,7 @@ public class StepprState extends AcsellState<StepprActuator, StepprJoint>
       for (StepprActuator actuator : StepprActuator.values)
       {
          actuatorStates
-               .put(actuator, new AcsellActuatorState(actuator, new StepprSlowSensorConstants(), registry));
+               .put(actuator, new AcsellActuatorState(actuator, AcsellRobot.STEPPR, new StepprSlowSensorConstants(), registry));
       }
       return actuatorStates;
    }
