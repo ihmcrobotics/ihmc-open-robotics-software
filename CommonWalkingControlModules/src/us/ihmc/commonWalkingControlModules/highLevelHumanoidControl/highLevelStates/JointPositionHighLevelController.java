@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -63,7 +64,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private static final boolean VISUALIZE_TASKSPACE_TRAJECTORIES = true;
    private static final boolean DEBUG = false;
    
-   private final String name;
+   private static final double NECK_SPEED = Math.PI / 3.0;
+   private static final double MIN_NECK_TRAJECTORY_TIME = 0.5;
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final HashSet<OneDoFJoint> jointsBeingControlled = new HashSet<OneDoFJoint>();
@@ -85,7 +88,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private boolean firstPacket = true;
    private final HandPoseStatusProducer handPoseStatusProducer;
    private boolean handTrajectoryDoneHasBeenSent;
-
+   private final HeadOrientationProvider headOrientationProvider;
 
    private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
 
@@ -123,8 +126,6 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    {
       super(controllerState);
       
-      name = getClass().getSimpleName();
-
       timeProvider = momentumBasedController.getYoTime();
       this.desiredJointsProvider = variousWalkingProviders.getDesiredJointsPositionProvider();
       this.handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
@@ -132,6 +133,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.momentumBasedController = momentumBasedController;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
+      this.headOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
@@ -447,6 +449,20 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
                   handPoseProvider.getRotationAngleRightHandRule(side), handPoseProvider.getGraspOffsetFromControlFrame(side), handPoseProvider.controlHandAngleAboutAxis(side));
          }
       }
+      
+      if (headOrientationProvider != null && headOrientationProvider.isNewHeadOrientationInformationAvailable())
+      {
+         pitchNeck(headOrientationProvider.getDesiredHeadOrientation().getPitch());
+      }
+   }
+
+   private void pitchNeck(double pitch)
+   {
+      OneDoFJoint neckPitchJoint = fullRobotModel.getNeckJoint(NeckJointName.LOWER_NECK_PITCH);
+      double currentPitch = neckPitchJoint.getQ();
+      double trajctoryTime = Math.max(Math.abs(currentPitch - pitch) / NECK_SPEED, MIN_NECK_TRAJECTORY_TIME);
+      
+      initializeForSingleJointAngle(trajctoryTime, neckPitchJoint.getName(), pitch);
    }
 
    private void initializeFromJointAnglesPacket(JointAnglesPacket packet)
@@ -517,15 +533,20 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       
       flattenFeet = packet.flattenFeetAtTheEnd;
    }
-
+   
    private void initializeFromSingleJointAnglePacket(SingleJointAnglePacket packet)
    {
+      initializeForSingleJointAngle(packet.trajcetoryTime, packet.jointName, packet.angle);
+   }
+
+   private void initializeForSingleJointAngle(double trajectoryTime, String jointName, double jointAngle)
+   {
       initialTrajectoryTime = timeProvider.getDoubleValue();
-      trajectoryTimeProvider.set(packet.trajcetoryTime);
+      trajectoryTimeProvider.set(trajectoryTime);
       
       for (OneDoFJoint joint : jointsBeingControlled)
       {
-         if (packet.jointName.equals(joint.getName()))
+         if (jointName.equals(joint.getName()))
          {
             if (joint.getName().contains("l_arm"))
             {
@@ -538,7 +559,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
                areHandJointspaceControlled.get(RobotSide.RIGHT).set(false);
             }
             
-            double desiredPosition = MathTools.clipToMinMax(packet.angle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+            double desiredPosition = MathTools.clipToMinMax(jointAngle, joint.getJointLimitLower(), joint.getJointLimitUpper());
             trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
 
             alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
