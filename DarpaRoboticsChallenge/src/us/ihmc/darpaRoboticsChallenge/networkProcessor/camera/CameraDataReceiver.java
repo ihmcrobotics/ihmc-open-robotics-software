@@ -14,6 +14,7 @@ import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -92,7 +93,8 @@ public abstract class CameraDataReceiver extends Thread
                }
                for (int i = 0; i < stereoListeners.size(); i++)
                {
-                  stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.intrinsicParameters);
+                  stereoListeners.get(i).newImageAvailable(data);
+//                  stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.intrinsicParameters);
                }
               
                compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
@@ -117,21 +119,6 @@ public abstract class CameraDataReceiver extends Thread
       stereoListeners.add(drcStereoListener);
    }
 
-   private static class CameraData
-   {
-      private final RobotSide robotSide;
-      private final BufferedImage image;
-      private final long timestamp;
-      private final IntrinsicParameters intrinsicParameters;
-
-      public CameraData(RobotSide robotSide, BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters)
-      {
-         this.robotSide = robotSide;
-         this.image = image;
-         this.timestamp = timestamp;
-         this.intrinsicParameters = intrinsicParameters;
-      }
-
-   }
+  
 
 }

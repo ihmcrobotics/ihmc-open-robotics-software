@@ -12,9 +12,9 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
+import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.robotSide.RobotSide;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<CalibrateArmPacket>
 {
@@ -64,13 +64,13 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
    }
 
    @Override
-   public void newImageAvailable(RobotSide robotSide, BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters)
+   public void newImageAvailable(CameraData data)
    {
-      if(robotSide == RobotSide.LEFT)
+      if(data.robotSide == RobotSide.LEFT)
       {
          lock.lock();
-         lastLeftEyeImage = image;
-         imageTimestamp = timestamp;
+         lastLeftEyeImage = data.image;
+         imageTimestamp = data.timestamp;
          lock.unlock();
       }
    }

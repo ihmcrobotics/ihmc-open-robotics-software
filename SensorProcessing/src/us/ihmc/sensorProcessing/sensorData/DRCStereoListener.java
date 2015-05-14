@@ -18,6 +18,8 @@ public interface DRCStereoListener
     * @param image
     * @param timestamp Time stamp in nano-seconds
     */
-   public void newImageAvailable(RobotSide robotSide , BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters);
+//   public void newImageAvailable(RobotSide robotSide , BufferedImage image, long timestamp, IntrinsicParameters intrinsicParameters);
+
+   public void newImageAvailable(CameraData data);
 
 }
