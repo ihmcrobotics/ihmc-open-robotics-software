@@ -15,6 +15,7 @@ import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.HandCommandManager;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.RosModule;
+import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -44,6 +45,7 @@ public class DRCNetworkProcessor
          setupRosModule(robotModel, params);
          setupGFEModule(params);
          setupMocapModule(robotModel, params);
+         setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
       }
@@ -52,6 +54,17 @@ public class DRCNetworkProcessor
          throw new RuntimeException(e);
       }
  }
+
+   private void setupZeroPoseRobotConfigurationPublisherModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)
+   {
+      if (params.isZeroPoseRobotConfigurationPublisherEnabled())
+      {
+         PacketCommunicator zeroPosePublisherCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ZERO_POSE_PRODUCER, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.ZERO_POSE_PRODUCER, zeroPosePublisherCommunicator);
+         
+         new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
+      }      
+   }
 
    private void addRobotSpecificModuleCommunicators(HashMap<NetworkPorts, PacketDestination> ports)
    {

@@ -21,6 +21,7 @@ public class DRCNetworkModuleParameters
    private boolean usePerceptionModule;
    private boolean useRosModule;
    private boolean useGFECommunicator;
+   private boolean useZeroPoseRobotConfigurationPublisher;
    private boolean useMocapModule;
    private boolean useLocalControllerCommunicator;
    private boolean runAutomaticDiagnostic = false;
@@ -76,6 +77,11 @@ public class DRCNetworkModuleParameters
    public void enableMultisenseManualTestModule(boolean b)
    {
       useMultisenseManualTestModule = b;
+   }
+   
+   public void enableZeroPoseRobotConfigurationPublisherModule(boolean b)
+   {
+      useZeroPoseRobotConfigurationPublisher = b;
    }
 
    public void enableSensorModule(boolean b)
@@ -160,6 +166,11 @@ public class DRCNetworkModuleParameters
    public boolean isLocalControllerCommunicatorEnabled()
    {
       return useLocalControllerCommunicator;
+   }
+   
+   public boolean isZeroPoseRobotConfigurationPublisherEnabled()
+   {
+      return useZeroPoseRobotConfigurationPublisher;
    }
    
    public void enableGFECommunicator(boolean useGFECommunicator)
