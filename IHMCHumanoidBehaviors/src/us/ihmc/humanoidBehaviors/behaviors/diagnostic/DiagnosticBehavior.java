@@ -204,6 +204,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       FLEX_UP,
       FLEX_DOWN,
       FLEX_UP_FLEX_DOWN,
+      KRANE_KICK,
       REDO_LAST_TASK // Keep that one at the end.
    };
 
@@ -1807,6 +1808,35 @@ public class DiagnosticBehavior extends BehaviorInterface
       }
 
    }
+   
+   private void sequenceKraneKick()
+   {
+      kraneKick(RobotSide.RIGHT);
+   }
+   
+   private void kraneKick(RobotSide robotSide)
+   {
+      ReferenceFrame ankleZUpFrame = ankleZUpFrames.get(robotSide.getOppositeSide());
+      // First Lift up the foot
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.1, robotSide.negateIfRightSide(0.25), 0.2));
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.KARATE_KID_KRANE_KICK);
+      pipeLine.requestNewStage();
+      
+   // Go back to stand prep but don't put the foot on the ground yet
+      submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
+      
+      FramePose footPose = new FramePose();
+      footPose.setToZero(ankleZUpFrame);
+      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
+      footPose.setOrientation(0.0, 0.0, 0.0);
+      submitFootPose(true, robotSide, footPose);
+
+      submitChestHomeCommand(true);
+      submitPelvisHomeCommand(true);
+
+      // Put the foot back on the ground
+      submitFootPosition(false, robotSide, new FramePoint(ankleZUpFrame, 0.0, robotSide.negateIfRightSide(0.25), -0.3));
+   }
 
    private void karateKid(RobotSide robotSide)
    {
@@ -2536,6 +2566,9 @@ public class DiagnosticBehavior extends BehaviorInterface
          case FLEX_UP_FLEX_DOWN:
             lastDiagnosticTask.set(DiagnosticTask.FLEX_UP_FLEX_DOWN);
             sequenceFlexUpFlexDown();
+         case KRANE_KICK:
+            lastDiagnosticTask.set(DiagnosticTask.KRANE_KICK);
+            sequenceKraneKick();
          default:
             break;
          }

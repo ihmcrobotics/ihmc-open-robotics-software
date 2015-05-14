@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 public enum HumanoidArmPose
 {   
-   STAND_PREP, SMALL_CHICKEN_WINGS, LARGE_CHICKEN_WINGS, STRAIGHTEN_ELBOWS, SUPPINATE_ARMS_IN_A_LITTLE, ARMS_BACK, LARGER_CHICKEN_WINGS,
+   STAND_PREP, SMALL_CHICKEN_WINGS, LARGE_CHICKEN_WINGS, STRAIGHTEN_ELBOWS, SUPPINATE_ARMS_IN_A_LITTLE, ARMS_BACK, LARGER_CHICKEN_WINGS, KARATE_KID_KRANE_KICK,
    ARMS_OUT_EXTENDED, SUPPINATE_ARMS_IN_MORE, SUPPINATE_ARMS_IN_A_LOT, SUPER_CHICKEN_WINGS, FLYING, FLYING_SUPPINATE_IN, FLYING_SUPPINATE_OUT, FLYING_PALMS_UP,
    FLEX_UP,FLEX_DOWN,REACH_BACK, REACH_WAY_BACK, ARMS_03, REACH_FORWARD, REACH_WAY_FORWARD, ARM_STRAIGHT_DOWN, ARM_NINETY_ELBOW_DOWN, ARM_NINETY_ELBOW_FORWARD,
    ARM_NINETY_ELBOW_UP, ARM_FORTFIVE_ELBOW_UP, ARM_FORTFIVE_ELBOW_DOWN, ARM_OUT_TRICEP_EXERCISE, ARM_NINETY_ELBOW_DOWN2, ARM_NINETY_ELBOW_FORWARD2, ARM_NINETY_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP2, ARM_FORTFIVE_ELBOW_UP3, ARM_FORTFIVE_ELBOW_DOWN2, ARM_FORTFIVE_ELBOW_DOWN3, REACH_FAR_FORWARD, REACH_FAR_BACK;
@@ -51,6 +51,8 @@ public enum HumanoidArmPose
             return new double[]{0.3, -1.2, 1.0, -0.4};
          case FLYING_SUPPINATE_OUT:
             return new double[]{0.3, -1.2, -1.0, -0.4};
+         case KARATE_KID_KRANE_KICK:
+            return new double[]{0.0,0.0,0.0,0.0};
          case SUPPINATE_ARMS_IN_MORE:
             return new double[]{0.3, -0.4, 0.3, -1.7};
          case SUPPINATE_ARMS_IN_A_LOT:
@@ -145,6 +147,8 @@ public enum HumanoidArmPose
             return new double[]{-0.0192, 0.3465, 1.1938};
          case FLYING_PALMS_UP:
             return new double[]{Math.PI/4.0, -Math.PI/2.0, Math.PI/4.0};
+         case KARATE_KID_KRANE_KICK:
+            return new double[]{0.6154, 0.5235, 2.5261};
          case FLEX_UP:
             return new double[]{Math.PI/4.0, -Math.PI/2.0, Math.PI/4.0};
          case FLEX_DOWN:
@@ -255,6 +259,8 @@ public enum HumanoidArmPose
          return new double[]{0.0, 0.0, 0.0};
       case FLYING_PALMS_UP:
          return new double[]{Math.PI/2, 0.0, 0.0};
+      case KARATE_KID_KRANE_KICK:
+         return new double[]{Math.PI/2,0.0,-0.7};
       case FLEX_UP:
          return new double[]{Math.PI/2,0.0,-0.7};
       case FLEX_DOWN:
