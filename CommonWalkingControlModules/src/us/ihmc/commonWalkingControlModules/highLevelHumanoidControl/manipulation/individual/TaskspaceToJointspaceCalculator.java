@@ -116,6 +116,7 @@ public class TaskspaceToJointspaceCalculator
    private final DenseMatrix64F spatialDesiredVelocity = new DenseMatrix64F(maxNumberOfConstraints, 1);
 
    private final DoubleYoVariable[] yoPrivilegedJointPositions;
+   private final AlphaFilteredYoVariable[] yoPrivilegedJointPositionsFiltered;
 
    private final DenseMatrix64F privilegedJointVelocities;
    private final DenseMatrix64F jointSquaredRangeOfMotions;
@@ -166,6 +167,7 @@ public class TaskspaceToJointspaceCalculator
       currentSecondaryObjective.set(SecondaryObjective.TOWARD_RESTING_CONFIGURATION);
 
       yoPrivilegedJointPositions = new DoubleYoVariable[numberOfDoF];
+      yoPrivilegedJointPositionsFiltered = new AlphaFilteredYoVariable[numberOfDoF];
       privilegedJointVelocities = new DenseMatrix64F(numberOfDoF, 1);
 
       desiredJointAngles = new DenseMatrix64F(numberOfDoF, 1);
@@ -190,6 +192,7 @@ public class TaskspaceToJointspaceCalculator
       {
          String jointName = originalJoints[i].getName();
          yoPrivilegedJointPositions[i] = new DoubleYoVariable("q_privileged_" + jointName, registry);
+         yoPrivilegedJointPositionsFiltered[i] = new AlphaFilteredYoVariable("q_privileged_filt_" + jointName, registry, 0.99, yoPrivilegedJointPositions[i]);
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
          jointAnlgesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
       }
@@ -447,7 +450,7 @@ public class TaskspaceToJointspaceCalculator
       computeDesiredSpatialVelocityToSolveFor(spatialDesiredVelocity, spatialVelocityFromError, desiredControlFrameTwist);
 
       if (currentSecondaryObjective.getEnumValue() == SecondaryObjective.TOWARD_RESTING_CONFIGURATION)
-         computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight.getDoubleValue(), yoPrivilegedJointPositions);
+         computePrivilegedJointVelocitiesForPriviligedJointAngles(privilegedJointVelocities, jointAngleRegularizationWeight.getDoubleValue());
       else
          computePrivilegedVelocitiesForStayingAwayFromJointLimits(privilegedJointVelocities, jointAngleRegularizationWeight.getDoubleValue());
 
@@ -591,11 +594,12 @@ public class TaskspaceToJointspaceCalculator
       }
    }
 
-   private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight, DoubleYoVariable[] yoPrivilegedJointPositions)
+   private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight)
    {
       for (int i = 0; i < numberOfDoF; i++)
       {
-         privilegedJointVelocitiesToPack.set(i, 0, - 2.0 * weight * (localJoints[i].getQ() - yoPrivilegedJointPositions[i].getDoubleValue()) / jointSquaredRangeOfMotions.get(i, 0));
+         yoPrivilegedJointPositionsFiltered[i].update();
+         privilegedJointVelocitiesToPack.set(i, 0, - 2.0 * weight * (localJoints[i].getQ() - yoPrivilegedJointPositionsFiltered[i].getDoubleValue()) / jointSquaredRangeOfMotions.get(i, 0));
       }
    }
 
