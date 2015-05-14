@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import java.util.LinkedHashMap;
 
+import javax.vecmath.Vector3d;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -478,5 +480,35 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public ReferenceFrame getReferenceFrame()
    {
       return desiredPose.getReferenceFrame();
+   }
+
+   public void setEnableCompliantControl(boolean enable)
+   {
+      enableCompliantControl.set(enable);
+   }
+
+   public void setEnableLinearCompliance(boolean[] enableLinearCompliance)
+   {
+      handCompliantControlHelper.setEnableLinearCompliance(enableLinearCompliance);
+   }
+
+   public void setEnableAngularCompliance(boolean[] enableAngularCompliance)
+   {
+      handCompliantControlHelper.setEnableAngularCompliance(enableAngularCompliance);
+   }
+
+   public void setDesiredForceOfHandOntoExternalEnvironment(Vector3d desiredForce)
+   {
+      handCompliantControlHelper.setDesiredForceOfHandOntoExternalEnvironment(desiredForce);
+   }
+
+   public void setDesiredTorqueOfHandOntoExternalEnvironment(Vector3d desiredTorque)
+   {
+      handCompliantControlHelper.setDesiredTorqueOfHandOntoExternalEnvironment(desiredTorque);
+   }
+
+   public void setMeasuredWrenchDeadzoneSize(double forceDeadzone, double torqueDeadzone)
+   {
+      handCompliantControlHelper.setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
    }
 }
