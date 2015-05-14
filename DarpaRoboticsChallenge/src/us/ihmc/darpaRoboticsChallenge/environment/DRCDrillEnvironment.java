@@ -33,7 +33,7 @@ public class DRCDrillEnvironment implements CommonAvatarEnvironmentInterface
    private final Vector2d wallPosition = new Vector2d(0.0, -2.05);
    
    private final double drillHeight = 0.3;
-   private final double drillRadius = 0.03;
+   private final double drillRadius = 0.025;
    private final double drillMass = 1.5;
    
    public DRCDrillEnvironment()
