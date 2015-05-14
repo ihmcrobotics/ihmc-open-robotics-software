@@ -26,7 +26,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getDoubleSupportDuration()
    {
-      return runningOnRealRobot ? 1.5 : 0.25;
+      return runningOnRealRobot ? 2.0 : 0.25;
    }
 
    /** {@inheritDoc} */
@@ -117,7 +117,7 @@ public class ValkyrieCapturePointPlannerParameters implements CapturePointPlanne
    @Override
    public double getEntryCMPInsideOffset()
    {
-      return runningOnRealRobot ? 0.015 : 0.006;
+      return runningOnRealRobot ? 0.0 : 0.006;
    }
 
    /** {@inheritDoc} */
