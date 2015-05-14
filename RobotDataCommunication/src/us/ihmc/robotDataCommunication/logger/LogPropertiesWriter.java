@@ -1,8 +1,9 @@
 package us.ihmc.robotDataCommunication.logger;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class LogPropertiesWriter extends LogProperties
 {
@@ -26,8 +27,11 @@ public class LogPropertiesWriter extends LogProperties
    
    public void store() throws IOException
    {
-      FileWriter writer = new FileWriter(file);
+      FileOutputStream os = new FileOutputStream(file);
+      OutputStreamWriter writer = new OutputStreamWriter(os);
       store(writer, "Written by yovariable data logger");
+      writer.flush();
+      os.getFD().sync();
       writer.close();
    }
 
