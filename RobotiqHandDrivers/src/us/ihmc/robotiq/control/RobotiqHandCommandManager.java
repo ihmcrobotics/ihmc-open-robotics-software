@@ -83,7 +83,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
          NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
          final PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port,
                new IHMCCommunicationKryoNetClassList());
-         PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND_MANAGER : PacketDestination.RIGHT_HAND_MANAGER;
+         PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND : PacketDestination.RIGHT_HAND;
          try
          {
             handModuleCommunicator.connect();
