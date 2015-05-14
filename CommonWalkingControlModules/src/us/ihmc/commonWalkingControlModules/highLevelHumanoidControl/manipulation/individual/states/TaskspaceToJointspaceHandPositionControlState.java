@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.FormattingTools;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -23,17 +22,13 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.ScrewTools;
 import us.ihmc.utilities.screwTheory.SpatialMotionVector;
-import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoUtilities.math.filters.DeadzoneYoFrameVector;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
-import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBasedTaskspaceHandControlState
@@ -69,26 +64,8 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    private final DoubleYoVariable doneTrajectoryTime;
    private final DoubleYoVariable holdPositionDuration;
 
-   private final ForceSensorDataReadOnly wristForceSensor;
    private final BooleanYoVariable enableCompliantControl;
-   private final Wrench measuredWrench = new Wrench();
-   private final FrameVector tempForceVector = new FrameVector();
-
-   private final BooleanYoVariable[] doCompliantControlLinear;
-   private final YoFrameVector rawMeasuredForce;
-   private final DoubleYoVariable forceDeadzoneSize;
-   private final DeadzoneYoFrameVector deadzoneMeasuredForce;
-   private final DoubleYoVariable measuredForceAlpha;
-   private final AlphaFilteredYoFrameVector filteredMeasuredForce;
-
-   private final FrameVector compliantControlLinearDisplacement = new FrameVector();
-   private final FrameVector compliantControlCorrection = new FrameVector();
-
-   private final DoubleYoVariable compliantControlLinearGain;
-   private final DoubleYoVariable compliantControlMaxCorrectionPerTick; 
-   private final DoubleYoVariable compliantControlMaxLinearDisplacement;
-   private final DoubleYoVariable compliantControlLeakRatio;
-   private final YoFrameVector yoCompliantControlLinearDisplacement;
+   private final HandCompliantControlHelper handCompliantControlHelper;
 
    private final boolean doPositionControl;
 
@@ -197,25 +174,15 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
          }
       }
 
-      wristForceSensor = momentumBasedController.getWristForceSensor(robotSide);
       enableCompliantControl = new BooleanYoVariable(namePrefix + "EnableCompliantControl", registry);
-      rawMeasuredForce = new YoFrameVector(namePrefix + "RawMeasuredForce", worldFrame, registry);
-      forceDeadzoneSize = new DoubleYoVariable(namePrefix + "ForceDeadzoneSize", registry);
-      deadzoneMeasuredForce = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredForce", registry, forceDeadzoneSize, rawMeasuredForce);
-      measuredForceAlpha = new DoubleYoVariable(namePrefix + "MeasuredForceAlpha", registry);
-      measuredForceAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(8.0, dt));
-      filteredMeasuredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(namePrefix + "FilteredMeasuredForce", "", registry, measuredForceAlpha, deadzoneMeasuredForce);
-
-      doCompliantControlLinear = new BooleanYoVariable[3];
-      doCompliantControlLinear[0] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearX", registry);
-      doCompliantControlLinear[1] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearY", registry);
-      doCompliantControlLinear[2] = new BooleanYoVariable(namePrefix + "DoCompliantControlLinearZ", registry);
-
-      compliantControlLinearGain = new DoubleYoVariable(namePrefix + "CompliantControlLinearGain", registry);
-      compliantControlMaxCorrectionPerTick = new DoubleYoVariable(namePrefix + "CompliantControlMaxCorrectionPerTick", registry);
-      compliantControlMaxLinearDisplacement = new DoubleYoVariable(namePrefix + "CompliantControlMaxLinearDisplacement", registry);
-      compliantControlLeakRatio = new DoubleYoVariable(namePrefix + "CompliantControlLeakRatio", registry);
-      yoCompliantControlLinearDisplacement = new YoFrameVector(namePrefix + "CompliantControlLinearDisplacement", worldFrame, registry);
+      if (momentumBasedController.getWristForceSensor(robotSide) != null)
+      {
+         handCompliantControlHelper = new HandCompliantControlHelper(namePrefix, robotSide, momentumBasedController, registry);
+      }
+      else
+      {
+         handCompliantControlHelper = null;
+      }
    }
 
    /** Either {@link #initializeWithCurrentJointAngles()} or {@link #initializeWithDesiredJointAngles()} needs to be called before {@link #doAction()} when this class is used as a standalone controller. */
@@ -252,7 +219,10 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
 
       decayAngularControl(currentTimeInState.getDoubleValue());
 
-      doCompliantControl(desiredPosition);
+      if (enableCompliantControl.getBooleanValue())
+         handCompliantControlHelper.doCompliantControl(desiredPosition, desiredOrientation);
+      else
+         handCompliantControlHelper.reset();
 
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
@@ -299,57 +269,6 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
          }
       }
-   }
-
-   private void doCompliantControl(FramePoint desiredPosition)
-   {
-      if (!enableCompliantControl.getBooleanValue())
-      {
-         yoCompliantControlLinearDisplacement.setToZero();
-         return;
-      }
-
-      if (wristForceSensor == null)
-      {
-         enableCompliantControl.set(false);
-         return;
-      }
-
-      wristForceSensor.packWrench(measuredWrench);
-      measuredWrench.packLinearPartIncludingFrame(tempForceVector);
-      rawMeasuredForce.setAndMatchFrame(tempForceVector);
-      deadzoneMeasuredForce.update();
-      filteredMeasuredForce.update();
-      filteredMeasuredForce.getFrameTupleIncludingFrame(tempForceVector);
-
-      yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(compliantControlLinearDisplacement);
-
-      tempForceVector.changeFrame(worldFrame);
-      compliantControlLinearDisplacement.changeFrame(worldFrame);
-
-      compliantControlCorrection.scale(-compliantControlLinearGain.getDoubleValue(), tempForceVector);
-
-      double correctionMagnitude = compliantControlCorrection.length();
-      if (correctionMagnitude > compliantControlMaxCorrectionPerTick.getDoubleValue())
-      {
-         compliantControlCorrection.scale(compliantControlMaxCorrectionPerTick.getDoubleValue() / correctionMagnitude);
-      }
-
-      compliantControlLinearDisplacement.scale(compliantControlLeakRatio.getDoubleValue());
-      compliantControlLinearDisplacement.add(compliantControlCorrection);
-      compliantControlLinearDisplacement.clipToMinMax(-compliantControlMaxLinearDisplacement.getDoubleValue(), compliantControlMaxLinearDisplacement.getDoubleValue());
-
-      if (!doCompliantControlLinear[0].getBooleanValue())
-         compliantControlLinearDisplacement.setX(0.0);
-      if (!doCompliantControlLinear[1].getBooleanValue())
-         compliantControlLinearDisplacement.setY(0.0);
-      if (!doCompliantControlLinear[2].getBooleanValue())
-         compliantControlLinearDisplacement.setZ(0.0);
-
-      yoCompliantControlLinearDisplacement.setAndMatchFrame(compliantControlLinearDisplacement);
-
-      compliantControlLinearDisplacement.changeFrame(desiredPosition.getReferenceFrame());
-      desiredPosition.add(compliantControlLinearDisplacement);
    }
 
    @Override
@@ -546,6 +465,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
       this.taskspaceToJointspaceCalculator = taskspaceToJointspaceCalculator;
+      handCompliantControlHelper.setHandControlFrame(this.taskspaceToJointspaceCalculator.getControlFrame());
    }
 
    @Override
