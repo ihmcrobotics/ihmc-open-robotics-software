@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,7 +71,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final HashSet<OneDoFJoint> jointsBeingControlled = new HashSet<OneDoFJoint>();
+
+   private final OneDoFJoint[] jointsBeingControlled;
    private final FullRobotModel fullRobotModel;
 
    public final static HighLevelState controllerState = HighLevelState.JOINT_POSITION_CONTROL;
@@ -90,7 +93,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private boolean handTrajectoryDoneHasBeenSent;
    private final HeadOrientationProvider headOrientationProvider;
 
-   private final HashMap<OneDoFJoint, Double> previousPosition = new HashMap<OneDoFJoint, Double>();
+   private final TObjectDoubleHashMap<OneDoFJoint> previousPosition = new TObjectDoubleHashMap<>();
 
    private SideDependentList<double[]> armJointAngles, legJointAngles;
    private double[] spineJointAngles;
@@ -153,6 +156,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       fullRobotModel = momentumBasedController.getFullRobotModel();
       trajectoryTimeProvider = new YoVariableDoubleProvider("jointControl_trajectory_time", registry);
       
+      HashSet<OneDoFJoint> jointsBeingControlled = new HashSet<>(); 
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
@@ -174,6 +178,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          useAlternative.set(false);
          useAlternativeController.put(joint, useAlternative ); 
       }
+      
+      this.jointsBeingControlled = jointsBeingControlled.toArray(new OneDoFJoint[jointsBeingControlled.size()]);
       
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
