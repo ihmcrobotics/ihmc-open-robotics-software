@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
@@ -56,6 +57,7 @@ public class ManipulationControlModule
    private final HandPoseProvider handPoseProvider;
    private final HandstepProvider handstepProvider;
    private final HandLoadBearingProvider handLoadBearingProvider;
+   private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
 
    private final ObjectWeightProvider objectWeightProvider;
    private final SideDependentList<ProvidedMassMatrixToolRigidBody> toolRigidBodies;
@@ -78,6 +80,7 @@ public class ManipulationControlModule
       handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       handstepProvider = variousWalkingProviders.getHandstepProvider();
       handLoadBearingProvider = variousWalkingProviders.getDesiredHandLoadBearingProvider();
+      handComplianceControlParametersProvider = variousWalkingProviders.getHandComplianceControlParametersProvider();
 
       objectWeightProvider = variousWalkingProviders.getObjectWeightProvider();
       toolRigidBodies = momentumBasedController.getToolRigitBodies();
@@ -145,6 +148,8 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         handleCompliantControlRequests(robotSide);
+
          handleDefaultState(robotSide);
 
          handleHandPoses(robotSide);
@@ -278,6 +283,27 @@ public class ManipulationControlModule
          else
          {
             handControlModules.get(robotSide).holdPositionInBase();
+         }
+      }
+   }
+
+   private void handleCompliantControlRequests(RobotSide robotSide)
+   {
+      if (handComplianceControlParametersProvider != null || handComplianceControlParametersProvider.checkForNewRequest(robotSide))
+      {
+         if (handComplianceControlParametersProvider.isResetRequested(robotSide))
+         {
+            handControlModules.get(robotSide).setEnableCompliantControl(false, null, null, null, null, Double.NaN, Double.NaN);
+         }
+         else
+         {
+            boolean[] enableLinearCompliance = handComplianceControlParametersProvider.getEnableLinearCompliance(robotSide);
+            boolean[] enableAngularCompliance = handComplianceControlParametersProvider.getEnableAngularCompliance(robotSide);
+            Vector3d desiredForce = handComplianceControlParametersProvider.getDesiredForce(robotSide);
+            Vector3d desiredTorque = handComplianceControlParametersProvider.getDesiredTorque(robotSide);
+            double forceDeadzone = handComplianceControlParametersProvider.getForceDeadzone(robotSide);
+            double torqueDeadzone = handComplianceControlParametersProvider.getTorqueDeadzone(robotSide);
+            handControlModules.get(robotSide).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque, forceDeadzone, torqueDeadzone);
          }
       }
    }

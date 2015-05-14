@@ -982,4 +982,18 @@ public class HandControlModule
    {
       return robotSide;
    }
+
+   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce, Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
+   {
+      if (taskSpacePositionControlState instanceof TaskspaceToJointspaceHandPositionControlState)
+      {
+         TaskspaceToJointspaceHandPositionControlState taskspaceToJointspaceHandPositionControlState = (TaskspaceToJointspaceHandPositionControlState) taskSpacePositionControlState;
+         taskspaceToJointspaceHandPositionControlState.setEnableCompliantControl(enable);
+         taskspaceToJointspaceHandPositionControlState.setEnableLinearCompliance(enableLinearCompliance);
+         taskspaceToJointspaceHandPositionControlState.setEnableAngularCompliance(enableAngularCompliance);
+         taskspaceToJointspaceHandPositionControlState.setDesiredForceOfHandOntoExternalEnvironment(desiredForce);
+         taskspaceToJointspaceHandPositionControlState.setDesiredTorqueOfHandOntoExternalEnvironment(desiredForce);
+         taskspaceToJointspaceHandPositionControlState.setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
+      }
+   }
 }

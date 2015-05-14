@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -36,7 +37,9 @@ public class HandCompliantControlHelper
    private final YoFrameVector measuredForceAtControlFrame;
    private final YoFrameVector measuredTorqueAtControlFrame;
 
+   /** This is the desired force that the external environment should apply on the hand */
    private final YoFrameVector desiredForce;
+   /** This is the desired torque that the external environment should apply on the hand */
    private final YoFrameVector desiredTorque;
 
    private final FrameVector totalLinearCorrection = new FrameVector();
@@ -244,5 +247,77 @@ public class HandCompliantControlHelper
    {
       yoCompliantControlLinearDisplacement.setToZero();
       yoCompliantControlAngularDisplacement.setToZero();
+   }
+
+   public void disableLinearCompliance()
+   {
+      for (int i = 0; i < 3; i++)
+         doCompliantControlLinear[i].set(false);
+   }
+
+   public void disableAngularCompliance()
+   {
+      for (int i = 0; i < 3; i++)
+         doCompliantControlAngular[i].set(false);
+   }
+
+   public void setEnableLinearCompliance(boolean[] enableLinearCompliance)
+   {
+      if (enableLinearCompliance == null)
+      {
+         disableLinearCompliance();
+      }
+      else
+      {
+         for (int i = 0; i < 3; i++)
+            doCompliantControlLinear[i].set(enableLinearCompliance[i]);
+      }
+   }
+
+   public void setEnableAngularCompliance(boolean[] enableAngularCompliance)
+   {
+      if (enableAngularCompliance == null)
+      {
+         disableAngularCompliance();
+      }
+      else
+      {
+         for (int i = 0; i < 3; i++)
+            doCompliantControlAngular[i].set(enableAngularCompliance[i]);
+      }
+   }
+
+   public void setDesiredForceOfHandOntoExternalEnvironment(Vector3d desiredForce)
+   {
+      if (desiredForce == null)
+      {
+         this.desiredForce.setToZero();
+      }
+      else
+      {
+         this.desiredForce.set(desiredForce);
+         this.desiredForce.scale(-1.0);
+      }
+   }
+
+   public void setDesiredTorqueOfHandOntoExternalEnvironment(Vector3d desiredTorque)
+   {
+      if (desiredTorque == null)
+      {
+         this.desiredTorque.setToZero();
+      }
+      else
+      {
+         this.desiredTorque.set(desiredTorque);
+         this.desiredTorque.scale(-1.0);
+      }
+   }
+
+   public void setMeasuredWrenchDeadzoneSize(double forceDeadzone, double torqueDeadzone)
+   {
+      if (!Double.isNaN(forceDeadzone))
+         forceDeadzoneSize.set(forceDeadzone);
+      if (!Double.isNaN(torqueDeadzone))
+         torqueDeadzoneSize.set(torqueDeadzone);
    }
 }
