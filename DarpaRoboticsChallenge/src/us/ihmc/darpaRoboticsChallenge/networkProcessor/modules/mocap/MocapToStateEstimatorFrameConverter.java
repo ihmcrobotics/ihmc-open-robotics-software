@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 
+import java.util.HashMap;
+
 import optitrack.MocapRigidBody;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -19,6 +21,9 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
  */
 public class MocapToStateEstimatorFrameConverter
 {
+   HashMap<Integer, ReferenceFrame> mocapReferenceFrames = new HashMap<Integer, ReferenceFrame>();
+   HashMap<Integer, RigidBodyTransform> mocapRigidBodyTransforms = new HashMap<Integer, RigidBodyTransform>();
+   
    /** Get robot configuration from controller **/
    private final RobotDataReceiver robotDataReceiver;
 
@@ -27,6 +32,9 @@ public class MocapToStateEstimatorFrameConverter
    
    /** in world frame, uses mocapHeadPoseInZUp as it's transform to parent */
    private final ReferenceFrame mocapHeadFrame;
+   
+   /** in world frame, uses mocapHeadPoseInZUp as it's transform to parent */
+   private final ReferenceFrame mocapOffsetFrame;
    
    /** the transform from mocap head in z-up to mocap origin */
    private final RigidBodyTransform mocapHeadPoseInZUp = new RigidBodyTransform();
@@ -44,6 +52,16 @@ public class MocapToStateEstimatorFrameConverter
    private final RigidBodyTransform workingRigidBodyTransform = new RigidBodyTransform();
 
    private boolean enableMocapUpdates = false;
+
+   private ReferenceFrame mocapOrigin = new ReferenceFrame("mocapOrigin", ReferenceFrame.getWorldFrame())
+   {
+      
+      @Override
+      protected void updateTransformToParent(RigidBodyTransform transformToParent)
+      {
+         transformToParent.setIdentity();
+      }
+   };
    
    public MocapToStateEstimatorFrameConverter(DRCRobotModel robotModel, PacketCommunicator mocapModulePacketCommunicator)
    {
@@ -53,12 +71,23 @@ public class MocapToStateEstimatorFrameConverter
       robotHeadFrame = referenceFrames.getNeckFrame(NeckJointName.LOWER_NECK_PITCH);
       
 
-      mocapHeadFrame = new ReferenceFrame("headInMocapFrame", ReferenceFrame.getWorldFrame())
+      mocapHeadFrame = new ReferenceFrame("headInMocapFrame", mocapOrigin)
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             transformToParent.set(mocapHeadPoseInZUp);
+         }
+      };
+      
+      mocapOffsetFrame = new ReferenceFrame("mocapOffsetFrame", mocapOrigin)
+      {
+         
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(transformFromMocapHeadToRobotHead);
+            
          }
       };
       
@@ -86,13 +115,42 @@ public class MocapToStateEstimatorFrameConverter
          
          mocapHeadFrame.update();
          robotDataReceiver.updateRobotModel();
-         robotHeadFrame.getTransformToDesiredFrame(transformFromMocapHeadToRobotHead , mocapHeadFrame);
+         mocapHeadFrame.getTransformToDesiredFrame(transformFromMocapHeadToRobotHead , robotHeadFrame);
+         mocapOffsetFrame.update();
       }
    }
 
-   public void convertMocapPoseToRobotFrame(RigidBodyTransform pose)
+   public RigidBodyTransform convertMocapPoseToRobotFrame(MocapRigidBody mocapRigidBody)
    {
-      pose.multiply(transformFromMocapHeadToRobotHead);
+      int id = mocapRigidBody.getId();
+      
+      if(!mocapReferenceFrames.containsKey(id))
+      {
+         ReferenceFrame mocapObjectFrame = createReferenceFrameForMocapObject(id);
+         mocapReferenceFrames.put(id, mocapObjectFrame);
+      }
+      
+      mocapRigidBody.getPose(mocapRigidBodyTransforms.get(id));
+      
+      ReferenceFrame referenceFrame = mocapReferenceFrames.get(id);
+      referenceFrame.update();
+      
+      return referenceFrame.getTransformToDesiredFrame(mocapOffsetFrame);
+   }
+
+   private ReferenceFrame createReferenceFrameForMocapObject(int id)
+   {
+      final RigidBodyTransform mocapRigidBodyTransform = new RigidBodyTransform();
+      mocapRigidBodyTransforms.put(id, mocapRigidBodyTransform);
+      ReferenceFrame mocapObjectFrame = new ReferenceFrame("mocapObject" + id, mocapOrigin )
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(mocapRigidBodyTransform);
+         }
+      };
+      return mocapObjectFrame;
    }
 
    public void enableMocapUpdates(boolean freezeMocapUpdates)

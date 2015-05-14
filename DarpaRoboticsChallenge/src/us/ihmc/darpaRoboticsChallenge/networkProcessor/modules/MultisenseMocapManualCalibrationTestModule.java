@@ -46,7 +46,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
     */
    public MultisenseMocapManualCalibrationTestModule(DRCRobotModel robotModel, URI rosMasterURI)
    {
-      RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "atlas/MultisenseMocapManualCalibrationTest", true);
+      RosMainNode rosMainNode = null;
       mocapToStateEstimatorFrameConverter = new MocapToStateEstimatorFrameConverter(robotModel, packetCommunicator);
       
       if (ENABLE_ZERO_POSE_CONFIGURATION_PUBLISHER)
@@ -58,19 +58,23 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       
       mocapToStateEstimatorFrameConverter.setTransformFromMocapCentroidToHeadRoot(transformFromMocapCentroidToHeadRoot);
       
-      // for each of the MultisenseTests send a point cloud to the ui
-      for (MultisenseTest topicToTest : MultisenseTest.values())
+      if(rosMasterURI != null)
       {
-         if(topicToTest != MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER)
+         rosMainNode = new RosMainNode(rosMasterURI, "atlas/MultisenseMocapManualCalibrationTest", true);
+      // for each of the MultisenseTests send a point cloud to the ui
+         for (MultisenseTest topicToTest : MultisenseTest.values())
          {
-            MultisensePointCloudReceiver lidarReceiver = new MultisensePointCloudReceiver(packetCommunicator, topicToTest, robotModel);
-            rosMainNode.attachSubscriber(topicToTest.getRosTopic(), lidarReceiver);
-            multisensePointCloudReceivers.add(lidarReceiver);
+            if(topicToTest != MultisenseTest.NEAR_SCAN_IN_POINT_CLOUD_DATA_RECEIVER)
+            {
+               MultisensePointCloudReceiver lidarReceiver = new MultisensePointCloudReceiver(packetCommunicator, topicToTest, robotModel);
+               rosMainNode.attachSubscriber(topicToTest.getRosTopic(), lidarReceiver);
+               multisensePointCloudReceivers.add(lidarReceiver);
+            }
          }
+         rosMainNode.execute();
       }
       
       mocapDataClient.registerRigidBodiesListener(this);
-      rosMainNode.execute();
       connect();
    }
 
@@ -115,7 +119,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
             RigidBodyTransform poseInStateEstimatorFrame = new RigidBodyTransform(pose);
             if(USE_ROBOT_FRAME)
             {
-               mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(poseInStateEstimatorFrame);
+               poseInStateEstimatorFrame = mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
             }
             if (zeroPoseProducer != null)
             {
@@ -124,7 +128,7 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
             
             updateReceiversWithMocapPose(poseInStateEstimatorFrame);
          }
-         sendDetectedObjectPacketToUi(pose, id);
+         sendDetectedObjectPacketToUi(mocapObject);
       }
    }
 
@@ -140,13 +144,15 @@ public class MultisenseMocapManualCalibrationTestModule implements MocapRigidbod
       }
    }
    
-   private void sendDetectedObjectPacketToUi(RigidBodyTransform pose, int id)
+   private void sendDetectedObjectPacketToUi(MocapRigidBody mocapObject)
    {
+      RigidBodyTransform pose = new RigidBodyTransform();
+      mocapObject.getPose(pose);
       if(USE_ROBOT_FRAME)
       {
-         mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(pose);
+         pose = mocapToStateEstimatorFrameConverter.convertMocapPoseToRobotFrame(mocapObject);
       }
-      DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, id);
+      DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, mocapObject.getId());
       if(packetCommunicator.isConnected())
       {
          packetCommunicator.send(detectedMocapObject);

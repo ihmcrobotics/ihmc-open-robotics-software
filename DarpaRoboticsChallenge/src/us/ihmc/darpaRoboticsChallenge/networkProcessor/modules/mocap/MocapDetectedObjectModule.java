@@ -36,7 +36,7 @@ public class MocapDetectedObjectModule implements MocapRigidbodiesListener
          RigidBodyTransform pose = new RigidBodyTransform();
          mocapObject.getPose(pose);
          
-         frameConverter.convertMocapPoseToRobotFrame(pose);
+         pose = frameConverter.convertMocapPoseToRobotFrame(mocapObject);
          
          DetectedObjectPacket detectedMocapObject = new DetectedObjectPacket(pose, id);
          mocapModulePacketCommunicator.send(detectedMocapObject);
