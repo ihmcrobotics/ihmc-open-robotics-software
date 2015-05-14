@@ -94,7 +94,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
          int[] indices = listToPackIndices.toArray();
          
          columnsForJoints.put(joint, indices);
@@ -181,7 +181,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
          //old garbage-full way
 //         int[] indicesIntoBlock = ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), joint); 
          indicesIntoBlock.clear();
-         ScrewTools.computeIndicesForJoint(baseToEndEffectorJacobian.getJointsInOrder(), indicesIntoBlock, joint);
+         ScrewTools.computeIndexForJoint(baseToEndEffectorJacobian.getJointsInOrder(), indicesIntoBlock, joint);
          int[] indicesIntoBigMatrix = columnsForJoints.get(joint);
 
          for (int i = 0; i < indicesIntoBlock.size(); i++)

@@ -104,7 +104,7 @@ public class MomentumSolver implements MomentumSolverInterface
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
          int[] indices = listToPackIndices.toArray();
          
          columnsForJoints.put(joint, indices);

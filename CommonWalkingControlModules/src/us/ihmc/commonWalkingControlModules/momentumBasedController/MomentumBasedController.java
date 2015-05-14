@@ -863,13 +863,17 @@ public class MomentumBasedController
    }
 
    private final Map<OneDoFJoint, DenseMatrix64F> tempJointAcceleration = new LinkedHashMap<OneDoFJoint, DenseMatrix64F>();
+   private final Map<OneDoFJoint, DesiredJointAccelerationCommand> tempDesiredJointAccelerationCommands = new LinkedHashMap<>();
 
    public void setOneDoFJointAcceleration(OneDoFJoint joint, double desiredAcceleration)
    {
-      if (tempJointAcceleration.get(joint) == null)
-         tempJointAcceleration.put(joint, new DenseMatrix64F(joint.getDegreesOfFreedom(), 1));
-
       DenseMatrix64F jointAcceleration = tempJointAcceleration.get(joint);
+      if (jointAcceleration == null)
+      {
+         jointAcceleration = new DenseMatrix64F(joint.getDegreesOfFreedom(), 1);
+         tempJointAcceleration.put(joint, jointAcceleration);
+      }
+
       jointAcceleration.set(0, 0, desiredAcceleration);
 
       if (momentumBasedControllerSpy != null)
@@ -877,7 +881,18 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredJointAcceleration(joint, jointAcceleration);
       }
 
-      DesiredJointAccelerationCommand desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+      DesiredJointAccelerationCommand desiredJointAccelerationCommand = tempDesiredJointAccelerationCommands.get(joint);
+
+      if (desiredJointAccelerationCommand == null)
+      {
+         desiredJointAccelerationCommand = new DesiredJointAccelerationCommand(joint, jointAcceleration);
+         tempDesiredJointAccelerationCommands.put(joint, desiredJointAccelerationCommand);
+      }
+      else
+      {
+         desiredJointAccelerationCommand.setDesiredAcceleration(jointAcceleration);
+      }
+
       momentumControlModuleBridge.setDesiredJointAcceleration(desiredJointAccelerationCommand);
    }
 
