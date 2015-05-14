@@ -10,7 +10,7 @@ public enum LogSettings
    ATLAS_NO_CAMERAS(true),
    VALKYRIE_IHMC(true, "239.255.25.2"),
    STEPPR_IHMC(true, "239.255.25.3", 2, 3),
-   SIMULATION(true, "239.255.25.4"),
+   SIMULATION(false, "239.255.25.4"),
    BEHAVIOR(false),
    EXO_X1A(false),
    EXO_HOPPER(false),
