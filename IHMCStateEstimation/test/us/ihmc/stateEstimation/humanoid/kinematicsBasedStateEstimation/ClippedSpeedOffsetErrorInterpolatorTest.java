@@ -715,64 +715,64 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          double[] yawPitchRollAngles = RandomTools.generateRandomDoubleArray(random, 3, Math.toRadians(10.0));
          RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, yawPitchRollAngles[0], yawPitchRollAngles[1], yawPitchRollAngles[2]);
          goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-         assertFalse(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+         assertFalse(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       }
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(10.1), Math.toRadians(0.0), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(10.1), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(10.2), Math.toRadians(10.3), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(10.2), Math.toRadians(0.0), Math.toRadians(10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(10.2), Math.toRadians(10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(20.0), Math.toRadians(10.2), Math.toRadians(10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(-10.1), Math.toRadians(0.0), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(-10.1), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(0.0), Math.toRadians(-10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(-10.2), Math.toRadians(-10.3), Math.toRadians(0.0));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(-10.2), Math.toRadians(0.0), Math.toRadians(-10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(0.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(goalOrientation, Math.toRadians(-20.0), Math.toRadians(-10.2), Math.toRadians(-10.1));
       goalPose.setPose(RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0), goalOrientation);
-      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfRotationErrorIsTooBig(startPose, goalPose));
+      assertTrue(clippedSpeedOffsetErrorInterpolator.checkIfErrorIsTooBig(startPose, goalPose));
       
       
    }

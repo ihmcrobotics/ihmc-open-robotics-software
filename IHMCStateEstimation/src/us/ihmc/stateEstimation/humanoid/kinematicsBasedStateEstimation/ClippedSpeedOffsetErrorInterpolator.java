@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -99,7 +100,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DeadzoneYoVariable goalTranslationWithDeadzoneX;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneY;
    private final DeadzoneYoVariable goalTranslationWithDeadzoneZ;
-
+   
    private final DoubleYoVariable goalTranslationRawX;
    private final DoubleYoVariable goalTranslationRawY;
    private final DoubleYoVariable goalTranslationRawZ;
@@ -110,9 +111,11 @@ public class ClippedSpeedOffsetErrorInterpolator
    //used to check if the orientation error is too big
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
    private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
+   private final FrameVector iterativeClosestPointTranslation = new FrameVector();
    private final double[] yawPitchRoll = new double[3];
    private final DoubleYoVariable maximumErrorAngleInDegrees;
-
+   private final DoubleYoVariable maximumErrorTranslation;
+   
    //for feedBack in scs
    private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
    private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
@@ -218,14 +221,20 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       maximumErrorAngleInDegrees = new DoubleYoVariable("maximumErrorAngleInDegrees", registry);
       maximumErrorAngleInDegrees.set(10.0);
+      maximumErrorTranslation = new DoubleYoVariable("maximumErrorTranslation", registry);
+      maximumErrorTranslation.set(0.1);
    }
 
-   public boolean checkIfRotationErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose)
+   public boolean checkIfErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose)
    {
       correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
+      
       iterativeClosestPointInWorldFramePose.getOrientationIncludingFrame(iterativeClosestPointOrientation);
+      iterativeClosestPointInWorldFramePose.getPositionIncludingFrame(iterativeClosestPointTranslation);
+      
       iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
-
+      iterativeClosestPointTranslation.changeFrame(correctedPelvisPoseReferenceFrame);
+      
       iterativeClosestPointOrientation.getYawPitchRoll(yawPitchRoll);
 
       for (int i = 0; i < yawPitchRoll.length; i++)
@@ -233,6 +242,14 @@ public class ClippedSpeedOffsetErrorInterpolator
          if (Math.abs(yawPitchRoll[i]) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
             return true;
       }
+      
+      if(iterativeClosestPointTranslation.getX() > maximumErrorTranslation.getDoubleValue())
+         return true;
+      if(iterativeClosestPointTranslation.getY() > maximumErrorTranslation.getDoubleValue())
+         return true;
+      if(iterativeClosestPointTranslation.getZ() > maximumErrorTranslation.getDoubleValue())
+         return true;
+      
       return false;
    }
 
