@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPosition
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
@@ -40,6 +41,7 @@ public class VariousWalkingProviders
    private final PelvisPoseProvider desiredPelvisPoseProvider;
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
+   private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
 
@@ -64,8 +66,8 @@ public class VariousWalkingProviders
                                   HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
                                   HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
                                   PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-                                  HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
-                                  FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
+                                  HandComplianceControlParametersProvider handComplianceControlParametersProvider, HandLoadBearingProvider desiredHandLoadBearingProvider,
+                                  ChestOrientationProvider desiredChestOrientationProvider, FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
                                   DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
                                   DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, ControlStatusProducer controlStatusProducer,
                                   CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
@@ -81,6 +83,7 @@ public class VariousWalkingProviders
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
+      this.handComplianceControlParametersProvider = handComplianceControlParametersProvider;
       this.footPoseProvider = footPoseProvider;
 
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
@@ -184,6 +187,11 @@ public class VariousWalkingProviders
    public HandPoseProvider getDesiredHandPoseProvider()
    {
       return desiredHandPoseProvider;
+   }
+
+   public HandComplianceControlParametersProvider getHandComplianceControlParametersProvider()
+   {
+      return handComplianceControlParametersProvider;
    }
 
    public HandLoadBearingProvider getDesiredHandLoadBearingProvider()
