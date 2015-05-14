@@ -19,6 +19,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.time.GlobalTimer;
@@ -26,10 +27,7 @@ import us.ihmc.yoUtilities.time.GlobalTimer;
 public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   static
-   {
-      simulationTestingParameters.setKeepSCSUp(false);
-   }
+   private static final double epsilon = 10e-8;
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    
    @Before
@@ -87,15 +85,15 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
       objectWeightBehavior.setInput(new ObjectWeightPacket(RobotSide.LEFT, weightLeft));
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
-      assertTrue(leftMass.getDoubleValue() == weightLeft);
-      assertTrue(rightMass.getDoubleValue() == 0.0);
+      assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));
+      assertTrue(MathTools.epsilonEquals(rightMass.getDoubleValue(), 0.0, epsilon));
       
       double weightRight = 0.8;
       objectWeightBehavior.initialize();
       objectWeightBehavior.setInput(new ObjectWeightPacket(RobotSide.RIGHT, weightRight));
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
-      assertTrue(leftMass.getDoubleValue() == weightLeft);
-      assertTrue(rightMass.getDoubleValue() == weightRight);
+      assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));
+      assertTrue(MathTools.epsilonEquals(rightMass.getDoubleValue(), weightRight, epsilon));
    }
 }
