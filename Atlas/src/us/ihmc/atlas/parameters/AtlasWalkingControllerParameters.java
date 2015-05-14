@@ -571,7 +571,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
       boolean realRobot = target == AtlasTarget.REAL_ROBOT;
 
-      double kpXY = 100.0;
+      double kpXY = 200.0;
       double kpZ = 200.0;
       double zetaXYZ = realRobot ? 0.7 : 0.7;
       double kpOrientation = 200.0;
@@ -838,7 +838,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
             return -2.0;
 
          default :
-            return -0.0;
+            return -1.0;
       }
    }
 
