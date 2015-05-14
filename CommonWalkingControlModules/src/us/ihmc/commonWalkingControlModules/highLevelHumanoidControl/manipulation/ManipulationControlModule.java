@@ -289,7 +289,7 @@ public class ManipulationControlModule
 
    private void handleCompliantControlRequests(RobotSide robotSide)
    {
-      if (handComplianceControlParametersProvider != null || handComplianceControlParametersProvider.checkForNewRequest(robotSide))
+      if (handComplianceControlParametersProvider != null && handComplianceControlParametersProvider.checkForNewRequest(robotSide))
       {
          if (handComplianceControlParametersProvider.isResetRequested(robotSide))
          {
