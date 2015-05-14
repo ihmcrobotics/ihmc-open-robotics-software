@@ -91,7 +91,7 @@ public class MotionConstraintHandler
       for (InverseDynamicsJoint joint : jointsInOrder)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndicesForJoint(jointsInOrder, listToPackIndices, joint);
+         ScrewTools.computeIndexForJoint(jointsInOrder, listToPackIndices, joint);
          int[] indeces = listToPackIndices.toArray();
          
          columnsForJoints.put(joint, indeces);
@@ -454,7 +454,7 @@ public class MotionConstraintHandler
          InverseDynamicsJoint joint = joints[index];
 //         int[] indicesIntoCompactBlock = ScrewTools.computeIndicesForJoint(joints, joint);
          indicesIntoCompactBlock.reset();
-         ScrewTools.computeIndicesForJoint(joints, indicesIntoCompactBlock, joint);
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
          int[] indicesIntoFullBlock = columnsForJoints.get(joint);
 
          if (indicesIntoFullBlock == null)    // don't do anything for joints that are not in the list

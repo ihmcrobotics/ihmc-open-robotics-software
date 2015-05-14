@@ -168,9 +168,9 @@ public class TwoWaypointPositionTrajectoryGenerator implements PositionTrajector
          time = totalTime;
 
       concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time);
-      desiredPosition.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getPosition());
-      desiredVelocity.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity());
-      desiredAcceleration.set(concatenatedSplinesWithArcLengthCalculatedIteratively.getAcceleration());
+      concatenatedSplinesWithArcLengthCalculatedIteratively.getPosition(desiredPosition);
+      concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity(desiredVelocity);
+      concatenatedSplinesWithArcLengthCalculatedIteratively.getAcceleration(desiredAcceleration);
 
       // concatenatedSplinesWithArcLengthCalculatedIteratively.compute(time - stepTime.getDoubleValue() / (double) numberOfTimeIntervals);
       // FrameVector previousVelocity = concatenatedSplinesWithArcLengthCalculatedIteratively.getVelocity();

@@ -15,7 +15,7 @@ public class DesiredJointAccelerationCommand
    public DesiredJointAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
    {
       this.joint = joint;
-      this.desiredAcceleration = desiredAcceleration;
+      this.desiredAcceleration = new DenseMatrix64F(desiredAcceleration);
       this.hasWeight = false;
       this.weight = Double.POSITIVE_INFINITY;
    }
@@ -23,20 +23,15 @@ public class DesiredJointAccelerationCommand
    public DesiredJointAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
    {
       this.joint = joint;
-      this.desiredAcceleration = desiredAcceleration;
+      this.desiredAcceleration = new DenseMatrix64F(desiredAcceleration);
       this.hasWeight = true;
       this.weight = weight;
    }
-     
 
-   public DesiredJointAccelerationCommand(DesiredJointAccelerationCommand command)
+   public void setDesiredAcceleration(DenseMatrix64F desiredAcceleration)
    {
-      this.joint = command.joint;
-      this.hasWeight = command.hasWeight;
-      this.weight = command.weight;
-      
-      //TODO: Do copy here?
-      this.desiredAcceleration = command.desiredAcceleration;
+      this.desiredAcceleration.reshape(desiredAcceleration.numRows, desiredAcceleration.numCols);
+      this.desiredAcceleration.set(desiredAcceleration);
    }
 
    public boolean getHasWeight()
