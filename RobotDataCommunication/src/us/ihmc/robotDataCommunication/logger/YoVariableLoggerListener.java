@@ -29,6 +29,8 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
+   private static final int FLUSH_EVERY_N_PACKETS = 250;
+   
    public static final String propertyFile = "robotData.log";
    private static final String handshakeFilename = "handshake.proto";
    private static final String dataFilename = "robotData.bsz";
@@ -59,6 +61,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private final InetSocketAddress videoStreamAddress;
 
    private boolean clearingLog = false;
+   
+   private long currentIndex = 0;
 
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
@@ -129,6 +133,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          FileOutputStream handshakeStream = new FileOutputStream(handshakeFile, false);
          handshakeStream.write(handshake.protoShake);
+         handshakeStream.getFD().sync();
          handshakeStream.close();
       }
       catch (IOException e)
@@ -150,9 +155,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             FileOutputStream modelStream = new FileOutputStream(modelFile, false);
             modelStream.write(handshake.model);
+            modelStream.getFD().sync();
             modelStream.close();
             FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
             resourceStream.write(handshake.resourceZip);
+            resourceStream.getFD().sync();
             resourceStream.close();
 
          }
@@ -187,6 +194,12 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
                indexChannel.write(indexBuffer);
                dataChannel.write(compressedBuffer);
+               
+               if(++currentIndex % FLUSH_EVERY_N_PACKETS == 0)
+               {
+                  indexChannel.force(false);
+                  dataChannel.force(false);
+               }
             }
             catch (IOException e)
             {
@@ -211,15 +224,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       for (VideoDataLoggerInterface videoDataLogger : videoDataLoggers)
       {
          videoDataLogger.close();
-      }
-
-      try
-      {
-         logProperties.store();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
       }
 
       if (!connected)
@@ -349,6 +353,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             dataChannel = new FileOutputStream(dataFile, false).getChannel();
             indexChannel = new FileOutputStream(indexFile, false).getChannel();
+            
          }
          catch (FileNotFoundException e)
          {
@@ -383,6 +388,20 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                e.printStackTrace();
             }
          }
+      }
+      
+      
+      // Write data to file, force it to exist
+      try
+      {
+         logProperties.store();
+
+         dataChannel.force(true);
+         indexChannel.force(true);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
       }
    }
 
