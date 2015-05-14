@@ -59,6 +59,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.enableBehaviorModule(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
          networkProcessorParameters.enableBehaviorVisualizer(modulesToStart.contains(Modules.BEHAVIOR_MODULE));
          networkProcessorParameters.enableSensorModule(modulesToStart.contains(Modules.SENSOR_MODULE));
+         networkProcessorParameters.enableZeroPoseRobotConfigurationPublisherModule(modulesToStart.contains(Modules.ZERO_POSE_PRODUCER));
          networkProcessorParameters.enablePerceptionModule(true);
          networkProcessorParameters.enableRosModule(modulesToStart.contains(Modules.ROS_MODULE));
          networkProcessorParameters.enableLocalControllerCommunicator(true);
@@ -132,6 +133,7 @@ public abstract class DRCSimulationTools
             boolean isNetworkProcessorEnabled = moduleCheckBoxes.get(Modules.NETWORK_PROCESSOR).isEnabled();
             moduleCheckBoxes.get(Modules.BEHAVIOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.SENSOR_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.ZERO_POSE_PRODUCER).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
       };
@@ -256,7 +258,7 @@ public abstract class DRCSimulationTools
 
    public enum Modules
    {
-      SIMULATION, OPERATOR_INTERFACE, SPECTATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE;
+      SIMULATION, OPERATOR_INTERFACE, SPECTATOR_INTERFACE, BEHAVIOR_VISUALIZER, NETWORK_PROCESSOR, SENSOR_MODULE, ROS_MODULE, BEHAVIOR_MODULE, ZERO_POSE_PRODUCER;
 
       public String getPropertyNameForEnable()
       {
