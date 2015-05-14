@@ -27,7 +27,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final BooleanYoVariable enableProcessNewPackets;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = false;
+   private static final boolean ENABLE_ROTATION_CORRECTION = true;
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
@@ -86,7 +86,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final FrameOrientation errorBetweenCorrectedAndLocalizationTransform_Rotation = new FrameOrientation(worldFrame);
    private final Quat4d errorBetweenCorrectedAndLocalizationQuaternion_Rotation = new Quat4d();
    
-   private final BooleanYoVariable isRotationErrorTooBig;
+   private final BooleanYoVariable isErrorTooBig;
    
    public NewPelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
          int pelvisBufferSize)
@@ -143,8 +143,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       hasOneIcpPacketEverBeenReceived = new BooleanYoVariable("hasOneIcpPacketEverBeenReceived", registry);
       hasOneIcpPacketEverBeenReceived.set(false);
       
-      isRotationErrorTooBig = new BooleanYoVariable("isRotationErrorTooBig", registry);
-      isRotationErrorTooBig.set(false);
+      isErrorTooBig = new BooleanYoVariable("isErrorTooBig", registry);
+      isErrorTooBig.set(false);
    }
    
    public void doControl(long timestamp)
@@ -260,15 +260,15 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-      if(offsetErrorInterpolator.checkIfRotationErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
+      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
       {
          requestLocalizationReset();
-         isRotationErrorTooBig.set(true);
+         isErrorTooBig.set(true);
       }
       else
       {
          offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, confidenceFactor.getDoubleValue());
-         isRotationErrorTooBig.set(false);
+         isErrorTooBig.set(false);
       }
    }
    
