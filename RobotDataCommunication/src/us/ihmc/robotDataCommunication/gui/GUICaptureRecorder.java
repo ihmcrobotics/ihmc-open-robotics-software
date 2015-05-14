@@ -33,6 +33,7 @@ public class GUICaptureRecorder extends JFrame
    public NetworkStreamVideoDataLogger currentLogger = null;
    
    private File target;
+   
 
    public GUICaptureRecorder()
    {
@@ -71,7 +72,7 @@ public class GUICaptureRecorder extends JFrame
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            stopLog();
+            stopLog(false);
          }
       });
       
@@ -82,6 +83,15 @@ public class GUICaptureRecorder extends JFrame
       setLocationByPlatform(true);
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+      Runtime.getRuntime().addShutdownHook(new Thread()
+      {
+         @Override
+         public void run()
+         {
+            stopLog(true);
+         }
+      });
+      
       pack();
       setVisible(true);
    }
@@ -112,12 +122,19 @@ public class GUICaptureRecorder extends JFrame
       
    }
 
-   public void stopLog()
+   public void stopLog(boolean exiting)
    {
       if(currentLogger != null)
       {
          currentLogger.close();
-         JOptionPane.showMessageDialog(this, "Video saved to " + target.getAbsolutePath());
+         if(!exiting)
+         {
+            JOptionPane.showMessageDialog(this, "Video saved to " + target.getAbsolutePath());
+         }
+         else
+         {
+            System.out.println("Video saved to " + target.getAbsolutePath());
+         }
          currentLogger = null;
       }
       start.setEnabled(true);
