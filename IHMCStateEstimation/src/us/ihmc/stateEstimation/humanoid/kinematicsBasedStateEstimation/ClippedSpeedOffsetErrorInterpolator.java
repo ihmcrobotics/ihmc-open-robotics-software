@@ -28,8 +28,10 @@ public class ClippedSpeedOffsetErrorInterpolator
    private static final double Z_DEADZONE_SIZE = 0.014;
    private static final double Y_DEADZONE_SIZE = 0.014;
    private static final double X_DEADZONE_SIZE = 0.014;
+   
    private static final double MAXIMUM_TRANSLATION_ERROR = 0.1;
    private static final double MAXIMUM_ANGLE_ERROR_IN_DEGRESS = 10.0;
+   
    private static final double MAX_TRANSLATIONAL_CORRECTION_SPEED = 0.05;
    private static final double MAX_ROTATIONAL_CORRECTION_SPEED = 0.05;
 
@@ -122,7 +124,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
    private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
    private final FrameVector iterativeClosestPointTranslation = new FrameVector();
-   private final double[] yawPitchRoll = new double[3];
+   private final AxisAngle4d axisAngleForError = new AxisAngle4d();
    private final DoubleYoVariable maximumErrorAngleInDegrees;
    private final DoubleYoVariable maximumErrorTranslation;
    
@@ -250,19 +252,16 @@ public class ClippedSpeedOffsetErrorInterpolator
       iterativeClosestPointOrientation.changeFrame(correctedPelvisPoseReferenceFrame);
       iterativeClosestPointTranslation.changeFrame(correctedPelvisPoseReferenceFrame);
       
-      iterativeClosestPointOrientation.getYawPitchRoll(yawPitchRoll);
+      iterativeClosestPointOrientation.getAxisAngle(axisAngleForError);
 
-      for (int i = 0; i < yawPitchRoll.length; i++)
-      {
-         if (Math.abs(yawPitchRoll[i]) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
-            return true;
-      }
+      if(Math.abs(axisAngleForError.getAngle()) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
+         return true;
       
-      if(iterativeClosestPointTranslation.getX() > maximumErrorTranslation.getDoubleValue())
+      if(Math.abs(iterativeClosestPointTranslation.getX()) > maximumErrorTranslation.getDoubleValue())
          return true;
-      if(iterativeClosestPointTranslation.getY() > maximumErrorTranslation.getDoubleValue())
+      if(Math.abs(iterativeClosestPointTranslation.getY()) > maximumErrorTranslation.getDoubleValue())
          return true;
-      if(iterativeClosestPointTranslation.getZ() > maximumErrorTranslation.getDoubleValue())
+      if(Math.abs(iterativeClosestPointTranslation.getZ()) > maximumErrorTranslation.getDoubleValue())
          return true;
       
       return false;
