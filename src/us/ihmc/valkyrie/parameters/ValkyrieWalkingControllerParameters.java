@@ -436,16 +436,17 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       ICPControlGains gains = new ICPControlGains();
 
-      double kp = runningOnRealRobot ? 1.5 : 1.5;
-      double ki = runningOnRealRobot ? 4.0 : 0.0;
+      double kpOrthogonal = runningOnRealRobot ? 1.9 : 1.5;
+      double kpParallel = runningOnRealRobot ? 2.0 : 1.5;
+      double ki = runningOnRealRobot ? 0.0 : 0.0;
       double kiBleedOff = 0.9;
       boolean useRawCMP = true;
       double cmpFilterBreakFrequencyInHertz = 16.0;
       double cmpRateLimit = runningOnRealRobot ? 6.0 : 60.0;
       double cmpAccelerationLimit = runningOnRealRobot ? 200.0 : 2000.0;
 
-      gains.setKpParallelToMotion(kp);
-      gains.setKpOrthogonalToMotion(kp);
+      gains.setKpParallelToMotion(kpParallel);
+      gains.setKpOrthogonalToMotion(kpOrthogonal);
       gains.setKi(ki);
       gains.setKiBleedOff(kiBleedOff);
       gains.setUseRawCMP(useRawCMP);
@@ -723,7 +724,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getDefaultTransferTime()
    {
-      return runningOnRealRobot ? 1.5 : 0.25;
+      return runningOnRealRobot ? 2.0 : 0.25;
    }
 
    @Override
@@ -846,13 +847,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSecondContactThresholdForceIgnoringCoP()
    {
-      return Double.POSITIVE_INFINITY;
+      return 115.0;
    }   
 
    @Override
    public double getCoPThresholdFraction()
    {
-      return Double.NaN;
+      return 0.02;
    }
 
    @Override
@@ -896,13 +897,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getMaxICPErrorBeforeSingleSupportX()
    {
-      return 0.035;
+      return 0.02;
    }
 
    @Override
    public double getMaxICPErrorBeforeSingleSupportY()
    {
-      return 0.035;
+      return 0.02;
    }
 
    /** {@inheritDoc} */
