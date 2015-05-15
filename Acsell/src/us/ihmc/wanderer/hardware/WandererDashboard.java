@@ -71,8 +71,8 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    {
       setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-      createPowerButtons(yoVariableHolder);
-      createCalibrationButtons(yoVariableHolder);
+      //createPowerButtons(yoVariableHolder);
+      //createCalibrationButtons(yoVariableHolder);
       createTable(yoVariableHolder);
       createInitializationButtons(yoVariableHolder);
 
@@ -189,8 +189,8 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       try
       {
          //TODO: Fix Me!
-      	//leftFootForce.addVariableChangedListener(robotOnGroundChecker);
-      	//rightFootForce.addVariableChangedListener(robotOnGroundChecker);
+      	leftFootForce.addVariableChangedListener(robotOnGroundChecker);
+      	rightFootForce.addVariableChangedListener(robotOnGroundChecker);
       }
       catch (Exception e)
       {

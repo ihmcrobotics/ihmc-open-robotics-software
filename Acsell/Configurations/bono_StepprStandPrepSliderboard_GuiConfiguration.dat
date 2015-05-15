@@ -204,7 +204,7 @@ UserStep
 <Title>
 Stiffness
 </Title>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>manualModeICPOffset,isPelvisTranslationManagerEnabled,isPelvisTranslationManagerRunning,l_leg_lhystiffness,r_leg_lhystiffness,l_leg_knystiffness,r_leg_knystiffness,r_leg_mhxstiffness,l_leg_mhxstiffness</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -222,7 +222,7 @@ ToeOff
 <Title>
 Tab6
 </Title>
-<Entry Boxes>torsoXActuatorMotorAngleOffset,torsoYActuatorMotorAngleOffset,chestCoMOffsetY,walkingState,sow_walkingState,requestedHighLevelState,highLevelState,enableOutput</Entry Boxes>
+<Entry Boxes>torsoXActuatorMotorAngleOffset,torsoYActuatorMotorAngleOffset,chestCoMOffsetY,walkingState,sow_walkingState,requestedHighLevelState,highLevelState,enableOutput,torsoZActuatorMotorAngleOffset</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
@@ -391,8 +391,8 @@ Tab7
 </GraphGroup>
 </Graph Array Window1><Graph Array Window2>
 <ScreenID>1</ScreenID>
-<WindowLocation>1920.0, 0.0</WindowLocation>
-<WindowSize>1280.0, 720.0</WindowSize>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
@@ -542,7 +542,7 @@ Tab7
 </GraphGroup>
 </Graph Array Window2><Graph Array Window3>
 <ScreenID>1</ScreenID>
-<WindowLocation>2562.0, 428.0</WindowLocation>
+<WindowLocation>2560.0, 424.0</WindowLocation>
 <WindowSize>1280.0, 776.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -621,7 +621,7 @@ Tab7
 </GraphGroup>
 </Graph Array Window3><Graph Array Window4>
 <ScreenID>1</ScreenID>
-<WindowLocation>1920.0, 428.0</WindowLocation>
+<WindowLocation>2208.0, 378.0</WindowLocation>
 <WindowSize>1280.0, 776.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
@@ -664,7 +664,7 @@ Tab7
 </GraphGroup>
 </Graph Array Window4><Graph Array Window5>
 <ScreenID>1</ScreenID>
-<WindowLocation>2560.0, 0.0</WindowLocation>
+<WindowLocation>2197.0, 113.0</WindowLocation>
 <WindowSize>1280.0, 776.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -1177,7 +1177,7 @@ Tab7
 </GraphGroup>
 </Graph Array Window7><Graph Array Window8>
 <ScreenID>1</ScreenID>
-<WindowLocation>2560.0, 132.0</WindowLocation>
+<WindowLocation>2074.0, 119.0</WindowLocation>
 <WindowSize>1280.0, 800.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
@@ -1406,15 +1406,39 @@ Tab7
 	</Graph>
 </GraphGroup>
 </Graph Array Window9><Graph Array Window10>
-<ScreenID>1</ScreenID>
-<WindowLocation>2267.0, 293.0</WindowLocation>
-<WindowSize>804.0, 533.0</WindowSize>
+<ScreenID>0</ScreenID>
+<WindowLocation>-2.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1172.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorControlTarget,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorMotorEncoderPosition,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.torsoYActuator.torsoYActuatorCurrentDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.StepprOutputWriter.StepprCommand.torsoYActuator.torsoYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.torsoYActuator.torsoYActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_yaw,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameYaw</Variables>
 		<GraphConfiguration>
 			<Name>config108</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_pitch,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFramePitch</Variables>
+		<GraphConfiguration>
+			<Name>config109</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_roll,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameRoll</Variables>
+		<GraphConfiguration>
+			<Name>config110</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1426,14 +1450,50 @@ Tab7
 </GraphGroup>
 </Graph Array Window10><Graph Array Window11>
 <ScreenID>1</ScreenID>
-<WindowLocation>2239.0, 291.0</WindowLocation>
-<WindowSize>804.0, 533.0</WindowSize>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.leftOutputProcessorFourbar.leftOutputProcessorFourbar_TransmissionRatio,root.remotemain.DRCControllerThread.DRCMomentumBasedController.StepprOutputProcessor.rightOutputProcessorFourbar.rightOutputProcessorFourbar_TransmissionRatio</Variables>
 		<GraphConfiguration>
-			<Name>config109</Name>
+			<Name>config111</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFramePitch,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_pitch</Variables>
+		<GraphConfiguration>
+			<Name>config112</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameYaw,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_yaw</Variables>
+		<GraphConfiguration>
+			<Name>config113</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.newPelvisPoseHistoryCorrection.correctedPelvisPoseInWorldFrameRoll,root.remotemain.DRCEstimatorThread.StepprSensorReader.Steppr.StepprUpperBodyOffsetCalculator.xsens_roll</Variables>
+		<GraphConfiguration>
+			<Name>config114</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1452,9 +1512,9 @@ Dashboard,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>5.927139407723791</Camera X>
+ <Camera Y>1.0020940380107424</Camera Y>
+ <Camera Z>0.4424373762883118</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
