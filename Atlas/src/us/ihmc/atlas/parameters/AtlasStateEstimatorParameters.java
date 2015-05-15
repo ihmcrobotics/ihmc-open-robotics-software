@@ -72,7 +72,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
-      DoubleYoVariable armJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable armJointVelocityAlphaFilter1 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter1", defaultFilterBreakFrequency);
+      DoubleYoVariable armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequency);
       DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointBacklashSlopTime", registry);
       armJointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
@@ -89,8 +90,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       sensorProcessing.computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(jointVelocityAlphaFilter, jointVelocitySlopTime, false, armJointNames);
       sensorProcessing.addJointVelocityAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter, false, armJointNames);
 
-      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter, armJointVelocitySlopTime, false, armJointNames);
-      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter, false, armJointNames);
+      sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, armJointVelocitySlopTime, false, armJointNames);
+      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
