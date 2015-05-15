@@ -179,9 +179,9 @@ abstract public class WholeBodyIkSolver
          
          public void setAllPreferedJointAngle(HashMap<String,Double> jointPreferedAngle)
          {
-            for(String string : jointPreferedAngle.keySet())
+            for(Map.Entry<String,Double> entry : jointPreferedAngle.entrySet())
             {
-               setPreferedJointAngle(string, jointPreferedAngle.get(string));
+               setPreferedJointAngle( entry.getKey(),  entry.getValue());
             }
          }
       }
@@ -921,7 +921,7 @@ abstract public class WholeBodyIkSolver
 
          case USE_JOINTS_CACHE:
          case RELAX:
-            adjustPreferedJointAngles(); 
+           
             break;
          }
          
@@ -1046,6 +1046,7 @@ abstract public class WholeBodyIkSolver
             checkIfLegsAndWaistNeedToBeLocked(actualSdfModel);
             setPreferedKneeAngle();
             checkIfArmShallStayQuiet(actualSdfModel);
+            adjustPreferedJointAngles(); 
 
             q_out.set(cachedAnglesQ);
             ret = hierarchicalSolver.solve(cachedAnglesQ, q_out,continueUntilPoseConverged);
