@@ -20,6 +20,8 @@ public class KryoObjectClient extends KryoObjectCommunicator
    private final InetAddress host;
    private final int tcpPort;
 
+   private final int writeBufferSize; 
+   
    private boolean reconnectAutomatically = false;
    private boolean isClosed = true;
 
@@ -54,6 +56,7 @@ public class KryoObjectClient extends KryoObjectCommunicator
       this.client = new Client(writeBufferSize, receiveBufferSize, serialization);
       this.host = host;
       this.tcpPort = tcpPort;
+      this.writeBufferSize = writeBufferSize;
 
       registerClassList(netClassList);
       createConnectionListener(client);
@@ -100,6 +103,11 @@ public class KryoObjectClient extends KryoObjectCommunicator
    @Override
    protected int sendTCP(Object object)
    {
+      // Do not send if the write buffer > 90% full
+      if (((double) client.getTcpWriteBufferSize()) / ((double) writeBufferSize) > 0.9)
+      {
+         return 0;
+      }
       return client.sendTCP(object);
    }
 
