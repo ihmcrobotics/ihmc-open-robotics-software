@@ -42,7 +42,7 @@ public class DrillDetectorGui
    };
 
    private JPanel soundDetectorGUI = null;
-   private Plotter plotter = null;
+   private Plotter drillPlotter = null;
    private int plotterDataSize = 0;
    private Container fftPlotContainer = null;
 
@@ -53,7 +53,7 @@ public class DrillDetectorGui
       JFrame frame = new JFrame("Drill Detection UI");
       frame.setContentPane(createContentPane());
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-      frame.setSize(800, 800);
+      frame.setSize(1000, 800);
       frame.setVisible(true);
 
       Runtime.getRuntime().addShutdownHook(new Thread()
@@ -71,10 +71,10 @@ public class DrillDetectorGui
       soundDetectorGUI.setOpaque(true);
 
       PlotterPanel plotterPanel = new PlotterPanel();
-      plotter = plotterPanel.getPlotter();
-      plotter.setXoffset(220);
-      plotter.setYoffset(80);
-      plotter.setRange(200);
+      drillPlotter = plotterPanel.getPlotter();
+      drillPlotter.setXoffset(320);
+      drillPlotter.setYoffset(80);
+      drillPlotter.setRange(200);
       soundDetectorGUI.add(plotterPanel, BorderLayout.PAGE_START);
 
       fftPlotContainer = new Container();
@@ -91,10 +91,10 @@ public class DrillDetectorGui
       int x = plotterDataSize++;
       Point2d p = new Point2d(x, data);
       PointArtifact pa = new PointArtifact("drillOn_" + x, p);
-      plotter.addArtifact(pa);
+      drillPlotter.addArtifact(pa);
 
       soundDetectorGUI.remove(fftPlotContainer);
-      FFTPlotter plot = new FFTPlotter(result.bodeData, "FFT Plot", "(Hz)", "(dB)", "(deg)");
+      FFTPlotter plot = new FFTPlotter(result.bodeData, "", "(Hz)", "(dB)", "(deg)");
       fftPlotContainer = plot.getContentPane();
       soundDetectorGUI.add(fftPlotContainer, BorderLayout.CENTER);
 

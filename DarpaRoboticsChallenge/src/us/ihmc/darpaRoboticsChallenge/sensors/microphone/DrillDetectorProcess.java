@@ -1,7 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
 /**
- * <p>Title: DrillDetector</p>
+ * <p>Title: OldDrillDetector</p>
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data from the Atlas Chest Webcam microphone around a given frequency</p>
  * 
  * @author Will

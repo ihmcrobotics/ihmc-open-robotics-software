@@ -1,20 +1,15 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
+import java.io.InputStream;
+
+import javax.sound.sampled.AudioFormat;
+
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
 
-import javax.sound.sampled.AudioFormat;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-
 /**
- * <p>Title: DrillDetector</p>
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data
  * from the Atlas Chest Webcam microphone around a given frequency</p>
- * 
- * @author Will
- * @author Igor
  */
 public class WorkingDrillDetector
 {
@@ -44,9 +39,6 @@ public class WorkingDrillDetector
    private static final int frameSizeInBytes = format.getFrameSize();
    private static final int bufferLengthInFrames = 16384 / 8;
    private static final int bufferLengthInBytes = bufferLengthInFrames * frameSizeInBytes;
-
-   private static final String COMMA_DELIMITER = ",";
-   private static final String NEW_LINE_SEPARATOR = "\n";
 
    public DrillDetectionResult isDrillOn(InputStream inputStream)
    {
@@ -82,9 +74,6 @@ public class WorkingDrillDetector
          audioData[i] = (MSB << 8) | (LSB & 0xFF);
       }
 
-      //Write buffer data to a CSV file
-//      writeAudioDataToLog(audioData);
-
       double[] input = new double[audioData.length];
       double[] time = new double[audioData.length];
       for (int i = 0; i < audioData.length; i++)
@@ -97,29 +86,31 @@ public class WorkingDrillDetector
       double[] frequency = fftData[0];
       double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(fftData[1]);
 
-      //Write frequency and magnitude data to a CSV file
-//      writeProcessedDataToLog(frequency, magnitude);
-
       //Peak detection math
       int dominantFrequencyBandLowerBoundIndex = 0;
       int dominantFrequencyBandUpperBoundIndex = 0;
       int relevantFrequencyBandLowerBoundIndex = 0;
       int relevantFrequencyBandUpperBoundIndex = 0;
 
-      for (int index = 0; index < frequency.length; index++){
-         if (frequency[index] < dominantFrequencyBandLowerBound){
+      for (int index = 0; index < frequency.length; index++)
+      {
+         if (frequency[index] <= dominantFrequencyBandLowerBound)
+         {
             dominantFrequencyBandLowerBoundIndex = index;
          }
 
-         if (frequency[index] < dominantFrequencyBandUpperBound){
+         if (frequency[index] <= dominantFrequencyBandUpperBound)
+         {
             dominantFrequencyBandUpperBoundIndex = index;
          }
 
-         if (frequency[index] < relevantFrequencyBandLowerBound){
+         if (frequency[index] <= relevantFrequencyBandLowerBound)
+         {
             relevantFrequencyBandLowerBoundIndex = index;
          }
 
-         if (frequency[index] < relevantFrequencyBandUpperBound){
+         if (frequency[index] <= relevantFrequencyBandUpperBound)
+         {
             relevantFrequencyBandUpperBoundIndex = index;
          }
       }
@@ -136,15 +127,14 @@ public class WorkingDrillDetector
       }
       relevantBandAverageMag /= relevantRangeSize;
 
-      for (int index = 0; index < dominantRangeSize; index++){
+      for (int index = 0; index < dominantRangeSize; index++)
+      {
          dominantBandAverageMag += magnitude[dominantFrequencyBandLowerBoundIndex + index];
       }
       dominantBandAverageMag /= dominantRangeSize;
 
-
       DrillDetectionResult result = new DrillDetectionResult();
       result.isOn = ((dominantBandAverageMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
-      System.out.println("Dominant - Relevant Magnitude: " + (dominantBandAverageMag - relevantBandAverageMag));
       result.bodeData = getBodeData(time, input);
 
       return result;
@@ -160,49 +150,5 @@ public class WorkingDrillDetector
 
       double[][] bodeData = new double[][] { frequency, magnitude, phase };
       return bodeData;
-   }
-
-   private void writeAudioDataToLog(int[] audioData)
-   {
-      try
-      {
-         FileWriter fileWriter = new FileWriter("buffercsv.csv");
-
-         for (int i = 0; i < audioData.length; i++)
-         {
-            String line = i + COMMA_DELIMITER + audioData[i];
-            fileWriter.append(line);
-            fileWriter.append(NEW_LINE_SEPARATOR);
-         }
-
-         fileWriter.flush();
-         fileWriter.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   private void writeProcessedDataToLog(double[] frequency, double[] magnitude)
-   {
-      try
-      {
-         FileWriter fileWriterBode = new FileWriter("freq_mag.csv");
-
-         for (int i = 0; i < frequency.length; i++)
-         {
-            String line = frequency[i] + COMMA_DELIMITER + magnitude[i];
-            fileWriterBode.append(line);
-            fileWriterBode.append(NEW_LINE_SEPARATOR);
-         }
-
-         fileWriterBode.flush();
-         fileWriterBode.close();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
    }
 }
