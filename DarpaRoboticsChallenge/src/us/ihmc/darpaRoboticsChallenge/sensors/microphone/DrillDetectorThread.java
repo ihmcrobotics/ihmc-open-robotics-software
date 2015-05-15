@@ -75,8 +75,8 @@ public abstract class DrillDetectorThread extends Thread
          {
             ThreadTools.sleep(iterationSleep);
 
-            boolean isDrillOn = detector.isDrillOn(inputStream);
-            onDrillDetectionResult(isDrillOn);
+            DrillDetectionResult result = detector.isDrillOn(inputStream);
+            if (result != null) { onDrillDetectionResult(result); }
 
             if (!isRunning) { break; }
          }
@@ -92,5 +92,5 @@ public abstract class DrillDetectorThread extends Thread
       System.out.println("Stopping drill detection thread...");
    }
 
-   public abstract void onDrillDetectionResult(boolean isDrillOn);
+   public abstract void onDrillDetectionResult(DrillDetectionResult result);
 }

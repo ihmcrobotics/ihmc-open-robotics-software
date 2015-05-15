@@ -1,6 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -11,6 +13,7 @@ import javax.vecmath.Point2d;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PointArtifact;
+import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 
 /**
  * Sound Detector Gui
@@ -26,20 +29,22 @@ public class DrillDetectorGui
    private final DrillDetectorThread detectorThread = new DrillDetectorThread()
    {
       @Override
-      public void onDrillDetectionResult(final boolean isDrillOn)
+      public void onDrillDetectionResult(final DrillDetectionResult result)
       {
          Runnable processResult = new Runnable()
          {
             @Override
-            public void run() { processDrillDetectionResult(isDrillOn); }
+            public void run() { processDrillDetectionResult(result); }
          };
 
          SwingUtilities.invokeLater(processResult);
       }
    };
 
+   private JPanel soundDetectorGUI = null;
    private Plotter plotter = null;
    private int plotterDataSize = 0;
+   private Container fftPlotContainer = null;
 
    public DrillDetectorGui()
    {
@@ -48,7 +53,7 @@ public class DrillDetectorGui
       JFrame frame = new JFrame("Drill Detection UI");
       frame.setContentPane(createContentPane());
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-      frame.setSize(700, 400);
+      frame.setSize(800, 800);
       frame.setVisible(true);
 
       Runtime.getRuntime().addShutdownHook(new Thread()
@@ -62,27 +67,38 @@ public class DrillDetectorGui
 
    private JPanel createContentPane()
    {
-      JPanel soundDetectorGUI = new JPanel(new BorderLayout());
+      soundDetectorGUI = new JPanel(new BorderLayout());
       soundDetectorGUI.setOpaque(true);
 
       PlotterPanel plotterPanel = new PlotterPanel();
       plotter = plotterPanel.getPlotter();
-      plotter.setXoffset(140);
-      plotter.setYoffset(60);
+      plotter.setXoffset(220);
+      plotter.setYoffset(80);
       plotter.setRange(200);
-      soundDetectorGUI.add(plotterPanel, BorderLayout.CENTER);
+      soundDetectorGUI.add(plotterPanel, BorderLayout.PAGE_START);
+
+      fftPlotContainer = new Container();
+      fftPlotContainer.setBackground(Color.blue);
+      soundDetectorGUI.add(fftPlotContainer, BorderLayout.CENTER);
 
       return soundDetectorGUI;
    }
-   
-   private void processDrillDetectionResult(boolean isDrillOn)
+
+   private void processDrillDetectionResult(DrillDetectionResult result)
    {
-      int data = isDrillOn ? 70 : 0;
+      int data = result.isOn ? 100 : 0;
 
       int x = plotterDataSize++;
       Point2d p = new Point2d(x, data);
       PointArtifact pa = new PointArtifact("drillOn_" + x, p);
       plotter.addArtifact(pa);
+
+      soundDetectorGUI.remove(fftPlotContainer);
+      FFTPlotter plot = new FFTPlotter(result.bodeData, "FFT Plot", "(Hz)", "(dB)", "(deg)");
+      fftPlotContainer = plot.getContentPane();
+      soundDetectorGUI.add(fftPlotContainer, BorderLayout.CENTER);
+
+      soundDetectorGUI.revalidate();
    }
 
    private void onShutdown()
