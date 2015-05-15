@@ -10,7 +10,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.controllers.AtlasFootstepGeneratorTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
-   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
    us.ihmc.atlas.posePlayback.AtlasPlaybackPoseSequenceTest.class,
    us.ihmc.atlas.utilities.kinematics.AtlasNumericalInverseKinematicsCalculatorWithRobotTest.class
 })
