@@ -93,8 +93,7 @@ public abstract class CameraDataReceiver extends Thread
                }
                for (int i = 0; i < stereoListeners.size(); i++)
                {
-                  stereoListeners.get(i).newImageAvailable(data);
-//                  stereoListeners.get(i).newImageAvailable(data.robotSide, data.image, robotTimestamp, data.intrinsicParameters);
+                  stereoListeners.get(i).newImageAvailable(data, cameraFrame.getTransformToWorldFrame());
                }
               
                compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);

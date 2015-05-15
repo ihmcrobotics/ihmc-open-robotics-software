@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.packets.manipulation.CalibrateArmPacket;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<CalibrateArmPacket>
@@ -64,7 +65,7 @@ public class ArmCalibrationHelper implements DRCStereoListener, PacketConsumer<C
    }
 
    @Override
-   public void newImageAvailable(CameraData data)
+   public void newImageAvailable(CameraData data, RigidBodyTransform transformToCamera)
    {
       if(data.robotSide == RobotSide.LEFT)
       {
