@@ -80,7 +80,7 @@ class RobotiqControlThrizzead extends HandControlThread
 
          if (handStatus.hasError())
          {
-            System.out.println(handStatus.getFaultStatus().name());
+//            System.out.println(handStatus.getFaultStatus().name());
          }
          
          if (fingerStateProvider.isNewFingerStateAvailable())
