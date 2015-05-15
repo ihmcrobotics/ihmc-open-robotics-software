@@ -266,7 +266,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       
    }
 
-   public boolean checkIfErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose)
+   public boolean checkIfErrorIsTooBig(FramePose correctedPelvisPoseInWorldFrame, FramePose iterativeClosestPointInWorldFramePose, boolean isRotationCorrectionEnabled)
    {
       correctedPelvisPoseReferenceFrame.setPoseAndUpdate(correctedPelvisPoseInWorldFrame);
       
@@ -283,8 +283,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       translationErrorY.set(Math.abs(iterativeClosestPointTranslation.getY()));
       translationErrorZ.set(Math.abs(iterativeClosestPointTranslation.getZ()));
       
-      
-      if(Math.abs(axisAngleForError.getAngle()) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
+      if(isRotationCorrectionEnabled && Math.abs(axisAngleForError.getAngle()) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
          return true;
       
       if(Math.abs(iterativeClosestPointTranslation.getX()) > maximumErrorTranslation.getDoubleValue())
