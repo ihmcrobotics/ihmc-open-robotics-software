@@ -25,7 +25,7 @@ public class ScriptTools
       removeAllEndOfScripts(listToEdit);
       removeAllPauses(listToEdit);
       removeAllZeroStepLists(listToEdit);
-      removeAllFootPosePackets(listToEdit);
+      //removeAllFootPosePackets(listToEdit);
    }
 
    private static void removePausesAndZeroStepLists(ArrayList<ScriptObject> listToEdit)
