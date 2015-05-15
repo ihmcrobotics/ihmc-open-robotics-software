@@ -3666,6 +3666,15 @@
           </friction>
         </surface>
       </collision>
+      <visual name='r_hand_chessboard'>
+        <pose>0.065 -0.198 0.04 0 1.57 0</pose>
+        <geometry>
+          <mesh>
+            <scale>.75 .75 .01</scale>
+            <uri>model://ihmc/calibration_cube.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
       <visual name='r_hand_visual'>
         <pose>-0.00179 -0.168 0 3.14159 -1.57079 0</pose>
         <geometry>
