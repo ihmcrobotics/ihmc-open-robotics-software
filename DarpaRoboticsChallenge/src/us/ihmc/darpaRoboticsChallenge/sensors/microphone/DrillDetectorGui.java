@@ -1,8 +1,9 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -14,15 +15,7 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
-
-/**
- * Sound Detector Gui
- * 
- * Press start to listen to microphone input and run the rotozip sound detector. "Rotozip ON!!!!" should show up on the gui when the sound detector notices it.
- * 
- * @author Will
- *
- */
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class DrillDetectorGui
 {
@@ -42,9 +35,12 @@ public class DrillDetectorGui
    };
 
    private JPanel soundDetectorGUI = null;
-   private Plotter drillPlotter = null;
-   private int plotterDataSize = 0;
+   private Plotter rawPlotter = null;
+   private Plotter filteredPlotter = null;
    private Container fftPlotContainer = null;
+   private int dataSize = 0;
+
+   private AlphaFilteredYoVariable filteredYoVariable = new AlphaFilteredYoVariable("FilteredMicrophoneData", null, 0.95);
 
    public DrillDetectorGui()
    {
@@ -53,7 +49,7 @@ public class DrillDetectorGui
       JFrame frame = new JFrame("Drill Detection UI");
       frame.setContentPane(createContentPane());
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-      frame.setSize(1000, 800);
+      frame.setSize(1000, 900);
       frame.setVisible(true);
 
       Runtime.getRuntime().addShutdownHook(new Thread()
@@ -67,36 +63,72 @@ public class DrillDetectorGui
 
    private JPanel createContentPane()
    {
-      soundDetectorGUI = new JPanel(new BorderLayout());
+      soundDetectorGUI = new JPanel(new GridBagLayout());
       soundDetectorGUI.setOpaque(true);
-
-      PlotterPanel plotterPanel = new PlotterPanel();
-      drillPlotter = plotterPanel.getPlotter();
-      drillPlotter.setXoffset(320);
-      drillPlotter.setYoffset(80);
-      drillPlotter.setRange(200);
-      soundDetectorGUI.add(plotterPanel, BorderLayout.PAGE_START);
 
       fftPlotContainer = new Container();
       fftPlotContainer.setBackground(Color.blue);
-      soundDetectorGUI.add(fftPlotContainer, BorderLayout.CENTER);
+      GridBagConstraints fftLayout = new GridBagConstraints();
+      fftLayout.gridx = 0;
+      fftLayout.gridy = 0;
+      fftLayout.weightx = 1;
+      fftLayout.fill = GridBagConstraints.HORIZONTAL;
+      soundDetectorGUI.add(fftPlotContainer, fftLayout);
+
+      PlotterPanel rawPlotterPanel = new PlotterPanel();
+      GridBagConstraints rawLayout = new GridBagConstraints();
+      rawLayout.gridx = 0;
+      rawLayout.gridy = 1;
+      rawLayout.weightx = 1;
+      rawLayout.fill = GridBagConstraints.HORIZONTAL;
+      soundDetectorGUI.add(rawPlotterPanel, rawLayout);
+
+      rawPlotter = rawPlotterPanel.getPlotter();
+      rawPlotter.setXoffset(320);
+      rawPlotter.setYoffset(80);
+      rawPlotter.setRange(200);
+
+      PlotterPanel filteredPlotterPanel = new PlotterPanel();
+      GridBagConstraints filteredLayout = new GridBagConstraints();
+      filteredLayout.gridx = 0;
+      filteredLayout.gridy = 2;
+      filteredLayout.weightx = 1;
+      filteredLayout.fill = GridBagConstraints.HORIZONTAL;
+      soundDetectorGUI.add(filteredPlotterPanel, filteredLayout);
+
+      filteredPlotter = filteredPlotterPanel.getPlotter();
+      filteredPlotter.setXoffset(320);
+      filteredPlotter.setYoffset(80);
+      filteredPlotter.setRange(200);
 
       return soundDetectorGUI;
    }
 
    private void processDrillDetectionResult(DrillDetectionResult result)
    {
-      int data = result.isOn ? 100 : 0;
-
-      int x = plotterDataSize++;
-      Point2d p = new Point2d(x, data);
-      PointArtifact pa = new PointArtifact("drillOn_" + x, p);
-      drillPlotter.addArtifact(pa);
-
       soundDetectorGUI.remove(fftPlotContainer);
       FFTPlotter plot = new FFTPlotter(result.bodeData, "", "(Hz)", "(dB)", "(deg)");
       fftPlotContainer = plot.getContentPane();
-      soundDetectorGUI.add(fftPlotContainer, BorderLayout.CENTER);
+      GridBagConstraints fftLayout = new GridBagConstraints();
+      fftLayout.gridx = 0;
+      fftLayout.gridy = 0;
+      fftLayout.weightx = 1;
+      fftLayout.fill = GridBagConstraints.HORIZONTAL;
+      soundDetectorGUI.add(fftPlotContainer, fftLayout);
+
+      int x = dataSize++;
+      double rawValue = result.isOn ? 100.0 : 0.0;
+
+      Point2d pRaw = new Point2d(x, rawValue);
+      PointArtifact paRaw = new PointArtifact("drillOn_" + x, pRaw);
+      rawPlotter.addArtifact(paRaw);
+
+      filteredYoVariable.update(rawValue);
+      double filteredValue = filteredYoVariable.getDoubleValue();
+
+      Point2d pFiltered = new Point2d(x, filteredValue);
+      PointArtifact paFiltered = new PointArtifact("filteredDrillOn_" + x, pFiltered);
+      filteredPlotter.addArtifact(paFiltered);
 
       soundDetectorGUI.revalidate();
    }

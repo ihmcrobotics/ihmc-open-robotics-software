@@ -11,7 +11,7 @@ import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data
  * from the Atlas Chest Webcam microphone around a given frequency</p>
  */
-public class WorkingDrillDetector
+public class DrillDetector
 {
 
    /**
@@ -24,7 +24,7 @@ public class WorkingDrillDetector
     * enough peak to trip detection.
     */
 
-   private static final double decibelsDeltaToTripDetection = -5.5; //dB
+   private static final double decibelsDeltaToTripDetection = -6.5; //dB
    private static final double dominantFrequencyBandLowerBound = 6900; //Hz
    private static final double dominantFrequencyBandUpperBound = 7900; //Hz
    private static final double relevantFrequencyBandLowerBound = 1000; //Hz
@@ -135,7 +135,6 @@ public class WorkingDrillDetector
 
       DrillDetectionResult result = new DrillDetectionResult();
       result.isOn = ((dominantBandAverageMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
-//      System.out.println("Dominant - Relevant Magnitude: " + (dominantBandAverageMag - relevantBandAverageMag));
       result.bodeData = getBodeData(time, input);
 
       return result;
