@@ -49,12 +49,12 @@ public class DrillDetector
    private static final String COMMA_DELIMITER = ",";
    private static final String NEW_LINE_SEPARATOR = "\n";
 
-   public boolean isDrillOn(InputStream inputStream)
+   public DrillDetectionResult isDrillOn(InputStream inputStream)
    {
       if (format.getSampleSizeInBits() != 16)
       {
          System.out.println("Can't detect: bad sample size");
-         return false;
+         return null;
       }
 
       try
@@ -66,11 +66,11 @@ public class DrillDetector
       catch (Exception ignored)
       {
          System.out.println("Failed to read from stream...");
-         return false;
+         return null;
       }
    }
 
-   private boolean detectDrill(byte[] audioBytes, int size)
+   private DrillDetectionResult detectDrill(byte[] audioBytes, int size)
    {
       int nlengthInSamples = size / 2;
       int[] audioData = new int[nlengthInSamples];
@@ -152,7 +152,23 @@ public class DrillDetector
          }
       }
 
-      return ((dominantBandPeakMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
+      DrillDetectionResult result = new DrillDetectionResult();
+      result.isOn = ((dominantBandPeakMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
+      result.bodeData = getBodeData(time, input);
+
+      return result;
+   }
+
+   private double[][] getBodeData(double[] time, double[] data)
+   {
+      double[][] freqMagPhase = BodePlotConstructor.computeFreqMagPhase(time, data);
+
+      double[] frequency = freqMagPhase[0];
+      double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(freqMagPhase[1]);
+      double[] phase = BodeUnitsConverter.convertRadianToDegrees(freqMagPhase[2]);
+
+      double[][] bodeData = new double[][] { frequency, magnitude, phase };
+      return bodeData;
    }
 
    private void writeAudioDataToLog(int[] audioData)
