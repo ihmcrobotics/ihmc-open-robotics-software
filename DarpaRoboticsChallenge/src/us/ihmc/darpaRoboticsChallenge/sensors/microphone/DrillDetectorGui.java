@@ -1,10 +1,17 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
+import java.awt.BorderLayout;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
+import javax.vecmath.Point2d;
+
+import us.ihmc.plotting.Plotter;
+import us.ihmc.plotting.PlotterPanel;
+import us.ihmc.plotting.shapes.PointArtifact;
 
 /**
  * Sound Detector Gui
@@ -33,12 +40,12 @@ public class DrillDetectorGui
    };
 
    private JTextArea textArea = null;
+   private Plotter plotter;
 
    public DrillDetectorGui()
    {
       System.out.println("Creating the UI");
 
-      JFrame.setDefaultLookAndFeelDecorated(true);
       JFrame frame = new JFrame("Drill Detection UI");
       frame.setContentPane(createContentPane());
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -56,8 +63,7 @@ public class DrillDetectorGui
 
    private JPanel createContentPane()
    {
-      JPanel soundDetectorGUI = new JPanel();
-      soundDetectorGUI.setLayout(null);
+      JPanel soundDetectorGUI = new JPanel(new BorderLayout());
       soundDetectorGUI.setOpaque(true);
 
       textArea = new JTextArea();
@@ -67,15 +73,26 @@ public class DrillDetectorGui
       textArea.setSize(450, 200);
       textArea.setLineWrap(true);
       textArea.setAutoscrolls(true);
-      soundDetectorGUI.add(textArea);
+      soundDetectorGUI.add(textArea, BorderLayout.SOUTH);
+      
+      PlotterPanel plotterPanel = new PlotterPanel();
+      plotter = plotterPanel.getPlotter();
+      plotter.setRangeLimit(20, (double) (5), -10.0, 10.0, 10.0, -10.0);
+      
+      soundDetectorGUI.add(plotterPanel, BorderLayout.CENTER);
 
       return soundDetectorGUI;
    }
 
+   private int count = 0;
+   
    private void processDrillDetectionResult(boolean isDrillOn)
    {
       int data = isDrillOn ? 1 : 0;
       textArea.append(" " + data);
+      
+      PointArtifact pa = new PointArtifact("drillOn_" + count++, new Point2d(count, data));
+      plotter.addArtifact(pa);
    }
 
    private void onShutdown()
