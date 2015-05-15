@@ -6,13 +6,13 @@ import java.io.InputStream;
 
 import javax.sound.sampled.AudioFormat;
 
-import sun.audio.AudioPlayer;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
 
 /**
  * <p>Title: DrillDetector</p>
- * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data from the Atlas Chest Webcam microphone around a given frequency</p>
+ * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data
+ * from the Atlas Chest Webcam microphone around a given frequency</p>
  * 
  * @author Will
  * @author Igor
@@ -62,23 +62,17 @@ public class DrillDetector
          return false;
       }
 
-      boolean drillIsOn = false;
-      AudioPlayer.player.start(inputStream);
-
       try
       {
          byte[] data = new byte[bufferLengthInBytes];
          int numBytesRead = inputStream.read(data, 0, bufferLengthInBytes);
-         drillIsOn = detectDrill(data, numBytesRead);
+         return detectDrill(data, numBytesRead);
       }
       catch (Exception ignored)
       {
          System.out.println("Failed to read from stream...");
-         inputStream = null;
+         return false;
       }
-
-      AudioPlayer.player.stop(inputStream);
-      return drillIsOn;
    }
 
    private boolean detectDrill(byte[] audioBytes, int size)

@@ -5,6 +5,7 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 
+import sun.audio.AudioPlayer;
 import us.ihmc.utilities.ThreadTools;
 
 /**
@@ -17,57 +18,70 @@ import us.ihmc.utilities.ThreadTools;
 public class DrillDetectorProcess
 {
    // The annoying audio.cgi disconnects us every ~33 seconds
-   private static final int reconnectPeriodSeconds = 32;
+   private static final int reconnectPeriodSeconds = 30;
    private static final int checkForDrillFrequencyHz = 4;
    private static final int iterationsCount = reconnectPeriodSeconds * checkForDrillFrequencyHz;
    private static final long iterationSleep = 1000 / checkForDrillFrequencyHz;
 
-   // initial state
-   private static DrillDetector detector = new DrillDetector();
-   private static boolean lastDrillState = false;
-   private static InputStream inputStream = null;
-
-   private static void connectToStream()
+   private static InputStream connectToStream()
    {
       try
       {
-//         URL url = new URL("http://10.6.100.57:80/audio.cgi"); //Robotlab
 //         URL url = new URL("http://192.168.0.19:80/audio.cgi"); //Home
+//         URL url = new URL("http://139.169.44.114:80/audio.cgi"); //JSC
 
-         URL url = new URL("http://139.169.44.114:80/audio.cgi"); //JSC
-         inputStream = url.openStream();
+         URL url = new URL("http://10.6.100.57:80/audio.cgi"); //Robotlab
+         return url.openStream();
       }
       catch (Exception e)
       {
          e.printStackTrace();
-         inputStream = null;
+         return null;
       }
    }
 
    private static void startDrillDetectionLoop()
    {
+      DrillDetector detector = new DrillDetector();
+      boolean globalState = false;
+      boolean lastDetectedState = false;
+
       while (true)
       {
-         connectToStream();
+         InputStream inputStream = connectToStream();
          if (inputStream == null)
          {
             ThreadTools.sleep(iterationSleep);
             continue;
          }
 
-         System.out.println("Connected to the stream!");
+         System.out.println("Connected to the webcam. Opening the stream...");
+         AudioPlayer.player.start(inputStream);
 
          for (int i = 0; i < iterationsCount; i++)
          {
-            boolean newState = detector.isDrillOn(inputStream);
-            if (lastDrillState != newState)
+            ThreadTools.sleep(iterationSleep);
+
+            boolean drillIsOn = detector.isDrillOn(inputStream);
+
+            if (drillIsOn && lastDetectedState)
             {
-               System.out.println(" - state change detected: isOn=" + newState);
-               lastDrillState = newState;
+                System.out.println(" - drill is ON");
+                globalState = true;
+            }
+            else
+            {
+               if (globalState) { System.out.println(" - drill is off"); }
+               globalState = false;
             }
 
-            ThreadTools.sleep(iterationSleep);
+            lastDetectedState = drillIsOn;
          }
+
+         System.out.println("Closing the stream...");
+         AudioPlayer.player.stop(inputStream);
+         try { inputStream.close(); }
+         catch (Exception ignored) { }
 
          System.out.println("Waiting for reconnect...");
       }
