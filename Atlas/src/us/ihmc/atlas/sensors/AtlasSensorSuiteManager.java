@@ -112,6 +112,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
       
+      
+//      new BlackFlyParameterSetter(rosMainNode, leftFishEyeCameraParameters, sensorSuitePacketCommunicator);
+//      new BlackFlyParameterSetter(rosMainNode, rightFishEyeCameraParameters, sensorSuitePacketCommunicator);
+      
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
