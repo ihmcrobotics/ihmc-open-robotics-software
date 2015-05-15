@@ -61,8 +61,15 @@ public class DRCNetworkProcessor
       {
          PacketCommunicator zeroPosePublisherCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ZERO_POSE_PRODUCER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.ZERO_POSE_PRODUCER, zeroPosePublisherCommunicator);
-         
-         new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
+         try
+         {
+            zeroPosePublisherCommunicator.connect();
+            new ZeroPoseMockRobotConfigurationDataPublisherModule(robotModel);
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
       }      
    }
 
