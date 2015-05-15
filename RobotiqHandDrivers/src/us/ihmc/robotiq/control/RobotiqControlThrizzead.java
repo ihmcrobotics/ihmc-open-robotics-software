@@ -76,59 +76,63 @@ class RobotiqControlThrizzead extends HandControlThread
       {
          robotiqHand.read();
          
-         if (robotiqHand.isConnected())
-         {
-            updateHandData();
+         updateHandData();
 
-            if (handStatus.hasError())
-            {
-               System.out.println(handStatus.getFaultStatus().name());
-            }
+         if (handStatus.hasError())
+         {
+            System.out.println(handStatus.getFaultStatus().name());
+         }
+         
+         if (fingerStateProvider.isNewFingerStateAvailable())
+         {
+            FingerStatePacket packet = fingerStateProvider.pullPacket();
+            FingerState state = packet.getFingerState();
             
-            if (fingerStateProvider.isNewFingerStateAvailable())
+            switch (state)
             {
-               FingerStatePacket packet = fingerStateProvider.pullPacket();
-               FingerState state = packet.getFingerState();
-               
-               switch (state)
-               {
-               case CALIBRATE:
-                  robotiqHand.initialize();
-                  break;
-               case OPEN:
-               case CLOSE:
-               case CRUSH:
-               case BASIC_GRIP:
-               case PINCH_GRIP:
-               case WIDE_GRIP:
-               case SCISSOR_GRIP:
+            case CALIBRATE:
+               robotiqHand.initialize();
+               break;
+            case OPEN:
+            case CLOSE:
+            case CRUSH:
+            case BASIC_GRIP:
+            case PINCH_GRIP:
+            case WIDE_GRIP:
+            case SCISSOR_GRIP:
+               if(robotiqHand.isConnected())
                   robotiqHand.sendHandCommand(state);
-                  break;
-               case OPEN_FINGERS:
-               case CLOSE_FINGERS:
+               break;
+            case OPEN_FINGERS:
+            case CLOSE_FINGERS:
+               if(robotiqHand.isConnected())
                   robotiqHand.sendFingersCommand(state);
-                  break;
-               case CLOSE_THUMB:
-               case OPEN_THUMB:
+               break;
+            case CLOSE_THUMB:
+            case OPEN_THUMB:
+               if(robotiqHand.isConnected())
                   robotiqHand.sendThumbCommand(state);
-                  break;
-               case RESET:
+               break;
+            case RESET:
+               if(robotiqHand.isConnected())
                   robotiqHand.reset();
-               case HOOK:
-                  //TODO
-                  break;
-               case HALF_CLOSE:
-                  //TODO
-                  break;
-               default:
-                  break;
-               }
-            }
-            
-            if (manualHandControlProvider.isNewPacketAvailable())
-            {
+            case CONNECT:
+               robotiqHand.reconnect();
+               break;
+            case HOOK:
                //TODO
+               break;
+            case HALF_CLOSE:
+               //TODO
+               break;
+            default:
+               break;
             }
+         }
+         
+         if (manualHandControlProvider.isNewPacketAvailable())
+         {
+            //TODO
          }
          
          ThreadTools.sleep(10);

@@ -22,8 +22,6 @@ public class RobotiqHandCommunicator
    
    private final int PORT = 502;
    
-   private boolean connected = false;
-
    private JamodTCPMaster communicator;
    
    private RobotiqWriteRequestFactory writeRequestFactory = new RobotiqWriteRequestFactory();
@@ -33,6 +31,8 @@ public class RobotiqHandCommunicator
    
    private RobotiqGraspMode graspMode = RobotiqGraspMode.BASIC_MODE;
    private FingerState fingerState = FingerState.OPEN;
+   
+   private boolean connected = false;
    
    public RobotiqHandCommunicator(RobotSide robotSide)
    {
@@ -54,7 +54,7 @@ public class RobotiqHandCommunicator
          connected = false;
       }
       
-      handSensorData.update(readResponseFactory.getResponse(), connected);
+      handSensorData.update(readResponseFactory.getResponse(), isConnected());
    }
    
    public void reconnect()
@@ -64,7 +64,7 @@ public class RobotiqHandCommunicator
    
    public boolean isConnected()
    {
-      return connected;
+      return communicator.isConnected() && connected;
    }
    
    public void initialize()
