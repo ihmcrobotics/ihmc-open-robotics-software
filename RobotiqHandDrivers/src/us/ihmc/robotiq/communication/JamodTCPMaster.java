@@ -34,6 +34,7 @@ public class JamodTCPMaster
       {
          slaveAddress = InetAddress.getByName(address);
          connection = new TCPMasterConnection(slaveAddress);
+         connection.setTimeout(3000);
          writeMultipleRegistersRequest = new WriteMultipleRegistersRequest();
          readInputRegistersRequest = new ReadInputRegistersRequest();
          readInputRegistersRequest.setUnitID(2);
@@ -60,6 +61,7 @@ public class JamodTCPMaster
          {
             connection.connect();
             transaction = new ModbusTCPTransaction(connection);
+            transaction.setRetries(0);
             System.out.println("Successfully connected at " + connection.getAddress().getHostAddress());
          }
          catch (Exception e)
@@ -76,6 +78,11 @@ public class JamodTCPMaster
          connection.close();
          transaction = null;
       }
+   }
+   
+   public boolean isConnected()
+   {
+      return connection.isConnected();
    }
    
    public void reconnect()
@@ -127,17 +134,20 @@ public class JamodTCPMaster
       {
          while(autoreconnect)
          {
-            try
+            if(isConnected())
             {
-               readInputRegisters(0, 1);
+               try
+               {
+                  readInputRegisters(0, 1);
+               }
+               catch (ModbusException | SocketTimeoutException e)
+               {
+                  System.out.println(getClass().getSimpleName() + ": " + slaveAddress.getHostAddress() + " disconnected. Attempting to reconnect...");
+                  reconnect();
+               }
+               
+               ThreadTools.sleep(200);
             }
-            catch (ModbusException | SocketTimeoutException e)
-            {
-               System.out.println(getClass().getSimpleName() + ": " + slaveAddress.getHostAddress() + " disconnected. Attempting to reconnect...");
-               reconnect();
-            }
-            
-            ThreadTools.sleep(200);
          }
       }
    }
