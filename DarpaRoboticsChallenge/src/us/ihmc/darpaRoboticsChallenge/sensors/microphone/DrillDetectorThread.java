@@ -12,7 +12,7 @@ public abstract class DrillDetectorThread extends Thread
 {
    // The annoying audio.cgi disconnects us every ~33 seconds
    private static final int reconnectPeriodSeconds = 30;
-   private static final double checkForDrillFrequencyHz = 5.0;
+   private static final double checkForDrillFrequencyHz = 10.0;
    private static final int iterationsCount = (int)((double)reconnectPeriodSeconds * checkForDrillFrequencyHz);
    private static final long iterationSleep = (long)(1000.0 / checkForDrillFrequencyHz);
 
@@ -56,7 +56,7 @@ public abstract class DrillDetectorThread extends Thread
    {
       System.out.println("Starting drill detection thread...");
 
-      WorkingDrillDetector detector = new WorkingDrillDetector();
+      DrillDetector detector = new DrillDetector();
       isRunning = true;
 
       while (isRunning)
