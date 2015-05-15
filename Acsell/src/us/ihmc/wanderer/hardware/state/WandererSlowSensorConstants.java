@@ -62,19 +62,19 @@ public class WandererSlowSensorConstants implements AcsellSlowSensorConstants
    @Override
    public double getPressureSensorOffset()
    {
-      return -11.5-58;
+      return -63.5;
    }
 
    @Override
    public double getPressureSensorScale()
    {
-      return 0.0815;
+      return 0.0815 / 16.0;
    }
 
    @Override
    public double getPressureSensorConversion()
    {
-      return 5.0 / 4095.0;
+      return 5.0 / 65536.0;
    }
 
    @Override
