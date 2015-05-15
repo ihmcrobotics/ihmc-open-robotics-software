@@ -33,7 +33,6 @@ import org.junit.runners.Suite;
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
    us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
    us.ihmc.atlas.networkProcessor.depthData.AtlasPointCloudDataReceiverTest.class,
-   us.ihmc.atlas.networkProcessor.downlinkSerializers.AtlasJointConfigurationDataSerializerTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasBigStepUpWithHandPlatformTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseEveryBuildTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseFlatTest.class,
