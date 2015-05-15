@@ -27,7 +27,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final BooleanYoVariable enableProcessNewPackets;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = true;
+   private static final boolean ENABLE_ROTATION_CORRECTION = false;  
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
@@ -260,16 +260,16 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
-      {
-         requestLocalizationReset();
-         isErrorTooBig.set(true);
-      }
-      else
-      {
+//      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
+//      {
+//         requestLocalizationReset();
+//         isErrorTooBig.set(true);
+//      }
+//      else
+//      {
          offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, confidenceFactor.getDoubleValue());
          isErrorTooBig.set(false);
-      }
+//      }
    }
    
    private void requestLocalizationReset()
