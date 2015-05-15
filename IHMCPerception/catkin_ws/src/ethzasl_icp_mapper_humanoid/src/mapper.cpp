@@ -399,18 +399,18 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		return;
 	}
 
-  // Fetch transformation from scanner to icpCorrectionFrame.
-  PM::TransformationParameters TScannerToCorrectionFrame;
+  // Fetch transformation from icpCorrectionFrame to scanner.
+  PM::TransformationParameters TCorrectionFrameToScanner;
   try
   {
-    TScannerToCorrectionFrame = PointMatcher_ros::eigenMatrixToDim<float>(
+    TCorrectionFrameToScanner = PointMatcher_ros::eigenMatrixToDim<float>(
         PointMatcher_ros::transformListenerToEigenMatrix<float>(
         tfListener,
         scannerFrame,
         icpCorrectionFrame,
         stamp
       ), dimp1);
-    ROS_DEBUG_STREAM("TScannerToCorrectionFrame:\n" << TScannerToCorrectionFrame);
+    ROS_DEBUG_STREAM("TCorrectionFrameToScanner:\n" << TCorrectionFrameToScanner);
   }
   catch(tf::ExtrapolationException e)
   {
@@ -483,8 +483,8 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
 		TOdomToMap = Ticp * TOdomToScanner;
 
 		// Compute transform for correction for state estimation.
-	  PM::TransformationParameters TOdomToCorrectionFrame = Ticp * TScannerToCorrectionFrame;
-	  ROS_DEBUG_STREAM("TOdomToCorrectionFrame:\n" << TOdomToCorrectionFrame);
+	  PM::TransformationParameters TCorrectionFrameToMap = Ticp * TCorrectionFrameToScanner;
+	  ROS_DEBUG_STREAM("TCorrectionFrameToMap:\n" << TCorrectionFrameToMap);
 
 		// Publish tf
 		if (publishTfCorrection) tfBroadcaster.sendTransform(PointMatcher_ros::eigenMatrixToStampedTransform<float>(TOdomToMap, mapFrame, odomFrame, stamp));
@@ -504,10 +504,10 @@ void Mapper::processCloud(unique_ptr<DP> newPointCloud, const std::string& scann
     // Publish correction pose for state estimation.
     if (icpCorrectionPub.getNumSubscribers())
     {
-      const tf::StampedTransform& transform = PointMatcher_ros::eigenMatrixToStampedTransform<float>(TOdomToCorrectionFrame, icpCorrectionFrame, odomFrame, stamp);
+      const tf::StampedTransform& transform = PointMatcher_ros::eigenMatrixToStampedTransform<float>(TCorrectionFrameToMap, mapFrame, icpCorrectionFrame, stamp);
       geometry_msgs::PoseStamped poseMessage;
       poseMessage.header.stamp = stamp;
-      poseMessage.header.frame_id = odomFrame;
+      poseMessage.header.frame_id = odomFrame; // Changing here from map to odom frame as a goal for state estimator.
       poseMessage.pose.position.x = transform.getOrigin().getX();
       poseMessage.pose.position.y = transform.getOrigin().getY();
       poseMessage.pose.position.z = transform.getOrigin().getZ();

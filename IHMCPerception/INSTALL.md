@@ -4,6 +4,11 @@
 
 ## 1. Install Third-Party Software
 
+### ihmc_ros
+
+> cd ~/<WORKSPACE NAME>/IHMCPerception/catkin_ws/src
+> git clone https://bitbucket.org/ihmcrobotics/ihmc_ros.git
+
 ### libnabo (for ethz_icp_mapper)
 
 > sudo add-apt-repository ppa:stephane.magnenat/trusty
@@ -45,12 +50,3 @@ Add this to your ~/.bashrc file:
 > export ROS_PACKAGE_PATH=~/workspace/DarpaRoboticsChallenge/ModelGenerator:$ROS_PACKAGE_PATH
 
 Close your console and open a new one for the next steps.
-
-
-
-
-# Update third-party software
-
-### ethz_icp_mapper
-
->
