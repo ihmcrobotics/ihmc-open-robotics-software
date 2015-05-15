@@ -79,6 +79,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       //      }
 
 //      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
+
+      VisionPoseEstimator visionPoseEstimator= new VisionPoseEstimator(sensorSuitePacketCommunicator, false);
+      cameraDataReceiver.registerCameraListener(visionPoseEstimator);
    }
 
    @Override
@@ -111,6 +114,9 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
+
+      VisionPoseEstimator visionPoseEstimator= new VisionPoseEstimator(sensorSuitePacketCommunicator,true);
+      multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
       
       
 //      new BlackFlyParameterSetter(rosMainNode, leftFishEyeCameraParameters, sensorSuitePacketCommunicator);
