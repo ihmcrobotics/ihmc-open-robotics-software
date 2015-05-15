@@ -135,6 +135,7 @@ public class WorkingDrillDetector
 
       DrillDetectionResult result = new DrillDetectionResult();
       result.isOn = ((dominantBandAverageMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
+//      System.out.println("Dominant - Relevant Magnitude: " + (dominantBandAverageMag - relevantBandAverageMag));
       result.bodeData = getBodeData(time, input);
 
       return result;
