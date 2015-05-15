@@ -80,7 +80,8 @@
                     </accel>
                 </noise>
             </imu>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>-0.0937 0.0 -0.0334 0 0.030 0</pose>
+            <!--<pose>0.1330 0.0 0.0478 0 0 0</pose>-->
         </sensor>
     </link>
     <link name='ltorso'>
