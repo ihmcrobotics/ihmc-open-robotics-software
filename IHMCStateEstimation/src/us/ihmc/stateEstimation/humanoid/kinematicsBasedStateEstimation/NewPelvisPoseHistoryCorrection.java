@@ -260,16 +260,16 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-//      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
-//      {
-//         requestLocalizationReset();
-//         isErrorTooBig.set(true);
-//      }
-//      else
-//      {
+      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
+      {
+         requestLocalizationReset();
+         isErrorTooBig.set(true);
+      }
+      else
+      {
          offsetErrorInterpolator.setInterpolatorInputs(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, confidenceFactor.getDoubleValue());
          isErrorTooBig.set(false);
-//      }
+      }
    }
    
    private void requestLocalizationReset()

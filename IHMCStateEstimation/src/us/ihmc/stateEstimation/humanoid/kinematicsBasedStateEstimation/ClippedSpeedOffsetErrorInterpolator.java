@@ -7,7 +7,6 @@ import javax.vecmath.Vector3d;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
-import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -132,7 +131,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    //used to check if the orientation error is too big
    private final PoseReferenceFrame correctedPelvisPoseReferenceFrame = new PoseReferenceFrame("correctedPelvisPoseReferenceFrame", worldFrame);
    private final FrameOrientation iterativeClosestPointOrientation = new FrameOrientation();
-   private final FrameVector iterativeClosestPointTranslation = new FrameVector();
+   private final FramePoint iterativeClosestPointTranslation = new FramePoint();
    private final AxisAngle4d axisAngleForError = new AxisAngle4d();
    private final DoubleYoVariable maximumErrorAngleInDegrees;
    private final DoubleYoVariable maximumErrorTranslation;
