@@ -27,6 +27,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double jointVelocitySlopTimeForBacklashCompensation;
 
    private final double defaultFilterBreakFrequency;
+   private final double defaultFilterBreakFrequencyArm;
 
    // private final SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuning();
    // private SensorNoiseParameters sensorNoiseParameters = DRCSimulatedSensorNoiseParameters.createNoiseParametersForEstimatorJerryTuningSeptember2013();
@@ -46,6 +47,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       this.estimatorDT = estimatorDT;
 
       defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
+      defaultFilterBreakFrequencyArm = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
 
       jointVelocitySlopTimeForBacklashCompensation = 0.03;
 
@@ -72,8 +74,8 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
-      DoubleYoVariable armJointVelocityAlphaFilter1 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter1", defaultFilterBreakFrequency);
-      DoubleYoVariable armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequency);
+      DoubleYoVariable armJointVelocityAlphaFilter1 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter1", defaultFilterBreakFrequencyArm);
+//      DoubleYoVariable armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequencyArm);
       DoubleYoVariable armJointVelocitySlopTime = new DoubleYoVariable("armJointBacklashSlopTime", registry);
       armJointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
@@ -91,7 +93,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       sensorProcessing.addJointVelocityAlphaFilterWithJointsToIgnore(jointVelocityAlphaFilter, false, armJointNames);
 
       sensorProcessing.computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(armJointVelocityAlphaFilter1, armJointVelocitySlopTime, false, armJointNames);
-      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
+//      sensorProcessing.addJointVelocityAlphaFilterOnlyForSpecifiedJoints(armJointVelocityAlphaFilter2, false, armJointNames);
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
