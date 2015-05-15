@@ -137,6 +137,12 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable maximumErrorAngleInDegrees;
    private final DoubleYoVariable maximumErrorTranslation;
    
+   private final DoubleYoVariable angleError;
+   private final DoubleYoVariable translationErrorX;
+   private final DoubleYoVariable translationErrorY;
+   private final DoubleYoVariable translationErrorZ
+   ;
+   
    //for feedBack in scs
    private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
    private final YoFramePose yoGoalOffsetErrorPose_InWorldFrame;
@@ -253,6 +259,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       startYaw = new DoubleYoVariable("startYaw", registry);
       goalYaw = new DoubleYoVariable("goalYaw", registry);
       interpolatedYaw = new DoubleYoVariable("interpolatedYaw", registry);
+    
+      angleError = new DoubleYoVariable("angleError", registry);
+      translationErrorX = new DoubleYoVariable("translationErrorX", registry);
+      translationErrorY = new DoubleYoVariable("translationErrorY", registry);
+      translationErrorZ = new DoubleYoVariable("translationErrorZ", registry);
       
    }
 
@@ -268,6 +279,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       iterativeClosestPointOrientation.getAxisAngle(axisAngleForError);
 
+      angleError.set(Math.abs(axisAngleForError.getAngle()));
+      translationErrorX.set(Math.abs(iterativeClosestPointTranslation.getX()));
+      translationErrorY.set(Math.abs(iterativeClosestPointTranslation.getY()));
+      translationErrorZ.set(Math.abs(iterativeClosestPointTranslation.getZ()));
+      
+      
       if(Math.abs(axisAngleForError.getAngle()) > Math.toRadians(maximumErrorAngleInDegrees.getDoubleValue()))
          return true;
       
