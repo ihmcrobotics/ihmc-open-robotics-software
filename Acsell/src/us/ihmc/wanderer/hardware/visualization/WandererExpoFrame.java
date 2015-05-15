@@ -12,6 +12,7 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
 public class WandererExpoFrame extends JFrame implements PlaybackListener
 {
@@ -20,7 +21,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private final JLabel power_label = new JLabel();
    private final JLabel time_label = new JLabel();
    private final DoubleYoVariable power;
-   private final DoubleYoVariable time;
+   private final LongYoVariable time;
       
    public WandererExpoFrame(YoVariableHolder yoVariableHolder, boolean isStandalone)
    {
@@ -45,7 +46,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
       } else
       {
          power = (DoubleYoVariable) yoVariableHolder.getVariable("Wanderer","totalMotorPower");
-         time = (DoubleYoVariable) yoVariableHolder.getVariable("SensorProcessing","timestamp");
+         time = (LongYoVariable) yoVariableHolder.getVariable("SensorProcessing","timestamp");
       }
       
       if(isStandalone) setupExitOnClose();
@@ -60,7 +61,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    public void indexChanged(int newIndex, double newTime)
    {
       power_label.setText(String.format("%.1f",power.getDoubleValue()));
-      time_label.setText(String.format("%.1f",TimeTools.nanoSecondstoSeconds((int)time.getDoubleValue())));
+      time_label.setText(String.format("%.1f",TimeTools.nanoSecondstoSeconds(time.getLongValue())));
    }
 
    @Override

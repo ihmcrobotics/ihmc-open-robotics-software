@@ -262,7 +262,7 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getInPlaceWidth()
    {
-      return 0.15;
+      return 0.25;
    }
 
    @Override
