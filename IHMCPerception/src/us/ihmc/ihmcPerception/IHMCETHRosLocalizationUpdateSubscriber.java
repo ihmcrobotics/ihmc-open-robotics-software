@@ -1,34 +1,41 @@
 package us.ihmc.ihmcPerception;
 
-import javax.vecmath.Point3d;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.ros.node.NodeConfiguration;
+import javax.vecmath.Point3d;
 
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
+import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StampedPosePacket;
+import us.ihmc.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.communication.packets.sensing.LocalizationStatusPacket;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 
-public class IHMCETHRosLocalizationUpdateSubscriber
+public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketConsumer<LocalizationPacket>
 {
    private static final boolean DEBUG = false;
    private double overlap = 1.0;
 
-   NodeConfiguration nodeConfig = NodeConfiguration.newPrivate();
+   private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
+   private final PacketCommunicator rosModulePacketCommunicator; 
    
    public IHMCETHRosLocalizationUpdateSubscriber(final RosMainNode rosMainNode, final PacketCommunicator rosModulePacketCommunicator,
          final PPSTimestampOffsetProvider ppsTimeOffsetProvider)
    {
-	   
+      this.rosModulePacketCommunicator = rosModulePacketCommunicator;
+      rosModulePacketCommunicator.attachListener(LocalizationPacket.class, this);
+      
 	   RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
 	   {
 		   @Override
@@ -79,14 +86,45 @@ public class IHMCETHRosLocalizationUpdateSubscriber
          public void onNewMessage(PointCloud2 pointCloud)
          {
             UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-            Point3d[] points = pointCloudData.getPoints();
-            
-            LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
-            localizationMapPacket.setLocalizationPointMap(points);
-            rosModulePacketCommunicator.send(localizationMapPacket);
+            localizationMapPointCloud.set(pointCloudData);
          }
+
       };
       rosMainNode.attachSubscriber(RosLocalizationConstants.NAV_POSE_MAP, pointMapSubscriber);
       
+      Thread localizationMapPublishingThread = new Thread(this);
+      localizationMapPublishingThread.start();  
+      
+   }
+   
+   private void processAndSendPointCloud(UnpackedPointCloud pointCloudData)
+   {
+      Point3d[] points = pointCloudData.getPoints();
+      LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
+      localizationMapPacket.setLocalizationPointMap(points);
+      rosModulePacketCommunicator.send(localizationMapPacket);
+   }
+
+   @Override
+   public void run()
+   {
+      while (true)
+      {
+         UnpackedPointCloud pointCloud = localizationMapPointCloud.get();
+         if(pointCloud != null)
+         {
+            processAndSendPointCloud(pointCloud);
+         }
+         ThreadTools.sleep(1000);
+      }
+   }
+
+   @Override
+   public void receivedPacket(LocalizationPacket packet)
+   {
+      if(packet.getReset())
+      {
+         localizationMapPointCloud.set(null);
+      }      
    }
 }
