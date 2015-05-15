@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules;
 
+import java.io.IOException;
+
 import javax.vecmath.Quat4d;
 import javax.vecmath.Quat4f;
 import javax.vecmath.Vector3d;
@@ -16,6 +18,8 @@ import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
+import us.ihmc.utilities.math.geometry.RotationFunctions;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
 {
@@ -28,15 +32,23 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
    {
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
-      Thread t = new Thread(this);
-      t.start();
+      try
+      {
+         packetCommunicator.connect();
+         Thread t = new Thread(this);
+         t.start();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
    }
 
 
    public void sendMockRobotConfiguration(long totalNsecs)
    {
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(fullRobotModel.getOneDoFJoints(), forceSensorDefinitions, null, imuDefinitions);
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), forceSensorDefinitions, null, imuDefinitions);
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
@@ -64,7 +76,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       while(true)
       {
          sendMockRobotConfiguration(timeStamp);
-         timeStamp++;
+         timeStamp += 250L * 1000000L;
          ThreadTools.sleep(250);
       }
    }
