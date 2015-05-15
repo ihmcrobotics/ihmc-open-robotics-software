@@ -5,7 +5,13 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.*;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingPacketConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.BlindWalkingToDestinationDesiredFootstepCalculator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseCommandConsumer;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -41,11 +47,22 @@ import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
-import us.ihmc.communication.packets.walking.*;
+import us.ihmc.communication.packets.walking.AbortWalkingPacket;
+import us.ihmc.communication.packets.walking.BlindWalkingPacket;
+import us.ihmc.communication.packets.walking.ChestOrientationPacket;
+import us.ihmc.communication.packets.walking.ComHeightPacket;
+import us.ihmc.communication.packets.walking.FootPosePacket;
+import us.ihmc.communication.packets.walking.FootStatePacket;
+import us.ihmc.communication.packets.walking.FootstepDataList;
+import us.ihmc.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.communication.packets.walking.PelvisPosePacket;
+import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
@@ -62,11 +79,13 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 {
    private final GlobalDataProducer objectCommunicator;
    private final FootstepTimingParameters footstepTimingParameters;
+   private final PeriodicThreadScheduler scheduler;
 
-   public DataProducerVariousWalkingProviderFactory(GlobalDataProducer objectCommunicator, FootstepTimingParameters footstepTimingParameters)
+   public DataProducerVariousWalkingProviderFactory(GlobalDataProducer objectCommunicator, FootstepTimingParameters footstepTimingParameters, PeriodicThreadScheduler scheduler)
    {
       this.objectCommunicator = objectCommunicator;
       this.footstepTimingParameters = footstepTimingParameters;
+      this.scheduler = scheduler;
    }
 
    public VariousWalkingProviders createVariousWalkingProviders(DoubleYoVariable yoTime, FullRobotModel fullRobotModel,
@@ -90,7 +109,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
          HighLevelHumanoidControllerFactoryHelper.getBlindWalkingToDestinationDesiredFootstepCalculator(walkingControllerParameters, referenceFrames, feet,
             registry);
 
-      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = new CapturabilityBasedStatusProducer(objectCommunicator);
+      CapturabilityBasedStatusProducer capturabilityBasedStatusProducer = new CapturabilityBasedStatusProducer(scheduler, objectCommunicator);
 
       FootstepPathCoordinator footstepPathCoordinator = new FootstepPathCoordinator(footstepTimingParameters, objectCommunicator, desiredFootstepCalculator,
                                                            swingTimeCalculator, transferTimeCalculator, registry);

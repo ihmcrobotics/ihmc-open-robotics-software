@@ -25,6 +25,7 @@ dependencies {
     compile project(':SimulationConstructionSet')
     compile project(':IHMCCommunication')
     compile project(':ConvexOptimizationAdapter');
+    compile project(':IHMCRealtime')
 
     testCompile project(':IHMCUtilities').sourceSets.test.output
 }

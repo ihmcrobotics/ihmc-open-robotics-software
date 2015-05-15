@@ -184,7 +184,7 @@ public class DRCSimGazeboControllerFactory
 
       if (USE_GUI)
       {
-         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
+         VariousWalkingProviderFactory variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
          controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
 
       }
