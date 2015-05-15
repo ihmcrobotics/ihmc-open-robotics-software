@@ -348,7 +348,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 
       FootstepTimingParameters footstepTimingParameters = FootstepTimingParameters.createForSlowWalkingOnRobot(walkingControllerParameters);
       VariousWalkingProviderFactory variousWalkingProviderFactory;
-      variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
+      variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"));
       controllerFactory.setVariousWalkingProviderFactory(variousWalkingProviderFactory);
 
       return controllerFactory;
