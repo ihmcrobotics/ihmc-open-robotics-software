@@ -55,6 +55,11 @@ public class StepprControllerFactory
    //Use DATA_PRODUCER for ui control. Use VELOCITY_HEADING_COMPONENT for joystick control. Use YOVARIABLE for editing step variables by hand.
    private static final WalkingProvider walkingProvider = WalkingProvider.VELOCITY_HEADING_COMPONENT;
 
+   private final PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
+   private final PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
+   private final PriorityParameters loggerPriority = new PriorityParameters(40);
+   private final PriorityParameters poseCommunicatorPriority = new PriorityParameters(45);
+   
    public StepprControllerFactory() throws IOException, JAXBException
    {
 
@@ -62,10 +67,6 @@ public class StepprControllerFactory
        * Create registries
        */
       AcsellAffinity stepprAffinity = new AcsellAffinity();
-      PriorityParameters estimatorPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 1);
-      PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
-      PriorityParameters loggerPriority = new PriorityParameters(40);
-      PriorityParameters poseCommunicatorPriority = new PriorityParameters(45);
       BonoRobotModel robotModel = new BonoRobotModel(true, true);
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
 
@@ -200,7 +201,7 @@ public class StepprControllerFactory
             variousWalkingProviderFactory = new YoVariableVariousWalkingProviderFactory();
             break;
          case DATA_PRODUCER:
-            variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters);
+            variousWalkingProviderFactory = new DataProducerVariousWalkingProviderFactory(dataProducer, footstepTimingParameters, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority));
             break;
          case VELOCITY_HEADING_COMPONENT:
             variousWalkingProviderFactory = new ComponentBasedVariousWalkingProviderFactory(false, null, robotModel.getControllerDT());
