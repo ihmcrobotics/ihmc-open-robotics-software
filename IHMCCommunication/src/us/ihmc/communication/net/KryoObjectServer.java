@@ -10,6 +10,8 @@ import com.esotericsoftware.kryonet.Server;
 
 public class KryoObjectServer extends KryoObjectCommunicator
 {
+   private final int writeBufferSize;
+   
    private final Server server;
 
    private final int tcpPort;
@@ -31,6 +33,7 @@ public class KryoObjectServer extends KryoObjectCommunicator
    {
       super();
       this.server = new Server(writeBufferSize, receiveBufferSize, serialization);
+      this.writeBufferSize = writeBufferSize;
       this.tcpPort = tcpPort;
 
       registerClassList(netClassList);
@@ -80,6 +83,11 @@ public class KryoObjectServer extends KryoObjectCommunicator
       for (int i = 0, n = connections.length; i < n; i++)
       {
          Connection connection = connections[i];
+         // Do not send if the write buffer > 90% full
+         if (((double) connection.getTcpWriteBufferSize()) / ((double) writeBufferSize) > 0.9)
+         {
+            continue;
+         }
          bytesSend = connection.sendTCP(object);
       }
 
