@@ -65,7 +65,7 @@
                     </accel>
                 </noise>
             </imu>
-            <pose>0 0 0 0 0 0</pose>
+            <pose>0.0914 0.0 0.0285 0 0 0</pose>
         </sensor>
     </link>
     <link name='ltorso'>
