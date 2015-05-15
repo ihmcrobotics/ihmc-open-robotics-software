@@ -36,6 +36,9 @@
             <ambient>
               <color sid="ambient">1 1 1 1</color>
             </ambient>
+            <specular>
+              <color sid="specular">1 1 1 1</color>
+            </specular>
             <diffuse>
               <texture texture="chessboardmap6-sampler" texcoord="UVMap"/>
             </diffuse>
