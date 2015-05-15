@@ -260,7 +260,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose))
+      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, ENABLE_ROTATION_CORRECTION))
       {
          requestLocalizationReset();
          isErrorTooBig.set(true);
