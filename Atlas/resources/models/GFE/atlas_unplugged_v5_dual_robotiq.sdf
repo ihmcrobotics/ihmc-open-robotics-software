@@ -1547,8 +1547,8 @@
     <link name='l_hand'>
       <pose>0.1281 0.94115 0.42859 0 -0 0</pose>
       <inertial>
-        <pose>-0.00118561 0.141218 6.19884e-06 0 -0 0</pose>
-        <mass>3.0</mass>
+        <pose>-0.0 0.04 0.0 0 -0 0</pose>
+        <mass>2.7</mass>
         <inertia>
           <ixx>0.00689651</ixx>
           <ixy>6.78926e-05</ixy>
@@ -3636,8 +3636,8 @@
     <link name='r_hand'>
       <pose>0.1281 -0.94115 0.42859 0 -0 0</pose>
       <inertial>
-        <pose>-0.00118561 -0.141218 6.19884e-06 0 -0 0</pose>
-        <mass>3.0</mass>
+        <pose>-0.0 -0.04 0.0 0 -0 0</pose>
+        <mass>2.7</mass>
         <inertia>
           <ixx>0.00689651</ixx>
           <ixy>-6.78926e-05</ixy>
