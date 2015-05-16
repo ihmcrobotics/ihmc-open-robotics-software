@@ -1236,9 +1236,12 @@ abstract public class WholeBodyIkSolver
       {
          for (Entry<String, Double> entry: seedAngles.entrySet()  )
          {
-            int index = jointNamesToIndex.get( entry.getKey() );
-            double Q = entry.getValue();
-            cachedAnglesQ.set(index,  Q );
+            Integer jointIndex = jointNamesToIndex.get( entry.getKey() );
+            if( jointIndex != null )
+            {
+               double Q = entry.getValue();
+               cachedAnglesQ.set(jointIndex,  Q );
+            }
          }
       }
       
@@ -1246,9 +1249,12 @@ abstract public class WholeBodyIkSolver
       {
          for (OneDoFJoint otherJoint: seedAngles  )
          {
-            int index = jointNamesToIndex.get( otherJoint.getName() );
-            double Q = otherJoint.getQ();
-            cachedAnglesQ.set(index,  Q );
+            Integer jointIndex = jointNamesToIndex.get( otherJoint.getName() );
+            if( jointIndex != null )
+            {
+               double Q = otherJoint.getQ();
+               cachedAnglesQ.set(jointIndex,  Q );
+            }
          }
       }
 
