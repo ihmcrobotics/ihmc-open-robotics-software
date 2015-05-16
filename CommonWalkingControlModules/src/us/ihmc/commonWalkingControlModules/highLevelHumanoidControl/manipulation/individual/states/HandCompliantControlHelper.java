@@ -119,12 +119,15 @@ public class HandCompliantControlHelper
 
       measuredForceAlpha.set(0.98);
       linearGain.set(0.0001);
-      angularGain.set(0.001);
+      angularGain.set(0.002);
       compliantControlMaxLinearCorrectionPerTick.set(0.0005);
-      compliantControlMaxAngularCorrectionPerTick.set(0.001);
+      compliantControlMaxAngularCorrectionPerTick.set(0.002);
       compliantControlMaxLinearDisplacement.set(0.05);
-      compliantControlMaxAngularDisplacement.set(0.17);
+      compliantControlMaxAngularDisplacement.set(0.2);
       compliantControlLeakRatio.set(0.99);
+      
+      forceDeadzoneSize.set(10.0);
+      torqueDeadzoneSize.set(0.5);
    }
 
    public void doCompliantControl(FramePoint desiredPosition, FrameOrientation desiredOrientation)
