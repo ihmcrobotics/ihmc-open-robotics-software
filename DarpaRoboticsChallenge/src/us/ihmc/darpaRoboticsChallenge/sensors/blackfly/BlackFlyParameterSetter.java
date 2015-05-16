@@ -1,11 +1,13 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.blackfly;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosDynamicReconfigure;
 import us.ihmc.utilities.ros.RosMainNode;
 
@@ -16,71 +18,50 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
    RosDynamicReconfigure dynamicReconfigureClient;
 
    String cameraNodeName;
+   RobotSide side;
 
-   public BlackFlyParameterSetter(RosMainNode rosMainNode, String cameraNode, PacketCommunicator packetCommunicator)
+   public BlackFlyParameterSetter(RosMainNode rosMainNode, RobotSide side, String cameraNode, PacketCommunicator packetCommunicator)
    {
       this.packetCommunicator = packetCommunicator;
       this.dynamicReconfigureClient = new RosDynamicReconfigure(cameraNode, rosMainNode);
+      this.side=side;
       this.cameraNodeName = cameraNode;
       packetCommunicator.attachListener(BlackFlyParameterPacket.class, this);
    }
 
-   public void sendDeviceSettingToUI()
+   public void sendDeviceSettingToUI(Map<String, Object> params)
    {
-      System.out.println("--");
-      Map<String, Object> params = dynamicReconfigureClient.getParameters();
-      if (params == null)
-      {
-         PrintTools.info(this, "BlackflyParameterSetter client null");
-         return;
-      }
-      if (packetCommunicator == null)
-      {
-         PrintTools.info(this, "packet comm null");
-         return;
-      }
-      System.out.println("start");
-      for(String key:params.keySet())
-         System.out.println(key + ":"+params.get(key));
+      for (String key : params.keySet())
+         System.out.println(key + ":" + params.get(key));
       BlackFlyParameterPacket packet = new BlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("brightness"),
-            (Double) params.get("frame_rate"), (Double) params.get("shutter_speed"));
+            (Double) params.get("frame_rate"), (Double) params.get("shutter_speed"), (Boolean) params.get("auto_exposure"), (Boolean) params.get("auto_gain"),
+            (Boolean) params.get("auto_shutter"), side);
       packetCommunicator.send(packet);
-      System.out.println("end");
    }
 
-   public void setBlackFlyParameters(BlackFlyParameterPacket packet)
+   public Map<String,Object> setBlackFlyParameters(BlackFlyParameterPacket packet)
    {
 
-      System.out.println("object received with gain " + packet.getGain() + " exposure " + packet.getExposure() + " framerate" + packet.getFrameRate()
-            + " shutter" + packet.getShutter());
-
-      if (packet.getGain() < 0)
-      {
-         dynamicReconfigureClient.setBool("auto_gain", true);
-         dynamicReconfigureClient.setBool("auto_exposure", true);
-         dynamicReconfigureClient.setBool("auto_shutter", true);
-      }
-      else
-      {
-         dynamicReconfigureClient.setBool("auto_exposure", false);
-//         dynamicReconfigureClient.setBool("auto_gain", false);
-         dynamicReconfigureClient.setBool("auto_shutter", false);
-         dynamicReconfigureClient.setDouble("exposure", packet.getGain());
-         dynamicReconfigureClient.setDouble("brightness", packet.getExposure());
-         dynamicReconfigureClient.setDouble("shutter_speed", packet.getShutter());
-      }
-
-      dynamicReconfigureClient.setDouble("frame_rate", packet.getFrameRate());
+      System.out.println("object received with " + packet);
+      Map<String, Object> parameters = new HashMap<>();
+      parameters.put("auto_exposure", packet.isAutoExposure());
+      parameters.put("auto_gain", packet.isAutoGain());
+      parameters.put("auto_shutter", packet.isAutoShutter());
+      parameters.put("exposure", packet.getGain());
+      parameters.put("brightness", packet.getExposure());
+      parameters.put("shutter_speed", packet.getShutter());
+      parameters.put("frame_rate", packet.getFrameRate());
+      return dynamicReconfigureClient.setParameters(parameters);
    }
 
    public void receivedPacket(BlackFlyParameterPacket packet)
    {
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI()) //avoid hearing my own packet
+         if (packet.isFromUI() && packet.getSide()==this.side) //avoid hearing my own packet
          {
-            setBlackFlyParameters(packet);
-            sendDeviceSettingToUI();
+            Map<String,Object> result=setBlackFlyParameters(packet);
+            sendDeviceSettingToUI(result);
          }
       }
       else
