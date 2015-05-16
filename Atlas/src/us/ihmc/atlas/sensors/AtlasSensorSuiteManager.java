@@ -28,6 +28,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -42,7 +43,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final SDFFullRobotModelFactory modelFactory;
-
+   private SideDependentList<BlackFlyParameterSetter> blackFlyParameterSetters = null;
    public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
          AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, AtlasTarget targetDeployment)
@@ -124,8 +125,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             robotConfigurationDataBuffer, true);
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
 
+      
+      blackFlyParameterSetters=new SideDependentList<BlackFlyParameterSetter>();
       for(RobotSide side:RobotSide.values)
-         new BlackFlyParameterSetter(rosMainNode, side, "/"+side.getLowerCaseName()+"/camera/camera_nodelet", sensorSuitePacketCommunicator);
+         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/"+side.getLowerCaseName()+"/camera/camera_nodelet", sensorSuitePacketCommunicator));
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
@@ -148,6 +151,11 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (sensorInformation.getLidarParameters().length > 0)
       {
          pointCloudDataReceiver.start();
+
+         if(blackFlyParameterSetters!=null)
+            for(BlackFlyParameterSetter setter:blackFlyParameterSetters.values())
+                  setter.onConnect();
+               
       }
    }
 

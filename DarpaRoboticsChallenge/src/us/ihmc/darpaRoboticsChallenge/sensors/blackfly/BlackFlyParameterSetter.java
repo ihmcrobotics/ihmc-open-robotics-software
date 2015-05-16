@@ -24,7 +24,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
    {
       this.packetCommunicator = packetCommunicator;
       this.dynamicReconfigureClient = new RosDynamicReconfigure(cameraNode, rosMainNode);
-      this.side=side;
+      this.side = side;
       this.cameraNodeName = cameraNode;
       packetCommunicator.attachListener(BlackFlyParameterPacket.class, this);
    }
@@ -39,7 +39,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
       packetCommunicator.send(packet);
    }
 
-   public Map<String,Object> setBlackFlyParameters(BlackFlyParameterPacket packet)
+   public Map<String, Object> setBlackFlyParameters(BlackFlyParameterPacket packet)
    {
 
       System.out.println("object received with " + packet);
@@ -54,13 +54,18 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
       return dynamicReconfigureClient.setParameters(parameters);
    }
 
+   public void onConnect()
+   {
+      sendDeviceSettingToUI(dynamicReconfigureClient.getParameters());
+   }
+
    public void receivedPacket(BlackFlyParameterPacket packet)
    {
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI() && packet.getSide()==this.side) //avoid hearing my own packet
+         if (packet.isFromUI() && packet.getSide() == this.side) //avoid hearing my own packet
          {
-            Map<String,Object> result=setBlackFlyParameters(packet);
+            Map<String, Object> result = setBlackFlyParameters(packet);
             sendDeviceSettingToUI(result);
          }
       }
