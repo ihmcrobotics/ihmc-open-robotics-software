@@ -19,6 +19,7 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.camera.SCSCameraDataRecei
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.SCSPointCloudLidarReceiver;
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
+import us.ihmc.darpaRoboticsChallenge.sensors.blackfly.BlackFlyParameterSetter;
 import us.ihmc.darpaRoboticsChallenge.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
@@ -119,8 +120,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
       
       
-//      new BlackFlyParameterSetter(rosMainNode, leftFishEyeCameraParameters, sensorSuitePacketCommunicator);
-//      new BlackFlyParameterSetter(rosMainNode, rightFishEyeCameraParameters, sensorSuitePacketCommunicator);
+      new BlackFlyParameterSetter(rosMainNode, "/left/camera/camera_nodelet", sensorSuitePacketCommunicator);
+      new BlackFlyParameterSetter(rosMainNode, "/right/camera/camera_nodelet", sensorSuitePacketCommunicator);
       
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 

@@ -35,6 +35,11 @@ public class RosDynamicReconfigure
          System.err.println("Could Not connect to Node " + nodeName);
       }
    }
+   
+   public boolean isConnected()
+   {
+      return client.getClient()!=null;
+   }
 
    public int setInt(String name, int value)
    {
