@@ -18,6 +18,8 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInterface
 {
+   private static final boolean CREATE_FACE = false;
+
    private final List<Robot> robots = new ArrayList<Robot>();
    
    private final CombinedTerrainObject3D combinedTerrainObject;
@@ -42,7 +44,14 @@ public class DRCSteeringWheelEnvironment implements CommonAvatarEnvironmentInter
       // add Polaris to environment
       RigidBodyTransform polarisTransform = new RigidBodyTransform();
       polarisTransform.setRotation(new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), 0.0));
-      robots.add(new PolarisRobot("polaris", polarisTransform));
+      PolarisRobot polarisRobot = new PolarisRobot("polaris", polarisTransform);
+      
+      if (CREATE_FACE)
+      {
+         polarisRobot.attachFaceCube();
+      }
+      
+      robots.add(polarisRobot);
    }
 
    @Override
