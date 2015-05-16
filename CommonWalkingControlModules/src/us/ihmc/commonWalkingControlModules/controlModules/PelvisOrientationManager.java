@@ -337,6 +337,11 @@ public class PelvisOrientationManager
       setToHoldCurrentDesired(worldFrame);
    }
 
+   public void setToHoldCurrentDesiredInMidFeetZUpFrame()
+   {
+      setToHoldCurrentDesired(midFeetZUpFrame);
+   }
+
    public void setToHoldCurrentDesiredInSupportFoot(RobotSide supportSide)
    {
       setToHoldCurrentDesired(ankleZUpFrames.get(supportSide));
