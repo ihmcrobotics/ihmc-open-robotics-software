@@ -33,6 +33,7 @@ import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 @BambooPlan(planType={BambooPlanType.Fast})
@@ -237,10 +238,16 @@ public class NewPelvisPoseHistoryCorrectionTest
       icpTransformPoseBufferInWorldFrame.put(currentPelvisTransformModifiedWithOffset, timeStamp);
    }
 
+   
+   private BooleanYoVariable isRotationCorrectionEnabled;
+   
    @EstimatedDuration(duration = 1.0)
    @Test(timeout = 60000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
+      isRotationCorrectionEnabled = (BooleanYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "isRotationCorrectionEnabled");
+      isRotationCorrectionEnabled.set(false);
+      
       generatePelvisWayPoints();
       generateSmallIcpOffsetsAroundPelvis();
       
