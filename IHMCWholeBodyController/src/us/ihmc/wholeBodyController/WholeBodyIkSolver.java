@@ -109,6 +109,7 @@ abstract public class WholeBodyIkSolver
       protected final SideDependentList<MutableBoolean> keepArmQuiet = new SideDependentList<MutableBoolean>();
 
       static public enum LockLevel{
+         DISABLED,
          USE_WHOLE_BODY,           // can move the entire body
          LOCK_PELVIS_ORIENTATION,  // pelvis can move but not rotate
          CONTROL_MANUALLY,
