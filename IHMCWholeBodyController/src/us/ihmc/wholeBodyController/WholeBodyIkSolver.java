@@ -59,6 +59,7 @@ abstract public class WholeBodyIkSolver
    }
 
    public enum ComputeResult { 
+      FAILED_DISABLED,
       FAILED_INVALID,         // calculated solution is completely wrong
       FAILED_NOT_CONVERGED,   // calculated solution is not good enough, but you might want to double check the error to see if it is acceptable.
       SUCCEEDED               // calculated solution is good.
@@ -1237,6 +1238,16 @@ abstract public class WholeBodyIkSolver
          {
             int index = jointNamesToIndex.get( entry.getKey() );
             double Q = entry.getValue();
+            cachedAnglesQ.set(index,  Q );
+         }
+      }
+      
+      public void setSeedAngles(OneDoFJoint[] seedAngles)
+      {
+         for (OneDoFJoint otherJoint: seedAngles  )
+         {
+            int index = jointNamesToIndex.get( otherJoint.getName() );
+            double Q = otherJoint.getQ();
             cachedAnglesQ.set(index,  Q );
          }
       }
