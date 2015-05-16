@@ -3,6 +3,9 @@ package us.ihmc.atlas.sensors;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -65,7 +68,7 @@ public class VisionPoseEstimator implements DRCStereoListener
       this.pointCloudDataReceiver = pointCloudDataReceiver;
 
       startChessBoardDetector();
-      startPlaneDetector();
+      //startPlaneDetector();
    }
 
    private void startPlaneDetector()
@@ -84,48 +87,64 @@ public class VisionPoseEstimator implements DRCStereoListener
             while (true)
             {
 
-                  Point3f[] fullPoints = pointCloudDataReceiver.getDecayingPointCloudPoints();
+               Point3f[] fullPoints = pointCloudDataReceiver.getDecayingPointCloudPoints();
 
-                  //get head
-                  robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
-                  RigidBodyTransform headToWorld = fullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame();
-                  Point3f head = new Point3f();
-                  headToWorld.transform(head);
+               //get head
+               robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
+               RigidBodyTransform headToWorld = fullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame();
+               Point3f head = new Point3f();
+               headToWorld.transform(head);
 
-                  //filter points
-                  ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
-                  int counter = 0;
-                  for (Point3f tmpPoint : fullPoints)
+               //filter points
+               ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
+               int counter = 0;
+               for (Point3f tmpPoint : fullPoints)
+               {
+                  if (!Double.isNaN(tmpPoint.z) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
+                     pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
+                  counter++;
+               }
+               PrintTools.debug(DEBUG, this, "Points around center " + pointsNearBy.size());
+
+               //find plane
+               ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(30, 1.2, 0.010, CloudShapeTypes.PLANE);
+               configRansac.minimumPoints = 100;
+               PointCloudShapeFinder findPlanes = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(20, 0.10), configRansac);
+
+               PrintStream out = System.out;
+               System.setOut(new PrintStream(new OutputStream()
+               {
+                  @Override
+                  public void write(int b) throws IOException
                   {
-                     if (!Double.isNaN(tmpPoint.z) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
-                        pointsNearBy.add(new Point3D_F64(tmpPoint.x, tmpPoint.y, tmpPoint.z));
-                     counter++;
                   }
-                  PrintTools.debug(DEBUG, "Points around center " + pointsNearBy.size());
-
-                  //find plane
-                  ConfigMultiShapeRansac configRansac = ConfigMultiShapeRansac.createDefault(30, 1.2, 0.010, CloudShapeTypes.PLANE);
-                  configRansac.minimumPoints = 100;
-                  PointCloudShapeFinder findPlanes = FactoryPointCloudShape.ransacSingleAll(new ConfigSurfaceNormals(20, 0.10), configRansac);
+               }));
+               try
+               {
                   findPlanes.process(pointsNearBy, null);
+               } finally
+               {
+                  System.setOut(out);
+               }
 
-                  //sort large to small
-                  List<Shape> planes = findPlanes.getFound();
-                  Collections.sort(planes, new Comparator<Shape>()
+               //sort large to small
+               List<Shape> planes = findPlanes.getFound();
+               Collections.sort(planes, new Comparator<Shape>()
+               {
+
+                  @Override
+                  public int compare(Shape o1, Shape o2)
                   {
+                     return -Integer.compare(o1.points.size(), o2.points.size());
+                  };
+               });
 
-                     @Override
-                     public int compare(Shape o1, Shape o2)
-                     {
-                        return -Integer.compare(o1.points.size(), o2.points.size());
-                     };
-                  });
+               for (Shape plane : planes)
+               {
+                  PlaneGeneral3D_F64 planeNormal = (PlaneGeneral3D_F64) plane.getParameters();
+                  PrintTools.debug(DEBUG, this, "plane #point " + plane.points.size() + " normal " + planeNormal);
 
-                  for (Shape plane : planes)
-                  {
-                     PlaneGeneral3D_F64 planeNormal = (PlaneGeneral3D_F64) plane.getParameters();
-                     PrintTools.debug(DEBUG, "plane #point " + plane.points.size() + " normal " + planeNormal);
-                  }
+               }
 
             }
          }
