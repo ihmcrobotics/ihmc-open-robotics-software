@@ -73,6 +73,37 @@ public class RobotiqReadResponse
       this.scissorCurrent.setRegisterValue(response.getScissorCurrent().getRegisterValue());
    }
    
+   @Override
+   public boolean equals(Object other)
+   {
+      if(other instanceof RobotiqReadResponse)
+      {
+         boolean ret = true;
+         
+         other = (RobotiqReadResponse) other;
+         
+         ret &= this.gripperStatus.equals(((RobotiqReadResponse) other).getGripperStatus());
+         ret &= this.objectDetection.equals(((RobotiqReadResponse) other).getObjectDetection());
+         ret &= this.faultStatus.equals(((RobotiqReadResponse) other).getFaultStatus());
+         ret &= this.fingerAPositionEcho.equals(((RobotiqReadResponse) other).getFingerAPositionEcho());
+         ret &= this.fingerAPosition.equals(((RobotiqReadResponse) other).getFingerAPosition());
+         ret &= this.fingerACurrent.equals(((RobotiqReadResponse) other).getFingerACurrent());
+         ret &= this.fingerBPositionEcho.equals(((RobotiqReadResponse) other).getFingerBPositionEcho());
+         ret &= this.fingerBPosition.equals(((RobotiqReadResponse) other).getFingerBPosition());
+         ret &= this.fingerBCurrent.equals(((RobotiqReadResponse) other).getFingerBCurrent());
+         ret &= this.fingerCPositionEcho.equals(((RobotiqReadResponse) other).getFingerCPositionEcho());
+         ret &= this.fingerCPosition.equals(((RobotiqReadResponse) other).getFingerCPosition());
+         ret &= this.fingerCCurrent.equals(((RobotiqReadResponse) other).getFingerCCurrent());
+         ret &= this.scissorPositionEcho.equals(((RobotiqReadResponse) other).getScissorPositionEcho());
+         ret &= this.scissorPosition.equals(((RobotiqReadResponse) other).getScissorPosition());
+         ret &= this.scissorCurrent.equals(((RobotiqReadResponse) other).getScissorCurrent());
+         
+         return ret;
+      }
+      else
+         return false;
+   }
+   
    public GripperStatusRegister getGripperStatus()
    {
       return gripperStatus;
