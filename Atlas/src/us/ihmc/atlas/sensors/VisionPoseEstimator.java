@@ -3,6 +3,7 @@ package us.ihmc.atlas.sensors;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -15,6 +16,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.vecmath.Point3f;
+import javax.vecmath.Quat4d;
+import javax.vecmath.Vector3d;
+
+import org.opencv.core.Rect;
 
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -22,6 +27,7 @@ import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.darpaRoboticsChallenge.networkProcessor.depthData.PointCloudDataReceiver;
 import us.ihmc.humanoidOperatorInterface.sensors.DetectedObjectManager.DetectedObjectId;
+import us.ihmc.ihmcPerception.OpenCVFaceDetector;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
@@ -40,6 +46,7 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 public class VisionPoseEstimator implements DRCStereoListener
 {
    private final OpenCVChessboardPoseEstimator chessboardDetector;
+   final OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
    private final static boolean DEBUG = false;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
 
@@ -67,8 +74,52 @@ public class VisionPoseEstimator implements DRCStereoListener
       this.modelFactory = modelFactory;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
 
-      startChessBoardDetector();
-      //startPlaneDetector();
+      //      startChessBoardDetector();
+      //      startFaceDetector();
+      //      startPlaneDetector();
+   }
+
+   private void startFaceDetector()
+   {
+      executorService.submit(new Runnable()
+      {
+
+         @Override
+         public void run()
+         {
+
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            while (true)
+            {
+               try
+               {
+                  Pair<CameraData, RigidBodyTransform> data = imagesToProcess.take();
+                  long timeStart = System.currentTimeMillis();
+                  //robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
+                  //IntrinsicParameters intrinsicParameters = data.first().intrinsicParameters;
+                  BufferedImage image = data.first().image;
+                  Rect[] faces = faceDetector.detect(image);
+
+                  for (Rect face : faces)
+                  {
+
+                     RigidBodyTransform transform = new RigidBodyTransform(new Quat4d(), new Vector3d(face.x, face.y, face.width));
+                     communicator.send(new DetectedObjectPacket(transform, DetectedObjectId.FACE.ordinal()));
+                     PrintTools.debug(DEBUG, this, "face found " + face);
+                  }
+
+                  long detectionTimeInNanos = System.currentTimeMillis() - timeStart;
+                  PrintTools.debug(VisionPoseEstimator.DEBUG, this, "detection time " + detectionTimeInNanos);
+
+               }
+               catch (InterruptedException e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         }
+      });
+
    }
 
    private void startPlaneDetector()
