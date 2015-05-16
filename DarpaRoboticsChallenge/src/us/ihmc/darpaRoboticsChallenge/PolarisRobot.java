@@ -99,6 +99,21 @@ public class PolarisRobot extends Robot
       this.addRootJoint(floatingJoint);
    }
    
+   public void attachFaceCube()
+   {
+      Link faceLink = new Link("FaceLink");
+      Graphics3DObject faceGraphics = new Graphics3DObject();
+      faceGraphics.scale(new Vector3d(3.0, 3.0, 0.1));
+      faceGraphics.addModelFile("models/GFE/ihmc/face_cube.dae");
+      faceLink.setLinkGraphics(faceGraphics);
+      
+      FloatingJoint faceJoint = new FloatingJoint("FaceJoint", "faceJoint" , new Vector3d(), this);
+      faceJoint.setRotationAndTranslation(new RigidBodyTransform(new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), - Math.PI / 2.0), new Vector3d(1.1, 0.0, 1.3)));
+      faceJoint.setLink(faceLink);
+      faceJoint.setDynamic(false);
+      floatingJoint.addJoint(faceJoint);
+   }
+   
    static
    {
       wheelToCarTransform.setTranslation(wheelToCarX, wheelToCarY, wheelToCarZ);
