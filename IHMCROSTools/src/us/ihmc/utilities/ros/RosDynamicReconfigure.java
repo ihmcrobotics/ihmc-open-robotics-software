@@ -10,6 +10,7 @@ import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
 
 import dynamic_reconfigure.BoolParameter;
+import dynamic_reconfigure.Config;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.IntParameter;
 import dynamic_reconfigure.Reconfigure;
@@ -22,7 +23,7 @@ public class RosDynamicReconfigure
 
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> client = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(
          Reconfigure._TYPE);
-   private MessageFactory messageFactory= NodeConfiguration.newPrivate().getTopicMessageFactory();
+   private MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
    public RosDynamicReconfigure(String nodeName, RosMainNode rosMainNode)
    {
@@ -35,10 +36,10 @@ public class RosDynamicReconfigure
          System.err.println("Could Not connect to Node " + nodeName);
       }
    }
-   
+
    public boolean isConnected()
    {
-      return client.getClient()!=null;
+      return client.getClient() != null;
    }
 
    public int setInt(String name, int value)
@@ -112,20 +113,61 @@ public class RosDynamicReconfigure
       }
       throw new RuntimeException("parameter " + name + " not found");
    }
-   
-   public Map<String, Object> getParameters()
+
+   public Map<String, Object> setParameters(Map<String, Object> parameters)
    {
       client.waitTillConnected();
       ReconfigureRequest request = client.getMessage();
+      if (parameters != null)
+      {
+         Config config = request.getConfig();
+         for (String key : parameters.keySet())
+         {
+            Object value = parameters.get(key);
+            if (value instanceof Integer)
+            {
+               IntParameter param = messageFactory.newFromType(IntParameter._TYPE);
+               param.setName(key);
+               param.setValue((Integer) value);
+               config.getInts().add(param);
+            }
+            else if (value instanceof Double)
+            {
+               DoubleParameter param = messageFactory.newFromType(DoubleParameter._TYPE);
+               param.setName(key);
+               param.setValue((Double) value);
+               config.getDoubles().add(param);
+            }
+            else if (value instanceof Boolean)
+            {
+               BoolParameter param = messageFactory.newFromType(BoolParameter._TYPE);
+               param.setName(key);
+               param.setValue((Boolean) value);
+               config.getBools().add(param);
+            }
+            else if (value instanceof String)
+            {
+               StrParameter param = messageFactory.newFromType(StrParameter._TYPE);
+               param.setName(key);
+               param.setValue((String) value);
+               config.getStrs().add(param);
+            }
+            else
+            {
+               throw new IllegalArgumentException("unknown parameter type, only Integer/Boolean/Double/String are allowed");
+            }
+
+         }
+      }
       ReconfigureResponse response = client.call(request);
-      HashMap<String,Object> allSettings = new HashMap<>();
-      for(DoubleParameter param :response.getConfig().getDoubles())
+      HashMap<String, Object> allSettings = new HashMap<>();
+      for (DoubleParameter param : response.getConfig().getDoubles())
          allSettings.put(param.getName(), new Double(param.getValue()));
-      for(IntParameter param :response.getConfig().getInts())
+      for (IntParameter param : response.getConfig().getInts())
          allSettings.put(param.getName(), new Integer(param.getValue()));
-      for(StrParameter param :response.getConfig().getStrs())
+      for (StrParameter param : response.getConfig().getStrs())
          allSettings.put(param.getName(), new String(param.getValue()));
-      for(BoolParameter param :response.getConfig().getBools())
+      for (BoolParameter param : response.getConfig().getBools())
          allSettings.put(param.getName(), new Boolean(param.getValue()));
       return allSettings;
    }
@@ -134,9 +176,9 @@ public class RosDynamicReconfigure
    {
       RosMainNode mainNode = new RosMainNode(new URI("http://localhost:11311"), "testDC");
       RosDynamicReconfigure testDynamicReconfigure = new RosDynamicReconfigure("/camera/driver", mainNode);
-      System.out.println("data_skip:"+testDynamicReconfigure.getParameters().get("data_skip"));
+      System.out.println("data_skip:" + testDynamicReconfigure.setParameters(null).get("data_skip"));
       testDynamicReconfigure.setInt("data_skip", 6);
-      System.out.println("data_skip:"+testDynamicReconfigure.getParameters().get("data_skip"));
+      System.out.println("data_skip:" + testDynamicReconfigure.setParameters(null).get("data_skip"));
       System.exit(0);
    }
 }

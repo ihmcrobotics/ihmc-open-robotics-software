@@ -27,6 +27,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
+import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -35,21 +36,22 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 {
    private final PacketCommunicator sensorSuitePacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
          new IHMCCommunicationKryoNetClassList());
-   
+
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
    private final DRCRobotSensorInformation sensorInformation;
    private final PointCloudDataReceiver pointCloudDataReceiver;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final SDFFullRobotModelFactory modelFactory;
 
-   public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider, PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation,
-         DRCRobotJointMap jointMap, AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters,
-         AtlasTarget targetDeployment)
+   public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
+         PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
+         AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, AtlasTarget targetDeployment)
    {
       this.ppsTimestampOffsetProvider = ppsTimestampOffsetProvider;
       this.sensorInformation = sensorInformation;
       this.robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, collisionBoxProvider, ppsTimestampOffsetProvider, jointMap, robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
+      this.pointCloudDataReceiver = new PointCloudDataReceiver(modelFactory, collisionBoxProvider, ppsTimestampOffsetProvider, jointMap,
+            robotConfigurationDataBuffer, sensorSuitePacketCommunicator);
       this.modelFactory = modelFactory;
    }
 
@@ -58,10 +60,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
-      SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory, sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
+      SCSCameraDataReceiver cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(), modelFactory,
+            sensorInformation.getCameraParameters(0).getSensorNameInSdf(), robotConfigurationDataBuffer, scsSensorsCommunicator, sensorSuitePacketCommunicator,
             ppsTimestampOffsetProvider);
       cameraDataReceiver.start();
-      
 
       //      if (sensorInformation.getPointCloudParameters().length > 0)
       //      {
@@ -79,9 +81,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       //         cameraReceiver.registerCameraListener(armCalibrationHelper);
       //      }
 
-//      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
+      //      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation);
 
-      VisionPoseEstimator visionPoseEstimator= new VisionPoseEstimator(sensorSuitePacketCommunicator, false);
+      VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
+            robotConfigurationDataBuffer, false);
       cameraDataReceiver.registerCameraListener(visionPoseEstimator);
    }
 
@@ -89,7 +92,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    public void initializePhysicalSensors(URI rosCoreURI)
    {
       if (rosCoreURI == null)
-        throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
+         throw new RuntimeException(getClass().getSimpleName() + " Physical sensor requires rosURI to be set in " + NetworkParameters.defaultParameterFile);
 
       sensorSuitePacketCommunicator.attachListener(RobotConfigurationData.class, robotConfigurationDataBuffer);
 
@@ -102,27 +105,28 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       DRCRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       DRCRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
 
-      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, pointCloudDataReceiver, robotConfigurationDataBuffer, rosMainNode,
-            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters,
-            multisenseLidarParameters, multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
-      
+      MultiSenseSensorManager multiSenseSensorManager = new MultiSenseSensorManager(modelFactory, pointCloudDataReceiver, robotConfigurationDataBuffer,
+            rosMainNode, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosCoreURI, multisenseLeftEyeCameraParameters, multisenseLidarParameters,
+            multisenseStereoParameters, sensorInformation.setupROSParameterSetters());
 
       DRCRobotCameraParameters leftFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_LEFT_CAMERA_ID);
       DRCRobotCameraParameters rightFishEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.BLACKFLY_RIGHT_CAMERA_ID);
-      
-      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
-      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer, sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
-      
+
+      FisheyeCameraReceiver leftFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, leftFishEyeCameraParameters, robotConfigurationDataBuffer,
+            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+      FisheyeCameraReceiver rightFishEyeCameraReceiver = new FisheyeCameraReceiver(modelFactory, rightFishEyeCameraParameters, robotConfigurationDataBuffer,
+            sensorSuitePacketCommunicator, ppsTimestampOffsetProvider, rosMainNode);
+
       leftFishEyeCameraReceiver.start();
       rightFishEyeCameraReceiver.start();
 
-      VisionPoseEstimator visionPoseEstimator= new VisionPoseEstimator(sensorSuitePacketCommunicator,true);
+      VisionPoseEstimator visionPoseEstimator = new VisionPoseEstimator(sensorSuitePacketCommunicator, pointCloudDataReceiver, modelFactory,
+            robotConfigurationDataBuffer, true);
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
-      
-      
-      new BlackFlyParameterSetter(rosMainNode, "/left/camera/camera_nodelet", sensorSuitePacketCommunicator);
-      new BlackFlyParameterSetter(rosMainNode, "/right/camera/camera_nodelet", sensorSuitePacketCommunicator);
-      
+
+      for(RobotSide side:RobotSide.values)
+         new BlackFlyParameterSetter(rosMainNode, side, "/"+side.getLowerCaseName()+"/camera/camera_nodelet", sensorSuitePacketCommunicator);
+
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
       //      if (DRCConfigParameters.CALIBRATE_ARM_MODE)
@@ -133,7 +137,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       multiSenseSensorManager.initializeParameterListeners();
 
-//      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
+      //      IMUBasedHeadPoseCalculatorFactory.create(sensorSuitePacketCommunicator, sensorInformation, rosMainNode);
       rosMainNode.execute();
    }
 
