@@ -181,4 +181,9 @@ public class RosDynamicReconfigure
       System.out.println("data_skip:" + testDynamicReconfigure.setParameters(null).get("data_skip"));
       System.exit(0);
    }
+
+   public  Map<String, Object>  getParameters()
+   {
+      return setParameters(null);
+   }
 }
