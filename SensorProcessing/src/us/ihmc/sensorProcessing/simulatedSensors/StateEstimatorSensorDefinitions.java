@@ -12,11 +12,6 @@ public class StateEstimatorSensorDefinitions
    private final ArrayList<IMUDefinition> imuSensorDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
 
-   public ArrayList<ForceSensorDefinition> getForceSensorDefinitions()
-   {
-      return forceSensorDefinitions;
-   }
-
    public StateEstimatorSensorDefinitions()
    {
    }
@@ -29,6 +24,11 @@ public class StateEstimatorSensorDefinitions
    public ArrayList<IMUDefinition> getIMUSensorDefinitions()
    {
       return imuSensorDefinitions;
+   }
+
+   public ArrayList<ForceSensorDefinition> getForceSensorDefinitions()
+   {
+      return forceSensorDefinitions;
    }
 
    public void addJointSensorDefinition(OneDoFJoint oneDoFJoint)
