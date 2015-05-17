@@ -5,7 +5,9 @@ import java.util.Map;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.sensing.BlackFlyParameterPacket;
+import us.ihmc.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosDynamicReconfigure;
@@ -14,7 +16,7 @@ import us.ihmc.utilities.ros.RosMainNode;
 public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameterPacket>
 {
    private final PacketCommunicator packetCommunicator;
-
+   private final boolean DEBUG = false;
    RosDynamicReconfigure dynamicReconfigureClient;
 
    String cameraNodeName;
@@ -27,36 +29,46 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
       this.side = side;
       this.cameraNodeName = cameraNode;
       packetCommunicator.attachListener(BlackFlyParameterPacket.class, this);
+      setupUIOnConnectResponder();
+
    }
 
    public void sendDeviceSettingToUI(Map<String, Object> params)
    {
-      for (String key : params.keySet())
-         System.out.println(key + ":" + params.get(key));
-      BlackFlyParameterPacket packet = new BlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("brightness"),
+      BlackFlyParameterPacket packet = new BlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("exposure"),
             (Double) params.get("frame_rate"), (Double) params.get("shutter_speed"), (Boolean) params.get("auto_exposure"), (Boolean) params.get("auto_gain"),
             (Boolean) params.get("auto_shutter"), side);
       packetCommunicator.send(packet);
+      PrintTools.debug(DEBUG, this, "packet to UI " + packet);
    }
 
    public Map<String, Object> setBlackFlyParameters(BlackFlyParameterPacket packet)
    {
 
-      System.out.println("object received with " + packet);
+      PrintTools.debug(DEBUG, this, "packet fr UI " + packet);     
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("auto_exposure", packet.isAutoExposure());
       parameters.put("auto_gain", packet.isAutoGain());
       parameters.put("auto_shutter", packet.isAutoShutter());
-      parameters.put("exposure", packet.getGain());
-      parameters.put("brightness", packet.getExposure());
+      parameters.put("exposure", packet.getExposure());
+      parameters.put("gain", packet.getGain());
       parameters.put("shutter_speed", packet.getShutter());
       parameters.put("frame_rate", packet.getFrameRate());
       return dynamicReconfigureClient.setParameters(parameters);
    }
 
-   public void onConnect()
+   public void setupUIOnConnectResponder()
    {
-      sendDeviceSettingToUI(dynamicReconfigureClient.getParameters());
+
+      packetCommunicator.attachListener(UIConnectedPacket.class, new PacketConsumer<UIConnectedPacket>()
+      {
+         @Override
+         public void receivedPacket(UIConnectedPacket packet)
+         {
+            sendDeviceSettingToUI(dynamicReconfigureClient.getParameters());
+            PrintTools.info(this, "UIConnected - send parameters");
+         }
+      });
    }
 
    public void receivedPacket(BlackFlyParameterPacket packet)
