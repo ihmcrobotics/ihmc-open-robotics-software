@@ -6,7 +6,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolv
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -18,7 +19,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.graphics.BagOfBalls;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint2d;
@@ -33,7 +33,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
    private final YoVariableRegistry registry;
 
-   private final ForceSensorData forceSensorData;
+   private final ForceSensorDataReadOnly forceSensorData;
    private final DoubleYoVariable footSwitchCoPThresholdFraction;
 
    private final GlitchFilteredBooleanYoVariable isForceMagnitudePastThreshold;
@@ -83,8 +83,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final AppearanceDefinition redAppearance = YoAppearance.Red();
    private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
 
-   public WrenchBasedFootSwitch(String namePrefix, ForceSensorData forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
-         YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
+   public WrenchBasedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, double footSwitchCoPThresholdFraction, double robotTotalWeight,
+         ContactablePlaneBody contactablePlaneBody, YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce,
+         YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
