@@ -6,6 +6,6 @@ package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 public class DrillDetectionResult
 {
    public boolean isOn;
-   public double averageMagnitude;
+   public double[] averageValues;
    public double[][] bodeData;
 }

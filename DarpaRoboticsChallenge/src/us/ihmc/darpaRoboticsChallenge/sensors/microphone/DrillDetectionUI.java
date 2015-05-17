@@ -15,11 +15,10 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PointArtifact;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
-import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
-public class DrillDetectorGui
+public class DrillDetectionUI
 {
-   private final DrillDetectorThread detectorThread = new DrillDetectorThread()
+   private final DrillDetectionThread detectorThread = new DrillDetectionThread()
    {
       @Override
       public void onDrillDetectionResult(final DrillDetectionResult result)
@@ -35,14 +34,12 @@ public class DrillDetectorGui
    };
 
    private JPanel soundDetectorGUI = null;
-   private Plotter rawPlotter = null;
-   private Plotter filteredPlotter = null;
    private Container fftPlotContainer = null;
+   private Plotter boolPlotter = null;
+   private Plotter[] doublePlotter = null;
    private int dataSize = 0;
 
-   private AlphaFilteredYoVariable filteredYoVariable = new AlphaFilteredYoVariable("FilteredMicrophoneData", null, 0.95);
-
-   public DrillDetectorGui()
+   public DrillDetectionUI()
    {
       System.out.println("Creating the UI");
 
@@ -75,31 +72,35 @@ public class DrillDetectorGui
       fftLayout.fill = GridBagConstraints.HORIZONTAL;
       soundDetectorGUI.add(fftPlotContainer, fftLayout);
 
-      PlotterPanel rawPlotterPanel = new PlotterPanel();
-      GridBagConstraints rawLayout = new GridBagConstraints();
-      rawLayout.gridx = 0;
-      rawLayout.gridy = 1;
-      rawLayout.weightx = 1;
-      rawLayout.fill = GridBagConstraints.HORIZONTAL;
-      soundDetectorGUI.add(rawPlotterPanel, rawLayout);
+      PlotterPanel boolPlotterPanel = new PlotterPanel();
+      GridBagConstraints boolPlotterLayout = new GridBagConstraints();
+      boolPlotterLayout.gridx = 0;
+      boolPlotterLayout.gridy = 1;
+      boolPlotterLayout.weightx = 1;
+      boolPlotterLayout.fill = GridBagConstraints.HORIZONTAL;
+      soundDetectorGUI.add(boolPlotterPanel, boolPlotterLayout);
 
-      rawPlotter = rawPlotterPanel.getPlotter();
-      rawPlotter.setXoffset(320);
-      rawPlotter.setYoffset(80);
-      rawPlotter.setRange(200);
+      boolPlotter = boolPlotterPanel.getPlotter();
+      boolPlotter.setXoffset(320);
+      boolPlotter.setYoffset(80);
+      boolPlotter.setRange(200);
 
-      PlotterPanel filteredPlotterPanel = new PlotterPanel();
-      GridBagConstraints filteredLayout = new GridBagConstraints();
-      filteredLayout.gridx = 0;
-      filteredLayout.gridy = 2;
-      filteredLayout.weightx = 1;
-      filteredLayout.fill = GridBagConstraints.HORIZONTAL;
-      soundDetectorGUI.add(filteredPlotterPanel, filteredLayout);
+      doublePlotter = new Plotter[2];
+      for (int i = 0; i < doublePlotter.length; i++)
+      {
+         PlotterPanel doublePlotterPanel = new PlotterPanel();
+         GridBagConstraints doublePlotterLayout = new GridBagConstraints();
+         doublePlotterLayout.gridx = 0;
+         doublePlotterLayout.gridy = 2 + i;
+         doublePlotterLayout.weightx = 1;
+         doublePlotterLayout.fill = GridBagConstraints.HORIZONTAL;
+         soundDetectorGUI.add(doublePlotterPanel, doublePlotterLayout);
 
-      filteredPlotter = filteredPlotterPanel.getPlotter();
-      filteredPlotter.setXoffset(320);
-      filteredPlotter.setYoffset(80);
-      filteredPlotter.setRange(200);
+         doublePlotter[i] = doublePlotterPanel.getPlotter();
+         doublePlotter[i].setXoffset(320);
+         doublePlotter[i].setYoffset(80);
+         doublePlotter[i].setRange(200);
+      }
 
       return soundDetectorGUI;
    }
@@ -117,18 +118,24 @@ public class DrillDetectorGui
       soundDetectorGUI.add(fftPlotContainer, fftLayout);
 
       int x = dataSize++;
-      double rawValue = result.isOn ? 100.0 : 0.0;
+      double rawValue = result.isOn ? 150.0 : 0.0;
 
       Point2d pRaw = new Point2d(x, rawValue);
       PointArtifact paRaw = new PointArtifact("drillOn_" + x, pRaw);
-      rawPlotter.addArtifact(paRaw);
+      boolPlotter.addArtifact(paRaw);
 
-      filteredYoVariable.update(rawValue);
-      double filteredValue = filteredYoVariable.getDoubleValue();
+      if (doublePlotter.length != result.averageValues.length)
+      {
+         System.err.println("Number of plotters != array size");
+         return;
+      }
 
-      Point2d pFiltered = new Point2d(x, filteredValue);
-      PointArtifact paFiltered = new PointArtifact("filteredDrillOn_" + x, pFiltered);
-      filteredPlotter.addArtifact(paFiltered);
+      for (int i = 0; i < doublePlotter.length; i++)
+      {
+         Point2d pAverage = new Point2d(x, result.averageValues[i]);
+         PointArtifact paAverage = new PointArtifact("average_" + i + "_" + x, pAverage);
+         doublePlotter[i].addArtifact(paAverage);
+      }
 
       soundDetectorGUI.revalidate();
    }
@@ -149,7 +156,7 @@ public class DrillDetectorGui
       SwingUtilities.invokeLater(new Runnable()
       {
          @Override
-         public void run() { new DrillDetectorGui(); }
+         public void run() { new DrillDetectionUI(); }
       });
    }
 }

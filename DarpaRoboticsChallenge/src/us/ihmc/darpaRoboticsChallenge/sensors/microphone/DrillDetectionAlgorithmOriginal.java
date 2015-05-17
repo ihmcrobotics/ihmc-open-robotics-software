@@ -1,9 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import java.io.InputStream;
-
-import javax.sound.sampled.AudioFormat;
-
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
 
@@ -11,7 +7,7 @@ import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data
  * from the Atlas Chest Webcam microphone around a given frequency</p>
  */
-public class DrillDetector
+public class DrillDetectionAlgorithmOriginal extends DrillDetectionAlgorithm
 {
 
    /**
@@ -24,44 +20,14 @@ public class DrillDetector
     * enough peak to trip detection.
     */
 
-   private static final double decibelsDeltaToTripDetection = -6.5; //dB
+   private static final double decibelsDeltaToTripDetection = -5.8; //dB
    private static final double dominantFrequencyBandLowerBound = 6900; //Hz
    private static final double dominantFrequencyBandUpperBound = 7900; //Hz
    private static final double relevantFrequencyBandLowerBound = 1000; //Hz
    private static final double relevantFrequencyBandUpperBound = 4900; //Hz
 
-   private static final float sampleRate = 16000; //Hz
-   private static final int sampleSizeInBits = 16;
-   private static final int channels = 1;
-   private static final boolean signed = true;
-   private static final boolean bigEndian = false;
-   private static final AudioFormat format = new AudioFormat(sampleRate, sampleSizeInBits, channels, signed, bigEndian);
-   private static final int frameSizeInBytes = format.getFrameSize();
-   private static final int bufferLengthInFrames = 16384 / 8;
-   private static final int bufferLengthInBytes = bufferLengthInFrames * frameSizeInBytes;
-
-   public DrillDetectionResult isDrillOn(InputStream inputStream)
-   {
-      if (format.getSampleSizeInBits() != 16)
-      {
-         System.out.println("Can't detect: bad sample size");
-         return null;
-      }
-
-      try
-      {
-         byte[] data = new byte[bufferLengthInBytes];
-         int numBytesRead = inputStream.read(data, 0, bufferLengthInBytes);
-         return detectDrill(data, numBytesRead);
-      }
-      catch (Exception ignored)
-      {
-         System.out.println("Failed to read from stream...");
-         return null;
-      }
-   }
-
-   private DrillDetectionResult detectDrill(byte[] audioBytes, int size)
+   @Override
+   public DrillDetectionResult isDrillOn(byte[] audioBytes, int size)
    {
       int nlengthInSamples = size / 2;
       int[] audioData = new int[nlengthInSamples];
@@ -79,7 +45,7 @@ public class DrillDetector
       for (int i = 0; i < audioData.length; i++)
       {
          input[i] = (double) audioData[i];
-         time[i] = (double) i / format.getSampleRate();
+         time[i] = (double) i / getSampleRate();
       }
 
       double[][] fftData = BodePlotConstructor.computeFreqMagPhase(time, input);
@@ -135,20 +101,9 @@ public class DrillDetector
 
       DrillDetectionResult result = new DrillDetectionResult();
       result.isOn = ((dominantBandAverageMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
+      result.averageValues = new double[] { relevantBandAverageMag, dominantBandAverageMag };
       result.bodeData = getBodeData(time, input);
 
       return result;
-   }
-
-   private double[][] getBodeData(double[] time, double[] data)
-   {
-      double[][] freqMagPhase = BodePlotConstructor.computeFreqMagPhase(time, data);
-
-      double[] frequency = freqMagPhase[0];
-      double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(freqMagPhase[1]);
-      double[] phase = BodeUnitsConverter.convertRadianToDegrees(freqMagPhase[2]);
-
-      double[][] bodeData = new double[][] { frequency, magnitude, phase };
-      return bodeData;
    }
 }
