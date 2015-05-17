@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -110,7 +110,7 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
    }
 
    @Override
-   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForController)
+   public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
       drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
    }

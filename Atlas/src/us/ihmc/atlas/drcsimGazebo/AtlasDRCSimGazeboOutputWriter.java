@@ -17,7 +17,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -162,7 +162,7 @@ public class AtlasDRCSimGazeboOutputWriter implements DRCOutputWriter
    }
 
    @Override
-   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForController)
+   public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
 
    }
