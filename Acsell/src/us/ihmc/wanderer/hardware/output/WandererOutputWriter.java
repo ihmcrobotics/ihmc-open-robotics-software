@@ -5,29 +5,27 @@ import java.util.EnumMap;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.acsell.hardware.command.AcsellJointCommand;
 import us.ihmc.acsell.hardware.command.UDPAcsellOutputWriter;
-import us.ihmc.acsell.springs.HystereticSpringCalculator;
 import us.ihmc.acsell.springs.HystereticSpringProperties;
 import us.ihmc.acsell.springs.LinearSpringCalculator;
 import us.ihmc.acsell.springs.SpringCalculator;
-import us.ihmc.wanderer.hardware.configuration.WandererLeftAnkleSpringProperties;
-import us.ihmc.wanderer.hardware.configuration.WandererLeftHipXSpringProperties;
-import us.ihmc.wanderer.hardware.configuration.WandererRightAnkleSpringProperties;
-import us.ihmc.wanderer.hardware.configuration.WandererRightHipXSpringProperties;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingState;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
-//import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.math.geometry.FrameVector2d;
+import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.WandererUtil;
 import us.ihmc.wanderer.hardware.command.WandererCommand;
+import us.ihmc.wanderer.hardware.configuration.WandererLeftAnkleSpringProperties;
+import us.ihmc.wanderer.hardware.configuration.WandererLeftHipXSpringProperties;
 import us.ihmc.wanderer.hardware.configuration.WandererNetworkParameters;
+import us.ihmc.wanderer.hardware.configuration.WandererRightAnkleSpringProperties;
+import us.ihmc.wanderer.hardware.configuration.WandererRightHipXSpringProperties;
 import us.ihmc.wanderer.hardware.controllers.WandererStandPrep;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.math.geometry.FrameVector2d;
-import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -339,7 +337,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    }
 
    @Override
-   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForController)
+   public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForController)
    {
 
    }
