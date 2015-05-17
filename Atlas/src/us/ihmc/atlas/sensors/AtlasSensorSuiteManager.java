@@ -44,6 +44,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final SDFFullRobotModelFactory modelFactory;
    private SideDependentList<BlackFlyParameterSetter> blackFlyParameterSetters = null;
+
    public AtlasSensorSuiteManager(SDFFullRobotModelFactory modelFactory, CollisionBoxProvider collisionBoxProvider,
          PPSTimestampOffsetProvider ppsTimestampOffsetProvider, DRCRobotSensorInformation sensorInformation, DRCRobotJointMap jointMap,
          AtlasPhysicalProperties physicalProperties, FootstepPlanningParameterization footstepParameters, AtlasTarget targetDeployment)
@@ -125,10 +126,10 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
             robotConfigurationDataBuffer, true);
       multiSenseSensorManager.registerCameraListener(visionPoseEstimator);
 
-      
-      blackFlyParameterSetters=new SideDependentList<BlackFlyParameterSetter>();
-      for(RobotSide side:RobotSide.values)
-         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/"+side.getLowerCaseName()+"/camera/camera_nodelet", sensorSuitePacketCommunicator));
+      blackFlyParameterSetters = new SideDependentList<BlackFlyParameterSetter>();
+      for (RobotSide side : RobotSide.values)
+         blackFlyParameterSetters.put(side, new BlackFlyParameterSetter(rosMainNode, side, "/" + side.getLowerCaseName() + "/camera/camera_nodelet",
+               sensorSuitePacketCommunicator));
 
       ppsTimestampOffsetProvider.attachToRosMainNode(rosMainNode);
 
@@ -152,11 +153,6 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       {
          pointCloudDataReceiver.start();
 
-         if(blackFlyParameterSetters!=null)
-            for(BlackFlyParameterSetter setter:blackFlyParameterSetters.values())
-                  setter.onConnect();
-               
       }
    }
-
 }
