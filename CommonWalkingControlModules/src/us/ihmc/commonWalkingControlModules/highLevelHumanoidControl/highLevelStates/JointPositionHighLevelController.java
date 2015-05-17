@@ -15,10 +15,12 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controlModuleInterfaces.Stoppable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.VariousWalkingProviders;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandTrajectoryType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
@@ -92,6 +94,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final HandPoseStatusProducer handPoseStatusProducer;
    private boolean handTrajectoryDoneHasBeenSent;
    private final HeadOrientationProvider headOrientationProvider;
+   private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
 
    private final TObjectDoubleHashMap<OneDoFJoint> previousPosition = new TObjectDoubleHashMap<>();
 
@@ -137,7 +140,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
       this.headOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
-      
+      this.handComplianceControlParametersProvider = variousWalkingProviders.getHandComplianceControlParametersProvider();
+
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
       useAlternativeController = new HashMap<OneDoFJoint, BooleanYoVariable>();
@@ -217,11 +221,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          handTaskspaceControllers.put(robotSide, handTaskspaceController);
 
          StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(namePrefix + "StraightLine", true, worldFrame, registry, VISUALIZE_TASKSPACE_TRAJECTORIES, yoGraphicsListRegistry);
-         CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(namePrefix + "Circular", chest.getBodyFixedFrame(), trajectoryTimeProvider, registry, yoGraphicsListRegistry);
+         CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(namePrefix + "Circular", worldFrame, trajectoryTimeProvider, registry, yoGraphicsListRegistry);
          
          handStraightLinePoseTrajectoryGenerators.put(robotSide, handStraightLinePoseTrajectoryGenerator);
          handCircularPoseTrajectoryGenerators.put(robotSide, handCircularPoseTrajectoryGenerator);
-
+         
          optionalHandControlFrames.put(robotSide, new PoseReferenceFrame("optional" + robotSide.getCamelCaseNameForMiddleOfExpression() + "HandControlFrame", handControlFrame));
       }
 
@@ -328,7 +332,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          }
       }
 
-      momentumBasedController.callUpdatables();
+      momentumBasedController.doPrioritaryControl();
       icpAndMomentumBasedController.update();
    }
 
@@ -433,6 +437,24 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       
       for (RobotSide side : RobotSide.values)
       {
+         if (handComplianceControlParametersProvider != null && handComplianceControlParametersProvider.checkForNewRequest(side))
+         {
+            if (handComplianceControlParametersProvider.isResetRequested(side))
+            {
+               handTaskspaceControllers.get(side).setEnableCompliantControl(false, null, null, null, null, Double.NaN, Double.NaN);
+            }
+            else
+            {
+               boolean[] enableLinearCompliance = handComplianceControlParametersProvider.getEnableLinearCompliance(side);
+               boolean[] enableAngularCompliance = handComplianceControlParametersProvider.getEnableAngularCompliance(side);
+               Vector3d desiredForce = handComplianceControlParametersProvider.getDesiredForce(side);
+               Vector3d desiredTorque = handComplianceControlParametersProvider.getDesiredTorque(side);
+               double forceDeadzone = handComplianceControlParametersProvider.getForceDeadzone(side);
+               double torqueDeadzone = handComplianceControlParametersProvider.getTorqueDeadzone(side);
+               handTaskspaceControllers.get(side).setEnableCompliantControl(true, enableLinearCompliance, enableAngularCompliance, desiredForce, desiredTorque, forceDeadzone, torqueDeadzone);
+            }
+         }
+
          if (handPoseProvider.checkForNewPose(side))
          {
             DataType dataType = handPoseProvider.checkHandPosePacketDataType(side);
@@ -639,7 +661,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = handStraightLinePoseTrajectoryGenerators.get(robotSide);
       handStraightLinePoseTrajectoryGenerator.registerAndSwitchFrame(desiredReferenceFrame);
-      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, handControlFrame);
+      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, handControlFrame, HandTrajectoryType.STRAIGHT_LINE);
       handStraightLinePoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
       handStraightLinePoseTrajectoryGenerator.setFinalPose(desiredHandPose);
       handStraightLinePoseTrajectoryGenerator.setTrajectoryTime(handPoseProvider.getTrajectoryTime());
@@ -677,7 +699,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       handCircularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
 
-      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, optionalHandControlFrame);
+      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
       handCircularPoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
       handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
@@ -711,24 +733,28 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handTaskspaceController.initializeWithDesiredJointAngles();
    }
 
-   private void computeHandCurrentDesiredFramePose(FramePose desiredHandPoseToPack, RobotSide robotSide, ReferenceFrame trajectoryFrame, ReferenceFrame newControlFrame)
+   private void computeHandCurrentDesiredFramePose(FramePose desiredHandPoseToPack, RobotSide robotSide, ReferenceFrame trajectoryFrame, ReferenceFrame newControlFrame, HandTrajectoryType newTrajectoryType)
    {
       TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
-      if (areHandTaskspaceControlled.get(robotSide).getBooleanValue())
+      TaskspaceToJointspaceHandPositionControlState handTaskspaceController = handTaskspaceControllers.get(robotSide);
+
+      if (!areHandTaskspaceControlled.get(robotSide).getBooleanValue() || newTrajectoryType == HandTrajectoryType.STRAIGHT_LINE)
       {
-         desiredHandPoseToPack.setPoseIncludingFrame(handTaskspaceControllers.get(robotSide).getDesiredPose());
+         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
+         handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+         handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredHandPoseToPack, trajectoryFrame);
+         handTaskspaceController.resetCompliantControl();
+      }
+      else
+      {
+         desiredHandPoseToPack.setPoseIncludingFrame(handTaskspaceController.getDesiredPose());
          ReferenceFrame oldControlFrame = handTaskspaceToJointspaceCalculator.getControlFrame();
          if (oldControlFrame != newControlFrame)
          {
             handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
             handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredHandPoseToPack, trajectoryFrame);
+            handTaskspaceController.resetCompliantControl();
          }
-      }
-      else
-      {
-         handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(newControlFrame);
-         handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
-         handTaskspaceToJointspaceCalculator.getDesiredEndEffectorPoseFromQDesireds(desiredHandPoseToPack, trajectoryFrame);
       }
 
       desiredHandPoseToPack.changeFrame(trajectoryFrame);

@@ -54,6 +54,7 @@ public class HandCompliantControlHelper
    private final DoubleYoVariable compliantControlMaxAngularCorrectionPerTick;
    private final DoubleYoVariable compliantControlMaxAngularDisplacement;
    private final DoubleYoVariable compliantControlLeakRatio;
+   private final DoubleYoVariable compliantControlResetLeakRatio;
    private final YoFrameVector yoCompliantControlLinearDisplacement;
    private final YoFrameVector yoCompliantControlAngularDisplacement;
 
@@ -114,17 +115,19 @@ public class HandCompliantControlHelper
       compliantControlMaxLinearDisplacement = new DoubleYoVariable(namePrefix + "CompliantControlMaxLinearDisplacement", registry);
       compliantControlMaxAngularDisplacement = new DoubleYoVariable(namePrefix + "CompliantControlMaxAngularDisplacement", registry);
       compliantControlLeakRatio = new DoubleYoVariable(namePrefix + "CompliantControlLeakRatio", registry);
+      compliantControlResetLeakRatio = new DoubleYoVariable(namePrefix + "CompliantControlResetLeakRatio", registry);
       yoCompliantControlLinearDisplacement = new YoFrameVector(namePrefix + "CompliantControlLinearDisplacement", worldFrame, registry);
       yoCompliantControlAngularDisplacement = new YoFrameVector(namePrefix + "CompliantControlAngularDisplacement", worldFrame, registry);
 
       measuredForceAlpha.set(0.98);
       linearGain.set(0.0001);
-      angularGain.set(0.002);
+      angularGain.set(0.001);
       compliantControlMaxLinearCorrectionPerTick.set(0.0005);
-      compliantControlMaxAngularCorrectionPerTick.set(0.002);
+      compliantControlMaxAngularCorrectionPerTick.set(0.001);
       compliantControlMaxLinearDisplacement.set(0.05);
       compliantControlMaxAngularDisplacement.set(0.2);
       compliantControlLeakRatio.set(0.99);
+      compliantControlResetLeakRatio.set(0.9999);
       
       forceDeadzoneSize.set(10.0);
       torqueDeadzoneSize.set(0.5);
@@ -161,22 +164,35 @@ public class HandCompliantControlHelper
       totalLinearCorrection.scale(compliantControlLeakRatio.getDoubleValue());
       totalAngularCorrection.scale(compliantControlLeakRatio.getDoubleValue());
 
-      totalLinearCorrection.add(linearCorrection);
-      totalAngularCorrection.add(angularCorrection);
+      if (doCompliantControlLinear[0].getBooleanValue())
+         totalLinearCorrection.setX(totalLinearCorrection.getX() + linearCorrection.getX());
+      else
+         totalLinearCorrection.setX(compliantControlResetLeakRatio.getDoubleValue() * totalLinearCorrection.getX());
 
-      if (!doCompliantControlLinear[0].getBooleanValue())
-         totalLinearCorrection.setX(0.0);
-      if (!doCompliantControlLinear[1].getBooleanValue())
-         totalLinearCorrection.setY(0.0);
-      if (!doCompliantControlLinear[2].getBooleanValue())
-         totalLinearCorrection.setZ(0.0);
+      if (doCompliantControlLinear[1].getBooleanValue())
+         totalLinearCorrection.setY(totalLinearCorrection.getY() + linearCorrection.getY());
+      else
+         totalLinearCorrection.setY(compliantControlResetLeakRatio.getDoubleValue() * totalLinearCorrection.getY());
 
-      if (!doCompliantControlAngular[0].getBooleanValue())
-         totalAngularCorrection.setX(0.0);
-      if (!doCompliantControlAngular[1].getBooleanValue())
-         totalAngularCorrection.setY(0.0);
-      if (!doCompliantControlAngular[2].getBooleanValue())
-         totalAngularCorrection.setZ(0.0);
+      if (doCompliantControlLinear[2].getBooleanValue())
+         totalLinearCorrection.setZ(totalLinearCorrection.getZ() + linearCorrection.getZ());
+      else
+         totalLinearCorrection.setZ(compliantControlResetLeakRatio.getDoubleValue() * totalLinearCorrection.getZ());
+
+      if (doCompliantControlAngular[0].getBooleanValue())
+         totalAngularCorrection.setX(totalAngularCorrection.getX() + angularCorrection.getX());
+      else
+         totalAngularCorrection.setX(compliantControlResetLeakRatio.getDoubleValue() * totalAngularCorrection.getX());
+
+      if (doCompliantControlAngular[1].getBooleanValue())
+         totalAngularCorrection.setY(totalAngularCorrection.getY() + angularCorrection.getY());
+      else
+         totalAngularCorrection.setY(compliantControlResetLeakRatio.getDoubleValue() * totalAngularCorrection.getY());
+
+      if (doCompliantControlAngular[2].getBooleanValue())
+         totalAngularCorrection.setZ(totalAngularCorrection.getZ() + angularCorrection.getZ());
+      else
+         totalAngularCorrection.setZ(compliantControlResetLeakRatio.getDoubleValue() * totalAngularCorrection.getZ());
 
       clipToVectorMagnitude(compliantControlMaxLinearDisplacement.getDoubleValue(), totalLinearCorrection);
       clipToVectorMagnitude(compliantControlMaxAngularDisplacement.getDoubleValue(), totalAngularCorrection);
@@ -184,21 +200,7 @@ public class HandCompliantControlHelper
       yoCompliantControlLinearDisplacement.setAndMatchFrame(totalLinearCorrection);
       yoCompliantControlAngularDisplacement.setAndMatchFrame(totalAngularCorrection);
 
-      ReferenceFrame originalFrame = desiredPosition.getReferenceFrame();
-      desiredPosition.changeFrame(controlFrame);
-      desiredOrientation.changeFrame(controlFrame);
-
-      desiredPosition.sub(totalLinearCorrection);
-
-      totalAngularCorrection.negate();
-      RotationFunctions.setAxisAngleBasedOnRotationVector(angularDisplacementAsAxisAngle, totalAngularCorrection.getVector());
-      angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
-      desiredOrientation.getMatrix3d(correctedRotationMatrix);
-      correctedRotationMatrix.mul(angularDisplacementAsMatrix, correctedRotationMatrix);
-      desiredOrientation.set(correctedRotationMatrix);
-
-      desiredPosition.changeFrame(originalFrame);
-      desiredOrientation.changeFrame(originalFrame);
+      applyCorrection(desiredPosition, desiredOrientation);
    }
 
    private final AxisAngle4d angularDisplacementAsAxisAngle = new AxisAngle4d();
@@ -250,6 +252,39 @@ public class HandCompliantControlHelper
    {
       yoCompliantControlLinearDisplacement.setToZero();
       yoCompliantControlAngularDisplacement.setToZero();
+   }
+
+   public void progressivelyCancelOutCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   {
+      yoCompliantControlLinearDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
+      yoCompliantControlAngularDisplacement.scale(compliantControlResetLeakRatio.getDoubleValue());
+
+      yoCompliantControlLinearDisplacement.getFrameTupleIncludingFrame(totalLinearCorrection);
+      yoCompliantControlAngularDisplacement.getFrameTupleIncludingFrame(totalAngularCorrection);
+
+      totalLinearCorrection.changeFrame(controlFrame);
+      totalAngularCorrection.changeFrame(controlFrame);
+
+      applyCorrection(desiredPosition, desiredOrientation);
+   }
+
+   private void applyCorrection(FramePoint desiredPosition, FrameOrientation desiredOrientation)
+   {
+      ReferenceFrame originalFrame = desiredPosition.getReferenceFrame();
+      desiredPosition.changeFrame(controlFrame);
+      desiredOrientation.changeFrame(controlFrame);
+
+      desiredPosition.sub(totalLinearCorrection);
+
+      totalAngularCorrection.negate();
+      RotationFunctions.setAxisAngleBasedOnRotationVector(angularDisplacementAsAxisAngle, totalAngularCorrection.getVector());
+      angularDisplacementAsMatrix.set(angularDisplacementAsAxisAngle);
+      desiredOrientation.getMatrix3d(correctedRotationMatrix);
+      correctedRotationMatrix.mul(angularDisplacementAsMatrix, correctedRotationMatrix);
+      desiredOrientation.set(correctedRotationMatrix);
+
+      desiredPosition.changeFrame(originalFrame);
+      desiredOrientation.changeFrame(originalFrame);
    }
 
    public void disableLinearCompliance()
