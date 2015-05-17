@@ -41,8 +41,7 @@ import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -138,10 +137,11 @@ public class MomentumBasedControllerFactory
    {
       momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
-   
+
    public RobotController getController(FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames, double controlDT, double gravity,
          DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry, TwistCalculator twistCalculator, CenterOfMassJacobian centerOfMassJacobian,
-         ForceSensorDataHolder forceSensorDataHolder, ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
+         ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder,
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
       SideDependentList<ContactablePlaneBody> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
 
@@ -265,7 +265,8 @@ public class MomentumBasedControllerFactory
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactablePlaneBody> bipedFeet,
-         ForceSensorDataHolder forceSensorDataHolder, ContactSensorHolder contactSensorHolder, double totalRobotWeight, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+         ForceSensorDataHolderReadOnly forceSensorDataHolder, ContactSensorHolder contactSensorHolder, double totalRobotWeight,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
@@ -273,7 +274,7 @@ public class MomentumBasedControllerFactory
       {
          FootSwitchInterface footSwitch = null;
          String footName = bipedFeet.get(robotSide).getName();
-         ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
+         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
          double contactThresholdForce = walkingControllerParameters.getContactThresholdForce();
          double footSwitchCoPThresholdFraction = walkingControllerParameters.getCoPThresholdFraction();
          
@@ -304,7 +305,7 @@ public class MomentumBasedControllerFactory
       return footSwitches;
    }
 
-   private SideDependentList<ForceSensorDataReadOnly> createWristForceSensors(ForceSensorDataHolder forceSensorDataHolder)
+   private SideDependentList<ForceSensorDataReadOnly> createWristForceSensors(ForceSensorDataHolderReadOnly forceSensorDataHolder)
    {
       if (wristSensorNames == null) return null;
 
