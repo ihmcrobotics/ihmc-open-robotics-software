@@ -79,6 +79,14 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
                + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
          shellOutSpindleSpeedCommand(fuerteSpindleSpeedShellString);
       }
+      else if (useRosIndigo(rosPrefix))
+      {
+         System.out.println("using indigo");
+         String[] indigoSpindleSpeedShellString = {"sh", "-c",
+               ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity
+               + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
+         shellOutSpindleSpeedCommand(indigoSpindleSpeedShellString);
+      }
    }
    
    private void shellOutSpindleSpeedCommand(String[] shellCommandString)
@@ -117,7 +125,12 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    {
       return new File(rosPrefix + "/hydro").exists();
    }
-
+      
+   private  boolean useRosIndigo(String rosPrefix)
+   {
+      return new File(rosPrefix + "/indigo").exists();
+   }
+   
    public  void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)
    {
       final RosDoublePublisher rosDoublePublisher = new RosDoublePublisher(true)
@@ -268,10 +281,10 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
                ReconfigureRequest request = multiSenseClient.getMessage();
                StrParameter resolutionParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(StrParameter._TYPE);
                resolutionParam.setName("resolution");
-               System.out.println("Setting multisense resolution to 2048x1088");
-               resolutionParam.setValue("2048x1088x64");
-//               System.out.println("Setting multisense resolution to 1024x544x128");
-//               resolutionParam.setValue("1024x544x128");
+//               System.out.println("Setting multisense resolution to 2048x1088");
+//               resolutionParam.setValue("2048x1088x64");
+               System.out.println("Setting multisense resolution to 1024x544x128");
+               resolutionParam.setValue("1024x544x256");
                request.getConfig().getStrs().add(resolutionParam);
 
                DoubleParameter fpsParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(DoubleParameter._TYPE);
