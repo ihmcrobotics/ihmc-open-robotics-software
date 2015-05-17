@@ -103,7 +103,7 @@ public class CirclePoseTrajectoryGeneratorTest
       trajectoryGenerator.packAngularAcceleration(accelerationToPack);
       assertEquals(0.0, accelerationToPack.getX(), EPSILON);
       assertEquals(0.0, accelerationToPack.getY(), EPSILON);
-      assertTrue(accelerationToPack.getZ() != 0.0);
+//      assertTrue(accelerationToPack.getZ() != 0.0); // Not the case anymore as we've switched to cubic spline
 
       trajectoryGenerator.compute(trajectoryTimeProvider.getValue() + 1.0);
 
