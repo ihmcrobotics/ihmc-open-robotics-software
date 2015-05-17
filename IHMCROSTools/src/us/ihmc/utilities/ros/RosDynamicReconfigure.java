@@ -174,11 +174,16 @@ public class RosDynamicReconfigure
 
    public static void main(String[] args) throws URISyntaxException
    {
-      RosMainNode mainNode = new RosMainNode(new URI("http://localhost:11311"), "testDC");
-      RosDynamicReconfigure testDynamicReconfigure = new RosDynamicReconfigure("/camera/driver", mainNode);
-      System.out.println("data_skip:" + testDynamicReconfigure.setParameters(null).get("data_skip"));
-      testDynamicReconfigure.setInt("data_skip", 6);
-      System.out.println("data_skip:" + testDynamicReconfigure.setParameters(null).get("data_skip"));
+      RosMainNode mainNode = new RosMainNode(new URI("http://cpu0:11311"), "testDC");
+      RosDynamicReconfigure testDynamicReconfigure = new RosDynamicReconfigure("/left/camera/camera_nodelet", mainNode);
+      mainNode.execute();
+      System.out.println("exposure:" + testDynamicReconfigure.setParameters(null).get("exposure"));
+      testDynamicReconfigure.setDouble("exposure", -0.2);
+      Map<String,Object> param = new HashMap<>(), ret;
+      param.put("exposure", -0.1);
+      ret=testDynamicReconfigure.setParameters(param);
+      System.out.println(ret.get("exposure"));
+      System.out.println("exposure:" + testDynamicReconfigure.setParameters(null).get("exposure"));
       System.exit(0);
    }
 
