@@ -29,7 +29,7 @@ import us.ihmc.utilities.humanoidRobot.RobotMotionStatusChangedListener;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
@@ -80,7 +80,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private final ReferenceFrames controllerReferenceFrames;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final ForceSensorDataHolder forceSensorDataHolderForController;
+   private final ForceSensorDataHolderReadOnly forceSensorDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
@@ -205,7 +205,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    public static RobotController createMomentumBasedController(SDFFullRobotModel controllerModel, OutputProcessor outputProcessor,
          ReferenceFrames referenceFramesForController, DRCRobotSensorInformation sensorInformation, MomentumBasedControllerFactory controllerFactory,
-         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolder forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
+         DoubleYoVariable yoTime, double controlDT, double gravity, ForceSensorDataHolderReadOnly forceSensorDataHolderForController, ContactSensorHolder contactSensorHolder,
          CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry,
          GlobalDataProducer dataProducer, InverseDynamicsJoint... jointsToIgnore)
    {
