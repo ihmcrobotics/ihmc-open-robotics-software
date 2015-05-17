@@ -103,7 +103,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (forceSensorName == wristForceSensorNames.get(robotSide))
+            if (forceSensorName.equals(wristForceSensorNames.get(robotSide)))
             {
                ForceSensorDistalMassCompensator massComp = new ForceSensorDistalMassCompensator(sensorDef, WORKER_SLEEP_TIME_MILLIS, registry);
                wristForceSensorDistalMassCompensators.put(robotSide, massComp);
