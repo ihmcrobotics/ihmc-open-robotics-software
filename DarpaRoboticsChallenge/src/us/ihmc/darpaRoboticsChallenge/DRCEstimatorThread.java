@@ -21,6 +21,7 @@ import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
+import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -30,10 +31,12 @@ import us.ihmc.simulationconstructionset.robotController.ModularRobotController;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
+import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -42,6 +45,8 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.RigidBody;
+import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.utilities.screwTheory.TotalMassCalculator;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCRobotContactPointParameters;
@@ -96,14 +101,21 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       this.robotVisualizer = robotVisualizer;
       this.globalDataProducer = dataProducer;
       estimatorFullRobotModel = threadDataSynchronizer.getEstimatorFullRobotModel();
-      rootFrame = estimatorFullRobotModel.getRootJoint().getFrameAfterJoint();
+      SixDoFJoint rootJoint = estimatorFullRobotModel.getRootJoint();
+      rootFrame = rootJoint.getFrameAfterJoint();
       
       forceSensorDataHolderForEstimator = threadDataSynchronizer.getEstimatorForceSensorDataHolder();
-      contactSensorHolder = threadDataSynchronizer.getEstimatorContactSensorHolder();
+      ContactSensorHolder estimatorContactSensorHolder = threadDataSynchronizer.getEstimatorContactSensorHolder();
+      contactSensorHolder = estimatorContactSensorHolder;
 
-      sensorReaderFactory
-            .build(estimatorFullRobotModel.getRootJoint(), estimatorFullRobotModel.getIMUDefinitions(), estimatorFullRobotModel.getForceSensorDefinitions(),
-                  forceSensorDataHolderForEstimator, threadDataSynchronizer.getEstimatorContactSensorHolder(), threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap(), threadDataSynchronizer.getEstimatorDesiredJointDataHolder(), estimatorRegistry);
+      IMUDefinition[] imuDefinitions = estimatorFullRobotModel.getIMUDefinitions();
+      ForceSensorDefinition[] forceSensorDefinitions = estimatorFullRobotModel.getForceSensorDefinitions();
+      RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap = threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap();
+      DesiredJointDataHolder estimatorDesiredJointDataHolder = threadDataSynchronizer.getEstimatorDesiredJointDataHolder();
+
+      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, forceSensorDataHolderForEstimator, estimatorContactSensorHolder,
+            estimatorRawJointSensorDataHolderMap, estimatorDesiredJointDataHolder, estimatorRegistry);
+
       sensorReader = sensorReaderFactory.getSensorReader();
 
       estimatorController = new ModularRobotController("EstimatorController");
@@ -140,10 +152,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          for(ForceSensorDefinition forceSensorDefinition:forceSensorDataHolderForEstimator.getForceSensorDefinitions())
          {
-            ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(
-                  forceSensorDefinition.getSensorName(),
-                  forceSensorDataHolderForEstimator.get(forceSensorDefinition),
-                  forceSensorDefinition.getRigidBody());
+            String sensorName = forceSensorDefinition.getSensorName();
+            RigidBody sensorLink = forceSensorDefinition.getRigidBody();
+            ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(forceSensorDefinition);
+            ForceSensorToJointTorqueProjector footSensorToJointTorqueProjector = new ForceSensorToJointTorqueProjector(sensorName, forceSensorData, sensorLink);
             estimatorController.addRobotController(footSensorToJointTorqueProjector);
          }
       }
