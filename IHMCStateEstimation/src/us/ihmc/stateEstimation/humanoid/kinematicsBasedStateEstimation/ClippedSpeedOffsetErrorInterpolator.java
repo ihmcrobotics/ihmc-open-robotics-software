@@ -435,20 +435,22 @@ public class ClippedSpeedOffsetErrorInterpolator
       referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
 
       //update the start and goal translations and rotations
+      //localization translation times interpolated translation times localization rotation times interpolated rotation
+      //the interpolated translation and rotation are those stored when a localization packet has been received
       updatedStartOffsetTransform.setIdentity();
-      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
       updatedStartOffsetTransform.multiply(startOffsetTransform_Translation);
-      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
+      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
       updatedStartOffsetTransform.multiply(startOffsetTransform_Rotation);
+      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
 
       updatedStartOffsetTransform.getTranslation(updatedStartOffset_Translation);
       updatedStartOffsetTransform.getRotation(updatedStartOffset_Rotation_quat);
 
       updatedGoalOffsetTransform.setIdentity();
-      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Translation);
-      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
+      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Rotation);
+      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
 
       updatedGoalOffsetTransform.getTranslation(updatedGoalOffset_Translation);
       updatedGoalOffsetTransform.getRotation(updatedGoalOffset_Rotation_quat);
@@ -513,10 +515,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       yoInterpolatedOffsetFrameOrientation_Rotation.setAndMatchFrame(interpolatedOffsetFrameOrientation_Rotation);
    }
 
-   public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize)
+   public void setDeadZoneSizes(double xDeadzoneSize, double yDeadzoneSize, double zDeadzoneSize, double yawDeadzoneSize)
    {
       this.xDeadzoneSize.set(xDeadzoneSize);
       this.yDeadzoneSize.set(yDeadzoneSize);
       this.zDeadzoneSize.set(zDeadzoneSize);
+      this.yawDeadzoneSize.set(yawDeadzoneSize);
    }
 }
