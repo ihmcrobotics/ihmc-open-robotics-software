@@ -1,8 +1,8 @@
 package us.ihmc.wholeBodyController;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -39,19 +39,19 @@ public class CenterOfMassCalibrationTool implements Updatable
    private final YoGraphicCoordinateSystem leftHipPitchFrameViz, leftHipPitchZUpFrameViz;
 
    private final FullRobotModel fullRobotModel;
-   private final ForceSensorDataHolder forceSensorDataHolder;
-   private final SideDependentList<ForceSensorData> ankleForceSensors = new SideDependentList<ForceSensorData>();
+   private final ForceSensorDataHolderReadOnly forceSensorDataHolder;
+   private final SideDependentList<ForceSensorDataReadOnly> ankleForceSensors = new SideDependentList<>();
    
    private final DoubleYoVariable leftKneeTorqueCheck = new DoubleYoVariable("leftKneeTorqueCheck", registry);
    
-   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CenterOfMassCalibrationTool(FullRobotModel fullRobotModel, ForceSensorDataHolderReadOnly forceSensorDataHolder, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.forceSensorDataHolder = forceSensorDataHolder;
             
-      ForceSensorData leftAnkleForceSensor = forceSensorDataHolder.getByName("LeftAnkle");
-      ForceSensorData rightAnkleForceSensor = forceSensorDataHolder.getByName("RightAnkle");
+      ForceSensorDataReadOnly leftAnkleForceSensor = forceSensorDataHolder.getByName("LeftAnkle");
+      ForceSensorDataReadOnly rightAnkleForceSensor = forceSensorDataHolder.getByName("RightAnkle");
       ankleForceSensors.put(RobotSide.LEFT, leftAnkleForceSensor);
       ankleForceSensors.put(RobotSide.RIGHT, rightAnkleForceSensor);
       
@@ -129,7 +129,7 @@ public class CenterOfMassCalibrationTool implements Updatable
          
       {
          Wrench footWrench = new Wrench();
-         ForceSensorData forceSensorData = ankleForceSensors.get(robotSide);
+         ForceSensorDataReadOnly forceSensorData = ankleForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
          forceSensorData.packWrench(footWrench);
          FrameVector footForce = footWrench.getLinearPartAsFrameVectorCopy();
