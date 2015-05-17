@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 
@@ -28,7 +29,7 @@ public class OpenCVFaceDetector
    {
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
-   CascadeClassifier faceDetector = new CascadeClassifier(OpenCVFaceDetector.class.getResource("haarcascade_frontalface_alt.xml").getPath());
+   CascadeClassifier faceDetector = new CascadeClassifier(Paths.get("resources", "us", "ihmc", "ihmcPerception", "haarcascade_frontalface_alt.xml").toString());
    MatOfRect faces = new MatOfRect();
    Mat image= new Mat();
    final double scaleFactor;
