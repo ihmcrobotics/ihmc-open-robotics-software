@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.gui.FFTPlotter;
 
 public class DrillDetectionUI
 {
-   private final DrillDetectionThread detectorThread = new DrillDetectionThread()
+   private final DrillDetectionThread detectorThread = new DrillDetectionThread(new DrillDetectionAlgorithmSimple())
    {
       @Override
       public void onDrillDetectionResult(final DrillDetectionResult result)
@@ -85,7 +85,7 @@ public class DrillDetectionUI
       boolPlotter.setYoffset(80);
       boolPlotter.setRange(200);
 
-      doublePlotter = new Plotter[2];
+      doublePlotter = new Plotter[1];
       for (int i = 0; i < doublePlotter.length; i++)
       {
          PlotterPanel doublePlotterPanel = new PlotterPanel();
