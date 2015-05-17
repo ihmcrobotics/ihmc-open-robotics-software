@@ -29,7 +29,7 @@ public class OpenCVFaceDetector
    {
       NativeLibraryLoader.loadLibrary("org.opencv", "opencv_java2411");
    }
-   CascadeClassifier faceDetector = new CascadeClassifier(Paths.get("resources", "us", "ihmc", "ihmcPerception", "haarcascade_frontalface_alt.xml").toString());
+   CascadeClassifier faceDetector = new CascadeClassifier(Paths.get("..", "IHMCPerception", "resources", "us", "ihmc", "ihmcPerception", "haarcascade_frontalface_alt.xml").toString());
    MatOfRect faces = new MatOfRect();
    Mat image= new Mat();
    final double scaleFactor;
