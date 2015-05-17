@@ -26,6 +26,7 @@ public class DRCNetworkModuleParameters
    private boolean useLocalControllerCommunicator;
    private boolean runAutomaticDiagnostic = false;
    private boolean useMultisenseManualTestModule;
+   private boolean useDrillDetectionModule;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
    
@@ -213,6 +214,16 @@ public class DRCNetworkModuleParameters
       return this.useMocapModule;
    }
 
+   public boolean isDrillDetectionModuleEnabled()
+   {
+      return useDrillDetectionModule;
+   }
+
+   public void setDrillDetectionModuleEnabled(boolean b)
+   {
+      useDrillDetectionModule = b;
+   }
+
    public void setRosUri(URI rosURI)
    {
       rosUri = rosURI;
@@ -246,9 +257,9 @@ public class DRCNetworkModuleParameters
    {
       return "DRCNetworkModuleParameters [useController=" + useController + "\n useSensorModule=" + useSensorModule + "\n useSimulatedSensors="
             + useSimulatedSensors + "\n useUiModule=" + useUiModule + "\n useBehaviorModule=" + useBehaviorModule + "\n useBehaviorVisualizer="
-            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule=" + useRosModule
-            + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator + "\n rosUri=" + rosUri
-            + "]";
+            + useBehaviorVisualizer + "\n useHandModule=" + useHandModule + "\n usePerceptionModule=" + usePerceptionModule + "\n useRosModule="
+            + useRosModule + "\n useDrillDetectionModule=" + useDrillDetectionModule + "\n simulatedSensorCommunicator=" + simulatedSensorCommunicator
+            + "\n rosUri=" + rosUri + "]";
    }
 
    public void addRobotSpecificModuleCommunicatorPort(NetworkPorts networkPort, PacketDestination communicatorId)

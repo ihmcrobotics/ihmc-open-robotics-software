@@ -38,15 +38,16 @@ public class DRCNetworkProcessor
       try
       {
          setupControllerCommunicator(params);
-         setupUiModule(robotModel, params);
+         setupUiModule(params);
          setupSensorModule(robotModel, params);
          setupBehaviorModule(robotModel, params);
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
          setupGFEModule(params);
-         setupMocapModule(robotModel, params);
+         setupMocapModule(params);
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
+         setupDrillDetectionModule(params);
          addRobotSpecificModuleCommunicators(params.getRobotSpecificModuleCommunicatorPorts());
       }
       catch (IOException e)
@@ -82,14 +83,35 @@ public class DRCNetworkProcessor
          
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(destinationId, packetCommunicator);
-         try {
-			packetCommunicator.connect();
-		} 
-        catch (IOException e) 
-        {
-			e.printStackTrace();
-		}
+         try
+         {
+		   	packetCommunicator.connect();
+		   }
+         catch (IOException e)
+         {
+   			e.printStackTrace();
+	   	}
          printModuleConnectedDebugStatement(destinationId, "addRobotSpecificModuleCommunicators");
+      }
+   }
+
+   private void setupDrillDetectionModule(DRCNetworkModuleParameters params)
+   {
+      if (params.isDrillDetectionModuleEnabled())
+      {
+         PacketCommunicator drillDetectorModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.DRILL_DETECTOR, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.DRILL_DETECTOR, drillDetectorModuleCommunicator);
+         try
+         {
+            drillDetectorModuleCommunicator.connect();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+
+         String methodName = "setupDrillDetectionModule";
+         printModuleConnectedDebugStatement(PacketDestination.DRILL_DETECTOR, methodName);
       }
    }
 
@@ -115,7 +137,7 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
+   private void setupMocapModule(DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
      {
@@ -223,7 +245,7 @@ public class DRCNetworkProcessor
       }
    }
 
-   private void setupUiModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
+   private void setupUiModule(DRCNetworkModuleParameters params) throws IOException
    {
       if (params.isUiModuleEnabled())
       {

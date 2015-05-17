@@ -12,13 +12,14 @@ public abstract class DrillDetectionThread extends Thread
 {
    // The annoying audio.cgi disconnects us every ~33 seconds
    private static final int reconnectPeriodSeconds = 30;
-   private static final double checkForDrillFrequencyHz = 10.0;
+   private static final double checkForDrillFrequencyHz = 5.0;
    private static final int iterationsCount = (int)((double)reconnectPeriodSeconds * checkForDrillFrequencyHz);
    private static final long iterationSleep = (long)(1000.0 / checkForDrillFrequencyHz);
 
+   private DrillDetectionAlgorithm algorithm = null;
    private boolean isRunning = false;
 
-   public DrillDetectionThread()
+   public DrillDetectionThread(DrillDetectionAlgorithm algorithm)
    {
       // set webcam authentification
       Authenticator.setDefault(new Authenticator()
@@ -26,7 +27,13 @@ public abstract class DrillDetectionThread extends Thread
          protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication("admin", "unknownpw".toCharArray()); }
       });
 
-      isRunning = false;
+      this.isRunning = false;
+      this.algorithm = algorithm;
+   }
+
+   public boolean isRunning()
+   {
+      return isRunning;
    }
 
    public void shutdown()
@@ -55,8 +62,6 @@ public abstract class DrillDetectionThread extends Thread
    public void run()
    {
       System.out.println("Starting drill detection thread...");
-
-      DrillDetectionAlgorithm detector = new DrillDetectionAlgorithmOriginal();
       isRunning = true;
 
       while (isRunning)
@@ -75,7 +80,7 @@ public abstract class DrillDetectionThread extends Thread
          {
             ThreadTools.sleep(iterationSleep);
 
-            DrillDetectionResult result = detector.isDrillOn(inputStream);
+            DrillDetectionResult result = algorithm.isDrillOn(inputStream);
             if (result != null) { onDrillDetectionResult(result); }
 
             if (!isRunning) { break; }

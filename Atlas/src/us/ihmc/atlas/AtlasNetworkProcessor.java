@@ -57,7 +57,7 @@ public class AtlasNetworkProcessor
         networkModuleParams.enableBehaviorModule(true);
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(true);
-
+        networkModuleParams.setDrillDetectionModuleEnabled(true);
 
         URI rosuri = NetworkParameters.getROSURI();
         if(rosuri != null)

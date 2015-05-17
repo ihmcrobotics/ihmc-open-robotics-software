@@ -19,7 +19,8 @@ public enum PacketDestination
    MULTISENSE_TEST_MODULE,
    GFE, 
    AUXILIARY_ROBOT_DATA_PUBLISHER, 
-   ZERO_POSE_PRODUCER;
+   ZERO_POSE_PRODUCER,
+   DRILL_DETECTOR;
 
    public static final PacketDestination[] values = values();
    
