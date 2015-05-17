@@ -7,7 +7,7 @@ package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
  * @author Will
  * @author Igor
  */
-public class DrillDetectorProcess
+public class DrillDetectionProcess
 {
   public static void main(String[] args)
    {

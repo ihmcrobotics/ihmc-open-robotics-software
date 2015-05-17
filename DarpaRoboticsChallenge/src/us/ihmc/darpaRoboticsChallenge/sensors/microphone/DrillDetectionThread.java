@@ -8,7 +8,7 @@ import java.net.URL;
 import sun.audio.AudioPlayer;
 import us.ihmc.utilities.ThreadTools;
 
-public abstract class DrillDetectorThread extends Thread
+public abstract class DrillDetectionThread extends Thread
 {
    // The annoying audio.cgi disconnects us every ~33 seconds
    private static final int reconnectPeriodSeconds = 30;
@@ -18,7 +18,7 @@ public abstract class DrillDetectorThread extends Thread
 
    private boolean isRunning = false;
 
-   public DrillDetectorThread()
+   public DrillDetectionThread()
    {
       // set webcam authentification
       Authenticator.setDefault(new Authenticator()
@@ -56,7 +56,7 @@ public abstract class DrillDetectorThread extends Thread
    {
       System.out.println("Starting drill detection thread...");
 
-      DrillDetector detector = new DrillDetector();
+      DrillDetectionAlgorithm detector = new DrillDetectionAlgorithmOriginal();
       isRunning = true;
 
       while (isRunning)
