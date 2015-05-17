@@ -224,7 +224,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       if (enableCompliantControl.getBooleanValue())
          handCompliantControlHelper.doCompliantControl(desiredPosition, desiredOrientation);
       else
-         handCompliantControlHelper.reset();
+         handCompliantControlHelper.progressivelyCancelOutCorrection(desiredPosition, desiredOrientation);
 
       taskspaceToJointspaceCalculator.compute(desiredPosition, desiredOrientation, desiredVelocity, desiredAngularVelocity);
       taskspaceToJointspaceCalculator.packDesiredJointAnglesIntoOneDoFJoints(oneDoFJoints);
@@ -482,6 +482,17 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
       return desiredPose.getReferenceFrame();
    }
 
+   public void setEnableCompliantControl(boolean enable, boolean[] enableLinearCompliance, boolean[] enableAngularCompliance, Vector3d desiredForce,
+         Vector3d desiredTorque, double forceDeadzone, double torqueDeadzone)
+   {
+      setEnableCompliantControl(enable);
+      setEnableLinearCompliance(enableLinearCompliance);
+      setEnableAngularCompliance(enableAngularCompliance);
+      setDesiredForceOfHandOntoExternalEnvironment(desiredForce);
+      setDesiredTorqueOfHandOntoExternalEnvironment(desiredForce);
+      setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
+   }
+
    public void setEnableCompliantControl(boolean enable)
    {
       enableCompliantControl.set(enable);
@@ -510,5 +521,10 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public void setMeasuredWrenchDeadzoneSize(double forceDeadzone, double torqueDeadzone)
    {
       handCompliantControlHelper.setMeasuredWrenchDeadzoneSize(forceDeadzone, torqueDeadzone);
+   }
+
+   public void resetCompliantControl()
+   {
+      handCompliantControlHelper.reset();
    }
 }
