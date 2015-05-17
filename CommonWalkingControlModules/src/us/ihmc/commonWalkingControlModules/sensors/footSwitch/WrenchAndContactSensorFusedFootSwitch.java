@@ -2,10 +2,9 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensor;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
-import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -18,7 +17,7 @@ public class WrenchAndContactSensorFusedFootSwitch implements FootSwitchInterfac
    private final YoVariableRegistry registry;
    private final BooleanYoVariable inContact;
    
-   public WrenchAndContactSensorFusedFootSwitch(String namePrefix, ForceSensorData forceSensorData, ContactSensor contactSensor, 
+   public WrenchAndContactSensorFusedFootSwitch(String namePrefix, ForceSensorDataReadOnly forceSensorData, ContactSensor contactSensor, 
          double footSwitchCoPThresholdFraction, double robotTotalWeight, ContactablePlaneBody contactablePlaneBody,
          YoGraphicsListRegistry yoGraphicsListRegistry, double contactThresholdForce, YoVariableRegistry parentRegistry)
    {
