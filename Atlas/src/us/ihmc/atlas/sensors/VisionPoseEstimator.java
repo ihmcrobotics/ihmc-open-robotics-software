@@ -45,7 +45,6 @@ import bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 
 public class VisionPoseEstimator implements DRCStereoListener
 {
-   private final OpenCVChessboardPoseEstimator chessboardDetector;
    final OpenCVFaceDetector faceDetector = new OpenCVFaceDetector(0.5);
    private final static boolean DEBUG = false;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
@@ -62,11 +61,12 @@ public class VisionPoseEstimator implements DRCStereoListener
    {
       if (runningOnRealRobot)
       {
-         chessboardDetector = new OpenCVChessboardPoseEstimator(4, 5, 0.01);
+         //         startChessBoardDetector(new OpenCVChessboardPoseEstimator(4, 5, 0.01), DetectedObjectManager.DetectedObjectId.RIGHT_HAND.ordinal());
+         startChessBoardDetector(new OpenCVChessboardPoseEstimator(4, 7, 0.01), DetectedObjectId.RIGHT_HAND.ordinal());
       }
       else
       {
-         chessboardDetector = new OpenCVChessboardPoseEstimator(5, 6, 0.00935);
+         startChessBoardDetector(new OpenCVChessboardPoseEstimator(5, 6, 0.00935), DetectedObjectId.RIGHT_HAND.ordinal());
       }
 
       this.communicator = packetCommunicator;
@@ -74,7 +74,6 @@ public class VisionPoseEstimator implements DRCStereoListener
       this.modelFactory = modelFactory;
       this.pointCloudDataReceiver = pointCloudDataReceiver;
 
-      //      startChessBoardDetector();
       //      startFaceDetector();
       //      startPlaneDetector();
    }
@@ -210,7 +209,7 @@ public class VisionPoseEstimator implements DRCStereoListener
       imagesToProcess.offer(new Pair<CameraData, RigidBodyTransform>(data, transformToWorld));
    }
 
-   private void startChessBoardDetector()
+   private void startChessBoardDetector(final OpenCVChessboardPoseEstimator chessboardDetector, final int targerId)
    {
       //      final FullRobotModel fullRobotModel=modelFactory.createFullRobotModel();
       executorService.submit(new Runnable()
@@ -245,7 +244,7 @@ public class VisionPoseEstimator implements DRCStereoListener
                      targetToWorld.multiply(cameraToWorld, opticalFrameToCameraFrame);
                      targetToWorld.multiply(targetToCameraOpticalFrame);
 
-                     communicator.send(new DetectedObjectPacket(targetToWorld, DetectedObjectId.RIGHT_HAND.ordinal()));
+                     communicator.send(new DetectedObjectPacket(targetToWorld, targerId));
                   }
 
                   long detectionTimeInNanos = System.currentTimeMillis() - timeStart;
