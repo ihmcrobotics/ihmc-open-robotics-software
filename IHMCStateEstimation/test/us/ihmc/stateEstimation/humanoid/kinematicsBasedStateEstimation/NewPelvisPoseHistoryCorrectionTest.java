@@ -34,6 +34,7 @@ import us.ihmc.utilities.screwTheory.RigidBody;
 import us.ihmc.utilities.screwTheory.SixDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 @BambooPlan(planType={BambooPlanType.Fast})
@@ -60,6 +61,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    
    private ExternalPelvisPoseCreator externalPelvisPoseCreator;
    private NewPelvisPoseHistoryCorrection pelvisCorrector;
+   private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    
    int numberOfPelvisWaypoints = 11;
    TimeStampedTransformBuffer pelvisWaypointsTransformPoseBufferInWorldFrame = new TimeStampedTransformBuffer(numberOfPelvisWaypoints);
@@ -78,6 +80,8 @@ public class NewPelvisPoseHistoryCorrectionTest
       registry = robot.getRobotsYoVariableRegistry();
       setupSim();
       setupCorrector();
+      simulationConstructionSet.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+      
    }
 
    @After
@@ -117,7 +121,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    private void setupCorrector()
    {
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
-      pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, externalPelvisPoseCreator);
+      pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator);
       pelvisCorrector.setDeadZoneSizes(0.0, 0.0, 0.0, 0.0);
    }
    
