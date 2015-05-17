@@ -4,6 +4,7 @@ import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -193,9 +194,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       previousClippedAlphaFilterValue = new DoubleYoVariable("previousClippedAlphaFilterValue", registry);
       previousClippedAlphaFilterValue.set(0.0);
 
-      maxTranslationalCorrectionVelocity = new DoubleYoVariable("maxTranslationalCorrectionVelocity", parentRegistry);
+      maxTranslationalCorrectionVelocity = new DoubleYoVariable("maxTranslationalCorrectionVelocity", registry);
       maxTranslationalCorrectionVelocity.set(MAX_TRANSLATIONAL_CORRECTION_SPEED);
-      maxRotationalCorrectionVelocity = new DoubleYoVariable("maxRotationalCorrectionVelocity", parentRegistry);
+      maxRotationalCorrectionVelocity = new DoubleYoVariable("maxRotationalCorrectionVelocity", registry);
       maxRotationalCorrectionVelocity.set(MAX_ROTATIONAL_CORRECTION_SPEED);
 
       distanceToTravel = new DoubleYoVariable("distanceToTravel", registry);
@@ -427,6 +428,9 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       //chose the smaller alpha (so the slower correction) between translation and rotation
       cLippedAlphaFilterValue.set(Math.min(temporaryTranslationAlphaClipped.getDoubleValue(), temporaryRotationAlphaClipped.getDoubleValue()));
+      cLippedAlphaFilterValue.set(MathTools.clipToMinMax(cLippedAlphaFilterValue.getDoubleValue(), 0.0, 1.0));
+      
+      
       previousClippedAlphaFilterValue.set(cLippedAlphaFilterValue.getDoubleValue());
 
       referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Translation, worldFrame);
