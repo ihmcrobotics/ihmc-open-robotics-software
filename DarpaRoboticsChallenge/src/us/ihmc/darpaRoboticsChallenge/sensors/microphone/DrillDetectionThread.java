@@ -27,7 +27,7 @@ public abstract class DrillDetectionThread extends Thread
          protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication("admin", "unknownpw".toCharArray()); }
       });
 
-      this.isRunning = false;
+      this.isRunning = true;
       this.algorithm = algorithm;
    }
 
@@ -62,7 +62,6 @@ public abstract class DrillDetectionThread extends Thread
    public void run()
    {
       System.out.println("Starting drill detection thread...");
-      isRunning = true;
 
       while (isRunning)
       {
