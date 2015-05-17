@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
@@ -323,7 +323,7 @@ public class DRCOutputWriterWithAccelerationIntegration implements DRCOutputWrit
    }
 
    @Override
-   public void setForceSensorDataHolderForController(ForceSensorDataHolder forceSensorDataHolderForEstimator)
+   public void setForceSensorDataHolderForController(ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator)
    {
       drcOutputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForEstimator);
    }
