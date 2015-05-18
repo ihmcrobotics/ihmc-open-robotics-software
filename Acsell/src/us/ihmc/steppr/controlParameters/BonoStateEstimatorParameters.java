@@ -9,6 +9,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
@@ -269,5 +270,12 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;
+   }
+
+
+   @Override
+   public SideDependentList<String> getWristForceSensorNames()
+   {
+      return null;
    }
 }
