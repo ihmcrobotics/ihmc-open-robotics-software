@@ -178,6 +178,8 @@ public class ForceSensorStateUpdater
 
    public void initialize()
    {
+      if (calibrateWristForceSensors != null)
+         calibrateWristForceSensors.set(true);
       updateForceSensorState();
    }
 
