@@ -301,6 +301,12 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
+   public boolean requestWristForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+   @Override
    public SideDependentList<String> getWristForceSensorNames()
    {
       return wristForceSensorNames;
