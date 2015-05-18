@@ -33,7 +33,6 @@ import us.ihmc.commonWalkingControlModules.sensors.ProvidedMassMatrixToolRigidBo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerStateChangedListener;
 import us.ihmc.utilities.humanoidRobot.RobotMotionStatus;
@@ -119,12 +118,6 @@ public class MomentumBasedController
    private final DoubleYoVariable yoTime;
    private final double controlDT;
    private final double gravity;
-
-   private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
-   private final BooleanYoVariable calibrateWristForceSensors;
-   
-   private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
-   private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
 
    private final SideDependentList<CenterOfMassReferenceFrame> handCenterOfMassFrames;
    private final SideDependentList<YoFrameVector> wristRawMeasuredForces;
@@ -471,9 +464,6 @@ public class MomentumBasedController
          wristRawMeasuredTorques = null;
          wristForcesHandWeightCancelled = null;
          wristTorquesHandWeightCancelled = null;
-         calibrateWristForceSensors = null;
-         wristForceCalibrationOffsets = null;
-         wristTorqueCalibrationOffsets = null;
          handCenterOfMassFrames = null;
          handsMass = null;
       }
@@ -484,9 +474,6 @@ public class MomentumBasedController
          wristRawMeasuredTorques = new SideDependentList<>();
          wristForcesHandWeightCancelled = new SideDependentList<>();
          wristTorquesHandWeightCancelled = new SideDependentList<>();
-         calibrateWristForceSensors = new BooleanYoVariable("calibrateWristForceSensors", registry);
-         wristForceCalibrationOffsets = new SideDependentList<>();
-         wristTorqueCalibrationOffsets = new SideDependentList<>();
          handCenterOfMassFrames = new SideDependentList<>();
          handsMass = new SideDependentList<>();
 
@@ -503,8 +490,6 @@ public class MomentumBasedController
             wristRawMeasuredTorques.put(robotSide, new YoFrameVector(namePrefix + "Torque", measurementFrame, registry));
             wristForcesHandWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "ForceHandWeightCancelled", measurementFrame, registry));
             wristTorquesHandWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "TorqueHandWeightCancelled", measurementFrame, registry));
-            wristForceCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
-            wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
 
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame handCoMFrame = new CenterOfMassReferenceFrame(sidePrefix + "HandCoMFrame", measurementFrame, handBodies);
@@ -991,23 +976,11 @@ public class MomentumBasedController
       if (wristForceSensors == null)
          return;
 
-      if (requestWristForceSensorCalibrationSubscriber != null && requestWristForceSensorCalibrationSubscriber.checkForNewCalibrationRequest())
-         calibrateWristForceSensors.set(true);
-
-      if (calibrateWristForceSensors.getBooleanValue())
-         calibrateWristForceSensors();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
          ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
          wristForceSensor.packWrench(wristTempWrench);
-
-         wristForceCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristForce);
-         wristTorqueCalibrationOffsets.get(robotSide).getFrameTupleIncludingFrame(tempWristTorque);
-
-         wristTempWrench.subLinearPart(tempWristForce);
-         wristTempWrench.subAngularPart(tempWristTorque);
 
          wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
          wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
@@ -1023,25 +996,6 @@ public class MomentumBasedController
          wristForcesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristForce);
          wristTorquesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristTorque);
       }
-   }
-
-   private void calibrateWristForceSensors()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ForceSensorDataReadOnly wristForceSensor = wristForceSensors.get(robotSide);
-         ReferenceFrame measurementFrame = wristForceSensor.getMeasurementFrame();
-
-         wristForceSensor.packWrench(wristTempWrench);
-         cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
-
-         wristTempWrench.packLinearPartIncludingFrame(tempWristForce);
-         wristTempWrench.packAngularPartIncludingFrame(tempWristTorque);
-
-         wristForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristForce);
-         wristTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempWristTorque);
-      }
-      calibrateWristForceSensors.set(false);
    }
 
    private void cancelHandWeight(RobotSide robotSide, Wrench wrenchToSubstractHandWeightTo, ReferenceFrame measurementFrame)
@@ -1480,11 +1434,6 @@ public class MomentumBasedController
       return toolRigidBodies;
    }
 
-   public void requestWristForceSensorsCalibration()
-   {
-      calibrateWristForceSensors.set(true);
-   }
-
    public void getWristRawMeasuredWrench(Wrench wrenchToPack, RobotSide robotSide)
    {
       if (wristRawMeasuredForces == null || wristRawMeasuredTorques == null)
@@ -1509,10 +1458,5 @@ public class MomentumBasedController
       wrenchToPack.setToZero(measurementFrames, measurementFrames);
       wrenchToPack.setLinearPart(tempWristForce);
       wrenchToPack.setAngularPart(tempWristTorque);
-   }
-
-   public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
-   {
-      this.requestWristForceSensorCalibrationSubscriber = requestWristForceSensorCalibrationSubscriber;
    }
 }
