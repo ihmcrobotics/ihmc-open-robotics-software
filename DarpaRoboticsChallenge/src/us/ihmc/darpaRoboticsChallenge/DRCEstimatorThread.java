@@ -42,6 +42,7 @@ import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -302,11 +303,13 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(estimatorFullRobotModel.getElevator()) * gravityMagnitude;
 
       SideDependentList<FootSwitchInterface> footSwitchesForEstimator = new SideDependentList<>();
+      ForceSensorDataHolderReadOnly forceSensorDataHolder = sensorOutputMapReadOnly.getForceSensorProcessedOutputs();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          String footForceSensorName = sensorInformation.getFeetForceSensorNames().get(robotSide);
          String footContactSensorName = sensorInformation.getFeetContactSensorNames().get(robotSide);
-         ForceSensorData footForceSensorForEstimator = forceSensorDataHolderForEstimator.getByName(footForceSensorName);
+         ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolder.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
          //         double footSwitchCoPThresholdFraction = 0.01;
