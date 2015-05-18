@@ -273,6 +273,12 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
    }
 
    @Override
+   public boolean requestWristForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
+
+   @Override
    public SideDependentList<String> getWristForceSensorNames()
    {
       return null;

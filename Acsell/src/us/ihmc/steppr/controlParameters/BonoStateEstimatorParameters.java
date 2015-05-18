@@ -272,6 +272,11 @@ public class BonoStateEstimatorParameters implements StateEstimatorParameters
       return FootSwitchType.WrenchBased;
    }
 
+   @Override
+   public boolean requestWristForceSensorCalibrationAtStart()
+   {
+      return false;
+   }
 
    @Override
    public SideDependentList<String> getWristForceSensorNames()
