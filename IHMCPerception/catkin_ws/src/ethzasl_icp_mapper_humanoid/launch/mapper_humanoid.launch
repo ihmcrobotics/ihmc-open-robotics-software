@@ -31,6 +31,7 @@
         <param name="minMapPointCount" value="1000" /> 
         <param name="localizing" value="false" /> 
         <param name="mapping" value="false" />
+        <param name="inputQueueSize" value="0" />
     </node>
     
     <node pkg="nodelet" type="nodelet" name="point_map_no_ground" args="load pcl/PassThrough eth_pcl_manager" output="screen">
