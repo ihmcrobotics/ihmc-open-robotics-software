@@ -339,6 +339,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    @Override
    public void doTransitionIntoAction()
    {
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         joint.setUnderPositionControl(true);
+      }
+      
       setJointTrajectoriesToCurrent();
       trajectoryTimeProvider.set(0.1);
    }
