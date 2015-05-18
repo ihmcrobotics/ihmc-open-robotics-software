@@ -318,6 +318,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    }
 
    @Override
+   public boolean requestWristForceSensorCalibrationAtStart()
+   {
+      return runningOnRealRobot;
+   }
+
+   @Override
    public FootSwitchType getFootSwitchType()
    {
       return FootSwitchType.WrenchBased;

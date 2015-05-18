@@ -20,6 +20,8 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();
 
+   public abstract boolean requestWristForceSensorCalibrationAtStart();
+
    public abstract SideDependentList<String> getWristForceSensorNames();
 
    // Parameters related to the kinematics based state estimator
