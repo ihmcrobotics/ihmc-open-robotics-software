@@ -134,7 +134,7 @@ public class AtlasRobotModel implements DRCRobotModel
       sensorInformation = new AtlasSensorInformation(target);
       armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, selectedVersion.getDistanceAttachmentPlateHand());
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
-      stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, runningOnRealRobot, getEstimatorDT());
+      stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       multiContactControllerParameters = new AtlasRobotMultiContactControllerParameters(jointMap);
       drivingControllerParameters = new AtlasDrivingControllerParameters(jointMap);
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
