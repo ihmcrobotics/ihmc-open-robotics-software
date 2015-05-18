@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.sensors.ReferenceFrameUpdater;
 import us.ihmc.commonWalkingControlModules.sensors.TwistUpdater;
 import us.ihmc.commonWalkingControlModules.visualizer.CenterOfMassVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
-import us.ihmc.commonWalkingControlModules.visualizer.ForceSensorDataVisualizer;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
@@ -57,7 +56,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    private static final boolean SHOW_INERTIA_GRAPHICS = false;
    private static final boolean SHOW_REFERENCE_FRAMES = false;
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
-   private static final boolean SHOW_WRIST_SENSOR_WRENCHES = true;
    private static final boolean SHOW_LEG_COM = false;
 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
@@ -227,15 +225,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             System.err.println("Couldn't create CenterOfMassCalibrationTool");
          }
-      }
-
-      if (SHOW_WRIST_SENSOR_WRENCHES && yoGraphicsListRegistry != null)
-      {
-         double forceVizScaling = 10.0;
-         String includeOnlySensorsContainingThisName = "arm";
-         ForceSensorDataVisualizer forceSensorDataVisualizer = new ForceSensorDataVisualizer(controllerModel, forceSensorDataHolderForController,
-               includeOnlySensorsContainingThisName, forceVizScaling, yoGraphicsListRegistry, registry);
-         controllerFactory.addUpdatable(forceSensorDataVisualizer);
       }
 
       if (SHOW_LEG_COM)
