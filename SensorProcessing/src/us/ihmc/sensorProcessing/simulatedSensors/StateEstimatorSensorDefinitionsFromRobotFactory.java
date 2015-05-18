@@ -44,6 +44,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       }
    }
 
+   // FIXME This is terrible, we should use the already existing ForceSensorDefinition from the FullRobotModel
    private LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> generateForceSensorDefinitions(
          ArrayList<WrenchCalculatorInterface> groundContactPointBasedWrenchCalculators)
    {
@@ -52,8 +53,9 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       {
          OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
          OneDoFJoint sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(forceTorqueSensorJoint);
-         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(),
-               sensorParentJoint.getSuccessor(), new RigidBodyTransform());
+         RigidBodyTransform transformFromSensorToParentJoint = new RigidBodyTransform();
+         groundContactPointBasedWrenchCalculator.getTransformToParentJoint(transformFromSensorToParentJoint);
+         ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), transformFromSensorToParentJoint);
          forceSensorDefinitions.put(groundContactPointBasedWrenchCalculator, sensorDefinition);
 
       }
@@ -70,6 +72,7 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       return stateEstimatorSensorDefinitions;
    }
 
+   // FIXME This is terrible, we should use the already existing IMUDefinition from the FullRobotModel
    private LinkedHashMap<IMUMount, IMUDefinition> generateIMUDefinitions(ArrayList<IMUMount> imuMounts)
    {
       LinkedHashMap<IMUMount, IMUDefinition> imuDefinitions = new LinkedHashMap<IMUMount, IMUDefinition>();

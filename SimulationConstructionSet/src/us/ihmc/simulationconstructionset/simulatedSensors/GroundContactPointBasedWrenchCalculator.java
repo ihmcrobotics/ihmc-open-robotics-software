@@ -10,6 +10,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.screwTheory.SpatialForceVector;
 import us.ihmc.utilities.screwTheory.Wrench;
 
 public class GroundContactPointBasedWrenchCalculator implements WrenchCalculatorInterface
@@ -33,6 +34,7 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
       this.transformToParentJoint = new RigidBodyTransform(transformToParentJoint);
    }
    
+   @Override
    public String getName()
    {
       return forceSensorName;
@@ -44,6 +46,7 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    private final Vector3d contactVectorOriginFrame = new Vector3d();
    private final Vector3d tau = new Vector3d();
    
+   @Override
    public void calculate()
    {
       //OriginaFrame : sensorFrame
@@ -75,7 +78,7 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
       
       if(doWrenchCorruption)
       {
-         for(int i = 0; i < Wrench.SIZE; i++)
+         for(int i = 0; i < SpatialForceVector.SIZE; i++)
          {
             wrenchMatrix.add(i, 0, corruptionMatrix.get(i,0));
          }
@@ -83,27 +86,38 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    }
 
 
+   @Override
    public OneDegreeOfFreedomJoint getJoint()
    {
       return forceTorqueSensorJoint;
    }
 
 
+   @Override
    public DenseMatrix64F getWrench()
    {
       return wrenchMatrix;
    }
    
+   @Override
    public void setDoWrenchCorruption(boolean value)
    {
       doWrenchCorruption = value;
    }
    
+   @Override
    public void corruptWrenchElement(int row, double value)
    {
       this.corruptionMatrix.add(row, 0, value);
    }
-   
+
+   @Override
+   public void getTransformToParentJoint(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(transformToParentJoint);
+   }
+
+   @Override
    public String toString()
    {
       return forceSensorName + " " + contactPoints;
