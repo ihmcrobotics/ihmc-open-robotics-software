@@ -223,9 +223,9 @@ public class BonoContactPointParameters extends DRCRobotContactPointParameters
    @Override
    public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
    {
-      linearGroundContactModel.setZStiffness(2000.0);      
-      linearGroundContactModel.setZDamping(1500.0);      
-      linearGroundContactModel.setXYStiffness(50000.0);      
-      linearGroundContactModel.setXYDamping(2000.0);      
+      linearGroundContactModel.setZStiffness(1500.0);      
+      linearGroundContactModel.setZDamping(750.0);      
+      linearGroundContactModel.setXYStiffness(25000.0);      
+      linearGroundContactModel.setXYDamping(750.0);       
    }
 }
