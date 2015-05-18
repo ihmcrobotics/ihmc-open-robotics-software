@@ -29,7 +29,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    protected final YoSE3PIDGains gains;
 
    protected final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
-   protected LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
+   private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
 
    private final OneDoFJoint hipYawJoint, anklePitchJoint, ankleRollJoint;
 
@@ -62,7 +62,11 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
       pelvis = momentumBasedController.getFullRobotModel().getPelvis();
-      legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
+
+      if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
+         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
+      else
+         legJointLimitAvoidanceControlModule = null;
    }
 
    /**
