@@ -127,6 +127,7 @@ public class ForceSensorStateUpdater
          subtreeCenterOfMassFrames = new SideDependentList<>();
 
          calibrateWristForceSensors = new BooleanYoVariable("calibrateWristForceSensors", registry);
+         calibrateWristForceSensors.set(stateEstimatorParameters.requestWristForceSensorCalibrationAtStart());
 
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -178,8 +179,6 @@ public class ForceSensorStateUpdater
 
    public void initialize()
    {
-      if (calibrateWristForceSensors != null)
-         calibrateWristForceSensors.set(true);
       updateForceSensorState();
    }
 

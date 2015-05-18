@@ -307,6 +307,13 @@ public class ComposableStateEstimatorEvaluator
             // TODO Auto-generated method stub
             return null;
          }
+
+         @Override
+         public boolean requestWristForceSensorCalibrationAtStart()
+         {
+            // TODO Auto-generated method stub
+            return false;
+         }
       };
 
       JointAndIMUSensorMap sensorMap = null; // simulatedSensorHolderAndReaderFromRobotFactory.getSensorReader().getJointAndIMUSensorMap();
