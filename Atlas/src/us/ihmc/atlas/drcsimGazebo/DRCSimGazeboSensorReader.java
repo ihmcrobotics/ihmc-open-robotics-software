@@ -42,7 +42,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
    private final LongYoVariable timeStampDelta = new LongYoVariable("timeStampDelta", registry);   
    private final SensorProcessing sensorProcessing;
    private final List<OneDoFJoint> jointList;
-   private ArrayList<ForceSensorDefinition> forceSensorDefinitions;
+   private final ArrayList<ForceSensorDefinition> forceSensorDefinitions;
 
    private final IMUDefinition imu;
 
