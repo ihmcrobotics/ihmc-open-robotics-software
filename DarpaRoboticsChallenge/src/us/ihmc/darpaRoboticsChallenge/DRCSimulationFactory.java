@@ -182,7 +182,7 @@ public class DRCSimulationFactory
 
       if (scsInitialSetup.usePerfectSensors())
       {
-         sensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, stateEstimatorParameters.getEstimatorDT());
+         sensorReaderFactory = new DRCPerfectSensorReaderFactory(simulatedRobot, threadDataSynchronizer.getEstimatorForceSensorDataHolder(), stateEstimatorParameters.getEstimatorDT());
       }
       else
       {

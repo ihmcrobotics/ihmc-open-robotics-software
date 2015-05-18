@@ -118,8 +118,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       RawJointSensorDataHolderMap estimatorRawJointSensorDataHolderMap = threadDataSynchronizer.getEstimatorRawJointSensorDataHolderMap();
       DesiredJointDataHolder estimatorDesiredJointDataHolder = threadDataSynchronizer.getEstimatorDesiredJointDataHolder();
 
-      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, forceSensorDataHolderForEstimator, estimatorContactSensorHolder,
-            estimatorRawJointSensorDataHolderMap, estimatorDesiredJointDataHolder, estimatorRegistry);
+      sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorContactSensorHolder, estimatorRawJointSensorDataHolderMap,
+            estimatorDesiredJointDataHolder, estimatorRegistry);
 
       sensorReader = sensorReaderFactory.getSensorReader();
 

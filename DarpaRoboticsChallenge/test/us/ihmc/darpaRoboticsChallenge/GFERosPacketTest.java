@@ -314,7 +314,7 @@ public abstract class GFERosPacketTest implements MultiRobotTestInterface
 	   int controllerTicksPerSimulationTick = (int) Math.round(robotModel.getControllerDT() / robotModel.getEstimatorDT());
 	   
 	   
-	   DRCPerfectSensorReaderFactory sensorReaderFactory = new DRCPerfectSensorReaderFactory(sdfRobot, robotModel.getEstimatorDT());
+	   DRCPerfectSensorReaderFactory sensorReaderFactory = new DRCPerfectSensorReaderFactory(sdfRobot, threadDataSynchronizer.getEstimatorForceSensorDataHolder(), robotModel.getEstimatorDT());
 	   
 	   DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(), robotModel.getStateEstimatorParameters(),
 	    		  sensorReaderFactory, threadDataSynchronizer, new PeriodicNonRealtimeThreadScheduler("DRCPoseCommunicator"), dataProducer, null, gravity);
