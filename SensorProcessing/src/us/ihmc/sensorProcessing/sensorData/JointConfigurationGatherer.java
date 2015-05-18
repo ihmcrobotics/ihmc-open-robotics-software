@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModelUtils;
@@ -30,7 +28,7 @@ public class JointConfigurationGatherer
 
    private final ForceSensorDefinition[] forceSensorDefinitions;
    private final ArrayList<String> forceSensorNameList = new ArrayList<String>();
-   private final ArrayList<ForceSensorData> forceSensorDataList = new ArrayList<>();
+   private final ArrayList<ForceSensorDataReadOnly> forceSensorDataList = new ArrayList<>();
 
    /**
     * The estimated state of the whole robot is packed and sent to the GUI using the DRCJointConfigurationData packet.
@@ -38,7 +36,7 @@ public class JointConfigurationGatherer
     * @param estimatorModel
     * @param forceSensorDataHolderForEstimator 
     */
-   public JointConfigurationGatherer(FullRobotModel estimatorModel, ForceSensorDataHolder forceSensorDataHolderForEstimator)
+   public JointConfigurationGatherer(FullRobotModel estimatorModel, ForceSensorDataHolderReadOnly forceSensorDataHolderForEstimator)
    {
       this.rootJoint = estimatorModel.getRootJoint();
 
@@ -50,7 +48,7 @@ public class JointConfigurationGatherer
          String sensorName = definition.getSensorName();
          forceSensorNameList.add(sensorName);
 
-         ForceSensorData forceSensorData = forceSensorDataHolderForEstimator.get(definition);
+         ForceSensorDataReadOnly forceSensorData = forceSensorDataHolderForEstimator.get(definition);
          forceSensorDataList.add(forceSensorData);
       }
    }
@@ -83,7 +81,7 @@ public class JointConfigurationGatherer
       rootJoint.getAngularVelocity(rootAngularVelocity);
       rootJoint.getLinearVelocity(rootLinearVelocity);
       rootJoint.getLinearAcceleration(rootLinearAcceleration);
-      
+
       jointConfigurationData.setPelvisAngularVelocity(rootAngularVelocity);
       jointConfigurationData.setPelvisLinearVelocity(rootLinearVelocity);
       jointConfigurationData.setPelvisLinearAcceleration(rootLinearAcceleration);
@@ -104,7 +102,7 @@ public class JointConfigurationGatherer
    {
       return joints.toArray(new OneDoFJoint[joints.size()]);
    }
-   
+
    public ForceSensorDefinition[] getForceSensorDefinitions()
    {
       return forceSensorDefinitions;
