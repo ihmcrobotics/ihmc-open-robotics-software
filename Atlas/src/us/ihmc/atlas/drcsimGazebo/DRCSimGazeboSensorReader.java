@@ -161,6 +161,7 @@ public class DRCSimGazeboSensorReader implements SensorReader
             wrench.set(4, 0, data.getDouble());
             wrench.set(5, 0, data.getDouble());
             dataHolder.setWrench(wrench);
+            sensorProcessing.setForceSensorValue(definition, wrench);
          }
 
          sensorProcessing.startComputation(currentTimestamp, currentTimestamp, -1);
