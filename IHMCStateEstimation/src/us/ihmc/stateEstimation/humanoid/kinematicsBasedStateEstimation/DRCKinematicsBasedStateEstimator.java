@@ -12,6 +12,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -20,7 +21,9 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
+import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.model.CenterOfPressureDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
@@ -33,7 +36,6 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicReferenceFrame;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
-import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {
@@ -50,6 +52,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdater pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
+   private final ForceSensorStateUpdater forceSensorStateUpdater;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -66,10 +69,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private StateEstimatorModeSubscriber stateEstimatorModeSubscriber = null;
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-         SensorOutputMapReadOnly sensorOutputMapReadOnly, String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
-         SideDependentList<FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         RobotMotionStatusHolder robotMotionStatusFromController, SideDependentList<ContactablePlaneBody> bipedFeet,
-         YoGraphicsListRegistry yoGraphicsListRegistry)
+         SensorOutputMapReadOnly sensorOutputMapReadOnly, String[] imuSensorsToUseInStateEstimator,
+         double gravitationalAcceleration, SideDependentList<FootSwitchInterface> footSwitches,
+         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
+         SideDependentList<ContactablePlaneBody> bipedFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutputMapReadOnly = sensorOutputMapReadOnly;
@@ -77,6 +80,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       usePelvisCorrector = new BooleanYoVariable("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
       jointStateUpdater = new JointStateUpdater(inverseDynamicsStructure, sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+      forceSensorStateUpdater = new ForceSensorStateUpdater(sensorOutputMapReadOnly, null, stateEstimatorParameters, gravitationalAcceleration, yoGraphicsListRegistry, registry);
 
       if(USE_NEW_PELVIS_POSE_CORRECTOR)
          this.pelvisPoseHistoryCorrection = new NewPelvisPoseHistoryCorrection(inverseDynamicsStructure, stateEstimatorParameters.getEstimatorDT(), registry, yoGraphicsListRegistry, 1000);
@@ -159,6 +163,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       jointStateUpdater.initialize();
       pelvisRotationalStateUpdater.initialize();
       pelvisLinearStateUpdater.initialize();
+      forceSensorStateUpdater.initialize();
    }
 
    @Override
@@ -189,6 +194,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             break;
       }
+
+      forceSensorStateUpdater.updateForceSensorState();
 
       if (usePelvisCorrector.getBooleanValue() && pelvisPoseHistoryCorrection != null)
       {
@@ -317,6 +324,16 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       // Do nothing
    }
 
+   public ForceSensorDataHolderReadOnly getForceSensorOutput()
+   {
+      return forceSensorStateUpdater.getForceSensorOutput();
+   }
+
+   public ForceSensorDataHolderReadOnly getForceSensorOutputWithGravityCancelled()
+   {
+      return forceSensorStateUpdater.getForceSensorOutputWithGravityCancelled();
+   }
+
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       pelvisPoseHistoryCorrection.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
@@ -325,5 +342,10 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    public void setOperatingModeSubscriber(StateEstimatorModeSubscriber stateEstimatorModeSubscriber)
    {
       this.stateEstimatorModeSubscriber = stateEstimatorModeSubscriber;
+   }
+
+   public void setRequestWristForceSensorCalibrationSubscriber(RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber)
+   {
+      forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
    }
 }
