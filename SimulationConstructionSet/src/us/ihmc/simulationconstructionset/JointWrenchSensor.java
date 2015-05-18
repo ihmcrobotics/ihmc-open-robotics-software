@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset;
 import javax.vecmath.Tuple3d;
 import javax.vecmath.Vector3d;
 
+import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.yoUtilities.math.frames.YoFrameVector;
 
 public class JointWrenchSensor
@@ -11,6 +12,7 @@ public class JointWrenchSensor
    private final YoFrameVector jointWrenchForce, jointWrenchTorque;
    private final Vector3d offsetFromJoint = new Vector3d();
 
+   // FIXME offsetFromJoint is probably the offsetToJoint.
    public JointWrenchSensor(String name, Vector3d offsetFromJoint, Robot robot)
    {
       this.name = name;
@@ -45,6 +47,11 @@ public class JointWrenchSensor
 
       wrenchToSet.getBottom(tempVector);
       jointWrenchTorque.set(tempVector);
+   }
+
+   public void getTransformToParentJoint(RigidBodyTransform transformToPack)
+   {
+      transformToPack.setTranslationAndIdentityRotation(offsetFromJoint);
    }
 
    public String getName()
