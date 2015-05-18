@@ -25,6 +25,7 @@ import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -297,6 +298,13 @@ public class ComposableStateEstimatorEvaluator
          @Override
          public FootSwitchType getFootSwitchType()
          {
+            return null;
+         }
+
+         @Override
+         public SideDependentList<String> getWristForceSensorNames()
+         {
+            // TODO Auto-generated method stub
             return null;
          }
       };

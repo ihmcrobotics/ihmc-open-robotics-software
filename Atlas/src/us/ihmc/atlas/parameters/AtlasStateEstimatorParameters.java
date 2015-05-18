@@ -13,6 +13,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -37,14 +38,18 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<>();
 
+   private final SideDependentList<String> wristForceSensorNames;
+
    private final DRCRobotJointMap jointMap;
 
-   public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, boolean runningOnRealRobot, double estimatorDT)
+   public AtlasStateEstimatorParameters(DRCRobotJointMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
 
       this.estimatorDT = estimatorDT;
+
+      wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       defaultFilterBreakFrequency = runningOnRealRobot ? 16.0 : Double.POSITIVE_INFINITY;
       defaultFilterBreakFrequencyArm = runningOnRealRobot ? 40.0 : Double.POSITIVE_INFINITY;
@@ -294,6 +299,12 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
    {
       // TODO For Valkyrie. Probably have to make more generic.
       return null;
+   }
+
+   @Override
+   public SideDependentList<String> getWristForceSensorNames()
+   {
+      return wristForceSensorNames;
    }
 
    @Override

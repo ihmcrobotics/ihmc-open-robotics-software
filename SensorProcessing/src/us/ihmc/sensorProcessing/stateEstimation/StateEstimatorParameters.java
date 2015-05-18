@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 
 public interface StateEstimatorParameters extends SensorProcessingConfiguration
@@ -13,10 +14,14 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract boolean useControllerDesiredCenterOfPressure();
 
-   public boolean useIMUsForSpineJointVelocityEstimation();
-   public double getAlphaIMUsForSpineJointVelocityEstimation();
+   public abstract boolean useIMUsForSpineJointVelocityEstimation();
+
+   public abstract double getAlphaIMUsForSpineJointVelocityEstimation();
+
    public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();
-   
+
+   public abstract SideDependentList<String> getWristForceSensorNames();
+
    // Parameters related to the kinematics based state estimator
    public abstract double getKinematicsPelvisPositionFilterFreqInHertz();
    public abstract double getKinematicsPelvisLinearVelocityFilterFreqInHertz();
