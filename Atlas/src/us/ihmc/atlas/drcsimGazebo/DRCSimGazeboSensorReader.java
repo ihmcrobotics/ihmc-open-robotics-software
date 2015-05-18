@@ -26,8 +26,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -42,9 +40,9 @@ public class DRCSimGazeboSensorReader implements SensorReader
 
    private final LongYoVariable delay = new LongYoVariable("delay", registry);
    private final LongYoVariable timeStampDelta = new LongYoVariable("timeStampDelta", registry);   
-   private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
    private final SensorProcessing sensorProcessing;
    private final List<OneDoFJoint> jointList;
+   private ArrayList<ForceSensorDefinition> forceSensorDefinitions;
 
    private final IMUDefinition imu;
 
@@ -60,8 +58,8 @@ public class DRCSimGazeboSensorReader implements SensorReader
    private final DenseMatrix64F wrench = new DenseMatrix64F(6, 1);
 
    public DRCSimGazeboSensorReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, DRCRobotSensorInformation sensorInformation,
-         StateEstimatorParameters stateEstimatorParameters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         RawJointSensorDataHolderMap rawJointSensorDataHolderMap, YoVariableRegistry parentRegistry)
+         StateEstimatorParameters stateEstimatorParameters, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
+         YoVariableRegistry parentRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, registry);
 
@@ -75,11 +73,11 @@ public class DRCSimGazeboSensorReader implements SensorReader
          }
       });;
       this.imu = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(0);
-      this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
 
       jointDataLength = jointList.size() * 8 * 2;
       imuDataLength = 10 * 8;
-      forceSensorDataLength = forceSensorDataHolderForEstimator.getForceSensorDefinitions().size() * 6 * 8;
+      forceSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
+      forceSensorDataLength = forceSensorDefinitions.size() * 6 * 8;
       data = ByteBuffer.allocate(16 + jointDataLength + imuDataLength + forceSensorDataLength);
       data.order(ByteOrder.nativeOrder());
 
@@ -149,9 +147,9 @@ public class DRCSimGazeboSensorReader implements SensorReader
          sensorProcessing.setLinearAccelerationSensorValue(imu, linearAcceleration);
          sensorProcessing.setAngularVelocitySensorValue(imu, angularVelocity);
 
-         for (int i = 0; i < forceSensorDataHolderForEstimator.getForceSensorDefinitions().size(); i++)
+         for (int i = 0; i < forceSensorDefinitions.size(); i++)
          {
-            ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
+            ForceSensorDefinition definition = forceSensorDefinitions.get(i);
 
             wrench.set(0, 0, data.getDouble());
             wrench.set(1, 0, data.getDouble());

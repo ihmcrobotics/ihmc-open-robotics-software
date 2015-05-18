@@ -57,7 +57,7 @@ public class DRCSimGazeboSensorReaderFactory implements SensorReaderFactory
       }
 
       atlasSensorReader = new DRCSimGazeboSensorReader(stateEstimatorSensorDefinitions, sensorInformation, stateEstimatorParameters,
-            forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, registry);
+            rawJointSensorDataHolderMap, registry);
    }
 
    public DRCSimGazeboSensorReader getSensorReader()
