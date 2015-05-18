@@ -69,8 +69,8 @@ public class StepprSensorReaderFactory implements SensorReaderFactory
       StepprState state = new StepprState(stateEstimatorParameters.getEstimatorDT(), sensorReaderRegistry);
       List<OneDoFJoint> jointList = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       EnumMap<StepprJoint, OneDoFJoint> stepprJoints = StepprUtil.createJointMap(jointList);
-      sensorReader = new AcsellSensorReader<StepprJoint>(state, StepprJoint.values, stepprJoints, stateEstimatorSensorDefinitions, forceSensorDataHolderForEstimator, rawJointSensorDataHolderMap, sensorInformation,
-            stateEstimatorParameters, estimatorDesiredJointDataHolder, sensorReaderRegistry);
+      sensorReader = new AcsellSensorReader<StepprJoint>(state, StepprJoint.values, stepprJoints, stateEstimatorSensorDefinitions, rawJointSensorDataHolderMap, sensorInformation, stateEstimatorParameters,
+            estimatorDesiredJointDataHolder, sensorReaderRegistry);
       
       
       parentRegistry.addChild(sensorReaderRegistry);

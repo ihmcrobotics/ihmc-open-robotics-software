@@ -24,7 +24,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.IMUDefinition;
 import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -45,7 +44,6 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
    private final EnumMap<JOINT, OneDoFJoint> acsellJoints;
 
    private final SideDependentList<ForceSensorDefinition> forceSensorDefinitions = new SideDependentList<>();
-   private final ForceSensorDataHolder forceSensorDataHolderForEstimator;
 
    private final IMUDefinition pelvisIMU;
 
@@ -57,9 +55,10 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
    
    private final DesiredJointDataHolder estimatorDesiredJointDataHolder;
 
-   public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints, StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DRCRobotSensorInformation sensorInformation,
-         StateEstimatorParameters stateEstimatorParameters, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
+   public AcsellSensorReader(AcsellState<?, JOINT> state, JOINT[] jointNames, EnumMap<JOINT, OneDoFJoint> acsellJoints,
+         StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
+         DRCRobotSensorInformation sensorInformation, StateEstimatorParameters stateEstimatorParameters,
+         DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry sensorReaderRegistry)
    {
       this.state = state;
       reader = new UDPAcsellStateReader(state);
@@ -67,7 +66,6 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
       sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, stateEstimatorParameters, sensorReaderRegistry);
 
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
-      this.forceSensorDataHolderForEstimator = forceSensorDataHolderForEstimator;
 
       this.jointNames = jointNames;
       this.acsellJoints = acsellJoints;
@@ -86,7 +84,7 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
       }
       this.pelvisIMU = pelvisIMU;
 
-      for (ForceSensorDefinition definition : forceSensorDataHolderForEstimator.getForceSensorDefinitions())
+      for (ForceSensorDefinition definition : stateEstimatorSensorDefinitions.getForceSensorDefinitions())
       {
          for (RobotSide robotSide : RobotSide.values)
          {
