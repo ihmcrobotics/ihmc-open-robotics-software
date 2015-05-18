@@ -45,7 +45,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
    public Map<String, Object> setBlackFlyParameters(BlackFlyParameterPacket packet)
    {
 
-      PrintTools.debug(DEBUG, this, "packet fr UI " + packet);     
+      PrintTools.debug(DEBUG, this, "packet fr UI " + packet);
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("auto_exposure", packet.isAutoExposure());
       parameters.put("auto_gain", packet.isAutoGain());
@@ -71,19 +71,28 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
       });
    }
 
-   public void receivedPacket(BlackFlyParameterPacket packet)
+   public void receivedPacket(final BlackFlyParameterPacket packet)
    {
+
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI() && packet.getSide() == this.side) //avoid hearing my own packet
+         if (packet.isFromUI() && packet.getSide() == BlackFlyParameterSetter.this.side) //avoid hearing my own packet
          {
-            Map<String, Object> result = setBlackFlyParameters(packet);
-            sendDeviceSettingToUI(result);
+            new Thread("BlackflyDynamicReconfigureSetter")
+            {
+               public void run()
+               {
+                  Map<String, Object> result = setBlackFlyParameters(packet);
+                  sendDeviceSettingToUI(result);
+               }
+            }.start();
          }
+         else
+         {
+            PrintTools.info(this, "blackfly dynamic reconfigure serivce not ready, skipping " + packet);
+         }
+
       }
-      else
-      {
-         PrintTools.info(this, "blackfly dynamic reconfigure serivce not ready, skipping " + packet);
-      }
+
    }
 }
