@@ -47,26 +47,26 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
 
-   private final ForceSensorDataHolder forceSensorDataHolder;
+   private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CommonHumanoidReferenceFrames referenceFrames)
    {
-      this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderForEstimator, referenceFrames);
+      this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
          CommonHumanoidReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.referenceFrames = referenceFrames;
-      this.forceSensorDataHolder = forceSensorDataHolderForEstimator;
+      this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
 
       this.rootJoint = rootJoint;
 
@@ -131,13 +131,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this.visionSensorTimestamp.set(timestamp);
       this.sensorHeadPPSTimetamp.set(timestamp);
 
-      if (forceSensorDataHolder != null)
+      if (forceSensorDataHolderToUpdate != null)
       {
          for (Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
             forceTorqueSensor.calculate();
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
+            forceSensorDataHolderToUpdate.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
          }
       }
    }
@@ -244,7 +244,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
    {
-      return forceSensorDataHolder;
+      return forceSensorDataHolderToUpdate;
    }
 
    @Override
@@ -285,7 +285,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
-      return forceSensorDataHolder;
+      return forceSensorDataHolderToUpdate;
    }
 
    @Override
