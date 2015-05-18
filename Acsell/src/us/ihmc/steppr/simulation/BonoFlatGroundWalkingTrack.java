@@ -92,7 +92,7 @@ public class BonoFlatGroundWalkingTrack
       desiredVelocityX.set(desiredVelocityX_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
     		  -maxDesiredVelocityX+desiredVelocityX_Bias, maxDesiredVelocityX+desiredVelocityX_Bias, deadZone, true));
-      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
+/*      desiredVelocityX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void variableChanged(YoVariable<?> v)
@@ -101,7 +101,7 @@ public class BonoFlatGroundWalkingTrack
             	 v.setValueFromDouble(minVelocityX, false);
          }
       });
-      
+*/      
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),

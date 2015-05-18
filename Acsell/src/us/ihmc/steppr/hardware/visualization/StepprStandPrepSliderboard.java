@@ -174,7 +174,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       final double maxVelocityX = 0.35;
       final double maxDesiredVelocityX_Setpoint = 0.25;
       final double maxDesiredVelocityX_Adjust = 0.25;
-      final double minVelocityX = -0.10;
+      final double minVelocityX = -0.35;
       
       
       final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
@@ -182,9 +182,9 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
          return;
       
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Setpoint, joystickUpdater.findComponent(Component.Identifier.Axis.SLIDER),
-            0, maxDesiredVelocityX_Setpoint, 0.0, true));
+           -maxDesiredVelocityX_Setpoint, 0.0, 0.0, false));
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelX_Adjust, joystickUpdater.findComponent(Component.Identifier.Axis.Y),
-    		  -maxDesiredVelocityX_Adjust, maxDesiredVelocityX_Adjust, deadZone, true));
+    		  -maxDesiredVelocityX_Adjust, maxDesiredVelocityX_Adjust, deadZone, false));
       desiredVelX_Adjust.addVariableChangedListener(new VariableChangedListener()
       {         
          @Override
@@ -216,7 +216,7 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityY, joystickUpdater.findComponent(Component.Identifier.Axis.X),
-    		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, true));
+    		  -0.1+desiredVelocityY_Bias, 0.1+desiredVelocityY_Bias, deadZone, false));
 
       DoubleYoVariable desiredHeadingDot = (DoubleYoVariable) registry.getVariable("RateBasedDesiredHeadingControlModule", "desiredHeadingDot");
       desiredHeadingDot.set(desiredHeadingDot_Bias);
