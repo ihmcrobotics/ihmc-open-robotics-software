@@ -8,6 +8,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.utilities.Pair;
+import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -39,6 +40,8 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    private final double defaultJointStiffness;
    private final HashMap<String, Double> jointSpecificStiffness = new HashMap<String, Double>();
 
+   private final SideDependentList<String> wristForceSensorNames;
+
    public ValkyrieStateEstimatorParameters(boolean runningOnRealRobot, double estimatorDT, ValkyrieSensorInformation sensorInformation, ValkyrieJointMap jointMap)
    {
       this.runningOnRealRobot = runningOnRealRobot;
@@ -47,6 +50,7 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
       
       this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
+      this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       jointVelocityFilterFrequencyHz = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
 
@@ -294,5 +298,11 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
    {
       return FootSwitchType.WrenchBased;
 //      return runningOnRealRobot ? FootSwitchType.WrenchAndContactSensorFused : FootSwitchType.WrenchBased;
+   }
+
+   @Override
+   public SideDependentList<String> getWristForceSensorNames()
+   {
+      return wristForceSensorNames;
    }
 }
