@@ -199,7 +199,7 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
          }
       };
       DRCKinematicsBasedStateEstimator stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            postProcessedSensors, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeet, yoGraphicsListRegistry);
+            postProcessedSensors, null, imuSensorsToUseInStateEstimator, gravitationalAcceleration, footSwitches, centerOfPressureDataHolder, new RobotMotionStatusHolder(), bipedFeet, yoGraphicsListRegistry);
       return stateEstimator;
    }
 

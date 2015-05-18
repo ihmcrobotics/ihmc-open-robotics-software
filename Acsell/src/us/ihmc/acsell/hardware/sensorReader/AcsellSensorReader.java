@@ -133,7 +133,6 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            forceSensorDataHolderForEstimator.setForceSensorValue(forceSensorDefinitions.get(robotSide), state.getFootWrench(robotSide));
             sensorProcessing.setForceSensorValue(forceSensorDefinitions.get(robotSide), state.getFootWrench(robotSide));
          }
 
