@@ -76,6 +76,7 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
 
       String[] armJointNames = createArmJointNames();
       DoubleYoVariable jointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointVelocityAlphaFilter", defaultFilterBreakFrequency);
+      DoubleYoVariable wristForceAlphaFilter = sensorProcessing.createAlphaFilter("wristForceAlphaFilter", defaultFilterBreakFrequency);
       DoubleYoVariable jointVelocitySlopTime = new DoubleYoVariable("jointBacklashSlopTime", registry);
       jointVelocitySlopTime.set(jointVelocitySlopTimeForBacklashCompensation);
 
@@ -105,6 +106,9 @@ public class AtlasStateEstimatorParameters implements StateEstimatorParameters
       sensorProcessing.addIMUOrientationAlphaFilter(orientationAlphaFilter, false);
       sensorProcessing.addIMUAngularVelocityAlphaFilter(angularVelocityAlphaFilter, false);
       sensorProcessing.addIMULinearAccelerationAlphaFilter(linearAccelerationAlphaFilter, false);
+
+      sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));
+      sensorProcessing.addForceSensorAlphaFilterOnlyForSpecifiedSensors(wristForceAlphaFilter, false, wristForceSensorNames.get(RobotSide.LEFT), wristForceSensorNames.get(RobotSide.RIGHT));
    }
 
    private String[] createArmJointNames()
