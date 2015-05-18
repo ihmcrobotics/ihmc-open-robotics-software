@@ -152,7 +152,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
          for (int i = 0; i < forceSensorDataHolderForEstimator.getForceSensorDefinitions().size(); i++)
          {
             ForceSensorDefinition definition = forceSensorDataHolderForEstimator.getForceSensorDefinitions().get(i);
-            ForceSensorData dataHolder = forceSensorDataHolderForEstimator.get(definition);
 
             wrench.set(0, 0, data.getDouble());
             wrench.set(1, 0, data.getDouble());
@@ -160,7 +159,6 @@ public class DRCSimGazeboSensorReader implements SensorReader
             wrench.set(3, 0, data.getDouble());
             wrench.set(4, 0, data.getDouble());
             wrench.set(5, 0, data.getDouble());
-            dataHolder.setWrench(wrench);
             sensorProcessing.setForceSensorValue(definition, wrench);
          }
 
