@@ -242,6 +242,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return new ArrayList<>();
    }
 
+   @Override
    public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
    {
       return forceSensorDataHolderToUpdate;
@@ -283,6 +284,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return new ArrayList<>();
    }
 
+   @Override
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
    {
       return forceSensorDataHolderToUpdate;

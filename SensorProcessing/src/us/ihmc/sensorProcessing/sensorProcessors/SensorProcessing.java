@@ -10,6 +10,8 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
@@ -17,8 +19,13 @@ import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.utilities.IMUDefinition;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
+import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.screwTheory.Wrench;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -52,9 +59,15 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final LinkedHashMap<IMUDefinition, YoFrameVector> inputAngularVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, YoFrameVector> inputLinearAccelerations = new LinkedHashMap<>();
 
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> inputForces = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> inputTorques = new LinkedHashMap<>();
+
    private final LinkedHashMap<IMUDefinition, YoFrameQuaternion> intermediateOrientations = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, YoFrameVector> intermediateAngularVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, YoFrameVector> intermediateLinearAccelerations = new LinkedHashMap<>();
+
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateForces = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, YoFrameVector> intermediateTorques = new LinkedHashMap<>();
 
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, List<ProcessingYoVariable>> processedJointVelocities = new LinkedHashMap<>();
@@ -65,6 +78,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedAngularVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<IMUDefinition, List<ProcessingYoVariable>> processedLinearAccelerations = new LinkedHashMap<>();
 
+   private final LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedForces = new LinkedHashMap<>();
+   private final LinkedHashMap<ForceSensorDefinition, List<ProcessingYoVariable>> processedTorques = new LinkedHashMap<>();
+
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointPositions = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointVelocities = new LinkedHashMap<>();
    private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> outputJointAccelerations = new LinkedHashMap<>();
@@ -73,8 +89,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final ArrayList<IMUSensor> inputIMUs = new ArrayList<IMUSensor>();
    private final ArrayList<IMUSensor> outputIMUs = new ArrayList<IMUSensor>();
 
+   private final ForceSensorDataHolder inputForceSensors;
+   private final ForceSensorDataHolder outputForceSensors;
+
    private final List<OneDoFJoint> jointSensorDefinitions;
    private final List<IMUDefinition> imuSensorDefinitions;
+   private final List<ForceSensorDefinition> forceSensorDefinitions;
 
    private final LinkedHashMap<OneDoFJoint, BooleanYoVariable> jointEnabledIndicators = new LinkedHashMap<>();
 
@@ -83,6 +103,10 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final Matrix3d tempOrientation = new Matrix3d();
    private final Vector3d tempAngularVelocity = new Vector3d();
    private final Vector3d tempLinearAcceleration = new Vector3d();
+
+   private final FrameVector tempForce = new FrameVector();
+   private final FrameVector tempTorque = new FrameVector();
+   private final Wrench tempWrench = new Wrench();
 
    private AuxiliaryRobotData auxiliaryRobotData;
 
@@ -93,6 +117,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
       jointSensorDefinitions = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
       imuSensorDefinitions = stateEstimatorSensorDefinitions.getIMUSensorDefinitions();
+      forceSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
       this.auxiliaryRobotData = null;
 
       for (int i = 0; i < jointSensorDefinitions.size(); i++)
@@ -151,6 +176,26 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          outputIMUs.add(new IMUSensor(imuDefinition, sensorNoiseParameters));
       }
 
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+         String sensorName = forceSensorDefinition.getSensorName();
+         ReferenceFrame sensorFrame = forceSensorDefinition.getSensorFrame();
+
+         YoFrameVector rawForce = new YoFrameVector("raw_" + sensorName + "_force", sensorFrame, registry);
+         inputForces.put(forceSensorDefinition, rawForce);
+         intermediateForces.put(forceSensorDefinition, rawForce);
+         processedForces.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
+
+         YoFrameVector rawTorque = new YoFrameVector("raw_" + sensorName + "_torque", sensorFrame, registry);
+         inputTorques.put(forceSensorDefinition, rawTorque);
+         intermediateTorques.put(forceSensorDefinition, rawTorque);
+         processedTorques.put(forceSensorDefinition, new ArrayList<ProcessingYoVariable>());
+      }
+
+      inputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
+      outputForceSensors = new ForceSensorDataHolder(forceSensorDefinitions);
+
       sensorProcessingConfiguration.configureSensorProcessing(this);
       parentRegistry.addChild(registry);
    }
@@ -199,6 +244,25 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
          outputIMU.setOrientationMeasurement(tempOrientation);
          outputIMU.setAngularVelocityMeasurement(tempAngularVelocity);
          outputIMU.setLinearAccelerationMeasurement(tempLinearAcceleration);
+      }
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+
+         inputForceSensors.getForceSensorValue(forceSensorDefinition, tempWrench);
+         tempWrench.packLinearPartIncludingFrame(tempForce); 
+         tempWrench.packAngularPartIncludingFrame(tempTorque); 
+         inputForces.get(forceSensorDefinition).set(tempForce);
+         inputTorques.get(forceSensorDefinition).set(tempTorque);
+         
+         updateProcessors(processedForces.get(forceSensorDefinition));
+         updateProcessors(processedTorques.get(forceSensorDefinition));
+
+         intermediateForces.get(forceSensorDefinition).getFrameTupleIncludingFrame(tempForce);
+         intermediateTorques.get(forceSensorDefinition).getFrameTupleIncludingFrame(tempTorque);
+         tempWrench.set(tempForce, tempTorque);
+         outputForceSensors.setForceSensorValue(forceSensorDefinition, tempWrench);
       }
    }
 
@@ -551,6 +615,50 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
    }
 
+   public void addForceSensorAlphaFilter(DoubleYoVariable alphaFilter, boolean forVizOnly)
+   {
+      addForceSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly);
+   }
+
+   public void addForceSensorAlphaFilterOnlyForSpecifiedSensors(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToBeProcessed)
+   {
+      addForceSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, invertForceSensorsSelection(sensorsToBeProcessed));
+   }
+
+   public void addForceSensorAlphaFilterWithSensorsToIgnore(DoubleYoVariable alphaFilter, boolean forVizOnly, String... sensorsToIgnore)
+   {
+      List<String> sensorToIgnoreList = new ArrayList<>();
+      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
+         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         ForceSensorDefinition forceSensorDefinition = forceSensorDefinitions.get(i);
+         String sensorName = forceSensorDefinition.getSensorName();
+
+         if (sensorToIgnoreList.contains(sensorName))
+            continue;
+
+         YoFrameVector intermediateForce = intermediateForces.get(forceSensorDefinition);
+         List<ProcessingYoVariable> forceProcessors = processedForces.get(forceSensorDefinition);
+         String forceSuffix = "_sp" + forceProcessors.size();
+         AlphaFilteredYoFrameVector filteredForce = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_" + sensorName + "_force", forceSuffix, registry, alphaFilter, intermediateForce);
+         forceProcessors.add(filteredForce);
+
+         YoFrameVector intermediateTorque = intermediateTorques.get(forceSensorDefinition);
+         List<ProcessingYoVariable> torqueProcessors = processedTorques.get(forceSensorDefinition);
+         String torqueSuffix = "_sp" + torqueProcessors.size();
+         AlphaFilteredYoFrameVector filteredTorque = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filt_" + sensorName + "_torque", torqueSuffix, registry, alphaFilter, intermediateTorque);
+         torqueProcessors.add(filteredTorque);
+         
+         if (!forVizOnly)
+         {
+            intermediateForces.put(forceSensorDefinition, filteredForce);
+            intermediateTorques.put(forceSensorDefinition, filteredTorque);
+         }
+      }
+   }
+
    /**
     * Add a low-pass filter stage on the joint torques.
     * This is cumulative, by calling this method twice for instance, you will obtain a two pole low-pass filter.
@@ -675,6 +783,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return invertSelection.toArray(new String[0]);
    }
 
+   private String[] invertForceSensorsSelection(String... subSelection)
+   {
+      List<String> invertSelection = new ArrayList<>();
+      List<String> originalForceSensorSelectionList = new ArrayList<>();
+      if (subSelection != null && subSelection.length > 0)
+         originalForceSensorSelectionList.addAll(Arrays.asList(subSelection));
+
+      for (int i = 0; i < forceSensorDefinitions.size(); i++)
+      {
+         String forceSensorName = forceSensorDefinitions.get(i).getSensorName();
+         if (!originalForceSensorSelectionList.contains(forceSensorName))
+            invertSelection.add(forceSensorName);
+      }
+      return invertSelection.toArray(new String[0]);
+   }
+
    @Override
    public long getTimestamp()
    {
@@ -738,6 +862,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       inputLinearAccelerations.get(imuDefinition).set(value);
    }
 
+   public void setForceSensorValue(ForceSensorDefinition forceSensorDefinition, DenseMatrix64F value)
+   {
+      if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
+         throw new RuntimeException("Unexpected size");
+
+      inputForceSensors.setForceSensorValue(forceSensorDefinition, value);
+   }
+
    @Override
    public double getJointPositionProcessedOutput(OneDoFJoint oneDoFJoint)
    {
@@ -766,6 +898,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    public List<? extends IMUSensorReadOnly> getIMUProcessedOutputs()
    {
       return outputIMUs;
+   }
+
+   @Override
+   public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+   {
+      return outputForceSensors;
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -797,7 +935,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return inputJointTaus.get(oneDoFJoint).getDoubleValue();
    }
 
-   @Override public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   @Override
+   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
    {
       return jointEnabledIndicators.get(oneDoFJoint).getBooleanValue();
    }
@@ -808,7 +947,14 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       return inputIMUs;
    }
 
-   @Override public AuxiliaryRobotData getAuxiliaryRobotData()
+   @Override
+   public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
+   {
+      return inputForceSensors;
+   }
+
+   @Override
+   public AuxiliaryRobotData getAuxiliaryRobotData()
    {
       return this.auxiliaryRobotData;
    }

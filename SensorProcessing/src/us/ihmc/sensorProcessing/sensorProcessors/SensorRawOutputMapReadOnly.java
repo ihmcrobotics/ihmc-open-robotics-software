@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 public interface SensorRawOutputMapReadOnly
@@ -23,6 +24,8 @@ public interface SensorRawOutputMapReadOnly
    public double getJointTauRawOutput(OneDoFJoint oneDoFJoint);
    
    public List<? extends IMUSensorReadOnly> getIMURawOutputs();
+
+   public ForceSensorDataHolderReadOnly getForceSensorRawOutputs();
 
    public AuxiliaryRobotData getAuxiliaryRobotData();
 }
