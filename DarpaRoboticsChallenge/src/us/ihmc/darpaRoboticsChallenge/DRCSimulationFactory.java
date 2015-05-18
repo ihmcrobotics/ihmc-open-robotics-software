@@ -42,7 +42,6 @@ import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotContr
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 import us.ihmc.simulationconstructionset.robotController.SingleThreadedRobotController;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.io.printing.PrintTools;
@@ -168,6 +167,17 @@ public class DRCSimulationFactory
    {
       StateEstimatorParameters stateEstimatorParameters = drcRobotModel.getStateEstimatorParameters();
 
+      if (scsInitialSetup.getRunMultiThreaded())
+      {
+         threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
+      }
+      else
+      {
+         YoVariableRegistry threadDataSynchronizerRegistry = new YoVariableRegistry("ThreadDataSynchronizerRegistry");
+         threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(scs, drcRobotModel, threadDataSynchronizerRegistry);
+         scs.addYoVariableRegistry(threadDataSynchronizerRegistry);
+      }
+
       SensorReaderFactory sensorReaderFactory;
 
       if (scsInitialSetup.usePerfectSensors())
@@ -180,17 +190,6 @@ public class DRCSimulationFactory
       }
 
       DRCRobotSensorInformation sensorInformation = drcRobotModel.getSensorInformation();
-
-      if (scsInitialSetup.getRunMultiThreaded())
-      {
-         threadDataSynchronizer = new ThreadDataSynchronizer(drcRobotModel);
-      }
-      else
-      {
-         YoVariableRegistry threadDataSynchronizerRegistry = new YoVariableRegistry("ThreadDataSynchronizerRegistry");
-         threadDataSynchronizer = new SingleThreadedThreadDataSynchronizer(scs, drcRobotModel, threadDataSynchronizerRegistry);
-         scs.addYoVariableRegistry(threadDataSynchronizerRegistry);
-      }
 
       DRCOutputWriter drcOutputWriter = new DRCSimulationOutputWriter(simulatedRobot);
 
