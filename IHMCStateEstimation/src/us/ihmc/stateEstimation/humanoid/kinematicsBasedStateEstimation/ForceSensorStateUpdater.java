@@ -173,6 +173,9 @@ public class ForceSensorStateUpdater
          return;
       }
 
+      outputForceSensorDataHolder.set(inputForceSensorDataHolder);
+      outputForceSensorDataHolderWithGravityCancelled.set(inputForceSensorDataHolder);
+
       if (requestWristForceSensorCalibrationSubscriber != null && requestWristForceSensorCalibrationSubscriber.checkForNewCalibrationRequest())
          calibrateWristForceSensors.set(true);
 
