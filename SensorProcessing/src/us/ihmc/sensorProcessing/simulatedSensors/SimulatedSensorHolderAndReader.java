@@ -10,7 +10,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.maps.ObjectObjectMap;
 import us.ihmc.utilities.math.TimeTools;
@@ -39,14 +38,10 @@ public class SimulatedSensorHolderAndReader implements SensorReader
 
    private final SensorProcessing sensorProcessing;
 
-   private final ForceSensorDataHolder forceSensorDataHolder;
-
    public SimulatedSensorHolderAndReader(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, SensorProcessingConfiguration sensorProcessingConfiguration, DoubleYoVariable yoTime,
-         YoVariableRegistry parentRegistry)
+         SensorProcessingConfiguration sensorProcessingConfiguration, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       this.sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
-      this.forceSensorDataHolder = forceSensorDataHolderForEstimator;
       this.yoTime = yoTime;
       step.set(29831);
 
@@ -158,14 +153,11 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          sensorProcessing.setLinearAccelerationSensorValue(linearAccelerationSensors.getFirst(i), value);
       }
 
-      if (forceSensorDataHolder != null)
+      for (int i = 0; i < forceTorqueSensors.getLength(); i++)
       {
-         for (int i = 0; i < forceTorqueSensors.getLength(); i++)
-         {
-            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
-            forceTorqueSensor.calculate();
-            sensorProcessing.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
-         }
+         final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
+         forceTorqueSensor.calculate();
+         sensorProcessing.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
       }
 
       long timestamp = TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue());
