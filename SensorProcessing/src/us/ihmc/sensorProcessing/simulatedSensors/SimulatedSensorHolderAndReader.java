@@ -164,7 +164,6 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          {
             final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensors.getSecond(i);
             forceTorqueSensor.calculate();
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
             sensorProcessing.setForceSensorValue(forceTorqueSensors.getFirst(i), forceTorqueSensor.getWrench());
          }
       }

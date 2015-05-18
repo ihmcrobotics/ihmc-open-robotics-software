@@ -288,9 +288,9 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private DRCKinematicsBasedStateEstimator createStateEstimator(SDFFullRobotModel estimatorFullRobotModel, DRCRobotSensorInformation sensorInformation,
          SensorOutputMapReadOnly sensorOutputMapReadOnly, double gravity, StateEstimatorParameters stateEstimatorParameters,
-         DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder forceSensorDataHolderForEstimator,
-         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-         RobotMotionStatusHolder robotMotionStatusFromController, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+         DRCRobotContactPointParameters contactPointParamaters, ForceSensorDataHolder estimatorForceSensorDataHolderToUpdate, ContactSensorHolder contactSensorHolder,
+         CenterOfPressureDataHolder centerOfPressureDataHolderFromController, RobotMotionStatusHolder robotMotionStatusFromController,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(estimatorFullRobotModel);
 
@@ -346,8 +346,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       // Create the sensor readers and state estimator here:
       DRCKinematicsBasedStateEstimator drcStateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters,
-            sensorOutputMapReadOnly, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator, centerOfPressureDataHolderFromController,
-            robotMotionStatusFromController, bipedFeet, yoGraphicsListRegistry);
+            sensorOutputMapReadOnly, estimatorForceSensorDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchesForEstimator,
+            centerOfPressureDataHolderFromController, robotMotionStatusFromController, bipedFeet, yoGraphicsListRegistry);
 
       return drcStateEstimator;
    }
