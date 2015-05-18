@@ -24,17 +24,19 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private final DRCPerfectSensorReader perfectSensorReader;
+   private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
 
-   public DRCPerfectSensorReaderFactory(SDFRobot robot, double estimateDT)
+   public DRCPerfectSensorReaderFactory(SDFRobot robot, ForceSensorDataHolder forceSensorDataHolderToUpdate, double estimateDT)
    {
       this.robot = robot;
       perfectSensorReader = new DRCPerfectSensorReader(estimateDT);
+      this.forceSensorDataHolderToUpdate = forceSensorDataHolderToUpdate;
    }
 
    @Override
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorHolder,
-         RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+         ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap,
+         DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       final Joint scsRootJoint = robot.getRootJoints().get(0);
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
@@ -45,7 +47,7 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
             scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators);
       stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
 
-      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderForEstimator, null);
+      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderToUpdate, null);
       perfectSensorReader.setSensorReader(sdfPerfectSimulatedSensorReader);
       perfectSensorReader.setSensorOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
       perfectSensorReader.setSensorRawOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
