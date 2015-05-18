@@ -41,6 +41,7 @@ import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.DesiredJointDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorData;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.RobotMotionStatusHolder;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -169,8 +170,14 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
       if (dataProducer != null)
       {
+         ForceSensorDataHolderReadOnly forceSensorDataHolderToSend;
+         if (drcStateEstimator != null && drcStateEstimator.getForceSensorOutputWithGravityCancelled() != null)
+            forceSensorDataHolderToSend = drcStateEstimator.getForceSensorOutputWithGravityCancelled();
+         else
+            forceSensorDataHolderToSend = forceSensorDataHolderForEstimator;
+
          JointConfigurationGatherer jointConfigurationGathererAndProducer = new JointConfigurationGatherer(estimatorFullRobotModel,
-               forceSensorDataHolderForEstimator);
+               forceSensorDataHolderToSend);
 
          poseCommunicator = new DRCPoseCommunicator(estimatorFullRobotModel, jointConfigurationGathererAndProducer, sensorReader, dataProducer,
                sensorOutputMapReadOnly, sensorRawOutputMapReadOnly, robotMotionStatusFromController, sensorInformation, scheduler);
