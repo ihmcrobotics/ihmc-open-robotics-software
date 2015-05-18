@@ -75,9 +75,30 @@ public class ForceSensorStateUpdater
 
       if (wristForceSensorNames == null || wristForceSensorNames.isEmpty())
       {
+         wristForceSensorDefinitions = null;
+      }
+      // Make sure that both sensors actually exist
+      else if (inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.LEFT)) == null
+            || inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(RobotSide.RIGHT)) == null)
+      {
+         wristForceSensorDefinitions = null;
+      }
+      else
+      {
+         wristForceSensorDefinitions = new SideDependentList<>();
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
+            wristForceSensorDefinitions.put(robotSide, forceSensorDefinition);
+         }
+      }
+      
+      
+      if (wristForceSensorDefinitions == null)
+      {
          outputForceSensorDataHolder = null;
          outputForceSensorDataHolderWithGravityCancelled = null;
-         wristForceSensorDefinitions = null;
          registry = null;
          wristForcesSubtreeWeightCancelled = null;
          wristTorquesSubtreeWeightCancelled = null;
@@ -98,7 +119,6 @@ public class ForceSensorStateUpdater
          registry = new YoVariableRegistry(getClass().getSimpleName());
          parentreRegistry.addChild(registry);
 
-         wristForceSensorDefinitions = new SideDependentList<>();
          wristForcesSubtreeWeightCancelled = new SideDependentList<>();
          wristTorquesSubtreeWeightCancelled = new SideDependentList<>();
          wristForceCalibrationOffsets = new SideDependentList<>();
@@ -110,11 +130,9 @@ public class ForceSensorStateUpdater
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            ForceSensorDefinition forceSensorDefinition = inputForceSensorDataHolder.findForceSensorDefinition(wristForceSensorNames.get(robotSide));
+            ForceSensorDefinition forceSensorDefinition = wristForceSensorDefinitions.get(robotSide);
             ReferenceFrame measurementFrame = forceSensorDefinition.getSensorFrame();
             RigidBody measurementLink = forceSensorDefinition.getRigidBody();
-
-            wristForceSensorDefinitions.put(robotSide, forceSensorDefinition);
 
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
             String namePrefix = sidePrefix + "WristSensor";
@@ -153,8 +171,7 @@ public class ForceSensorStateUpdater
             double forceVizScaling = 10.0;
             AppearanceDefinition forceAppearance = YoAppearance.DarkRed();
             AppearanceDefinition torqueAppearance = YoAppearance.DarkBlue();
-            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", bodies, forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance,
-                  torqueAppearance);
+            wrenchVisualizer = new WrenchVisualizer("ForceSensorData", bodies, forceVizScaling, yoGraphicsListRegistry, registry, forceAppearance, torqueAppearance);
          }
       }
    }
