@@ -1,7 +1,9 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
@@ -10,8 +12,12 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
+import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.FrameVector;
@@ -39,16 +45,28 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final LongYoVariable visionSensorTimestamp = new LongYoVariable("visionSensorTimestamp", registry);
    private final LongYoVariable sensorHeadPPSTimetamp = new LongYoVariable("sensorHeadPPSTimetamp", registry);
 
+   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
+
+   private final ForceSensorDataHolder forceSensorDataHolder;
+
    public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
    {
-      this(robot, fullRobotModel.getRootJoint(), referenceFrames);
+      this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, CommonHumanoidReferenceFrames referenceFrames)
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+         CommonHumanoidReferenceFrames referenceFrames)
+   {
+      this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderForEstimator, referenceFrames);
+   }
+
+   public SDFPerfectSimulatedSensorReader(SDFRobot robot, SixDoFJoint rootJoint, ForceSensorDataHolder forceSensorDataHolderForEstimator,
+         CommonHumanoidReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
       this.referenceFrames = referenceFrames;
+      this.forceSensorDataHolder = forceSensorDataHolderForEstimator;
 
       this.rootJoint = rootJoint;
 
@@ -56,7 +74,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
       for (InverseDynamicsJoint joint : jointsArray)
       {
-
          if (joint instanceof OneDoFJoint)
          {
             OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
@@ -67,6 +84,11 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             revoluteJoints.add(jointPair);
          }
       }
+   }
+
+   public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
+   {
+      forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
 
    @Override
@@ -108,6 +130,16 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this.timestamp.set(timestamp);
       this.visionSensorTimestamp.set(timestamp);
       this.sensorHeadPPSTimetamp.set(timestamp);
+
+      if (forceSensorDataHolder != null)
+      {
+         for (Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
+         {
+            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
+            forceTorqueSensor.calculate();
+            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
+         }
+      }
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
@@ -154,7 +186,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());
          revoluteJoint.setQdd(pinJoint.getQDD().getDoubleValue());
-
       }
    }
 
@@ -211,6 +242,11 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return new ArrayList<>();
    }
 
+   public ForceSensorDataHolderReadOnly getForceSensorProcessedOutputs()
+   {
+      return forceSensorDataHolder;
+   }
+
    @Override
    public double getJointPositionRawOutput(OneDoFJoint oneDoFJoint)
    {
@@ -235,7 +271,8 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return oneDoFJoint.getTau();
    }
 
-   @Override public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
+   @Override
+   public boolean isJointEnabled(OneDoFJoint oneDoFJoint)
    {
       return oneDoFJoint.isEnabled();
    }
@@ -246,7 +283,13 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       return new ArrayList<>();
    }
 
-   @Override public AuxiliaryRobotData getAuxiliaryRobotData()
+   public ForceSensorDataHolderReadOnly getForceSensorRawOutputs()
+   {
+      return forceSensorDataHolder;
+   }
+
+   @Override
+   public AuxiliaryRobotData getAuxiliaryRobotData()
    {
       return null;
    }

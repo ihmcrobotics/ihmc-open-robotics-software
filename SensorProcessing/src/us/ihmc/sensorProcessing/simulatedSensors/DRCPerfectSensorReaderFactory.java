@@ -33,7 +33,8 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
 
    @Override
    public void build(SixDoFJoint rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorDataHolder, RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
+         ForceSensorDataHolder forceSensorDataHolderForEstimator, ContactSensorHolder contactSensorHolder,
+         RawJointSensorDataHolderMap rawJointSensorDataHolderMap, DesiredJointDataHolder estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
       final Joint scsRootJoint = robot.getRootJoints().get(0);
       SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
@@ -44,15 +45,14 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
             scsToInverseDynamicsJointMap, new ArrayList<IMUMount>(), groundContactPointBasedWrenchCaclculators);
       stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
 
-      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, null);
+      SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader = new SDFPerfectSimulatedSensorReader(robot, rootJoint, forceSensorDataHolderForEstimator, null);
       perfectSensorReader.setSensorReader(sdfPerfectSimulatedSensorReader);
       perfectSensorReader.setSensorOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
       perfectSensorReader.setSensorRawOutputMapReadOnly(sdfPerfectSimulatedSensorReader);
-      perfectSensorReader.setForceSensorDataHolder(forceSensorDataHolderForEstimator);
 
       Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
 
-      createAndAddForceSensors(forceSensors);
+      createAndAddForceSensors(sdfPerfectSimulatedSensorReader, forceSensors);
    }
 
    @Override
@@ -73,12 +73,13 @@ public class DRCPerfectSensorReaderFactory implements SensorReaderFactory
       return false;
    }
 
-   private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors)
+   private void createAndAddForceSensors(SDFPerfectSimulatedSensorReader sdfPerfectSimulatedSensorReader,
+         Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors)
    {
       for (Entry<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitionEntry : forceSensors.entrySet())
       {
          WrenchCalculatorInterface groundContactPointBasedWrenchCalculator = forceSensorDefinitionEntry.getKey();
-         perfectSensorReader.addForceTorqueSensorPort(forceSensorDefinitionEntry.getValue(), groundContactPointBasedWrenchCalculator);
+         sdfPerfectSimulatedSensorReader.addForceTorqueSensorPort(forceSensorDefinitionEntry.getValue(), groundContactPointBasedWrenchCalculator);
       }
    }
 }

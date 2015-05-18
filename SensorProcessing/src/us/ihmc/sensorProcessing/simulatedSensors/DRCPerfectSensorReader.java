@@ -1,15 +1,9 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-
 import us.ihmc.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
-import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 
 public class DRCPerfectSensorReader implements SensorReader
@@ -19,10 +13,6 @@ public class DRCPerfectSensorReader implements SensorReader
    private SensorOutputMapReadOnly sensorOutputMapReadOnly;
    private SensorRawOutputMapReadOnly sensorRawOutputMapReadOnly;
 
-   private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface>();
-
-   private ForceSensorDataHolder forceSensorDataHolder;
-   
    public DRCPerfectSensorReader(double estimateDT)
    {
    }
@@ -54,11 +44,6 @@ public class DRCPerfectSensorReader implements SensorReader
       return sensorRawOutputMapReadOnly;
    }
 
-   public void setForceSensorDataHolder(ForceSensorDataHolder forceSensorDataHolder)
-   {
-      this.forceSensorDataHolder = forceSensorDataHolder;
-   }
-
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -71,24 +56,10 @@ public class DRCPerfectSensorReader implements SensorReader
       {
          rawSensorReader.read();
       }
-      
-      if(forceSensorDataHolder != null)
-      {
-         for(Entry<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensorEntry : forceTorqueSensors.entrySet())
-         {
-            final WrenchCalculatorInterface forceTorqueSensor = forceTorqueSensorEntry.getValue();
-            forceTorqueSensor.calculate();  
-            forceSensorDataHolder.setForceSensorValue(forceTorqueSensorEntry.getKey(), forceTorqueSensor.getWrench());
-         }
-      }
-   }
-   
-   public void addForceTorqueSensorPort(ForceSensorDefinition forceSensorDefinition, WrenchCalculatorInterface groundContactPointBasedWrenchCalculator)
-   {
-      forceTorqueSensors.put(forceSensorDefinition, groundContactPointBasedWrenchCalculator);
    }
 
-   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   @Override
+   public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
    {
       return null;
    }
