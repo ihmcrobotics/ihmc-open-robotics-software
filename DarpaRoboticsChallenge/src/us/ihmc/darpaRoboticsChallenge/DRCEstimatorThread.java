@@ -12,9 +12,11 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
+import us.ihmc.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
 import us.ihmc.communication.subscribers.StateEstimatorModeSubscriber;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.JointConfigurationGatherer;
@@ -135,8 +137,12 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (globalDataProducer != null)
          {
             StateEstimatorModeSubscriber stateEstimatorModeSubscriber = new StateEstimatorModeSubscriber();
+            RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
             globalDataProducer.attachListener(StateEstimatorModePacket.class, stateEstimatorModeSubscriber);
+            dataProducer.attachListener(RequestWristForceSensorCalibrationPacket.class, requestWristForceSensorCalibrationSubscriber);
+
             drcStateEstimator.setOperatingModeSubscriber(stateEstimatorModeSubscriber);
+            drcStateEstimator.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
 
          estimatorController.addRobotController(drcStateEstimator);
