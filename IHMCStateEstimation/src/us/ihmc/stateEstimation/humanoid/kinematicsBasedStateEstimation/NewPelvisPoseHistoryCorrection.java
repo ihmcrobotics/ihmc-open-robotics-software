@@ -303,10 +303,18 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       }
    }
    
+   
+   Vector3d translationalResidualError = new Vector3d();
+   Vector3d translationalTotalError = new Vector3d();
    private void sendCorrectionUpdatePacket()
    {
-      stateEstimatorPelvisTransformInWorldForUI.set(stateEstimatorPelvisTransformInWorld);
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalErrorBetweenPelvisAndLocalizationTransform, errorBetweenCorrectedAndLocalizationTransform, stateEstimatorPelvisTransformInWorldForUI, localizationTransformInWorld);
+      errorBetweenCorrectedAndLocalizationTransform.get(translationalResidualError);
+      totalErrorBetweenPelvisAndLocalizationTransform.get(translationalTotalError);
+      
+      double absoluteResidualError = translationalResidualError.length();
+      double absoluteTotalError = translationalTotalError.length();
+
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    

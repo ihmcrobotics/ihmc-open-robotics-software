@@ -453,14 +453,24 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       manuallyTriggerLocalizationUpdate.set(false);
    }
 
+   Vector3d translationalResidualError = new Vector3d();
+   Vector3d translationalTotalError = new Vector3d();
    //TODO Check how to integrate the rotationCorrection here
    private void sendCorrectionUpdatePacket()
    {
       totalRotationErrorFrame.get(totalRotationError);
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
+      
+      errorBetweenCurrentPositionAndCorrected.get(translationalResidualError);
+      
+      double absoluteResidualError = translationalResidualError.length();
+      
+      totalError.get(translationalTotalError);
+      
+      double absoluteTotalError = translationalTotalError.length();
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket(totalError, errorBetweenCurrentPositionAndCorrected, null, null);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 
