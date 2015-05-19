@@ -68,4 +68,10 @@ public class DrillDetectionAlgorithmSimple extends DrillDetectionAlgorithm
 
       return result;
    }
+
+   @Override
+   public int getNumReturnedBands()
+   {
+      return 1;
+   }
 }

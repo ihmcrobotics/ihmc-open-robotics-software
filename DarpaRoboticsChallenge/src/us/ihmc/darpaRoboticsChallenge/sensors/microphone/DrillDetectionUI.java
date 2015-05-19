@@ -1,24 +1,41 @@
 package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.vecmath.Point2d;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.data.time.Millisecond;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
 import us.ihmc.plotting.shapes.PointArtifact;
+import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.simulationconstructionset.dataBuffer.DataEntryHolder;
+import us.ihmc.simulationconstructionset.dataBuffer.TimeDataHolder;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
+import us.ihmc.simulationconstructionset.gui.GraphIndicesHolder;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
+import us.ihmc.simulationconstructionset.gui.YoGraphRemover;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
 public class DrillDetectionUI
 {
-   private final DrillDetectionThread detectorThread = new DrillDetectionThread(new DrillDetectionAlgorithmSimple())
+   DrillDetectionAlgorithm detectionAlgorithm = new DrillDetectionCalibrationHelper();
+   private final DrillDetectionThread detectorThread = new DrillDetectionThread(detectionAlgorithm)
    {
       @Override
       public void onDrillDetectionResult(final DrillDetectionResult result)
@@ -36,14 +53,30 @@ public class DrillDetectionUI
    private JPanel soundDetectorGUI = null;
    private Container fftPlotContainer = null;
    private Plotter boolPlotter = null;
-   private Plotter[] doublePlotter = null;
    private int dataSize = 0;
+   private int numBands;
+   YoVariableRegistry registry = new YoVariableRegistry("registry");
+   ArrayList<DoubleYoVariable> bandValues = new ArrayList<>();
+   boolean shouldZero = true;
+   double[] zeroValues;
+   private final TimeSeriesCollection dataset;
+   private int time = 0;
 
    public DrillDetectionUI()
    {
       System.out.println("Creating the UI");
 
       JFrame frame = new JFrame("Drill Detection UI");
+
+      numBands = detectionAlgorithm.getNumReturnedBands();
+      dataset = new TimeSeriesCollection();
+      for (int i = 0; i < numBands; i++){
+         DoubleYoVariable iVariable = new DoubleYoVariable(i+"AverageBandMagnitude", registry);
+         bandValues.add(iVariable);
+         dataset.addSeries(new TimeSeries(i+"th Band"));
+      }
+      zeroValues = new double[numBands];
+
       frame.setContentPane(createContentPane());
       frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
       frame.setSize(1000, 900);
@@ -85,22 +118,28 @@ public class DrillDetectionUI
       boolPlotter.setYoffset(80);
       boolPlotter.setRange(200);
 
-      doublePlotter = new Plotter[1];
-      for (int i = 0; i < doublePlotter.length; i++)
-      {
-         PlotterPanel doublePlotterPanel = new PlotterPanel();
-         GridBagConstraints doublePlotterLayout = new GridBagConstraints();
-         doublePlotterLayout.gridx = 0;
-         doublePlotterLayout.gridy = 2 + i;
-         doublePlotterLayout.weightx = 1;
-         doublePlotterLayout.fill = GridBagConstraints.HORIZONTAL;
-         soundDetectorGUI.add(doublePlotterPanel, doublePlotterLayout);
 
-         doublePlotter[i] = doublePlotterPanel.getPlotter();
-         doublePlotter[i].setXoffset(320);
-         doublePlotter[i].setYoffset(80);
-         doublePlotter[i].setRange(200);
-      }
+      JFreeChart bandGraph = ChartFactory.createTimeSeriesChart("Band Magnitudes", "Time", "Magnitude(dB)", dataset, true, false, false);
+      final XYPlot plot = bandGraph.getXYPlot();
+      ValueAxis axis = plot.getDomainAxis();
+      axis.setAutoRange(true);
+      axis.setFixedAutoRange(60000.0);  // 60 seconds
+      axis = plot.getRangeAxis();
+      axis.setRange(-25.0, 25.0);
+      ChartPanel chartPanel = new ChartPanel(bandGraph);
+      boolPlotterLayout.gridy++;
+      soundDetectorGUI.add(chartPanel, boolPlotterLayout);
+
+      JButton zero = new JButton("Zero Sound Differences");
+      zero.addActionListener(new ActionListener() {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            shouldZero = true;
+         }
+      });
+      boolPlotterLayout.gridy++;
+      soundDetectorGUI.add(zero, boolPlotterLayout);
 
       return soundDetectorGUI;
    }
@@ -124,18 +163,29 @@ public class DrillDetectionUI
       PointArtifact paRaw = new PointArtifact("drillOn_" + x, pRaw);
       boolPlotter.addArtifact(paRaw);
 
-      if (doublePlotter.length != result.averageValues.length)
+      if (numBands != result.averageValues.length)
       {
          System.err.println("Number of plotters != array size");
          return;
       }
 
-      for (int i = 0; i < doublePlotter.length; i++)
+      Millisecond now = new Millisecond();
+      double average = 0;
+      for (int i = 0; i < numBands; i++)
       {
-         Point2d pAverage = new Point2d(x, result.averageValues[i]);
-         PointArtifact paAverage = new PointArtifact("average_" + i + "_" + x, pAverage);
-         doublePlotter[i].addArtifact(paAverage);
+         bandValues.get(i).set(result.averageValues[i]);
+         average+= result.averageValues[i];
       }
+      if (numBands != 0) average /= numBands;
+
+      for (int i = 0; i < numBands; i++)
+      {
+         if (shouldZero){
+            zeroValues[i] = bandValues.get(i).getDoubleValue() - average;
+         }
+         dataset.getSeries(i).add(now, bandValues.get(i).getDoubleValue() - average - zeroValues[i]);
+      }
+      shouldZero = false;
 
       soundDetectorGUI.revalidate();
    }

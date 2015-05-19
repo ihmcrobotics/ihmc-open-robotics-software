@@ -2,6 +2,8 @@ package us.ihmc.darpaRoboticsChallenge.sensors.microphone;
 
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 import us.ihmc.utilities.linearDynamicSystems.BodeUnitsConverter;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 /**
  * <p>Description: Detects a distinct sound by searching for a characteristic peak in FFT magnitude data of sound data
@@ -25,6 +27,10 @@ public class DrillDetectionAlgorithmOriginal extends DrillDetectionAlgorithm
    private static final double dominantFrequencyBandUpperBound = 7900; //Hz
    private static final double relevantFrequencyBandLowerBound = 1000; //Hz
    private static final double relevantFrequencyBandUpperBound = 4900; //Hz
+
+   private YoVariableRegistry registry = new YoVariableRegistry("DrillRegistry");
+   private AlphaFilteredYoVariable filteredRelevantMagnitude = new AlphaFilteredYoVariable("FilteredRelevantMagnitude", registry, 0.9);
+   private AlphaFilteredYoVariable filteredDominantMagnitude = new AlphaFilteredYoVariable("FilteredDominantMagnitude", registry, 0.9);
 
    @Override
    public DrillDetectionResult isDrillOn(byte[] audioBytes, int size)
@@ -92,18 +98,26 @@ public class DrillDetectionAlgorithmOriginal extends DrillDetectionAlgorithm
          relevantBandAverageMag += magnitude[relevantFrequencyBandLowerBoundIndex + index];
       }
       relevantBandAverageMag /= relevantRangeSize;
+      filteredRelevantMagnitude.update(relevantBandAverageMag);
 
       for (int index = 0; index < dominantRangeSize; index++)
       {
          dominantBandAverageMag += magnitude[dominantFrequencyBandLowerBoundIndex + index];
       }
       dominantBandAverageMag /= dominantRangeSize;
+      filteredDominantMagnitude.update(dominantBandAverageMag);
 
       DrillDetectionResult result = new DrillDetectionResult();
-      result.isOn = ((dominantBandAverageMag - relevantBandAverageMag) > decibelsDeltaToTripDetection);
-      result.averageValues = new double[] { relevantBandAverageMag, dominantBandAverageMag };
+      result.isOn = ((filteredDominantMagnitude.getDoubleValue() - filteredRelevantMagnitude.getDoubleValue()) > decibelsDeltaToTripDetection);
+      result.averageValues = new double[] { filteredRelevantMagnitude.getDoubleValue(), filteredDominantMagnitude.getDoubleValue() };
       result.bodeData = getBodeData(time, input);
 
       return result;
+   }
+
+   @Override
+   public int getNumReturnedBands()
+   {
+      return 2;
    }
 }

@@ -58,4 +58,5 @@ public abstract class DrillDetectionAlgorithm
    }
 
    public abstract DrillDetectionResult isDrillOn(byte[] audioBytes, int size);
+   public abstract int getNumReturnedBands();
 }
