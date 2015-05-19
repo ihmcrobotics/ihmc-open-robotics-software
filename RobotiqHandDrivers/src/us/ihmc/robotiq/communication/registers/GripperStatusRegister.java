@@ -72,10 +72,10 @@ public class GripperStatusRegister extends RobotiqInputRegister
    {
       byte ret = (byte)0x0;
       
-      ret |= gsta.getValue() << 7;
-      ret |= gimc.getValue() << 5;
+      ret |= gsta.getValue() << 6;
+      ret |= gimc.getValue() << 4;
       ret |= ggto.getValue() << 3;
-      ret |= gmod.getValue() << 2;
+      ret |= gmod.getValue() << 1;
       ret |= gact.getValue();
       
       return ret;
@@ -121,16 +121,27 @@ public class GripperStatusRegister extends RobotiqInputRegister
       }
    }
    
-   public static void main(String[] args)
-   {
-      GripperStatusRegister gsr = new GripperStatusRegister(gACT.GRIPPER_RESET, gMOD.BASIC_MODE, gGTO.STOPPED, gIMC.ACTIVATION_AND_MODE_CHANGE_COMPLETE, gSTA.ALL_FINGERS_STOPPED);
-      gsr.setRegisterValue((byte)242);
-   }
-
    @Override
    public int getRegisterIndex()
    {
       return 0;
+   }
+   
+   @Override
+   public boolean equals(Object other)
+   {
+      boolean ret = super.equals(other);
+      
+      if(ret)
+      {
+         ret &= this.gact.equals(((GripperStatusRegister) other).getGact());
+         ret &= this.gmod.equals(((GripperStatusRegister) other).getGmod());
+         ret &= this.ggto.equals(((GripperStatusRegister) other).getGgto());
+         ret &= this.gimc.equals(((GripperStatusRegister) other).getGimc());
+         ret &= this.gsta.equals(((GripperStatusRegister) other).getGsta());
+      }
+      
+      return ret;
    }
    
    public enum gACT implements RobotiqRegisterComponent

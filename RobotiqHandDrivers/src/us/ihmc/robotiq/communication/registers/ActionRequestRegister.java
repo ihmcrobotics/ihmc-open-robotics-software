@@ -93,6 +93,22 @@ public class ActionRequestRegister extends RobotiqOutputRegister
       ratr = ratrInitial;
    }
    
+   @Override
+   public boolean equals(Object other)
+   {
+      boolean ret = super.equals(other);
+      
+      if(ret)
+      {
+         ret &= this.ract.equals(((ActionRequestRegister) other).getRact());
+         ret &= this.rmod.equals(((ActionRequestRegister) other).getRmod());
+         ret &= this.rgto.equals(((ActionRequestRegister) other).getRgto());
+         ret &= this.ratr.equals(((ActionRequestRegister) other).getRatr());
+      }
+      
+      return ret;
+   }
+
    public enum rACT implements RobotiqRegisterComponent
    {
       DEACTIVATE_GRIPPER((byte)0x0), ACTIVATE_GRIPPER((byte)0x1);

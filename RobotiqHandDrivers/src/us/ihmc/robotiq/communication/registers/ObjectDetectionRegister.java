@@ -60,10 +60,10 @@ public class ObjectDetectionRegister extends RobotiqInputRegister
    {
       byte ret = (byte)0x0;
       
-      ret |= gdts.getValue() << 7;
-      ret |= gdtc.getValue() << 5;
-      ret |= gdtb.getValue() << 3;
-      ret |= gdta.getValue() << 1;
+      ret |= gdts.getValue() << 6;
+      ret |= gdtc.getValue() << 4;
+      ret |= gdtb.getValue() << 2;
+      ret |= gdta.getValue() << 0;
       
       return ret;
    }
@@ -107,6 +107,22 @@ public class ObjectDetectionRegister extends RobotiqInputRegister
       return 1;
    }
    
+   @Override
+   public boolean equals(Object other)
+   {
+      boolean ret = super.equals(other);
+      
+      if(ret)
+      {
+         ret &= this.gdta.equals(((ObjectDetectionRegister) other).getGdta());
+         ret &= this.gdtb.equals(((ObjectDetectionRegister) other).getGdtb());
+         ret &= this.gdtc.equals(((ObjectDetectionRegister) other).getGdtc());
+         ret &= this.gdts.equals(((ObjectDetectionRegister) other).getGdts());
+      }
+      
+      return ret;
+   }
+
    public enum gDTA implements RobotiqRegisterComponent
    {
       FINGER_A_IN_MOTION((byte)0x0), FINGER_A_CONTACT_WHILE_OPENING((byte)0x1),
