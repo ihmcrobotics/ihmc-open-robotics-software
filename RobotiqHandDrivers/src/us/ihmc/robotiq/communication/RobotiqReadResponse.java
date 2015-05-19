@@ -74,6 +74,30 @@ public class RobotiqReadResponse
    }
    
    @Override
+   public String toString()
+   {
+      String ret = "";
+      
+      ret += "Gripper Status = " + this.gripperStatus.getRegisterValue() + "\n";
+      ret += "Object Detection = " + this.objectDetection.getRegisterValue() + "\n";
+      ret += "Fault Status = " + this.faultStatus.getRegisterValue() + "\n";
+      ret += "Finger A Requested Position = " + this.fingerAPositionEcho.getRegisterValue() + "\n";
+      ret += "Finger A Position = " + this.fingerAPosition.getRegisterValue() + "\n";
+      ret += "Finger A Current = " + this.fingerACurrent.getRegisterValue() + "\n";
+      ret += "Finger B Requested Position = " + this.fingerBPositionEcho.getRegisterValue() + "\n";
+      ret += "Finger B Position = " + this.fingerBPosition.getRegisterValue() + "\n";
+      ret += "Finger B Current = " + this.fingerBCurrent.getRegisterValue() + "\n";
+      ret += "Finger C Requested Position = " + this.fingerCPositionEcho.getRegisterValue() + "\n";
+      ret += "Finger C Position = " + this.fingerCPosition.getRegisterValue() + "\n";
+      ret += "Finger C Current = " + this.fingerCCurrent.getRegisterValue() + "\n";
+      ret += "Scissor Requested Position = " + this.scissorPositionEcho.getRegisterValue() + "\n";
+      ret += "Scissor Position = " + this.scissorPosition.getRegisterValue() + "\n";
+      ret += "Scissor Current = " + this.scissorCurrent.getRegisterValue() + "\n";
+      
+      return ret;
+   }
+   
+   @Override
    public boolean equals(Object other)
    {
       if(other instanceof RobotiqReadResponse)

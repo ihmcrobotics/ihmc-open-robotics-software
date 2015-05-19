@@ -11,6 +11,6 @@ public abstract class RobotiqRegister
       if(!this.getClass().equals(other.getClass()))
          return false;
       
-      return this.getRegisterValue() == ((RobotiqRegister)other).getRegisterValue();
+      return this.getRegisterValue() == ((RobotiqRegister)other).getRegisterValue() && this.getRegisterIndex() == ((RobotiqRegister)other).getRegisterIndex();
    }
 }

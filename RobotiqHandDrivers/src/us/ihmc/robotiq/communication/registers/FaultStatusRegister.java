@@ -41,6 +41,17 @@ public class FaultStatusRegister extends RobotiqInputRegister
       return 2;
    }
    
+   @Override
+   public boolean equals(Object other)
+   {
+      boolean ret = super.equals(other);
+      
+      if(ret)
+         ret &= this.gflt.equals(((FaultStatusRegister) other).getGflt());
+      
+      return ret;
+   }
+
    public enum gFLT implements RobotiqRegisterComponent
    {
       NO_FAULT((byte)0x0), ACTION_DELAYED_BY_ACTIVATION((byte)0x5), ACTION_DELAYED_BY_MODE_CHANGE((byte)0x6),
