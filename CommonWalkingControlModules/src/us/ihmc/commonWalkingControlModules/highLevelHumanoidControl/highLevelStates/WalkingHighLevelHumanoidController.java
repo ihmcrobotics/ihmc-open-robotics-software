@@ -945,7 +945,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
          // Just standing in double support, do nothing
          if (transferToSide == null)
-            pelvisOrientationManager.setToHoldCurrentDesiredInWorldFrame();
+            pelvisOrientationManager.setToHoldCurrentDesiredInMidFeetZUpFrame();
          // Transferring to execute a foot pose, hold current desired in upcoming support foot in case it slips
          else if (footPoseProvider.checkForNewPose() != null)
             pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
