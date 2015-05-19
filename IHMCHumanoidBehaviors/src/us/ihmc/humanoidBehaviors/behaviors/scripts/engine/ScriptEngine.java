@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import com.thoughtworks.xstream.io.StreamException;
+
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
@@ -66,10 +69,9 @@ public class ScriptEngine
 
          return scriptObjects;
       }
-      catch (IOException e)
+      catch (IOException | StreamException exception)
       {
-         System.err.println("Problem loading file. Try another one. Sorry :(.");
-
+         PrintTools.error("Problem loading file. Try another one. Sorry :(.");
          return null;
       }
    }

@@ -8,18 +8,20 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import us.ihmc.utilities.TransformableDataObject;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 public class ScriptFileLoader
 {
 
    private final FileReader fileReader;
-   private final ObjectInputStream inputStream;
+   private ObjectInputStream inputStream;
 
-   public ScriptFileLoader(String filename) throws IOException
+   public ScriptFileLoader(String filename) throws IOException, StreamException
    {
       File file = new File(filename);
       if (!file.exists())
@@ -42,6 +44,7 @@ public class ScriptFileLoader
       };
 
       fileReader = new FileReader(file.getAbsoluteFile());
+      
       inputStream = xStream.createObjectInputStream(fileReader);
    }
    
