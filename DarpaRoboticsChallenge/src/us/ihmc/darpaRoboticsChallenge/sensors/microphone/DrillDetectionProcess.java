@@ -19,7 +19,7 @@ public class DrillDetectionProcess extends DrillDetectionThread implements NetSt
 
    public DrillDetectionProcess()
    {
-      super(new DrillDetectionAlgorithmSimple());
+      super(new DrillDetectionCalibrationHelper());
    }
 
    @Override
