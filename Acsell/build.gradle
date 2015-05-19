@@ -27,7 +27,7 @@ remotes {
 	wandererController
     {
 		host = '10.66.171.21'
-    	user = 'unknownid'
+    	user = 'root'
 		password = 'unknownpw'
 		knownHosts = allowAnyHosts
     }
