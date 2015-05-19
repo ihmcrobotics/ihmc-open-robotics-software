@@ -1,3 +1,7 @@
+plugins {
+  id 'org.hidetake.ssh' version '1.1.3'
+}
+
 apply plugin: 'java'
 apply from: 'gradleScripts/util.gradle'
 
@@ -10,56 +14,38 @@ setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
 
-buildscript {
-    repositories {
-        jcenter()
 
-        maven{
-            url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-        }
-    }
-    dependencies {
-        classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
-        classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
+
+remotes {
+	stepprController
+   	{
+    	host = '10.66.171.20' //CPU1
+        user = 'root'
+        password = 'unknownpw'
+        knownHosts = allowAnyHosts
+	}
+	wandererController
+    {
+		host = '10.66.171.21'
+    	user = 'unknownid'
+		password = 'unknownpw'
+		knownHosts = allowAnyHosts
     }
 }
-
-
-apply plugin: 'org.hidetake.ssh'
-
-remotes
-        {
-            stepprController
-                    {
-                        host = '10.66.171.20' //CPU1
-                        user = 'root'
-                        password = 'unknownpw'
-                        knownHosts = allowAnyHosts
-                    }
-            wandererController
-                    {
-					    host='10.66.171.21'
-                        user = 'unknownid'
-                        password = 'unknownpw'
-                        knownHosts = allowAnyHosts
-                    }
-        }
-
 
 jar {
 	List depend = []
 	configurations.runtime.each {
-	if(!it.name.contains("IHMCHumanoidOperatorInterface"))
-		{
+		if(!it.name.contains("IHMCHumanoidOperatorInterface")){
 			depend.add('lib/' + it.name)
 		}
 	}
-	manifest {		
+	manifest {
 		attributes('Created-By': 'IHMC Gradle Build Script', 'Implementation-Vendor': 'IHMC', 'Class-Path': depend.join(' '))
 	}
 }
 
-task deploy(dependsOn: assemble) {
+task deploy(dependsOn: assemble) << {
 
 	def rep;
 	def scriptDir;
@@ -82,28 +68,23 @@ task deploy(dependsOn: assemble) {
 		throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
 	}
 
-	doLast{
-	sshexec {
-            session(rep)
-                    {
-                    execute("mkdir -p " + directory + "/lib")
+	ssh.run {
+		session(rep) {
+			execute("mkdir -p " + directory + "/lib")
 
-                        configurations.runtime.each
-                                {
-                                    put it, directory + '/lib'
-                                }
+			configurations.runtime.each
+            {
+            	put it, directory + '/lib'
+        	}
 
-                        put jar.archivePath, directory + '/AcsellController.jar'
+            put jar.archivePath, directory + '/AcsellController.jar'
 
-                        def scriptDirCollection = files { scriptDir.listFiles() }
-                        put scriptDirCollection, directory
+            def scriptDirCollection = files { scriptDir.listFiles() }
+	        put scriptDirCollection, directory
 
-                        scriptDirCollection.each
-                                {
-                                    execute 'chmod 777 ' + directory + '/' + it.name
-                                }
-                    }
-            }
-
+            scriptDirCollection.each {
+                execute 'chmod 777 ' + directory + '/' + it.name
+			}
+		}
 	}
 }
