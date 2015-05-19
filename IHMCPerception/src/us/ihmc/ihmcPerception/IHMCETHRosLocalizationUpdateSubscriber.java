@@ -92,8 +92,8 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       };
       rosMainNode.attachSubscriber(RosLocalizationConstants.NAV_POSE_MAP, pointMapSubscriber);
       
-      Thread localizationMapPublishingThread = new Thread(this);
-      localizationMapPublishingThread.start();  
+//      Thread localizationMapPublishingThread = new Thread(this);
+//      localizationMapPublishingThread.start();  
       
    }
    
