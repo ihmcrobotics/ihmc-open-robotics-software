@@ -41,7 +41,23 @@ jar {
 
 task deploy(dependsOn: assemble) {
 
-	def rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
+	def rep;
+	def scriptDir;
+	if(!project.hasProperty("robot")) {
+		throw new GradleException("No robot passed in. Pass in -Probot=[robot].");
+	}
+	else if("$robot" == "steppr") {
+		rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
+		scriptDir = new File("scripts/steppr");
+	}
+	else if("$robot" == "wanderer") {
+		rep = new org.apache.maven.wagon.repository.Repository("wanderer", "scp://10.66.171.21/root/acsell")
+		scriptDir = new File("scripts/wanderer");
+	}
+	else {
+		throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
+	}
+	
 	def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo() 
 	auth.userName = 'root'
 	auth.password = 'unknownpw'
@@ -59,7 +75,7 @@ task deploy(dependsOn: assemble) {
 			wagon.put(it, "lib/" + it.name)
 		}
 		
-		def scriptDir = new File("scripts")
+		
 		def scriptDirCollection = files { scriptDir.listFiles() }
 		scriptDirCollection.each
 		{
