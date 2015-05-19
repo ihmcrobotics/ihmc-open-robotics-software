@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import com.thoughtworks.xstream.io.StreamException;
+
 import us.ihmc.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.communication.packets.walking.FootPosePacket;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.PauseCommand;
+import us.ihmc.utilities.io.printing.PrintTools;
 
 /**
  * Created with IntelliJ IDEA.
@@ -126,13 +129,23 @@ public class ScriptTools
       }
    }
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args) //throws IOException
    {
       File file = ScriptFileSelector.getScriptFileFromUserSelection(ScriptEngineSettings.extension);
 
       System.out.println("Loading file: " + file.getAbsolutePath());
 
-      ScriptFileLoader loader = new ScriptFileLoader(file.getAbsolutePath());
+      ScriptFileLoader loader = null;
+      try
+      {
+         loader = new ScriptFileLoader(file.getAbsolutePath());
+      }
+      catch (StreamException | IOException e)
+      {
+         PrintTools.error(e.getMessage());
+         System.exit(-1);
+      }
+      
       ArrayList<ScriptObject> scriptObjects = loader.readIntoList();
       loader.close();
 
@@ -147,6 +160,6 @@ public class ScriptTools
       System.out.println("\nAfter:");
       System.out.println(ScriptObject.getListInfo(scriptObjects));
 
-      System.exit(0);
+      System.exit(-1);
    }
 }
