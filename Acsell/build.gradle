@@ -4,26 +4,46 @@ apply from: 'gradleScripts/util.gradle'
 sourceCompatibility = 1.7
 version = '1.0'
 
-configurations {
-	sshAntTask
-}
-
-buildscript {
-  repositories {
-	  maven{
-		  url "https://bengal.ihmc.us/nexus/content/repositories/central/"
-	  }
-  }  
-  dependencies {
-      classpath "org.apache.maven.wagon:wagon-ssh:2.7" 
-  }
-}
-
 setupDefaultDirectoryStructure()
 
 setupDefaultRepositories()
 
 setupProjectSpecificDependencies()
+
+buildscript {
+    repositories {
+        jcenter()
+
+        maven{
+            url "https://bengal.ihmc.us/nexus/content/repositories/central/"
+        }
+    }
+    dependencies {
+        classpath "com.monochromeroad.gradle-plugins:gradle-aws-s3-sync:0.5"
+        classpath 'org.hidetake:gradle-ssh-plugin:0.3.12'
+    }
+}
+
+
+apply plugin: 'org.hidetake.ssh'
+
+remotes
+        {
+            stepprController
+                    {
+                        host = '10.66.171.20' //CPU1
+                        user = 'root'
+                        password = 'unknownpw'
+                        knownHosts = allowAnyHosts
+                    }
+            wandererController
+                    {
+					    host='10.66.171.21'
+                        user = 'unknownid'
+                        password = 'unknownpw'
+                        knownHosts = allowAnyHosts
+                    }
+        }
 
 
 jar {
@@ -43,60 +63,47 @@ task deploy(dependsOn: assemble) {
 
 	def rep;
 	def scriptDir;
+	def directory;
+	
 	if(!project.hasProperty("robot")) {
 		throw new GradleException("No robot passed in. Pass in -Probot=[robot].");
 	}
 	else if("$robot" == "steppr") {
-		rep = new org.apache.maven.wagon.repository.Repository("steppr", "scp://10.66.171.20/root/acsell")
+		rep = remotes.stepprController
 		scriptDir = new File("scripts/steppr");
+		directory = "steppr"
 	}
 	else if("$robot" == "wanderer") {
-		rep = new org.apache.maven.wagon.repository.Repository("wanderer", "scp://10.66.171.21/root/acsell")
+		rep = remotes.wandererController
 		scriptDir = new File("scripts/wanderer");
+		directory = "wanderer"
 	}
 	else {
 		throw new GradleException("Invalid robot \"$robot\" passed in. Valid options are \"steppr\" and \"wanderer\"");
 	}
-	
-	def auth = new org.apache.maven.wagon.authentication.AuthenticationInfo() 
-	auth.userName = 'root'
-	auth.password = 'unknownpw'
-	def hosts = new org.apache.maven.wagon.providers.ssh.knownhost.NullKnownHostProvider()
-	hosts.setHostKeyChecking("no")
-	
-		
-	doLast {
-		def wagon = new org.apache.maven.wagon.providers.ssh.jsch.ScpWagon() 
-		wagon.setKnownHostsProvider(hosts)
-		wagon.connect(rep, auth)
-		
-		configurations.runtime.each 
-		{
-			wagon.put(it, "lib/" + it.name)
-		}
-		
-		
-		def scriptDirCollection = files { scriptDir.listFiles() }
-		scriptDirCollection.each
-		{
-			wagon.put(it, it.name)
-		}
 
-		def configDir = new File("Configurations")
-		def configFileCollection = files { configDir.listFiles() }
-		configFileCollection.each
-		{
-			if(it.name.contains(".ini"))
-			{
-				
-				System.out.println(it.name)
-				wagon.put(it, "Configurations/" + it.name)
-			}
-		}
-		def networkParams = new File("IHMCNetworkParameters.ini")
-		wagon.put(networkParams, networkParams.name)
-		
-		wagon.put(jar.archivePath, "AcsellController.jar")
+	doLast{
+	sshexec {
+            session(rep)
+                    {
+                    execute("mkdir -p " + directory + "/lib")
+
+                        configurations.runtime.each
+                                {
+                                    put it, directory + '/lib'
+                                }
+
+                        put jar.archivePath, directory + '/AcsellController.jar'
+
+                        def scriptDirCollection = files { scriptDir.listFiles() }
+                        put scriptDirCollection, directory
+
+                        scriptDirCollection.each
+                                {
+                                    execute 'chmod 777 ' + directory + '/' + it.name
+                                }
+                    }
+            }
+
 	}
-	 
 }
