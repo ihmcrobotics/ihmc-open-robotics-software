@@ -9,10 +9,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
@@ -39,7 +38,7 @@ public class ROSMessageGenerator
    {
       generate();
    }
-   
+
    public static void generate() throws Exception
    {
       ROSMessageGenerator messageGenerator = new ROSMessageGenerator(true);
@@ -55,8 +54,8 @@ public class ROSMessageGenerator
       {
          return "";
       }
-      
-      if(!IHMCRosApiPacket.class.isAssignableFrom(clazz))
+
+      if (!IHMCRosApiPacket.class.isAssignableFrom(clazz))
          System.err.println(clazz.getSimpleName() + " does not extend IHMCRosApiPacket");
 
       File file = new File(messageFolder);
@@ -82,11 +81,11 @@ public class ROSMessageGenerator
             ClassDocumentation annotation = (ClassDocumentation) clazz.getAnnotation(ClassDocumentation.class);
             if (annotation != null)
             {
-            	String[] annotationString = annotation.documentation().split("\r?\n|\r");
-         	   for(String line : annotationString)
-         	   {
-         		   outBuffer += "# " + line + System.lineSeparator();
-         	   }
+               String[] annotationString = annotation.documentation().split("\r?\n|\r");
+               for (String line : annotationString)
+               {
+                  outBuffer += "# " + line + System.lineSeparator();
+               }
             }
             else
             {
@@ -96,14 +95,29 @@ public class ROSMessageGenerator
             outBuffer += System.lineSeparator();
 
             Field[] fields = clazz.getFields();
+            Set<String> enumsAlreadyDocumented = new TreeSet<String>();
             for (Field field : fields)
             {
-               if(isConstant(field) || isIgnoredField(field))
+               if (isConstant(field) || isIgnoredField(field))
                {
                   continue;
                }
 
-               outBuffer += printType(field);
+               if (field.getType().isEnum())
+               {
+                  String enumName = field.getType().getSimpleName();
+                  boolean duplicateEnum = enumsAlreadyDocumented.contains(enumName);
+                  if (!duplicateEnum)
+                  {
+                     enumsAlreadyDocumented.add(enumName);
+                  }
+
+                  outBuffer += printType(field, duplicateEnum);
+               }
+               else
+               {
+                  outBuffer += printType(field);
+               }
 
                String formattedFieldName = camelCaseToLowerCaseWithUnderscores(field.getName());
                outBuffer += " " + formattedFieldName + System.lineSeparator() + System.lineSeparator();
@@ -119,15 +133,15 @@ public class ROSMessageGenerator
 
       return messageName;
    }
-   
+
    private String camelCaseToLowerCaseWithUnderscores(String in)
    {
       String regex = "([a-z])([A-Z]+)";
       String replacement = "$1_$2";
-      
+
       String inWithUnderscores = in.replaceAll(regex, replacement);
       String ret = inWithUnderscores.toLowerCase();
-      
+
       return ret;
    }
 
@@ -145,26 +159,31 @@ public class ROSMessageGenerator
 
    private String printType(Field field) throws Exception
    {
-	   String buffer = "";
-	   FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
-	   if(fieldAnnotation != null)
-	   {
-		   String[] annotationString = fieldAnnotation.documentation().split("\r?\n|\r");
-		   for(String line : annotationString)
-		   {
-			   buffer += "# " + line + System.lineSeparator();
-		   }
-	   }
-	   
+      return printType(field, false);
+   }
+
+   private String printType(Field field, boolean duplicateEnum) throws Exception
+   {
+      String buffer = "";
+      FieldDocumentation fieldAnnotation = field.getAnnotation(FieldDocumentation.class);
+      if (fieldAnnotation != null)
+      {
+         String[] annotationString = fieldAnnotation.documentation().split("\r?\n|\r");
+         for (String line : annotationString)
+         {
+            buffer += "# " + line + System.lineSeparator();
+         }
+      }
+
       if (List.class.isAssignableFrom(field.getType()))
       {
          Class genericType = ((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]);
-         buffer += printType(genericType, field.getName());
+         buffer += printType(genericType, field.getName(), duplicateEnum);
          buffer += "[]";
       }
       else
       {
-         buffer += printType(field.getType(), field.getName());
+         buffer += printType(field.getType(), field.getName(), duplicateEnum);
       }
 
       return buffer;
@@ -172,6 +191,12 @@ public class ROSMessageGenerator
 
    @SuppressWarnings("unchecked")
    private String printType(Class clazz, String varName) throws Exception
+   {
+      return printType(clazz, varName, false);
+   }
+
+   @SuppressWarnings("unchecked")
+   private String printType(Class clazz, String varName, boolean duplicateEnum) throws Exception
    {
       String buffer = "";
       if (clazz == null)
@@ -181,7 +206,7 @@ public class ROSMessageGenerator
 
       if (clazz.isArray())
       {
-         buffer += printType(clazz.getComponentType(), varName );
+         buffer += printType(clazz.getComponentType(), varName, duplicateEnum);
          buffer += "[]";
       }
       else if (clazz.isEnum())
@@ -189,21 +214,28 @@ public class ROSMessageGenerator
          if (DocumentedEnum.class.isAssignableFrom(clazz))
          {
             DocumentedEnum[] enumList = (DocumentedEnum[]) clazz.getEnumConstants();
-            if(enumList.length > 0)
+            if (enumList.length > 0)
             {
                List<Object> documentedValues = Arrays.asList(enumList[0].getDocumentedValues());
-               
+
                buffer += "# Options for " + varName + System.lineSeparator();
-               
+
                for (int i = 0; i < documentedValues.size(); i++)
                {
-                  buffer += "uint8 " + documentedValues.get(i).toString() + "=" + i;
+                  if (duplicateEnum)
+                  {
+                     buffer += "# ";
+                  }else
+                  {
+                     buffer += "uint8 ";
+                  }
+                  buffer += documentedValues.get(i).toString() + "=" + i;
                   DocumentedEnum<Object> documentedEnum = (DocumentedEnum<Object>) Enum.valueOf(clazz, documentedValues.get(i).toString());
                   String documentation = documentedEnum.getDocumentation(documentedValues.get(i));
                   buffer += " # " + documentation;
                   buffer += System.lineSeparator();
                }
-               
+
                buffer += "uint8";
             }
          }
@@ -265,13 +297,13 @@ public class ROSMessageGenerator
 
       return buffer;
    }
-   
-//   private void printAnnotation(String annotaionString, String printBuffer)
-//   {
-//	   String[] annotationString = annotaionString.split("\r?\n|\r");
-//	   for(String line : annotationString)
-//	   {
-//		   printBuffer += "# " + line + System.lineSeparator();
-//	   }
-//   }
+
+// private void printAnnotation(String annotaionString, String printBuffer)
+// {
+//       String[] annotationString = annotaionString.split("\r?\n|\r");
+//       for(String line : annotationString)
+//       {
+//               printBuffer += "# " + line + System.lineSeparator();
+//       }
+// }
 }
