@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+import com.esotericsoftware.kryo.Kryo;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-
-import com.esotericsoftware.kryo.Kryo;
+import us.ihmc.communication.net.TcpNetStateListener;
 
 public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicator
 {
@@ -72,6 +72,12 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
             listener.consumeObject(object);
          }
       }
+   }
+
+   @Override
+   public void attachStateListener(TcpNetStateListener stateListener)
+   {
+      throw new RuntimeException("TcpNetStateListeners are not allowed for intraprocess communication!");
    }
 
    @Override

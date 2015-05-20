@@ -8,11 +8,16 @@ public interface NetworkedObjectCommunicator extends ObjectCommunicator
     * @param object
     * @return bytes send
     */
-   public int send(Object object);
-   
+   int send(Object object);
+
+   /**
+    * TCP connections may want to change settings like keepAlive or timeOut.
+    */
+   void attachStateListener(TcpNetStateListener stateListener);
+
    /**
     * Disconnect the connection, but leave the executor listeners alive. This allows re-connecting at a later moment. 
     * Use close() when you want to shutdown the connection completely. 
     */
-   public void closeConnection();
+   void closeConnection();
 }

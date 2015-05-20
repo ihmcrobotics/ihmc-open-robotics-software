@@ -12,6 +12,7 @@ import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.net.TcpNetStateListener;
 import us.ihmc.communication.net.local.IntraprocessObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
@@ -68,6 +69,11 @@ public class PacketCommunicator
    }
 
    public void attachStateListener(NetStateListener stateListener)
+   {
+      communicator.attachStateListener(stateListener);
+   }
+
+   public void attachStateListener(TcpNetStateListener stateListener)
    {
       communicator.attachStateListener(stateListener);
    }
