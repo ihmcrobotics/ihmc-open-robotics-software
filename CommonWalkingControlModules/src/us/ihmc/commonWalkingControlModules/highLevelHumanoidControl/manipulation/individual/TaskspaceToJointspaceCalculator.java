@@ -120,7 +120,7 @@ public class TaskspaceToJointspaceCalculator
 
    private final DenseMatrix64F privilegedJointVelocities;
    private final DenseMatrix64F jointSquaredRangeOfMotions;
-   private final DenseMatrix64F jointAnlgesAtMidRangeOfMotion;
+   private final DenseMatrix64F jointAnglesAtMidRangeOfMotion;
    private final DenseMatrix64F desiredJointAngles;
    private final DenseMatrix64F desiredJointVelocities;
    private final DenseMatrix64F desiredJointAccelerations;
@@ -175,7 +175,7 @@ public class TaskspaceToJointspaceCalculator
       desiredJointAccelerations = new DenseMatrix64F(numberOfDoF, 1);
 
       jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoF, 1);
-      jointAnlgesAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoF, 1);
+      jointAnglesAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoF, 1);
 
       maximumJointVelocity = new DoubleYoVariable(namePrefix + "MaximumJointVelocity", registry);
       maximumJointVelocity.set(Double.POSITIVE_INFINITY);
@@ -194,7 +194,7 @@ public class TaskspaceToJointspaceCalculator
          yoPrivilegedJointPositions[i] = new DoubleYoVariable("q_privileged_" + jointName, registry);
          yoPrivilegedJointPositionsFiltered[i] = new AlphaFilteredYoVariable("q_privileged_filt_" + jointName, registry, 0.99, yoPrivilegedJointPositions[i]);
          jointSquaredRangeOfMotions.set(i, 0, MathTools.square(localJoints[i].getJointLimitUpper() - localJoints[i].getJointLimitLower()));
-         jointAnlgesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
+         jointAnglesAtMidRangeOfMotion.set(i, 0, 0.5 * (localJoints[i].getJointLimitUpper() + localJoints[i].getJointLimitLower()));
       }
 
       yoDesiredControlFramePose = new YoFramePose(namePrefix + "Desired", worldFrame, registry);
@@ -339,7 +339,7 @@ public class TaskspaceToJointspaceCalculator
    public void setPrivilegedJointPositionsToMidRange()
    {
       for (int i = 0; i < numberOfDoF; i++)
-         yoPrivilegedJointPositions[i].set(jointAnlgesAtMidRangeOfMotion.get(i, 0));
+         yoPrivilegedJointPositions[i].set(jointAnglesAtMidRangeOfMotion.get(i, 0));
    }
 
    public void setPrivilegedJointPosition(int jointIndex, double qPrivileged)
@@ -617,14 +617,14 @@ public class TaskspaceToJointspaceCalculator
       
       for (int i = 0; i < numberOfDoF; i++)
       {
-         sumOfPows += MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnlgesAtMidRangeOfMotion.get(i, 0)), p);
+         sumOfPows += MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p);
       }
 
       pThRootOfSumOfPows = Math.pow(sumOfPows, 1.0 / ((double) p));
 
       for (int i = 0; i < numberOfDoF; i++)
       {
-         double numerator = MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnlgesAtMidRangeOfMotion.get(i, 0)), p - 1) * pThRootOfSumOfPows;
+         double numerator = MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p - 1) * pThRootOfSumOfPows;
          double qDotPrivileged = - weight * numerator / sumOfPows;
          privilegedJointVelocitiesToPack.set(i, 0, qDotPrivileged);
       }
@@ -650,6 +650,27 @@ public class TaskspaceToJointspaceCalculator
       return NormOps.normP2(subspaceSpatialError);
    }
 
+   private final FramePoint tempPoint = new FramePoint();
+   private final FrameVector tempPositionError = new FrameVector();
+
+   public double getNormPositionError(FramePoint desiredPosition)
+   {
+      tempPoint.setIncludingFrame(desiredPosition);
+      tempPoint.changeFrame(localControlFrame);
+      tempPositionError.setIncludingFrame(tempPoint);
+      return tempPositionError.length();
+   }
+
+   private final FrameOrientation tempOrientation = new FrameOrientation();
+
+   public double getNormRotationError(FrameOrientation desiredOrientation)
+   {
+      tempOrientation.setIncludingFrame(desiredOrientation);
+      tempOrientation.changeFrame(localControlFrame);
+      tempOrientation.getAxisAngle(errorAxisAngle);
+      return Math.abs(errorAxisAngle.getAngle());
+   }
+
    public DenseMatrix64F getDesiredJointAngles()
    {
       return desiredJointAngles;
@@ -663,6 +684,18 @@ public class TaskspaceToJointspaceCalculator
    public DenseMatrix64F getDesiredJointAccelerations()
    {
       return desiredJointAccelerations;
+   }
+
+   public void getDesiredJointAngles(DenseMatrix64F desiredJointAnglesToPack)
+   {
+      desiredJointAnglesToPack.reshape(numberOfDoF, 1);
+      desiredJointAnglesToPack.set(desiredJointAngles);
+   }
+
+   public void getDesiredJointVelocities(DenseMatrix64F desiredJointVelocitiesToPack)
+   {
+      desiredJointVelocitiesToPack.reshape(numberOfDoF, 1);
+      desiredJointVelocitiesToPack.set(desiredJointVelocities);
    }
 
    public void packDesiredJointAnglesIntoOneDoFJoints(OneDoFJoint[] joints)
