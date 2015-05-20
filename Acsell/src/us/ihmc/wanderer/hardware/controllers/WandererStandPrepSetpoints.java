@@ -6,9 +6,9 @@ import us.ihmc.wanderer.hardware.WandererJoint;
 public enum WandererStandPrepSetpoints
 {
    
-   TORSO_Z(      0, 11820,    0, 455.04,  1, WandererJoint.TORSO_Z),
-   TORSO_Y(   0.05, 16800,    0,    648,  1, WandererJoint.TORSO_Y),
-   TORSO_X(      0, 14890,    0, 573.12,  1, WandererJoint.TORSO_X),
+   TORSO_Z(      0,  6800,    0, 455.04,  1, WandererJoint.TORSO_Z),
+   TORSO_Y(   0.05,  9000,    0,    648,  1, WandererJoint.TORSO_Y),
+   TORSO_X(      0,  4500,    0, 573.12,  1, WandererJoint.TORSO_X),
    HIP_X(     0.05,   500, 25.0,    100, -1, WandererJoint.LEFT_HIP_X, WandererJoint.RIGHT_HIP_X),
    HIP_Z(        0,   125, 6.25,     10, -1, WandererJoint.LEFT_HIP_Z, WandererJoint.RIGHT_HIP_Z), // damping must < 20
    HIP_Y(    -0.24,   500, 25.0,   89.3,  1, WandererJoint.LEFT_HIP_Y, WandererJoint.RIGHT_HIP_Y),

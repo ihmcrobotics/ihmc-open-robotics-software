@@ -170,7 +170,7 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    }
 
    private final double minimumHeightAboveGround = 0.695;
-   private double nominalHeightAboveGround = 0.80;
+   private double nominalHeightAboveGround = 0.79;
    private final double maximumHeightAboveGround = 0.89;//Hip height fully upright//0.735;
    //private final double additionalOffsetHeightWanderer = 0.15;
 
@@ -348,37 +348,37 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    {
       ICPControlGains gains = new ICPControlGains();
 
-      double kp = 1.5;
-      double ki = 4.0;
-      double kiBleedOff = 0.9;
-      boolean useRawCMP = false;
-      double cmpFilterBreakFrequencyInHertz = 16.0;
-      double cmpRateLimit = 6.0;
-      double cmpAccelerationLimit = 200.0;
-
-      gains.setKpParallelToMotion(kp);
-      gains.setKpOrthogonalToMotion(kp);
-      gains.setKi(ki);
-      gains.setKiBleedOff(kiBleedOff);
-      gains.setUseRawCMP(useRawCMP);
-      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
-      gains.setCMPRateLimit(cmpRateLimit);
-      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
-
-      // TODO Try using similar parameters to Atlas:
-//      double kpParallel = 2.5;
-//      double kpOrthogonal = 1.5;
-//      double ki = 0.0;
+//      double kp = 1.5;
+//      double ki = 4.0;
 //      double kiBleedOff = 0.9;
-//      boolean useRawCMP = true;
-//      boolean useHackToReduceFeedForward = false;
+//      boolean useRawCMP = false;
+//      double cmpFilterBreakFrequencyInHertz = 16.0;
+//      double cmpRateLimit = 6.0;
+//      double cmpAccelerationLimit = 200.0;
 //
-//      gains.setKpParallelToMotion(kpParallel);
-//      gains.setKpOrthogonalToMotion(kpOrthogonal);
+//      gains.setKpParallelToMotion(kp);
+//      gains.setKpOrthogonalToMotion(kp);
 //      gains.setKi(ki);
 //      gains.setKiBleedOff(kiBleedOff);
 //      gains.setUseRawCMP(useRawCMP);
-//      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
+//      gains.setCMPFilterBreakFrequencyInHertz(cmpFilterBreakFrequencyInHertz);
+//      gains.setCMPRateLimit(cmpRateLimit);
+//      gains.setCMPAccelerationLimit(cmpAccelerationLimit);
+
+      // TODO Try using similar parameters to Atlas:
+      double kpParallel = 2.5;
+      double kpOrthogonal = 1.5;
+      double ki = 0.0;
+      double kiBleedOff = 0.9;
+      boolean useRawCMP = true;
+      boolean useHackToReduceFeedForward = false;
+
+      gains.setKpParallelToMotion(kpParallel);
+      gains.setKpOrthogonalToMotion(kpOrthogonal);
+      gains.setKi(ki);
+      gains.setKiBleedOff(kiBleedOff);
+      gains.setUseRawCMP(useRawCMP);
+      gains.setUseHackToReduceFeedForward(useHackToReduceFeedForward);
 
       return gains;
    }
@@ -524,13 +524,13 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    {
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
-      double kpXY = 75.0;
-      double kpZ = 100.0; // 200.0 Trying to smash the ground there
-      double zetaXYZ = 0.3;
-      double kpXYOrientation = 100.0; // 300 not working
+      double kpXY = 150.0;
+      double kpZ = 200.0; // 200.0 Trying to smash the ground there
+      double zetaXYZ = 0.7;
+      double kpXYOrientation = 150.0; // 300 not working
       double kpZOrientation = 100.0;
-      double zetaXYOrientation = 0.3;
-      double zetaZOrientation = runningOnRealRobot ? 0.3 : 0.7;
+      double zetaXYOrientation = 0.7;
+      double zetaZOrientation = 0.7;
       double maxPositionAcceleration = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
       double maxPositionJerk = runningOnRealRobot ? 150.0 : Double.POSITIVE_INFINITY;
       double maxOrientationAcceleration = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
@@ -905,6 +905,6 @@ public class WandererWalkingControllerParameters implements WalkingControllerPar
    public boolean useICPPlannerHackN13()
    {
       // TODO When using new ICP planner, set that one to false.
-      return true;
+      return false;
    }
 }

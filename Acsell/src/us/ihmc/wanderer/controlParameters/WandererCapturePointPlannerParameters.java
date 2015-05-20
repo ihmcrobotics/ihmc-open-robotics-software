@@ -13,8 +13,8 @@ public class WandererCapturePointPlannerParameters implements CapturePointPlanne
    public WandererCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      useTwoCMPsPerSupport = false;
-      useNewICPPlanner = false;
+      useTwoCMPsPerSupport = true;
+      useNewICPPlanner = true;
    }
 
    /** {@inheritDoc} */
@@ -156,7 +156,7 @@ public class WandererCapturePointPlannerParameters implements CapturePointPlanne
    public boolean useTerribleHackToReduceICPVelocityAtTheEndOfTransfer()
    {
       // TODO Try to deactivate that one.
-      return true;
+      return false;
    }
 
    /** {@inheritDoc} */

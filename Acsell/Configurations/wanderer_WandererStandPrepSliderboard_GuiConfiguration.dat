@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorStatorHallSwitches,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorStatorHallSwitches</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -114,7 +114,7 @@ Tab1
 <Title>
 Tab2
 </Title>
-<Entry Boxes></Entry Boxes>
+<Entry Boxes>requestedHighLevelState,kpXYLinearSwingFoot,kdXYLinearSwingFoot,zetaLinearSwingFoot,kpZLinearSwingFoot,zetaXYAngularSwingFoot,zetaZAngularSwingFoot</Entry Boxes>
 </EntryBoxTab>
 </Entry Boxes Tab Pane>
 
@@ -123,51 +123,51 @@ Tab2
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>7</Graph Array Window Size>
+<Graph Array Window Size>8</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
 <WindowLocation>1920.0, 0.0</WindowLocation>
 <WindowSize>1918.0, 1163.0</WindowSize>
 <GraphGroup>
-	<Cols>1</Cols>
+	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorRawPhaseACurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorRawPhaseBCurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorRawPhaseCCurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorControlTarget</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.leftHipXActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config9</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>16500.0</MaxScaling>
-			<MinScaling>16000.0</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseACurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseBCurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorRawPhaseCCurrentADTicks,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorControlTarget</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.rightHipXActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config10</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>16500.0</MaxScaling>
-			<MinScaling>16000.0</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorMotorEncoderPosition,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorJointEncoderPosition,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorJointEncoderPosition,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorEncoderPosition</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config11</Name>
-			<ScalingMethod>2</ScalingMethod>
+			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
 			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>12.0</MaxScaling>
-			<MinScaling>-12.0</MinScaling>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorQuadratureCompositeStatorCurrent,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorQuadratureCompositeStatorCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipYActuator.leftHipYActuatorCurrentDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipYActuator.rightHipYActuatorCurrentDesired</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config12</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -179,7 +179,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.WandererStandPrepSliderBoard.selectedJoint_q_d,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorJointEncoderPosition,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorJointEncoderPosition</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.leftHipZActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config13</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -191,9 +191,81 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.rightHipXActuatorJointEncoderPosition,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.leftHipXActuatorJointEncoderPosition</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.rightHipZActuatorMotorPower</Variables>
 		<GraphConfiguration>
 			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.leftKneeActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.rightKneeActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorMotorPower</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -210,79 +282,7 @@ Tab2
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.leftHipXActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.rightHipXActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config18</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.leftHipZActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config19</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.rightHipZActuatorMotorPower</Variables>
-		<GraphConfiguration>
-			<Name>config20</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.leftKneeActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipXActuator.leftHipXActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.leftHipXActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -294,7 +294,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.rightKneeActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipXActuator.rightHipXActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.rightHipXActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -306,7 +306,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipZActuator.leftHipZActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.leftHipZActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -318,7 +318,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipZActuator.rightHipZActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.rightHipZActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -330,7 +330,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipYActuator.leftHipYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -342,9 +342,81 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorMotorPower</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipYActuator.rightHipYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorQuadratureCompositeStatorCurrent</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftKneeActuator.leftKneeActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.leftKneeActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightKneeActuator.rightKneeActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.rightKneeActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftAnkleCommand.leftAnkleCommandRightActuator.leftAnkleCommandRightActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config29</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightAnkleCommand.rightAnkleCommandRightActuator.rightAnkleCommandRightActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftAnkleCommand.leftAnkleCommandLeftActuator.leftAnkleCommandLeftActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightAnkleCommand.rightAnkleCommandLeftActuator.rightAnkleCommandLeftActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorQuadratureCompositeStatorCurrent</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -361,79 +433,7 @@ Tab2
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipXActuator.leftHipXActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.leftHipXActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config27</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipXActuator.rightHipXActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.rightHipXActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config28</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipZActuator.leftHipZActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.leftHipZActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config29</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipZActuator.rightHipZActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.rightHipZActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config30</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftHipYActuator.leftHipYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.leftHipYActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config31</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightHipYActuator.rightHipYActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.rightHipYActuatorQuadratureCompositeStatorCurrent</Variables>
-		<GraphConfiguration>
-			<Name>config32</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftKneeActuator.leftKneeActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.leftKneeActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.SlowSensors.leftHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -445,7 +445,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightKneeActuator.rightKneeActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.rightKneeActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.SlowSensors.rightHipXActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -457,7 +457,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftAnkleCommand.leftAnkleCommandRightActuator.leftAnkleCommandRightActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.leftAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.SlowSensors.leftHipZActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -469,7 +469,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightAnkleCommand.rightAnkleCommandRightActuator.rightAnkleCommandRightActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.rightAnkleRightActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.SlowSensors.rightHipZActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -481,7 +481,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.leftAnkleCommand.leftAnkleCommandLeftActuator.leftAnkleCommandLeftActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.leftAnkleLeftActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.SlowSensors.leftHipYActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config37</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -493,9 +493,81 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.rightAnkleCommand.rightAnkleCommandLeftActuator.rightAnkleCommandLeftActuatorCurrentDesired_filt,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.rightAnkleLeftActuatorQuadratureCompositeStatorCurrent</Variables>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.SlowSensors.rightHipYActuatorQuadratureControlEffort</Variables>
 		<GraphConfiguration>
 			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorQuadratureControlEffort</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -512,79 +584,7 @@ Tab2
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipXActuator.SlowSensors.leftHipXActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config39</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipXActuator.SlowSensors.rightHipXActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config40</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipZActuator.SlowSensors.leftHipZActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config41</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipZActuator.SlowSensors.rightHipZActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config42</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftHipYActuator.SlowSensors.leftHipYActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config43</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightHipYActuator.SlowSensors.rightHipYActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config44</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorQuadratureControlEffort</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkle.leftAnkle_tau_yPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.l_leg_uay.l_leg_uayTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_uay_tauSpringCorrection</Variables>
 		<GraphConfiguration>
 			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -596,7 +596,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorQuadratureControlEffort</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkle.rightAnkle_tau_yPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.r_leg_uay.r_leg_uayTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_uay_tauSpringCorrection</Variables>
 		<GraphConfiguration>
 			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -608,7 +608,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleLeftActuator.SlowSensors.leftAnkleLeftActuatorQuadratureControlEffort</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.l_leg_mhx.l_leg_mhx_tauPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.l_leg_mhx.l_leg_mhxTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_mhx_tauSpringCorrection</Variables>
 		<GraphConfiguration>
 			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -620,33 +620,9 @@ Tab2
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorQuadratureControlEffort</Variables>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.r_leg_mhx.r_leg_mhx_tauPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.r_leg_mhx.r_leg_mhxTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_mhx_tauSpringCorrection</Variables>
 		<GraphConfiguration>
 			<Name>config48</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config49</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleLeftActuator.SlowSensors.rightAnkleLeftActuatorQuadratureControlEffort</Variables>
-		<GraphConfiguration>
-			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -658,69 +634,14 @@ Tab2
 </GraphGroup>
 </Graph Array Window4><Graph Array Window5>
 <ScreenID>1</ScreenID>
-<WindowLocation>2080.0, 164.0</WindowLocation>
-<WindowSize>1457.0, 859.0</WindowSize>
-<GraphGroup>
-	<Cols>2</Cols>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkle.leftAnkle_tau_yPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.l_leg_uay.l_leg_uayTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_uay_tauSpringCorrection</Variables>
-		<GraphConfiguration>
-			<Name>config51</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_uay_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkle.rightAnkle_tau_yPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.r_leg_uay.r_leg_uayTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_uay_tauSpringCorrection</Variables>
-		<GraphConfiguration>
-			<Name>config52</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.l_leg_mhx.l_leg_mhx_tauPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.l_leg_mhx.l_leg_mhxTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.l_leg_mhx_tauSpringCorrection</Variables>
-		<GraphConfiguration>
-			<Name>config53</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_mhx_tauSpringTotalDesired,root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.r_leg_mhx.r_leg_mhx_tauPredictedCurrent,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.r_leg_mhx.r_leg_mhxTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_mhx_tauSpringCorrection</Variables>
-		<GraphConfiguration>
-			<Name>config54</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-</GraphGroup>
-</Graph Array Window5><Graph Array Window6>
-<ScreenID>1</ScreenID>
-<WindowLocation>2880.0, 0.0</WindowLocation>
-<WindowSize>960.0, 600.0</WindowSize>
+<WindowLocation>1918.0, -3.0</WindowLocation>
+<WindowSize>1924.0, 1207.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.leftWandererFootForceZ</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -732,7 +653,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.rightWandererFootForceZ</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -744,7 +665,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.leftWandererFootTauX</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -756,7 +677,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.rightWandererFootTauX</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -768,7 +689,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.leftWandererFootTauY</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -780,7 +701,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.rightWandererFootTauY</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -792,7 +713,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.leftWandererFootCoPX</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
+			<Name>config55</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -804,7 +725,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.rightWandererFootCoPX</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config56</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -816,7 +737,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.leftWandererFootCoPY</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -828,7 +749,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.WandererFootManager.rightWandererFootCoPY</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -838,7 +759,7 @@ Tab2
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window6><Graph Array Window7>
+</Graph Array Window5><Graph Array Window6>
 <ScreenID>1</ScreenID>
 <WindowLocation>1918.0, -3.0</WindowLocation>
 <WindowSize>1924.0, 1207.0</WindowSize>
@@ -847,7 +768,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorForce0</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config59</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -859,7 +780,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorForce1</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config60</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -871,7 +792,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorForce0</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config61</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -883,7 +804,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorForce1</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config62</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -895,7 +816,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorForce2</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config63</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -907,7 +828,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftKneeActuator.SlowSensors.leftKneeActuatorForce3</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config64</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -919,7 +840,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorForce2</Variables>
 		<GraphConfiguration>
-			<Name>config71</Name>
+			<Name>config65</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -931,7 +852,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightKneeActuator.SlowSensors.rightKneeActuatorForce3</Variables>
 		<GraphConfiguration>
-			<Name>config72</Name>
+			<Name>config66</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -943,7 +864,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce0</Variables>
 		<GraphConfiguration>
-			<Name>config73</Name>
+			<Name>config67</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -955,7 +876,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce1</Variables>
 		<GraphConfiguration>
-			<Name>config74</Name>
+			<Name>config68</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -967,7 +888,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce0</Variables>
 		<GraphConfiguration>
-			<Name>config75</Name>
+			<Name>config69</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -979,7 +900,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce1</Variables>
 		<GraphConfiguration>
-			<Name>config76</Name>
+			<Name>config70</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -991,7 +912,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce2</Variables>
 		<GraphConfiguration>
-			<Name>config77</Name>
+			<Name>config71</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1003,7 +924,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.leftAnkleRightActuator.SlowSensors.leftAnkleRightActuatorForce3</Variables>
 		<GraphConfiguration>
-			<Name>config78</Name>
+			<Name>config72</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1015,7 +936,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce2</Variables>
 		<GraphConfiguration>
-			<Name>config79</Name>
+			<Name>config73</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1027,7 +948,7 @@ Tab2
 	<Graph>
 		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.rightAnkleRightActuator.SlowSensors.rightAnkleRightActuatorForce3</Variables>
 		<GraphConfiguration>
-			<Name>config80</Name>
+			<Name>config74</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -1037,7 +958,69 @@ Tab2
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window7>
+</Graph Array Window6><Graph Array Window7>
+<ScreenID>1</ScreenID>
+<WindowLocation>2522.0, 325.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.WandererCommand.r_leg_kny.r_leg_knyTauDesired,root.remotemain.DRCControllerThread.DRCOutputWriterWithAccelerationIntegration.WandererOutputWriter.r_leg_knytauControllerOutput,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isLeftFootTrusted,root.remotemain.DRCEstimatorThread.EstimatorController.DRCKinematicsBasedStateEstimator.PelvisLinearStateUpdater.isRightFootTrusted</Variables>
+		<GraphConfiguration>
+			<Name>config75</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window7><Graph Array Window8>
+<ScreenID>1</ScreenID>
+<WindowLocation>2080.0, 310.0</WindowLocation>
+<WindowSize>804.0, 533.0</WindowSize>
+<GraphGroup>
+	<Cols>1</Cols>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.xsens.accelX</Variables>
+		<GraphConfiguration>
+			<Name>config76</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.xsens.accelY</Variables>
+		<GraphConfiguration>
+			<Name>config77</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.remotemain.DRCEstimatorThread.WandererSensorReader.Wanderer.xsens.accelZ</Variables>
+		<GraphConfiguration>
+			<Name>config78</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window8>
 
 <Extra Panels>
 <Main Viewport>

@@ -204,6 +204,7 @@
         </inertia>
       </inertial>
 -->
+<!--
       <inertial>
         <pose> 0.006491 0.0 0.321049 0 -0 0</pose>
         <mass>1</mass>
@@ -216,6 +217,19 @@
           <izz> 0.001</izz>
         </inertia>
       </inertial>      
+-->
+      <inertial>
+        <pose> 0.021892 0.010133 0.385833 0 0 0</pose>
+        <mass>6.920518</mass>
+        <inertia>
+          <ixx> 0.195742</ixx>
+          <ixy> 0.004250</ixy>
+          <ixz> 0.001886</ixz>
+          <iyy> 0.104078</iyy>
+          <iyz> 0.000191</iyz>
+          <izz> 0.127069</izz>
+        </inertia>
+      </inertial>
       <collision name='utorso_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>

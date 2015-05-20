@@ -72,8 +72,8 @@ SelectedJoint
 <Graph Array Window Size>2</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>1</ScreenID>
-<WindowLocation>1918.0, -3.0</WindowLocation>
-<WindowSize>1924.0, 1207.0</WindowSize>
+<WindowLocation>1920.0, 0.0</WindowLocation>
+<WindowSize>1918.0, 1163.0</WindowSize>
 <GraphGroup>
 	<Cols>2</Cols>
 	<Graph>

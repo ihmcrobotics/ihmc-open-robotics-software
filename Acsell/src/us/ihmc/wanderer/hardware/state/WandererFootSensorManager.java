@@ -23,13 +23,15 @@ public class WandererFootSensorManager
    private static final int PRESSURE_SENSORS_PER_ROW = 4;
    private static final int PRESSURE_SENSORS_PER_FOOT = leftFootSensorActuators.length*PRESSURE_SENSORS_PER_ROW;
    private static final double[] sensorYPositions = new double[]
-         { 2.125 * 0.0254,  0.750 * 0.0254, -0.750 * 0.0254, -2.125 * 0.0254};
+         { -2.125 * 0.0254,  -0.750 * 0.0254, 0.750 * 0.0254, 2.125 * 0.0254};
    private static final double[] sensorXPositions = new double[]
-         { 0.700 * 0.0254 - WandererPhysicalProperties.footBack,
-           9.300 * 0.0254 - WandererPhysicalProperties.footBack,
-           7.450 * 0.0254 - WandererPhysicalProperties.footBack,
-           0.000 * 0.0254 - WandererPhysicalProperties.footBack
+         { 0.700 * 0.0254 - WandererPhysicalProperties.footLength/2.0,
+           9.300 * 0.0254 - WandererPhysicalProperties.footLength/2.0,
+           7.450 * 0.0254 - WandererPhysicalProperties.footLength/2.0,
+           0.000 * 0.0254 - WandererPhysicalProperties.footLength/2.0
          };
+   private static final double[][] leftSensorsToUse = {{1,1,1,1},{1,1,1,1}};
+   private static final double[][] rightSensorsToUse = {{1,1,1,1},{1,1,1,1}};
    
    private final EnumMap<WandererJoint, AcsellJointState> jointStates;
    private final EnumMap<WandererActuator, AcsellActuatorState> actuatorStates;
@@ -92,8 +94,8 @@ public class WandererFootSensorManager
          feetTauY.get(side).set(footTauY);
          if(footForceZ>25)
          {
-            feetCoPX.get(side).set(footTauX/footForceZ);
-            feetCoPY.get(side).set(footTauY/footForceZ);
+            feetCoPX.get(side).set(footTauY/footForceZ);
+            feetCoPY.get(side).set(footTauX/footForceZ);
          }         
       
          footWrenches.get(side).set(5, footForceZ);
@@ -109,7 +111,7 @@ public class WandererFootSensorManager
          for(int id = 0; id < PRESSURE_SENSORS_PER_ROW; id++)
          {
             sensorIndex = a_id*PRESSURE_SENSORS_PER_ROW + id;
-            leftPressureSensorValues.get(sensorIndex).set(actuatorStates.get(actuator).getPressureSensor(id).getValue());
+            leftPressureSensorValues.get(sensorIndex).set(actuatorStates.get(actuator).getPressureSensor(id).getValue()*leftSensorsToUse[a_id][id]);
          }
          a_id++;
       }
@@ -120,7 +122,7 @@ public class WandererFootSensorManager
          for(int id = 0; id < PRESSURE_SENSORS_PER_ROW; id++)
          {
             sensorIndex = a_id*PRESSURE_SENSORS_PER_ROW + id;
-            rightPressureSensorValues.get(sensorIndex).set(actuatorStates.get(actuator).getPressureSensor(id).getValue());
+            rightPressureSensorValues.get(sensorIndex).set(actuatorStates.get(actuator).getPressureSensor(id).getValue()*rightSensorsToUse[a_id][id]);
          }
          a_id++;
       }

@@ -202,7 +202,7 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
       
       joystickUpdater.listComponents();
       
-      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootWandereroviderWrapper","walk");
+      BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper","walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
       
       if (treadmillManager!=null)

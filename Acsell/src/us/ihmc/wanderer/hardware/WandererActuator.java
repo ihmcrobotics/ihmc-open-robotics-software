@@ -19,9 +19,10 @@ public enum WandererActuator implements AcsellActuator
    LEFT_ANKLE_LEFT("leftAnkleLeftActuator",   1.335e-3, 1.152, 0.587, 26.0, 1, 4, -2.0*Math.PI/16384.0, +2.0*Math.PI/16384.0, 15975.0),
    LEFT_ANKLE_RIGHT("leftAnkleRightActuator", 1.335e-3, 1.152, 0.587, 26.0, 1, 5, -2.0*Math.PI/16384.0, -2.0*Math.PI/16384.0, 2390.1),
 
-   TORSO_X("torsoXActuator", 0.069e-3, 0.398, .104,  6.8, 2, 1, -2.0*Math.PI/16384.0, -2.0*Math.PI/16384.0, 130.0),
+   TORSO_Z("torsoZActuator", 0.069e-3, 0.316, .104, 10.8, 2, 3, +2.0*Math.PI/16384.0, 0*2.0*Math.PI/16384.0, 0),
    TORSO_Y("torsoYActuator", 0.197e-3, 0.450, .192, 18.3, 2, 2, +2.0*Math.PI/16384.0, +2.0*Math.PI/16384.0, 9082.0),
-   TORSO_Z("torsoZActuator", 0.069e-3, 0.316, .104, 10.8, 2, 3, +2.0*Math.PI/16384.0, 0*2.0*Math.PI/16384.0, 0);
+   TORSO_X("torsoXActuator", 0.069e-3, 0.398, .104,  6.8, 2, 1, -2.0*Math.PI/16384.0, -2.0*Math.PI/16384.0, 130.0);
+   
 
    public static final WandererActuator[] values = values();
 

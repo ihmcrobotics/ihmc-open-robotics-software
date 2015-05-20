@@ -15,7 +15,7 @@ public class WandererRightHipXSpringProperties implements HystereticSpringProper
 	
 	@Override
 	public double getLinearSpringConstant() {
-		return 950;
+		return 950*0.9;
 	}
 	
 	@Override

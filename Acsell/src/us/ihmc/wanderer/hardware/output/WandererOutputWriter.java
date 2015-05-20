@@ -250,6 +250,9 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
             jointCommand.setTauDesired(tau - tauSpring, wholeBodyControlJoint.getQddDesired(), rawSensorData);
                         
             jointCommand.setDamping(kd);
+            
+            // Slightly hackish but won't change any ATLAS code.
+            wholeBodyControlJoint.setTau(tau);
 
          }
    }
@@ -314,15 +317,23 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
       {
         yoAngleSpring.get(joint).set(q);
         leftAnkleSpringCalculator.update(q);
-        return (USE_LEFT_ANKLE_SPRING && (currentWalkingState != WalkingState.RIGHT_SUPPORT)) ? 
-            leftAnkleSpringCalculator.getSpringForce() : 0.0;
+        if(USE_LEFT_ANKLE_SPRING)
+           return (currentWalkingState != WalkingState.RIGHT_SUPPORT) ? 
+              leftAnkleSpringCalculator.getSpringForce() : 
+              leftAnkleSpringCalculator.getSpringForce()/2.0;
+        else
+           return 0.0;
       }
       case RIGHT_ANKLE_Y:
       {
         yoAngleSpring.get(joint).set(q);
         rightAnkleSpringCalculator.update(q);
-        return (USE_RIGHT_ANKLE_SPRING && (currentWalkingState != WalkingState.LEFT_SUPPORT)) ?
-            rightAnkleSpringCalculator.getSpringForce() : 0.0;
+        if(USE_RIGHT_ANKLE_SPRING)
+           return (currentWalkingState != WalkingState.LEFT_SUPPORT) ?
+              rightAnkleSpringCalculator.getSpringForce() :
+              rightAnkleSpringCalculator.getSpringForce()/2.0;
+        else
+           return 0.0;
       }
       default:
          return 0.0;
