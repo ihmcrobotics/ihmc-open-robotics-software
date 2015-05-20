@@ -9,6 +9,9 @@ uint8 JOINT_POSITION_CONTROL=1 # joint control. NOTE: controller will not attemp
 uint8 initial_state
 
 # endState gives the state the controller has transitioned into
+# Options for endState
+# WALKING=0 # whole body force control employing IHMC walking, balance, and manipulation algorithms
+# JOINT_POSITION_CONTROL=1 # joint control. NOTE: controller will not attempt to keep the robot balanced
 uint8 end_state
 
 
