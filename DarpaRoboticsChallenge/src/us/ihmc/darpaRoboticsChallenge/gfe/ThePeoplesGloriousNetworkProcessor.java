@@ -1,14 +1,8 @@
 package us.ihmc.darpaRoboticsChallenge.gfe;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Map;
-
 import org.ros.internal.message.Message;
 import org.ros.message.MessageFactory;
 import org.ros.node.NodeConfiguration;
-
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
@@ -36,6 +30,11 @@ import us.ihmc.utilities.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.utilities.ros.subscriber.RequestControllerStopSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosArmJointTrajectorySubscriber;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class ThePeoplesGloriousNetworkProcessor
 {
@@ -72,7 +71,7 @@ public class ThePeoplesGloriousNetworkProcessor
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
-      gfe_communicator.attachListener(HighLevelStateChangePacket.class, new RosHighLevelStatePublisher(rosMainNode, namespace));
+      gfe_communicator.attachListener(HighLevelStateChangePacket.class, new PeriodicRosHighLevelStatePublisher(rosMainNode, namespace));
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);

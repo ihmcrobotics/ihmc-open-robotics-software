@@ -5,8 +5,7 @@ import us.ihmc.communication.packets.HighLevelStateChangePacket;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.msgToPacket.converter.ROSMessageConverter;
-import us.ihmc.utilities.ros.publisher.RosUInt8Publisher;
+import us.ihmc.utilities.ros.publisher.RosHighLevelStatePublisher;
 
 import java.util.concurrent.TimeUnit;
 
@@ -14,15 +13,15 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class RosHighLevelStatePublisher implements PacketConsumer<HighLevelStateChangePacket>, Runnable
+public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLevelStateChangePacket>, Runnable
 {
-   private final RosUInt8Publisher stateBytePublisher = new RosUInt8Publisher(false);
+   private final RosHighLevelStatePublisher statePublisher = new RosHighLevelStatePublisher(false);
    private final RosMainNode rosMainNode;
 
    private HighLevelState currentState = HighLevelState.DO_NOTHING_BEHAVIOR;
    private final PeriodicNonRealtimeThreadScheduler scheduler = new PeriodicNonRealtimeThreadScheduler(getClass().getName());
 
-   public RosHighLevelStatePublisher(RosMainNode rosMainNode, String rosNameSpace)
+   public PeriodicRosHighLevelStatePublisher(RosMainNode rosMainNode, String rosNameSpace)
    {
       this.rosMainNode = rosMainNode;
       initialize(rosNameSpace);
@@ -30,7 +29,7 @@ public class RosHighLevelStatePublisher implements PacketConsumer<HighLevelState
 
    private void initialize(String rosNameSpace)
    {
-      rosMainNode.attachPublisher(rosNameSpace + "/output/high_level_state", stateBytePublisher);
+      rosMainNode.attachPublisher(rosNameSpace + "/output/high_level_state", statePublisher);
 
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
@@ -53,7 +52,7 @@ public class RosHighLevelStatePublisher implements PacketConsumer<HighLevelState
       }
       else if (rosMainNode.isStarted())
       {
-         stateBytePublisher.publish(ROSMessageConverter.convertEnumToByte(currentState));
+         statePublisher.publish(currentState);
       }
    }
 }
