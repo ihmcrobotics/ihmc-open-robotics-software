@@ -116,6 +116,7 @@ class RobotiqControlThrizzead extends HandControlThread
             case RESET:
                if(robotiqHand.isConnected())
                   robotiqHand.reset();
+               break;
             case CONNECT:
                robotiqHand.reconnect();
                break;
