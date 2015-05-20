@@ -29,12 +29,12 @@ root.remotemain.wanderer.Wanderer.leftAnkleLeftActuator*false*false
 root.remotemain.wanderer.Wanderer.leftAnkleLeftActuator.SlowSensors*false*false
 root.remotemain.wanderer.Wanderer.leftAnkleRightActuator*false*false
 root.remotemain.wanderer.Wanderer.leftAnkleRightActuator.SlowSensors*false*false
-root.remotemain.wanderer.Wanderer.torsoXActuator*false*false
-root.remotemain.wanderer.Wanderer.torsoXActuator.SlowSensors*false*false
-root.remotemain.wanderer.Wanderer.torsoYActuator*false*false
-root.remotemain.wanderer.Wanderer.torsoYActuator.SlowSensors*false*false
 root.remotemain.wanderer.Wanderer.torsoZActuator*false*false
 root.remotemain.wanderer.Wanderer.torsoZActuator.SlowSensors*false*false
+root.remotemain.wanderer.Wanderer.torsoYActuator*false*false
+root.remotemain.wanderer.Wanderer.torsoYActuator.SlowSensors*false*false
+root.remotemain.wanderer.Wanderer.torsoXActuator*false*false
+root.remotemain.wanderer.Wanderer.torsoXActuator.SlowSensors*false*false
 root.remotemain.wanderer.Wanderer.l_leg_mhx*false*false
 root.remotemain.wanderer.Wanderer.l_leg_uhz*false*false
 root.remotemain.wanderer.Wanderer.l_leg_lhy*false*false
@@ -48,6 +48,7 @@ root.remotemain.wanderer.Wanderer.back_mby*false*false
 root.remotemain.wanderer.Wanderer.back_lbx*false*false
 root.remotemain.wanderer.Wanderer.leftAnkle*false*false
 root.remotemain.wanderer.Wanderer.rightAnkle*false*false
+root.remotemain.wanderer.WandererFootManager*false*false
 root.remotemain.wanderer.WandererCommand*false*false
 root.remotemain.wanderer.WandererCommand.l_leg_mhx*false*false
 root.remotemain.wanderer.WandererCommand.l_leg_uhz*false*false

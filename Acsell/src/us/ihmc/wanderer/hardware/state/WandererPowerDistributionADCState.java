@@ -19,6 +19,10 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
    private final DoubleYoVariable leftLimbCurrent;
    private final DoubleYoVariable rightLimbCurrent;
    private final DoubleYoVariable torsoLimbCurrent;
+   private final DoubleYoVariable vicor48Current;
+   private final DoubleYoVariable vicor12Current;
+   private final DoubleYoVariable armCurrent;
+   private final DoubleYoVariable inputCurrent;
    private final double dt;
 
    public WandererPowerDistributionADCState(String name, YoVariableRegistry parentRegistry)
@@ -35,6 +39,11 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
       leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
       rightLimbCurrent = new DoubleYoVariable("rightLimbCurrent", registry);
       torsoLimbCurrent = new DoubleYoVariable("torsoLimbCurrent", registry);
+      vicor48Current = new DoubleYoVariable("vicor48Current", registry);
+      vicor12Current = new DoubleYoVariable("vicor12Current", registry);
+      armCurrent = new DoubleYoVariable("armCurrent", registry);
+      inputCurrent = new DoubleYoVariable("inputCurrent", registry);
+      
       dt = (new WandererRobotModel(true, false)).getEstimatorDT();
       parentRegistry.addChild(registry);
    }
@@ -46,10 +55,14 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
          ADC[i].set(buffer.getShort());
       }
 
-      busVoltage.set(((double) (ADC[0].getIntegerValue() & 0xFFFF)) / 491.0 - 0.1);
-      leftLimbCurrent.set((ADC[1].getValueAsDouble() + 16.0) * 0.0061);
-      rightLimbCurrent.set((ADC[2].getValueAsDouble() + 14.0) * 0.0061);
-      torsoLimbCurrent.set((ADC[3].getValueAsDouble() + 15.0) * 0.0061);
+      busVoltage.set(((double) (ADC[6].getIntegerValue() & 0xFFFF)) / 491.0 - 0.1);
+      leftLimbCurrent.set((ADC[0].getValueAsDouble() + 0.0) * 0.0061);
+      rightLimbCurrent.set((ADC[1].getValueAsDouble() + 0.0) * 0.0061);
+      torsoLimbCurrent.set((ADC[2].getValueAsDouble() + 0.0) * 0.0061);
+      vicor48Current.set((ADC[3].getValueAsDouble() + 0.0) * 0.0061);
+      vicor12Current.set((ADC[4].getValueAsDouble() + 0.0) * 0.0061);
+      armCurrent.set((ADC[5].getValueAsDouble() + 0.0) * 0.0061);
+      inputCurrent.set((ADC[7].getValueAsDouble() + 0.0) * 0.0061);
 
       robotPower.set(busVoltage.getDoubleValue() * (leftLimbCurrent.getDoubleValue() + rightLimbCurrent.getDoubleValue() + torsoLimbCurrent.getDoubleValue()));
       robotWork.add(robotPower.getDoubleValue() *  dt);

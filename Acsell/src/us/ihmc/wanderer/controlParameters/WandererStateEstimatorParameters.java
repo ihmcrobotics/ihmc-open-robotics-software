@@ -46,14 +46,14 @@ public class WandererStateEstimatorParameters implements StateEstimatorParameter
       jointSpecificStiffness.put(WandererJoint.LEFT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_Z.getSdfName(), Double.POSITIVE_INFINITY);
       
-      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_X.getSdfName(), 4500.0); //6000
-      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_X.getSdfName(), 4500.0); //6000
+      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_X.getSdfName(), 8000.0); //4500
+      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_X.getSdfName(), 8000.0); //4500
       
-      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_Y.getSdfName(), 10000.0);
-      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_Y.getSdfName(), 10000.0);
+      jointSpecificStiffness.put(WandererJoint.LEFT_HIP_Y.getSdfName(), 16000.0);//10000
+      jointSpecificStiffness.put(WandererJoint.RIGHT_HIP_Y.getSdfName(), 16000.0);
       
-      jointSpecificStiffness.put(WandererJoint.LEFT_KNEE_Y.getSdfName(), 6000.0);
-      jointSpecificStiffness.put(WandererJoint.RIGHT_KNEE_Y.getSdfName(), 6000.0);
+      jointSpecificStiffness.put(WandererJoint.LEFT_KNEE_Y.getSdfName(), 4000.0);//6000
+      jointSpecificStiffness.put(WandererJoint.RIGHT_KNEE_Y.getSdfName(), 4000.0);
 
    }
    
