@@ -27,7 +27,6 @@ import us.ihmc.acsell.hardware.state.slowSensors.SensorMCUTime;
 import us.ihmc.acsell.hardware.state.slowSensors.StatorHallSwitches;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.wanderer.hardware.WandererActuator;
-import us.ihmc.wanderer.hardware.controllers.WandererStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
@@ -42,6 +41,7 @@ public class AcsellActuatorState
    private final int SensedCurrentToTorqueDirection;
 
    private final LongYoVariable microControllerTime;
+   private final LongYoVariable actualActuatorDT;
 
    private final DoubleYoVariable inphaseCompositeStatorCurrent;
    private final DoubleYoVariable quadratureCompositeStatorCurrent;
@@ -67,7 +67,7 @@ public class AcsellActuatorState
    private final int STRAIN_SENSOR_BASE_15 = 15;
    private final int PRESSURE_SENSOR_BASE_11 = 11;
    
-   private long lastmicroControllerTime;
+   private long lastMicroControllerTime;
    private final LongYoVariable consecutivePacketDropCount;
    private final LongYoVariable totalPacketDropCount;
    private final AcsellSlowSensorConstants slowSensorConstants;
@@ -87,6 +87,7 @@ public class AcsellActuatorState
       this.slowSensorConstants = slowSensorConstants;
       this.SensedCurrentToTorqueDirection = actuator.getSensedCurrentToTorqueDirection();
       this.microControllerTime = new LongYoVariable(name + "MicroControllerTime", registry);
+      this.actualActuatorDT = new LongYoVariable(name + "ActualDT", registry);
 
       this.inphaseCompositeStatorCurrent = new DoubleYoVariable(name + "InphaseCompositeStatorCurrent", registry);
       this.quadratureCompositeStatorCurrent = new DoubleYoVariable(name + "QuadratureCompositeStatorCurrent", registry);
@@ -195,7 +196,7 @@ public class AcsellActuatorState
 
    public void update(ByteBuffer buffer) throws IOException
    {
-      lastmicroControllerTime = microControllerTime.getLongValue();
+      lastMicroControllerTime = microControllerTime.getLongValue();
       // Values are of no use to us
       @SuppressWarnings("unused")
       int frameFormat = buffer.get() & 0xFF;
@@ -235,6 +236,7 @@ public class AcsellActuatorState
       }
 
       microControllerTime.set(buffer.getInt() & 0xFFFFFFFFl);
+      actualActuatorDT.set(microControllerTime.getLongValue() - lastMicroControllerTime);
       inphaseCompositeStatorCurrent.set(buffer.getFloat());
       quadratureCompositeStatorCurrent.set(buffer.getFloat());
       controlTarget.set(buffer.getFloat());
@@ -337,7 +339,7 @@ public class AcsellActuatorState
    
    public boolean isLastPacketDropped()
    {
-      return (lastmicroControllerTime==microControllerTime.getLongValue()) && lastmicroControllerTime!=0;
+      return (lastMicroControllerTime==microControllerTime.getLongValue()) && lastMicroControllerTime!=0;
    }
    
    private void updatePacketDropStatistics()
