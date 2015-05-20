@@ -25,8 +25,8 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
 
    private final LinkedHashMap<Class<?>, ExecutorService> listenerExecutors = new LinkedHashMap<Class<?>, ExecutorService>();
    private final LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>> listeners = new LinkedHashMap<Class<?>, ArrayList<ObjectConsumer<?>>>();
-   
 
+   private final ArrayList<TcpNetStateListener> tcpStateListeners = new ArrayList<TcpNetStateListener>();
    private final ArrayList<NetStateListener> stateListeners = new ArrayList<NetStateListener>();
    
    private final ArrayList<GlobalObjectConsumer> globalListeners = new ArrayList<GlobalObjectConsumer>();
@@ -85,6 +85,12 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
    public void attachStateListener(NetStateListener stateListener)
    {
       stateListeners.add(stateListener);
+   }
+
+   @Override
+   public void attachStateListener(TcpNetStateListener stateListener)
+   {
+      tcpStateListeners.add(stateListener);
    }
    
    @Override
@@ -210,6 +216,11 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
          @Override
          public void connected(Connection connection)
          {
+            for (TcpNetStateListener tcpStateListener : tcpStateListeners)
+            {
+               tcpStateListener.connected(connection);
+            }
+
             for(NetStateListener stateListener : stateListeners)
             {
                stateListener.connected();
@@ -219,6 +230,11 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
          @Override
          public void disconnected(Connection connection)
          {
+            for (TcpNetStateListener tcpStateListener : tcpStateListeners)
+            {
+               tcpStateListener.disconnected(connection);
+            }
+
             for(NetStateListener stateListener : stateListeners)
             {
                stateListener.disconnected();
