@@ -13,17 +13,11 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.*;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.communication.subscribers.RobotDataReceiver;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
-import us.ihmc.darpaRoboticsChallenge.ros.RosRobotConfigurationDataPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSCameraPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosSCSLidarPublisher;
-import us.ihmc.darpaRoboticsChallenge.ros.RosTfPublisher;
+import us.ihmc.darpaRoboticsChallenge.ros.*;
 import us.ihmc.ihmcPerception.IHMCProntoRosLocalizationUpdateSubscriber;
 import us.ihmc.ihmcPerception.RosLocalizationPoseCorrectionSubscriber;
 import us.ihmc.pathGeneration.footstepGenerator.TimestampedPoseFootStepGenerator;
@@ -78,6 +72,7 @@ public class ThePeoplesGloriousNetworkProcessor
       RobotDataReceiver robotDataReceiver = new RobotDataReceiver(fullRobotModel, null);
       gfe_communicator.attachListener(RobotConfigurationData.class, robotDataReceiver);
       gfe_communicator.attachListener(RobotConfigurationData.class, ppsOffsetProvider);
+      gfe_communicator.attachListener(HighLevelStateChangePacket.class, new RosHighLevelStatePublisher(rosMainNode, namespace));
       
       setupInputs(namespace, robotDataReceiver, fullRobotModel);
       setupOutputs(namespace, tfPrefix);
