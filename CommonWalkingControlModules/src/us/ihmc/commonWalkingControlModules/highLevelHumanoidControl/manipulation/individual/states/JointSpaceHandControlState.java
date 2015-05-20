@@ -148,7 +148,7 @@ public class JointSpaceHandControlState extends State<HandControlState>
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint joint = oneDoFJoints[i];
-            trajectories.get(joint).initialize();
+            trajectories.get(joint).initialize(joint.getQ(), joint.getQd());
 
             if (!doPositionControl)
                pidControllers.get(joint).setCumulativeError(0.0);
