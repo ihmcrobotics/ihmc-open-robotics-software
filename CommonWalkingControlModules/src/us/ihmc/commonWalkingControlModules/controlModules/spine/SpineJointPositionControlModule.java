@@ -45,7 +45,7 @@ public class SpineJointPositionControlModule implements SpineControlModule
       spineTorquesToPack.setTorquesToZero();
       
       // control
-      for (SpineJointName spineJointName : SpineJointName.values())
+      for (SpineJointName spineJointName : SpineJointName.values)
       {
          PIDController pidController = spineControllers.get(spineJointName);
 
@@ -63,7 +63,7 @@ public class SpineJointPositionControlModule implements SpineControlModule
 
    private void populateYoVariables()
    {
-      for (SpineJointName spineJointName : SpineJointName.values())
+      for (SpineJointName spineJointName : SpineJointName.values)
       {
          String name = "desired" + spineJointName.getCamelCaseNameForMiddleOfExpression();
          DoubleYoVariable variable = new DoubleYoVariable(name, registry);
@@ -73,7 +73,7 @@ public class SpineJointPositionControlModule implements SpineControlModule
 
    private void populateControllers()
    {
-      for (SpineJointName spineJointName : SpineJointName.values())
+      for (SpineJointName spineJointName : SpineJointName.values)
       {
          spineControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression(), registry));
       }

@@ -64,7 +64,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<SDFRobot>
                }
            }
             
-            for (SpineJointName jointName : SpineJointName.values())
+            for (SpineJointName jointName : SpineJointName.values)
             {
                String key = jointMap.getSpineJointName(jointName);
                setRobotAngle(key, properties, robot);

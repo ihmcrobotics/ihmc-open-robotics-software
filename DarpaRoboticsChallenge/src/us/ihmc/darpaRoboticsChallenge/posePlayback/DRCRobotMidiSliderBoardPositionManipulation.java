@@ -310,7 +310,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          neckSCSJoints.put(jointName, sdfRobot.getOneDegreeOfFreedomJoint(neckJoint.getName()));
       }
 
-      for (SpineJointName jointName : SpineJointName.values())
+      for (SpineJointName jointName : SpineJointName.values)
       {
          OneDoFJoint spineJoint = fullRobotModel.getSpineJoint(jointName);
          if (spineJoint == null)
