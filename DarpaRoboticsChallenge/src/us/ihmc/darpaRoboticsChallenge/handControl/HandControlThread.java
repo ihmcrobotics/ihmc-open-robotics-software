@@ -1,5 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.handControl;
 
+import us.ihmc.communication.configuration.NetworkParameterKeys;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -12,7 +14,8 @@ public abstract class HandControlThread implements Runnable
    public HandControlThread(RobotSide robotSide)
    {
       NetworkPorts port = robotSide.equals(RobotSide.LEFT) ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
-      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, new IHMCCommunicationKryoNetClassList());
+      String host = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
+      packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorClient(host, port, new IHMCCommunicationKryoNetClassList(), true);
    }
    
    public abstract void connect();
