@@ -143,16 +143,16 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
    private void initializeMotorDamping()
    {
       //TODO: Update For Wanderer
-      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_X).set(5.0);//0.14
-      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_Y).set(5.0);
-      yoMotorDamping.get(WandererJoint.LEFT_KNEE_Y).set(1.0);//0.01
-      yoMotorDamping.get(WandererJoint.LEFT_HIP_Y).set(1.0);//0.01
-      yoMotorDamping.get(WandererJoint.LEFT_HIP_X).set(10.0);//0.1
-      yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_X).set(5.0);
-      yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_Y).set(5.0);
-      yoMotorDamping.get(WandererJoint.RIGHT_KNEE_Y).set(1.0);
-      yoMotorDamping.get(WandererJoint.RIGHT_HIP_Y).set(1.0);
-      yoMotorDamping.get(WandererJoint.RIGHT_HIP_X).set(10.0);
+      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_X).set(5.0*1.152);//0.14
+      yoMotorDamping.get(WandererJoint.LEFT_ANKLE_Y).set(5.0*1.152);
+      yoMotorDamping.get(WandererJoint.LEFT_KNEE_Y).set(1.0*0.612);//0.01
+      yoMotorDamping.get(WandererJoint.LEFT_HIP_Y).set(1.0*0.612);//0.01
+      yoMotorDamping.get(WandererJoint.LEFT_HIP_X).set(10.0*2.286);//0.1
+      yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_X).set(5.0*1.152);
+      yoMotorDamping.get(WandererJoint.RIGHT_ANKLE_Y).set(5.0*1.152);
+      yoMotorDamping.get(WandererJoint.RIGHT_KNEE_Y).set(1.0*0.612);
+      yoMotorDamping.get(WandererJoint.RIGHT_HIP_Y).set(1.0*0.612);
+      yoMotorDamping.get(WandererJoint.RIGHT_HIP_X).set(10.0*2.286);
       masterMotorDamping.set(1.0);
       
    }
@@ -320,7 +320,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
         if(USE_LEFT_ANKLE_SPRING)
            return (currentWalkingState != WalkingState.RIGHT_SUPPORT) ? 
               leftAnkleSpringCalculator.getSpringForce() : 
-              leftAnkleSpringCalculator.getSpringForce()/2.0;
+              leftAnkleSpringCalculator.getSpringForce()*0.75;
         else
            return 0.0;
       }
@@ -331,7 +331,7 @@ public class WandererOutputWriter implements DRCOutputWriter, ControllerStateCha
         if(USE_RIGHT_ANKLE_SPRING)
            return (currentWalkingState != WalkingState.LEFT_SUPPORT) ?
               rightAnkleSpringCalculator.getSpringForce() :
-              rightAnkleSpringCalculator.getSpringForce()/2.0;
+              rightAnkleSpringCalculator.getSpringForce()*0.75;
         else
            return 0.0;
       }

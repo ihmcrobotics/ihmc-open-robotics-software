@@ -69,7 +69,7 @@ public abstract class AcsellActuatorCommand
       {
          target.put((byte) 3);
          target.putFloat((float) (filteredCurrentDesired.getDoubleValue()));
-         target.putFloat((float) (damping.getDoubleValue() / actuator.getKt()));
+         target.putFloat((float) (damping.getDoubleValue() / actuator.getKt() * actuator.getDampingSign()));
          target.putFloat(0f);
          target.putInt(controlID);
       }

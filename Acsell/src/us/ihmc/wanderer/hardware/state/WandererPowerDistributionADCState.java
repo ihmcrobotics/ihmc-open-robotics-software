@@ -55,16 +55,16 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
          ADC[i].set(buffer.getShort());
       }
 
-      busVoltage.set(((double) (ADC[6].getIntegerValue() & 0xFFFF)) / 491.0 - 0.1);
-      leftLimbCurrent.set((ADC[0].getValueAsDouble() + 0.0) * 0.0061);
-      rightLimbCurrent.set((ADC[1].getValueAsDouble() + 0.0) * 0.0061);
-      torsoLimbCurrent.set((ADC[2].getValueAsDouble() + 0.0) * 0.0061);
-      vicor48Current.set((ADC[3].getValueAsDouble() + 0.0) * 0.0061);
-      vicor12Current.set((ADC[4].getValueAsDouble() + 0.0) * 0.0061);
-      armCurrent.set((ADC[5].getValueAsDouble() + 0.0) * 0.0061);
-      inputCurrent.set((ADC[7].getValueAsDouble() + 0.0) * 0.0061);
+      busVoltage.set(((double) (ADC[6].getIntegerValue() & 0xFFFF)) / 68.7 - 0.1);
+      armCurrent.set(-(ADC[0].getValueAsDouble() + 0.5) * 0.0244);
+      vicor48Current.set(-(ADC[1].getValueAsDouble() - 1.5) * 0.0244);
+      vicor12Current.set(-(ADC[2].getValueAsDouble() + 0.3) * 0.0244);
+      torsoLimbCurrent.set(-(ADC[3].getValueAsDouble() - 2.0) * 0.0244);
+      leftLimbCurrent.set(-(ADC[4].getValueAsDouble() + 0.0) * 0.0244);
+      rightLimbCurrent.set(-(ADC[5].getValueAsDouble() + 0.0) * 0.0244);
+      inputCurrent.set((ADC[7].getValueAsDouble() + 0.0) * 0.0244);
 
-      robotPower.set(busVoltage.getDoubleValue() * (leftLimbCurrent.getDoubleValue() + rightLimbCurrent.getDoubleValue() + torsoLimbCurrent.getDoubleValue()));
+      robotPower.set(busVoltage.getDoubleValue() * (inputCurrent.getDoubleValue()));
       robotWork.add(robotPower.getDoubleValue() *  dt);
    }
 }
