@@ -21,6 +21,9 @@ public class CostOfTransportCalculator implements RobotVisualizer
 
    private final RobotVisualizer superVisualizer;
    
+   private DoubleYoVariable deltaWork;
+   private DoubleYoVariable distanceTraveled; 
+   private DoubleYoVariable deltaTime; 
    private DoubleYoVariable costOfTransport;
    
    private FullRobotModel fullRobotModel;
@@ -82,12 +85,15 @@ public class CostOfTransportCalculator implements RobotVisualizer
       if(index > samples)
       {
          double deltaTime = this.robotTime[currentSample] - this.robotTime[historicSample];
+         this.deltaTime.set(deltaTime);
          double deltaWork = this.totalWork[currentSample] - this.totalWork[historicSample];
+         this.deltaWork.set(deltaWork);
          
          double dx = this.xPosition[currentSample] - this.xPosition[historicSample];
          double dy = this.yPosition[currentSample] - this.yPosition[historicSample];
 
          double distance = Math.sqrt(dx*dx+dy*dy);
+         this.distanceTraveled.set(distance);
          
          double avarageVelocity = distance/deltaTime;
          
@@ -113,6 +119,9 @@ public class CostOfTransportCalculator implements RobotVisualizer
    {
       PrintTools.info(this, "Initializing cost of transport calculator. Robot mass is " + robotMass + "kg");
       this.costOfTransport = new DoubleYoVariable("CostOfTransport", registry);
+      this.deltaTime = new DoubleYoVariable("deltaTime", registry);
+      this.deltaWork = new DoubleYoVariable("deltaWork", registry);
+      this.distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
       this.fullRobotModel = fullRobotModel;
       
       superVisualizer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);
