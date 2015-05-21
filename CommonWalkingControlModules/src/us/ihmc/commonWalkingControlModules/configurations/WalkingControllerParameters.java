@@ -37,6 +37,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract double maximumHeightAboveAnkle();
 
+   public abstract double defaultOffsetHeightAboveAnkle();
+
    public abstract double minimumHeightBetweenAnkleAndPelvisForHeightAdjustment();
 
    public abstract double nominalHeightBetweenAnkleAndPelvisForHeightAdjustment();

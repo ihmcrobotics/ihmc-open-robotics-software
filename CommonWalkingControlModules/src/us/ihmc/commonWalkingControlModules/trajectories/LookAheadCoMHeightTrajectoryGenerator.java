@@ -106,9 +106,9 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
 
    public LookAheadCoMHeightTrajectoryGenerator(DesiredComHeightProvider desiredComHeightProvider, double minimumHeightAboveGround,
-           double nominalHeightAboveGround, double maximumHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame pelvisFrame,
-           SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
-           YoVariableRegistry parentRegistry)
+         double nominalHeightAboveGround, double maximumHeightAboveGround, double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn,
+         ReferenceFrame pelvisFrame, SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.pelvisFrame = pelvisFrame;
@@ -117,8 +117,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       this.yoTime = yoTime;
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
-      offsetHeightAboveGround.set(0.0);
-      offsetHeightAboveGroundPrevValue.set(0.0);
+      offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
+      offsetHeightAboveGroundPrevValue.set(defaultOffsetHeightAboveGround);
       offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
       {
          @Override

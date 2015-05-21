@@ -247,6 +247,13 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       return maximumHeightAboveGround;
    }
 
+   @Override
+   public double defaultOffsetHeightAboveAnkle()
+   {
+      double defaultOffset = target == AtlasTarget.REAL_ROBOT ? 0.035 : 0.0;
+      return defaultOffset;
+   }
+
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
