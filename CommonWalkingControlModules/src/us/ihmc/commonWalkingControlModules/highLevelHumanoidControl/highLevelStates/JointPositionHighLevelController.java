@@ -23,12 +23,14 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPosition
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.HandPoseStatusProducer;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
 import us.ihmc.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
@@ -90,6 +92,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final DesiredJointsPositionProvider desiredJointsProvider;
    private final HandPoseProvider handPoseProvider;
    private final SingleJointPositionProvider singleJointPositionProvider;
+   private final MultiJointPositionProvider multiJointPositionProvider;
    private boolean firstPacket = true;
    private final HandPoseStatusProducer handPoseStatusProducer;
    private boolean handTrajectoryDoneHasBeenSent;
@@ -136,6 +139,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.desiredJointsProvider = variousWalkingProviders.getDesiredJointsPositionProvider();
       this.handPoseProvider = variousWalkingProviders.getDesiredHandPoseProvider();
       this.singleJointPositionProvider = variousWalkingProviders.getSingleJointPositionProvider();
+      this.multiJointPositionProvider = variousWalkingProviders.getMultiJointPositionProvider();
       this.momentumBasedController = momentumBasedController;
       this.icpAndMomentumBasedController = icpAndMomentumBasedController;
       this.handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
@@ -440,6 +444,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
          initializeFromSingleJointAnglePacket(singleJointPositionProvider.getNewPacket());
       
+      if (multiJointPositionProvider != null && multiJointPositionProvider.checkForNewPacket())
+	     initializeFromMultiJointAnglePacket(multiJointPositionProvider.getNewPacket());
+      
       for (RobotSide side : RobotSide.values)
       {
          if (handComplianceControlParametersProvider != null && handComplianceControlParametersProvider.checkForNewRequest(side))
@@ -603,6 +610,62 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
          }
          
+      }
+   }
+   
+   private void initializeFromMultiJointAnglePacket(MultiJointAnglePacket multiJointAnglePacket)
+   {
+	   SingleJointAnglePacket[] jointPackets = multiJointAnglePacket.singleJointAnglePackets;
+	   if (jointPackets.length == 0)
+	   {
+		   System.out.println("Recieved empty multi joint angle packet.");
+		   return;
+	   }
+	   if (jointPackets[0].trajcetoryTime <= 0.0)
+	   {
+	      System.out.println("Multi joint angle packet has invalid trajectory time of " + jointPackets[0].trajcetoryTime);
+	      return;
+	   }
+	   
+	   initialTrajectoryTime = timeProvider.getDoubleValue();
+	   trajectoryTimeProvider.set(jointPackets[0].trajcetoryTime);
+	   
+      for (OneDoFJoint joint : jointsBeingControlled)
+      {
+         boolean jointSpecified = false;
+         
+         for (int i = 0; i < jointPackets.length; i++)
+         {
+            String jointName = jointPackets[i].jointName;
+            double jointAngle = jointPackets[i].angle;
+
+            if (jointName.equals(joint.getName()))
+            {
+               jointSpecified = true;
+               
+               if (joint.getName().contains("l_arm"))
+               {
+                  areHandTaskspaceControlled.get(RobotSide.LEFT).set(false);
+                  areHandJointspaceControlled.get(RobotSide.LEFT).set(false);
+               }
+               else if (joint.getName().contains("r_arm"))
+               {
+                  areHandTaskspaceControlled.get(RobotSide.RIGHT).set(false);
+                  areHandJointspaceControlled.get(RobotSide.RIGHT).set(false);
+               }
+
+               double desiredPosition = MathTools.clipToMinMax(jointAngle, joint.getJointLimitLower(), joint.getJointLimitUpper());
+               trajectoryGenerator.get(joint).setFinalPosition(desiredPosition);
+
+               alternativeController.get(joint).setMaximumOutputLimit(Double.POSITIVE_INFINITY);
+               trajectoryGenerator.get(joint).initialize();
+            }
+         }
+         
+         if (!jointSpecified)
+         {
+            trajectoryGenerator.get(joint).initialize(joint.getqDesired(), 0.0);
+         }
       }
    }
 

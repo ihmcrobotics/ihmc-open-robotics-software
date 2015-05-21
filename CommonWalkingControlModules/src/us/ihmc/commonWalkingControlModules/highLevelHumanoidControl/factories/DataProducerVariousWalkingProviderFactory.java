@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetProducers.CapturabilityBasedStatusProducer;
@@ -126,6 +127,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
    
       DesiredJointsPositionProvider desiredJointsPositionProvider = new DesiredJointsPositionProvider();
       SingleJointPositionProvider singleJointPositionProvider = new SingleJointPositionProvider();
+      MultiJointPositionProvider multiJointPositionProvider = new MultiJointPositionProvider();
 
       DesiredHandLoadBearingProvider handLoadBearingProvider = new DesiredHandLoadBearingProvider();
       DesiredFootStateProvider footLoadBearingProvider = new DesiredFootStateProvider();
@@ -182,7 +184,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
                                                            pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, handLoadBearingProvider,
                                                            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
-                                                           objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider);
+                                                           objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,
+                                                           multiJointPositionProvider);
 
       return variousWalkingProviders;
    }

@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControl
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandstepProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
@@ -79,6 +80,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
       
       DesiredJointsPositionProvider desiredJointsPositionProvider = null;
       SingleJointPositionProvider singleJointPositionProvider = null;
+      MultiJointPositionProvider multiJointPositionProvider = null;
       AbortWalkingProvider abortWalkingProvider = null;
 
       HandComplianceControlParametersProvider handComplianceControlParametersProvider = null;
@@ -88,7 +90,7 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
                                                            handComplianceControlParametersProvider, handLoadBearingProvider, chestOrientationProvider, footPoseProvider,
                                                            footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer,
                                                            capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
-                                                           singleJointPositionProvider, abortWalkingProvider);
+                                                           singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
 
       return variousWalkingProviders;
    }
