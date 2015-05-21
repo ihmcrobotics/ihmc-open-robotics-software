@@ -652,13 +652,23 @@ public class TaskspaceToJointspaceCalculator
 
    private final FramePoint tempPoint = new FramePoint();
    private final FrameVector tempPositionError = new FrameVector();
+   private final DenseMatrix64F tempSpatialError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
+   private final DenseMatrix64F tempSubspaceError = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
    public double getNormPositionError(FramePoint desiredPosition)
    {
       tempPoint.setIncludingFrame(desiredPosition);
       tempPoint.changeFrame(localControlFrame);
       tempPositionError.setIncludingFrame(tempPoint);
-      return tempPositionError.length();
+
+      DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
+      tempSpatialError.reshape(SpatialMotionVector.SIZE, 1);
+      tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
+
+      MatrixTools.insertFrameTupleIntoEJMLVector(tempPositionError, tempSpatialError, 3);
+      CommonOps.mult(selectionMatrix, tempSpatialError, tempSubspaceError);
+
+      return NormOps.normP2(tempSubspaceError);
    }
 
    private final FrameOrientation tempOrientation = new FrameOrientation();
@@ -668,7 +678,17 @@ public class TaskspaceToJointspaceCalculator
       tempOrientation.setIncludingFrame(desiredOrientation);
       tempOrientation.changeFrame(localControlFrame);
       tempOrientation.getAxisAngle(errorAxisAngle);
-      return Math.abs(errorAxisAngle.getAngle());
+      errorRotationVector.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
+      errorRotationVector.scale(errorAxisAngle.getAngle());
+
+      DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
+      tempSpatialError.reshape(SpatialMotionVector.SIZE, 1);
+      tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
+
+      MatrixTools.insertTuple3dIntoEJMLVector(errorRotationVector, tempSpatialError, 0);
+      CommonOps.mult(selectionMatrix, tempSpatialError, tempSubspaceError);
+
+      return NormOps.normP2(tempSubspaceError);
    }
 
    public DenseMatrix64F getDesiredJointAngles()
