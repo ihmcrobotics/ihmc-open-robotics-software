@@ -193,6 +193,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
       return maximumHeightAboveGround + additionalOffsetHeightBono;
    }
 
+   @Override
+   public double defaultOffsetHeightAboveAnkle()
+   {
+      return 0.0;
+   }
+
    public void setNominalHeightAboveAnkle(double nominalHeightAboveAnkle)
    {
       this.nominalHeightAboveGround = nominalHeightAboveAnkle;
