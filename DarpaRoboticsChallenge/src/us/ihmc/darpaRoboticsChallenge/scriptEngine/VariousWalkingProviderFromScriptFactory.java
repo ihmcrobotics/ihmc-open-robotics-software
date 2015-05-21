@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBeari
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.PelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.SingleJointPositionProvider;
@@ -109,6 +110,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
       
       DesiredJointsPositionProvider desiredJointsPositionProvider = null;
       SingleJointPositionProvider singleJointPositionProvider = null;
+      MultiJointPositionProvider multiJointPositionProvider = null;
 
       AbortWalkingProvider abortWalkingProvider = null;
 
@@ -118,7 +120,7 @@ public class VariousWalkingProviderFromScriptFactory implements VariousWalkingPr
             headOrientationProvider, desiredComHeightProvider, pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, handLoadBearingProvider, chestOrientationProvider,
             footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider,
             controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
-            singleJointPositionProvider, abortWalkingProvider);
+            singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
 
       return variousProviders;
    }
