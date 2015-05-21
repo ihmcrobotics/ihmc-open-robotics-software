@@ -5,11 +5,11 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public class SpineJointPositions
 {
-   private double[] jointPositions = new double[SpineJointName.values().length];
+   private double[] jointPositions = new double[SpineJointName.values.length];
 
    public static void validateSpineJointPositions(SpineJointPositions[] spineJointAnglesArray)
    {
-      if (spineJointAnglesArray.length != SpineJointName.values().length)
+      if (spineJointAnglesArray.length != SpineJointName.values.length)
          throw new RuntimeException("SpineJointPositions wrong length.");
    }
 
@@ -69,7 +69,7 @@ public class SpineJointPositions
    {
       String ret = "The spineJointPositions:\n";
 
-      for (SpineJointName spineJointName : SpineJointName.values())
+      for (SpineJointName spineJointName : SpineJointName.values)
       {
          ret += spineJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointPositions[spineJointName.ordinal()] + "\n";
       }

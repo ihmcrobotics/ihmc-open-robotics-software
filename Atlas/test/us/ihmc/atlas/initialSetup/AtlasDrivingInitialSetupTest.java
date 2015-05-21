@@ -81,7 +81,7 @@ public class AtlasDrivingInitialSetupTest
             }
          }
          
-         for (SpineJointName jointName : SpineJointName.values())
+         for (SpineJointName jointName : SpineJointName.values)
          {
             String key = jointMap.getSpineJointName(jointName);
             if (key == null)

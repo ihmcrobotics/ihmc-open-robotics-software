@@ -5,7 +5,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public class SpineTorques
 {
-   private double[] torques = new double[SpineJointName.values().length];
+   private double[] torques = new double[SpineJointName.values.length];
 
    public SpineTorques()
    {

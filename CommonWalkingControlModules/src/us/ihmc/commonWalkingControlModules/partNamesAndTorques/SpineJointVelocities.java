@@ -6,7 +6,7 @@ import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 
 public class SpineJointVelocities
 {
-   private double[] jointVelocities = new double[SpineJointName.values().length];
+   private double[] jointVelocities = new double[SpineJointName.values.length];
 
    public SpineJointVelocities()
    {
@@ -74,7 +74,7 @@ public class SpineJointVelocities
    {
       String ret = "The SpineJointVelocities:\n";
 
-      for (SpineJointName spineJointName : SpineJointName.values())
+      for (SpineJointName spineJointName : SpineJointName.values)
       {
          ret += spineJointName.getCamelCaseNameForMiddleOfExpression() + " = " + jointVelocities[spineJointName.ordinal()] + "\n";
       }

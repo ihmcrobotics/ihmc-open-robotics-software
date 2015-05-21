@@ -141,7 +141,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 	// THIS METHOD IS NOT USED
 	public void doSpineControl(SpineTorques spineTorquesToPack)
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			PIDController pidController = spinePDControllers.get(spineJointName);
 
@@ -169,7 +169,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 		spineJointIDCalc.compute();
 
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			double torque = spineRevoluteJointList.get(spineJointName).getTau();
 			spineTorques.setTorque(spineJointName, torque);
@@ -204,7 +204,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 		spineJointIDCalc.setExternalWrench(chest, virtualWrench);
 		spineJointIDCalc.compute();
 		
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			double torque = spineRevoluteJointList.get(spineJointName).getTau();
 			spineTorques.setTorque(spineJointName, torque);
@@ -340,7 +340,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private void setDesiredAccelerationOnSpineJointsUsingPDcontrol()
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName);
 
@@ -357,7 +357,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private void setDesiredAccelerationOnSpineJointsToZero()
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			RevoluteJoint spineRevoluteJoint = spineRevoluteJointList.get(spineJointName);
 			spineRevoluteJoint.setQddDesired(0.0);
@@ -368,7 +368,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private void computeSpineTorqueUsingPDControl(SpineTorques spineTorquesToPack)
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			PIDController pidController = spinePDControllers.get(spineJointName);
 
@@ -592,7 +592,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private void populateControllers()
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			spinePDControllers.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "ctrl", registry));
 			spinePDControllersForInvDynamicsQddTrajectory.put(spineJointName, new PIDController(spineJointName.getCamelCaseNameForStartOfExpression() + "qddDesired" + "ctrl", registry));            
@@ -624,7 +624,7 @@ public class SpineJointLungingControlModule implements SpineLungingControlModule
 
 	private void populateYoVariables()
 	{
-		for (SpineJointName spineJointName : SpineJointName.values())
+		for (SpineJointName spineJointName : SpineJointName.values)
 		{
 			String name = "desired" + spineJointName.getCamelCaseNameForMiddleOfExpression();
 			DoubleYoVariable variable = new DoubleYoVariable(name, registry);
