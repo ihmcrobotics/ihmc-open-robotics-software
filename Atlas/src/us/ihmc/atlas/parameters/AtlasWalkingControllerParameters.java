@@ -552,7 +552,7 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
       double kpXY = 40.0; //80.0;
       double kpZ = 40.0; //80.0;
       double zetaXY = realRobot ? 0.5 : 0.8;
-      double zetaZ = realRobot ? 0.5 : 0.8;
+      double zetaZ = realRobot ? 0.22 : 0.8;
       double maxAccel = realRobot ? 6.0 : 36.0;
       double maxJerk = realRobot ? 60.0 : 540.0;
 
