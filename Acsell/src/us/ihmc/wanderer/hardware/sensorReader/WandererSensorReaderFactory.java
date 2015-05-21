@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 
+import us.ihmc.acsell.CostOfTransportCalculator;
 import us.ihmc.acsell.hardware.sensorReader.AcsellSensorReader;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -29,14 +30,17 @@ public class WandererSensorReaderFactory implements SensorReaderFactory
 {
    private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private AcsellSensorReader<WandererJoint> sensorReader;
+   
+   private final CostOfTransportCalculator costOfTransportCalculator;
 
    private final DRCRobotSensorInformation sensorInformation;
    private final StateEstimatorParameters stateEstimatorParameters;
    
-   public WandererSensorReaderFactory(DRCRobotModel robotModel)
+   public WandererSensorReaderFactory(DRCRobotModel robotModel, CostOfTransportCalculator costOfTransportCalculator)
    {
       sensorInformation = robotModel.getSensorInformation();
       stateEstimatorParameters = robotModel.getStateEstimatorParameters();
+      this.costOfTransportCalculator = costOfTransportCalculator;
    }
 
    @Override
@@ -71,6 +75,8 @@ public class WandererSensorReaderFactory implements SensorReaderFactory
       sensorReader = new AcsellSensorReader<WandererJoint>(state, WandererJoint.values, wandererJoints, stateEstimatorSensorDefinitions, rawJointSensorDataHolderMap, sensorInformation, stateEstimatorParameters,
             estimatorDesiredJointDataHolder, sensorReaderRegistry);
       
+      
+      costOfTransportCalculator.setTotalWorkVariable(state.getPowerDistributionState().getTotalWorkVariable());
       parentRegistry.addChild(sensorReaderRegistry);
 
    }

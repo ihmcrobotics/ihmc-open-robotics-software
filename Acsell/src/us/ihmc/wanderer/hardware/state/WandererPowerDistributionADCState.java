@@ -71,4 +71,10 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
       robotWork.add(robotPower.getDoubleValue() *  dt);
       averageRobotPower.update();
    }
+
+   @Override
+   public DoubleYoVariable getTotalWorkVariable()
+   {
+      return robotWork;
+   }
 }

@@ -14,7 +14,6 @@ import us.ihmc.acsell.hardware.state.AcsellState;
 import us.ihmc.acsell.hardware.state.slowSensors.PressureSensor;
 import us.ihmc.acsell.hardware.state.slowSensors.StrainSensor;
 import us.ihmc.utilities.robotSide.RobotSide;
-import us.ihmc.wanderer.hardware.state.WandererFootSensorManager;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererJoint;
 import us.ihmc.wanderer.hardware.configuration.WandererAnkleKinematicParameters;
