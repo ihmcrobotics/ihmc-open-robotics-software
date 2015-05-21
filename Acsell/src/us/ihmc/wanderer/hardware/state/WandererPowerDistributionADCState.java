@@ -7,6 +7,7 @@ import us.ihmc.wanderer.parameters.WandererRobotModel;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
+import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 
 public class WandererPowerDistributionADCState implements AcsellPowerDistributionADCState
 {
@@ -23,6 +24,7 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
    private final DoubleYoVariable vicor12Current;
    private final DoubleYoVariable armCurrent;
    private final DoubleYoVariable inputCurrent;
+   private final AlphaFilteredYoVariable averageRobotPower;
    private final double dt;
 
    public WandererPowerDistributionADCState(String name, YoVariableRegistry parentRegistry)
@@ -34,6 +36,7 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
       }
 
       robotPower = new DoubleYoVariable("robotPower", registry);
+      averageRobotPower = new AlphaFilteredYoVariable("averageRobotPower", registry, 0.99975, robotPower);
       robotWork = new DoubleYoVariable("robotWork", registry);
       busVoltage = new DoubleYoVariable("busVoltage", registry);
       leftLimbCurrent = new DoubleYoVariable("leftLimbCurrent", registry);
@@ -66,5 +69,6 @@ public class WandererPowerDistributionADCState implements AcsellPowerDistributio
 
       robotPower.set(busVoltage.getDoubleValue() * (inputCurrent.getDoubleValue()));
       robotWork.add(robotPower.getDoubleValue() *  dt);
+      averageRobotPower.update();
    }
 }

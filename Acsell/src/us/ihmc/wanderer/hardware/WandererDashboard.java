@@ -24,6 +24,7 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.wanderer.hardware.visualization.WandererExpoFrame;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
@@ -41,7 +42,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    private final EnumMap<WandererActuator, YoVariable<?>> motorEncoders = new EnumMap<>(WandererActuator.class);
    
 
-   public static void createDashboard(final SimulationConstructionSet scs, YoVariableHolder registry)
+   public static void createDashboard(final SimulationConstructionSet scs, YoVariableRegistry registry)
    {
       final WandererDashboard wandererDashboard = new WandererDashboard(registry);
       scs.addExtraJpanel(wandererDashboard, "Dashboard");

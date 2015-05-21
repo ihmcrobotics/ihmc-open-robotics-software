@@ -1,16 +1,21 @@
 package us.ihmc.wanderer.hardware.visualization;
 
+import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 import us.ihmc.simulationconstructionset.PlaybackListener;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
+import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 
@@ -19,49 +24,84 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private static final long serialVersionUID = 9154257744299379146L;
    
    private final JLabel power_label = new JLabel();
+   private final JLabel avg_power_label = new JLabel();
+   private final JLabel power_value = new JLabel();
+   private final JLabel avg_power_value = new JLabel();
    private final JLabel time_label = new JLabel();
+   private final JLabel time_value = new JLabel();
    private final DoubleYoVariable power;
-   private final LongYoVariable time;
+   private final DoubleYoVariable avgpower;
+   private final LongYoVariable nanosecondstime;
+   private final DoubleYoVariable time;
+   private final DoubleYoVariable startTime;
+   private boolean init_complete = false;
       
-   public WandererExpoFrame(YoVariableHolder yoVariableHolder, boolean isStandalone)
+   public WandererExpoFrame(YoVariableRegistry parentRegistry, boolean isStandalone)
    {
       super();
       setBounds(0,0,1920,1080);
       final JPanel panel = new JPanel();
-      final JLabel label = new JLabel();
-      final JLabel label2 = new JLabel();
       this.add(panel);
       panel.setLayout(new GridLayout(0,2));
-      panel.add(label);
       panel.add(power_label);
-      panel.add(label2);
+      power_label.setText("Motor Power: ");
+      panel.add(power_value);
+      panel.add(avg_power_label);
+      avg_power_label.setText("Avg. Power: ");      
+      panel.add(avg_power_value);
       panel.add(time_label);
-      label.setText("Robot Power: ");
-      label2.setText("Running Time: ");
+      panel.add(time_value);
+      time_label.setText("Running Time: ");      
       
       if(isStandalone)
       {
-         power = null;
-         time = null;
+         YoVariableRegistry registry = new YoVariableRegistry("base");
+         avgpower = new DoubleYoVariable("averagePower", registry);
+         power = new DoubleYoVariable("motorPower", registry);
+         nanosecondstime = new LongYoVariable("longtime", registry);
+         time = new DoubleYoVariable("time", registry);
+         startTime = new DoubleYoVariable("startTime", registry);
+         avgpower.set(123456);
+         power.set(123456);
+         nanosecondstime.set(1234567890);
+         time.set(123456);
+         indexChanged(1, 1.0);
       } else
       {
-         power = (DoubleYoVariable) yoVariableHolder.getVariable("Wanderer","totalMotorPower");
-         time = (LongYoVariable) yoVariableHolder.getVariable("SensorProcessing","timestamp");
+         avgpower = (DoubleYoVariable) parentRegistry.getVariable("powerDistribution","averageRobotPower");
+         power = (DoubleYoVariable) parentRegistry.getVariable("Wanderer","totalMotorPower");
+         nanosecondstime = (LongYoVariable) parentRegistry.getVariable("SensorProcessing","timestamp");
+         time = new DoubleYoVariable("expoTime", parentRegistry);
+         startTime = new DoubleYoVariable("expoStartTime", parentRegistry);
       }
       
       if(isStandalone) setupExitOnClose();
       
-      label.setFont(label.getFont().deriveFont(100.0f));
-      label2.setFont(label.getFont().deriveFont(100.0f));
-      power_label.setFont(label.getFont().deriveFont(100.0f));
-      time_label.setFont(label.getFont().deriveFont(100.0f));
+      setFontSize(100.0f);
+   }
+   
+   private void setFontSize(float size)
+   {
+      power_label.setFont(power_label.getFont().deriveFont(size));
+      avg_power_label.setFont(power_label.getFont());
+      time_label.setFont(power_label.getFont());
+      power_value.setFont(power_label.getFont());
+      avg_power_value.setFont(power_label.getFont());
+      time_value.setFont(power_label.getFont());
    }
    
    @Override
    public void indexChanged(int newIndex, double newTime)
    {
-      power_label.setText(String.format("%.1f",power.getDoubleValue()));
-      time_label.setText(String.format("%.1f",TimeTools.nanoSecondstoSeconds(time.getLongValue())));
+      if(!init_complete)
+      {
+         startTime.set(TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue()));
+         init_complete = true;
+      }
+      power_value.setText(String.format("%.1f",power.getDoubleValue()));
+      avg_power_value.setText(String.format("%.1f",avgpower.getDoubleValue()));
+      time.set(TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue())-startTime.getDoubleValue());
+      time_value.setText(String.format("%.1f",time.getDoubleValue()));
    }
 
    @Override
