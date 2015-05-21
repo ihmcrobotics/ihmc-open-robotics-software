@@ -238,7 +238,7 @@ public class AtlasCapturePointPlannerParameters implements CapturePointPlannerPa
    @Override
    public double getStepLengthThresholdForExitCMPOnToesWhenSteppingDown()
    {
-      return 0.15;
+      return AtlasPhysicalProperties.footLengthForControl;
    }
 
    /** {@inheritDoc} */
