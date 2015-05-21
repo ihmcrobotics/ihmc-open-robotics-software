@@ -470,7 +470,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       
       double absoluteTotalError = translationalTotalError.length();
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError, false);
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
 

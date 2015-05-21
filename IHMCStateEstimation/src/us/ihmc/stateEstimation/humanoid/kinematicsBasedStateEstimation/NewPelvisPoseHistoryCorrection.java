@@ -32,7 +32,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private static final boolean ENABLE_GRAPHICS = true;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_ROTATION_CORRECTION = true;  
+   private static final boolean ENABLE_ROTATION_CORRECTION = false;  
    
    private static final double DEFAULT_BREAK_FREQUENCY = 0.6;
 
@@ -44,6 +44,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final ReferenceFrame pelvisReferenceFrame;
    private final ClippedSpeedOffsetErrorInterpolator offsetErrorInterpolator;
    private final OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseUpdater;
+   
+   private boolean hasMapBeenReset = false;
    
    private final double estimatorDT;
    private boolean sendCorrectionUpdate = false;
@@ -277,7 +279,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
       /////
       
-      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, ENABLE_ROTATION_CORRECTION))
+      if(offsetErrorInterpolator.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, true))
       {
          requestLocalizationReset();
          isErrorTooBig.set(true);
@@ -292,6 +294,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private void requestLocalizationReset()
    {
       pelvisPoseCorrectionCommunicator.sendLocalizationResetRequest(new LocalizationPacket(true, true));
+      hasMapBeenReset = true;
    }
 
    private void checkForNeedToSendCorrectionUpdate()
@@ -306,6 +309,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    
    Vector3d translationalResidualError = new Vector3d();
    Vector3d translationalTotalError = new Vector3d();
+   
    private void sendCorrectionUpdatePacket()
    {
       errorBetweenCorrectedAndLocalizationTransform.get(translationalResidualError);
@@ -314,7 +318,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();
 
-      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError);
+      PelvisPoseErrorPacket pelvisPoseErrorPacket = new PelvisPoseErrorPacket((float) absoluteTotalError, (float) absoluteResidualError, hasMapBeenReset);
+      hasMapBeenReset = false;
       pelvisPoseCorrectionCommunicator.sendPelvisPoseErrorPacket(pelvisPoseErrorPacket);
    }
    
