@@ -302,6 +302,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public double defaultOffsetHeightAboveAnkle()
+   {
+      return 0.0;
+   }
+
+   @Override
    public double getFootForwardOffset()
    {
       return ValkyriePhysicalProperties.footForward;
