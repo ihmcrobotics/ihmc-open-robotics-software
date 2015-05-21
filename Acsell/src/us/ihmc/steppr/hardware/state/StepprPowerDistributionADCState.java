@@ -54,4 +54,10 @@ public class StepprPowerDistributionADCState implements AcsellPowerDistributionA
       robotPower.set(busVoltage.getDoubleValue() * (leftLimbCurrent.getDoubleValue() + rightLimbCurrent.getDoubleValue() + torsoLimbCurrent.getDoubleValue()));
       robotWork.add(robotPower.getDoubleValue() *  dt);
    }
+
+   @Override
+   public DoubleYoVariable getTotalWorkVariable()
+   {
+      return robotWork;
+   }
 }

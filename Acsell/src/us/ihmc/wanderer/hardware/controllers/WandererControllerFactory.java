@@ -3,8 +3,10 @@ package us.ihmc.wanderer.hardware.controllers;
 import java.io.IOException;
 import java.util.logging.Level;
 
+import javax.vecmath.Point3d;
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.acsell.CostOfTransportCalculator;
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
@@ -79,6 +81,13 @@ public class WandererControllerFactory
       GlobalDataProducer dataProducer = new GlobalDataProducer(drcNetworkProcessorServer);
 
       /*
+       * Create cost of transport calculator
+       */
+      
+      double mass = robotModel.createSdfRobot(true).computeCenterOfMass(new Point3d());
+      CostOfTransportCalculator costOfTransportCalculator = new CostOfTransportCalculator(mass, gravity, 10.0, robotModel.getEstimatorDT(), yoVariableServer);
+      
+      /*
        * Create controllers
        */
       MomentumBasedControllerFactory controllerFactory = createDRCControllerFactory(robotModel, dataProducer, sensorInformation);
@@ -87,7 +96,7 @@ public class WandererControllerFactory
        * Create sensors
        */
 
-      WandererSensorReaderFactory sensorReaderFactory = new WandererSensorReaderFactory(robotModel);
+      WandererSensorReaderFactory sensorReaderFactory = new WandererSensorReaderFactory(robotModel, costOfTransportCalculator);
 
       /*
        * Create output writer
@@ -121,7 +130,7 @@ public class WandererControllerFactory
        */
       ThreadDataSynchronizer threadDataSynchronizer = new ThreadDataSynchronizer(robotModel);
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSensorInformation(), robotModel.getContactPointParameters(),
-            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, yoVariableServer, gravity);
+            robotModel.getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer, new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), dataProducer, costOfTransportCalculator, gravity);
       estimatorThread.setExternalPelvisCorrectorSubscriber(externalPelvisPoseSubscriber);
       DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
             drcOutputWriter, dataProducer, yoVariableServer, gravity, robotModel.getEstimatorDT());

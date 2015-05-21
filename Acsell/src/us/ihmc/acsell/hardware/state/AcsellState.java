@@ -151,4 +151,9 @@ public abstract class AcsellState<ACTUATOR extends Enum<ACTUATOR> & AcsellActuat
    {
       return footWrenches.get(robotSide);
    }
+
+   public AcsellPowerDistributionADCState getPowerDistributionState()
+   {
+      return powerDistributionState;
+   }
 }
