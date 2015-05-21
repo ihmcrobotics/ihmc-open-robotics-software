@@ -512,4 +512,8 @@ public class OptimizationMomentumControlModule implements MomentumControlModule
 //    return externalWrenchHandler.getExternalWrenches();
 // }
 
+   public void setWRhoSmoother(double wRhoSmoother)
+   {
+      wrenchMatrixCalculator.setWRhoSmoother(wRhoSmoother);
+   }
 }

@@ -1762,6 +1762,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       momentumBasedController.doPassiveKneeControl();
       momentumBasedController.doProportionalControlOnCoP();
+      momentumBasedController.smoothDesiredCoPIfNeeded();
    }
 
    private final FramePoint2d finalDesiredCapturePoint2d = new FramePoint2d();

@@ -8,7 +8,6 @@ import us.ihmc.utilities.screwTheory.Momentum;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-
 /**
  * @author twan
  *         Date: 5/1/13
@@ -32,7 +31,13 @@ public class MomentumOptimizationSettings
 
    private final DenseMatrix64F momentumSubspaceProjector = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
-   private final Momentum tempMomentum = new Momentum();    // just to make sure that the ordering of force and torque are correct
+   private final Momentum tempMomentum = new Momentum(); // just to make sure that the ordering of force and torque are correct
+
+   // Parameters for shaky feet
+   private boolean enableCoPSmootherControlForShakies = false;
+   private double copErrorThresholdToTriggerSmoother = 0.10;
+   private double copSmootherDuration = 0.5;
+   private double maxWRhoSmoother = 1.5;
 
    public MomentumOptimizationSettings(InverseDynamicsJoint[] jointsToOptimizeFor, YoVariableRegistry parentRegistry)
    {
@@ -127,5 +132,45 @@ public class MomentumOptimizationSettings
    public InverseDynamicsJoint[] getJointsToOptimizeFor()
    {
       return jointsToOptimizeFor;
+   }
+
+   public boolean getEnableCoPSmootherControlForShakies()
+   {
+      return enableCoPSmootherControlForShakies;
+   }
+
+   public void setEnableCoPSmootherControlForShakies(boolean enableCoPSmootherControlForShakies)
+   {
+      this.enableCoPSmootherControlForShakies = enableCoPSmootherControlForShakies;
+   }
+
+   public double getCopErrorThresholdToTriggerSmoother()
+   {
+      return copErrorThresholdToTriggerSmoother;
+   }
+
+   public void setCopErrorThresholdToTriggerSmoother(double copErrorThresholdToTriggerSmoother)
+   {
+      this.copErrorThresholdToTriggerSmoother = copErrorThresholdToTriggerSmoother;
+   }
+
+   public double getCoPSmootherDuration()
+   {
+      return copSmootherDuration;
+   }
+
+   public void setCopSmootherDuration(double copSmootherDuration)
+   {
+      this.copSmootherDuration = copSmootherDuration;
+   }
+
+   public double getMaxWRhoSmoother()
+   {
+      return maxWRhoSmoother;
+   }
+
+   public void setMaxWRhoSmoother(double maxWRhoSmoother)
+   {
+      this.maxWRhoSmoother = maxWRhoSmoother;
    }
 }
