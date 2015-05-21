@@ -46,6 +46,15 @@ public class PacketCommunicator
    {
       return createTCPPacketCommunicatorServer(port, BUFFER_SIZE, BUFFER_SIZE, netClassList);
    }
+
+   public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList, int maximumObjectSize)
+   {
+      KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
+      server.setMaximumObjectSize(maximumObjectSize);
+
+      return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList.getPacketClassList());
+   }
+
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
       return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList.getPacketClassList());
