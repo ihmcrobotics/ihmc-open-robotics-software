@@ -19,7 +19,7 @@ import com.martiansoftware.jsap.JSAP;
 import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 
-class RobotiqControlThrizzead extends HandControlThread
+public class RobotiqControlThrizzead extends HandControlThread
 {
    private final boolean CALIBRATE_ON_CONNECT = false;
    
