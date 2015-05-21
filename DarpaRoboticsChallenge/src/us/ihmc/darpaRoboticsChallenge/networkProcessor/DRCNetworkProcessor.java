@@ -156,25 +156,16 @@ public class DRCNetworkProcessor
    {
       if (params.isHandModuleEnabled())
       {
-         SideDependentList<? extends HandCommandManager> handCommandModule = robotModel.createHandCommandManager();
-         if (handCommandModule == null)
-         {
-            return;
-         }
-         
          for(RobotSide robotSide : RobotSide.values)
          {
-            if(handCommandModule.get(robotSide) != null)
-            {
-               NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_MANAGER_PORT : NetworkPorts.RIGHT_HAND_MANAGER_PORT;
-               PacketCommunicator handModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(port, NET_CLASS_LIST);
-               PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND : PacketDestination.RIGHT_HAND;
-               packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
-               handModuleCommunicator.connect();
-               
-               String methodName = "setupHandModules ";
-               printModuleConnectedDebugStatement(destination, methodName);
-            }
+            NetworkPorts port = robotSide == RobotSide.LEFT ? NetworkPorts.LEFT_HAND_PORT : NetworkPorts.RIGHT_HAND_PORT;
+            PacketCommunicator handModuleCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(port, NET_CLASS_LIST);
+            PacketDestination destination = robotSide == RobotSide.LEFT ? PacketDestination.LEFT_HAND : PacketDestination.RIGHT_HAND;
+            packetRouter.attachPacketCommunicator(destination, handModuleCommunicator);
+            handModuleCommunicator.connect();
+            
+            String methodName = "setupHandModules ";
+            printModuleConnectedDebugStatement(destination, methodName);
          }
       }
    }
