@@ -13,4 +13,5 @@ public interface AcsellActuator
    public int getIndex();
    public int getSensedCurrentToTorqueDirection();
    public double getMotorInertia();
+   public double getDampingSign();
 }

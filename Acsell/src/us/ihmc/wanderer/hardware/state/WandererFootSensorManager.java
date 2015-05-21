@@ -18,8 +18,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
 public class WandererFootSensorManager
 {
-   private static final WandererActuator[] leftFootSensorActuators = {WandererActuator.LEFT_KNEE,WandererActuator.LEFT_ANKLE_RIGHT};
-   private static final WandererActuator[] rightFootSensorActuators = {WandererActuator.RIGHT_KNEE,WandererActuator.RIGHT_ANKLE_RIGHT};
+   private static final WandererActuator[] leftFootSensorActuators = {WandererActuator.LEFT_KNEE,WandererActuator.LEFT_ANKLE_RIGHT,WandererActuator.LEFT_ANKLE_LEFT};
+   private static final WandererActuator[] rightFootSensorActuators = {WandererActuator.RIGHT_KNEE,WandererActuator.RIGHT_ANKLE_RIGHT,WandererActuator.RIGHT_ANKLE_LEFT};
    private static final int PRESSURE_SENSORS_PER_ROW = 4;
    private static final int PRESSURE_SENSORS_PER_FOOT = leftFootSensorActuators.length*PRESSURE_SENSORS_PER_ROW;
    private static final double[] sensorYPositions = new double[]
@@ -30,8 +30,8 @@ public class WandererFootSensorManager
            7.450 * 0.0254 - WandererPhysicalProperties.footLength/2.0,
            0.000 * 0.0254 - WandererPhysicalProperties.footLength/2.0
          };
-   private static final double[][] leftSensorsToUse = {{1,1,1,1},{1,1,1,1}};
-   private static final double[][] rightSensorsToUse = {{1,1,1,1},{1,1,1,1}};
+   private static final double[][] leftSensorsToUse = {{1,1,1,1},{1,1,1,1},{1,0,0,1}};
+   private static final double[][] rightSensorsToUse = {{1,1,1,1},{1,1,1,1},{1,0,0,1}};
    
    private final EnumMap<WandererJoint, AcsellJointState> jointStates;
    private final EnumMap<WandererActuator, AcsellActuatorState> actuatorStates;

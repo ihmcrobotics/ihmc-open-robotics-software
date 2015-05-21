@@ -105,6 +105,12 @@ public enum WandererActuator implements AcsellActuator
    {
       return motorEncoderScale;
    }
+   
+   @Override
+   public double getDampingSign()
+   {
+      return Math.signum(motorEncoderScale);
+   }   
 
    @Override
    public double getJointEncoderOffset()

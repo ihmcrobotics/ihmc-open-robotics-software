@@ -107,6 +107,12 @@ public enum StepprActuator implements AcsellActuator
    {
       return 0.0;
    }
+
+   @Override
+   public double getDampingSign()
+   {
+      return 1.0;
+   }
    
    
 }
