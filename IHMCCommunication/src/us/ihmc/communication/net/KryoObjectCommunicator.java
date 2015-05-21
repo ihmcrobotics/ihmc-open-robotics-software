@@ -197,8 +197,10 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
                      ArrayList<ObjectConsumer<?>> objectListeners = listeners.get(classType);
                      if(objectListeners != null)
                      {
-                        for(@SuppressWarnings("rawtypes") ObjectConsumer listener : objectListeners)
+                        for(int i=0; i<objectListeners.size(); i++)
                         {
+                           @SuppressWarnings("rawtypes")
+                           ObjectConsumer listener = objectListeners.get(i);
                            listener.consumeObject(object);
                         }
                      }
