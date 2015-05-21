@@ -7,6 +7,8 @@ import java.awt.Insets;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -40,18 +42,33 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    {
       super();
       setBounds(0,0,1920,1080);
-      final JPanel panel = new JPanel();
-      this.add(panel);
-      panel.setLayout(new GridLayout(0,2));
-      panel.add(power_label);
+      final JPanel mainpanel = new JPanel();
+      this.add(mainpanel);
+      mainpanel.setLayout(new BoxLayout(mainpanel,BoxLayout.Y_AXIS));
+      
+      final JPanel power_panel = new JPanel();
+      power_panel.setLayout(new BoxLayout(power_panel,BoxLayout.X_AXIS));
+      power_panel.add(power_label);
       power_label.setText("Motor Power: ");
-      panel.add(power_value);
-      panel.add(avg_power_label);
-      avg_power_label.setText("Avg. Power: ");      
-      panel.add(avg_power_value);
-      panel.add(time_label);
-      panel.add(time_value);
-      time_label.setText("Running Time: ");      
+      power_panel.add(Box.createHorizontalGlue());
+      power_panel.add(power_value);
+      mainpanel.add(power_panel);
+      
+      final JPanel avgpower_panel = new JPanel();
+      avgpower_panel.setLayout(new BoxLayout(avgpower_panel,BoxLayout.X_AXIS));
+      avgpower_panel.add(avg_power_label);
+      avg_power_label.setText("Avg. Robot Power: ");
+      avgpower_panel.add(Box.createHorizontalGlue());
+      avgpower_panel.add(avg_power_value);
+      mainpanel.add(avgpower_panel);
+      
+      final JPanel time_panel = new JPanel();
+      time_panel.setLayout(new BoxLayout(time_panel,BoxLayout.X_AXIS));
+      time_panel.add(time_label);
+      time_label.setText("Running Time: ");
+      time_panel.add(Box.createHorizontalGlue());
+      time_panel.add(time_value);
+      mainpanel.add(time_panel);
       
       if(isStandalone)
       {
@@ -61,8 +78,8 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
          nanosecondstime = new LongYoVariable("longtime", registry);
          time = new DoubleYoVariable("time", registry);
          startTime = new DoubleYoVariable("startTime", registry);
-         avgpower.set(123456);
-         power.set(123456);
+         avgpower.set(456);
+         power.set(123);
          nanosecondstime.set(1234567890);
          time.set(123456);
          indexChanged(1, 1.0);
