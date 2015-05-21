@@ -150,6 +150,7 @@ public class MomentumBasedController
 
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
+   private final OptimizationMomentumControlModule optimizationMomentumControlModule;
    private final MomentumControlModuleBridge momentumControlModuleBridge;
 
    @Deprecated
@@ -365,13 +366,9 @@ public class MomentumBasedController
          wrenchVisualizer = null;
       }
 
-      OptimizationMomentumControlModule optimizationMomentumControlModule = null;
-      if (momentumOptimizationSettings != null)
-      {
-         optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(), referenceFrames.getCenterOfMassFrame(),
-                 controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder, yoPlaneContactStateList, yoGraphicsListRegistry,
-                 registry);
-      }
+      optimizationMomentumControlModule = new OptimizationMomentumControlModule(fullRobotModel.getRootJoint(),
+            referenceFrames.getCenterOfMassFrame(), controlDT, gravityZ, momentumOptimizationSettings, twistCalculator, robotJacobianHolder,
+            yoPlaneContactStateList, yoGraphicsListRegistry, registry);
 
       momentumControlModuleBridge = new MomentumControlModuleBridge(optimizationMomentumControlModule, oldMomentumControlModule, centerOfMassFrame, registry);
 
@@ -499,6 +496,12 @@ public class MomentumBasedController
             handMass.set(TotalMassCalculator.computeSubTreeMass(measurementLink));
          }
       }
+
+      enableCoPSmootherForShakies.set(momentumOptimizationSettings.getEnableCoPSmootherControlForShakies());
+      defaultWRhoSmoother.set(momentumOptimizationSettings.getRateOfChangeOfRhoPlaneContactRegularization());
+      maxWRhoSmoother.set(momentumOptimizationSettings.getMaxWRhoSmoother());
+      copSmootherControlDuration.set(momentumOptimizationSettings.getCoPSmootherDuration());
+      copSmootherErrorThreshold.set(momentumOptimizationSettings.getCopErrorThresholdToTriggerSmoother());
    }
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
@@ -766,6 +769,82 @@ public class MomentumBasedController
 
          OneDoFJoint ankleRollJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL);
          ankleRollJoint.setTau(ankleRollJoint.getTau() + desiredTorqueForCoPControl.getY());
+      }
+   }
+
+   private final BooleanYoVariable enableCoPSmootherForShakies = new BooleanYoVariable("enableCoPSmootherForShakies", registry);
+   private final BooleanYoVariable isCoPControlBad = new BooleanYoVariable("isCoPControlBad", registry);
+   private final BooleanYoVariable isDesiredCoPBeingSmoothened = new BooleanYoVariable("isDesiredCoPBeingSmoothened", registry);
+   private final DoubleYoVariable copSmootherErrorThreshold = new DoubleYoVariable("copSmootherErrorThreshold", registry);
+   private final DoubleYoVariable copSmootherControlStartTime = new DoubleYoVariable("copSmootherControlStartTime", registry);
+   private final DoubleYoVariable defaultWRhoSmoother = new DoubleYoVariable("defaultWRhoSmoother", registry);
+   private final DoubleYoVariable maxWRhoSmoother = new DoubleYoVariable("maxWRhoSmoother", registry);
+   private final DoubleYoVariable copSmootherControlDuration = new DoubleYoVariable("copSmootherControlDuration", registry);
+   private final DoubleYoVariable copSmootherPercent = new DoubleYoVariable("copSmootherPercent", registry);
+
+   public void smoothDesiredCoPIfNeeded()
+   {
+      boolean atLeastOneFootWithBadCoPControl = false;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ContactablePlaneBody contactablePlaneBody = feet.get(robotSide);
+         ReferenceFrame planeFrame = contactablePlaneBody.getSoleFrame();
+
+         FramePoint2d cop = planeContactWrenchProcessor.getCoP(contactablePlaneBody);
+
+         if ((cop == null) || cop.containsNaN())
+         {
+            yoCoPError.get(robotSide).setToZero();
+            yoCoPErrorMagnitude.get(robotSide).set(0.0);
+         }
+
+         copDesired.setIncludingFrame(cop);
+         FootSwitchInterface footSwitch = footSwitches.get(robotSide);
+         footSwitch.computeAndPackCoP(copActual);
+
+         if (copActual.containsNaN())
+         {
+            yoCoPError.get(robotSide).setToZero();
+            yoCoPErrorMagnitude.get(robotSide).set(0.0);
+         }
+
+         copError.setToZero(planeFrame);
+         copError.sub(copDesired, copActual);
+         yoCoPError.get(robotSide).set(copError);
+         yoCoPErrorMagnitude.get(robotSide).set(copError.length());
+
+         if (yoCoPErrorMagnitude.get(robotSide).getDoubleValue() > copSmootherErrorThreshold.getDoubleValue())
+         {
+            atLeastOneFootWithBadCoPControl = true;
+         }
+      }
+
+      isCoPControlBad.set(atLeastOneFootWithBadCoPControl);
+
+      if (atLeastOneFootWithBadCoPControl && !isDesiredCoPBeingSmoothened.getBooleanValue())
+      {
+         isDesiredCoPBeingSmoothened.set(true);
+         copSmootherControlStartTime.set(yoTime.getDoubleValue());
+      }
+
+      if (isDesiredCoPBeingSmoothened.getBooleanValue())
+      {
+         double deltaTime = yoTime.getDoubleValue() - copSmootherControlStartTime.getDoubleValue();
+         double percent = MathTools.clipToMinMax(deltaTime / copSmootherControlDuration.getDoubleValue(), 0.0, 1.0);
+         copSmootherPercent.set(percent);
+
+         if (enableCoPSmootherForShakies.getBooleanValue())
+         {
+            double wRhoSmoother = percent * defaultWRhoSmoother.getDoubleValue() + (1.0 - percent) * maxWRhoSmoother.getDoubleValue();
+            optimizationMomentumControlModule.setWRhoSmoother(wRhoSmoother);
+         }
+
+         if (percent >= 1.0)
+         {
+            optimizationMomentumControlModule.setWRhoSmoother(defaultWRhoSmoother.getDoubleValue());
+            isDesiredCoPBeingSmoothened.set(false);
+         }
       }
    }
 

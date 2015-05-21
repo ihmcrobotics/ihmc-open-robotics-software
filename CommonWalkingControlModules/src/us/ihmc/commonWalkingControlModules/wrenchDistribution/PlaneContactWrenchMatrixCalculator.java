@@ -415,4 +415,9 @@ public class PlaneContactWrenchMatrixCalculator
    {
       return qFeetCoP;
    }
+
+   public void setWRhoSmoother(double wRhoSmoother)
+   {
+      this.wRhoSmoother.set(wRhoSmoother);
+   }
 }
