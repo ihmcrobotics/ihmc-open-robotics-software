@@ -91,7 +91,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       setupStuff(yoGraphicsListRegistry, registry);
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(desiredComHeightProvider,
                                                                                        minimumHeightAboveGround, nominalHeightAboveGround,
-                                                                                       maximumHeightAboveGround, doubleSupportPercentageIn, pelvisFrame,
+                                                                                       maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame,
                                                                                        ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
