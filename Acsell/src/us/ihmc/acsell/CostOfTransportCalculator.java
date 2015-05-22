@@ -20,11 +20,13 @@ public class CostOfTransportCalculator implements RobotVisualizer
 {
 
    private final RobotVisualizer superVisualizer;
-   
-   private DoubleYoVariable deltaWork;
-   private DoubleYoVariable distanceTraveled; 
-   private DoubleYoVariable deltaTime; 
-   private DoubleYoVariable costOfTransport;
+ 
+   private final YoVariableRegistry registry;
+   private final DoubleYoVariable deltaWork;
+   private final DoubleYoVariable distanceTraveled; 
+   private final DoubleYoVariable deltaTime;
+   private final DoubleYoVariable averageVelocity; 
+   private final DoubleYoVariable costOfTransport;
    
    private FullRobotModel fullRobotModel;
    private DoubleYoVariable totalWorkVariable;
@@ -58,6 +60,13 @@ public class CostOfTransportCalculator implements RobotVisualizer
       this.xPosition = new double[samples];
       this.yPosition = new double[samples];
       this.zPosition = new double[samples];
+      
+      this.registry = new YoVariableRegistry("CostOfTransportCalculator");
+      this.costOfTransport = new DoubleYoVariable("costOfTransport", registry);
+      this.deltaTime = new DoubleYoVariable("deltaTime", registry);
+      this.deltaWork = new DoubleYoVariable("deltaWork", registry);
+      this.distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
+      this.averageVelocity = new DoubleYoVariable("averageVelocity", registry);
       
       this.superVisualizer = superVisualizer;
    }
@@ -95,9 +104,9 @@ public class CostOfTransportCalculator implements RobotVisualizer
          double distance = Math.sqrt(dx*dx+dy*dy);
          this.distanceTraveled.set(distance);
          
-         double avarageVelocity = distance/deltaTime;
+         this.averageVelocity.set(distance/deltaTime);
          
-         costOfTransport.set(deltaWork / (robotMass * gravity * avarageVelocity));
+         costOfTransport.set(deltaWork / (robotMass * gravity * distance));
          
       }
       
@@ -118,10 +127,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
    public void setMainRegistry(YoVariableRegistry registry, FullRobotModel fullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       PrintTools.info(this, "Initializing cost of transport calculator. Robot mass is " + robotMass + "kg");
-      this.costOfTransport = new DoubleYoVariable("CostOfTransport", registry);
-      this.deltaTime = new DoubleYoVariable("deltaTime", registry);
-      this.deltaWork = new DoubleYoVariable("deltaWork", registry);
-      this.distanceTraveled = new DoubleYoVariable("distanceTraveled", registry);
+      registry.addChild(this.registry);
       this.fullRobotModel = fullRobotModel;
       
       superVisualizer.setMainRegistry(registry, fullRobotModel, yoGraphicsListRegistry);

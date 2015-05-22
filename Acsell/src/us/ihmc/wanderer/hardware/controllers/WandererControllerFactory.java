@@ -85,7 +85,7 @@ public class WandererControllerFactory
        * Create cost of transport calculator
        */
       
-      double mass = robotModel.createSdfRobot(true).computeCenterOfMass(new Point3d());
+      double mass = 89.693;
       CostOfTransportCalculator costOfTransportCalculator = new CostOfTransportCalculator(mass, gravity, 10.0, robotModel.getEstimatorDT(), yoVariableServer);
       
       /*
