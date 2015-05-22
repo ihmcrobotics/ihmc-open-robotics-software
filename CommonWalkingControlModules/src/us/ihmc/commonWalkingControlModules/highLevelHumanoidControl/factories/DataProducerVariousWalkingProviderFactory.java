@@ -60,6 +60,7 @@ import us.ihmc.communication.packets.walking.PauseCommand;
 import us.ihmc.communication.packets.walking.PelvisPosePacket;
 import us.ihmc.communication.packets.walking.ThighStatePacket;
 import us.ihmc.communication.packets.wholebody.JointAnglesPacket;
+import us.ihmc.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 import us.ihmc.communication.packets.wholebody.WholeBodyTrajectoryPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
@@ -175,6 +176,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
      
       objectCommunicator.attachListener( JointAnglesPacket.class , desiredJointsPositionProvider.getPacketConsumer() );
       objectCommunicator.attachListener(SingleJointAnglePacket.class, singleJointPositionProvider.getPacketConsumer());
+      objectCommunicator.attachListener(MultiJointAnglePacket.class, multiJointPositionProvider.getPacketConsumer());
       objectCommunicator.attachListener(AbortWalkingPacket.class, abortWalkingProvider);
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);

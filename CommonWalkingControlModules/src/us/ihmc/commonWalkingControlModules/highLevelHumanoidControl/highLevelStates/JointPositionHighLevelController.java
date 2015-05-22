@@ -616,6 +616,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private void initializeFromMultiJointAnglePacket(MultiJointAnglePacket multiJointAnglePacket)
    {
 	   SingleJointAnglePacket[] jointPackets = multiJointAnglePacket.singleJointAnglePackets;
+	   if (jointPackets == null)
+	   {
+	      System.out.println("MultiJointAnglePacket was null");
+	      return;
+	   }
 	   if (jointPackets.length == 0)
 	   {
 		   System.out.println("Recieved empty multi joint angle packet.");
