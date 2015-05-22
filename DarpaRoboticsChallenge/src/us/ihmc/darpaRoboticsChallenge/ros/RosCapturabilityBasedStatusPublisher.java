@@ -1,0 +1,93 @@
+package us.ihmc.darpaRoboticsChallenge.ros;
+
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.utilities.robotSide.RobotSide;
+import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.publisher.RosPoint2dPublisher;
+import us.ihmc.utilities.ros.publisher.RosPoint32Publisher;
+
+import java.util.concurrent.ArrayBlockingQueue;
+
+/**
+ *
+ * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
+ */
+public class RosCapturabilityBasedStatusPublisher implements PacketConsumer<CapturabilityBasedStatus>, Runnable
+{
+   private final ArrayBlockingQueue<CapturabilityBasedStatus> availableCapturabilityStatus = new ArrayBlockingQueue<>(30);
+
+   private final RosPoint2dPublisher capturePointPublisher = new RosPoint2dPublisher(false);
+   private final RosPoint2dPublisher desiredCapturePointPublisher = new RosPoint2dPublisher(false);
+   private final RosPoint32Publisher centerOfMassPublisher = new RosPoint32Publisher(false);
+
+   private final SideDependentList<RosSupportPolygonPublisher> supportPolygonPublishers = new SideDependentList<>();
+   private final RosMainNode rosMainNode;
+
+   public RosCapturabilityBasedStatusPublisher(RosMainNode rosMainNode, String rosNameSpace)
+   {
+      this.rosMainNode = rosMainNode;
+
+      for (RobotSide value : RobotSide.values)
+      {
+         RosSupportPolygonPublisher rosSupportPolygonPublisher = new RosSupportPolygonPublisher(false);
+         supportPolygonPublishers.put(value, rosSupportPolygonPublisher);
+         this.rosMainNode
+               .attachPublisher(rosNameSpace + "/output/" + value.getCamelCaseNameForStartOfExpression() + "_foot_support_polygon", rosSupportPolygonPublisher);
+      }
+
+      this.rosMainNode.attachPublisher(rosNameSpace + "/output/capture_point", capturePointPublisher);
+      this.rosMainNode.attachPublisher(rosNameSpace + "/output/desired_capture_point", desiredCapturePointPublisher);
+      this.rosMainNode.attachPublisher(rosNameSpace + "/output/center_of_mass", centerOfMassPublisher);
+
+      new Thread(this, getClass().getName()).start();
+   }
+
+   @Override
+   public void receivedPacket(CapturabilityBasedStatus packet)
+   {
+      if (!availableCapturabilityStatus.offer(packet))
+      {
+         availableCapturabilityStatus.clear();
+      }
+   }
+
+   @Override
+   public void run()
+   {
+      while (true)
+      {
+         CapturabilityBasedStatus capturabilityBasedStatus;
+         try
+         {
+            capturabilityBasedStatus = availableCapturabilityStatus.take();
+         }
+         catch (InterruptedException e)
+         {
+            continue;
+         }
+
+         if (rosMainNode.isStarted())
+         {
+            capturePointPublisher.publish(capturabilityBasedStatus.capturePoint);
+            desiredCapturePointPublisher.publish(capturabilityBasedStatus.desiredCapturePoint);
+            centerOfMassPublisher.publish(capturabilityBasedStatus.centerOfMass);
+
+            for (RobotSide value : RobotSide.values)
+            {
+               RosSupportPolygonPublisher rosSupportPolygonPublisher = supportPolygonPublishers.get(value);
+               switch (value)
+               {
+               case LEFT:
+                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.leftFootSupportPolygonStore);
+                  break;
+               case RIGHT:
+                  rosSupportPolygonPublisher.publish(capturabilityBasedStatus.rightFootSupportPolygonStore);
+                  break;
+               }
+            }
+         }
+      }
+   }
+}

@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.FieldDocumentation;
@@ -286,7 +287,7 @@ public class ROSMessageGenerator
       {
          buffer += "geometry_msgs/Quaternion";
       }
-      else if (clazz.equals(Point3d.class) || (clazz.equals(Vector3d.class)))
+      else if (clazz.equals(Point3d.class) || (clazz.equals(Vector3d.class)) || clazz.equals(Vector3f.class))
       {
          buffer += "geometry_msgs/Vector3";
       }
