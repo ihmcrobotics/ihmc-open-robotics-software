@@ -1,6 +1,8 @@
 package us.ihmc.utilities.ros.msgToPacket.converter;
 
 import com.google.common.base.CaseFormat;
+import sun.reflect.generics.tree.Tree;
+import us.ihmc.communication.packetAnnotations.ClassDocumentation;
 import us.ihmc.communication.packetAnnotations.IgnoreField;
 
 /**
@@ -12,13 +14,12 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -140,6 +141,19 @@ public class GenericRosMessageConverter
                for (Vector3d vector3d : vectors)
                {
                   value.add(convertVector3dToVector3(vector3d));
+               }
+
+               setValue = message.getClass().getMethod(methodName, value.getClass());
+               fieldValue = value;
+            }
+            else if (componentType.equals(Vector3f.class))
+            {
+               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
+               List<Vector3f> vectors = Arrays.asList((Vector3f[]) field.get(packet));
+
+               for (Vector3f vector3f : vectors)
+               {
+                  value.add(convertVector3fToVector3(vector3f));
                }
 
                setValue = message.getClass().getMethod(methodName, value.getClass());
@@ -284,6 +298,19 @@ public class GenericRosMessageConverter
                setValue = message.getClass().getMethod(methodName, List.class);
                fieldValue = value;
             }
+            else if (componentType.equals(Vector3f.class))
+            {
+               List<geometry_msgs.Vector3> value = new ArrayList<geometry_msgs.Vector3>();
+               List<Vector3f> vectors = (List<Vector3f>) field.get(packet);
+
+               for (Vector3f vector3f : vectors)
+               {
+                  value.add(convertVector3fToVector3(vector3f));
+               }
+
+               setValue = message.getClass().getMethod(methodName, List.class);
+               fieldValue = value;
+            }
             else if (componentType.equals(Quat4d.class))
             {
                List<geometry_msgs.Quaternion> value = new ArrayList<geometry_msgs.Quaternion>();
@@ -323,6 +350,12 @@ public class GenericRosMessageConverter
             // message is geometry_msgs/Quaternion
             setValue = message.getClass().getMethod(methodName, geometry_msgs.Vector3.class);
             fieldValue = convertVector3dToVector3((Vector3d) field.get(packet));
+         }
+         else if (fieldType.equals(Vector3f.class))
+         {
+            // message is geometry_msgs/Quaternion
+            setValue = message.getClass().getMethod(methodName, geometry_msgs.Vector3.class);
+            fieldValue = convertVector3fToVector3((Vector3f) field.get(packet));
          }
          else if (fieldType.equals(Quat4d.class))
          {
@@ -476,6 +509,18 @@ public class GenericRosMessageConverter
 
                field.set(outputPacket, points.toArray());
             }
+            else if (fieldType.equals(Vector3f.class))
+            {
+               List<Vector3> vectors = (List) getValue.invoke(message);
+               List<Vector3f> points = new ArrayList<Vector3f>();
+
+               for (Vector3 vector3 : vectors)
+               {
+                  points.add(convertVector3ToVector3f(vector3));
+               }
+
+               field.set(outputPacket, points.toArray());
+            }
             else if (componentType.equals(Quat4d.class))
             {
                List<Quaternion> quaternions = (List) getValue.invoke(message);
@@ -574,6 +619,18 @@ public class GenericRosMessageConverter
 
                valueList = points;
             }
+            else if (fieldType.equals(Vector3f.class))
+            {
+               List<Vector3> vectors = (List) getValue.invoke(message);
+               List<Vector3f> points = new ArrayList<Vector3f>();
+
+               for (Vector3 vector3 : vectors)
+               {
+                  points.add(convertVector3ToVector3f(vector3));
+               }
+
+               valueList = points;
+            }
             else if (componentType.equals(Quat4d.class))
             {
                List<Quaternion> quaternions = (List) getValue.invoke(message);
@@ -620,6 +677,10 @@ public class GenericRosMessageConverter
          {
             field.set(outputPacket, convertVector3ToVector3d((Vector3) getValue.invoke(message)));
          }
+         else if (fieldType.equals(Vector3f.class))
+         {
+            field.set(outputPacket, convertVector3ToVector3f((Vector3) getValue.invoke(message)));
+         }
          else if (fieldType.equals(Quat4d.class))
          {
             field.set(outputPacket, convertQuaternionToQuat4d((Quaternion) getValue.invoke(message)));
@@ -662,6 +723,15 @@ public class GenericRosMessageConverter
 
       return value;
    }
+   private static Vector3 convertVector3fToVector3(Vector3f vector3f){
+      geometry_msgs.Vector3 value = messageFactory.newFromType("geometry_msgs/Vector3");
+
+      value.setX(vector3f.getX());
+      value.setY(vector3f.getY());
+      value.setZ(vector3f.getZ());
+
+      return value;
+   }
 
    public static FramePose convertPoseStampedToFramePose(ReferenceFrame referenceFrame, Pose msg)
    {
@@ -700,6 +770,13 @@ public class GenericRosMessageConverter
       Vector3d vector3d = new Vector3d(vector.getX(), vector.getY(), vector.getZ());
 
       return vector3d;
+   }
+
+   public static Vector3f convertVector3ToVector3f(geometry_msgs.Vector3 vector)
+   {
+      Vector3f vector3f = new Vector3f((float) vector.getX(), (float)vector.getY(), (float)vector.getZ());
+
+      return vector3f;
    }
 
    public static Quat4d convertQuaternionToQuat4d(geometry_msgs.Quaternion quaternion)
