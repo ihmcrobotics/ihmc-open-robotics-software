@@ -34,6 +34,7 @@ import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataCommunication.YoVariableServer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
+import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.io.logging.LogTools;
 import us.ihmc.utilities.robotSide.SideDependentList;
@@ -159,7 +160,6 @@ public class WandererControllerFactory
 
       AcsellSetup wandererSetup = new AcsellSetup(yoVariableServer);
 
-      yoVariableServer.start();
 
       AcsellSetup.startStreamingData();
       wandererSetup.start();
@@ -167,6 +167,10 @@ public class WandererControllerFactory
       robotController.start();
       WandererRunner runner = new WandererRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
+      
+      ThreadTools.sleep(2000);
+      yoVariableServer.start();
+      
       runner.join();
 
       System.exit(0);
