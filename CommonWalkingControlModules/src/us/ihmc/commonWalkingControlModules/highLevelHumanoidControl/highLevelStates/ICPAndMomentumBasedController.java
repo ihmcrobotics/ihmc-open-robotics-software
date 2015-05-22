@@ -189,7 +189,9 @@ public class ICPAndMomentumBasedController
       if (capturabilityBasedStatusProducer != null)
       {
          yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
-         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, bipedSupportPolygons.getFootPolygonsInWorldFrame());
+         centerOfMassPosition.setToZero(centerOfMassFrame);
+         centerOfMassPosition.changeFrame(worldFrame);
+         capturabilityBasedStatusProducer.sendStatus(capturePoint2d, desiredCapturePoint2d, centerOfMassPosition, bipedSupportPolygons.getFootPolygonsInWorldFrame());
       }
    }
 

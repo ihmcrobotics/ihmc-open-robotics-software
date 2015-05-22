@@ -8,6 +8,7 @@ import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.utilities.math.geometry.FrameConvexPolygon2d;
+import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -27,10 +28,12 @@ public class CapturabilityBasedStatusProducer implements Runnable
       scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
    }
 
-   public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
+   public void sendStatus(FramePoint2d capturePoint2d, FramePoint2d desiredCapturePoint2d, FramePoint centerOfMass, SideDependentList<FrameConvexPolygon2d> footSupportPolygons)
    {
       capturePoint2d.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredCapturePoint2d.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+
+      centerOfMass.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       
       CapturabilityBasedStatus nextStatus = capturabilityBuffer.next();
       
@@ -38,6 +41,7 @@ public class CapturabilityBasedStatusProducer implements Runnable
       {
          capturePoint2d.get(nextStatus.capturePoint);
          desiredCapturePoint2d.get(nextStatus.desiredCapturePoint);
+         centerOfMass.get(nextStatus.centerOfMass);
          for(RobotSide robotSide : RobotSide.values)
          {
             nextStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
