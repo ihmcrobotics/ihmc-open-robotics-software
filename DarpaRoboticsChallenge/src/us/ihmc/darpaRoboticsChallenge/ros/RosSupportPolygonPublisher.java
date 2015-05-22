@@ -23,55 +23,37 @@ public class RosSupportPolygonPublisher extends RosTopicPublisher<SupportPolygon
       super(SupportPolygonMessage._TYPE, latched);
    }
 
-   public void publish(Point2d[] points)
+   public void publish(Point2d[] points, int numberOfVertices)
    {
       SupportPolygonMessage message = getMessage();
+      message.setNumberOfVertices(numberOfVertices);
       List<Point2dMessage> vertices = message.getVertices();
       vertices.clear();
-      int length = 0;
-      for (Point2d point : points)
+      for (int i = 0; i < numberOfVertices; i++)
       {
-         if(!isZeroPoint(point))
-         {
-            Point2dMessage point2d = messageFactory.newFromType(Point2dMessage._TYPE);
-            point2d.setX((float) point.x);
-            point2d.setY((float) point.y);
-            vertices.add(point2d);
-            length++;
-         }
+         Point2dMessage point2d = messageFactory.newFromType(Point2dMessage._TYPE);
+         point2d.setX((float) points[i].x);
+         point2d.setY((float) points[i].y);
+         vertices.add(point2d);
       }
-      message.setNumberOfVertices(length);
       publish(message);
    }
 
-   public void publish(Point2f[] points)
+   public void publish(Point2f[] points, int numberOfVertices)
    {
       SupportPolygonMessage message = getMessage();
+      message.setNumberOfVertices(numberOfVertices);
       List<Point2dMessage> vertices = message.getVertices();
       vertices.clear();
-      int length = 0;
-      for (Point2f point : points)
+      for (int i = 0; i < numberOfVertices; i++)
       {
-         if(!isZeroPoint(point))
-         {
-            Point2dMessage point2d = messageFactory.newFromType(Point2dMessage._TYPE);
-            point2d.setX(point.x);
-            point2d.setY(point.y);
-            vertices.add(point2d);
-            length++;
-         }
+
+         Point2dMessage point2d = messageFactory.newFromType(Point2dMessage._TYPE);
+         point2d.setX(points[i].x);
+         point2d.setY(points[i].y);
+         vertices.add(point2d);
+
       }
-      message.setNumberOfVertices(length);
       publish(message);
-   }
-
-   private boolean isZeroPoint(Point2d point)
-   {
-      return point.x == 0.0 && point.y == 0.0;
-   }
-
-   private boolean isZeroPoint(Point2f point)
-   {
-      return point.x == 0.0f && point.y == 0.0f;
    }
 }
