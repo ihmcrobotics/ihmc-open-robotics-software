@@ -83,11 +83,11 @@ public class KryoObjectServer extends KryoObjectCommunicator
    }
 
    /** This method produces a lot of garbage. Use it wisely! */
-   private int calculateObjectSize(Object object)
+   public static int calculateObjectSize(Object object, int bufferSize)
    {
       Kryo kryo = new Kryo();
-      ByteBufferOutputStream bbos = new ByteBufferOutputStream(writeBufferSize);
-      Output output = new Output(bbos, writeBufferSize);
+      ByteBufferOutputStream bbos = new ByteBufferOutputStream(bufferSize);
+      Output output = new Output(bbos, bufferSize);
       kryo.writeClassAndObject(output, object);
       output.flush();
       output.close();
@@ -102,7 +102,7 @@ public class KryoObjectServer extends KryoObjectCommunicator
       // Do not send if the object is above the limit
       if (maximumObjectSize > 0)
       {
-         int size = calculateObjectSize(object);
+         int size = calculateObjectSize(object, writeBufferSize);
          if (size > maximumObjectSize)
          {
             PrintTools.error(this, "Dropping the object of " + object.getClass() + ", because it is too big " + size + " > " + maximumObjectSize);
