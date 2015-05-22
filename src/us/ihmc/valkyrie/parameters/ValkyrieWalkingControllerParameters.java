@@ -853,13 +853,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSecondContactThresholdForceIgnoringCoP()
    {
-      return 115.0;
+      return 75.0;
    }   
 
    @Override
    public double getCoPThresholdFraction()
    {
-      return 0.02;
+      return 0.01;
    }
 
    @Override
