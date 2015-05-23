@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHeadOrientatio
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
@@ -39,6 +40,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
 import us.ihmc.communication.packets.manipulation.HandPoseListPacket;
@@ -46,6 +48,7 @@ import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.communication.packets.manipulation.ObjectWeightPacket;
+import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.AbortWalkingPacket;
@@ -101,6 +104,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), objectCommunicator);
 
       HandComplianceControlParametersProvider handComplianceControlParametersProvider = new HandComplianceControlParametersProvider();
+
+      DesiredSteeringWheelProvider desiredSteeringWheelProvider = new DesiredSteeringWheelProvider(objectCommunicator);
 
       PacketConsumer<StopMotionPacket> handPauseCommandConsumer = handPoseProvider.getHandPauseCommandConsumer();
       HandPoseStatusProducer handPoseStatusProducer = new HandPoseStatusProducer(objectCommunicator);
@@ -162,6 +167,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(HandPosePacket.class, handPoseProvider);
       objectCommunicator.attachListener(HandPoseListPacket.class, handPoseProvider.getHandPoseListConsumer());
       objectCommunicator.attachListener(HandRotateAboutAxisPacket.class, handPoseProvider.getHandRotateAboutAxisConsumer());
+      objectCommunicator.attachListener(SteeringWheelInformationPacket.class, desiredSteeringWheelProvider);
+      objectCommunicator.attachListener(DesiredSteeringAnglePacket.class, desiredSteeringWheelProvider.getDesiredSteeringAngleProvider());
       objectCommunicator.attachListener(HandLoadBearingPacket.class, handLoadBearingProvider);
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, handPoseProvider.getWholeBodyTrajectoryPacketConsumer());
       objectCommunicator.attachListener(ArmJointTrajectoryPacket.class, handPoseProvider.getArmJointTrajectoryConsumer());
@@ -183,7 +190,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, handstepProvider,
                                                            mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
-                                                           pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, handLoadBearingProvider,
+                                                           pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider,
                                                            chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
                                                            objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,

@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
@@ -43,6 +44,7 @@ public class VariousWalkingProviders
    private final DesiredComHeightProvider desiredComHeightProvider;
    private final HandPoseProvider desiredHandPoseProvider;
    private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
+   private final DesiredSteeringWheelProvider desiredSteeringWheelProvider;
    private final ChestOrientationProvider desiredChestOrientationProvider;
    private final FootPoseProvider footPoseProvider;
 
@@ -68,12 +70,12 @@ public class VariousWalkingProviders
                                   HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters,
                                   HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
                                   PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
-                                  HandComplianceControlParametersProvider handComplianceControlParametersProvider, HandLoadBearingProvider desiredHandLoadBearingProvider,
-                                  ChestOrientationProvider desiredChestOrientationProvider, FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider,
-                                  DesiredHighLevelStateProvider desiredHighLevelStateProvider, DesiredThighLoadBearingProvider thighLoadBearingProvider,
-                                  DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider, ControlStatusProducer controlStatusProducer,
-                                  CapturabilityBasedStatusProducer capturabilityBasedStatusProducer, HandPoseStatusProducer handPoseStatusProducer,
-                                  ObjectWeightProvider objectWeightProvider, DesiredJointsPositionProvider desiredJointsPositionProvider,
+                                  HandComplianceControlParametersProvider handComplianceControlParametersProvider, DesiredSteeringWheelProvider desiredSteeringWheelProvider,
+                                  HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
+                                  FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
+                                  DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
+                                  ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
+                                  HandPoseStatusProducer handPoseStatusProducer, ObjectWeightProvider objectWeightProvider, DesiredJointsPositionProvider desiredJointsPositionProvider,
                                   SingleJointPositionProvider singleJointPositionProvider, AbortWalkingProvider abortProvider,
                                   MultiJointPositionProvider multiJointPositionProvider)
    {
@@ -86,6 +88,7 @@ public class VariousWalkingProviders
       this.desiredComHeightProvider = desiredComHeightProvider;
       this.desiredChestOrientationProvider = desiredChestOrientationProvider;
       this.desiredHandPoseProvider = desiredHandPoseProvider;
+      this.desiredSteeringWheelProvider = desiredSteeringWheelProvider;
       this.handComplianceControlParametersProvider = handComplianceControlParametersProvider;
       this.footPoseProvider = footPoseProvider;
 
@@ -201,6 +204,11 @@ public class VariousWalkingProviders
    public HandComplianceControlParametersProvider getHandComplianceControlParametersProvider()
    {
       return handComplianceControlParametersProvider;
+   }
+
+   public DesiredSteeringWheelProvider getDesiredSteeringWheelProvider()
+   {
+      return desiredSteeringWheelProvider;
    }
 
    public HandLoadBearingProvider getDesiredHandLoadBearingProvider()

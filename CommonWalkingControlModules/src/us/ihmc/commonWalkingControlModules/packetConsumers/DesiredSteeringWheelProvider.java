@@ -11,6 +11,9 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.math.geometry.FramePoint;
+import us.ihmc.utilities.math.geometry.FrameVector;
+import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
@@ -18,6 +21,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWheelInformationPacket>
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final SideDependentList<AtomicReference<Point3d>> steeringWheelCenterAtomic = new SideDependentList<>(new AtomicReference<Point3d>(null), new AtomicReference<Point3d>(null));
    private final SideDependentList<AtomicReference<Vector3d>> steeringWheelRotationAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
    private final SideDependentList<AtomicReference<Vector3d>> steeringWheelZeroAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
@@ -28,7 +33,7 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
 
    private final SideDependentList<AtomicBoolean> hasReceivedNewSteeringWheelInformation = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
    private final SideDependentList<AtomicBoolean> hasReceivedNewDesiredSteeringAngle = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
-   
+
    private final PacketConsumer<DesiredSteeringAnglePacket> desiredSteeringAngleProvider;
 
    private final GlobalDataProducer globalDataProducer;
@@ -44,7 +49,6 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
          {
             if (packet == null)
                return;
-
 
             if (!PacketValidityChecker.validateDesiredSteeringAnglePacket(packet, steeringWheelIdAtomic, globalDataProducer))
                return;
@@ -80,5 +84,32 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
       steeringWheelIdAtomic.get(robotSide).set(packet.getSteeringWheelId());
 
       hasReceivedNewSteeringWheelInformation.get(robotSide).set(true);
+   }
+
+   public boolean checkForNewSteeringWheelInformation(RobotSide robotSide)
+   {
+      return hasReceivedNewSteeringWheelInformation.get(robotSide).getAndSet(false);
+   }
+
+   public boolean checkForNewDesiredAbsoluteSteeringAngle(RobotSide robotSide)
+   {
+      return hasReceivedNewDesiredSteeringAngle.get(robotSide).getAndSet(false);
+   }
+
+   public void getSteeringWheelPose(RobotSide robotSide, FramePoint centerToPack, FrameVector rotationAxisToPack, FrameVector zeroAxisToPack)
+   {
+      centerToPack.setIncludingFrame(worldFrame, steeringWheelCenterAtomic.get(robotSide).getAndSet(null));
+      rotationAxisToPack.setIncludingFrame(worldFrame, steeringWheelRotationAxisAtomic.get(robotSide).getAndSet(null));
+      zeroAxisToPack.setIncludingFrame(worldFrame, steeringWheelZeroAxisAtomic.get(robotSide).getAndSet(null));
+   }
+
+   public double getSteeringWheelRadius(RobotSide robotSide)
+   {
+      return steeringWheelRadiusAtomic.get(robotSide).get();
+   }
+
+   public double getDesiredAbsoluteSteeringAngle(RobotSide robotSide)
+   {
+      return desiredAbsoluteSteeringAngle.get(robotSide).get();
    }
 }

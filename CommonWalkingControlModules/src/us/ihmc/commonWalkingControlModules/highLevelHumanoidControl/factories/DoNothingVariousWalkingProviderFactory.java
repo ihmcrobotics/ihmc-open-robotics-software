@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvi
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredHandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandLoadBearingProvider;
@@ -85,9 +86,11 @@ public class DoNothingVariousWalkingProviderFactory implements VariousWalkingPro
 
       HandComplianceControlParametersProvider handComplianceControlParametersProvider = null;
 
+      DesiredSteeringWheelProvider desiredSteeringWheelProvider = null;
+
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepProvider, handstepProvider, mapFromFootstepsToTrajectoryParameters,
                                                            headOrientationProvider, comHeightProvider, pelvisPoseProvider, handPoseProvider,
-                                                           handComplianceControlParametersProvider, handLoadBearingProvider, chestOrientationProvider, footPoseProvider,
+                                                           handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider, chestOrientationProvider, footPoseProvider,
                                                            footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider, pelvisLoadBearingProvider, controlStatusProducer,
                                                            capturabilityBasedStatusProducer, handPoseStatusProducer, objectWeightProvider, desiredJointsPositionProvider,
                                                            singleJointPositionProvider, abortWalkingProvider, multiJointPositionProvider);
