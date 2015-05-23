@@ -999,7 +999,7 @@
       </axis>
     </joint>
 	
-<!--
+
 	<link name='l_arm_ugh'>
       <pose>-0.006817 0.347293 0.671245 0 0 0</pose>
       <inertial>
@@ -1601,6 +1601,5 @@
         </dynamics>
       </axis>
     </joint>
--->
   </model>
 </sdf>

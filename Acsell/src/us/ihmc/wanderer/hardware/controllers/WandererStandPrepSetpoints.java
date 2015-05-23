@@ -12,7 +12,7 @@ public enum WandererStandPrepSetpoints
    HIP_X(     0.05,   500, 25.0,    22.86, -1, WandererJoint.LEFT_HIP_X, WandererJoint.RIGHT_HIP_X),
    HIP_Z(        0,   125, 6.25,   0.1755, -1, WandererJoint.LEFT_HIP_Z, WandererJoint.RIGHT_HIP_Z), // damping must < 20
    HIP_Y(    -0.18,   500, 25.0,   0.6120,  1, WandererJoint.LEFT_HIP_Y, WandererJoint.RIGHT_HIP_Y),
-   KNEE(      0.495,   800, 6.0,   1.2,  1, WandererJoint.LEFT_KNEE_Y, WandererJoint.RIGHT_KNEE_Y), //v2 knee motors (same as hip y)
+   KNEE(      0.4419,   800, 6.0,   1.2,  1, WandererJoint.LEFT_KNEE_Y, WandererJoint.RIGHT_KNEE_Y), //v2 knee motors (same as hip y)
    ANKLE_Y( -0.234,   600,  9.0,   5.8061,  1, WandererJoint.LEFT_ANKLE_Y, WandererJoint.RIGHT_ANKLE_Y),
    ANKLE_X(      0,    10,  5.0,   5.8061, -1, WandererJoint.LEFT_ANKLE_X, WandererJoint.RIGHT_ANKLE_X);
 
