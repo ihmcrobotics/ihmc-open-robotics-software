@@ -517,8 +517,9 @@ public class TaskspaceToJointspaceCalculator
 
    private void computeDesiredSpatialVelocityToSolveFor(DenseMatrix64F spatialDesiredVelocityToPack, DenseMatrix64F spatialVelocityFromError, Twist desiredControlFrameTwist)
    {
+      DenseMatrix64F selectionMatrix = inverseJacobianSolver.getSelectionMatrix();
       // Clip to maximum velocity
-      clipSpatialVector(spatialVelocityFromError, maximumTaskspaceAngularVelocityMagnitude.getDoubleValue(), maximumTaskspaceLinearVelocityMagnitude.getDoubleValue());
+      clipSpatialVector(spatialVelocityFromError, selectionMatrix, maximumTaskspaceAngularVelocityMagnitude.getDoubleValue(), maximumTaskspaceLinearVelocityMagnitude.getDoubleValue());
 
       // Update YoVariables for the velocity
       getAngularAndLinearPartsFromSpatialVector(yoAngularVelocityFromError, yoLinearVelocityFromError, spatialVelocityFromError);
@@ -534,14 +535,33 @@ public class TaskspaceToJointspaceCalculator
 
    private final FrameVector angularPart = new FrameVector();
    private final FrameVector linearPart = new FrameVector();
+   private final DenseMatrix64F subspaceSpatialVector = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F tempSpatialVector = new DenseMatrix64F(1, 1);
 
-   private void clipSpatialVector(DenseMatrix64F spatialVectorToClip, double maximumAngularMagnitude, double maximumLinearMagnitude)
+   private void clipSpatialVector(DenseMatrix64F spatialVectorToClip, DenseMatrix64F selectionMatrix, double maximumAngularMagnitude, double maximumLinearMagnitude)
    {
       getAngularAndLinearPartsFromSpatialVector(angularPart, linearPart, spatialVectorToClip);
 
-      clipToVectorMagnitude(maximumAngularMagnitude, angularPart);
-      clipToVectorMagnitude(maximumLinearMagnitude, linearPart);
+      // Clip the angular part of the spatialVectorToClip
+      subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
+      tempSpatialVector.reshape(SpatialMotionVector.SIZE, 1);
+      MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, tempSpatialVector, 0);
+      CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
 
+      double angularPartmagnitude = NormOps.normP2(subspaceSpatialVector);
+      if (angularPartmagnitude > maximumAngularMagnitude)
+         angularPart.scale(maximumAngularMagnitude / angularPartmagnitude);
+
+      // Clip the linear part of the spatialVectorToClip
+      subspaceSpatialVector.reshape(selectionMatrix.getNumRows(), 1);
+      tempSpatialVector.reshape(SpatialMotionVector.SIZE, 1);
+      MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, tempSpatialVector, 3);
+      CommonOps.mult(selectionMatrix, tempSpatialVector, subspaceSpatialVector);
+
+      double linearPartMagnitude = NormOps.normP2(subspaceSpatialVector);
+      if (linearPartMagnitude > maximumAngularMagnitude)
+         linearPart.scale(maximumAngularMagnitude / linearPartMagnitude);
+      
       setSpatialVectorFromAngularAndLinearParts(spatialVectorToClip, angularPart, linearPart);
    }
 
@@ -583,15 +603,6 @@ public class TaskspaceToJointspaceCalculator
    {
       MatrixTools.insertFrameTupleIntoEJMLVector(angularPart, spatialVectorToPack, 0);
       MatrixTools.insertFrameTupleIntoEJMLVector(linearPart, spatialVectorToPack, 3);
-   }
-
-   private void clipToVectorMagnitude(double maximumMagnitude, FrameVector frameVectorToClip)
-   {
-      double magnitude = frameVectorToClip.length();
-      if (magnitude > maximumMagnitude)
-      {
-         frameVectorToClip.scale(maximumMagnitude / magnitude);
-      }
    }
 
    private void computePrivilegedJointVelocitiesForPriviligedJointAngles(DenseMatrix64F privilegedJointVelocitiesToPack, double weight)
