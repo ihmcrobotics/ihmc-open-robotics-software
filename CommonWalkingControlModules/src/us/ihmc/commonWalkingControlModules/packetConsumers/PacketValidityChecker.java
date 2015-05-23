@@ -1,10 +1,14 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
 import us.ihmc.communication.packets.manipulation.JointTrajectoryPoint;
+import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
 import us.ihmc.communication.packets.walking.FootPosePacket;
@@ -12,6 +16,8 @@ import us.ihmc.communication.packets.walking.FootstepData;
 import us.ihmc.communication.packets.walking.FootstepDataList;
 import us.ihmc.communication.packets.walking.FootstepStatus;
 import us.ihmc.communication.packets.walking.HeadOrientationPacket;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.utilities.robotSide.SideDependentList;
 
 public abstract class PacketValidityChecker
 {
@@ -437,5 +443,87 @@ public abstract class PacketValidityChecker
       }
       
       return null;
+   }
+
+   public static boolean validateSteeringWheelInformationPacket(SteeringWheelInformationPacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, GlobalDataProducer globalDataProducer)
+   {
+      boolean packetIsValid = true;
+
+      if (packet.getRobotSide() == null)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering hand side missing");
+      }
+
+      if (packet.getSteeringWheelCenter() == null)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel center missing");
+      }
+
+      if (packet.getSteeringWheelRotationAxis() == null)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel rotation axis missing");
+      }
+
+      if (packet.getSteeringWheelZeroAxis() == null)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel zero axis missing");
+      }
+
+      if (Double.isNaN(packet.getSteeringWheelRadius()))
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Steering wheel radius missing");
+      }
+
+      if (packet.getSteeringWheelId() <= 0)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
+      }
+
+      if (packet.getSteeringWheelId() == steeringWheelIdAtomic.get(packet.getRobotSide()).get())
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
+               "Invalid steering wheel ID, must be different than the previous ID");
+      }
+
+      return packetIsValid;
+   }
+
+   public static boolean validateDesiredSteeringAnglePacket(DesiredSteeringAnglePacket packet, SideDependentList<AtomicInteger> steeringWheelIdAtomic, GlobalDataProducer globalDataProducer)
+   {
+      boolean packetIsValid = true;
+
+      if (Double.isNaN(packet.getDesiredAbsoluteSteeringAngle()))
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Desired steering angle missing");
+      }
+
+      if (steeringWheelIdAtomic.get(packet.getRobotSide()).get() == -1)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Never received SteeringWheelInformationPacket");
+      }
+
+      if (packet.getSteeringWheelId() <= 0)
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class, "Invalid steering wheel ID, must be greater than or equal to 1");
+      }
+
+      if (packet.getSteeringWheelId() != steeringWheelIdAtomic.get(packet.getRobotSide()).get())
+      {
+         packetIsValid = false;
+         globalDataProducer.notifyInvalidPacketReceived(SteeringWheelInformationPacket.class,
+               "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket");
+      }
+
+      return packetIsValid;
    }
 }
