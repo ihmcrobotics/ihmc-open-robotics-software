@@ -243,9 +243,9 @@ public class HandCompliantControlHelper
       }
    }
 
-   public void setHandControlFrame(ReferenceFrame handControlFrame)
+   public void setCompliantControlFrame(ReferenceFrame compliantControlFrame)
    {
-      controlFrame = handControlFrame;
+      controlFrame = compliantControlFrame;
    }
 
    public void reset()
