@@ -795,6 +795,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       initializeTaskspaceHandTrajectory(robotSide, handCircularPoseTrajectoryGenerator, selectionMatrix);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
+      ReferenceFrame tangentialCircleFrame = handCircularPoseTrajectoryGenerator.getTangentialCircleFrame();
+      handTaskspaceControllers.get(robotSide).setCompliantControlFrame(tangentialCircleFrame);
    }
 
    private void initializeTaskspaceHandTrajectory(RobotSide robotSide, PoseTrajectoryGenerator trajectory, DenseMatrix64F selectionMatrix)

@@ -467,7 +467,12 @@ public class TaskspaceToJointspaceHandPositionControlState extends TrajectoryBas
    public void setControlModuleForPositionControl(TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator)
    {
       this.taskspaceToJointspaceCalculator = taskspaceToJointspaceCalculator;
-      handCompliantControlHelper.setHandControlFrame(this.taskspaceToJointspaceCalculator.getControlFrame());
+      handCompliantControlHelper.setCompliantControlFrame(this.taskspaceToJointspaceCalculator.getControlFrame());
+   }
+
+   public void setCompliantControlFrame(ReferenceFrame compliantControlFrame)
+   {
+      handCompliantControlHelper.setCompliantControlFrame(compliantControlFrame);
    }
 
    @Override
