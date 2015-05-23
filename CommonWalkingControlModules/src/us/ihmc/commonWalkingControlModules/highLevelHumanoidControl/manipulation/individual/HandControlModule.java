@@ -518,12 +518,6 @@ public class HandControlModule
    
    public void moveInCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time)
    {
-      // Limit arm joint motor speed based on Boston Dynamics Limit
-      // of 700 rad/s input to the transmission.
-      // For now, just set move time to at least 2 seconds
-      if (time < 2.0)
-         time = 2.0;
-
       optionalHandControlFrame.setX(graspOffsetFromControlFrame);
       optionalHandControlFrame.update();
 
@@ -531,6 +525,8 @@ public class HandControlModule
 
       rotationAxisOrigin.setIncludingFrame(worldFrame, rotationAxisOriginInWorld);
       rotationAxis.setIncludingFrame(worldFrame, rotationAxisInWorld);
+
+      circularPoseTrajectoryGenerator.setControlledFrame(optionalHandControlFrame);
 
       circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
       circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);

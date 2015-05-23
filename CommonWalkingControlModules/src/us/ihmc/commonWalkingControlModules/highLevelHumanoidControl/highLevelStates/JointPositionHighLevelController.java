@@ -774,6 +774,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
       handCircularPoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
+      handCircularPoseTrajectoryGenerator.setControlledFrame(optionalHandControlFrame);
       handCircularPoseTrajectoryGenerator.setControlHandAngleAboutAxis(controlHandAngleAboutAxis);
 
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
