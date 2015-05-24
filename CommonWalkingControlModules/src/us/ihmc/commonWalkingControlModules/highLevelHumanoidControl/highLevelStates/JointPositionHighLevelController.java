@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredJointsPositionProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HeadOrientationProvider;
@@ -61,6 +62,7 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.yoUtilities.math.trajectories.SteeringPoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.providers.YoVariableDoubleProvider;
 
@@ -98,6 +100,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private boolean handTrajectoryDoneHasBeenSent;
    private final HeadOrientationProvider headOrientationProvider;
    private final HandComplianceControlParametersProvider handComplianceControlParametersProvider;
+   private final DesiredSteeringWheelProvider desiredSteeringWheelProvider;
 
    private final TObjectDoubleHashMap<OneDoFJoint> previousPosition = new TObjectDoubleHashMap<>();
 
@@ -122,6 +125,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final FramePoint rotationAxisOrigin = new FramePoint();
    private final FrameVector rotationAxis = new FrameVector();
    private final SideDependentList<CirclePoseTrajectoryGenerator> handCircularPoseTrajectoryGenerators;
+   private final SideDependentList<SteeringPoseTrajectoryGenerator> handSteeringPoseTrajectoryGenerators;
    private final SideDependentList<TaskspaceToJointspaceCalculator> handTaskspaceToJointspaceCalculators;
    private final SideDependentList<PoseReferenceFrame> optionalHandControlFrames;
 
@@ -145,6 +149,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       this.handPoseStatusProducer = variousWalkingProviders.getHandPoseStatusProducer();
       this.headOrientationProvider = variousWalkingProviders.getDesiredHeadOrientationProvider();
       this.handComplianceControlParametersProvider = variousWalkingProviders.getHandComplianceControlParametersProvider();
+      this.desiredSteeringWheelProvider = variousWalkingProviders.getDesiredSteeringWheelProvider();
 
       trajectoryGenerator = new HashMap<OneDoFJoint, OneDoFJointQuinticTrajectoryGenerator>();
       alternativeController = new HashMap<OneDoFJoint, PIDController>();
@@ -196,6 +201,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       areHandJointspaceControlled = new SideDependentList<>();
       handStraightLinePoseTrajectoryGenerators = new SideDependentList<>();
       handCircularPoseTrajectoryGenerators = new SideDependentList<>();
+      handSteeringPoseTrajectoryGenerators = new SideDependentList<>();
       handTaskspaceToJointspaceCalculators = new SideDependentList<>();
       optionalHandControlFrames = new SideDependentList<PoseReferenceFrame>();
 
@@ -226,9 +232,11 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
          StraightLinePoseTrajectoryGenerator handStraightLinePoseTrajectoryGenerator = new StraightLinePoseTrajectoryGenerator(namePrefix + "StraightLine", true, worldFrame, registry, VISUALIZE_TASKSPACE_TRAJECTORIES, yoGraphicsListRegistry);
          CirclePoseTrajectoryGenerator handCircularPoseTrajectoryGenerator = new CirclePoseTrajectoryGenerator(namePrefix + "Circular", worldFrame, trajectoryTimeProvider, registry, yoGraphicsListRegistry);
+         SteeringPoseTrajectoryGenerator steeringPoseTrajectoryGenerator = new SteeringPoseTrajectoryGenerator(namePrefix, worldFrame, registry, yoGraphicsListRegistry);
          
          handStraightLinePoseTrajectoryGenerators.put(robotSide, handStraightLinePoseTrajectoryGenerator);
          handCircularPoseTrajectoryGenerators.put(robotSide, handCircularPoseTrajectoryGenerator);
+         handSteeringPoseTrajectoryGenerators.put(robotSide, steeringPoseTrajectoryGenerator);
          
          optionalHandControlFrames.put(robotSide, new PoseReferenceFrame("optional" + robotSide.getCamelCaseNameForMiddleOfExpression() + "HandControlFrame", handControlFrame));
       }
@@ -488,6 +496,16 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
             initializeFromRotateAboutAxisPacket(side, handPoseProvider.getRotationAxisOriginInWorld(side), handPoseProvider.getRotationAxisInWorld(side),
                   handPoseProvider.getRotationAngleRightHandRule(side), handPoseProvider.getGraspOffsetFromControlFrame(side), handPoseProvider.controlHandAngleAboutAxis(side));
          }
+
+         if (desiredSteeringWheelProvider.checkForNewSteeringWheelInformation(side))
+         {
+            updateSteeringWheelInformation(side);
+         }
+
+         if (desiredSteeringWheelProvider.checkForNewDesiredAbsoluteSteeringAngle(side))
+         {
+            initializeSteeringWheelTrajectory(side);
+         }
       }
       
       if (headOrientationProvider != null && headOrientationProvider.isNewHeadOrientationInformationAvailable())
@@ -740,6 +758,63 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handStraightLinePoseTrajectoryGenerator.setTrajectoryTime(handPoseProvider.getTrajectoryTime());
 
       initializeTaskspaceHandTrajectory(robotSide, handStraightLinePoseTrajectoryGenerator, selectionMatrix);
+   }
+
+   private final FramePoint steeringWheelCenter = new FramePoint();
+   private final FrameVector steeringWheelRotationAxis = new FrameVector();
+   private final FrameVector steeringWheelZeroAxis = new FrameVector();
+
+   private void updateSteeringWheelInformation(RobotSide robotSide)
+   {
+      desiredSteeringWheelProvider.getSteeringWheelPose(robotSide, steeringWheelCenter, steeringWheelRotationAxis, steeringWheelZeroAxis);
+      SteeringPoseTrajectoryGenerator handSteeringPoseTrajectoryGenerator = handSteeringPoseTrajectoryGenerators.get(robotSide);
+      handSteeringPoseTrajectoryGenerator.updateSteeringWheel(steeringWheelCenter, steeringWheelRotationAxis, steeringWheelZeroAxis);
+      handSteeringPoseTrajectoryGenerator.setSteeringWheelRadius(desiredSteeringWheelProvider.getSteeringWheelRadius(robotSide));
+   }
+
+   private void initializeSteeringWheelTrajectory(RobotSide robotSide)
+   {
+      SteeringPoseTrajectoryGenerator handSteeringPoseTrajectoryGenerator = handSteeringPoseTrajectoryGenerators.get(robotSide);
+      handSteeringPoseTrajectoryGenerator.setTrajectoryTime(desiredSteeringWheelProvider.getTrajectoryTime(robotSide));
+      handSteeringPoseTrajectoryGenerator.setFinalSteeringAngle(desiredSteeringWheelProvider.getDesiredAbsoluteSteeringAngle(robotSide));
+
+      PoseReferenceFrame optionalHandControlFrame = optionalHandControlFrames.get(robotSide);
+      optionalHandControlFrame.setX(desiredSteeringWheelProvider.getGraspOffsetFromControlFrame(robotSide));
+      optionalHandControlFrame.update();
+
+      TaskspaceToJointspaceCalculator handTaskspaceToJointspaceCalculator = handTaskspaceToJointspaceCalculators.get(robotSide);
+      handTaskspaceToJointspaceCalculator.setPrivilegedJointPositionsToMidRange();
+
+      // Hack for driving to get away from the shz limit
+      if (robotSide == RobotSide.LEFT)
+      {
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(2, 1.0); // ely
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(4, -2.5); // wry
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(5, -0.8); // wrx
+         handTaskspaceToJointspaceCalculator.setPrivilegedJointPosition(6, 0.0); // wry2
+      }
+
+      computeHandCurrentDesiredFramePose(currentDesiredHandPose, robotSide, worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
+      handSteeringPoseTrajectoryGenerator.setInitialPose(currentDesiredHandPose);
+      handSteeringPoseTrajectoryGenerator.setControlledFrame(optionalHandControlFrame);
+
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+      
+      selectionFrameMatrix.setToZero(handSteeringPoseTrajectoryGenerator.getSteeringWheelFrame());
+      selectionFrameMatrix.setElement(0, 0, 1.0);
+      selectionFrameMatrix.setElement(1, 1, 1.0);
+      selectionFrameMatrix.setElement(2, 2, 0.0);
+      selectionFrameMatrix.changeFrame(optionalHandControlFrame);
+
+      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+      selectionFrameMatrix.getDenseMatrix(selectionMatrix, 0, 0);
+
+      initializeTaskspaceHandTrajectory(robotSide, handSteeringPoseTrajectoryGenerator, selectionMatrix);
+      handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
+      ReferenceFrame tangentialCircleFrame = handSteeringPoseTrajectoryGenerator.getTangentialSteeringFrame();
+      handTaskspaceControllers.get(robotSide).setCompliantControlFrame(tangentialCircleFrame);
    }
 
    private void initializeFromRotateAboutAxisPacket(RobotSide robotSide, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngleRightHandRule, double graspOffsetFromControlFrame, boolean controlHandAngleAboutAxis)
