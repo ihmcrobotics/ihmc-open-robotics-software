@@ -120,13 +120,13 @@ public class HandCompliantControlHelper
       yoCompliantControlAngularDisplacement = new YoFrameVector(namePrefix + "CompliantControlAngularDisplacement", worldFrame, registry);
 
       measuredForceAlpha.set(0.98);
-      linearGain.set(0.0001);
+      linearGain.set(0.00001);
       angularGain.set(0.001);
-      compliantControlMaxLinearCorrectionPerTick.set(0.0005);
+      compliantControlMaxLinearCorrectionPerTick.set(0.005);
       compliantControlMaxAngularCorrectionPerTick.set(0.001);
       compliantControlMaxLinearDisplacement.set(0.05);
       compliantControlMaxAngularDisplacement.set(0.2);
-      compliantControlLeakRatio.set(0.99);
+      compliantControlLeakRatio.set(0.999);
       compliantControlResetLeakRatio.set(0.9999);
       
       forceDeadzoneSize.set(10.0);
