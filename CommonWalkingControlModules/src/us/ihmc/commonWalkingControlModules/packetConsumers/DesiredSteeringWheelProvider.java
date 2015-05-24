@@ -27,9 +27,11 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
    private final SideDependentList<AtomicReference<Vector3d>> steeringWheelRotationAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
    private final SideDependentList<AtomicReference<Vector3d>> steeringWheelZeroAxisAtomic = new SideDependentList<>(new AtomicReference<Vector3d>(null), new AtomicReference<Vector3d>(null));
    private final SideDependentList<AtomicDouble> steeringWheelRadiusAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
+   private final SideDependentList<AtomicDouble> graspOffsetFromCotnrolFrameAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
    private final SideDependentList<AtomicInteger> steeringWheelIdAtomic = new SideDependentList<>(new AtomicInteger(-1), new AtomicInteger(-1));
 
    private final SideDependentList<AtomicDouble> desiredAbsoluteSteeringAngle = new SideDependentList<>(new AtomicDouble(0.0), new AtomicDouble(0.0));
+   private final SideDependentList<AtomicDouble> desiredSteeringTrajectoryTimeAtomic = new SideDependentList<>(new AtomicDouble(Double.NaN), new AtomicDouble(Double.NaN));
 
    private final SideDependentList<AtomicBoolean> hasReceivedNewSteeringWheelInformation = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
    private final SideDependentList<AtomicBoolean> hasReceivedNewDesiredSteeringAngle = new SideDependentList<>(new AtomicBoolean(false), new AtomicBoolean(false));
@@ -56,6 +58,7 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
             RobotSide robotSide = packet.getRobotSide();
 
             desiredAbsoluteSteeringAngle.get(robotSide).set(packet.getDesiredAbsoluteSteeringAngle());
+            desiredSteeringTrajectoryTimeAtomic.get(robotSide).set(packet.getTrajectoryTime());
 
             hasReceivedNewDesiredSteeringAngle.get(robotSide).set(true);
          }
@@ -81,6 +84,7 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
       steeringWheelRotationAxisAtomic.get(robotSide).set(packet.getSteeringWheelRotationAxis());
       steeringWheelZeroAxisAtomic.get(robotSide).set(packet.getSteeringWheelZeroAxis());
       steeringWheelRadiusAtomic.get(robotSide).set(packet.getSteeringWheelRadius());
+      graspOffsetFromCotnrolFrameAtomic.get(robotSide).set(packet.getGraspOffsetFromControlFrame());
       steeringWheelIdAtomic.get(robotSide).set(packet.getSteeringWheelId());
 
       hasReceivedNewSteeringWheelInformation.get(robotSide).set(true);
@@ -88,7 +92,7 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
 
    public boolean checkForNewSteeringWheelInformation(RobotSide robotSide)
    {
-      return hasReceivedNewSteeringWheelInformation.get(robotSide).getAndSet(false);
+      return hasReceivedNewSteeringWheelInformation.get(robotSide).getAndSet(false);   
    }
 
    public boolean checkForNewDesiredAbsoluteSteeringAngle(RobotSide robotSide)
@@ -108,8 +112,18 @@ public class DesiredSteeringWheelProvider implements PacketConsumer<SteeringWhee
       return steeringWheelRadiusAtomic.get(robotSide).get();
    }
 
+   public double getGraspOffsetFromControlFrame(RobotSide robotSide)
+   {
+      return graspOffsetFromCotnrolFrameAtomic.get(robotSide).get();
+   }
+
    public double getDesiredAbsoluteSteeringAngle(RobotSide robotSide)
    {
       return desiredAbsoluteSteeringAngle.get(robotSide).get();
+   }
+
+   public double getTrajectoryTime(RobotSide robotSide)
+   {
+      return desiredSteeringTrajectoryTimeAtomic.get(robotSide).get();
    }
 }
