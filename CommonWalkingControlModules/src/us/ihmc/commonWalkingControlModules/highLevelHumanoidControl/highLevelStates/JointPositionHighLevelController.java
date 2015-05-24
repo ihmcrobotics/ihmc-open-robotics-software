@@ -58,7 +58,9 @@ import us.ihmc.yoUtilities.controllers.PIDController;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
+import us.ihmc.yoUtilities.math.frames.YoFramePose;
 import us.ihmc.yoUtilities.math.trajectories.CirclePoseTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
@@ -128,6 +130,8 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
    private final SideDependentList<SteeringPoseTrajectoryGenerator> handSteeringPoseTrajectoryGenerators;
    private final SideDependentList<TaskspaceToJointspaceCalculator> handTaskspaceToJointspaceCalculators;
    private final SideDependentList<PoseReferenceFrame> optionalHandControlFrames;
+   private final SideDependentList<YoFramePose> optionalHandControlFramePoses;
+   private final FramePose tempFramePose = new FramePose();
 
    private final MomentumBasedController momentumBasedController;
    private final ICPAndMomentumBasedController icpAndMomentumBasedController;
@@ -204,6 +208,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       handSteeringPoseTrajectoryGenerators = new SideDependentList<>();
       handTaskspaceToJointspaceCalculators = new SideDependentList<>();
       optionalHandControlFrames = new SideDependentList<PoseReferenceFrame>();
+      optionalHandControlFramePoses = new SideDependentList<>();
 
       String shortControllerNamePrefix = "JPCtrl";
 
@@ -238,7 +243,16 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
          handCircularPoseTrajectoryGenerators.put(robotSide, handCircularPoseTrajectoryGenerator);
          handSteeringPoseTrajectoryGenerators.put(robotSide, steeringPoseTrajectoryGenerator);
          
-         optionalHandControlFrames.put(robotSide, new PoseReferenceFrame("optional" + robotSide.getCamelCaseNameForMiddleOfExpression() + "HandControlFrame", handControlFrame));
+         PoseReferenceFrame optionalHandControlFrame = new PoseReferenceFrame("optional" + robotSide.getCamelCaseNameForMiddleOfExpression() + "HandControlFrame", handControlFrame);
+         optionalHandControlFrames.put(robotSide, optionalHandControlFrame);
+         YoFramePose optionalHandControlFramePose = new YoFramePose(optionalHandControlFrame.getName(), worldFrame, registry);
+         optionalHandControlFramePoses.put(robotSide, optionalHandControlFramePose);
+         
+         if (yoGraphicsListRegistry != null)
+         {
+            YoGraphicCoordinateSystem optionalControlFrameViz = new YoGraphicCoordinateSystem(robotSide.getCamelCaseNameForMiddleOfExpression() + "Steering Control Frame", optionalHandControlFramePose, 0.3);
+            yoGraphicsListRegistry.registerYoGraphic("Steering", optionalControlFrameViz);
+         }
       }
 
    }
@@ -346,6 +360,18 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
 
       momentumBasedController.doPrioritaryControl();
       icpAndMomentumBasedController.update();
+
+      updateVisualization();
+   }
+
+   private void updateVisualization()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         tempFramePose.setToZero(optionalHandControlFrames.get(robotSide));
+         tempFramePose.changeFrame(worldFrame);
+         optionalHandControlFramePoses.get(robotSide).set(tempFramePose);
+      }
    }
 
    @Override
