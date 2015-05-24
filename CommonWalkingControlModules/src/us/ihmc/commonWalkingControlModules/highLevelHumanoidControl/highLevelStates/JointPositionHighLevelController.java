@@ -770,12 +770,12 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       SteeringPoseTrajectoryGenerator handSteeringPoseTrajectoryGenerator = handSteeringPoseTrajectoryGenerators.get(robotSide);
       handSteeringPoseTrajectoryGenerator.updateSteeringWheel(steeringWheelCenter, steeringWheelRotationAxis, steeringWheelZeroAxis);
       handSteeringPoseTrajectoryGenerator.setSteeringWheelRadius(desiredSteeringWheelProvider.getSteeringWheelRadius(robotSide));
+      handSteeringPoseTrajectoryGenerator.setDesiredSteeringSpeed(desiredSteeringWheelProvider.getDesiredSteeringSpeed(robotSide));
    }
 
    private void initializeSteeringWheelTrajectory(RobotSide robotSide)
    {
       SteeringPoseTrajectoryGenerator handSteeringPoseTrajectoryGenerator = handSteeringPoseTrajectoryGenerators.get(robotSide);
-      handSteeringPoseTrajectoryGenerator.setTrajectoryTime(desiredSteeringWheelProvider.getTrajectoryTime(robotSide));
       handSteeringPoseTrajectoryGenerator.setFinalSteeringAngle(desiredSteeringWheelProvider.getDesiredAbsoluteSteeringAngle(robotSide));
 
       PoseReferenceFrame optionalHandControlFrame = optionalHandControlFrames.get(robotSide);
