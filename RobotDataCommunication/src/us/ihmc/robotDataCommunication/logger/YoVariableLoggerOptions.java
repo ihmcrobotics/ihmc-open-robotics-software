@@ -26,6 +26,8 @@ public class YoVariableLoggerOptions
    private String cookieJarRemoteDirectory = "";
    private boolean disableVideo = false;
    private String configurationFile = "";
+   
+   private boolean flushAggressivelyToDisk = false;
 
    public static YoVariableLoggerOptions parse(String[] args) throws JSAPException
    {
@@ -38,7 +40,8 @@ public class YoVariableLoggerOptions
             new FlaggedOption("configurationFile", JSAP.STRING_PARSER, YoVariableLoggerOptions.defaultConfigurationFile, JSAP.NOT_REQUIRED, 'f', "config",
                   "Camera configuration file"),
             new FlaggedOption("videoQuality", JSAP.INTEGER_PARSER, String.valueOf(YoVariableLoggerOptions.defaultVideoQuality), JSAP.NOT_REQUIRED, 'q',
-                  "quality", "Video quality") });
+                  "quality", "Video quality"),
+            new Switch("flushAggressivelyToDisk", 's', "sync", "Aggressively flush data to disk. Reduces change of data loss but doesn't work on slow platters.") });
       JSAPResult config = jsap.parse(args);
       if (jsap.messagePrinted())
       {
@@ -53,6 +56,7 @@ public class YoVariableLoggerOptions
       options.setVideoQuality(config.getInt("videoQuality"));
       options.setDisableVideo(config.getBoolean("disableVideo"));
       options.setConfigurationFile(config.getString("configurationFile"));
+      options.setFlushAggressivelyToDisk(config.getBoolean("flushAggressivelyToDisk"));
 
       return options;
    }
@@ -146,4 +150,16 @@ public class YoVariableLoggerOptions
    {
       this.configurationFile = configurationFile;
    }
+
+   public boolean isFlushAggressivelyToDisk()
+   {
+      return flushAggressivelyToDisk;
+   }
+
+   public void setFlushAggressivelyToDisk(boolean flushAggressivelyToDisk)
+   {
+      this.flushAggressivelyToDisk = flushAggressivelyToDisk;
+   }
+   
+   
 }

@@ -40,6 +40,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
    private final Object synchronizer = new Object();
 
+   private final boolean flushAggressivelyToDisk;
+   
    private final File tempDirectory;
    private final File finalDirectory;
    private final YoVariableLoggerOptions options;
@@ -67,6 +69,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    public YoVariableLoggerListener(File tempDirectory, File finalDirectory, String timestamp, AnnounceRequest request, YoVariableLoggerOptions options)
    {
       System.out.println(request);
+      this.flushAggressivelyToDisk = options.isFlushAggressivelyToDisk();
       this.tempDirectory = tempDirectory;
       this.finalDirectory = finalDirectory;
       this.options = options;
@@ -195,10 +198,13 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
                indexChannel.write(indexBuffer);
                dataChannel.write(compressedBuffer);
                
-               if(++currentIndex % FLUSH_EVERY_N_PACKETS == 0)
+               if(flushAggressivelyToDisk)
                {
-                  indexChannel.force(false);
-                  dataChannel.force(false);
+                  if(++currentIndex % FLUSH_EVERY_N_PACKETS == 0)
+                  {
+                     indexChannel.force(false);
+                     dataChannel.force(false);
+                  }                  
                }
             }
             catch (IOException e)
