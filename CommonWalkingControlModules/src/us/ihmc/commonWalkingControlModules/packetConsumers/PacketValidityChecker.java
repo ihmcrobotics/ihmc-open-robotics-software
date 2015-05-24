@@ -548,13 +548,6 @@ public abstract class PacketValidityChecker
                "Unexpected steering wheel ID, probably dropped the last SteeringWheelInformationPacket");
       }
 
-      ObjectErrorType errorTime = ObjectValidityChecker.validateTrajectoryTime(packet.getTrajectoryTime());
-      if (errorTime != null)
-      {
-         packetIsValid = false;
-         globalDataProducer.notifyInvalidPacketReceived(DesiredSteeringAnglePacket.class, "Trajectory time " + errorTime.getMessage());
-      }
-
       return packetIsValid;
    }
 }
