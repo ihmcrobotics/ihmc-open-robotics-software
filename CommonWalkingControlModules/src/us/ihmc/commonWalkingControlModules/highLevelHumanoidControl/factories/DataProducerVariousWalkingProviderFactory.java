@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathConsumer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepPathCoordinator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepTimingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.PauseCommandConsumer;
+import us.ihmc.commonWalkingControlModules.packetConsumers.BatchedDesiredSteeringAngleAndSingleJointAngleProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootPoseProvider;
@@ -40,6 +41,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.BumStatePacket;
 import us.ihmc.communication.packets.HighLevelStatePacket;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
+import us.ihmc.communication.packets.manipulation.BatchedDesiredSteeringAngleAndSingleJointAnglePacket;
 import us.ihmc.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.communication.packets.manipulation.HandComplianceControlParametersPacket;
 import us.ihmc.communication.packets.manipulation.HandLoadBearingPacket;
@@ -143,6 +145,9 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       ObjectWeightProvider objectWeightProvider = new ObjectWeightProvider();
       AbortWalkingProvider abortWalkingProvider = new AbortWalkingProvider();
 
+      BatchedDesiredSteeringAngleAndSingleJointAngleProvider batchedDesiredSteeringWheelAngleAndSingleJointAngleProvider = new BatchedDesiredSteeringAngleAndSingleJointAngleProvider(desiredSteeringWheelProvider.getDesiredSteeringAngleProvider(), singleJointPositionProvider);
+      
+      
       objectCommunicator.attachListener(FootstepDataList.class, footstepPathConsumer);
       objectCommunicator.attachListener(HandstepPacket.class, handstepProvider);
       objectCommunicator.attachListener(BlindWalkingPacket.class, blindWalkingPacketConsumer);
@@ -185,6 +190,8 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(SingleJointAnglePacket.class, singleJointPositionProvider.getPacketConsumer());
       objectCommunicator.attachListener(MultiJointAnglePacket.class, multiJointPositionProvider.getPacketConsumer());
       objectCommunicator.attachListener(AbortWalkingPacket.class, abortWalkingProvider);
+      
+      objectCommunicator.attachListener(BatchedDesiredSteeringAngleAndSingleJointAnglePacket.class, batchedDesiredSteeringWheelAngleAndSingleJointAngleProvider);
       
       ControlStatusProducer controlStatusProducer = new NetworkControlStatusProducer(objectCommunicator);
 

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.packetConsumers;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
@@ -7,8 +8,17 @@ import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 
 public class SingleJointPositionProvider
 {
+   private static final double timeout = 0.5;
+   private static final double resetTrajectoryTime = 0.1;
+   private static final String defaultJointName = "l_leg_aky";
+   
    private final PacketConsumer<SingleJointAnglePacket> packetConsumer;
    private final AtomicReference<SingleJointAnglePacket> lastPacket = new AtomicReference<SingleJointAnglePacket>();
+   
+   private final AtomicBoolean receivedData = new AtomicBoolean();
+
+   private double lastReceivedTime = Double.MIN_VALUE;
+   private double resetAngle = Double.NaN;
    
    public SingleJointPositionProvider()
    {
@@ -25,18 +35,48 @@ public class SingleJointPositionProvider
       };
    }
    
-   public boolean checkForNewPacket()
+   public void notifyWatchdogEventReceived()
    {
-      return lastPacket.get() != null;
+      receivedData.set(true);
    }
    
-   public SingleJointAnglePacket getNewPacket()
+   public SingleJointAnglePacket getNewPacket(double time)
    {
-      return lastPacket.getAndSet(null);
+      SingleJointAnglePacket packet = lastPacket.getAndSet(null);
+
+      if(receivedData.getAndSet(false))
+      {
+         lastReceivedTime = time;         
+      }
+      
+      if(packet != null)
+      {
+         resetAngle = packet.resetAngle;
+         if(packet.jointName == null)
+         {
+            packet.jointName = defaultJointName;
+         }
+         
+      }
+      else if (!Double.isNaN(resetAngle))
+      {
+         if((time - lastReceivedTime) > timeout)
+         {
+//            PrintTools.debug(this, "JOINT ANGLE WATCHDOG TIMEOUT: LIFTING TOES");
+            packet = new SingleJointAnglePacket(defaultJointName, resetAngle, resetTrajectoryTime, Double.NaN);
+            resetAngle = Double.NaN;
+         }
+      }
+      return packet;
    }
    
    public PacketConsumer<SingleJointAnglePacket> getPacketConsumer()
    {
       return packetConsumer;
+   }
+
+   public void receivedPacket(SingleJointAnglePacket singleJointAnglePacket)
+   {
+      packetConsumer.receivedPacket(singleJointAnglePacket);
    }
 }
