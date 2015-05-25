@@ -18,6 +18,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
@@ -46,13 +47,13 @@ public class OpenCVChessboardPoseEstimator
    {
       setBoardSize(rowsOfSquare, colsOfSquare, gridWidth);
    }
-   
+
    public void setBoardSize(int rowsOfSquare, int colsOfSquare, double gridWidth)
    {
       boardInnerCrossPattern = new Size(colsOfSquare - 1, rowsOfSquare - 1);
       this.gridWidth = gridWidth;
       generateBoardPoints();
-      
+
    }
 
    private void generateBoardPoints()
@@ -116,13 +117,37 @@ public class OpenCVChessboardPoseEstimator
       cameraMatrix.put(2, 2, 1);
    }
 
+   public boolean findChessCornerRobustForExtremePitch(Mat original, Size patternSize, MatOfPoint2f corners, int flags)
+   {
+      if (Calib3d.findChessboardCorners(original, boardInnerCrossPattern, corners, flags))
+      {
+         return true;
+      }
+
+      //try stretch image vertically
+      Mat resizeMat = new Mat();
+      Imgproc.resize(original, resizeMat, new Size(original.width(), original.height() * 2));
+      if (Calib3d.findChessboardCorners(resizeMat, boardInnerCrossPattern, corners, flags))
+      {
+         System.out.println("Found corners using rescaled-height image");
+         Point[] cornerArray = corners.toArray();
+         for (Point p : cornerArray)
+            p.y /= 2;
+         corners.fromArray(cornerArray);
+         return true;
+      }
+      
+      
+      return false;
+   }
+
    public RigidBodyTransform detect(BufferedImage image)
    {
       if (cameraMatrix == null)
          setDefaultCameraMatrix(image.getHeight(), image.getWidth(), Math.PI / 4);
       Mat imageMat = convertBufferedImageToMat(image);
-      int flags = Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_NORMALIZE_IMAGE;//+ Calib3d.CALIB_CB_FAST_CHECK;
-      if (Calib3d.findChessboardCorners(imageMat, boardInnerCrossPattern, corners, flags))
+      int flags = Calib3d.CALIB_CB_ADAPTIVE_THRESH + Calib3d.CALIB_CB_FAST_CHECK;
+      if (findChessCornerRobustForExtremePitch(imageMat, boardInnerCrossPattern, corners, flags))
       {
          Mat imageGray = new Mat(imageMat.rows(), imageMat.cols(), CvType.CV_8UC1);
          Imgproc.cvtColor(imageMat, imageGray, Imgproc.COLOR_BGRA2GRAY);
@@ -189,7 +214,7 @@ public class OpenCVChessboardPoseEstimator
       rigidBodyTransformToOpenCVTR(transform, tvec, rvec);
       drawAxis(image, rvec, tvec, scale);
    }
-   
+
    public javax.vecmath.Point2d getCheckerBoardImageOrigin(RigidBodyTransform transform)
    {
       Point3 origin = new Point3();
