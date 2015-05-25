@@ -9,7 +9,7 @@ import us.ihmc.communication.packets.wholebody.SingleJointAnglePacket;
 public class SingleJointPositionProvider
 {
    private static final double timeout = 0.5;
-   private static final double resetTrajectoryTime = 0.1;
+   private static final double resetTrajectoryTime = 0.25;
    private static final String defaultJointName = "l_leg_aky";
    
    private final PacketConsumer<SingleJointAnglePacket> packetConsumer;
