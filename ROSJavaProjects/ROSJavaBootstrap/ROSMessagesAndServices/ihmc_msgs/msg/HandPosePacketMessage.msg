@@ -17,7 +17,7 @@ uint8 HAND_POSE=0 # the hand pose will be represented by a hand position and a h
 uint8 JOINT_ANGLES=1 # the joint angles contained in this package will be used for control (position and orientation will be ignored)
 uint8 data_type
 
-# when using HAND_POSE datatype commands, specify whether the pose is in world or chest frame.
+# when using HAND_POSE datatype commands, specify whether the pose should be held in world or chest frame. Note that regardless of the frame specified here the position and orientation must be expressed in world frame.
 # Options for referenceFrame
 uint8 CHEST=0 # frame attached to the chest of the robot
 uint8 WORLD=1 # world frame
