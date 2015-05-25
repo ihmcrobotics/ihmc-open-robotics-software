@@ -475,8 +475,14 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       if ((desiredJointsProvider != null) && desiredJointsProvider.checkForNewPacket())
          initializeFromJointAnglesPacket(desiredJointsProvider.getNewPacket());
    
-      if (singleJointPositionProvider != null && singleJointPositionProvider.checkForNewPacket())
-         initializeFromSingleJointAnglePacket(singleJointPositionProvider.getNewPacket());
+      if (singleJointPositionProvider != null)
+      {
+         SingleJointAnglePacket newPacket = singleJointPositionProvider.getNewPacket(timeProvider.getDoubleValue());
+         if (newPacket != null)
+         {
+            initializeFromSingleJointAnglePacket(newPacket);
+         }
+      }
       
       if (multiJointPositionProvider != null && multiJointPositionProvider.checkForNewPacket())
 	     initializeFromMultiJointAnglePacket(multiJointPositionProvider.getNewPacket());
