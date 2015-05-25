@@ -45,7 +45,7 @@ public class DrillDetectionProcess extends DrillDetectionThread implements NetSt
       DrillDetectionPacket packet = new DrillDetectionPacket();
       packet.setDestination(PacketDestination.UI);
       packet.isDrillOn = result.isOn;
-      packet.averageValues = result.averageValues;
+//      packet.averageValues = result.averageValues;
 
       packetCommunicator.send(packet);
       lastSentPacketTimestamp = now;
