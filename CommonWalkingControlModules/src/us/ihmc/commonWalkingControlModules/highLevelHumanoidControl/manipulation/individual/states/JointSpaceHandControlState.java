@@ -31,6 +31,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
    private final DoubleYoVariable maxAcceleration;
 
+   private final BooleanYoVariable setDesiredJointAccelerations;
+
    private final YoVariableRegistry registry;
    private final MomentumBasedController momentumBasedController;
    private final BooleanYoVariable initialized;
@@ -57,6 +59,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
 
       if (!doPositionControl)
       {
+         setDesiredJointAccelerations = null;
+
          maxAcceleration = gains.getYoMaximumAcceleration();
          pidControllers = new LinkedHashMap<OneDoFJoint, PIDController>();
          rateLimitedAccelerations = new LinkedHashMap<OneDoFJoint, RateLimitedYoVariable>();
@@ -73,6 +77,9 @@ public class JointSpaceHandControlState extends State<HandControlState>
       }
       else
       {
+         setDesiredJointAccelerations = new BooleanYoVariable(namePrefix + "SetDesiredJointAccelerations", registry);
+         setDesiredJointAccelerations.set(false);
+
          maxAcceleration = null;
          pidControllers = null;
          rateLimitedAccelerations = null;
@@ -107,6 +114,8 @@ public class JointSpaceHandControlState extends State<HandControlState>
             joint.setqDesired(trajectoryGenerator.getValue());
             joint.setQdDesired(trajectoryGenerator.getVelocity());
             double desiredAcceleration = trajectoryGenerator.getAcceleration();
+            if (!setDesiredJointAccelerations.getBooleanValue())
+               desiredAcceleration = 0.0;
             momentumBasedController.setOneDoFJointAcceleration(joint, desiredAcceleration);
          }
          else
