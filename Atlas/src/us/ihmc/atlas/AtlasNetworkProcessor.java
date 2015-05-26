@@ -23,6 +23,7 @@ import com.martiansoftware.jsap.Switch;
 
 public class AtlasNetworkProcessor
 {
+   private static final boolean ENABLE_BEHAVIOR_MODULE = false;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
    
    public static void main(String[] args) throws URISyntaxException, JSAPException
@@ -54,7 +55,7 @@ public class AtlasNetworkProcessor
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
        
         networkModuleParams.enableUiModule(true);
-        networkModuleParams.enableBehaviorModule(true);
+        networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
         networkModuleParams.enableSensorModule(true);
         networkModuleParams.enableBehaviorVisualizer(true);
         networkModuleParams.setDrillDetectionModuleEnabled(true);
