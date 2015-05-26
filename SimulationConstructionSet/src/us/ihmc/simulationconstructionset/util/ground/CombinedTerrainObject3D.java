@@ -153,11 +153,12 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return this.linkGraphics;
    }
 
+   private final Point3d localIntersection = new Point3d();
+   private final Vector3d localNormal = new Vector3d();
+   
    public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
-      Point3d localIntersection = new Point3d();
-      Vector3d localNormal = new Vector3d();
       boolean isInside = false;
 
       tempPointToCheck.set(x, y, z);
