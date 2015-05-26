@@ -287,8 +287,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         // TODO: Do something like the following to prevent garbage on the swing leg:
-//         if (tempCoP2d.containsNaN() || footSwitches.get(trustedSide).computeFootLoadPercentage() < 0.2)
          if (tempCoP2d.containsNaN())
          {
             tempCoP2d.setToZero();
@@ -299,21 +297,28 @@ public class PelvisKinematicsBasedLinearStateCalculator
             boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP2d);
             if (!isCoPInsideFoot)
             {
-               FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedSide);
-               footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
-               // TODO Garbage
-               FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
-
-               if (intersectionPoints.length == 2)
-                  System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
-               
-               if (intersectionPoints.length == 0)
+               if (footSwitches.get(trustedSide).computeFootLoadPercentage() > 0.2)
                {
-                  System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
-                  tempCoP2d.setToZero(footFrame);
+                  FrameLineSegment2d footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedSide);
+                  footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
+                  // TODO Garbage
+                  FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
+
+                  if (intersectionPoints.length == 2)
+                     System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
+
+                  if (intersectionPoints.length == 0)
+                  {
+                     System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
+                     tempCoP2d.setToZero(footFrame);
+                  }
+                  else
+                     tempCoP2d.set(intersectionPoints[0]);
                }
-               else
-                  tempCoP2d.set(intersectionPoints[0]);
+               else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
+               {
+                  copsRawInFootFrame.get(trustedSide).getFrameTuple2dIncludingFrame(tempCoP2d);
+               }
             }
          }
       }
