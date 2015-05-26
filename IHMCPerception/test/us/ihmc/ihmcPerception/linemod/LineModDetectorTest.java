@@ -28,7 +28,7 @@ public class LineModDetectorTest
    static final String modelFile="drill_DCS551/drillUI.obj";
 //   static final String modelFile=""/examples/drill/drill.obj";
          
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 1.0)
    @Test(timeout=3000)
    public void testGenerateVertexes()
    {
@@ -39,7 +39,7 @@ public class LineModDetectorTest
       org.junit.Assert.assertEquals(257,vertexes.size());
    }
 
-   @EstimatedDuration(duration = 3000)
+   @EstimatedDuration(duration = 3.0)
    @Test(timeout=3000)
    public void trainOneTestOne() throws IOException
    {
@@ -74,7 +74,7 @@ public class LineModDetectorTest
       }
    }
    
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 1.0)
    @Test(timeout = 3000)
    public void trainOneTestOneScaled() throws IOException
    {
@@ -102,7 +102,7 @@ public class LineModDetectorTest
       assertTrue(bestDetection.score> 0.94);
    }
    
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 1.0)
    @Test(timeout = 5000)
    public void testFeatureSaveLoad()
    {
@@ -128,7 +128,7 @@ public class LineModDetectorTest
       System.out.println("score:"+bestDetection.score);
    }
 
-   @EstimatedDuration(duration = 3000)
+   @EstimatedDuration(duration = 3.0)
    @Test(timeout=120000)
    public void testYawAngles() 
    {
