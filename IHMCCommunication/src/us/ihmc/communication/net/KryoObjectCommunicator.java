@@ -189,15 +189,15 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
                   @Override
                   public void run()
                   {
-                     for(GlobalObjectConsumer listener : globalListeners)
+                     for(int i = 0; i < globalListeners.size(); i++)
                      {
-                        listener.consumeObject(object);
+                        globalListeners.get(i).consumeObject(object);
                      }
                      
                      ArrayList<ObjectConsumer<?>> objectListeners = listeners.get(classType);
-                     if(objectListeners != null)
+                     if (objectListeners != null)
                      {
-                        for(int i=0; i<objectListeners.size(); i++)
+                        for (int i = 0; i < objectListeners.size(); i++)
                         {
                            @SuppressWarnings("rawtypes")
                            ObjectConsumer listener = objectListeners.get(i);
@@ -218,28 +218,28 @@ public abstract class KryoObjectCommunicator implements NetworkedObjectCommunica
          @Override
          public void connected(Connection connection)
          {
-            for (TcpNetStateListener tcpStateListener : tcpStateListeners)
+            for (int i = 0; i < tcpStateListeners.size(); i++)
             {
-               tcpStateListener.connected(connection);
+               tcpStateListeners.get(i).connected(connection);
             }
 
-            for(NetStateListener stateListener : stateListeners)
+            for(int i = 0; i< stateListeners.size(); i++)
             {
-               stateListener.connected();
+               stateListeners.get(i).connected();
             }
          }
          
          @Override
          public void disconnected(Connection connection)
          {
-            for (TcpNetStateListener tcpStateListener : tcpStateListeners)
+            for (int i = 0; i < tcpStateListeners.size(); i++)
             {
-               tcpStateListener.disconnected(connection);
+               tcpStateListeners.get(i).disconnected(connection);
             }
 
-            for(NetStateListener stateListener : stateListeners)
+            for(int i = 0; i< stateListeners.size(); i++)
             {
-               stateListener.disconnected();
+               stateListeners.get(i).disconnected();
             }
          }
 
