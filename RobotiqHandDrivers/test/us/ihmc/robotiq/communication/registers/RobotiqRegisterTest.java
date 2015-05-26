@@ -18,7 +18,7 @@ import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 public class RobotiqRegisterTest
 {
    @Test(timeout = 3000)
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 0.1)
    public void testEquals()
    {
       ActionRequestRegister arr = new ActionRequestRegister(rACT.ACTIVATE_GRIPPER, rMOD.BASIC_MODE, rGTO.GO_TO, rATR.NORMAL);

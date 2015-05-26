@@ -5,6 +5,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 
 public abstract class RobotiqInputRegisterTest
@@ -14,7 +16,7 @@ public abstract class RobotiqInputRegisterTest
    protected abstract byte getValueToSet();
    
    @Test(timeout = 3000)
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 0.1)
    public void testSetRegister()
    {
       RobotiqInputRegister inputRegister = getInputRegister();
@@ -24,7 +26,7 @@ public abstract class RobotiqInputRegisterTest
    }
 
    @Test(timeout = 3000)
-   @EstimatedDuration(duration = 1000)
+   @EstimatedDuration(duration = 0.1)
    public void testGetRegister()
    {
       assertEquals(getValueToSet(), getExpectedRegister().getRegisterValue());
