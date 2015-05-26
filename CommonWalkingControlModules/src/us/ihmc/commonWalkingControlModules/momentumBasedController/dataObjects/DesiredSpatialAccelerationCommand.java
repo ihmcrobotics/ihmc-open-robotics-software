@@ -5,10 +5,16 @@ import us.ihmc.utilities.screwTheory.GeometricJacobian;
 
 public class DesiredSpatialAccelerationCommand
 {
-   private final boolean hasWeight;
-   private final double weight;
-   private final GeometricJacobian jacobian;
-   private final TaskspaceConstraintData taskspaceConstraintData;
+   private boolean hasWeight;
+   private double weight;
+   private GeometricJacobian jacobian;
+   private TaskspaceConstraintData taskspaceConstraintData;
+
+   public DesiredSpatialAccelerationCommand()
+   {
+      this.hasWeight = false;
+      this.weight = Double.POSITIVE_INFINITY;
+   }
 
    public DesiredSpatialAccelerationCommand(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
    {
@@ -34,6 +40,13 @@ public class DesiredSpatialAccelerationCommand
       this.weight = desiredSpatialAccelerationCommand.weight;
    }
 
+   public void set(GeometricJacobian jacobian, TaskspaceConstraintData taskspaceConstraintData)
+   {
+      this.jacobian = jacobian;
+      this.taskspaceConstraintData = taskspaceConstraintData;
+      this.hasWeight = false;
+      this.weight = Double.POSITIVE_INFINITY; 
+   }
   
    public boolean getHasWeight()
    {
@@ -54,10 +67,32 @@ public class DesiredSpatialAccelerationCommand
    {
       return taskspaceConstraintData;
    }
+   
+   public void setHasWeight(boolean hasWeight)
+   {
+      this.hasWeight = hasWeight;
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+
+   public void setJacobian(GeometricJacobian jacobian)
+   {
+      this.jacobian = jacobian;
+   }
+
+   public void setTaskspaceConstraintData(TaskspaceConstraintData taskspaceConstraintData)
+   {
+      this.taskspaceConstraintData = taskspaceConstraintData;
+   }
 
    public String toString()
    {
       return "DesiredSpatialAccelerationCommand: GeometricJacobian = " + jacobian.getShortInfo() + ", taskspaceConstraintData = " + taskspaceConstraintData;
    }
+
+
 
 }

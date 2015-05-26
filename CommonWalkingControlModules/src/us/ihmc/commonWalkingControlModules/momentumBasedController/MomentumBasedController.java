@@ -90,6 +90,8 @@ public class MomentumBasedController
    public static final boolean SPY_ON_MOMENTUM_BASED_CONTROLLER = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final DesiredSpatialAccelerationCommandPool desiredSpatialAccelerationCommandPool = new DesiredSpatialAccelerationCommandPool();
+   
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
@@ -667,6 +669,7 @@ public class MomentumBasedController
       inverseDynamicsCalculator.compute();
 
       updateYoVariables();
+      desiredSpatialAccelerationCommandPool.recycleObjectPool();
    }
 
    // FIXME GET RID OF THAT HACK!!!
@@ -1231,7 +1234,7 @@ public class MomentumBasedController
          momentumBasedControllerSpy.setDesiredSpatialAcceleration(jacobian, taskspaceConstraintData);
       }
 
-      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = new DesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
+      DesiredSpatialAccelerationCommand desiredSpatialAccelerationCommand = desiredSpatialAccelerationCommandPool.getUnusedDesiredSpatialAccelerationCommand(jacobian, taskspaceConstraintData);
       momentumControlModuleBridge.setDesiredSpatialAcceleration(desiredSpatialAccelerationCommand);
    }
 
