@@ -287,7 +287,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         if (tempCoP2d.containsNaN())
+         if (tempCoP2d.containsNaN() || footSwitches.get(trustedSide).computeFootLoadPercentage() < 0.2)
          {
             tempCoP2d.setToZero();
          }
