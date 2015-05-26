@@ -11,7 +11,7 @@ public interface DesiredHeadingControlModule
 
    public abstract double getDesiredHeadingAngle();
    
-   public abstract FrameVector2d getDesiredHeading();
+   public abstract void getDesiredHeading(FrameVector2d desiredHeadingToPack);
 
    public abstract double getFinalHeadingTargetAngle();
    

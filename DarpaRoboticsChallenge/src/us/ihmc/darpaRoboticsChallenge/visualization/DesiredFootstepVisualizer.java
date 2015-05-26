@@ -406,6 +406,9 @@ public class DesiredFootstepVisualizer
 
       double time = scs.getTime();
 
+      FrameVector2d desiredHeading = new FrameVector2d();
+      FrameVector2d desiredVelocity = new FrameVector2d();
+
       for (int i = 0; i < numberOfSteps; i++)
       {
          desiredFootstepVisualizer.hideSwingLeg(swingLegSide);
@@ -415,8 +418,8 @@ public class DesiredFootstepVisualizer
             desiredHeadingControlModule.updateDesiredHeadingFrame();
             headingAndVelocityEvaluationScript.update(time);
 
-            FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
-            FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+            desiredHeadingControlModule.getDesiredHeading(desiredHeading);
+            desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
 
             heading.set(desiredHeading.getX(), desiredHeading.getY(), HEADING_VIZ_Z);
             velocity.set(desiredVelocity.getX(), desiredVelocity.getY(), VELOCITY_VIZ_Z);

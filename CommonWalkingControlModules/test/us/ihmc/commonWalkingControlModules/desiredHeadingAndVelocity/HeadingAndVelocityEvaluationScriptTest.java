@@ -85,14 +85,18 @@ public class HeadingAndVelocityEvaluationScriptTest
       ArrayList<FrameVector2d> desiredHeadings = new ArrayList<FrameVector2d>();
       ArrayList<FrameVector2d> desiredVelocities = new ArrayList<FrameVector2d>();
       
+      FrameVector2d desiredVelocity = new FrameVector2d();
+      
       for (int i=0; i<numberOfTicksToTest; i++)
       {
          script.update(time);
 
          desiredHeadingControlModule.updateDesiredHeadingFrame();
          
-         FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
-         FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+         FrameVector2d desiredHeading = new FrameVector2d();
+               
+         desiredHeadingControlModule.getDesiredHeading(desiredHeading);
+         desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
          double desiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
 
          desiredHeadings.add(desiredHeading);

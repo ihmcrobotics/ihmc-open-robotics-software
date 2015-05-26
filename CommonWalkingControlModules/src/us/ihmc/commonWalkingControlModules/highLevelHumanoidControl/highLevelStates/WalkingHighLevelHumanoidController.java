@@ -771,6 +771,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          }
       }
 
+      private final FramePoint2d tempFramePoint2d = new FramePoint2d();
+      
       private Pair<FramePoint2d, Double> computeFinalDesiredICPAndTrajectoryTime()
       {
          Pair<FramePoint2d, Double> finalDesiredICPAndTrajectoryTime;
@@ -814,9 +816,9 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             FramePoint2d finalDesiredICP = capturePointPlannerAdapter.getFinalDesiredICP();
             double trajectoryTime = transferTimeCalculationProvider.getValue();
 
-            FramePoint2d temp = new FramePoint2d(finalDesiredICP);
-            temp.changeFrame(worldFrame);
-            finalDesiredICPInWorld.set(temp);
+            tempFramePoint2d.setIncludingFrame(finalDesiredICP);
+            tempFramePoint2d.changeFrame(worldFrame);
+            finalDesiredICPInWorld.set(tempFramePoint2d);
             finalDesiredICPAndTrajectoryTime = new Pair<FramePoint2d, Double>(finalDesiredICP, trajectoryTime);
          }
 
@@ -1000,6 +1002,8 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
       private final FramePoint2d capturePoint2d = new FramePoint2d();
       private final FramePoint2d desiredCMP = new FramePoint2d();
 
+      private final FramePoint2d transferToFootstepLocation = new FramePoint2d();
+      
       private Footstep nextFootstep;
       private double captureTime;
 
@@ -1029,7 +1033,7 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
             feetManager.requestMoveStraight(swingSide, footPoseProvider.getDesiredFootPose(swingSide), footPoseProvider.getTrajectoryTime());
 
          RobotSide supportSide = swingSide.getOppositeSide();
-         FramePoint2d transferToFootstepLocation = transferToFootstep.getFramePoint2dCopy();
+         transferToFootstep.packFramePoint2d(transferToFootstepLocation);
 
          boolean icpErrorIsTooLarge = capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 

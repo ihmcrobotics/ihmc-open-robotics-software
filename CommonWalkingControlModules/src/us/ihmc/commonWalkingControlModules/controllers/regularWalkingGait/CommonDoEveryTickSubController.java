@@ -95,10 +95,12 @@ public class CommonDoEveryTickSubController implements DoEveryTickSubController
       }
    }
 
+   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   
    public void doEveryControlTick(RobotSide supportLeg)
    {
       desiredVelocityControlModule.updateDesiredVelocity();
-      FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+      desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
       couplingRegistry.setDesiredVelocity(desiredVelocity);
       desiredHeadingControlModule.updateDesiredHeadingFrame();
 

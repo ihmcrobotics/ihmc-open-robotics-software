@@ -119,6 +119,8 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
       controllerInstance = null;
    }
 
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+
    public void updateDynamicGraphicObjectListRegistry()
    {
       if(robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
@@ -127,7 +129,6 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
                  registry.updateChangedValues();
          if (simulatedRobot != null)
          {
-            RigidBodyTransform transformToWorld = new RigidBodyTransform();
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
             robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
          }

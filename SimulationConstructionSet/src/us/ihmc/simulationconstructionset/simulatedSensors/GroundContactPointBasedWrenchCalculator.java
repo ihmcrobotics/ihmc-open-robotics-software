@@ -46,6 +46,8 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
    private final Vector3d contactVectorOriginFrame = new Vector3d();
    private final Vector3d tau = new Vector3d();
    
+   private final Point3d tempContactPoint = new Point3d();
+
    @Override
    public void calculate()
    {
@@ -63,7 +65,9 @@ public class GroundContactPointBasedWrenchCalculator implements WrenchCalculator
          transformToOriginFrame.transform(force);
 
          contactPointOriginFrame.set(0.0, 0.0, 0.0);
-         transformToOriginFrame.transform(contactPoint.getPositionPoint(), contactPointOriginFrame);
+         
+         contactPoint.getPosition(tempContactPoint);
+         transformToOriginFrame.transform(tempContactPoint, contactPointOriginFrame);
          contactVectorOriginFrame.set(contactPointOriginFrame);
          tau.cross(contactVectorOriginFrame, force);
          

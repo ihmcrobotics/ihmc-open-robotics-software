@@ -114,6 +114,8 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
       previousStepLength.set(Math.abs(footToFoot.getX()));
    }
 
+   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   
    private void computeStepLength()
    {
       double swingDuration = couplingRegistry.getSingleSupportDuration();    // EVIL: single support duration should be computed based on desired velocity and step length, not the other way around
@@ -121,7 +123,8 @@ public class AdjustableDesiredFootstepCalculator extends AbstractAdjustableDesir
       double totalDuration = swingDuration + stanceDuration;
 
       // Do not multiply by 2, this will give you the stride length and not the step length !!!
-      stepLengthForDesiredVelocity.set(totalDuration * desiredVelocityControlModule.getDesiredVelocity().getX());
+      desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
+      stepLengthForDesiredVelocity.set(totalDuration * desiredVelocity.getX());
 
       double stepLengthError = stepLengthForDesiredVelocity.getDoubleValue() - stepLength.getDoubleValue();
 
