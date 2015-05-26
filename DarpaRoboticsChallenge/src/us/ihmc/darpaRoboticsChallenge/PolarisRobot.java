@@ -46,11 +46,11 @@ public class PolarisRobot extends Robot
 //         -0.6544,  -0.0140,   0.7560);
    
    //Tingfan 05252013
-   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.1275, -0.3837, -0.6464);
+   private static final Vector3d checkerBoardToWheelTranslation = new Vector3d(-0.0992, 0.3762, 0.6109 );
    private static final Matrix3d checkerBoardToWheelRotation = new Matrix3d(
-         0.7777,   0.0115,   0.6285, 
-         0.0235,  -0.9997,  -0.0108, 
-         0.6282,   0.0232,  -0.7777);
+		   0.7693 , -0.0024 ,  0.6389, 
+		   -0.0024 ,  1.0000  , 0.0066, 
+		   -0.6389 , -0.0066,   0.7693 );
 
 
 
