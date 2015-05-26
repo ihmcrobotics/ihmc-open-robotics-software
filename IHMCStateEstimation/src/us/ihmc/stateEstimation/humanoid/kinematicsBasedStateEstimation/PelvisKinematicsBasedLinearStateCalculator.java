@@ -287,7 +287,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
       
       if (trustCoPAsNonSlippingContactPoint.getBooleanValue())
       {
-         if (tempCoP2d.containsNaN() || footSwitches.get(trustedSide).computeFootLoadPercentage() < 0.2)
+         // TODO: Do something like the following to prevent garbage on the swing leg:
+//         if (tempCoP2d.containsNaN() || footSwitches.get(trustedSide).computeFootLoadPercentage() < 0.2)
+         if (tempCoP2d.containsNaN())
          {
             tempCoP2d.setToZero();
          }
