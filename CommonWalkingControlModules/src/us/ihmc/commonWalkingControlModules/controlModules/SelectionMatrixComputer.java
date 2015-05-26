@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.screwTheory.GeometricJacobian;
+import us.ihmc.yoUtilities.math.SolvePseudoInverseSvdGCFree;
 
 public class SelectionMatrixComputer
 {
-   private final LinearSolver<DenseMatrix64F> selectionMatrixSolver = LinearSolverFactory.pseudoInverse(true);
+   private final LinearSolver<DenseMatrix64F> selectionMatrixSolver = new SolvePseudoInverseSvdGCFree(12, 12);
 
    public void computeSelectionMatrix(int jacobianId, MomentumBasedController momentumBasedController, DenseMatrix64F selectionMatrix)
    {
