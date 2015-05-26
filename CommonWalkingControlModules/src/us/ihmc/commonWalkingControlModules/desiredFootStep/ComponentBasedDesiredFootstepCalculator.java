@@ -141,12 +141,16 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractAdjustableD
       return footstepPosition;
    }
 
+   private final FrameVector2d desiredHeading = new FrameVector2d();
+   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   private final FrameVector2d toLeftOfDesiredHeading = new FrameVector2d();
+   
    // TODO: clean up
    private FrameVector2d computeDesiredOffsetFromSupportAnkle(RobotSide swingLegSide, ReferenceFrame desiredHeadingFrame)
    {
-      FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
-      FrameVector2d desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
-      FrameVector2d toLeftOfDesiredHeading = new FrameVector2d(desiredHeading.getReferenceFrame(), -desiredHeading.getY(), desiredHeading.getX());
+      desiredHeadingControlModule.getDesiredHeading(desiredHeading);
+      desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
+      toLeftOfDesiredHeading.setIncludingFrame(desiredHeading.getReferenceFrame(), -desiredHeading.getY(), desiredHeading.getX());
 
       desiredVelocity.changeFrame(desiredHeading.getReferenceFrame());
       velocityMagnitudeInHeading.set(desiredVelocity.dot(desiredHeading));

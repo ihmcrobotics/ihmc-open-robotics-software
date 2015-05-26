@@ -61,12 +61,10 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
       return desiredHeading.getDoubleValue();
    }
    
-   public FrameVector2d getDesiredHeading()
+   public void getDesiredHeading(FrameVector2d desiredHeadingToPack)
    {
-      FrameVector2d desiredHeadingVector = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
+      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
                                     Math.sin(desiredHeading.getDoubleValue()));
-
-      return desiredHeadingVector;
    }
 
    public void resetHeadingAngle(double newHeading)

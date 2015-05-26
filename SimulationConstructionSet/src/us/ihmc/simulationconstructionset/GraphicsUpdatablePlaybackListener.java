@@ -18,8 +18,9 @@ public class GraphicsUpdatablePlaybackListener implements PlaybackListener
    {
       if (graphicsUpdatableList != null)
       {
-         for (GraphicsUpdatable graphicsUpdatable : graphicsUpdatableList)
+         for (int i=0; i<graphicsUpdatableList.size(); i++)
          {
+            GraphicsUpdatable graphicsUpdatable = graphicsUpdatableList.get(i);
             graphicsUpdatable.update();
          }
       }

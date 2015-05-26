@@ -100,11 +100,13 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       return maxHeadingDot.getDoubleValue();
    }
 
+   private final FrameVector2d desiredHeading = new FrameVector2d();
+   
    public void update(double time)
    {
 //      desiredHeadingControlModule.updateDesiredHeadingFrame();
 
-      FrameVector2d desiredHeading = desiredHeadingControlModule.getDesiredHeading();
+      desiredHeadingControlModule.getDesiredHeading(desiredHeading);
       double previousDesiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
 
       // State transitions:
@@ -402,9 +404,11 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       this.desiredVelocityDirection.set(desiredVelocityDirection);
    }
 
+   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   
    private void updateDesiredVelocityVector()
    {
-      FrameVector2d desiredVelocity = new FrameVector2d(desiredVelocityControlModule.getDesiredVelocity().getReferenceFrame());
+      desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
       desiredVelocity.set(desiredVelocityDirection);
       desiredVelocity.scale(desiredVelocityMagnitude.getDoubleValue());
       desiredVelocityControlModule.setDesiredVelocity(desiredVelocity);

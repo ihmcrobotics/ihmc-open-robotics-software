@@ -18,6 +18,8 @@ public class VelocityErrorCalculator
       
    }
    
+   private final FrameVector2d desiredCenterOfMassVelocity = new FrameVector2d();
+   
    public FrameVector2d getVelocityErrorInFrame(ReferenceFrame referenceFrame, RobotSide legToTrustForCoMVelocity)
    {
       if (!referenceFrame.isZupFrame())
@@ -28,7 +30,7 @@ public class VelocityErrorCalculator
       FrameVector centerOfMassVelocity = processedSensors.getCenterOfMassVelocityInFrame(referenceFrame);
       FrameVector2d centerOfMassVelocity2d = centerOfMassVelocity.toFrameVector2d();
 
-      FrameVector2d desiredCenterOfMassVelocity = desiredVelocityControlModule.getDesiredVelocity();
+      desiredVelocityControlModule.getDesiredVelocity(desiredCenterOfMassVelocity);
       desiredCenterOfMassVelocity.changeFrame(referenceFrame);
 
       FrameVector2d ret = new FrameVector2d(referenceFrame);

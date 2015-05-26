@@ -105,12 +105,10 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       return desiredHeading.getDoubleValue();
    }
    
-   public FrameVector2d getDesiredHeading()
+   public void getDesiredHeading(FrameVector2d desiredHeadingToPack)
    {
-      FrameVector2d desiredHeadingVector = new FrameVector2d(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
+      desiredHeadingToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeading.getDoubleValue()),
                                     Math.sin(desiredHeading.getDoubleValue()));
-
-      return desiredHeadingVector;
    }
 
    public void resetHeadingAngle(double newHeading)
@@ -133,6 +131,8 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    {
       private static final long serialVersionUID = 4657294310129415811L;
 
+      private final Matrix3d rotation = new Matrix3d();
+      
       public DesiredHeadingFrame()
       {
          super("DesiredHeadingFrame", ReferenceFrame.getWorldFrame(), false, false, true);
@@ -140,7 +140,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
 
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
-         Matrix3d rotation = new Matrix3d();
          rotation.rotZ(desiredHeading.getDoubleValue());
 
          transformToParent.setRotationAndZeroTranslation(rotation);

@@ -411,17 +411,17 @@ public class CommonStanceSubController implements StanceSubController
       return hasCapturePointLeftBaseOfSupport;
    }
 
+   private final FrameVector2d desiredVelocity = new FrameVector2d();
+   
    private void doSingleSupportControl(LegTorques legTorquesToPackForStanceSide, SingleSupportCondition singleSupportCondition, double timeInState)
-   {
-      FrameVector2d desiredVelocity;
-      
+   {      
       if (singleSupportCondition == SingleSupportCondition.StopWalking)
       {
-         desiredVelocity = new FrameVector2d(ReferenceFrame.getWorldFrame());
+         desiredVelocity.setToZero(ReferenceFrame.getWorldFrame());
       }
       else
       {
-         desiredVelocity = desiredVelocityControlModule.getDesiredVelocity();
+         desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
       }
 
       FrameOrientation desiredPelvisOrientation =
@@ -432,9 +432,16 @@ public class CommonStanceSubController implements StanceSubController
 
    private void doDoubleSupportControl(LowerBodyTorques lowerBodyTorquesToPack, RobotSide loadingLeg, boolean walk)
    {
-      FrameVector2d desiredVelocity = walk
-                                      ? desiredVelocityControlModule.getDesiredVelocity()
-                                      : new FrameVector2d(desiredVelocityControlModule.getDesiredVelocity().getReferenceFrame());
+      if (walk)
+      {
+         desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
+      }
+      else
+      {
+         desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
+         desiredVelocity.setToZero();
+      }
+                                      
       FrameOrientation desiredPelvisOrientation = desiredPelvisOrientationControlModule.getDesiredPelvisOrientationDoubleSupportCopy();
       balanceSupportControlModule.doDoubleSupportBalance(lowerBodyTorquesToPack, loadingLeg, desiredVelocity, desiredPelvisOrientation);
 

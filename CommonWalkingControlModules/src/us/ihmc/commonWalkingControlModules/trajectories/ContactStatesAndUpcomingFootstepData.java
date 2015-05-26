@@ -63,7 +63,10 @@ public class ContactStatesAndUpcomingFootstepData
    public void setContactStates(List<? extends PlaneContactState> contactStates)
    {
       this.contactStates.clear();
-      this.contactStates.addAll(contactStates);
+      for (int i=0; i<contactStates.size(); i++)
+      {
+         this.contactStates.add(contactStates.get(i));
+      }
    }
 
    public void set(ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame, RobotSide supportLeg, Footstep upcomingFootstep,

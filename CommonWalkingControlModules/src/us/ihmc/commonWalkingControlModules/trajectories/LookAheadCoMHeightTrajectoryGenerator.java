@@ -251,6 +251,10 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       correctForCoMHeightDrift.set(activate);
    }
 
+   private final Point2d[] points = new Point2d[4];
+   private final double[] endpointSlopes = new double[] {0.0, 0.0};
+   private final double[] waypointSlopes = new double[2];
+   
    @Override
    public void setSupportLeg(RobotSide supportLeg)
    {
@@ -271,11 +275,15 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, sF.getY());
       tempFramePoint.changeFrame(newFrame);
       sF.setY(tempFramePoint.getZ());
+      
+      points[0] = s0;
+      points[1] = d0;
+      points[2] = dF;
+      points[3] = sF;
+      
+      endpointSlopes[0] = 0.0;
+      endpointSlopes[1] = 0.0;
 
-      Point2d[] points = new Point2d[] {s0, d0, dF, sF};
-      double[] endpointSlopes = new double[] {0.0, 0.0};
-
-      double[] waypointSlopes = new double[2];
       waypointSlopes[0] = (points[2].y - points[0].y) / (points[2].x - points[0].x);
       waypointSlopes[1] = (points[3].y - points[1].y) / (points[3].x - points[1].x);
 
@@ -735,7 +743,8 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
    private final FramePoint height = new FramePoint();
    private final FramePoint desiredPosition = new FramePoint();
    private final double[] splineOutput = new double[3];
-
+   private final double[] partialDerivativesWithRespectToS = new double[2];
+   
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2d queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
@@ -801,7 +810,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       double dzds = splineOutput[1];
       double ddzdds = splineOutput[2];
 
-      double[] partialDerivativesWithRespectToS = getPartialDerivativesWithRespectToS(projectionSegment);
+      getPartialDerivativesWithRespectToS(projectionSegment, partialDerivativesWithRespectToS);
       double dsdx = partialDerivativesWithRespectToS[0];
       double dsdy = partialDerivativesWithRespectToS[1];
       double ddsddx = 0;
@@ -831,12 +840,13 @@ public class LookAheadCoMHeightTrajectoryGenerator implements CoMHeightTrajector
       initializeToCurrent.set(true);
    }
 
-   private double[] getPartialDerivativesWithRespectToS(LineSegment2d segment)
+   private void getPartialDerivativesWithRespectToS(LineSegment2d segment, double[] partialDerivativesToPack)
    {
       double dsdx = (segment.getX1() - segment.getX0()) / segment.length();
       double dsdy = (segment.getY1() - segment.getY0()) / segment.length();
 
-      return new double[] {dsdx, dsdy};
+      partialDerivativesToPack[0] = dsdx;
+      partialDerivativesToPack[1] = dsdy;
    }
 
    private final FramePoint coM = new FramePoint();

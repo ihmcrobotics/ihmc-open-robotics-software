@@ -30,9 +30,9 @@ public class SimpleDesiredVelocityControlModule implements DesiredVelocityContro
       updateDesiredVelocity();
    }
 
-   public FrameVector2d getDesiredVelocity()
+   public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
    {
-      return new FrameVector2d(desiredVelocity.getReferenceFrame(), desiredVelocity.getX(), desiredVelocity.getY());
+      desiredVelocityToPack.setIncludingFrame(desiredVelocity.getReferenceFrame(), desiredVelocity.getX(), desiredVelocity.getY());
    }
 
    public void updateDesiredVelocity()

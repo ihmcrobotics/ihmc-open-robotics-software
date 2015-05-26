@@ -23,9 +23,9 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
       desiredVelocity.set(newDesiredVelocity);  
    }
 
-   public FrameVector2d getDesiredVelocity()
+   public void getDesiredVelocity(FrameVector2d desiredVelocityToPack)
    {
-      return desiredVelocity.getFrameVector2dCopy();
+      desiredVelocity.packFrameVector2d(desiredVelocityToPack);
    }
 
    public void updateDesiredVelocity()
