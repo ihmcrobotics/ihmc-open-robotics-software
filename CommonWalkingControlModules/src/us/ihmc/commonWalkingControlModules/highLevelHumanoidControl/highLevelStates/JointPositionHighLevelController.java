@@ -347,7 +347,7 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
                handTrajectoryDoneHasBeenSent = false;
             }
             
-            for (ArmJointName jointName : ArmJointName.values())
+            for (ArmJointName jointName : ArmJointName.values)
             {
                OneDoFJoint joint = fullRobotModel.getArmJoint(robotSide, jointName);
                if (joint == null) continue;
