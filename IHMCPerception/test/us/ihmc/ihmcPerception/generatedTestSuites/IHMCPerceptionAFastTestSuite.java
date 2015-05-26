@@ -7,6 +7,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses
 ({
+   us.ihmc.ihmcPerception.chessboardDetection.ChessboardPoseEstimatorTest.class,
    us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBoxTest.class,
    us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinderTest.class,
    us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphereTest.class,
