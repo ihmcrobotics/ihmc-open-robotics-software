@@ -18,7 +18,7 @@ import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 
-@BambooPlan(planType = {BambooPlanType.Slow, BambooPlanType.VideoA})
+@BambooPlan(planType = {BambooPlanType.Flaky, BambooPlanType.VideoA})
 public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFootTest
 {
    @Override

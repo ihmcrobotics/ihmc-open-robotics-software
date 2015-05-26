@@ -2,7 +2,10 @@ package us.ihmc.atlas;
 
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.utilities.code.agileTesting.BambooAnnotations.BambooPlan;
+import us.ihmc.utilities.code.agileTesting.BambooPlanType;
 
+@BambooPlan(planType = BambooPlanType.Slow)
 public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 {
    protected DRCRobotModel getRobotModel()
