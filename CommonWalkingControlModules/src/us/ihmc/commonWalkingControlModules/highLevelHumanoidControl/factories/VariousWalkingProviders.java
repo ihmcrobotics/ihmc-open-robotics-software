@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.AbortWalkingProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ChestOrientationProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredComHeightProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
@@ -35,6 +36,8 @@ public class VariousWalkingProviders
    private final FootstepProvider footstepProvider;
    private final HandstepProvider handstepProvider;
    private final AbortWalkingProvider abortProvider;
+
+   private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
 
    private final HashMap<Footstep, TrajectoryParameters> mapFromFootstepsToTrajectoryParameters;
 
@@ -71,7 +74,7 @@ public class VariousWalkingProviders
                                   HeadOrientationProvider desiredHeadOrientationProvider, DesiredComHeightProvider desiredComHeightProvider,
                                   PelvisPoseProvider desiredPelvisPoseProvider, HandPoseProvider desiredHandPoseProvider,
                                   HandComplianceControlParametersProvider handComplianceControlParametersProvider, DesiredSteeringWheelProvider desiredSteeringWheelProvider,
-                                  HandLoadBearingProvider desiredHandLoadBearingProvider, ChestOrientationProvider desiredChestOrientationProvider,
+                                  HandLoadBearingProvider desiredHandLoadBearingProvider, AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator, ChestOrientationProvider desiredChestOrientationProvider,
                                   FootPoseProvider footPoseProvider, DesiredFootStateProvider footStateProvider, DesiredHighLevelStateProvider desiredHighLevelStateProvider,
                                   DesiredThighLoadBearingProvider thighLoadBearingProvider, DesiredPelvisLoadBearingProvider pelvisLoadBearingProvider,
                                   ControlStatusProducer controlStatusProducer, CapturabilityBasedStatusProducer capturabilityBasedStatusProducer,
@@ -91,6 +94,8 @@ public class VariousWalkingProviders
       this.desiredSteeringWheelProvider = desiredSteeringWheelProvider;
       this.handComplianceControlParametersProvider = handComplianceControlParametersProvider;
       this.footPoseProvider = footPoseProvider;
+
+      this.automaticManipulationAbortCommunicator = automaticManipulationAbortCommunicator;
 
       this.desiredHandLoadBearingProvider = desiredHandLoadBearingProvider;
       this.desiredFootLoadBearingProvider = footStateProvider;
@@ -265,5 +270,10 @@ public class VariousWalkingProviders
    public AbortWalkingProvider getAbortProvider()
    {
       return abortProvider;
+   }
+
+   public AutomaticManipulationAbortCommunicator getAutomaticManipulationAbortCommunicator()
+   {
+      return automaticManipulationAbortCommunicator;
    }
 }

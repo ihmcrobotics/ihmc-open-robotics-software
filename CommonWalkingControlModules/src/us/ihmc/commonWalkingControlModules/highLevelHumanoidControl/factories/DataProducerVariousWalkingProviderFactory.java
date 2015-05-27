@@ -26,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisLoadBear
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredPelvisPoseProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredSteeringWheelProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredThighLoadBearingProvider;
+import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.HandComplianceControlParametersProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.MultiJointPositionProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.ObjectWeightProvider;
@@ -54,6 +55,7 @@ import us.ihmc.communication.packets.manipulation.SteeringWheelInformationPacket
 import us.ihmc.communication.packets.manipulation.StopMotionPacket;
 import us.ihmc.communication.packets.sensing.LookAtPacket;
 import us.ihmc.communication.packets.walking.AbortWalkingPacket;
+import us.ihmc.communication.packets.walking.AutomaticManipulationAbortPacket;
 import us.ihmc.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.communication.packets.walking.ChestOrientationPacket;
 import us.ihmc.communication.packets.walking.ComHeightPacket;
@@ -104,6 +106,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
 
       DesiredHandPoseProvider handPoseProvider = new DesiredHandPoseProvider(fullRobotModel,
                                                     walkingControllerParameters.getDesiredHandPosesWithRespectToChestFrame(), objectCommunicator);
+      AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator = new AutomaticManipulationAbortCommunicator(objectCommunicator);
 
       HandComplianceControlParametersProvider handComplianceControlParametersProvider = new HandComplianceControlParametersProvider();
 
@@ -161,6 +164,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       objectCommunicator.attachListener(LookAtPacket.class, headOrientationProvider.getLookAtPacketConsumer());
       objectCommunicator.attachListener(StopMotionPacket.class, handPauseCommandConsumer);
       objectCommunicator.attachListener(FootPosePacket.class, footPoseProvider);
+      objectCommunicator.attachListener(AutomaticManipulationAbortPacket.class, automaticManipulationAbortCommunicator);
 
       objectCommunicator.attachListener(ChestOrientationPacket.class, chestOrientationProvider);
       objectCommunicator.attachListener(WholeBodyTrajectoryPacket.class, chestOrientationProvider.getWholeBodyTrajectoryPacketConsumer());
@@ -198,7 +202,7 @@ public class DataProducerVariousWalkingProviderFactory implements VariousWalking
       VariousWalkingProviders variousWalkingProviders = new VariousWalkingProviders(footstepPathCoordinator, handstepProvider,
                                                            mapFromFootstepsToTrajectoryParameters, headOrientationProvider, desiredComHeightProvider,
                                                            pelvisPoseProvider, handPoseProvider, handComplianceControlParametersProvider, desiredSteeringWheelProvider, handLoadBearingProvider,
-                                                           chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
+                                                           automaticManipulationAbortCommunicator, chestOrientationProvider, footPoseProvider, footLoadBearingProvider, highLevelStateProvider, thighLoadBearingProvider,
                                                            pelvisLoadBearingProvider, controlStatusProducer, capturabilityBasedStatusProducer, handPoseStatusProducer,
                                                            objectWeightProvider, desiredJointsPositionProvider, singleJointPositionProvider, abortWalkingProvider,
                                                            multiJointPositionProvider);
