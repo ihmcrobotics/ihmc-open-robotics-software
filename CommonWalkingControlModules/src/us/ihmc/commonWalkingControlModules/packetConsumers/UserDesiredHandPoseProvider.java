@@ -109,6 +109,12 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
    }
 
    @Override
+   public void clear()
+   {
+      userHandPoseTakeEm.set(false);
+   }
+
+   @Override
    public boolean checkForNewPose(RobotSide robotSide)
    {
       if (userHandPoseSide.getEnumValue() != robotSide)

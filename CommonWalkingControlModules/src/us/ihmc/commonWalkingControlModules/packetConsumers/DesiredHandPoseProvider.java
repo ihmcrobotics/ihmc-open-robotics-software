@@ -263,6 +263,18 @@ public class DesiredHandPoseProvider implements PacketConsumer<HandPosePacket>, 
    }
 
    @Override
+   public void clear()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handPosePackets.get(robotSide).set(null);
+         handPoseListPackets.get(robotSide).set(null);
+         handRotateAboutAxisPackets.get(robotSide).set(null);
+         armJointTrajectoryPackets.get(robotSide).set(null);
+      }
+   }
+
+   @Override
    public boolean checkForNewPose(RobotSide robotSide)
    {
       return handPosePackets.get(robotSide).get() != null;

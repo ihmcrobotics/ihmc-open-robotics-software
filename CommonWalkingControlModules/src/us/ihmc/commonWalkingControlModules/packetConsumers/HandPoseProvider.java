@@ -22,6 +22,8 @@ public interface HandPoseProvider
 
    public abstract double getTrajectoryTime();
    
+   public abstract void clear();
+   
    public abstract boolean checkForNewPose(RobotSide robotSide);
 
    public abstract boolean checkForNewPoseList(RobotSide robotSide);
