@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Va
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CapturePointPlannerAdapter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumControlModuleBridge.MomentumControlModuleType;
+import us.ihmc.commonWalkingControlModules.packetConsumers.AutomaticManipulationAbortCommunicator;
 import us.ihmc.commonWalkingControlModules.packetConsumers.DesiredFootStateProvider;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.FootSwitchInterface;
@@ -241,6 +242,14 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
    private final BooleanYoVariable enablePushRecoveryOnFailure = new BooleanYoVariable("enablePushRecoveryOnFailure", registry);
 
+   private final AutomaticManipulationAbortCommunicator automaticManipulationAbortCommunicator;
+   private final BooleanYoVariable isAutomaticManipulationAbortEnabled = new BooleanYoVariable("isAutomaticManipulationAbortEnabled", registry);
+   private final BooleanYoVariable hasManipulationBeenAborted = new BooleanYoVariable("hasManipulationBeenAborted", registry);
+   private final DoubleYoVariable icpErrorThresholdToAbortManipulation = new DoubleYoVariable("icpErrorThresholdToAbortManipulation", registry);
+   private final DoubleYoVariable minimumDurationBetweenTwoManipulationAborts = new DoubleYoVariable("minimumDurationBetweenTwoManipulationAborts", registry);
+   private final DoubleYoVariable timeOfLastManipulationAbortRequest = new DoubleYoVariable("timeOfLastManipulationAbortRequest", registry);
+   private final DoubleYoVariable manipulationIgnoreInputsDurationAfterAbort = new DoubleYoVariable("manipulationIgnoreInputsDurationAfterAbort", registry);
+
    public WalkingHighLevelHumanoidController(VariousWalkingProviders variousWalkingProviders, VariousWalkingManagers variousWalkingManagers,
          CoMHeightTrajectoryGenerator centerOfMassHeightTrajectoryGenerator, TransferTimeCalculationProvider transferTimeCalculationProvider,
          SwingTimeCalculationProvider swingTimeCalculationProvider, WalkingControllerParameters walkingControllerParameters,
@@ -265,6 +274,12 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
       doPreparePelvisForLocomotion.set(true);
+
+      automaticManipulationAbortCommunicator = variousWalkingProviders.getAutomaticManipulationAbortCommunicator();
+      isAutomaticManipulationAbortEnabled.set(walkingControllerParameters.allowAutomaticManipulationAbort());
+      icpErrorThresholdToAbortManipulation.set(0.04);
+      minimumDurationBetweenTwoManipulationAborts.set(5.0);
+      manipulationIgnoreInputsDurationAfterAbort.set(2.0);
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
 
@@ -696,6 +711,48 @@ public class WalkingHighLevelHumanoidController extends AbstractHighLevelHumanoi
          {
             capturePoint.getFrameTuple2dIncludingFrame(capturePoint2d);
             pushRecoveryModule.updateForDoubleSupport(desiredICPLocal, capturePoint2d, icpAndMomentumBasedController.getOmega0());
+         }
+
+         // Do it only when standing
+         if (transferToSide == null)
+            handleAutomaticManipulationAbortOnICPError();
+      }
+
+      private void handleAutomaticManipulationAbortOnICPError()
+      {
+         if (manipulationControlModule == null)
+         {
+            return;
+         }
+
+         if (automaticManipulationAbortCommunicator != null && automaticManipulationAbortCommunicator.checkForNewInformation())
+         {
+            isAutomaticManipulationAbortEnabled.set(automaticManipulationAbortCommunicator.isAutomaticManipulationAbortRequested());
+         }
+
+         if (!isAutomaticManipulationAbortEnabled.getBooleanValue())
+         {
+            return;
+         }
+
+         if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < minimumDurationBetweenTwoManipulationAborts.getDoubleValue())
+            return;
+
+         if (capturePoint2d.distance(desiredICPLocal) > icpErrorThresholdToAbortManipulation.getDoubleValue())
+         {
+            hasManipulationBeenAborted.set(true);
+            manipulationControlModule.freeze();
+            manipulationControlModule.ignoreInputsForGivenDuration(manipulationIgnoreInputsDurationAfterAbort.getDoubleValue());
+            timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
+
+            if (automaticManipulationAbortCommunicator != null)
+            {
+               automaticManipulationAbortCommunicator.reportManipulationAborted();
+            }
+         }
+         else
+         {
+            hasManipulationBeenAborted.set(false);
          }
       }
 
