@@ -81,6 +81,8 @@ public class HandControlModule
    // JPratt. February 27, 2015: Added this since new Atlas was having trouble with network stuff.
    // It was sending 14,000 variables. This and others reduces it a bit when set to false.
    private static final boolean REGISTER_YOVARIABLES = true;
+
+   private static final boolean DEBUG = false;
    
    private static final boolean USE_VELOCITYCONSTRAINED_INSTEADOF_STRAIGHTLINE = false;
 
@@ -112,6 +114,7 @@ public class HandControlModule
    private final MultipleWaypointsOrientationTrajectoryGenerator waypointOrientationTrajectoryGenerator;
    private final WrapperForPositionAndOrientationTrajectoryGenerators wayPointPositionAndOrientationTrajectoryGenerator;
 
+   private final LinkedHashMap<OneDoFJoint, DoubleYoVariable> qDesireds = new LinkedHashMap<>();
 
    private final BooleanYoVariable isExecutingHandStep;
 
@@ -206,6 +209,12 @@ public class HandControlModule
       twistCalculator = momentumBasedController.getTwistCalculator();
 
       oneDoFJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(chest, hand), OneDoFJoint.class);
+
+      if (DEBUG)
+      {
+         for (OneDoFJoint joint : oneDoFJoints)
+            qDesireds.put(joint, new DoubleYoVariable("qDesired_" + joint.getName(), registry));
+      }
 
       requestedState = new EnumYoVariable<HandControlState>(name + "RequestedState", "", registry, HandControlState.class, true);
       requestedState.set(null);
@@ -391,6 +400,12 @@ public class HandControlModule
       stateMachine.doAction();
 
       checkAndSendHandPoseStatusIsCompleted();
+
+      if (DEBUG)
+      {
+         for (OneDoFJoint joint : oneDoFJoints)
+            qDesireds.get(joint).set(joint.getqDesired());
+      }
    }
 
    private boolean checkIfAtLeastOneJointIsDisabled()
