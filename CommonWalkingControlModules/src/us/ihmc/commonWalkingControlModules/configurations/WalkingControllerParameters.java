@@ -73,6 +73,8 @@ public interface WalkingControllerParameters extends HeadOrientationControllerPa
 
    public abstract boolean allowDisturbanceRecoveryBySpeedingUpSwing();
 
+   public abstract boolean allowAutomaticManipulationAbort();
+
    public abstract double getMinimumSwingTimeForDisturbanceRecovery();
 
    public abstract double getICPErrorThresholdToSpeedUpSwing();
