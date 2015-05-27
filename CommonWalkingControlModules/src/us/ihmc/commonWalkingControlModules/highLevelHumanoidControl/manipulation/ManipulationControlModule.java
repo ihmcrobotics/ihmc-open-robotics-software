@@ -68,11 +68,18 @@ public class ManipulationControlModule
 
    private final BooleanYoVariable goToLoadBearingWhenHandlingHandstep;
 
+   private final BooleanYoVariable isIgnoringInputs = new BooleanYoVariable("isManipulationIgnoringInputs", registry);
+   private final DoubleYoVariable startTimeForIgnoringInputs = new DoubleYoVariable("startTimeForIgnoringManipulationInputs", registry);
+   private final DoubleYoVariable durationForIgnoringInputs = new DoubleYoVariable("durationForIgnoringManipulationInputs", registry);
+
+   private final DoubleYoVariable yoTime;
+
    public ManipulationControlModule(VariousWalkingProviders variousWalkingProviders, ArmControllerParameters armControllerParameters,
          MomentumBasedController momentumBasedController, YoVariableRegistry parentRegistry)
    {
       fullRobotModel = momentumBasedController.getFullRobotModel();
       this.armControlParameters = armControllerParameters;
+      this.yoTime = momentumBasedController.getYoTime();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
@@ -145,6 +152,16 @@ public class ManipulationControlModule
       }
 
       updateGraphics();
+
+      if (yoTime.getDoubleValue() - startTimeForIgnoringInputs.getDoubleValue() < durationForIgnoringInputs.getDoubleValue())
+      {
+         isIgnoringInputs.set(true);
+         handPoseProvider.clear();
+      }
+      else
+      {
+         isIgnoringInputs.set(false);
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -333,6 +350,18 @@ public class ManipulationControlModule
    public void prepareForLocomotion()
    {
       holdCurrentArmConfiguration();
+   }
+
+   public void freeze()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         handControlModules.get(robotSide).holdPositionInJointSpace();
+   }
+
+   public void ignoreInputsForGivenDuration(double duration)
+   {
+      startTimeForIgnoringInputs.set(yoTime.getDoubleValue());
+      durationForIgnoringInputs.set(duration);
    }
 
    public void holdCurrentArmConfiguration()
