@@ -992,6 +992,12 @@ public class HandControlModule
       moveUsingQuinticSplines(jointCurrentPositionMap, 0.0, false);
    }
 
+   public void resetJointIntegrators()
+   {
+      for (OneDoFJoint joint : oneDoFJoints)
+         joint.resetIntegrator();
+   }
+
    public boolean isControllingPoseInWorld()
    {
       State<HandControlState> currentState = stateMachine.getCurrentState();

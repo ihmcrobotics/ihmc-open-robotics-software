@@ -355,7 +355,11 @@ public class ManipulationControlModule
    public void freeze()
    {
       for (RobotSide robotSide : RobotSide.values)
-         handControlModules.get(robotSide).holdPositionInJointSpace();
+      {
+         HandControlModule handControlModule = handControlModules.get(robotSide);
+         handControlModule.holdPositionInJointSpace();
+         handControlModule.resetJointIntegrators();
+      }
    }
 
    public void ignoreInputsForGivenDuration(double duration)
