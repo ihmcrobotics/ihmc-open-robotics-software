@@ -180,6 +180,12 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
+   public boolean allowAutomaticManipulationAbort()
+   {
+      return false;
+   }
+
+   @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
       return Double.POSITIVE_INFINITY;
