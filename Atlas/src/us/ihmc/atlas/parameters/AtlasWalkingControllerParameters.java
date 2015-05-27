@@ -172,6 +172,12 @@ public class AtlasWalkingControllerParameters implements WalkingControllerParame
    }
 
    @Override
+   public boolean allowAutomaticManipulationAbort()
+   {
+      return true;
+   }
+
+   @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
       return 0.05;
