@@ -134,6 +134,12 @@ public class BonoWalkingControllerParameters implements WalkingControllerParamet
    }
 
    @Override
+   public boolean allowAutomaticManipulationAbort()
+   {
+      return false;
+   }
+
+   @Override
    public double getICPErrorThresholdToSpeedUpSwing()
    {
       return Double.POSITIVE_INFINITY;
