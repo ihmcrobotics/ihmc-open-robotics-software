@@ -152,11 +152,11 @@ public class GUICaptureViewer
                double scaleWidth = ((double) labelSize.getWidth()) / ((double) img.getWidth());
                double scaleHeight = ((double) labelSize.getHeight()) / ((double) img.getHeight());
 
-               scaleWidth = Math.min(scaleWidth, scaleHeight);
+               scaleWidth = Math.max(scaleWidth, scaleHeight);
                scaleHeight = scaleWidth;
                int newWidth = ((int) (scaleWidth * (double) img.getWidth()) >> 1) << 1;
                int newHeight = ((int) (scaleHeight * (double) img.getHeight()) >> 1) << 1;
-               img.scale(newWidth, newHeight, FilterModeEnum.kFilterLinear);
+               img.scale(newWidth, newHeight, FilterModeEnum.kFilterBilinear);
                image = converter.toBufferedImage(img, image);
                ImageIcon icon = new ImageIcon(image);
                label.setIcon(icon);
