@@ -1,10 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.vecmath.Vector3d;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
 import us.ihmc.utilities.humanoidRobot.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.utilities.humanoidRobot.footstep.Footstep;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
@@ -56,6 +61,9 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable minStepHeightForToeOff = new DoubleYoVariable("minStepHeightForToeOff", registry);
    private final DoubleYoVariable minStepLengthForToeTouchdown = new DoubleYoVariable("minStepLengthForToeTouchdown", registry);
 
+   private final SideDependentList<YoPlaneContactState> footContactStates;
+   private final List<FramePoint> contactStatePoints = new ArrayList<>();
+
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final SideDependentList<FrameConvexPolygon2d> footDefaultPolygons;
    private final FrameConvexPolygon2d leadingFootSupportPolygon = new FrameConvexPolygon2d();
@@ -92,7 +100,7 @@ public class WalkOnTheEdgesManager
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(FullRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
+   public WalkOnTheEdgesManager(MomentumBasedController momentumBasedController, WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
          SideDependentList<FootControlModule> footEndEffectorControlModules, YoVariableRegistry parentRegistry)
    {
       this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
@@ -103,7 +111,7 @@ public class WalkOnTheEdgesManager
 
       this.walkingControllerParameters = walkingControllerParameters;
 
-      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModel = momentumBasedController.getFullRobotModel();
       this.feet = feet;
       this.footEndEffectorControlModules = footEndEffectorControlModules;
       desiredFootstep = null;
@@ -128,6 +136,12 @@ public class WalkOnTheEdgesManager
          footDefaultPolygons.put(robotSide, new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d()));
       }
 
+      footContactStates = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footContactStates.put(robotSide, momentumBasedController.getContactState(feet.get(robotSide)));
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -150,8 +164,18 @@ public class WalkOnTheEdgesManager
          isDesiredECMPOKForToeOff.set(true);
       }
 
-      leadingFootSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(trailingLeg.getOppositeSide()));
-      leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+      RobotSide leadingLeg = trailingLeg.getOppositeSide();
+      if (footContactStates.get(leadingLeg).getTotalNumberOfContactPoints() > 0)
+      {
+         footContactStates.get(leadingLeg).getContactFramePointsInContact(contactStatePoints);
+         leadingFootSupportPolygon.setIncludingFrameByProjectionOntoXYPlaneAndUpdate(worldFrame, contactStatePoints);
+      }
+      else
+      {
+         leadingFootSupportPolygon.setIncludingFrameAndUpdate(footDefaultPolygons.get(leadingLeg));
+         leadingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+      }
+
       isDesiredICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(desiredICP));
       isCurrentICPOKForToeOff.set(leadingFootSupportPolygon.isPointInside(currentICP));
 
