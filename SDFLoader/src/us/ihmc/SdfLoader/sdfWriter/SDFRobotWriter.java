@@ -29,6 +29,8 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU.IMUNoise.NoiseParameters;
 import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DRotateInstruction;
+import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -240,42 +242,81 @@ public abstract class SDFRobotWriter
 
    private List<SDFVisual> createSDFVisual(Link scsLink)
    {
+      if (scsLink.getName().contains("body"))
+         System.out.println();
+      
       List<SDFVisual> sdfVisuals = new ArrayList<>();
 
       ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = scsLink.getLinkGraphics().getGraphics3DInstructions();
 
+      RigidBodyTransform parentJointTransformToWorld = new RigidBodyTransform();
       Joint parentJoint = scsLink.getParentJoint();
-
-      for (Graphics3DPrimitiveInstruction instruction : graphics3dInstructions)
-      {
-         sdfVisuals.add(createSDFVisual(parentJoint, instruction));
-      }
+      
+      if (scsRobot.getRootJoints().contains(parentJoint))
+         parentJoint.getTransformToWorld(parentJointTransformToWorld);
+      
+      SDFVisual sdfVisual = createSDFVisual(parentJointTransformToWorld, graphics3dInstructions);
+      
+      if (sdfVisual != null)
+         sdfVisuals.add(sdfVisual);
 
       return sdfVisuals;
    }
 
-   private SDFVisual createSDFVisual(Joint parentJoint, Graphics3DPrimitiveInstruction instruction)
+   private SDFVisual createSDFVisual(RigidBodyTransform parentJointTransformToWorld, ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions)
    {
+      SDFVisual sdfVisual = new SDFVisual();
+      RigidBodyTransform visualPose = new RigidBodyTransform();
+
+//      for (Graphics3DPrimitiveInstruction instruction : graphics3dInstructions)
+//      {
+      for (int i = graphics3dInstructions.size() - 1; i >= 0; i--)
+      {
+         Graphics3DPrimitiveInstruction instruction = graphics3dInstructions.get(i);
+         if (instruction instanceof Graphics3DRotateInstruction)
+         {
+            Graphics3DRotateInstruction graphics3dRotateInstruction = (Graphics3DRotateInstruction) instruction;
+            RigidBodyTransform temp = new RigidBodyTransform();
+            temp.setRotation(graphics3dRotateInstruction.getRotationMatrix());
+//            temp.invert();
+            visualPose.multiply(temp, visualPose);
+         }
+         else if (instruction instanceof Graphics3DTranslateInstruction)
+         {
+            Graphics3DTranslateInstruction graphics3dTranslateInstruction = (Graphics3DTranslateInstruction) instruction;
+            RigidBodyTransform temp = new RigidBodyTransform();
+            temp.setTranslation(graphics3dTranslateInstruction.getTranslation());
+            visualPose.multiply(temp, visualPose);
+         }
+      }
+      
+      visualPose.multiply(parentJointTransformToWorld, visualPose);
+      sdfVisual.setPose(getPoseFromTransform3D(visualPose));
+      
       SDFGeometry sdfGeometry = new SDFGeometry();
 
-      if (instruction instanceof Graphics3DAddModelFileInstruction)
+      for (Graphics3DPrimitiveInstruction instruction : graphics3dInstructions)
       {
-         Graphics3DAddModelFileInstruction modelFileInstruction = (Graphics3DAddModelFileInstruction) instruction;
+         if (instruction instanceof Graphics3DRotateInstruction || instruction instanceof Graphics3DTranslateInstruction)
+            continue;
+         if (instruction instanceof Graphics3DAddModelFileInstruction)
+         {
+            Graphics3DAddModelFileInstruction modelFileInstruction = (Graphics3DAddModelFileInstruction) instruction;
 
-         if (modelFileInstruction.getResourceDirectories().size() > 0)
-            System.err.println("Doesn't handle resource directories: " + instruction.getClass().getSimpleName());
+            if (modelFileInstruction.getResourceDirectories().size() > 0)
+               System.err.println("Doesn't handle resource directories: " + instruction.getClass().getSimpleName());
 
-         Mesh mesh = new Mesh();
-         String uri = modelFileInstruction.getFileName();
-         mesh.setUri(uri);
-         sdfGeometry.setMesh(mesh);
+            Mesh mesh = new Mesh();
+            String uri = modelFileInstruction.getFileName();
+            mesh.setUri(uri);
+            sdfGeometry.setMesh(mesh);
+         }
+         else
+         {
+            System.err.println("Doesn't handle: " + instruction.getClass().getSimpleName());
+         }
       }
-      else
-      {
-         System.err.println("Doesn't handle: " + instruction.getClass().getSimpleName());
-      }
 
-      SDFVisual sdfVisual = new SDFVisual();
       sdfVisual.setGeometry(sdfGeometry);
 
       return sdfVisual;
@@ -325,18 +366,19 @@ public abstract class SDFRobotWriter
       Matrix3d rotation = new Matrix3d();
       scsJointOffset.get(rotation);
       Vector3d eulerAngles = new Vector3d();
-      eulerAngles.y = Math.asin(rotation.m02);
-      double cosY = Math.cos(eulerAngles.y);
-      if (Math.abs(cosY) > 1e-5)
-      {
-         eulerAngles.x = -Math.atan2(rotation.m12 / cosY, rotation.m22 / cosY);
-         eulerAngles.z = -Math.atan2(rotation.m01 / cosY, rotation.m00 / cosY);
-      }
-      else
-      {
-         eulerAngles.x = Math.atan2(rotation.m21, rotation.m11);
-         eulerAngles.z = 0.0;
-      }
+      scsJointOffset.getEulerXYZ(eulerAngles);
+//      eulerAngles.y = Math.asin(rotation.m02);
+//      double cosY = Math.cos(eulerAngles.y);
+//      if (Math.abs(cosY) > 1e-5)
+//      {
+//         eulerAngles.x = -Math.atan2(rotation.m12 / cosY, rotation.m22 / cosY);
+//         eulerAngles.z = -Math.atan2(rotation.m01 / cosY, rotation.m00 / cosY);
+//      }
+//      else
+//      {
+//         eulerAngles.x = Math.atan2(rotation.m21, rotation.m11);
+//         eulerAngles.z = 0.0;
+//      }
       String pose = String.valueOf(translation.x) + " " + String.valueOf(translation.y) + " " + String.valueOf(translation.z) + " "
             + String.valueOf(eulerAngles.x) + " " + String.valueOf(eulerAngles.y) + " " + String.valueOf(eulerAngles.z);
       return pose;
