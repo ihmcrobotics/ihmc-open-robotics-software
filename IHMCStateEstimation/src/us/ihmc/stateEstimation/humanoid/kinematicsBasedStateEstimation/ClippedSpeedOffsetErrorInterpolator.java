@@ -49,10 +49,10 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable dt;
 
    ////////////////////////////////////////////
-   private final FramePose referenceFrameToBeCorrectedPose_Translation = new FramePose(worldFrame);
-   private final PoseReferenceFrame referenceFrameToBeCorrectedPoseReferenceFrame_Translation = new PoseReferenceFrame("referenceFrameToBeCorrectedPoseReferenceFrame_Translation", referenceFrameToBeCorrectedPose_Translation);
-   private final FramePose referenceFrameToBeCorrectedPose_Rotation = new FramePose(worldFrame);
-   private final PoseReferenceFrame referenceFrameToBeCorrectedPoseReferenceFrame_Rotation = new PoseReferenceFrame("referenceFrameToBeCorrectedPoseReferenceFrame_Rotation", referenceFrameToBeCorrectedPose_Rotation);
+   private final FramePose stateEstimatorPose_Translation = new FramePose(worldFrame);
+   private final PoseReferenceFrame stateEstimatorReferenceFrame_Translation = new PoseReferenceFrame("stateEstimatorReferenceFrame_Translation", stateEstimatorPose_Translation);
+   private final FramePose stateEstimatorPose_Rotation = new FramePose(worldFrame);
+   private final PoseReferenceFrame stateEstimatorReferenceFrame_Rotation = new PoseReferenceFrame("stateEstimatorReferenceFrame_Rotation", stateEstimatorPose_Rotation);
 
    private final RigidBodyTransform updatedStartOffsetTransform = new RigidBodyTransform();
    private final FramePose startOffsetErrorPose = new FramePose(worldFrame);
@@ -97,9 +97,9 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable temporaryTranslationAlphaClipped;
    private final DoubleYoVariable temporaryRotationAlphaClipped;
 
-   private final ReferenceFrame referenceFrameToBeCorrected;
-   private final RigidBodyTransform referenceFrameToBeCorrectedTransform_Translation = new RigidBodyTransform();
-   private final RigidBodyTransform referenceFrameToBeCorrectedTransform_Rotation = new RigidBodyTransform();
+   private final ReferenceFrame stateEstimatorReferenceFrame;
+   private final RigidBodyTransform stateEstimatorTransform_Translation = new RigidBodyTransform();
+   private final RigidBodyTransform stateEstimatorTransform_Rotation = new RigidBodyTransform();
 
    
    //Deadzone translation variables
@@ -123,7 +123,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final FrameOrientation updatedGoalOffsetWithDeadZone_Rotation = new FrameOrientation(worldFrame);
    private final Quat4d updatedGoalOffsetWithDeadZone_Rotation_quat = new Quat4d();
    
-   double[] referenceFrameToBeCorrectedYawPitchRoll = new double[3];
+   double[] stateEstimatorYawPitchRoll = new double[3];
    double[] temporaryYawPitchRoll = new double[3];
    private final DoubleYoVariable startYaw;
    private final DoubleYoVariable goalYaw;
@@ -174,7 +174,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       this.dt = new DoubleYoVariable("dt", registry);
       this.dt.set(estimator_dt);
 
-      this.referenceFrameToBeCorrected = referenceFrame;
+      this.stateEstimatorReferenceFrame = referenceFrame;
 
       isRotationCorrectionEnabled = new BooleanYoVariable("isRotationCorrectionEnabled", registry);
       isRotationCorrectionEnabled.set(correctRotation);
@@ -312,29 +312,29 @@ public class ClippedSpeedOffsetErrorInterpolator
       yoGoalOffsetErrorPose_InWorldFrame.set(goalOffsetErrorPose);
       ///////////
       // update the state estimator reference frames 
-      referenceFrameToBeCorrected.update();
-      referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Translation, worldFrame);
-      referenceFrameToBeCorrectedTransform_Translation.setRotationToIdentity();
-      referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Rotation, worldFrame);
-      referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
+      stateEstimatorReferenceFrame.update();
+      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
+      stateEstimatorTransform_Translation.setRotationToIdentity();
+      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
+      stateEstimatorTransform_Rotation.zeroTranslation();
 
-      referenceFrameToBeCorrectedPose_Translation.setPose(referenceFrameToBeCorrectedTransform_Translation);
-      referenceFrameToBeCorrectedPoseReferenceFrame_Translation.setPoseAndUpdate(referenceFrameToBeCorrectedPose_Translation);
+      stateEstimatorPose_Translation.setPose(stateEstimatorTransform_Translation);
+      stateEstimatorReferenceFrame_Translation.setPoseAndUpdate(stateEstimatorPose_Translation);
 
-      referenceFrameToBeCorrectedPose_Rotation.setPose(referenceFrameToBeCorrectedTransform_Rotation);
-      referenceFrameToBeCorrectedPoseReferenceFrame_Rotation.setPoseAndUpdate(referenceFrameToBeCorrectedPose_Rotation);
+      stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
+      stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
 
       /////////////////////
-      startOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Translation);
+      startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
       startOffsetErrorPose.getPosition(updatedStartOffset_Translation);
-      startOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Rotation);
+      startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
       startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation_quat);
       startOffsetErrorPose.changeFrame(worldFrame);
       startOffsetErrorPose.getOrientationIncludingFrame(updatedStartOffset_Rotation);
 
-      goalOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Translation);
+      goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
       goalOffsetErrorPose.getPosition(updatedGoalOffset_Translation);
-      goalOffsetErrorPose.changeFrame(referenceFrameToBeCorrectedPoseReferenceFrame_Rotation);
+      goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
       goalOffsetErrorPose.getOrientation(updatedGoalOffset_Rotation_quat);
       goalOffsetErrorPose.changeFrame(worldFrame);
       goalOffsetErrorPose.getOrientationIncludingFrame(updatedGoalOffset_Rotation);
@@ -433,28 +433,28 @@ public class ClippedSpeedOffsetErrorInterpolator
       
       previousClippedAlphaFilterValue.set(cLippedAlphaFilterValue.getDoubleValue());
 
-      referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Translation, worldFrame);
-      referenceFrameToBeCorrectedTransform_Translation.setRotationToIdentity();
-      referenceFrameToBeCorrected.getTransformToDesiredFrame(referenceFrameToBeCorrectedTransform_Rotation, worldFrame);
-      referenceFrameToBeCorrectedTransform_Rotation.zeroTranslation();
+      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
+      stateEstimatorTransform_Translation.setRotationToIdentity();
+      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
+      stateEstimatorTransform_Rotation.zeroTranslation();
 
       //update the start and goal translations and rotations
       //localization translation times interpolated translation times localization rotation times interpolated rotation
       //the interpolated translation and rotation are those stored when a localization packet has been received
       updatedStartOffsetTransform.setIdentity();
       updatedStartOffsetTransform.multiply(startOffsetTransform_Translation);
-      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
+      updatedStartOffsetTransform.multiply(stateEstimatorTransform_Translation);
       updatedStartOffsetTransform.multiply(startOffsetTransform_Rotation);
-      updatedStartOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
+      updatedStartOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
       updatedStartOffsetTransform.getTranslation(updatedStartOffset_Translation);
       updatedStartOffsetTransform.getRotation(updatedStartOffset_Rotation_quat);
 
       updatedGoalOffsetTransform.setIdentity();
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Translation);
-      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Translation);
+      updatedGoalOffsetTransform.multiply(stateEstimatorTransform_Translation);
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Rotation);
-      updatedGoalOffsetTransform.multiply(referenceFrameToBeCorrectedTransform_Rotation);
+      updatedGoalOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
       updatedGoalOffsetTransform.getTranslation(updatedGoalOffset_Translation);
       updatedGoalOffsetTransform.getRotation(updatedGoalOffset_Rotation_quat);
@@ -464,7 +464,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
-         RotationFunctions.getYawPitchRoll(referenceFrameToBeCorrectedYawPitchRoll, referenceFrameToBeCorrectedTransform_Rotation);
+         RotationFunctions.getYawPitchRoll(stateEstimatorYawPitchRoll, stateEstimatorTransform_Rotation);
          
          RotationFunctions.setYawPitchRollBasedOnQuaternion(temporaryYawPitchRoll , updatedStartOffset_Rotation_quat);
          startYaw.set(temporaryYawPitchRoll[0]);
@@ -473,11 +473,11 @@ public class ClippedSpeedOffsetErrorInterpolator
          goalYaw.set(temporaryYawPitchRoll[0]);
          
          interpolatedYaw.set((1 - cLippedAlphaFilterValue.getDoubleValue()) * startYaw.getDoubleValue() + cLippedAlphaFilterValue.getDoubleValue() * goalYaw.getDoubleValue());
-         RotationFunctions.setQuaternionBasedOnYawPitchRoll(interpolatedRotation, interpolatedYaw.getDoubleValue(), referenceFrameToBeCorrectedYawPitchRoll[1], referenceFrameToBeCorrectedYawPitchRoll[2]);
+         RotationFunctions.setQuaternionBasedOnYawPitchRoll(interpolatedRotation, interpolatedYaw.getDoubleValue(), stateEstimatorYawPitchRoll[1], stateEstimatorYawPitchRoll[2]);
       }
       else
       {
-         referenceFrameToBeCorrectedTransform_Rotation.getRotation(interpolatedRotation);
+         stateEstimatorTransform_Rotation.getRotation(interpolatedRotation);
       }
 
       offsetPoseToPack.setPose(interpolatedTranslation, interpolatedRotation);
