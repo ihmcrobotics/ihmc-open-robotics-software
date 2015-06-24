@@ -319,7 +319,8 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       initializeAlphaFilter(alphaFilterPosition);
       
-      updateMaxAlphaVariationSpeed();
+      updateMaxTranslationAlphaVariationSpeed();
+      updateMaxRotationAlphaVariationSpeed();
    }
 
    private void initializeAlphaFilter(double alphaFilterPosition)
@@ -392,21 +393,24 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
    }
 
-
-   private void updateMaxAlphaVariationSpeed()
+   private void updateMaxTranslationAlphaVariationSpeed()
    {
+      //Translation
       distanceToTravelVector.sub(updatedGoalOffsetWithDeadzone_Translation, updatedStartOffset_Translation);
-
       distanceToTravel.set(distanceToTravelVector.length());
       translationalSpeedForGivenDistanceToTravel.set(distanceToTravel.getDoubleValue() / dt.getDoubleValue());
-
-      rotationToTravel.setOrientationFromOneToTwo(updatedStartOffset_Rotation, updatedGoalOffsetWithDeadZone_Rotation);
-      rotationToTravel.getAxisAngle(axisAngletoTravel);
-
-      angleToTravel.set(axisAngletoTravel.getAngle());
-      rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());
    }
 
+   private void updateMaxRotationAlphaVariationSpeed()
+   {
+      //Rotation
+      rotationToTravel.setOrientationFromOneToTwo(updatedStartOffset_Rotation, updatedGoalOffsetWithDeadZone_Rotation);
+      rotationToTravel.getAxisAngle(axisAngletoTravel);
+      angleToTravel.set(axisAngletoTravel.getAngle());
+      rotationalSpeedForGivenAngleToTravel.set(angleToTravel.getDoubleValue() / dt.getDoubleValue());
+
+   }
+   
    public void interpolateError(FramePose offsetPoseToPack)
    {
       if (!hasBeenCalled.getBooleanValue())
