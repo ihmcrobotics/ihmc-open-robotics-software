@@ -310,38 +310,24 @@ public class ClippedSpeedOffsetErrorInterpolator
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
       yoGoalOffsetErrorPose_InWorldFrame.set(goalOffsetErrorPose);
-      ///////////
-      // update the state estimator reference frames 
+      
+      
       stateEstimatorReferenceFrame.update();
+      
+      //Translation
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
       stateEstimatorTransform_Translation.setRotationToIdentity();
-      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
-      stateEstimatorTransform_Rotation.zeroTranslation();
-
       stateEstimatorPose_Translation.setPose(stateEstimatorTransform_Translation);
       stateEstimatorReferenceFrame_Translation.setPoseAndUpdate(stateEstimatorPose_Translation);
-
-      stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
-      stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
-
-      /////////////////////
+      
       startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
       startOffsetErrorPose.getPosition(updatedStartOffset_Translation);
-      startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
-      startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation_quat);
-      startOffsetErrorPose.changeFrame(worldFrame);
-      startOffsetErrorPose.getOrientationIncludingFrame(updatedStartOffset_Rotation);
-
+      
       goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Translation);
       goalOffsetErrorPose.getPosition(updatedGoalOffset_Translation);
-      goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
-      goalOffsetErrorPose.getOrientation(updatedGoalOffset_Rotation_quat);
-      goalOffsetErrorPose.changeFrame(worldFrame);
-      goalOffsetErrorPose.getOrientationIncludingFrame(updatedGoalOffset_Rotation);
-
+      
       startOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedStartOffset_Translation);
-      startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
-
+      
       offsetBetweenStartAndGoalVector_Translation.sub(updatedGoalOffset_Translation, updatedStartOffset_Translation);
       goalTranslationRawX.set(offsetBetweenStartAndGoalVector_Translation.getX());
       goalTranslationRawY.set(offsetBetweenStartAndGoalVector_Translation.getY());
@@ -349,11 +335,31 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalTranslationWithDeadzoneX.update();
       goalTranslationWithDeadzoneY.update();
       goalTranslationWithDeadzoneZ.update();
-
+      
       updatedGoalOffsetWithDeadzone_Translation.setX(updatedStartOffset_Translation.getX() + goalTranslationWithDeadzoneX.getDoubleValue());
       updatedGoalOffsetWithDeadzone_Translation.setY(updatedStartOffset_Translation.getY() + goalTranslationWithDeadzoneY.getDoubleValue());
       updatedGoalOffsetWithDeadzone_Translation.setZ(updatedStartOffset_Translation.getZ() + goalTranslationWithDeadzoneZ.getDoubleValue());
+      
+      goalOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedGoalOffsetWithDeadzone_Translation);
+      
+      //Rotation    
+      stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
+      stateEstimatorTransform_Rotation.zeroTranslation();
+      stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
+      stateEstimatorReferenceFrame_Rotation.setPoseAndUpdate(stateEstimatorPose_Rotation);
 
+      startOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
+      startOffsetErrorPose.getOrientation(updatedStartOffset_Rotation_quat);
+      startOffsetErrorPose.changeFrame(worldFrame);
+      startOffsetErrorPose.getOrientationIncludingFrame(updatedStartOffset_Rotation);
+      
+      goalOffsetErrorPose.changeFrame(stateEstimatorReferenceFrame_Rotation);
+      goalOffsetErrorPose.getOrientation(updatedGoalOffset_Rotation_quat);
+      goalOffsetErrorPose.changeFrame(worldFrame);
+      goalOffsetErrorPose.getOrientationIncludingFrame(updatedGoalOffset_Rotation);
+      
+      startOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedStartOffset_Rotation_quat);
+      
       offsetBetweenStartAndGoal_Rotation.setOrientationFromOneToTwo(updatedGoalOffset_Rotation, updatedStartOffset_Rotation);
       offsetBetweenStartAndGoal_Rotation.getYawPitchRoll(temporaryYawPitchRoll);
       goalYawRaw.set(temporaryYawPitchRoll[0]);
@@ -361,8 +367,9 @@ public class ClippedSpeedOffsetErrorInterpolator
       RotationFunctions.setQuaternionBasedOnYawPitchRoll(updatedGoalOffsetWithDeadZone_Rotation_quat, goalYawWithDeadZone.getDoubleValue(), temporaryYawPitchRoll[1], temporaryYawPitchRoll[2]);
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
-      goalOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedGoalOffsetWithDeadzone_Translation);
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
+      
+      /////////////////////
 
       alphaFilter_PositionValue.set(alphaFilterPosition);
       alphaFilter.set(0.0);
