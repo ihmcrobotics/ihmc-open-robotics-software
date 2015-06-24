@@ -306,14 +306,33 @@ public class ClippedSpeedOffsetErrorInterpolator
          startOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
          goalOffsetErrorPose.setOrientation(0.0, 0.0, 0.0);
       }
-
       //scs feedback only
       yoStartOffsetErrorPose_InWorldFrame.set(startOffsetErrorPose);
       yoGoalOffsetErrorPose_InWorldFrame.set(goalOffsetErrorPose);
-      
-      
+
       stateEstimatorReferenceFrame.update();
       
+      updateStartAndGoalOffsetErrorTranslation();
+      updateStartAndGoalOffsetErrorRotation();
+      
+      /////////////////////
+
+      initializeAlphaFilter(alphaFilterPosition);
+      
+      updateMaxAlphaVariationSpeed();
+   }
+
+   private void initializeAlphaFilter(double alphaFilterPosition)
+   {
+      alphaFilter_PositionValue.set(alphaFilterPosition);
+      alphaFilter.set(0.0);
+      previousClippedAlphaFilterValue.set(0.0);
+      cLippedAlphaFilterValue.set(0.0);
+      hasBeenCalled.set(false);
+   }
+   
+   private void updateStartAndGoalOffsetErrorTranslation()
+   {
       //Translation
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Translation, worldFrame);
       stateEstimatorTransform_Translation.setRotationToIdentity();
@@ -341,8 +360,11 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedGoalOffsetWithDeadzone_Translation.setZ(updatedStartOffset_Translation.getZ() + goalTranslationWithDeadzoneZ.getDoubleValue());
       
       goalOffsetTransform_Translation.setTranslationAndIdentityRotation(updatedGoalOffsetWithDeadzone_Translation);
-      
-      //Rotation    
+   }
+
+   private void updateStartAndGoalOffsetErrorRotation()
+   {    
+      //Rotation  
       stateEstimatorReferenceFrame.getTransformToDesiredFrame(stateEstimatorTransform_Rotation, worldFrame);
       stateEstimatorTransform_Rotation.zeroTranslation();
       stateEstimatorPose_Rotation.setPose(stateEstimatorTransform_Rotation);
@@ -368,18 +390,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedGoalOffsetWithDeadZone_Rotation.set(updatedGoalOffsetWithDeadZone_Rotation_quat);
       
       goalOffsetTransform_Rotation.setRotationAndZeroTranslation(updatedGoalOffsetWithDeadZone_Rotation_quat);
-      
-      /////////////////////
-
-      alphaFilter_PositionValue.set(alphaFilterPosition);
-      alphaFilter.set(0.0);
-      previousClippedAlphaFilterValue.set(0.0);
-      cLippedAlphaFilterValue.set(0.0);
-
-      updateMaxAlphaVariationSpeed();
-
-      hasBeenCalled.set(false);
    }
+
 
    private void updateMaxAlphaVariationSpeed()
    {
