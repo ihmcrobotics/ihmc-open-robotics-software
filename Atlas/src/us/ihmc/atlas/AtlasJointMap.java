@@ -147,7 +147,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
-         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(WRIST_ROLL));
+         nameOfJointsBeforeHands.put(robtSide, armJointStrings.get(robtSide).get(SECOND_WRIST_PITCH));
       }
    }
 
