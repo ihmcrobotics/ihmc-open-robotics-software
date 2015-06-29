@@ -43,8 +43,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          timeStamp = random.nextLong();
          transform = generateRandomUpToDateTransforms(random);
-         outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(transform, timeStamp);
-         assertTrue(timeStamp == outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferNewestTimestamp());
+         outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(transform, timeStamp);
+         assertTrue(timeStamp == outdatedPoseToUpToDateReferenceFrameUpdater.getStateEstimatorTimeStampedBufferNewestTimestamp());
       }
    }
 
@@ -66,11 +66,11 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       for (int i = 0; i < 100; i++)
       {
          transform = generateRandomUpToDateTransforms(random);
-         outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(transform, timeStamp);
+         outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(transform, timeStamp);
          if (i < 20)
-            assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferOldestTimestamp() == firstTimeStamp);
+            assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.getStateEstimatorTimeStampedBufferOldestTimestamp() == firstTimeStamp);
          else
-            assertTrue((timeStamp - (numberOfUpToDateTransforms - 1)) == outdatedPoseToUpToDateReferenceFrameUpdater.getUpToDateTimeStampedBufferOldestTimestamp());
+            assertTrue((timeStamp - (numberOfUpToDateTransforms - 1)) == outdatedPoseToUpToDateReferenceFrameUpdater.getStateEstimatorTimeStampedBufferOldestTimestamp());
          timeStamp++;
       }
    }
@@ -95,7 +95,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       OutdatedPoseToUpToDateReferenceFrameUpdater outdatedPoseToUpToDateReferenceFrameUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(
             numberOfUpToDateTransforms, upToDateReferenceFrameInPresent);
       ReferenceFrame outdatedReferenceFrame_ToBeUpdated;
-      outdatedReferenceFrame_ToBeUpdated = outdatedPoseToUpToDateReferenceFrameUpdater.getOutdatedReferenceFrameToBeUpdated();
+      outdatedReferenceFrame_ToBeUpdated = outdatedPoseToUpToDateReferenceFrameUpdater.getLocalizationReferenceFrameToBeUpdated();
       
       TimeStampedTransformBuffer upToDateTimeStampedTransformPoseBuffer = new TimeStampedTransformBuffer(numberOfUpToDateTransforms);
       TimeStampedTransformBuffer outdatedTimeStampedTransformBuffer = new TimeStampedTransformBuffer(numberOfOutdatedTransforms);
@@ -106,7 +106,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          long timeStamp = (long) (i * (lastTimeStamp - firstTimeStamp) / numberOfUpToDateTransforms + firstTimeStamp);
          RigidBodyTransform upToDateTransform = generateRandomUpToDateTransforms(random);
          upToDateTimeStampedTransformPoseBuffer.put(upToDateTransform, timeStamp);
-         outdatedPoseToUpToDateReferenceFrameUpdater.putUpToDateTransformInBuffer(upToDateTransform, timeStamp);
+         outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(upToDateTransform, timeStamp);
       }
       
       //generate outdatedTransforms offsets based on the upToDateTransforms
@@ -141,8 +141,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
             {
                TimeStampedTransform3D outdatedTimeStampedTransform = new TimeStampedTransform3D();
                outdatedTimeStampedTransformBuffer.findTransform(outdatedTimeStamps[outdatedTimeStampsIndex], outdatedTimeStampedTransform);
-               assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.upToDateTimeStampedBufferIsInRange(outdatedTimeStampedTransform.getTimeStamp()));
-               outdatedPoseToUpToDateReferenceFrameUpdater.updateOutdatedTransform(outdatedTimeStampedTransform);
+               assertTrue(outdatedPoseToUpToDateReferenceFrameUpdater.stateEstimatorTimeStampedBufferIsInRange(outdatedTimeStampedTransform.getTimeStamp()));
+               outdatedPoseToUpToDateReferenceFrameUpdater.updateLocalizationTransform(outdatedTimeStampedTransform);
                outdatedTimeStampsIndex++;
             }
          }
