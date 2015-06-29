@@ -55,7 +55,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final DoubleYoVariable confidenceFactor;
    
    private final RigidBodyTransform stateEstimatorPelvisTransformInWorld = new RigidBodyTransform();
-   private final RigidBodyTransform stateEstimatorPelvisTransformInWorldForUI = new RigidBodyTransform();
    private final RigidBodyTransform localizationTransformInWorld = new RigidBodyTransform();
    private final RigidBodyTransform correctedPelvisTransformInWorldFrame = new RigidBodyTransform();
    
@@ -305,7 +304,6 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          sendCorrectionUpdate = false;
       }
    }
-   
    
    Vector3d translationalResidualError = new Vector3d();
    Vector3d translationalTotalError = new Vector3d();

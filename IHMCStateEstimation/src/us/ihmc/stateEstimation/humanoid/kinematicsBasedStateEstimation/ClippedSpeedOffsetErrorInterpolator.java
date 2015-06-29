@@ -140,8 +140,7 @@ public class ClippedSpeedOffsetErrorInterpolator
    private final DoubleYoVariable angleError;
    private final DoubleYoVariable translationErrorX;
    private final DoubleYoVariable translationErrorY;
-   private final DoubleYoVariable translationErrorZ
-   ;
+   private final DoubleYoVariable translationErrorZ;
    
    //for feedBack in scs
    private final YoFramePose yoStartOffsetErrorPose_InWorldFrame;
