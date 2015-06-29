@@ -14,7 +14,7 @@ import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 /**
  * @author Nicolas EYSSETTE
  * 
- * The aim of this class is to express an outdated transform in an updated reference.
+ * The aim of this class is to express the outdated localization transform in the updated stateEstimator reference.
  * It will compare the outdated transform to the updated transform at the same timeStamp in the past,
  * and express the result in the up to date referenceFrame in the present.
  *
@@ -54,14 +54,14 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
    /**
     * Constructor
-    * @param upToDateBufferSize is the size of the TimeStampedTransformBuffer that will be used to compare the outdated transforms
-    * @param upToDateReferenceFrameInPresent is the ReferenceFrame in which the outdated pose will be expressed
+    * @param stateEstimatorBufferSize is the size of the TimeStampedTransformBuffer that will be used to compare the outdated transforms
+    * @param stateEsimatorReferenceFrameInPresent is the ReferenceFrame in which the outdated pose will be expressed
     */
-   public OutdatedPoseToUpToDateReferenceFrameUpdater(int upToDateBufferSize, ReferenceFrame upToDateReferenceFrameInPresent)
+   public OutdatedPoseToUpToDateReferenceFrameUpdater(int stateEstimatorBufferSize, ReferenceFrame stateEsimatorReferenceFrameInPresent)
    {
-      this.stateEstimatorReferenceFrameInPresent = upToDateReferenceFrameInPresent;
+      this.stateEstimatorReferenceFrameInPresent = stateEsimatorReferenceFrameInPresent;
 
-      stateEstimatorTimeStampedTransformBuffer = new TimeStampedTransformBuffer(upToDateBufferSize);
+      stateEstimatorTimeStampedTransformBuffer = new TimeStampedTransformBuffer(stateEstimatorBufferSize);
       stateEstimatorTimeStampedTransformInPast = new TimeStampedTransform3D();
       stateEstimatorPoseInThePast = new FramePose(worldFrame);
       localizationPoseInThePast = new FramePose(worldFrame);
@@ -137,17 +137,17 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    }
 
    /**
-    * Compare the outdatedTimeStampedTransform with the upToDateTimeStampedTransform having the same timeStamp
+    * Compare the localizationTimeStampedTransform with the stateEstimatorTimeStampedTransform having the same timeStamp
     * @param localizationTimeStampedTransformInWorld
     */
    public void updateLocalizationTransform(TimeStampedTransform3D localizationTimeStampedTransformInWorld)
    {
-      //update the upToDate reference frame in the past
+      //update the stateEstimator reference frame in the past
       stateEstimatorTimeStampedTransformBuffer.findTransform(localizationTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
       stateEstimatorPoseInThePast.setPoseIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
       stateEstimatorReferenceFrameInThePast.setPoseAndUpdate(stateEstimatorPoseInThePast);
 
-      //update the outdated Pose
+      //update the localization Pose
       localizationPoseInThePast.setPoseIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
       localizationReferenceFrameInThePast.setPoseAndUpdate(localizationPoseInThePast);
 
@@ -173,7 +173,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
    }
 
    /**
-    * Puts the upToDateTransform in the buffer with the corresponding timeStamp
+    * Puts the stateEstimatorTransform in the buffer with the corresponding timeStamp
     * @param stateEstimatorTransform 
     * @param timeStamp
     */
@@ -184,7 +184,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
    /**
     * @param timeStamp
-    * @return true if the timeStamp is in range of the upToDateTimeStampedBuffer
+    * @return true if the timeStamp is in range of the stateEstimatorTimeStampedBuffer
     */
    public boolean stateEstimatorTimeStampedBufferIsInRange(long timeStamp)
    {
