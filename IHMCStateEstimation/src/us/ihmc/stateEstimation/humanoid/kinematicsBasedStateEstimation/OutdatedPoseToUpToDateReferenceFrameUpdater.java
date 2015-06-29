@@ -138,18 +138,17 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
    /**
     * Compare the outdatedTimeStampedTransform with the upToDateTimeStampedTransform having the same timeStamp
-    * @param outdatedTimeStampedTransformInWorld
-    * @param outdatedPoseToBeUpdatedToPack
+    * @param localizationTimeStampedTransformInWorld
     */
-   public void updateOutdatedTransform(TimeStampedTransform3D outdatedTimeStampedTransformInWorld)
+   public void updateLocalizationTransform(TimeStampedTransform3D localizationTimeStampedTransformInWorld)
    {
       //update the upToDate reference frame in the past
-      stateEstimatorTimeStampedTransformBuffer.findTransform(outdatedTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
+      stateEstimatorTimeStampedTransformBuffer.findTransform(localizationTimeStampedTransformInWorld.getTimeStamp(), stateEstimatorTimeStampedTransformInPast);
       stateEstimatorPoseInThePast.setPoseIncludingFrame(worldFrame, stateEstimatorTimeStampedTransformInPast.getTransform3D());
       stateEstimatorReferenceFrameInThePast.setPoseAndUpdate(stateEstimatorPoseInThePast);
 
       //update the outdated Pose
-      localizationPoseInThePast.setPoseIncludingFrame(worldFrame, outdatedTimeStampedTransformInWorld.getTransform3D());
+      localizationPoseInThePast.setPoseIncludingFrame(worldFrame, localizationTimeStampedTransformInWorld.getTransform3D());
       localizationReferenceFrameInThePast.setPoseAndUpdate(localizationPoseInThePast);
 
       stateEstimatorPositionInThePastInWorldFrame.setToZero(stateEstimatorReferenceFrameInThePast);
@@ -175,34 +174,34 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
    /**
     * Puts the upToDateTransform in the buffer with the corresponding timeStamp
-    * @param upToDateTransform 
+    * @param stateEstimatorTransform 
     * @param timeStamp
     */
-   public void putUpToDateTransformInBuffer(RigidBodyTransform upToDateTransform, long timeStamp)
+   public void putStateEstimatorTransformInBuffer(RigidBodyTransform stateEstimatorTransform, long timeStamp)
    {
-      stateEstimatorTimeStampedTransformBuffer.put(upToDateTransform, timeStamp);
+      stateEstimatorTimeStampedTransformBuffer.put(stateEstimatorTransform, timeStamp);
    }
 
    /**
     * @param timeStamp
     * @return true if the timeStamp is in range of the upToDateTimeStampedBuffer
     */
-   public boolean upToDateTimeStampedBufferIsInRange(long timeStamp)
+   public boolean stateEstimatorTimeStampedBufferIsInRange(long timeStamp)
    {
       return stateEstimatorTimeStampedTransformBuffer.isInRange(timeStamp);
    }
 
-   public ReferenceFrame getOutdatedReferenceFrameToBeUpdated()
+   public ReferenceFrame getLocalizationReferenceFrameToBeUpdated()
    {
       return localizationReferenceFrameInPresent_Rotation;
    }
 
-   public long getUpToDateTimeStampedBufferNewestTimestamp()
+   public long getStateEstimatorTimeStampedBufferNewestTimestamp()
    {
       return stateEstimatorTimeStampedTransformBuffer.getNewestTimestamp();
    }
 
-   public long getUpToDateTimeStampedBufferOldestTimestamp()
+   public long getStateEstimatorTimeStampedBufferOldestTimestamp()
    {
       return stateEstimatorTimeStampedTransformBuffer.getOldestTimestamp();
    }

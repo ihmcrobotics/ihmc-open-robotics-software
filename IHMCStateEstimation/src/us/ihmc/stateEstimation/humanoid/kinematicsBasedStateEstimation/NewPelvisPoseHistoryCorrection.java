@@ -132,7 +132,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       offsetErrorInterpolator = new ClippedSpeedOffsetErrorInterpolator(registry, pelvisReferenceFrame, alphaFilterBreakFrequency, this.estimatorDT, ENABLE_ROTATION_CORRECTION);
       outdatedPoseUpdater = new OutdatedPoseToUpToDateReferenceFrameUpdater(pelvisBufferSize, pelvisReferenceFrame);
       
-      iterativeClosestPointReferenceFrame = outdatedPoseUpdater.getOutdatedReferenceFrameToBeUpdated();
+      iterativeClosestPointReferenceFrame = outdatedPoseUpdater.getLocalizationReferenceFrameToBeUpdated();
       
       //used only for feedback in SCS
       yoStateEstimatorInWorldFramePose = new YoFramePose("stateEstimatorInWorldFramePose", worldFrame, registry);
@@ -173,7 +173,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
          checkForNewPacket();
 
          pelvisReferenceFrame.getTransformToDesiredFrame(stateEstimatorPelvisTransformInWorld, worldFrame);
-         outdatedPoseUpdater.putUpToDateTransformInBuffer(stateEstimatorPelvisTransformInWorld, timestamp);
+         outdatedPoseUpdater.putStateEstimatorTransformInBuffer(stateEstimatorPelvisTransformInWorld, timestamp);
          
          offsetErrorInterpolator.interpolateError(correctedPelvisPoseInWorldFrame);
          /////for SCS feedback
@@ -237,7 +237,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       {
          TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
 
-         if (outdatedPoseUpdater.upToDateTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
+         if (outdatedPoseUpdater.stateEstimatorTimeStampedBufferIsInRange(timeStampedExternalPose.getTimeStamp()))
          {
             if (!hasOneIcpPacketEverBeenReceived.getBooleanValue())
                hasOneIcpPacketEverBeenReceived.set(true);
@@ -256,7 +256,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    private void addNewExternalPose(TimeStampedTransform3D timeStampedExternalPose)
    {
-      outdatedPoseUpdater.updateOutdatedTransform(timeStampedExternalPose);
+      outdatedPoseUpdater.updateLocalizationTransform(timeStampedExternalPose);
       iterativeClosestPointReferenceFrame.update();
       iterativeClosestPointInWorldFramePose.setToZero(iterativeClosestPointReferenceFrame);
       iterativeClosestPointInWorldFramePose.changeFrame(worldFrame);
