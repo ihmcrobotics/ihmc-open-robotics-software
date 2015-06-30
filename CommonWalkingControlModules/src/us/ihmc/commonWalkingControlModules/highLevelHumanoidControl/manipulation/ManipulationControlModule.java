@@ -252,7 +252,10 @@ public class ManipulationControlModule
 
          if(handPoseProvider.checkHandRotateAboutAxisDataType(robotSide) == HandRotateAboutAxisPacket.DataType.ROTATE_ABOUT_AXIS_FORCE_CONTROLLED)
          {
-//           TODO: moveInCircleWithForceControl
+        	 Vector3d forceConstraintVector = handPoseProvider.getForceConstraint(robotSide);
+        	 double desiredTangentialForce = handPoseProvider.getTangentialForce(robotSide);
+        	 handControlModules.get(robotSide).moveInCircleUsingForceControl(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngleRightHandRule, controlHandAngleAboutAxis,
+        			 graspOffsetFromControlFrame, trajectoryTime, forceConstraintVector, desiredTangentialForce);
          }
          else
          {
