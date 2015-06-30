@@ -565,6 +565,14 @@ public class HandControlModule
       executeTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
+   
+   public void moveInCircleUsingForceControl(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time,
+		   Vector3d forceConstraintVector, double desiredTangentialForce)
+   {
+	   //TODO: implement method.
+	   moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngle, controlHandAngleAboutAxis, graspOffsetFromControlFrame, time);
+   }
+   
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes, double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
    {
