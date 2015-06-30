@@ -7,6 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.utilities.math.geometry.FramePose;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -34,6 +35,8 @@ public interface HandPoseProvider
    
    public abstract Vector3d getRotationAxisInWorld(RobotSide robotSide);
    
+   public abstract HandRotateAboutAxisPacket.DataType checkHandRotateAboutAxisDataType(RobotSide robotSide);
+   
    public abstract double getRotationAngleRightHandRule(RobotSide robotSide);
 
    public abstract boolean controlHandAngleAboutAxis(RobotSide robotSide);
@@ -55,6 +58,10 @@ public interface HandPoseProvider
    public abstract boolean checkForNewArmJointTrajectory(RobotSide robotSide);
 
    public abstract ArmJointTrajectoryPacket getArmJointTrajectoryPacket(RobotSide robotSide);
+   
+   public abstract Vector3d getForceConstraint(RobotSide robotSide);
+   
+   public abstract double getTangentialForce(RobotSide robotSide);
 
    /**
     * By default it should be all true, meaning the hand orientation will be full constrained.

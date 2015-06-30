@@ -9,6 +9,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.communication.packets.manipulation.ArmJointTrajectoryPacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.DataType;
+import us.ihmc.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -267,4 +268,22 @@ public class UserDesiredHandPoseProvider implements HandPoseProvider
       return 0.0;
    }
 
+   @Override
+   public Vector3d getForceConstraint(RobotSide robotSide)
+   {
+      return null;
+   }
+
+   @Override
+   public double getTangentialForce(RobotSide robotSide)
+   {
+      return Double.NaN;
+   }
+
+   @Override
+   public HandRotateAboutAxisPacket.DataType checkHandRotateAboutAxisDataType(RobotSide robotSide)
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
 }
