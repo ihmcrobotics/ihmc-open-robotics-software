@@ -22,6 +22,7 @@ import us.ihmc.humanoidBehaviors.behaviors.RemoveMultipleDebrisBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.TurnValveBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.WalkToGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.midLevel.ForceControlledWallTaskBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.ScriptBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.BehaviorCommunicationBridge;
@@ -205,8 +206,8 @@ public class IHMCHumanoidBehaviorManager
 //      PushButtonBehavior pushButtonBehavior = new PushButtonBehavior(outgoingCommunicationBridge, referenceFrames, yoTime, wristSensors);
 //      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.PUSH_BUTTON, pushButtonBehavior);
 
-//      ForceControlledWallTaskBehavior forcecontrolledWallTaskBehavior = new ForceControlledWallTaskBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel, yoTime, yoGraphicsListRegistry);
-//      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
+      ForceControlledWallTaskBehavior forcecontrolledWallTaskBehavior = new ForceControlledWallTaskBehavior(outgoingCommunicationBridge, referenceFrames, fullRobotModel, yoTime, yoGraphicsListRegistry);
+      dispatcher.addHumanoidBehavior(HumanoidBehaviorType.FORCECONTROL_WALL_TASK, forcecontrolledWallTaskBehavior);
 
       if (wholeBodyControllerParameters.createWholeBodyIkSolver() != null)
       {
