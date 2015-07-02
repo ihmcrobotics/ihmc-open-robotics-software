@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandPositionControlState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandForcefeedbackControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceToJointspaceHandPositionControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TrajectoryBasedTaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.MomentumBasedController;
@@ -123,6 +124,7 @@ public class HandControlModule
    private final TrajectoryBasedTaskspaceHandControlState taskSpacePositionControlState;
    private final JointSpaceHandControlState jointSpaceHandControlState;
    private final LoadBearingHandControlState loadBearingControlState;
+   private final TaskspaceToJointspaceHandForcefeedbackControlState taskspaceToJointspaceHandForcefeedbackControlState;
 
    private final EnumYoVariable<HandControlState> requestedState;
    private final OneDoFJoint[] oneDoFJoints;
@@ -295,7 +297,8 @@ public class HandControlModule
       doPositionControl = armControlParameters.doLowLevelPositionControl();
       String stateNamePrefix = namePrefix + "Hand";
       jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
-
+      taskspaceToJointspaceHandForcefeedbackControlState = new TaskspaceToJointspaceHandForcefeedbackControlState(stateNamePrefix,
+            HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
@@ -333,12 +336,19 @@ public class HandControlModule
    {
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, jointSpaceHandControlState);
       addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, false, jointSpaceHandControlState, taskspaceToJointspaceHandForcefeedbackControlState);
 
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskSpacePositionControlState);
       addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, jointSpaceHandControlState);
-
+      addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+      
+      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskSpacePositionControlState);
+      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, jointSpaceHandControlState);
+      addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+      
       stateMachine.addState(jointSpaceHandControlState);
       stateMachine.addState(taskSpacePositionControlState);
+      stateMachine.addState(taskspaceToJointspaceHandForcefeedbackControlState);
 
       if (!doPositionControl)
       {
@@ -346,6 +356,8 @@ public class HandControlModule
          addRequestedStateTransition(requestedState, false, taskSpacePositionControlState, loadBearingControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, taskSpacePositionControlState);
          addRequestedStateTransition(requestedState, false, loadBearingControlState, jointSpaceHandControlState);
+         addRequestedStateTransition(requestedState, false, loadBearingControlState, taskspaceToJointspaceHandForcefeedbackControlState);
+         addRequestedStateTransition(requestedState, false, taskspaceToJointspaceHandForcefeedbackControlState, loadBearingControlState);
 
          setupTransitionToSupport(taskSpacePositionControlState);
          stateMachine.addState(loadBearingControlState);
@@ -473,6 +485,25 @@ public class HandControlModule
 
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
    }
+   
+   public void executeForceControlledTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
+   {
+	   handSpatialAccelerationControlModule.setGains(taskspaceGains);
+	   taskspaceToJointspaceHandForcefeedbackControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, Double.NaN, Double.NaN);
+	   taskspaceToJointspaceHandForcefeedbackControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
+	   taskspaceToJointspaceHandForcefeedbackControlState.setSelectionMatrix(selectionMatrix);
+	   requestedState.set(taskspaceToJointspaceHandForcefeedbackControlState.getStateEnum());
+	   stateMachine.checkTransitionConditions();
+	   isExecutingHandStep.set(false);
+
+	   handTaskspaceToJointspaceCalculator.initializeFromDesiredJointAngles();
+
+	   if (handPoseStatusProducer != null)
+	   {
+	      handPoseStatusProducer.sendStartedStatus(robotSide);
+	   }
+	   handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
+   }
 
    private final FramePoint tempPosition = new FramePoint();
    private final FramePoint tempPositionOld = new FramePoint();
@@ -569,10 +600,25 @@ public class HandControlModule
    public void moveInCircleUsingForceControl(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double rotationAngle, boolean controlHandAngleAboutAxis, double graspOffsetFromControlFrame, double time,
 		   Vector3d forceConstraintVector, double desiredTangentialForce)
    {
-	   //TODO: implement method.
-	   moveInCircle(rotationAxisOriginInWorld, rotationAxisInWorld, rotationAngle, controlHandAngleAboutAxis, graspOffsetFromControlFrame, time);
+	   optionalHandControlFrame.setX(graspOffsetFromControlFrame);
+	   optionalHandControlFrame.update();
+
+	   trajectoryTimeProvider.set(time);
+
+	   rotationAxisOrigin.setIncludingFrame(worldFrame, rotationAxisOriginInWorld);
+	   rotationAxis.setIncludingFrame(worldFrame, rotationAxisInWorld);
+
+	   circularPoseTrajectoryGenerator.setControlledFrame(optionalHandControlFrame);
+
+	   circularPoseTrajectoryGenerator.setDesiredRotationAngle(rotationAngle);
+	   circularPoseTrajectoryGenerator.updateCircleFrame(rotationAxisOrigin, rotationAxis);
+	   FramePose desiredFramePose = computeDesiredFramePose(worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
+	   circularPoseTrajectoryGenerator.setInitialPose(desiredFramePose);
+
+	   executeForceControlledTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
+	   handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
-   
+
 
    public void moveInStraightLine(FramePose finalDesiredPose, double time, ReferenceFrame trajectoryFrame, boolean[] controlledOrientationAxes, double percentOfTrajectoryWithOrientationBeingControlled, double swingClearance)
    {
