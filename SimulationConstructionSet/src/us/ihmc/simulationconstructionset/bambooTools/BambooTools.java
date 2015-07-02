@@ -26,10 +26,11 @@ import org.tmatesoft.svn.core.wc.SVNWCClient;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.utilities.DateTools;
-import us.ihmc.utilities.code.agileTesting.youtube.YouTubeCredentials;
-import us.ihmc.utilities.code.agileTesting.youtube.YouTubeUploader;
+import us.ihmc.utilities.code.agileTesting.YouTubeCredentials;
+import us.ihmc.utilities.code.agileTesting.YouTubeUploader;
 import us.ihmc.utilities.gui.GUIMessageFrame;
 import us.ihmc.utilities.io.files.FileTools;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 
 public class BambooTools
@@ -214,6 +215,8 @@ public class BambooTools
    public static File getEraseableDirectoryWithMostRecentBambooDataAndVideos()
    {
       String rootDirectory = determineEraseableBambooDataAndVideosRootDirectoryToUse();
+      
+      PrintTools.info(rootDirectory);
 
       return getDirectoryWithMostRecentBambooDataAndVideos(rootDirectory);
    }
