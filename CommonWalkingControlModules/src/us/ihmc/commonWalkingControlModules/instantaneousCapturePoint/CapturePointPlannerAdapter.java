@@ -359,7 +359,8 @@ public class CapturePointPlannerAdapter
          icpPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
       else         
          capturePointPlanner.getFinalDesiredCapturePointPosition(tmpFramePoint);
-      tmpFramePoint2d.set(tmpFramePoint.getX(), tmpFramePoint.getY());
+      tmpFramePoint.changeFrame(worldFrame);
+      tmpFramePoint2d.setByProjectionOntoXYPlaneIncludingFrame(tmpFramePoint);
       return tmpFramePoint2d;
    }
 
