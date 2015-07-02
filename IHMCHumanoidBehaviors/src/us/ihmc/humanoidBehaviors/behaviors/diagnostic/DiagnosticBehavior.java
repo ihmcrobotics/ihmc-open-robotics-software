@@ -411,7 +411,7 @@ public class DiagnosticBehavior extends BehaviorInterface
       pelvisOrientationScaleFactor.set(0.1);
 
       // These values were tuned by Jerry Pratt on February 24, 2015 to match Atlas the best.
-      int maxIterations = 200; // 60 Seems to be a bit too low, 100 seems to be enough, just set it to 200 to make sure (Sylvain)
+      int maxIterations = 1000; // 60 Seems to be a bit too low, 100 seems to be enough, just set it to 200 to make sure (Sylvain)
       double lambdaLeastSquares = 0.0009;
       double tolerance = 0.0025;
       double maxStepSize = 0.2;
@@ -2450,7 +2450,8 @@ public class DiagnosticBehavior extends BehaviorInterface
             break;
          case RUNNING_MAN:
             lastDiagnosticTask.set(DiagnosticTask.RUNNING_MAN);
-            sequenceRunningMan();
+            runningMan(activeSideForFootControl.getEnumValue());
+//            sequenceRunningMan();
             break;
          case BOW:
             lastDiagnosticTask.set(DiagnosticTask.BOW);
