@@ -6,5 +6,5 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
  */
 public enum HandControlState
 {
-   JOINT_SPACE, TASK_SPACE_POSITION, LOAD_BEARING
+   JOINT_SPACE, TASK_SPACE_POSITION, LOAD_BEARING, TASK_SPACE_FORCE_FEEDBACK_CONTROL
 }
