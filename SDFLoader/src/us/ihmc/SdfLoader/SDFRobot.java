@@ -124,6 +124,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
       for (SDFJointHolder child : rootLink.getChildren())
       {
+//         PrintTools.info("Joint name: " + child.getName());
+         
          Set<String> lastSimulatedJoints;
 
          if (sdfJointNameMap != null)
@@ -183,6 +185,8 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
 
             counters.put(jointName, count);
 
+//            PrintTools.info("Joint Contact Point: " + jointContactPoint);
+            
             if (SHOW_CONTACT_POINTS)
             {
                Graphics3DObject graphics = joint.getLink().getLinkGraphics();
@@ -190,6 +194,22 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
                graphics.translate(jointContactPoint.second());
                double radius = 0.01;
                graphics.addSphere(radius, YoAppearance.Orange());
+               
+//               double bigRadius = 0.05;
+//               if (jointContactPoint.first().equals("r_arm_wrx"))
+//               {
+//                  Graphics3DObject specialGraphic = joint.getLink().getLinkGraphics();
+//                  specialGraphic.identity();
+//                  specialGraphic.translate(0.00017, -0.02515, 0.00163);
+//                  specialGraphic.addSphere(bigRadius, YoAppearance.Orange());
+//               }
+//               else if (jointContactPoint.first().equals("l_arm_wrx"))
+//               {
+//                  Graphics3DObject specialGraphic = joint.getLink().getLinkGraphics();
+//                  specialGraphic.identity();
+//                  specialGraphic.translate(0.00017, 0.02515, 0.00163);
+//                  specialGraphic.addSphere(bigRadius, YoAppearance.Orange());
+//               }
             }
 
             for (RobotSide robotSide : RobotSide.values)
