@@ -97,7 +97,7 @@ public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvid
    {
       synchronized (lock)
       {
-         if (rosMainNode != null && rosMainNode.isStarted())
+         if (rosMainNode != null)// && rosMainNode.isStarted()
          {
             long lastPPSTimestampFromRobot = packet.getSensorHeadPPSTimestamp();
 
