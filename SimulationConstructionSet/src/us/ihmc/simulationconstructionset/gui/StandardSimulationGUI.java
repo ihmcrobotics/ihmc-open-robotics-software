@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import javax.swing.AbstractButton;
 import javax.swing.JApplet;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -831,7 +832,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       this.exitActionListeners.add(listener);
    }
 
-   public void addButton(JButton button)
+   public void addButton(AbstractButton button)
    {
       buttonPanel.add(button);
       buttonPanel.updateUI();

@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JApplet;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -1202,7 +1202,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
     *
     * @param button JButton to be added.
     */
-   public void addButton(JButton button)
+   public void addButton(AbstractButton button)
    {
       if (myGUI != null)
       {

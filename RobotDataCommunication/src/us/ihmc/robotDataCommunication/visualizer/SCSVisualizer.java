@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JToggleButton;
 
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
@@ -227,6 +228,26 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       for (SCSVisualizerStateListener stateListener : stateListeners)
          stateListener.starting(scs, robot, this.registry);
 
+      final JToggleButton record = new JToggleButton("Pause recording");
+      scs.addButton(record);
+      record.addActionListener(new ActionListener()
+      {   
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            if(record.isSelected())
+            {
+               recording = false;
+               record.setText("Resume recording");
+            }
+            else
+            {
+               recording = true;
+               record.setText("Pause recording");
+            }
+         }
+      });
+      
       for (String yoVariableName : buttons.keySet())
       {
          final YoVariable<?> var = registry.getVariable(yoVariableName);
