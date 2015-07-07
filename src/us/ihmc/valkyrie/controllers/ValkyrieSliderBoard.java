@@ -52,8 +52,6 @@ public class ValkyrieSliderBoard
 
    private final IntegerYoVariable remoteTurboIndex;
 
-   private boolean joystickControlsVelocityX = true;
-
    @SuppressWarnings("unchecked")
    public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel, ValkyrieSliderBoardType sliderBoardType)
    {
@@ -136,7 +134,7 @@ public class ValkyrieSliderBoard
       final double minVelocityX = -0.10;
       
       //Whether we are controlling velocity through joystick or through treadmill
-      final BooleanYoVariable isJoystickControllingWalkingSpeed = new BooleanYoVariable("joystickControlsVelocityX", registry);
+      final BooleanYoVariable isJoystickControllingWalkingSpeed = new BooleanYoVariable("isJoystickControllingWalkingSpeed", registry);
       final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if (desiredVelocityX == null || joystickUpdater == null)
          return;
