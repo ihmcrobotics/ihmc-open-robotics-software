@@ -44,7 +44,7 @@ public class ValkyrieFlatGroundWalkingTrack
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();
       if (USE_JOYSTICK_CONTROLLER)
       {
-         ValkyrieSliderBoard.setupJoyStick(scs);
+         ValkyrieSliderBoard.setupJoyStickAndTreadmill(scs.getRootRegistry());
          flatGroundWalkingTrack.getDrcSimulation().start();
          flatGroundWalkingTrack.getDrcSimulation().simulate();
       }

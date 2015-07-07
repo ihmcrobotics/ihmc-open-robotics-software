@@ -1,5 +1,7 @@
 package us.ihmc.valkyrie.controllers;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -32,7 +34,8 @@ import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
-
+import us.ihmc.valkyrie.treadmill.ValkyrieTreadmill;
+import us.ihmc.valkyrie.treadmill.ValkyrieTreadmillRunner;
 /**
  * Created by dstephen on 2/28/14.
  */
@@ -49,12 +52,14 @@ public class ValkyrieSliderBoard
 
    private final IntegerYoVariable remoteTurboIndex;
 
+   private boolean joystickControlsVelocityX = true;
+
    @SuppressWarnings("unchecked")
    public ValkyrieSliderBoard(SimulationConstructionSet scs, YoVariableRegistry registry, DRCRobotModel drcRobotModel, ValkyrieSliderBoardType sliderBoardType)
    {
       selectedJoint = new EnumYoVariable<>("selectedJoint", registry, ValkyrieSliderBoardSelectableJoints.class);
       selectedJoint.set(ValkyrieSliderBoardSelectableJoints.RightKneeExtensor);
-      
+
       controllerSelectedJoint = (EnumYoVariable<ValkyrieSliderBoardSelectableJoints>) registry.getVariable("ValkyrieSliderBoardController", "selectedJoint");
 
       remoteTurboIndex = (IntegerYoVariable) registry.getVariable("ValkyrieSliderBoardController", "turboIndex");
@@ -75,7 +80,7 @@ public class ValkyrieSliderBoard
 
       case WALKING:
          new WalkControllerSliderBoard(scs, registry, drcRobotModel);
-         setupJoyStick(registry);
+         setupJoyStickAndTreadmill(registry);
          break;
 
       case TUNING:
@@ -100,7 +105,7 @@ public class ValkyrieSliderBoard
       sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
    }
 
-   public static void setupJoyStick(YoVariableHolder registry)
+   public static void setupJoyStickAndTreadmill(YoVariableRegistry registry)
    {
       final JoystickUpdater joystickUpdater;
       try
@@ -115,16 +120,26 @@ public class ValkyrieSliderBoard
       Thread thread = new Thread(joystickUpdater);
       thread.start();
 
+      // Start the treadmill manager thread.
+      final ValkyrieTreadmill myTreadmill = new ValkyrieTreadmill(false); // Show GUI
+      final Thread treadmillThread = new Thread(myTreadmill);
+      treadmillThread.start();
+      //Start the treadmill writer thread
+      final ValkyrieTreadmillWriter treadmillWriter = new ValkyrieTreadmillWriter(registry);
+      final Thread treadmillWriterThread = new Thread(treadmillWriter);
+      treadmillWriterThread.start();
+      
       double deadZone = 0.02;
-      double desiredVelocityX_Bias = 0.0;
+      final double desiredVelocityX_Bias = 0.0;
       double desiredVelocityY_Bias = 0.0;
       double desiredHeadingDot_Bias = 0.0;
       final double minVelocityX = -0.10;
-
-      DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
+      
+      //Whether we are controlling velocity through joystick or through treadmill
+      final BooleanYoVariable isJoystickControllingWalkingSpeed = new BooleanYoVariable("joystickControlsVelocityX", registry);
+      final DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");
       if (desiredVelocityX == null || joystickUpdater == null)
          return;
-
       desiredVelocityX.set(desiredVelocityX_Bias);
       joystickUpdater.addListener(new DoubleYoVariableJoystickEventListener(desiredVelocityX, joystickUpdater.findComponent(Component.Identifier.Axis.Y), -0.2
             + desiredVelocityX_Bias, 0.2 + desiredVelocityX_Bias, deadZone, true));
@@ -133,10 +148,45 @@ public class ValkyrieSliderBoard
          @Override
          public void variableChanged(YoVariable<?> v)
          {
+            if (!isJoystickControllingWalkingSpeed.getBooleanValue())
+               v.setValueFromDouble(ValkyrieTreadmill.getCurrentVelocity());
             if (v.getValueAsDouble() < minVelocityX)
                v.setValueFromDouble(minVelocityX, false);
          }
       });
+      isJoystickControllingWalkingSpeed.set(true);
+      isJoystickControllingWalkingSpeed.addVariableChangedListener(new VariableChangedListener(){
+
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            //If we are enabling joystick, reset the value to joystick control.
+            if (v.getValueAsDouble() != 0){
+               desiredVelocityX.set(desiredVelocityX_Bias);
+            }
+         }
+      });
+      //Variable to hold the treadmill duty from ValkyrieTreadmill
+      IntegerYoVariable treadmillDuty = new IntegerYoVariable("treadmillDuty", registry);
+      treadmillDuty.setStepSize(1);
+      treadmillDuty.addVariableChangedListener(new VariableChangedListener(){
+         @Override
+         public void variableChanged(YoVariable<?> v)
+         {
+            if (v.getValueAsDouble() < 0){
+               v.setValueFromDouble(0);
+            }
+            else if (v.getValueAsDouble() > 25){
+               v.setValueFromDouble(25);
+            }
+            ValkyrieTreadmill.duty = (int) v.getValueAsDouble();
+         }
+      });
+      treadmillDuty.set(0, true);
+      
+      //Variable to hold the treadmill velocity from ValkyrieTreadmill refereshed every second.
+      DoubleYoVariable treadmillVelocity = new DoubleYoVariable("treadmillVelocity", registry);
+      treadmillVelocity.setValueFromDouble(0.0);
 
       DoubleYoVariable desiredVelocityY = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityY");
       desiredVelocityY.set(desiredVelocityY_Bias);
@@ -152,6 +202,7 @@ public class ValkyrieSliderBoard
 
       BooleanYoVariable walk = (BooleanYoVariable) registry.getVariable("DesiredFootstepCalculatorFootstepProviderWrapper", "walk");
       joystickUpdater.addListener(new BooleanYoVariableJoystickEventListener(walk, joystickUpdater.findComponent(Component.Identifier.Button.TRIGGER), true));
+
    }
 
    private void setupSliderBoardForForceControl(YoVariableRegistry registry, GeneralizedSDFRobotModel generalizedSDFRobotModel,
@@ -285,9 +336,13 @@ public class ValkyrieSliderBoard
                               sliderBoardConfigurationManager.setSlider(3, "kd_" + pdControllerBaseName, registry, 0.0, 600.0);
                               sliderBoardConfigurationManager.setSlider(4, "ki_" + pdControllerBaseName, registry, 0.0, 600.0);
                               sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_transitionFactor", registry, 0.0, 1.0);
-                              //                              sliderBoardConfigurationManager.setSlider(5, pdControllerBaseName + "_tauDesired", registry, -100.0, 100.0);
+                              // sliderBoardConfigurationManager.setSlider(5,
+                              // pdControllerBaseName + "_tauDesired",
+                              // registry, -100.0, 100.0);
 
-                              //                              sliderBoardConfigurationManager.setButton(1, pdControllerBaseName + "_useFunctionGenerator", registry);
+                              // sliderBoardConfigurationManager.setButton(1,
+                              // pdControllerBaseName +
+                              // "_useFunctionGenerator", registry);
                               sliderBoardConfigurationManager.setSlider(6, pdControllerBaseName + "_functionGeneratorAmplitude", registry, 0, 200);
                               sliderBoardConfigurationManager.setSlider(7, pdControllerBaseName + "_functionGeneratorFrequency", registry, 0, 50);
                               sliderBoardConfigurationManager.setSlider(8, pdControllerBaseName + "_functionGeneratorOffset", registry, -100, 100);
@@ -413,5 +468,41 @@ public class ValkyrieSliderBoard
             sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
          }
       });
+   }
+
+   public static class ValkyrieTreadmillWriter extends Thread
+   {
+      YoVariableHolder registry;
+
+      public ValkyrieTreadmillWriter(YoVariableHolder holder)
+      {
+         registry = holder;
+      }
+
+      public void run()
+      {
+         while (true)
+         {
+            DoubleYoVariable desiredVelocityX = (DoubleYoVariable) registry.getVariable("ManualDesiredVelocityControlModule", "desiredVelocityX");         
+            BooleanYoVariable joystickControlsVelocityX = (BooleanYoVariable) registry.getVariable("joystickControlsVelocityX");
+            DoubleYoVariable treadmillVelocity = (DoubleYoVariable) registry.getVariable("treadmillVelocity");
+            if (joystickControlsVelocityX == null || treadmillVelocity == null || desiredVelocityX == null){
+               continue;
+            }
+            //Set our variable according to current velocity
+            treadmillVelocity.set(ValkyrieTreadmill.getCurrentVelocity());
+            //Update the desired velocity on val only if we disable joystick input
+            if (!joystickControlsVelocityX.getBooleanValue())
+               desiredVelocityX.set(ValkyrieTreadmill.getCurrentVelocity());
+            try
+            {
+               Thread.sleep(1000);
+            }
+            catch (InterruptedException e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }
    }
 }
