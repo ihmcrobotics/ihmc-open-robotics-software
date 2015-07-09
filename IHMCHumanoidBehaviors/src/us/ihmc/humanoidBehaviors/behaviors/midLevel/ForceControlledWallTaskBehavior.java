@@ -291,7 +291,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
       rotationAxis.setToZero(chestFrame);
       rotationAxis.set(1.0, 0.0, 0.0);
 
-      startPose.setPosition(0.6, 0.05, -0.45);//okay
+      startPose.setPosition(0.6, -0.05, -0.45);//okay
 
 
       startPose.setOrientation(RotationMatrix);
