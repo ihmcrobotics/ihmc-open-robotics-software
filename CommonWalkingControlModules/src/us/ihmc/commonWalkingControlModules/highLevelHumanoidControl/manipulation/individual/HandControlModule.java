@@ -298,7 +298,7 @@ public class HandControlModule
       String stateNamePrefix = namePrefix + "Hand";
       jointSpaceHandControlState = new JointSpaceHandControlState(stateNamePrefix, oneDoFJoints, doPositionControl, momentumBasedController, jointspaceGains, controlDT, registry);
       taskspaceToJointspaceHandForcefeedbackControlState = new TaskspaceToJointspaceHandForcefeedbackControlState(stateNamePrefix,
-            HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
+            HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL, robotSide, momentumBasedController, jacobianId, chest, hand, doPositionControl, jointspaceGains, registry);
       if (doPositionControl)
       {
          // TODO Not implemented for position control.
@@ -486,9 +486,10 @@ public class HandControlModule
       handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
    }
    
-   public void executeForceControlledTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix)
+   public void executeForceControlledTaskSpaceTrajectory(PoseTrajectoryGenerator poseTrajectory, DenseMatrix64F selectionMatrix, Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld)
    {
 	   handSpatialAccelerationControlModule.setGains(taskspaceGains);
+	   taskspaceToJointspaceHandForcefeedbackControlState.initialize(rotationAxisOriginInWorld, rotationAxisInWorld);
 	   taskspaceToJointspaceHandForcefeedbackControlState.setTrajectoryWithAngularControlQuality(poseTrajectory, Double.NaN, Double.NaN);
 	   taskspaceToJointspaceHandForcefeedbackControlState.setControlModuleForPositionControl(handTaskspaceToJointspaceCalculator);
 	   taskspaceToJointspaceHandForcefeedbackControlState.setSelectionMatrix(selectionMatrix);
@@ -615,7 +616,7 @@ public class HandControlModule
 	   FramePose desiredFramePose = computeDesiredFramePose(worldFrame, optionalHandControlFrame, HandTrajectoryType.CIRCULAR);
 	   circularPoseTrajectoryGenerator.setInitialPose(desiredFramePose);
 
-	   executeForceControlledTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix);
+	   executeForceControlledTaskSpaceTrajectory(circularPoseTrajectoryGenerator, selectionMatrix, rotationAxisOriginInWorld, rotationAxisInWorld);
 	   handTaskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(optionalHandControlFrame);
    }
 
