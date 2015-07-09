@@ -78,7 +78,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
    private Vector3d tempVector = new Vector3d();
    private FramePoint tempFramePoint = new FramePoint();
-   private final static double EPSILON = 5.0e-3; 
+   private final static double EPSILON = 10.0e-3;
+   private final DoubleYoVariable distanceToGoal;
 
    private enum BehaviorStates {SET_STARTPOSITION, WAIT_FOR_STARTPOSITION, WAIT_FOR_REACHING_GOAL, SEND_COMMAND_TO_CONTROLLER, DONE}
    private BehaviorStates behaviorState;
@@ -111,7 +112,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
       circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
       straightTrajectoryTime.set(5.0);
       circleTrajectorytime.set(20.0);
-
+      
+      distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
       straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
       circleControlCmd = new HandRotateAboutAxisPacket();
       rotationAxisInWorld = new Vector3d();
@@ -166,7 +168,9 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
          tempVector.set(tempFramePoint.getPoint().x, tempFramePoint.getPoint().y, tempFramePoint.getPoint().z);
          tempVector.sub(nextCoordinate);
 
-         if(tempVector.length() < EPSILON)
+         distanceToGoal.set(tempVector.length());
+         
+         if(distanceToGoal.getDoubleValue() < EPSILON)
          {
             behaviorState = BehaviorStates.SEND_COMMAND_TO_CONTROLLER;
          }
