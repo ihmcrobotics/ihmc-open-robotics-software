@@ -1,9 +1,9 @@
 package us.ihmc.communication.packets;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
-
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.utilities.ComparableDataObject;
+import us.ihmc.utilities.compare.ComparableDataObject;
+
+import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
 public abstract class Packet<T> implements ComparableDataObject<T>
 {
