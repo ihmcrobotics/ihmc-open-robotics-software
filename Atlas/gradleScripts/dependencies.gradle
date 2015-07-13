@@ -56,7 +56,6 @@ dependencies {
     compile project(':UserInterface')
     compile project(':Planning')
     compile project(':IHMCPerception')
-    compile project(':ThirdParty')
 	compile project(':PathGeneration')
 	testCompile project(':PathGeneration').sourceSets.test.output
   }
