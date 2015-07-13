@@ -28,7 +28,6 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.Graphics3DInstruction;
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.BlinkingDaemon;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.VectorTuple;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
@@ -230,14 +229,6 @@ public class GraphicsDemoTools
       }
       
       return pointCloud;
-   }
-
-   public static void daemonizeAllRunnables(ArrayList<Runnable> runnables)
-   {
-      for (Runnable runnable : runnables)
-      {
-         BlinkingDaemon.startAsBlinkingDaemon(runnable, 10L);
-      }
    }
 
    public static void setupCameras(Graphics3DAdapter graphics3DAdapter)
