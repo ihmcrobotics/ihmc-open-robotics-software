@@ -5,7 +5,7 @@ import java.util.Arrays;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMapCopier;
-import us.ihmc.utilities.GenericCRC32;
+import us.ihmc.utilities.compare.GenericCRC32;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateChecksum;
