@@ -8,8 +8,8 @@ import org.tmatesoft.svn.core.SVNException;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.DateTools;
 import us.ihmc.utilities.ThreadTools;
+import us.ihmc.utilities.time.DateTools;
 
 public class DataExporter implements ActionListener
 {
