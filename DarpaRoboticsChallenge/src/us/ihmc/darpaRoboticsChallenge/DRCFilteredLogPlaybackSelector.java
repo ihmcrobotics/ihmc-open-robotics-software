@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import us.ihmc.utilities.gui.IHMCSwingTools;
+import us.ihmc.utilities.gui.SwingTools;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
@@ -83,7 +83,7 @@ public class DRCFilteredLogPlaybackSelector
 
    private void initSwingGui()
    {
-      IHMCSwingTools.setNativeLookAndFeel();
+      SwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("Filtered Log Playback Selector");
       frame.setSize(350, 100);
