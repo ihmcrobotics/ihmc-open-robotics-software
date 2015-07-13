@@ -9,7 +9,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
-import us.ihmc.utilities.GraphicsUpdatable;
+import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
