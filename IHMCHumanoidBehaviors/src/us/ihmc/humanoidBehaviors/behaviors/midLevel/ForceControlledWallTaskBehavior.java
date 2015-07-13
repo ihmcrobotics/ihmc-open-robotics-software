@@ -34,6 +34,7 @@ import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.graphics.YoGraphicCoordinateSystem;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.math.frames.YoFramePose;
@@ -81,8 +82,9 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
    private final static double EPSILON = 10.0e-3;
    private final DoubleYoVariable distanceToGoal;
 
-   private enum BehaviorStates {SET_STARTPOSITION, WAIT_FOR_STARTPOSITION, WAIT_FOR_REACHING_GOAL, SEND_COMMAND_TO_CONTROLLER, DONE}
-   private BehaviorStates behaviorState;
+   private enum BehaviorStates {SET_STARTPOSITION, WAIT_FOR_STARTPOSITION, WAIT_FOR_REACHING_GOAL, SEND_COMMAND_TO_CONTROLLER, DONE};
+   private EnumYoVariable<BehaviorStates> behaviorState;
+   
    private final RobotSide robotSide;
    private Matrix3d RotationMatrix;
 
@@ -95,7 +97,10 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
       this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
       this.robotSide = RobotSide.RIGHT;
       this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
-
+      
+      behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
+      behaviorState.set(null);
+      
       isDone = new BooleanYoVariable("isDone", registry);
       isDone.set(false);
 
@@ -143,8 +148,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
       {
          consumeHandPoseStatus(handStatusListeningQueue.getNewestPacket());
       }
-
-      switch(behaviorState)
+      
+      switch(behaviorState.getEnumValue())
       {
       case SET_STARTPOSITION:
 
@@ -157,7 +162,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
          straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
          sendPacketToController(straightLineControlCmd);
          PrintTools.debug(this, "Sent startposition to controller.");
-         behaviorState = BehaviorStates.WAIT_FOR_STARTPOSITION;
+         behaviorState.set(BehaviorStates.WAIT_FOR_STARTPOSITION);
          break;
 
       case WAIT_FOR_STARTPOSITION:
@@ -172,7 +177,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
          
          if(distanceToGoal.getDoubleValue() < EPSILON)
          {
-            behaviorState = BehaviorStates.SEND_COMMAND_TO_CONTROLLER;
+            behaviorState.set(BehaviorStates.SEND_COMMAND_TO_CONTROLLER);
          }
          break;
 
@@ -185,13 +190,12 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
          rotationAxisInWorld.set(rotationAxis.getVector());
          initializeForceControlCircle(rotationAxisOriginInWorld, rotationAxisInWorld, -5.0, -3.0);
          sendPacketToController(circleControlCmd);
-         behaviorState = BehaviorStates.WAIT_FOR_REACHING_GOAL;
-
+         behaviorState.set(BehaviorStates.WAIT_FOR_REACHING_GOAL);
          break;
 
       case WAIT_FOR_REACHING_GOAL:
          // TODO: replace with status request condition
-         behaviorState = BehaviorStates.DONE;
+         behaviorState.set(BehaviorStates.DONE);
          break;
 
       case DONE:
@@ -299,7 +303,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 
       startPose.setOrientation(RotationMatrix);
-      behaviorState = BehaviorStates.SET_STARTPOSITION;
+      behaviorState.set(BehaviorStates.SET_STARTPOSITION);
       status = null;
       hasBeenInitialized.set(true);
    }
