@@ -56,7 +56,7 @@ import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROS
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.gui.IHMCSwingTools;
+import us.ihmc.utilities.gui.SwingTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
 public class DRCDashboard
@@ -128,7 +128,7 @@ public class DRCDashboard
    {
       sshSimLauncher.start();
 
-      IHMCSwingTools.setNativeLookAndFeel();
+      SwingTools.setNativeLookAndFeel();
 
       instance = this;
 

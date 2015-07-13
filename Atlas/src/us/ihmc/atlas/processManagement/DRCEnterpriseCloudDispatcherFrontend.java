@@ -41,7 +41,7 @@ import us.ihmc.communication.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
-import us.ihmc.utilities.gui.IHMCSwingTools;
+import us.ihmc.utilities.gui.SwingTools;
 import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
 
@@ -363,7 +363,7 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void initAndStartSwingGui()
    {
-      IHMCSwingTools.setNativeLookAndFeel();
+      SwingTools.setNativeLookAndFeel();
 
       frame = new JFrame("DRC Networking Dispatcher");
       frame.setSize(1310, 345);
