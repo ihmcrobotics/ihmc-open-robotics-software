@@ -1,7 +1,6 @@
 package us.ihmc.kalman;
 
 import static org.ejml.ops.CommonOps.addEquals;
-import static us.ihmc.utilities.CheckTools.checkMatrixDimensions;
 import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.checkPositiveSemiDefinite;
 import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesMatrix;
 import static us.ihmc.yoUtilities.math.MatrixYoVariableConversionTools.getFromYoVariablesSymmetric;
@@ -25,6 +24,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
+import us.ihmc.utilities.compare.CheckTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
@@ -125,9 +125,9 @@ public class YoKalmanFilter implements KalmanFilter
 
       if (doChecks)
       {
-         checkMatrixDimensions(F, nStates.getIntegerValue(), nStates.getIntegerValue());
-         checkMatrixDimensions(G, nStates.getIntegerValue(), nInputs.getIntegerValue());
-         checkMatrixDimensions(H, nMeasurements.getIntegerValue(), nStates.getIntegerValue());
+         CheckTools.checkMatrixDimensions(F, nStates.getIntegerValue(), nStates.getIntegerValue());
+         CheckTools.checkMatrixDimensions(G, nStates.getIntegerValue(), nInputs.getIntegerValue());
+         CheckTools.checkMatrixDimensions(H, nMeasurements.getIntegerValue(), nStates.getIntegerValue());
       }
 
       populateYoVariablesMatrix(yoF, F.getNumRows(), F.getNumCols(), "F", registry);
@@ -147,7 +147,7 @@ public class YoKalmanFilter implements KalmanFilter
       if (doChecks)
       {
          checkPositiveSemiDefinite(Q);
-         checkMatrixDimensions(Q, nStates.getIntegerValue(), nStates.getIntegerValue());
+         CheckTools.checkMatrixDimensions(Q, nStates.getIntegerValue(), nStates.getIntegerValue());
       }
 
       populateYoVariablesSymmetricMatrix(yoQ, Q.getNumRows(), "Q", registry);
@@ -160,7 +160,7 @@ public class YoKalmanFilter implements KalmanFilter
       if (doChecks)
       {
          checkPositiveSemiDefinite(R);
-         checkMatrixDimensions(R, nMeasurements.getIntegerValue(), nMeasurements.getIntegerValue());
+         CheckTools.checkMatrixDimensions(R, nMeasurements.getIntegerValue(), nMeasurements.getIntegerValue());
       }
 
       populateYoVariablesSymmetricMatrix(yoR, R.getNumRows(), "R", registry);
@@ -172,8 +172,8 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         checkMatrixDimensions(x, nStates.getIntegerValue(), 1);
-         checkMatrixDimensions(P, nStates.getIntegerValue(), nStates.getIntegerValue());
+         CheckTools.checkMatrixDimensions(x, nStates.getIntegerValue(), 1);
+         CheckTools.checkMatrixDimensions(P, nStates.getIntegerValue(), nStates.getIntegerValue());
       }
 
       storeInYoVariablesVector(x, yoX);
@@ -184,7 +184,7 @@ public class YoKalmanFilter implements KalmanFilter
    {
       if (doChecks)
       {
-         checkMatrixDimensions(u, nInputs.getIntegerValue(), 1);
+         CheckTools.checkMatrixDimensions(u, nInputs.getIntegerValue(), 1);
       }
 
       checkForNaN(u);
