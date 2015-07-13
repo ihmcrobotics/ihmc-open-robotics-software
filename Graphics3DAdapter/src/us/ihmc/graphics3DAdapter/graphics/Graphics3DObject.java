@@ -30,8 +30,8 @@ import us.ihmc.graphics3DAdapter.graphics.instructions.primitives.Graphics3DTran
 import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.utilities.Axis;
-import us.ihmc.utilities.InertiaTools;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
+import us.ihmc.utilities.math.InertiaTools;
 import us.ihmc.utilities.math.geometry.ConvexPolygon2d;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.Shape3d;
