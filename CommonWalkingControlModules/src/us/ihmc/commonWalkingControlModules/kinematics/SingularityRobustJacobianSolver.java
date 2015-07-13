@@ -8,7 +8,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
-import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.compare.CheckTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;

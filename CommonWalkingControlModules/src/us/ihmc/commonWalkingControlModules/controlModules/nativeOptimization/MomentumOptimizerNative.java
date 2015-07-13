@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.CheckTools;
+import us.ihmc.utilities.compare.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
