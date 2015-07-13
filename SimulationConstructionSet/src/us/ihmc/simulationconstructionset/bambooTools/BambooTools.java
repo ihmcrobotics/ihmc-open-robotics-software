@@ -292,11 +292,6 @@ public class BambooTools
       return updateReturnValue;
    }
 
-   private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs)
-   {
-      return createMovieAndDataWithDateTimeClassMethod(rootDirectory, simplifiedRobotModelName, scs, 3);
-   }
-
    private static File[] createMovieAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs, int stackDepthForRelevantCallingMethod)
    {
       String dateString = DateTools.getDateString();
