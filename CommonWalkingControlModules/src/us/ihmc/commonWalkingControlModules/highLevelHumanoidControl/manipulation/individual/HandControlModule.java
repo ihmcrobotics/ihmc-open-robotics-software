@@ -435,6 +435,7 @@ public class HandControlModule
    {
       boolean isExecutingHandPose = stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_POSITION;
       isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.JOINT_SPACE;
+      isExecutingHandPose |= stateMachine.getCurrentStateEnum() == HandControlState.TASK_SPACE_FORCE_FEEDBACK_CONTROL;
 
       if ((handPoseStatusProducer != null) && isExecutingHandPose && isDone() &&!hasHandPoseStatusBeenSent.getBooleanValue())
       {
