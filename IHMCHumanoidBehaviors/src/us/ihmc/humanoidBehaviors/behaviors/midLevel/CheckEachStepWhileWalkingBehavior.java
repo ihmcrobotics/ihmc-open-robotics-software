@@ -235,10 +235,10 @@ public class CheckEachStepWhileWalkingBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      footstepListBehavior.finalize();
-      lookAtBehavior.finalize();
+      footstepListBehavior.doPostBehaviorCleanup();
+      lookAtBehavior.doPostBehaviorCleanup();
    }
 
    @Override

@@ -44,7 +44,7 @@ public class FootStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingFootStatePacket = null;

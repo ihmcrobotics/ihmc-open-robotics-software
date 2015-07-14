@@ -2876,7 +2876,7 @@ public class DiagnosticBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
    }
 

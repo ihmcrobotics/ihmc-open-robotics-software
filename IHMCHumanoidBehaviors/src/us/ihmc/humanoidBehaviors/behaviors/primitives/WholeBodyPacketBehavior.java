@@ -101,7 +101,7 @@ public class WholeBodyPacketBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSent.set(false);
@@ -110,7 +110,7 @@ public class WholeBodyPacketBehavior extends BehaviorInterface
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed.set(Double.NaN);
       packetsToSend.clear();
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 
    @Override

@@ -63,7 +63,7 @@ public class HandStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingHandStatePacket = null;

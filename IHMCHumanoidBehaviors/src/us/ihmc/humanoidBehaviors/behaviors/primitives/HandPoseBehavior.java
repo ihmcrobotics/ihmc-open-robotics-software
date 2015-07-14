@@ -245,7 +245,7 @@ public class HandPoseBehavior extends BehaviorInterface
       {
          isPausedDueToCollision.set(false);
          stopArmMotion();
-         finalize();
+         doPostBehaviorCleanup();
          isDone.set(true);
          PrintTools.debug(this, "Giving Up on Re-Attempting HandPoseBehavior \n");
       }
@@ -312,7 +312,7 @@ public class HandPoseBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingPacket = null;

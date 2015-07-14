@@ -141,7 +141,7 @@ public class HandPoseListBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingHandPoseListPacket = null;

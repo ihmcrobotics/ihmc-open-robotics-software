@@ -35,10 +35,10 @@ public class BehaviorStateMachine <E extends Enum<E>> extends GenericStateMachin
       currentState.stop();
    }
 
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       BehaviorStateWrapper<E> currentState = getAndCheckCurrentState();
-      currentState.finalize();
+      currentState.doPostBehaviorCleanup();
    }
 
    public void enableActions()

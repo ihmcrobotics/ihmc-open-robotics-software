@@ -48,7 +48,7 @@ public class ThighStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingThighStatePacket = null;

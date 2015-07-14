@@ -46,7 +46,7 @@ public abstract class BehaviorTask implements Task
    @Override
    public void doTransitionOutOfAction()
    {
-      behavior.finalize();
+      behavior.doPostBehaviorCleanup();
    }
 
    @Override

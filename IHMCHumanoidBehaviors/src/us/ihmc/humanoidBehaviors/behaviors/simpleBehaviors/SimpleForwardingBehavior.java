@@ -29,7 +29,7 @@ public class SimpleForwardingBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       if (communicationBridge != null)
          communicationBridge.setPacketPassThrough(false);

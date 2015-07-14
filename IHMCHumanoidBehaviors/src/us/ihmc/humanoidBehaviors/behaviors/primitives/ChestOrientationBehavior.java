@@ -74,7 +74,7 @@ public class ChestOrientationBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingChestOrientationPacket = null;

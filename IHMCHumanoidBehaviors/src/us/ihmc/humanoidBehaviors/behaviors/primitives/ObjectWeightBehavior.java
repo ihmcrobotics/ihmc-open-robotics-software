@@ -81,9 +81,9 @@ public class ObjectWeightBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
       hasInputBeenSet.set(false);
    }
 

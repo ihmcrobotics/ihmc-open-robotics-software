@@ -439,7 +439,7 @@ public class WalkToGoalBehavior extends BehaviorInterface {
 	}
 
 	@Override
-	public void finalize()
+	public void doPostBehaviorCleanup()
 	{
 		isPaused.set(false);
 		isStopped.set(false);

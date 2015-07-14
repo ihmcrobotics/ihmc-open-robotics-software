@@ -187,7 +187,7 @@ public class RemoveMultipleDebrisBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       debrisDataList.clear();
       sortedDebrisDataList.clear();

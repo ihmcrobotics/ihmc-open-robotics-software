@@ -111,7 +111,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 	}
 
 	@Override
-	public void finalize() {
+	public void doPostBehaviorCleanup() {
 		// TODO Auto-generated method stub
 
 	}
@@ -129,7 +129,7 @@ public class LocalizationBehavior extends BehaviorInterface {
 	}
 	
 	private void reloadScriptBehavior() {
-		scriptBehavior.finalize();
+		scriptBehavior.doPostBehaviorCleanup();
 		scriptBehavior.initialize();
 		scriptResourceStream = getClass().getClassLoader().getResourceAsStream(receivedScriptBehavior.getScriptName());
 		scriptBehavior.importChildInputPackets(getClass().getSimpleName(), scriptResourceStream,scriptObjectTransformToWorld);

@@ -284,12 +284,12 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       status = null;
       hasBeenInitialized.set(false);
       isDone.set(false);
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 
    @Override

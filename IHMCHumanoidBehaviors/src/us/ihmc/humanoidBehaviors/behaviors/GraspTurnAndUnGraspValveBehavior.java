@@ -190,13 +190,13 @@ public class GraspTurnAndUnGraspValveBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasInputBeenSet.set(false);
 
-      handPoseBehavior.finalize();
-      graspValveBehavior.finalize();
-      fingerStateBehavior.finalize();
+      handPoseBehavior.doPostBehaviorCleanup();
+      graspValveBehavior.doPostBehaviorCleanup();
+      fingerStateBehavior.doPostBehaviorCleanup();
    }
 
    @Override

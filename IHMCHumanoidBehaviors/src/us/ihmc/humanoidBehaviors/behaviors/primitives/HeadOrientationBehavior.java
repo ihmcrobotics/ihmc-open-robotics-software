@@ -75,7 +75,7 @@ public class HeadOrientationBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingHeadOrientationPacket = null;

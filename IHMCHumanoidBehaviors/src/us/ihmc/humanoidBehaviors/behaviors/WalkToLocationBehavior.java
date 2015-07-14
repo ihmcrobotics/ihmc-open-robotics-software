@@ -332,13 +332,13 @@ public class WalkToLocationBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       isPaused.set(false);
       isStopped.set(false);
       hasTargetBeenProvided.set(false);
       haveFootstepsBeenGenerated.set(false);
-      footstepListBehavior.finalize();
+      footstepListBehavior.doPostBehaviorCleanup();
    }
 
    public boolean hasInputBeenSet()

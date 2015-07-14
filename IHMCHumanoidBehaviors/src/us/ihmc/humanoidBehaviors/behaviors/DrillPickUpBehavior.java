@@ -223,13 +223,13 @@ public class DrillPickUpBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
 
       for (BehaviorInterface behavior : behaviors)
       {
-         behavior.finalize();
+         behavior.doPostBehaviorCleanup();
       }
    }
 

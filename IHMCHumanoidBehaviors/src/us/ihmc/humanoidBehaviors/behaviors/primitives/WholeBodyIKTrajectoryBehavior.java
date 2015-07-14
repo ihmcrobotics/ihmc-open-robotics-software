@@ -199,9 +199,9 @@ public class WholeBodyIKTrajectoryBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
       reset();
    }
 

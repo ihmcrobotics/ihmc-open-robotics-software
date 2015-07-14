@@ -42,7 +42,7 @@ public class FootstepTask extends BehaviorTask
    @Override
    public void doTransitionOutOfAction()
    {
-      footstepListBehavior.finalize();
+      footstepListBehavior.doPostBehaviorCleanup();
       footsteps.clear();
    }
 }

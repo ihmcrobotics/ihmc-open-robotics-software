@@ -48,7 +48,7 @@ public class BumStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingBumStatePacket = null;

@@ -424,7 +424,7 @@ public class PushButtonBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       haveInputsBeenSet.set(false);
       isDone.set(false);

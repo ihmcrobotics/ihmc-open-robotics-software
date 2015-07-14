@@ -48,7 +48,7 @@ public class HighLevelStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingHighLevelStatePacket = null;
