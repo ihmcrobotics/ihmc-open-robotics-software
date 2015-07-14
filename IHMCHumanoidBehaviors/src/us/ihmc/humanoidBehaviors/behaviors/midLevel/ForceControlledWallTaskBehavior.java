@@ -1,14 +1,3 @@
-/**
- * 
- * next steps:
- *    send handposepacket to controller
- *    wait for until done() (from controllerstate? or from trajectory?)
- *    send new handposepacket
- *    implement controller in taskspaceToJointspaceHandForcefeedbackControlState
- * 
- * 
- */
-
 package us.ihmc.humanoidBehaviors.behaviors.midLevel;
 
 import javax.vecmath.Matrix3d;
@@ -46,274 +35,311 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 public class ForceControlledWallTaskBehavior extends BehaviorInterface
 {
-   private final ConcurrentListeningQueue<HandPoseStatus> handStatusListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
-   protected Status status;
-   private BooleanYoVariable isDone;
+	private final ConcurrentListeningQueue<HandPoseStatus> handStatusListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
+	protected Status status;
+	private BooleanYoVariable isDone;
 
-   private final FullRobotModel fullrobotModel;
-   private final DoubleYoVariable yoTime;
-   private final YoGraphicsListRegistry visualizerYoGraphicsRegistry;
-   private final YoGraphicCoordinateSystem yoTrajectoryControlFrame;
-   private final YoFramePose yoHandPose;
+	private final FullRobotModel fullrobotModel;
+	private final DoubleYoVariable yoTime;
+	private final YoGraphicsListRegistry visualizerYoGraphicsRegistry;
+	private final YoGraphicCoordinateSystem yoTrajectoryControlFrame;
+	private final YoFramePose yoHandPose;
 
-   // Reference Frames
-   private final ReferenceFrame worldFrame;
-   private final ReferenceFrame chestFrame;
-   private final ReferenceFrame handControlFrame;
+	// Reference Frames
+	private final ReferenceFrame worldFrame;
+	private final ReferenceFrame chestFrame;
+	private final ReferenceFrame handControlFrame;
 
-   // Handpose commands
-   private HandPosePacket straightLineControlCmd;
-   private HandRotateAboutAxisPacket circleControlCmd;
-   private final DoubleYoVariable straightTrajectoryTime;
+	// Handpose commands
+	private HandPosePacket straightLineControlCmd;
+	private HandRotateAboutAxisPacket circleControlCmd;
+	private final DoubleYoVariable straightTrajectoryTime;
 
-   // Circle commands
-   private final DoubleYoVariable circleTrajectorytime;
-   private FrameVector rotationAxis;
-   private Point3d rotationAxisOriginInWorld;
-   private Vector3d rotationAxisInWorld;
-   private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.20);
+	// Circle commands
+	private final DoubleYoVariable circleTrajectorytime;
+	private FrameVector rotationAxis;
+	private Point3d rotationAxisOriginInWorld;
+	private Vector3d rotationAxisInWorld;
+	private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.20);
 
-   private FramePose startPose = new FramePose();
-   private Point3d nextCoordinate = new Point3d();
-   private Quat4d nextOrientation = new Quat4d();
+	private FramePose handPose = new FramePose();
+	private Point3d nextCoordinate = new Point3d();
+	private Quat4d nextOrientation = new Quat4d();
 
-   private Vector3d tempVector = new Vector3d();
-   private FramePoint tempFramePoint = new FramePoint();
-   private final static double EPSILON = 10.0e-3;
-   private final DoubleYoVariable distanceToGoal;
+	private Vector3d tempVector = new Vector3d();
+	private FramePoint tempFramePoint = new FramePoint();
+	private final static double EPSILON = 5.0e-3;
+	private final DoubleYoVariable distanceToGoal;
 
-   private enum BehaviorStates {SET_STARTPOSITION, WAIT_FOR_STARTPOSITION, WAIT_FOR_REACHING_GOAL, SEND_COMMAND_TO_CONTROLLER, DONE};
-   private EnumYoVariable<BehaviorStates> behaviorState;
-   
-   private final RobotSide robotSide;
-   private Matrix3d RotationMatrix;
+	private enum BehaviorStates {SET_STARTPOSITION, WAIT, SEND_CUT_COMMAND_TO_CONTROLLER, GET_TO_DROP_POSITION, DONE};
+	private EnumYoVariable<BehaviorStates> behaviorState;
+	private BehaviorStates nextBehaviorState;
 
-
-   public ForceControlledWallTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsRegistry)
-   {
-      super(outgoingCommunicationBridge);
-      this.fullrobotModel = fullRobotModel;
-      this.yoTime = yoTime;
-      this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
-      this.robotSide = RobotSide.RIGHT;
-      this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
-      
-      behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
-      behaviorState.set(null);
-      
-      isDone = new BooleanYoVariable("isDone", registry);
-      isDone.set(false);
-
-      // Reference Frames:
-      worldFrame = ReferenceFrames.getWorldFrame();
-      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-
-      yoHandPose = new YoFramePose("yoHandPose", worldFrame, registry);
-      yoTrajectoryControlFrame = new YoGraphicCoordinateSystem("yoTrajectoryControlFrame", yoHandPose, 0.2);
-      visualizerYoGraphicsRegistry.registerYoGraphic("yoTrajectoryControlFrameViz", yoTrajectoryControlFrame);
-
-      straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
-      circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
-      straightTrajectoryTime.set(5.0);
-      circleTrajectorytime.set(20.0);
-      
-      distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
-      straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
-      circleControlCmd = new HandRotateAboutAxisPacket();
-      rotationAxisInWorld = new Vector3d();
-      rotationAxisOriginInWorld = new Point3d();
-
-      rotationAxis = new FrameVector();
-
-      RotationMatrix = new Matrix3d();
-      if(robotSide == RobotSide.RIGHT)
-      {
-         RotationMatrix.rotZ(Math.PI / 2.0);
-      }
-      else if(robotSide == RobotSide.LEFT)
-      {
-         RotationMatrix.rotZ(-Math.PI / 2.0);
-      }
-      else
-      {
-         PrintTools.error(this, "robotSide not defined.");
-      }
-   }
-
-   @Override
-   public void doControl()
-   {
-      if (handStatusListeningQueue.isNewPacketAvailable())
-      {
-         consumeHandPoseStatus(handStatusListeningQueue.getNewestPacket());
-      }
-      
-      switch(behaviorState.getEnumValue())
-      {
-      case SET_STARTPOSITION:
-
-         startPose.changeFrame(worldFrame);
-         startPose.getPosition(nextCoordinate);
-         startPose.getOrientation(nextOrientation);
-
-         straightLineControlCmd.position = nextCoordinate;
-         straightLineControlCmd.orientation = nextOrientation;
-         straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
-         sendPacketToController(straightLineControlCmd);
-         PrintTools.debug(this, "Sent startposition to controller.");
-         behaviorState.set(BehaviorStates.WAIT_FOR_STARTPOSITION);
-         break;
-
-      case WAIT_FOR_STARTPOSITION:
-         // TODO: replace with status request condition
-
-         tempFramePoint.setToZero(handControlFrame);
-         tempFramePoint.changeFrame(worldFrame);
-         tempVector.set(tempFramePoint.getPoint().x, tempFramePoint.getPoint().y, tempFramePoint.getPoint().z);
-         tempVector.sub(nextCoordinate);
-
-         distanceToGoal.set(tempVector.length());
-         
-         if(distanceToGoal.getDoubleValue() < EPSILON)
-         {
-            behaviorState.set(BehaviorStates.SEND_COMMAND_TO_CONTROLLER);
-         }
-         break;
-
-      case SEND_COMMAND_TO_CONTROLLER:
-
-         startPose.changeFrame(worldFrame);
-         startPose.getPosition(rotationAxisOriginInWorld);
-         rotationAxisOriginInWorld.add(startToCenter);
-         rotationAxis.changeFrame(worldFrame);
-         rotationAxisInWorld.set(rotationAxis.getVector());
-         initializeForceControlCircle(rotationAxisOriginInWorld, rotationAxisInWorld, -5.0, -3.0);
-         sendPacketToController(circleControlCmd);
-         behaviorState.set(BehaviorStates.WAIT_FOR_REACHING_GOAL);
-         break;
-
-      case WAIT_FOR_REACHING_GOAL:
-         // TODO: replace with status request condition
-         behaviorState.set(BehaviorStates.DONE);
-         break;
-
-      case DONE:
-         isDone.set(true);
-         break;
-
-      default:
-         PrintTools.error(this, "No valid behavior state. Set initial state.");
-
-         break;
-      }
-   }
-
-   private void initializeForceControlCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double tangentialForce, double normalForce)
-   {
-      circleControlCmd.graspOffsetFromControlFrame = 0.0;
-      circleControlCmd.robotSide = robotSide;
-      circleControlCmd.trajectoryTime = circleTrajectorytime.getDoubleValue();
-      circleControlCmd.controlHandAngleAboutAxis = false;
-      circleControlCmd.rotationAxisInWorld = rotationAxisInWorld;
-      circleControlCmd.rotationAxisOriginInWorld = rotationAxisOriginInWorld;
-      circleControlCmd.rotationRightHandRule = 2.0 * Math.PI;
-
-      Vector3d normalForceVector = new Vector3d(rotationAxisInWorld);
-      normalForceVector.scale(normalForce);
-
-      circleControlCmd.setForceControlParameters(tangentialForce, normalForceVector);
-   }
-
-   private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
-   {
-      RobotSide statusRobotSide = handPoseStatus.getRobotSide();
-
-      if (statusRobotSide == robotSide)
-      {
-         status = handPoseStatus.getStatus();
-      }
-   }
-
-   @Override
-   protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   protected void passReceivedControllerObjectToChildBehaviors(Object object)
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public void stop()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public void enableActions()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public void pause()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public void resume()
-   {
-      // TODO Auto-generated method stub
-
-   }
-
-   @Override
-   public boolean isDone()
-   {
-      return isDone.getBooleanValue();
-   }
-
-   @Override
-   public void doPostBehaviorCleanup()
-   {
-      status = null;
-      hasBeenInitialized.set(false);
-      isDone.set(false);
-      defaultPostBehaviorCleanup();
-   }
-
-   @Override
-   public void initialize()
-   {
-      startPose.setToZero(chestFrame);
-      rotationAxis.setToZero(chestFrame);
-      rotationAxis.set(1.0, 0.0, 0.0);
-
-      startPose.setPosition(0.6, -0.05, -0.45);//okay
+	private final RobotSide robotSide;
+	private Matrix3d executionRotationMatrix;
+	private Matrix3d dropRotationMatrix;
+	private Vector3d startPositionInChest;
+	private Vector3d dropPositionInChest;
 
 
-      startPose.setOrientation(RotationMatrix);
-      behaviorState.set(BehaviorStates.SET_STARTPOSITION);
-      status = null;
-      hasBeenInitialized.set(true);
-   }
+	public ForceControlledWallTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsRegistry)
+	{
+		super(outgoingCommunicationBridge);
+		this.fullrobotModel = fullRobotModel;
+		this.yoTime = yoTime;
+		this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
+		this.robotSide = RobotSide.LEFT;
+		this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
 
-   @Override
-   public boolean hasInputBeenSet()
-   {
-      // TODO Auto-generated method stub
-      return false;
-   }
+		behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
+		behaviorState.set(null);
 
+		isDone = new BooleanYoVariable("isDone", registry);
+		isDone.set(false);
+
+		// Reference Frames:
+		worldFrame = ReferenceFrames.getWorldFrame();
+		chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+		handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+
+		yoHandPose = new YoFramePose("yoHandPose", worldFrame, registry);
+		yoTrajectoryControlFrame = new YoGraphicCoordinateSystem("yoTrajectoryControlFrame", yoHandPose, 0.2);
+		visualizerYoGraphicsRegistry.registerYoGraphic("yoTrajectoryControlFrameViz", yoTrajectoryControlFrame);
+
+		straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
+		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
+		circleTrajectorytime.set(20.0);
+
+		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
+		straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
+		circleControlCmd = new HandRotateAboutAxisPacket();
+		rotationAxisInWorld = new Vector3d();
+		rotationAxisOriginInWorld = new Point3d();
+
+		rotationAxis = new FrameVector();
+
+		executionRotationMatrix = new Matrix3d();
+		dropRotationMatrix = new Matrix3d();
+		startPositionInChest = new Vector3d();
+		dropPositionInChest = new Vector3d();
+		if(robotSide == RobotSide.RIGHT)
+		{
+			executionRotationMatrix.rotZ(Math.PI / 2.0);
+			startPositionInChest.set(0.6, -0.05, -0.45);
+			dropRotationMatrix.rotX(-Math.PI / 2.0);
+			dropPositionInChest.set(0.45, -0.55, -0.65);
+		}
+		else if(robotSide == RobotSide.LEFT)
+		{
+			executionRotationMatrix.rotZ(-Math.PI / 2.0);
+			startPositionInChest.set(0.6, +0.05, -0.45);
+			dropRotationMatrix.rotX(Math.PI / 2.0);
+			dropPositionInChest.set(0.45, +0.55, -0.65);
+		}
+		else
+		{
+			PrintTools.error(this, "robotSide not defined.");
+		}
+	}
+
+	@Override
+	public void doControl()
+	{
+		if (handStatusListeningQueue.isNewPacketAvailable())
+		{
+			consumeHandPoseStatus(handStatusListeningQueue.getNewestPacket());
+		}
+
+		switch(behaviorState.getEnumValue())
+		{
+		case SET_STARTPOSITION :
+			goToStartPosition();
+			nextBehaviorState = BehaviorStates.SEND_CUT_COMMAND_TO_CONTROLLER;
+			behaviorState.set(BehaviorStates.WAIT);
+			break;
+
+		case WAIT :
+			tempFramePoint.setToZero(handControlFrame);
+			tempFramePoint.changeFrame(worldFrame);
+			tempVector.set(tempFramePoint.getPoint().x, tempFramePoint.getPoint().y, tempFramePoint.getPoint().z);
+			tempVector.sub(nextCoordinate);
+
+			distanceToGoal.set(tempVector.length());
+
+			if(distanceToGoal.getDoubleValue() < EPSILON && status == Status.COMPLETED)
+			{
+				behaviorState.set(nextBehaviorState);
+				status = null;
+			}
+			break;
+
+		case SEND_CUT_COMMAND_TO_CONTROLLER :
+			sendCutCommand();
+			nextBehaviorState = BehaviorStates.GET_TO_DROP_POSITION;
+			behaviorState.set(BehaviorStates.WAIT);
+			break;
+
+		case GET_TO_DROP_POSITION :
+			goToDropPosition();
+			nextBehaviorState = BehaviorStates.DONE;
+			behaviorState.set(BehaviorStates.WAIT);
+			break;
+
+		case DONE :
+			isDone.set(true);
+			break;
+
+		default :
+			PrintTools.error(this, "No valid behavior state. Set initial state.");
+			break;
+		}
+	}
+
+	private void consumeHandPoseStatus(HandPoseStatus handPoseStatus)
+	{
+		RobotSide statusRobotSide = handPoseStatus.getRobotSide();
+
+		if (statusRobotSide == robotSide)
+		{
+			status = handPoseStatus.getStatus();
+		}
+	}
+
+	@Override
+	protected void passReceivedNetworkProcessorObjectToChildBehaviors(Object object)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void passReceivedControllerObjectToChildBehaviors(Object object)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void stop()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void enableActions()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void pause()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void resume()
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public boolean isDone()
+	{
+		return isDone.getBooleanValue();
+	}
+
+	@Override
+	public void doPostBehaviorCleanup()
+	{
+		status = null;
+		hasBeenInitialized.set(false);
+		isDone.set(false);
+		defaultPostBehaviorCleanup();
+	}
+
+	@Override
+	public void initialize()
+	{
+		handPose.setToZero(chestFrame);
+		handPose.setPosition(startPositionInChest);
+		handPose.setOrientation(executionRotationMatrix);
+
+		rotationAxis.setToZero(chestFrame);
+		rotationAxis.set(1.0, 0.0, 0.0);
+		behaviorState.set(BehaviorStates.SET_STARTPOSITION);
+
+		status = null;
+		hasBeenInitialized.set(true);
+	}
+
+	private void goToStartPosition()
+	{
+		handPose.changeFrame(worldFrame);
+		handPose.getPosition(nextCoordinate);
+		handPose.getOrientation(nextOrientation);
+		straightTrajectoryTime.set(5.0);
+		
+		straightLineControlCmd.position = nextCoordinate;
+		straightLineControlCmd.orientation = nextOrientation;
+		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
+		sendPacketToController(straightLineControlCmd);
+	}
+	
+	private void sendCutCommand()
+	{
+		handPose.changeFrame(worldFrame);
+		handPose.getPosition(rotationAxisOriginInWorld);
+		rotationAxisOriginInWorld.add(startToCenter);
+		rotationAxis.changeFrame(worldFrame);
+		rotationAxisInWorld.set(rotationAxis.getVector());
+		initializeForceControlCircle(rotationAxisOriginInWorld, rotationAxisInWorld, -5.0, -3.0);
+		sendPacketToController(circleControlCmd);
+	}
+	
+	private void initializeForceControlCircle(Point3d rotationAxisOriginInWorld, Vector3d rotationAxisInWorld, double tangentialForce, double normalForce)
+	{
+		circleControlCmd.graspOffsetFromControlFrame = 0.0;
+		circleControlCmd.robotSide = robotSide;
+		circleControlCmd.trajectoryTime = circleTrajectorytime.getDoubleValue();
+		circleControlCmd.controlHandAngleAboutAxis = false;
+		circleControlCmd.rotationAxisInWorld = rotationAxisInWorld;
+		circleControlCmd.rotationAxisOriginInWorld = rotationAxisOriginInWorld;
+		circleControlCmd.rotationRightHandRule = 2.0 * Math.PI;
+
+		Vector3d normalForceVector = new Vector3d(rotationAxisInWorld);
+		normalForceVector.scale(normalForce);
+
+		circleControlCmd.setForceControlParameters(tangentialForce, normalForceVector);
+	}
+
+	private void goToDropPosition()
+	{
+		handPose.setToZero(chestFrame);
+		handPose.setOrientation(dropRotationMatrix);
+		handPose.setPosition(dropPositionInChest);
+
+		handPose.changeFrame(worldFrame);
+		handPose.getPosition(nextCoordinate);
+		handPose.getOrientation(nextOrientation);
+
+		straightTrajectoryTime.set(5.0);
+		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
+		straightLineControlCmd.position = nextCoordinate;
+		straightLineControlCmd.orientation = nextOrientation;
+		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
+		sendPacketToController(straightLineControlCmd);
+	}
+
+	@Override
+	public boolean hasInputBeenSet()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
 }
 
