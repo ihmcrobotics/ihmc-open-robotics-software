@@ -505,7 +505,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
       if (jointControlMode == JointControlMode.POSITION_CONTROL)
       {
          disableJointPositionControl();
-         jointControlMode = null;
       }
    }
 
