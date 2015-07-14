@@ -196,7 +196,7 @@ public class DropDebrisBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       haveInputsBeenSet.set(false);
       isDone.set(false);

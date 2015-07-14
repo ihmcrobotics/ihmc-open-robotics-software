@@ -211,8 +211,8 @@ public abstract class BehaviorInterface implements RobotController
    /**
     * Clean up method that is called when leaving the behavior for another one.
     */
-   public abstract void finalize();
-   public void defaultFinalize()
+   public abstract void doPostBehaviorCleanup();
+   public void defaultPostBehaviorCleanup()
    {
       isPaused.set(false);
       isStopped.set(false);

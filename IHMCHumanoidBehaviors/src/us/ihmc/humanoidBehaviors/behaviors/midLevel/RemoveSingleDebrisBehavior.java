@@ -198,7 +198,7 @@ public class RemoveSingleDebrisBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       haveInputsBeenSet.set(false);
    }

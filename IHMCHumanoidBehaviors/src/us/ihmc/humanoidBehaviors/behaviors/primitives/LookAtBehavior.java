@@ -137,7 +137,7 @@ public class LookAtBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       initialize();
    }

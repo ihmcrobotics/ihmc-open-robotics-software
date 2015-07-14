@@ -85,7 +85,7 @@ public class KeepArmOutOfCinderBlocksBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       isPaused.set(false);
       isStopped.set(false);

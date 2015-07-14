@@ -578,7 +578,7 @@ public class ScriptBehavior extends BehaviorInterface
       PrintTools.debug(this, "Stopping");
       stateMachine.stop();
       scriptFinished.set(true);
-      finalize();
+      doPostBehaviorCleanup();
       if (childInputPackets != null)
       {
          childInputPackets.clear();
@@ -586,7 +586,7 @@ public class ScriptBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       PrintTools.debug(this, "Finalizing");
       scriptImported.set(false);
@@ -595,7 +595,7 @@ public class ScriptBehavior extends BehaviorInterface
       //      scriptResourceStream = null;
       scriptIndex = 0;
       childInputPackets = null;
-      stateMachine.finalize();
+      stateMachine.doPostBehaviorCleanup();
       stateMachine.setCurrentState(PrimitiveBehaviorType.IDLE);
    }
 

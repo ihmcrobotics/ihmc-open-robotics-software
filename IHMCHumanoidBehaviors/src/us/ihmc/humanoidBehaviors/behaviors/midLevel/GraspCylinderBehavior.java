@@ -157,7 +157,7 @@ public class GraspCylinderBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       haveInputsBeenSet.set(false);
    }

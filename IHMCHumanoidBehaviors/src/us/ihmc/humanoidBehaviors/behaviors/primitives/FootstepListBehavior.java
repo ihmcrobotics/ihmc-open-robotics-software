@@ -159,7 +159,7 @@ public class FootstepListBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       if (DEBUG)
          PrintTools.debug(this, "Finalize");

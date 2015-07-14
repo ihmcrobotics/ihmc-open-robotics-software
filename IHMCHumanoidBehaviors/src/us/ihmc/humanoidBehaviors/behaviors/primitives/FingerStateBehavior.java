@@ -157,7 +157,7 @@ public class FingerStateBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasInputBeenSet.set(false);
       hasPacketBeenSet.set(false);

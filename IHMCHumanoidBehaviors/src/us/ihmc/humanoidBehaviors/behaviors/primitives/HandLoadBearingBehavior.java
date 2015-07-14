@@ -48,7 +48,7 @@ public class HandLoadBearingBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       outgoingHandLoadBearingPacket = null;

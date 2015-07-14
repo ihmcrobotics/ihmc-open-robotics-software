@@ -23,9 +23,9 @@ public class SimpleDoNothingBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 
    @Override

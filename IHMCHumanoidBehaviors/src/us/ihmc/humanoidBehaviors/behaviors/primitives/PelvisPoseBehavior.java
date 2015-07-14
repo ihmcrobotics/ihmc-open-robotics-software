@@ -71,7 +71,7 @@ public class PelvisPoseBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingPelvisPosePacket = null;

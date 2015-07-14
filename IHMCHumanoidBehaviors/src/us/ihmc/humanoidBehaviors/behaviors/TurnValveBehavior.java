@@ -374,11 +374,11 @@ public class TurnValveBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       for (BehaviorInterface childBehavior : childBehaviors)
       {
-         childBehavior.finalize();
+         childBehavior.doPostBehaviorCleanup();
       }
 
       hasInputBeenSet.set(false);

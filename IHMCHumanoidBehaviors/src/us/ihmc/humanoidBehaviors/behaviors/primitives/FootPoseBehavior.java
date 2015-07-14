@@ -80,7 +80,7 @@ public class FootPoseBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       hasPacketBeenSent.set(false);
       outgoingFootPosePacket = null;

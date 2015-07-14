@@ -167,9 +167,9 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 
    @Override
@@ -182,6 +182,6 @@ public class LocalizeDrillBehavior extends BehaviorInterface implements VideoStr
    @Override
    public void initialize()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 }

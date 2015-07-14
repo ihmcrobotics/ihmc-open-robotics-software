@@ -323,7 +323,7 @@ public class GraspPieceOfDebrisBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       haveInputsBeenSet.set(false);
       hasTasksBeenSetUp.set(false);

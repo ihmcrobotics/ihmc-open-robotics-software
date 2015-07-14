@@ -115,9 +115,9 @@ public class ReceiveImageBehavior extends BehaviorInterface implements VideoStre
 	}
 
 	@Override
-	public void finalize()
+	public void doPostBehaviorCleanup()
 	{
-	   defaultFinalize();
+	   defaultPostBehaviorCleanup();
 	}
 
 	
@@ -131,6 +131,6 @@ public class ReceiveImageBehavior extends BehaviorInterface implements VideoStre
    @Override
    public void initialize()
    {
-      defaultFinalize();
+      defaultPostBehaviorCleanup();
    }
 }

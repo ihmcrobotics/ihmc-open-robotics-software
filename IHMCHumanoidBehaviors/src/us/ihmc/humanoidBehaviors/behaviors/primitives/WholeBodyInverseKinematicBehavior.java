@@ -163,7 +163,7 @@ public class WholeBodyInverseKinematicBehavior extends BehaviorInterface
    }
 
    @Override
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
       packetHasBeenSent.set(false);
       hasInputBeenSet.set(false);

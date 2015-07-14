@@ -39,7 +39,7 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
    @Override
    public void doTransitionOutOfAction()
    {
-      behavior.finalize();
+      behavior.doPostBehaviorCleanup();
    }
 
    @Override
@@ -68,9 +68,9 @@ public class BehaviorStateWrapper <E extends Enum<E>> extends State<E>
       behavior.enableActions();
    }
    
-   public void finalize()
+   public void doPostBehaviorCleanup()
    {
-      behavior.finalize();
+      behavior.doPostBehaviorCleanup();
    }
 
    public BehaviorInterface getBehavior()
