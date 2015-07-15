@@ -5,6 +5,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
+import org.xbill.DNS.NXTRecord;
+
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -55,32 +57,34 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private HandRotateAboutAxisPacket circleControlCmd;
 	private final DoubleYoVariable straightTrajectoryTime;
 
-	// Circle commands
+	// Circle
 	private final DoubleYoVariable circleTrajectorytime;
-	private FrameVector rotationAxis;
-	private Point3d rotationAxisOriginInWorld;
-	private Vector3d rotationAxisInWorld;
+	private FramePoint rotationAxisOrigin = new FramePoint();
+	private FrameVector rotationAxis = new FrameVector();
 	private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.20);
-
+	
+	// Straight lines
 	private FramePose handPose = new FramePose();
-	private Point3d nextCoordinate = new Point3d();
-	private Quat4d nextOrientation = new Quat4d();
-
+	private FramePoint nextCoordinate = new FramePoint();
+	private Quat4d nextOrientationInWorld = new Quat4d();
+	
 	private Vector3d tempVector = new Vector3d();
 	private FramePoint tempFramePoint = new FramePoint();
 	private final static double EPSILON = 5.0e-3;
 	private final DoubleYoVariable distanceToGoal;
 
-	private enum BehaviorStates {SET_STARTPOSITION, WAIT, SEND_CUT_COMMAND_TO_CONTROLLER, GET_TO_DROP_POSITION, DONE};
+	private enum BehaviorStates {SET_STARTPOSITION, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
 	private EnumYoVariable<BehaviorStates> behaviorState;
 	private BehaviorStates nextBehaviorState;
 
 	private final RobotSide robotSide;
 	private Matrix3d executionRotationMatrix;
 	private Matrix3d dropRotationMatrix;
-	private Vector3d startPositionInChest;
-	private Vector3d dropPositionInChest;
-
+	
+	private FramePoint startPosition;
+	private FramePoint startCutPosition;
+	private FrameVector drillInsertion;
+	private FramePoint dropPosition;
 
 	public ForceControlledWallTaskBehavior(OutgoingCommunicationBridgeInterface outgoingCommunicationBridge, ReferenceFrames referenceFrames, FullRobotModel fullRobotModel, DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsRegistry)
 	{
@@ -88,7 +92,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		this.fullrobotModel = fullRobotModel;
 		this.yoTime = yoTime;
 		this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
-		this.robotSide = RobotSide.LEFT;
+		this.robotSide = RobotSide.RIGHT;
 		this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
 
 		behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
@@ -108,33 +112,41 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		straightTrajectoryTime = new DoubleYoVariable("straightTrajectoryTime", registry);
 		circleTrajectorytime = new DoubleYoVariable("circularTrajectoryTime", registry);
-		circleTrajectorytime.set(20.0);
+		circleTrajectorytime.set(30.0);
 
 		distanceToGoal = new DoubleYoVariable(getName()+ "distanceToGoal", registry);
 		straightLineControlCmd = new HandPosePacket(robotSide, Frame.WORLD, null, null, 1.0);
 		circleControlCmd = new HandRotateAboutAxisPacket();
-		rotationAxisInWorld = new Vector3d();
-		rotationAxisOriginInWorld = new Point3d();
 
 		rotationAxis = new FrameVector();
 
 		executionRotationMatrix = new Matrix3d();
 		dropRotationMatrix = new Matrix3d();
-		startPositionInChest = new Vector3d();
-		dropPositionInChest = new Vector3d();
+		
+		
+		startPosition = new FramePoint(chestFrame);
+		startCutPosition = new FramePoint(chestFrame);
+		dropPosition = new FramePoint(chestFrame);
+		
+		drillInsertion = new FrameVector(chestFrame, 0.1, 0.0, 0.0);
+		
 		if(robotSide == RobotSide.RIGHT)
 		{
 			executionRotationMatrix.rotZ(Math.PI / 2.0);
-			startPositionInChest.set(0.6, -0.05, -0.45);
+			startPosition.set(0.5, -0.05, -0.45);
+			startCutPosition.set(startPosition);
+			startCutPosition.add(drillInsertion);
 			dropRotationMatrix.rotX(-Math.PI / 2.0);
-			dropPositionInChest.set(0.45, -0.55, -0.65);
+			dropPosition.set(0.45, -0.55, -0.65);
 		}
 		else if(robotSide == RobotSide.LEFT)
 		{
 			executionRotationMatrix.rotZ(-Math.PI / 2.0);
-			startPositionInChest.set(0.6, +0.05, -0.45);
+			startPosition.set(0.5, +0.05, -0.45);
+			startCutPosition.set(startPosition);
+			startCutPosition.add(drillInsertion);
 			dropRotationMatrix.rotX(Math.PI / 2.0);
-			dropPositionInChest.set(0.45, +0.55, -0.65);
+			dropPosition.set(0.45, +0.55, -0.65);
 		}
 		else
 		{
@@ -154,7 +166,19 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		{
 		case SET_STARTPOSITION :
 			goToStartPosition();
+			nextBehaviorState = BehaviorStates.INSERT_DRILL;
+			behaviorState.set(BehaviorStates.WAIT);
+			break;
+			
+		case INSERT_DRILL :
+			insertDrill();
 			nextBehaviorState = BehaviorStates.SEND_CUT_COMMAND_TO_CONTROLLER;
+			behaviorState.set(BehaviorStates.WAIT);
+			break;
+			
+		case RETRACT_DRILL :
+			retractDrill();
+			nextBehaviorState = BehaviorStates.GET_TO_DROP_POSITION;
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 
@@ -162,7 +186,12 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 			tempFramePoint.setToZero(handControlFrame);
 			tempFramePoint.changeFrame(worldFrame);
 			tempVector.set(tempFramePoint.getPoint().x, tempFramePoint.getPoint().y, tempFramePoint.getPoint().z);
-			tempVector.sub(nextCoordinate);
+			if(nextCoordinate.getReferenceFrame() != worldFrame)
+			{
+				nextCoordinate.changeFrame(worldFrame);
+			}
+			
+			tempVector.sub(nextCoordinate.getPoint());
 
 			distanceToGoal.set(tempVector.length());
 
@@ -175,7 +204,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		case SEND_CUT_COMMAND_TO_CONTROLLER :
 			sendCutCommand();
-			nextBehaviorState = BehaviorStates.GET_TO_DROP_POSITION;
+			nextBehaviorState = BehaviorStates.RETRACT_DRILL;
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 
@@ -266,7 +295,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	public void initialize()
 	{
 		handPose.setToZero(chestFrame);
-		handPose.setPosition(startPositionInChest);
+		handPose.setPosition(startPosition);
+		
 		handPose.setOrientation(executionRotationMatrix);
 
 		rotationAxis.setToZero(chestFrame);
@@ -276,25 +306,57 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		status = null;
 		hasBeenInitialized.set(true);
 	}
+	
+	private void insertDrill()
+	{
+		handPose.setToZero(chestFrame);
+		handPose.setPosition(startCutPosition);
+		handPose.setOrientation(executionRotationMatrix);
+		
+		handPose.changeFrame(worldFrame);
+		handPose.getPositionIncludingFrame(nextCoordinate);
+		handPose.getOrientation(nextOrientationInWorld);
+		
+		straightTrajectoryTime.set(5.0);
+		
+		moveInStraightLine(nextCoordinate.getPoint(), nextOrientationInWorld, straightTrajectoryTime.getDoubleValue());
+		
+	}
+	
+	private void retractDrill()
+	{
+		//TODO
+		handPose.setToZero(handControlFrame);
+		handPose.changeFrame(chestFrame);
+		handPose.getPositionIncludingFrame(nextCoordinate);
+		nextCoordinate.sub(drillInsertion);
+		
+		handPose.changeFrame(worldFrame);
+		handPose.getOrientation(nextOrientationInWorld);
+		
+		nextCoordinate.changeFrame(worldFrame);
+		straightTrajectoryTime.set(5.0);
+		moveInStraightLine(nextCoordinate.getPoint(), nextOrientationInWorld, straightTrajectoryTime.getDoubleValue());
+	}
 
 	private void goToStartPosition()
 	{
 		handPose.changeFrame(worldFrame);
-		handPose.getPosition(nextCoordinate);
-		handPose.getOrientation(nextOrientation);
+		handPose.getPositionIncludingFrame(nextCoordinate);
+		handPose.getOrientation(nextOrientationInWorld);
 		straightTrajectoryTime.set(5.0);
 		
-		moveInStraightLine(nextCoordinate, nextOrientation, straightTrajectoryTime.getDoubleValue());
+		moveInStraightLine(nextCoordinate.getPoint(), nextOrientationInWorld, straightTrajectoryTime.getDoubleValue());
 	}
 	
 	private void sendCutCommand()
 	{
 		handPose.changeFrame(worldFrame);
-		handPose.getPosition(rotationAxisOriginInWorld);
-		rotationAxisOriginInWorld.add(startToCenter);
+		handPose.getPositionIncludingFrame(rotationAxisOrigin);
+		rotationAxisOrigin.add(startToCenter);
 		rotationAxis.changeFrame(worldFrame);
-		rotationAxisInWorld.set(rotationAxis.getVector());
-		initializeForceControlCircle(rotationAxisOriginInWorld, rotationAxisInWorld, -5.0, -3.0);
+		
+		initializeForceControlCircle(rotationAxisOrigin.getPoint(), rotationAxis.getVector(), -5.0, -3.0);
 		sendPacketToController(circleControlCmd);
 	}
 	
@@ -318,15 +380,15 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	{
 		handPose.setToZero(chestFrame);
 		handPose.setOrientation(dropRotationMatrix);
-		handPose.setPosition(dropPositionInChest);
+		handPose.setPosition(dropPosition);
 
 		handPose.changeFrame(worldFrame);
-		handPose.getPosition(nextCoordinate);
-		handPose.getOrientation(nextOrientation);
+		handPose.getPositionIncludingFrame(nextCoordinate);
+		handPose.getOrientation(nextOrientationInWorld);
 
 		straightTrajectoryTime.set(5.0);
 		
-		moveInStraightLine(nextCoordinate, nextOrientation, straightTrajectoryTime.getDoubleValue());
+		moveInStraightLine(nextCoordinate.getPoint(), nextOrientationInWorld, straightTrajectoryTime.getDoubleValue());
 	}
 
 	private void moveInStraightLine(Point3d nextCoordinateInWorld, Quat4d nextOrientationInWorld, double trajectoryTime)
