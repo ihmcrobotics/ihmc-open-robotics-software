@@ -284,10 +284,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		handPose.getOrientation(nextOrientation);
 		straightTrajectoryTime.set(5.0);
 		
-		straightLineControlCmd.position = nextCoordinate;
-		straightLineControlCmd.orientation = nextOrientation;
-		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
-		sendPacketToController(straightLineControlCmd);
+		moveInStraightLine(nextCoordinate, nextOrientation, straightTrajectoryTime.getDoubleValue());
 	}
 	
 	private void sendCutCommand()
@@ -328,13 +325,18 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		handPose.getOrientation(nextOrientation);
 
 		straightTrajectoryTime.set(5.0);
-		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
-		straightLineControlCmd.position = nextCoordinate;
-		straightLineControlCmd.orientation = nextOrientation;
-		straightLineControlCmd.trajectoryTime = straightTrajectoryTime.getDoubleValue();
-		sendPacketToController(straightLineControlCmd);
+		
+		moveInStraightLine(nextCoordinate, nextOrientation, straightTrajectoryTime.getDoubleValue());
 	}
 
+	private void moveInStraightLine(Point3d nextCoordinateInWorld, Quat4d nextOrientationInWorld, double trajectoryTime)
+	{
+		straightLineControlCmd.position = nextCoordinateInWorld;
+		straightLineControlCmd.orientation = nextOrientationInWorld;
+		straightLineControlCmd.trajectoryTime = trajectoryTime;
+		sendPacketToController(straightLineControlCmd);
+	}
+	
 	@Override
 	public boolean hasInputBeenSet()
 	{
