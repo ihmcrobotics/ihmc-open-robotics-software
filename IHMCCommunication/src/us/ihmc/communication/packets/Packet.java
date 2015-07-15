@@ -1,7 +1,7 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.communication.packetAnnotations.IgnoreField;
-import us.ihmc.utilities.compare.ComparableDataObject;
+import us.ihmc.communication.ComparableDataObject;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 

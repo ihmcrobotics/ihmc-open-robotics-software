@@ -35,7 +35,7 @@ import javax.swing.plaf.basic.BasicArrowButton;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
-import us.ihmc.utilities.compare.ComparableDataObject;
+import us.ihmc.communication.ComparableDataObject;
 import us.ihmc.utilities.math.TimeTools;
 
 public class ScriptEditorInterface
