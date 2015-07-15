@@ -7,8 +7,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.TransformableDataObject;
-import us.ihmc.utilities.io.printing.PrintTools;
+import us.ihmc.communication.TransformableDataObject;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 
 import com.thoughtworks.xstream.XStream;
