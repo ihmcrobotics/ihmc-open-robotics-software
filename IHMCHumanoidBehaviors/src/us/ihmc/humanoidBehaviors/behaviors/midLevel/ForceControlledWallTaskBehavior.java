@@ -128,7 +128,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		startPosition = new FramePoint(chestFrame);
 		startCutPosition = new FramePoint(chestFrame);
 		dropPosition = new FramePoint(chestFrame);
-		drillInsertion = new FrameVector(chestFrame, 0.1, 0.0, 0.0);
+		drillInsertion = new FrameVector(chestFrame, 0.15, 0.0, 0.0);
 		
 		// Set coordinates depending on robotSide
 		executionRotationMatrix.rotZ(robotSide.negateIfLeftSide(Math.PI / 2.0));
