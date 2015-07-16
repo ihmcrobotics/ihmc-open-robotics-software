@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.linearDynamicSystems.TransferFunction;
-import us.ihmc.utilities.test.HumanAssistedTestFrame;
 
 /**
  * All tests ignored because they are human assisted. They also might not work.
