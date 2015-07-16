@@ -228,29 +228,34 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       for (SCSVisualizerStateListener stateListener : stateListeners)
          stateListener.starting(scs, robot, this.registry);
 
-      //TODO: Jesper needs to implement this correctly
-//      final JToggleButton record = new JToggleButton("Pause recording");
-//      scs.addButton(record);
-//      record.addActionListener(new ActionListener()
-//      {   
-//         @Override
-//         public void actionPerformed(ActionEvent e)
-//         {
-//            if(record.isSelected())
-//            {
-//               recording = false;
-//               record.setText("Resume recording");
-//               scs.setScrollGraphsEnabled(true);
-//            }
-//            else
-//            {
-//               scs.gotoOutPointNow();
-//               recording = true;
-//               record.setText("Pause recording");
-//               scs.setScrollGraphsEnabled(false);
-//            }
-//         }
-//      });
+      final JToggleButton record = new JToggleButton("Pause recording");
+      scs.addButton(record);
+      record.addActionListener(new ActionListener()
+      {   
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            if(record.isSelected())
+            {
+               synchronized (this)
+               {
+                  recording = false;
+                  record.setText("Resume recording");
+                  scs.setScrollGraphsEnabled(true);                  
+               }
+            }
+            else
+            {
+               synchronized (this)
+               {
+                  scs.gotoOutPointNow();
+                  recording = true;
+                  record.setText("Pause recording");
+                  scs.setScrollGraphsEnabled(false);                  
+               }
+            }
+         }
+      });
       
       for (String yoVariableName : buttons.keySet())
       {
@@ -291,5 +296,11 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void clearLog()
    {
+   }
+
+   @Override
+   public synchronized boolean executeVariableChangedListeners()
+   {
+      return recording;
    }
 }

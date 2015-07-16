@@ -84,10 +84,13 @@ public class LogControlClient implements NetStateListener
 
       public void variableChanged(YoVariable<?> v)
       {
-         VariableChangeRequest request = new VariableChangeRequest();
-         request.variableID = id;
-         request.requestedValue = v.getValueAsDouble();
-         client.consumeObject(request);
+         if(listener.executeVariableChangedListeners())
+         {
+            VariableChangeRequest request = new VariableChangeRequest();
+            request.variableID = id;
+            request.requestedValue = v.getValueAsDouble();
+            client.consumeObject(request);
+         }
       }
    }
 

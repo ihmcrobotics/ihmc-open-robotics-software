@@ -447,4 +447,10 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
+   @Override
+   public boolean executeVariableChangedListeners()
+   {
+      return false;
+   }
+
 }

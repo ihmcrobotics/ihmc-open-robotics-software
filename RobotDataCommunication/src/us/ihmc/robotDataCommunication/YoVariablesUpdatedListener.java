@@ -34,4 +34,6 @@ public interface YoVariablesUpdatedListener
 
    public void clearLog();
 
+   public boolean executeVariableChangedListeners();
+
 }
