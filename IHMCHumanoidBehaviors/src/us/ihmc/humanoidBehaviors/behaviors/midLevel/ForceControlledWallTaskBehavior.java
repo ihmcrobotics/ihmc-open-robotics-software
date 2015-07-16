@@ -92,7 +92,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		this.fullrobotModel = fullRobotModel;
 		this.yoTime = yoTime;
 		this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
-		this.robotSide = RobotSide.RIGHT;
+		this.robotSide = RobotSide.LEFT;
 		this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
 
 		behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
@@ -127,31 +127,15 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		startPosition = new FramePoint(chestFrame);
 		startCutPosition = new FramePoint(chestFrame);
 		dropPosition = new FramePoint(chestFrame);
-		
 		drillInsertion = new FrameVector(chestFrame, 0.1, 0.0, 0.0);
 		
-		if(robotSide == RobotSide.RIGHT)
-		{
-			executionRotationMatrix.rotZ(Math.PI / 2.0);
-			startPosition.set(0.5, -0.05, -0.45);
-			startCutPosition.set(startPosition);
-			startCutPosition.add(drillInsertion);
-			dropRotationMatrix.rotX(-Math.PI / 2.0);
-			dropPosition.set(0.45, -0.55, -0.65);
-		}
-		else if(robotSide == RobotSide.LEFT)
-		{
-			executionRotationMatrix.rotZ(-Math.PI / 2.0);
-			startPosition.set(0.5, +0.05, -0.45);
-			startCutPosition.set(startPosition);
-			startCutPosition.add(drillInsertion);
-			dropRotationMatrix.rotX(Math.PI / 2.0);
-			dropPosition.set(0.45, +0.55, -0.65);
-		}
-		else
-		{
-			PrintTools.error(this, "robotSide not defined.");
-		}
+		// Set coordinateds depending on robotSide
+		executionRotationMatrix.rotZ(robotSide.negateIfLeftSide(Math.PI / 2.0));
+		startPosition.set(0.5, robotSide.negateIfRightSide(0.05), -0.45);
+		startCutPosition.set(startPosition);
+		startCutPosition.add(drillInsertion);
+		dropRotationMatrix.rotX(robotSide.negateIfRightSide(Math.PI / 2.0));
+		dropPosition.set(0.45, robotSide.negateIfRightSide(0.55), -0.65);
 	}
 
 	@Override
@@ -325,7 +309,6 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	
 	private void retractDrill()
 	{
-		//TODO
 		handPose.setToZero(handControlFrame);
 		handPose.changeFrame(chestFrame);
 		handPose.getPositionIncludingFrame(nextCoordinate);
@@ -386,7 +369,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		handPose.getPositionIncludingFrame(nextCoordinate);
 		handPose.getOrientation(nextOrientationInWorld);
 
-		straightTrajectoryTime.set(5.0);
+		straightTrajectoryTime.set(10.0);
 		
 		moveInStraightLine(nextCoordinate.getPoint(), nextOrientationInWorld, straightTrajectoryTime.getDoubleValue());
 	}
