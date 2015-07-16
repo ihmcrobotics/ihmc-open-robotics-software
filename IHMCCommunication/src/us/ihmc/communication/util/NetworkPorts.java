@@ -40,8 +40,6 @@ public class NetworkPorts
    public static final NetworkPorts MISSION_CONTROL_CPU0_TEST_PORT = new NetworkPorts(2147);
    public static final NetworkPorts MISSION_CONTROL_CPU1_TEST_PORT = new NetworkPorts(2148);
    public static final NetworkPorts MISSION_CONTROL_CPU2_TEST_PORT = new NetworkPorts(2149);
-   public static final NetworkPorts MISSION_CONTROL_FIELD_SHAPER_TEST_PORT = new NetworkPorts(2150);
-   public static final NetworkPorts MISSION_CONTROL_OCU_SHAPER_TEST_PORT = new NetworkPorts(2151);
 
    // Dynamic ports for testing purposes
    public static NetworkPorts createMissionControlIntraprocessPort(NetworkPorts port)
