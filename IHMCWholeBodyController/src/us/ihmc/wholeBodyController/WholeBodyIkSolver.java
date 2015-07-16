@@ -41,6 +41,9 @@ import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
 /*
  * This class is a front-end to the HierarchicalIKSolver.
+ * It adds some customization and initialization and an higher level API on top of it.
+ * A specific robot should implement the abstract classes, in particular configureTasks().
+ * 
  */
 abstract public class WholeBodyIkSolver
 {
@@ -58,11 +61,11 @@ abstract public class WholeBodyIkSolver
       }
    }
 
-   public enum ComputeResult { 
-      FAILED_DISABLED,
+   static public enum ComputeResult { 
+      FAILED_DISABLED,        // the solver is disabled (i.e. using LockLevel.DISABLED).
       FAILED_INVALID,         // calculated solution is completely wrong
       FAILED_NOT_CONVERGED,   // calculated solution is not good enough, but you might want to double check the error to see if it is acceptable.
-      SUCCEEDED               // calculated solution is good.
+      SUCCEEDED               // calculated solution converged.
    };
 
    ///--------------- Constants -----------------------------------------
@@ -78,9 +81,9 @@ abstract public class WholeBodyIkSolver
    }
 
    static public enum ComputeOption { 
-      RESEED,  // create a random joint pose and search again a solution.
-      USE_ACTUAL_MODEL_JOINTS,  // use the actual position of the robot's joints as initial guess.
-      USE_JOINTS_CACHE,  // use the last computed position of the joints as initial guess.
+      RESEED,                    // create a random joint pose and search again a solution.
+      USE_ACTUAL_MODEL_JOINTS,   // use the actual position of the robot's joints as initial guess.
+      USE_JOINTS_CACHE,          // use the last computed position of the joints as initial guess.
       RELAX };
 
       // I just like shorter names :/
@@ -99,11 +102,24 @@ abstract public class WholeBodyIkSolver
 
       //---------------  tasks assigned to this solver --------------------------------
       public HierarchicalTask_COM        taskComPosition;
+    
+      // this task is the last in the hierarchy and controls the posture of the robot in
+      // joint space.
       public HierarchicalTask_JointsPose taskJointsPose;
+      
+      // Task use to control mostly the pelvis. Note that when taskComPosition is active, this task
+      // should control only the rotation.
       public final HierarchicalTask_BodyPose taskPelvisPose;
+      
+      // Task that controls the foot position of the leg opposite to the root foot.
+      public final HierarchicalTask_BodyPose taskLegPose;
+     
+      // NOTE: HierarchicalTask_BodyPose can be used to control 6 degrees of freedom.
+      // Nevertheless we split this 6 DoF task in two tasks, each of them controlling 3 DoF.
+      // This allows us to prioritize the position task over the rotation one.
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorPosition = new SideDependentList<HierarchicalTask_BodyPose>();
       public final SideDependentList<HierarchicalTask_BodyPose> taskEndEffectorRotation = new SideDependentList<HierarchicalTask_BodyPose>();
-      public final HierarchicalTask_BodyPose taskLegPose;
+ 
 
       // ------------- Parameters that change the overall behavior ----------------------
 
@@ -122,6 +138,8 @@ abstract public class WholeBodyIkSolver
 
       private boolean suggestKneeAngle = true;
 
+      // All the parameters that affect the behavior of the solver are stored in this
+      // sub class to make easier to save and load them
       public class WholeBodyConfiguration
       {
          private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
@@ -199,7 +217,6 @@ abstract public class WholeBodyIkSolver
       protected final int[] waistJointId;
 
       protected final DenseMatrix64F coupledJointWeights;
-     // protected final Vector64F      preferedJointPose;
 
       // this is used to store the initial position that is sent to the Hierarchical solver
       protected final Vector64F cachedAnglesQ;
@@ -318,15 +335,7 @@ abstract public class WholeBodyIkSolver
       public RigidBodyTransform getLocalBodyTransform(int bodyid )
       {
          RigidBodyTransform out = new RigidBodyTransform();
-         VectorXd body_rot = new VectorXd(4);
-         VectorXd body_pos = new VectorXd(3);
-         getHierarchicalSolver().getForwardSolver().getBodyPose( bodyid, body_rot, body_pos);
-
-         Quat4d quat = new Quat4d( body_rot.get(0), body_rot.get(1), body_rot.get(2), body_rot.get(3) );
-         quat.inverse();
-
-         out.setRotation( quat );
-         out.setTranslation( new Vector3d( body_pos.get(0), body_pos.get(1), body_pos.get(2) ) ); 
+         getHierarchicalSolver().getForwardSolver().getBodyPose( bodyid, out);
          return out;
       }
 
@@ -537,7 +546,7 @@ abstract public class WholeBodyIkSolver
                weightForRotationOnly = new Vector64F(6, 1,1,1,  1,1,1 );
             }
             
-         taskPelvisPose.setWeightError( weightForRotationOnly );
+       //  taskPelvisPose.setWeightError( weightForRotationOnly );
          taskPelvisPose.setWeightsTaskSpace( weightForRotationOnly );
       }
 
@@ -648,35 +657,34 @@ abstract public class WholeBodyIkSolver
 
             case DOF_3P:
                taskEndEffectorPosition.get(side).setEnabled(true);
-               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,   0.01,  0.01, 0.01) );
-               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,   0,     0,    0) );
+               taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,   0.0,  0.0, 0.0) );
+             //  taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,   0,     0,    0) );
                
                taskEndEffectorRotation.get(side).setEnabled(false);      
                taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,   0, 0, 0) );          
-               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,   0, 0, 0) );
+             //  taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,   0, 0, 0) );
                break;
 
 
             case DOF_3P3R:
                taskEndEffectorPosition.get(side).setEnabled(true);
                taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );
-               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
+           //    taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
                
                taskEndEffectorRotation.get(side).setEnabled(true);
                taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  0.5,  0.5,  0.5) );
-               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
+            //   taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
                break;   
 
             case DOF_3P2R:
 
                taskEndEffectorPosition.get(side).setEnabled(true);
                taskEndEffectorPosition.get(side).setWeightsTaskSpace( new Vector64F(6, 1, 1, 1,  0, 0, 0) );           
-               taskEndEffectorPosition.get(side).setWeightError(      new Vector64F(6, 1, 1, 1,  0, 0, 0) );
 
                //-------------
                taskEndEffectorRotation.get(side).setEnabled(true);
-               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
-               taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
+               taskEndEffectorRotation.get(side).setWeightsTaskSpace( new Vector64F(6, 0, 0, 0,  1, 1, 1) );
+           //    taskEndEffectorRotation.get(side).setWeightError(      new Vector64F(6, 0, 0, 0,  1.0,  1.0,  1.0) );
                
                Vector3d axisToDisable = new Vector3d(0, 1, 0);
                taskEndEffectorRotation.get(side).disableAxisInTaskSpace(rotationWeight, axisToDisable );  
@@ -691,7 +699,7 @@ abstract public class WholeBodyIkSolver
          double val = enable ? 1 : 0; 
 
          taskJointsPose.getWeightsJointSpace().set(index, val);
-         taskJointsPose.getWeightsError().set( index, val );
+       //  taskJointsPose.getWeightsError().set( index, val );
 
          getHierarchicalSolver().collisionAvoidance.getJointWeights().set(index, val);
 
