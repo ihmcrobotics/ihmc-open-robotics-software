@@ -70,7 +70,8 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	
 	private Vector3d tempVector = new Vector3d();
 	private FramePoint tempFramePoint = new FramePoint();
-	private final static double EPSILON = 5.0e-3;
+	//TODO: Eventually add Integrator part on low level forearm controllers.
+	private final static double EPSILON = 100.0; //5.0e-3;
 	private final DoubleYoVariable distanceToGoal;
 
 	private enum BehaviorStates {SET_STARTPOSITION, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
