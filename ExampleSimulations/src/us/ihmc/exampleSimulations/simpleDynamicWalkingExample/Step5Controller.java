@@ -101,6 +101,8 @@ public class Step5Controller implements RobotController
    @Override
    public void doControl()
    {
+      rob.updateIDRobot();
+      
       for (RobotSide robotSide : RobotSide.values())
       {
          /********** Body height ****************/
@@ -120,6 +122,7 @@ public class Step5Controller implements RobotController
          //            hipTau.set(controllerLegPitch.compute(rob.getBodyPitch(rotationToPack), 0.0, rob.getHipVelocity(robotSide), 0.0, deltaT));
          //            rob.setHipTau(robotSide, hipTau.getDoubleValue());
          //         }
+         
          if (robotSide == RobotSide.LEFT)
          {
             /********** Leg Swing ************/
@@ -132,7 +135,11 @@ public class Step5Controller implements RobotController
             hipTau.set(controllerLegPitch.compute(rob.getHipPitch(robotSide), desiredLegPitch.getDoubleValue(), rob.getHipVelocity(robotSide), 0.0, deltaT));
             rob.setHipTau(robotSide, hipTau.getDoubleValue());
          }
-
+         
+         rob.applyTorques(); //Note: this is getting called twice, one per side
+         
       }
+      
+      
    }
 }

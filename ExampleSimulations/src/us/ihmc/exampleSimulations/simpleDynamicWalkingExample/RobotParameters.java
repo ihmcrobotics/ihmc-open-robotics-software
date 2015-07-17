@@ -67,13 +67,15 @@ public class RobotParameters
    {
       LENGTHS.put(LinkNames.UPPER_LINK, 0.9);
       LENGTHS.put(LinkNames.LOWER_LINK, 0.8);
+      LENGTHS.put(LinkNames.BODY_LINK, 0.0); //TODO try removing
    }
 
    public final static EnumMap<LinkNames, Double> RADII = new EnumMap<LinkNames, Double>(LinkNames.class);
    static
    {
-      RADII.put(LinkNames.UPPER_LINK, 0.1);
-      RADII.put(LinkNames.LOWER_LINK, 0.15);
+      RADII.put(LinkNames.UPPER_LINK, 0.15);
+      RADII.put(LinkNames.LOWER_LINK, 0.1);
+      RADII.put(LinkNames.BODY_LINK, 0.0); //TODO try removing
    }
 
    public final static EnumMap<Axis, Double> BODY_DIMENSIONS = new EnumMap<Axis, Double>(Axis.class);
@@ -91,12 +93,15 @@ public class RobotParameters
       {
          if (LinkNames.BODY_LINK.getName() == "bodyLink")
          {
-            System.out.println("i am in coms");
-            COMs.put(linkName, new Vector3d(0.0, 0.0, BODY_DIMENSIONS.get(Axis.Z)));
+            //Check stuff
+//            System.out.println("i am in coms");
+//            System.out.println(new Vector3d(0.0, 0.0, BODY_DIMENSIONS.get(Axis.Z)/2.0));
+//            System.out.println("name" + linkName);
+            COMs.put(linkName, new Vector3d(0.0, 0.0, BODY_DIMENSIONS.get(Axis.Z)/2.0));
          }
          else
          {
-            COMs.put(linkName, new Vector3d(0.0, 0.0, LENGTHS.get(linkName) / 2.0));
+            COMs.put(linkName, new Vector3d(0.0, 0.0, -LENGTHS.get(linkName) / 2.0)); 
          }
 
       }

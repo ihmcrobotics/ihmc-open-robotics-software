@@ -16,6 +16,7 @@ public class Step5Simulation
       Step5IDandSCSRobot v5Robot = new Step5IDandSCSRobot();
       
       //Controller 
+      //Step5IDController v5Controller = new Step5IDController(v5Robot, "v5Robot", deltaT);
       Step5Controller v5Controller = new Step5Controller(v5Robot, "v5Robot", deltaT);
       v5Robot.setController(v5Controller);
       
@@ -26,7 +27,7 @@ public class Step5Simulation
       sim.setCameraFix(0.0, 0.025, 1.05);
       sim.setCameraPosition(12.6, -15.4, 2.3);
       sim.changeBufferSize(32000);
-      sim.selectConfiguration("Step4GUI.guiConf");
+      sim.selectConfiguration("Step5GUI.guiConf");
 
       Thread myThread = new Thread(sim);
       myThread.start();
