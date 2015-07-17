@@ -98,7 +98,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final double w1_0 = 1.0;
 	private final double w2_0 = 8.0;
 
-	//MP
+	//MPC
 	private boolean trajectoryIsDone = false;
 	private final DoubleYoVariable scaledTimeVariable;
 	private final DoubleYoVariable timeParameterScaleFactor;
@@ -108,8 +108,10 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final DoubleYoVariable currentTangentialVelocity;
 	private final DoubleYoVariable mpcVelocity;
 	private final DoubleYoVariable desiredTangentialForce;
-	private final DoubleYoVariable pControl;
+	private final DoubleYoVariable pCutControl;
+	
 	private final double referenceForce = -10.0;
+	private final double pressForce = -5.0;
 
 	private final FramePoint preScalingTrajectoryPosition = new FramePoint(worldFrame);
 	private final FrameVector preScalingTrajectoryVelocity = new FrameVector(worldFrame);
@@ -120,6 +122,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private Vector3d tempVector = new Vector3d();
 	private Vector3d tempVector2 = new Vector3d();
 	private Vector3d forceVectorInWorld = new Vector3d();
+	private Vector3d normalVectorInWorld = new Vector3d();
 	private Vector3d tangentTrajectoryVectorInWorld = new Vector3d();
 	private Point3d currentTrajectoryPositionInWorld = new Point3d();
 	private Point3d lastTrajectoryPositionInWorld = new Point3d();
@@ -142,6 +145,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		dtControl = momentumBasedController.getControlDT();
 		oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
 		doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
+		
 
 		// TODO: Add mass of drill.
 		massHandandDrill = TotalMassCalculator.computeSubTreeMass(momentumBasedController.getFullRobotModel().getHand(robotSide));
@@ -199,8 +203,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		mpcVelocity = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_v_MPC", registry);
 
 		desiredTangentialForce = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_F_tangential_desired", registry);
-		pControl = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_P_Control", registry);
-		pControl.set(0.2);
+		pCutControl = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_P_Control", registry);
+		pCutControl.set(0.2);
 		desiredTangentialForce.set(referenceForce);
 
 		coeffC1 = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_C1", registry);
@@ -327,7 +331,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		else
 		{
 			timeParameterScaleFactor.set(mpcVelocity.getDoubleValue() / preScalingTrajectoryVelocityDouble + referenceError.getDoubleValue()
-					* pControl.getDoubleValue());
+					* pCutControl.getDoubleValue());
 		}
 		// Check if scaled too much:
 		if (timeParameterScaleFactor.getDoubleValue() > MAX_TIME_SCALE)
@@ -343,7 +347,20 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue());
 
 		poseTrajectoryGenerator.get(desiredPose);
+		
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
+
+		// TODO:
+		/**
+		 * PID Control in direction of wall
+		 */
+//		desiredPosition.checkReferenceFrameMatch(worldFrame);
+//		
+//		forceVectorInWorld.scale(1.0);
+//		forceVectorInWorld.dot(normalVectorInWorld);
+//		
+//		tempVector.set(-0.01*(forceVectorInWorld.length() - Math.abs(pressForce)), 0.0, 0.0);
+//		desiredPosition.add(tempVector);
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
@@ -492,12 +509,16 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	{
 		if (rotationAxisOriginInWorld != null)
 		{
+			normalVectorInWorld.set(rotationAxisInWorld);
+			normalVectorInWorld.normalize();
 			circularTrajectoryOrigin = new Point3d(rotationAxisOriginInWorld);
 			circularTrajectoryOmega = new Vector3d(rotationAxisInWorld);
 			circularTrajectoryRadius = new Vector3d();
 		}
 		else
 		{
+			normalVectorInWorld.set(rotationAxisInWorld);
+			normalVectorInWorld.normalize();
 			circularTrajectoryOrigin = null;
 			circularTrajectoryOmega = null;
 			circularTrajectoryRadius = null;
