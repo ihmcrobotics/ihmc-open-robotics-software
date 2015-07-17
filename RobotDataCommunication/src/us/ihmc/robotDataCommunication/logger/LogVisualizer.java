@@ -180,7 +180,7 @@ public class LogVisualizer
    private void setupReadEveryNTicksTextField()
    {
       JLabel label = new JLabel("ReadEveryNTicks");
-      scs.addJLable(label);
+      scs.addJLabel(label);
 
       String everyNTicksString = Integer.toString(robot.getReadEveryNTicks());
       final JTextField textField = new JTextField(everyNTicksString, 3);
