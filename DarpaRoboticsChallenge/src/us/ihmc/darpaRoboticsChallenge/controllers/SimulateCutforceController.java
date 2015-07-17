@@ -113,7 +113,7 @@ public class SimulateCutforceController implements RobotController
       
       //
       quadraticForcecoeff = new DoubleYoVariable("quadraticForceCoeff", registry);
-      quadraticForcecoeff.set(1000.0);
+      quadraticForcecoeff.set(5000.0);
             
    }
 
@@ -159,10 +159,9 @@ public class SimulateCutforceController implements RobotController
       
       
       
-//      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
+      efpGravity.setForce(0.0, 0.0, -gGRAVITY * MASSDRILL);
 //      efpGravity.setForce(0.0, 0.0, 0.0);
-//      efpToolTip.setForce(quadraticCutForceModel(efpToolTip.getVelocityVector()));
-      
+      efpToolTip.setForce(quadraticCutForceModel(efpToolTip.getVelocityVector()));
    }
    
    private Vector3d quadraticCutForceModel(Vector3d toolTipVelocity)
