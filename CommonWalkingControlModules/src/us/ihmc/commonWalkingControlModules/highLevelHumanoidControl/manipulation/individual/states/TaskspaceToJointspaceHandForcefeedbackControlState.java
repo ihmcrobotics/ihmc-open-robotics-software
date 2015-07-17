@@ -35,7 +35,7 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
-	private final static boolean TRAJECTORY_FORCEFEEDBACK = false; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
+	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
 	private final static boolean SIMULATION = false;
 
 	private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -215,7 +215,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		//TODO: find reasonable initial coeffs
 		coeffC1.set(90.00);//100.0);
-		coeffC2.set(1.5);//2.0);
+		coeffC2.set(50.0);//2.0);
 		epsilon.set(0.0);
 		lnC1 = Math.log(coeffC1.getDoubleValue());
 		c2 = coeffC2.getDoubleValue();
@@ -234,8 +234,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			randomGenerator = null;
 		}
 	}
-
-	private void mpaMpcControl()
+	
+	//
+	private void getTangentForce()
 	{
 		/**
 		 * Get tangent vector of trajectory to project force on it
@@ -282,6 +283,11 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		}
 		wristSensorUpdate(forceVectorInWorld, currentTrajectoryPositionInWorld, lastTrajectoryPositionInWorld, scaledTimeVariable.getDoubleValue());
 		lastTrajectoryPositionInWorld.set(currentTrajectoryPositionInWorld);
+	}
+
+	private void mpaMpcControl()
+	{
+		getTangentForce();
 
 		// calculate current velocity in desired trajectory plane by finite differences:
 		currentHandPos.setToZero(handControlFrame);
@@ -303,18 +309,21 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		{
 			// MPA
 			currentTangentialForceModel.set(coeffC1.getDoubleValue() * (Math.exp(coeffC2.getDoubleValue() * currentTangentialVelocity.getDoubleValue()) - 1.0));
-			// model defined for positive forces: abs()
-			epsilon.set(Math.log(Math.abs(currentTangentialForce.getDoubleValue()) + coeffC1.getDoubleValue())
-					- Math.log(currentTangentialForceModel.getDoubleValue() + coeffC1.getDoubleValue()));
-			modelError.set(currentTangentialForce.getDoubleValue() + currentTangentialForceModel.getDoubleValue());
-			referenceError.set(currentTangentialForce.getDoubleValue() - desiredTangentialForce.getDoubleValue());
-
-			lnC1 += w1.getDoubleValue() * epsilon.getDoubleValue();
-			c2 += w2.getDoubleValue() * c2 * epsilon.getDoubleValue();
-			coeffC1.set(Math.exp(lnC1));
-			coeffC2.set(c2);
+			
+			
+//			// model defined for positive forces: abs()
+//			epsilon.set(Math.log(Math.abs(currentTangentialForce.getDoubleValue()) + coeffC1.getDoubleValue())
+//					- Math.log(currentTangentialForceModel.getDoubleValue() + coeffC1.getDoubleValue()));
+//			modelError.set(currentTangentialForce.getDoubleValue() + currentTangentialForceModel.getDoubleValue());
+//			referenceError.set(currentTangentialForce.getDoubleValue() - desiredTangentialForce.getDoubleValue());
+//
+//			lnC1 += w1.getDoubleValue() * epsilon.getDoubleValue();
+//			c2 += w2.getDoubleValue() * c2 * epsilon.getDoubleValue();
+//			coeffC1.set(Math.exp(lnC1));
+//			coeffC2.set(c2);
 			//MPC
 			mpcVelocity.set(1.0 / coeffC2.getDoubleValue() * Math.log(Math.abs(desiredTangentialForce.getDoubleValue()) / coeffC1.getDoubleValue() + 1.0));
+			
 		}
 		else
 		{
@@ -380,6 +389,10 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 	private void trajectoryPositionControl()
 	{
+		scaledTimeVariable.set(currentTimeInState.getDoubleValue());
+		
+		getTangentForce();
+		
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 		poseTrajectoryGenerator.get(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
