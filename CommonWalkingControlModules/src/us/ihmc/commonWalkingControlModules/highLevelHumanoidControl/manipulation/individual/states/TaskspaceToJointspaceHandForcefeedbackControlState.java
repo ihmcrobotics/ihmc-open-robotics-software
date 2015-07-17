@@ -102,7 +102,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private boolean trajectoryIsDone = false;
 	private final DoubleYoVariable scaledTimeVariable;
 	private final DoubleYoVariable timeParameterScaleFactor;
-	private final static double MAX_TIME_SCALE = 4.0;
+	private final static double MAX_TIME_SCALE = 1.0;
 	private final DoubleYoVariable currentTangentialForce;
 	private final DoubleYoVariable currentTangentialForceModel;
 	private final DoubleYoVariable currentTangentialVelocity;
