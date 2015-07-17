@@ -1210,7 +1210,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public void addJLable(JLabel label)
+   public void addJLabel(JLabel label)
    {
       if (myGUI != null)
       {
