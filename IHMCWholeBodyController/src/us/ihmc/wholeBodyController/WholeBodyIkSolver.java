@@ -430,17 +430,22 @@ abstract public class WholeBodyIkSolver
          ///----- Step B: allocate all the tasks and add them to the solver --------------
 
          ForwardKinematicSolver fk = hierarchicalSolver.getForwardSolver();
-
-         taskComPosition = new HierarchicalTask_COM(fk);
-
-         taskPelvisPose = new HierarchicalTask_BodyPose(fk, urdfModel, "pelvis");
+         
+         taskComPosition = new HierarchicalTask_COM("COM Position",fk);
+         taskPelvisPose = new HierarchicalTask_BodyPose("PelvisPose",fk, urdfModel, "pelvis");
          
          for (RobotSide robotSide : RobotSide.values())
          {
-            int currentHandId = urdfModel.getBodyId(getGripperPalmLinkName(robotSide));
+            String gripperPalm = getGripperPalmLinkName(robotSide);
+            int currentHandId = urdfModel.getBodyId(gripperPalm);
 
-            taskEndEffectorPosition.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
-            taskEndEffectorRotation.set(robotSide, new HierarchicalTask_BodyPose(fk, urdfModel, getGripperPalmLinkName(robotSide)));
+            String sideName = (robotSide == RobotSide.LEFT) ? "Left" : "Right";
+            
+            taskEndEffectorPosition.set(robotSide, 
+                  new HierarchicalTask_BodyPose(sideName + " Hand Position", fk, urdfModel, gripperPalm));
+            taskEndEffectorRotation.set(robotSide, 
+                  new HierarchicalTask_BodyPose(sideName + " Hand Rotation", fk, urdfModel, gripperPalm));
+            
             feetTarget.set(robotSide, null );
             handTarget.set(robotSide, null );
 
@@ -455,7 +460,7 @@ abstract public class WholeBodyIkSolver
          {
             RobotSide otherFootSide = getSideOfTheFootRoot().getOppositeSide(); 
             int leftFootId = urdfModel.getBodyId(  getFootLinkName(otherFootSide ) );
-            taskLegPose = new HierarchicalTask_BodyPose(fk,urdfModel,  getFootLinkName(otherFootSide ));
+            taskLegPose = new HierarchicalTask_BodyPose("Left Leg Pose",fk,urdfModel,  getFootLinkName(otherFootSide ));
 
             int [] indexes = new  int[ getNumberDoFperArm()];
             urdfModel.getParentJoints(leftFootId, getNumberDoFperLeg(), indexes );
@@ -470,20 +475,9 @@ abstract public class WholeBodyIkSolver
             legJointIds.get( getSideOfTheFootRoot()).add(i);
          }
 
-         taskJointsPose = new HierarchicalTask_JointsPose(fk);
+         taskJointsPose = new HierarchicalTask_JointsPose("Whole body Posture", fk);
 
-         taskLegPose.setName( "left Leg Pose");
-         taskComPosition.setName( "COM Position");
-         taskPelvisPose.setName("PelvisPose");
-
-         taskEndEffectorPosition.get(RIGHT).setName( "Right Hand Position" );
-         taskEndEffectorPosition.get(LEFT).setName( "Left Hand Position" );
-
-         taskEndEffectorRotation.get(RIGHT).setName( "Right Hand Rotation" );
-         taskEndEffectorRotation.get(LEFT).setName( "Left Hand Rotation" );
-
-         taskJointsPose.setName( "Whole body Posture" );
-
+  
          // the order is important!! first to be added have higher priority
          hierarchicalSolver.addTask(taskPelvisPose);
          hierarchicalSolver.addTask(taskLegPose); 
