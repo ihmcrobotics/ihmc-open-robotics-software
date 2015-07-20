@@ -79,8 +79,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	// Force measurement
 	private final String sensorPrefix;
 	private ForceSensorDataReadOnly wristSensor;
-	private final Point3d lastPositionInWorld = new Point3d();
-	private final Point3d currentPositionInWorld = new Point3d();
 	private Wrench wristSensorWrench = new Wrench();
 	private final DoubleYoVariable fxRaw, fyRaw, fzRaw;
 	private final AlphaFilteredYoVariable fxFiltered, fyFiltered, fzFiltered;
@@ -158,7 +156,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		forcefeedback.set(TRAJECTORY_FORCEFEEDBACK);
 
 		// TODO: Add mass of drill.
-		massHandandDrill = TotalMassCalculator.computeSubTreeMass(momentumBasedController.getFullRobotModel().getHand(robotSide)) + MASSDRILL;
+		massHandandDrill = TotalMassCalculator.computeSubTreeMass(momentumBasedController.getFullRobotModel().getHand(robotSide)) ;//+ MASSDRILL;
 
 		for (int i = 0; i < oneDoFJoints.length; i++)
 		{
@@ -277,8 +275,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		tempHandPose.getPosition(currentTrajectoryPositionInWorld);
 		tangentTrajectoryVectorInWorld.sub(precalTrajectoryPositionInWorld, currentTrajectoryPositionInWorld);
 
-
-		wristSensorUpdate(forceVectorInWorld, scaledTimeVariable.getDoubleValue());
+		// assume move on desired circular trajectory
+		wristSensorUpdate(forceVectorInWorld, currentTrajectoryPositionInWorld, lastTrajectoryPositionInWorld, scaledTimeVariable.getDoubleValue());
 
 		if (tangentTrajectoryVectorInWorld.length() > 0.0)
 		{
@@ -445,7 +443,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 	}
 
-	private void wristSensorUpdate(Vector3d vectorToPack, double trajectoryParameter)
+	private void wristSensorUpdate(Vector3d vectorToPack, Point3d currentPositionInWorld, Point3d lastPositionInWorld, double trajectoryParameter)
 	{
 		wristSensor.packWrench(wristSensorWrench);
 
@@ -465,8 +463,6 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		// Compensate the gravity: 
 		fzRaw.add(massHandandDrill * GRAVITY);
 
-		lastPositionInWorld.set(currentPositionInWorld);
-		wristSensor.getMeasurementFrame().getTransformToWorldFrame().getTranslation(currentPositionInWorld);
 
 
 		// For a cicular trajectory the radial force must be compensated as well. Assume we move on circular trajectory: Fy gets filtered perfectly, some remaining errors in x and z 
