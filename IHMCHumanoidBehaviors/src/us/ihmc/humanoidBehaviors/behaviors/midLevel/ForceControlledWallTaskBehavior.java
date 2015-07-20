@@ -62,7 +62,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private FramePoint rotationAxisOrigin = new FramePoint();
 	private FrameVector rotationAxis = new FrameVector();
 	private Vector3d startToCenter = new Vector3d(0.0, 0.0, 0.20);
-	
+	private int circlecounter = 0;
 	// Straight lines
 	private FramePose handPose = new FramePose();
 	private FramePoint nextCoordinate = new FramePoint();
@@ -200,7 +200,15 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		case SEND_CUT_COMMAND_TO_CONTROLLER :
 			sendCutCommand();
-			nextBehaviorState = BehaviorStates.RETRACT_DRILL;
+			circlecounter ++;
+			if (circlecounter == 10)
+			{
+				nextBehaviorState = BehaviorStates.RETRACT_DRILL;
+			}
+			else
+			{
+				nextBehaviorState = BehaviorStates.SEND_CUT_COMMAND_TO_CONTROLLER;
+			}
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 
