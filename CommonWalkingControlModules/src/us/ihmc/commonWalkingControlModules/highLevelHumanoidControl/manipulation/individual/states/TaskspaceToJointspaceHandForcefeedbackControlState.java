@@ -76,6 +76,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	 *  MP/MPA Controller:
 	 */
 	// Force measurement
+	private final String sensorPrefix;
 	private ForceSensorDataReadOnly wristSensor;
 	private final Point3d lastPositionInWorld = new Point3d();
 	private final Point3d currentPositionInWorld = new Point3d();
@@ -191,7 +192,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		PrintTools.warn(this, "Joint control Mode: " + jointControlMode, true);	
 
 		wristSensor = momentumBasedController.getWristForceSensor(robotSide);
-		String sensorPrefix = robotSide.getShortLowerCaseName() + "_wristSensor";
+		sensorPrefix = robotSide.getShortLowerCaseName() + "_wristSensor";
 
 		alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0, dtControl);
 		fxRaw = new DoubleYoVariable(sensorPrefix + "_Fx_raw", registry);
@@ -242,9 +243,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	}
 
 	private void resetFilterVariables(){
-		fxFiltered.reset();
-		fyFiltered.reset();
-		fzFiltered.reset();
+	   fxFiltered.reset();
+	   fyFiltered.reset();
+	   fzFiltered.reset();
 	}
 
 	private void getTangentForce()
