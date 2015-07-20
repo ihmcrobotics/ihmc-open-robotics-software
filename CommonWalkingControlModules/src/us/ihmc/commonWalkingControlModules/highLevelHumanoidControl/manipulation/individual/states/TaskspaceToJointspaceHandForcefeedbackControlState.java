@@ -87,6 +87,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final double alpha;
 	private double massHandandDrill;
 	private static final double GRAVITY = 9.81;
+	private static final double MASSDRILL = 1.442;
 	private Vector3d circularTrajectoryOmega;
 	private Vector3d circularTrajectoryRadius;
 	private Point3d circularTrajectoryOrigin;
@@ -157,7 +158,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		forcefeedback.set(TRAJECTORY_FORCEFEEDBACK);
 
 		// TODO: Add mass of drill.
-		massHandandDrill = TotalMassCalculator.computeSubTreeMass(momentumBasedController.getFullRobotModel().getHand(robotSide));
+		massHandandDrill = TotalMassCalculator.computeSubTreeMass(momentumBasedController.getFullRobotModel().getHand(robotSide)) + MASSDRILL;
 
 		for (int i = 0; i < oneDoFJoints.length; i++)
 		{
