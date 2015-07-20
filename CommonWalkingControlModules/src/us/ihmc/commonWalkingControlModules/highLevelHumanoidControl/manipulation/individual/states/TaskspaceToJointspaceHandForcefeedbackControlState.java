@@ -30,6 +30,7 @@ import us.ihmc.yoUtilities.controllers.YoPIDGains;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.DoubleYoVariable;
+import us.ihmc.yoUtilities.dataStructure.variable.IntegerYoVariable;
 import us.ihmc.yoUtilities.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoUtilities.math.filters.RateLimitedYoVariable;
 import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
@@ -89,6 +90,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private Vector3d circularTrajectoryOmega;
 	private Vector3d circularTrajectoryRadius;
 	private Point3d circularTrajectoryOrigin;
+	private final IntegerYoVariable trajectoryNumber;
 
 	// Cut force model
 	private final DoubleYoVariable coeffC1, coeffC2;
@@ -201,6 +203,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		fxFiltered = new AlphaFilteredYoVariable(sensorPrefix + "_Fx_filtered", registry, alpha, fxRaw);
 		fyFiltered = new AlphaFilteredYoVariable(sensorPrefix + "_Fy_filtered", registry, alpha, fyRaw);
 		fzFiltered = new AlphaFilteredYoVariable(sensorPrefix + "_Fz_filtered", registry, alpha, fzRaw);
+		trajectoryNumber = new IntegerYoVariable(sensorPrefix + "_trajectory_number", registry);
+		trajectoryNumber.set(0);
 
 		currentTangentialForce = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_F_tangential", registry);
 		currentTangentialForceModel = new DoubleYoVariable(robotSide.getShortLowerCaseName() + "_F_tangential_model", registry);
@@ -243,9 +247,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	}
 
 	private void resetFilterVariables(){
-	   fxFiltered.reset();
-	   fyFiltered.reset();
-	   fzFiltered.reset();
+		fxFiltered.reset();
+		fyFiltered.reset();
+		fzFiltered.reset();
 	}
 
 	private void getTangentForce()
@@ -570,6 +574,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	@Override
 	public void doTransitionIntoAction()
 	{
+		trajectoryNumber.add(1);
 		resetFilterVariables();
 		currentTimeInState.set(0.0);
 		scaledTimeVariable.set(0.0);
