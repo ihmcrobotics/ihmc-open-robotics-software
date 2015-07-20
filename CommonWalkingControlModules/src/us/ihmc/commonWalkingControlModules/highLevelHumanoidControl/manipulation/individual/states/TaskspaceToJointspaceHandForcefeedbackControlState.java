@@ -36,7 +36,7 @@ import us.ihmc.yoUtilities.math.trajectories.PoseTrajectoryGenerator;
 
 public class TaskspaceToJointspaceHandForcefeedbackControlState extends TrajectoryBasedTaskspaceHandControlState
 {
-	private final static boolean TRAJECTORY_FORCEFEEDBACK = true; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
+	private final static boolean TRAJECTORY_FORCEFEEDBACK = false; //DO NOT SET TO TRUE! NOT ENTIRELY TESTED YET!! T.Meier
 	private final static boolean SIMULATION = false;
 	private final BooleanYoVariable forcefeedback;
 
@@ -77,6 +77,8 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	 */
 	// Force measurement
 	private ForceSensorDataReadOnly wristSensor;
+	private final Point3d lastPositionInWorld = new Point3d();
+	private final Point3d currentPositionInWorld = new Point3d();
 	private Wrench wristSensorWrench = new Wrench();
 	private final DoubleYoVariable fxRaw, fyRaw, fzRaw;
 	private final AlphaFilteredYoVariable fxFiltered, fyFiltered, fzFiltered;
@@ -111,7 +113,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private final DoubleYoVariable mpcVelocity;
 	private final DoubleYoVariable desiredTangentialForce;
 	private final DoubleYoVariable pCutControl;
-	
+
 	private final double referenceForce = -10.0;
 	private final double pressForce = -5.0;
 
@@ -147,7 +149,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		dtControl = momentumBasedController.getControlDT();
 		oneDoFJoints = ScrewTools.createOneDoFJointPath(base, endEffector);
 		doIntegrateDesiredAccelerations = new boolean[oneDoFJoints.length];
-		
+
 		forcefeedback = new BooleanYoVariable(robotSide.getShortLowerCaseName() + "_forceFeedback", parentRegistry);
 		forcefeedback.set(TRAJECTORY_FORCEFEEDBACK);
 
@@ -219,7 +221,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 
 		//TODO: find reasonable initial coeffs
 		coeffC1.set(90.00);//100.0);
-		coeffC2.set(50.0);//2.0);
+		coeffC2.set(1.0);//2.0);
 		epsilon.set(0.0);
 		lnC1 = Math.log(coeffC1.getDoubleValue());
 		c2 = coeffC2.getDoubleValue();
@@ -238,8 +240,13 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			randomGenerator = null;
 		}
 	}
-	
-	//
+
+	private void resetFilterVariables(){
+		fxFiltered.reset();
+		fyFiltered.reset();
+		fzFiltered.reset();
+	}
+
 	private void getTangentForce()
 	{
 		/**
@@ -262,11 +269,10 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			tempHandPose.changeFrame(worldFrame);
 		}
 		tempHandPose.getPosition(currentTrajectoryPositionInWorld);
-		
 		tangentTrajectoryVectorInWorld.sub(precalTrajectoryPositionInWorld, currentTrajectoryPositionInWorld);
-		
-		
-		wristSensorUpdate(forceVectorInWorld, currentTrajectoryPositionInWorld, /*lastTrajectoryPositionInWorld, */scaledTimeVariable.getDoubleValue());
+
+
+		wristSensorUpdate(forceVectorInWorld, scaledTimeVariable.getDoubleValue());
 
 		if (tangentTrajectoryVectorInWorld.length() > 0.0)
 		{
@@ -288,7 +294,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			trajectoryIsDone = true;
 			currentTangentialForce.set(0.0);
 		}
-		
+
 		lastTrajectoryPositionInWorld.set(currentTrajectoryPositionInWorld);
 	}
 
@@ -307,38 +313,38 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		lastHandPos.setIncludingFrame(currentHandPos);
 		currentTangentialVelocity.set(tempVector.length());
 
-		mpcVelocity.set(1.0);
+		mpcVelocity.set(0.0);
 
 		/**
 		 * Control:
 		 */
-		if (trajectoryIsDone == false && timeParameterScaleFactor.getDoubleValue() != MAX_TIME_SCALE)
+		if (trajectoryIsDone == false /*&& timeParameterScaleFactor.getDoubleValue() */)
 		{
 			// MPA
 			currentTangentialForceModel.set(coeffC1.getDoubleValue() * (Math.exp(coeffC2.getDoubleValue() * currentTangentialVelocity.getDoubleValue()) - 1.0));
-			
-			
-			// model defined for positive forces: abs()
-			epsilon.set(Math.log(Math.abs(currentTangentialForce.getDoubleValue()) + coeffC1.getDoubleValue())
-					- Math.log(currentTangentialForceModel.getDoubleValue() + coeffC1.getDoubleValue()));
-			modelError.set(currentTangentialForce.getDoubleValue() + currentTangentialForceModel.getDoubleValue());
-			referenceError.set(currentTangentialForce.getDoubleValue() - desiredTangentialForce.getDoubleValue());
 
-			lnC1 += w1.getDoubleValue() * epsilon.getDoubleValue();
-			c2 += w2.getDoubleValue() * c2 * epsilon.getDoubleValue();
-			coeffC1.set(Math.exp(lnC1));
-			coeffC2.set(c2);
-			
-			
-			if(coeffC2.getDoubleValue() < 0.01)
-			{
-				coeffC2.set(0.01);
-				c2 = 0.01;
-			}
-			
-//			MPC
+
+			// model defined for positive forces: abs()
+			//			epsilon.set(Math.log(Math.abs(currentTangentialForce.getDoubleValue()) + coeffC1.getDoubleValue())
+			//					- Math.log(currentTangentialForceModel.getDoubleValue() + coeffC1.getDoubleValue()));
+			//			modelError.set(currentTangentialForce.getDoubleValue() + currentTangentialForceModel.getDoubleValue());
+			//			referenceError.set(currentTangentialForce.getDoubleValue() - desiredTangentialForce.getDoubleValue());
+			//
+			//			lnC1 += w1.getDoubleValue() * epsilon.getDoubleValue();
+			//			c2 += w2.getDoubleValue() * c2 * epsilon.getDoubleValue();
+			//			coeffC1.set(Math.exp(lnC1));
+			//			coeffC2.set(c2);
+			//			
+			//			
+			//			if(coeffC2.getDoubleValue() < 0.01)
+			//			{
+			//				coeffC2.set(0.01);
+			//				c2 = 0.01;
+			//			}
+
+			//			MPC
 			mpcVelocity.set(1.0 / coeffC2.getDoubleValue() * Math.log(Math.abs(desiredTangentialForce.getDoubleValue()) / coeffC1.getDoubleValue() + 1.0));
-			
+
 		}
 		else
 		{
@@ -363,9 +369,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 			timeParameterScaleFactor.set(MAX_TIME_SCALE);
 			PrintTools.warn(this, "Scale factor saturation.");
 		}
-		
-		
-		
+
+
+
 		// DEBUG: SET TO 1 anyway
 		//    timeParameterScaleFactor.set(1.0);
 
@@ -374,20 +380,20 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		poseTrajectoryGenerator.compute(scaledTimeVariable.getDoubleValue());
 
 		poseTrajectoryGenerator.get(desiredPose);
-		
+
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
 		// TODO:
 		/**
 		 * PID Control in direction of wall
 		 */
-//		desiredPosition.checkReferenceFrameMatch(worldFrame);
-//		
-//		forceVectorInWorld.scale(1.0);
-//		forceVectorInWorld.dot(normalVectorInWorld);
-//		
-//		tempVector.set(-0.01*(forceVectorInWorld.length() - Math.abs(pressForce)), 0.0, 0.0);
-//		desiredPosition.add(tempVector);
+		//		desiredPosition.checkReferenceFrameMatch(worldFrame);
+		//		
+		//		forceVectorInWorld.scale(1.0);
+		//		forceVectorInWorld.dot(normalVectorInWorld);
+		//		
+		//		tempVector.set(-0.01*(forceVectorInWorld.length() - Math.abs(pressForce)), 0.0, 0.0);
+		//		desiredPosition.add(tempVector);
 
 		desiredVelocity.scale(timeParameterScaleFactor.getDoubleValue());
 		desiredAcceleration.scale(timeParameterScaleFactor.getDoubleValue() * timeParameterScaleFactor.getDoubleValue());
@@ -408,9 +414,9 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	private void trajectoryPositionControl()
 	{
 		scaledTimeVariable.set(currentTimeInState.getDoubleValue());
-		
+
 		getTangentForce();
-		
+
 		poseTrajectoryGenerator.compute(currentTimeInState.getDoubleValue());
 		poseTrajectoryGenerator.get(desiredPose);
 		poseTrajectoryGenerator.packLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
@@ -433,7 +439,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		taskspaceToJointspaceCalculator.packDesiredJointAccelerationsIntoOneDoFJoints(oneDoFJoints);
 	}
 
-	private void wristSensorUpdate(Vector3d vectorToPack, Point3d currentPosition, /*Point3d lastPosition,*/ double trajectoryParameter)
+	private void wristSensorUpdate(Vector3d vectorToPack, double trajectoryParameter)
 	{
 		wristSensor.packWrench(wristSensorWrench);
 
@@ -453,27 +459,31 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 		// Compensate the gravity: 
 		fzRaw.add(massHandandDrill * GRAVITY);
 
-		// For higher velocities and a circular trajectory the radial force has to be compensated as well:
-//		if (circularTrajectoryOrigin != null && trajectoryParameter > 0.0)
-//		{
-//			// Get radius and omega
-//			circularTrajectoryRadius.sub(currentPosition, circularTrajectoryOrigin);
-//			tempVector.sub(currentPosition, lastPosition);
-//			tempVector.scale(1.0 / (dtControl * circularTrajectoryRadius.length()));
-//
-//			circularTrajectoryOmega.normalize();
-//			circularTrajectoryOmega.scale(tempVector.length());
-//
-//			// radial force:
-//			tempVector2.cross(circularTrajectoryOmega, circularTrajectoryRadius);
-//			tempVector.cross(circularTrajectoryOmega, tempVector2);
-//
-//			tempVector.scale(massHandandDrill);
-//
-//			fxRaw.add(tempVector.getX());
-//			fyRaw.add(tempVector.getY());
-//			fzRaw.add(tempVector.getZ());
-//		}
+		lastPositionInWorld.set(currentPositionInWorld);
+		wristSensor.getMeasurementFrame().getTransformToWorldFrame().getTranslation(currentPositionInWorld);
+
+
+		// For a cicular trajectory the radial force must be compensated as well. Assume we move on circular trajectory: Fy gets filtered perfectly, some remaining errors in x and z 
+		if (circularTrajectoryOrigin != null && trajectoryParameter > 0.0)
+		{
+			// Get radius and omega
+			circularTrajectoryRadius.sub(currentPositionInWorld, circularTrajectoryOrigin);
+			tempVector.sub(currentPositionInWorld, lastPositionInWorld);
+			tempVector.scale(1.0 / (dtControl * circularTrajectoryRadius.length()));
+
+			circularTrajectoryOmega.normalize();
+			circularTrajectoryOmega.scale(tempVector.length());
+
+			// radial force:
+			tempVector2.cross(circularTrajectoryOmega, circularTrajectoryRadius);
+			tempVector.cross(circularTrajectoryOmega, tempVector2);
+
+			tempVector.scale(massHandandDrill);
+
+			fxRaw.add(tempVector.getX());
+			fyRaw.add(tempVector.getY());
+			fzRaw.add(tempVector.getZ());
+		}
 
 		fxFiltered.update();
 		fyFiltered.update();
@@ -559,6 +569,7 @@ public class TaskspaceToJointspaceHandForcefeedbackControlState extends Trajecto
 	@Override
 	public void doTransitionIntoAction()
 	{
+		resetFilterVariables();
 		currentTimeInState.set(0.0);
 		scaledTimeVariable.set(0.0);
 
