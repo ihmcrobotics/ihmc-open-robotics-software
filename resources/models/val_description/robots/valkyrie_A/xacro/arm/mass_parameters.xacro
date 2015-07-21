@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/arm/mass_parameters">
+
+  <xacro:property name="ShoulderPitchLinkMass" value="2.65" />
+  <xacro:property name="ShoulderPitchLinkComPosition" value="-0.012000 ${reflect*0.251000} 0.000000" />
+
+  <xacro:property name="ShoulderRollLinkMass" value="2.87" />
+  <xacro:property name="ShoulderRollLinkComPosition" value="-0.020086 ${reflect*0.040000} -0.004999" />
+
+  <xacro:property name="ShoulderYawLinkMass" value="2.575" />
+  <xacro:property name="ShoulderYawLinkComPosition" value="0.004000	${reflect*0.273000}	-0.019953" />
+
+  <xacro:property name="ElbowPitchLinkMass" value="2.367" />
+  <xacro:property name="ElbowPitchLinkComPosition" value="-0.027000	${reflect*0.080200} 0.000000" />
+
+  <xacro:property name="ForearmYawLinkMass" value="2.903" />
+  <xacro:property name="ForearmYawLinkComPosition" value="0.015000	${reflect*0.110000} 0.019564" />
+
+  <xacro:property name="WristRollLinkMass" value="0.1" />
+  <xacro:property name="WristRollLinkComPosition" value="0 ${reflect*0} 0" />
+
+  <xacro:property name="PalmMass" value="0.712" />
+  <xacro:property name="PalmComPosition" value="0.002954 ${reflect*0.052034} -0.000236" />
+
+</robot>

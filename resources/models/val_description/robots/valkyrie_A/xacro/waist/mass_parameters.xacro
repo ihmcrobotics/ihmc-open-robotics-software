@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/waist/mass_parameters">
+
+	<xacro:property name="TorsoYawLinkMass" value="2.858" />
+	<xacro:property name="TorsoPitchLinkMass" value="0.001"/>
+  <xacro:property name="TorsoRollLinkMass" value="42.6" />
+
+</robot>

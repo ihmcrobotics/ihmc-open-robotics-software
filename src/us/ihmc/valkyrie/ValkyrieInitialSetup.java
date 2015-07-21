@@ -53,24 +53,26 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<SDFRobot>
          String hipRoll = jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL);
          String ankleRoll = jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL);
          
-         robot.getOneDegreeOfFreedomJoint(hipPitch).setQ(-0.305);
-         robot.getOneDegreeOfFreedomJoint(knee).setQ(-0.80);
-         robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.495);
+         robot.getOneDegreeOfFreedomJoint(hipPitch).setQ(-0.6);
+         robot.getOneDegreeOfFreedomJoint(knee).setQ(1.3);
+         robot.getOneDegreeOfFreedomJoint(anklePitch).setQ(-0.65);
          robot.getOneDegreeOfFreedomJoint(hipRoll).setQ(0.0);
          robot.getOneDegreeOfFreedomJoint(ankleRoll).setQ(0.0);
 
          String shoulderRoll = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL);
          String shoulderPitch = jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH);
          String elbowPitch = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH);
+         String elbowRoll = jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL);
          
          if (shoulderRoll != null)
-            robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(-0.18);
+            robot.getOneDegreeOfFreedomJoint(shoulderRoll).setQ(robotSide.negateIfRightSide(-1.2));//inv
          if (shoulderPitch != null)
-            robot.getOneDegreeOfFreedomJoint(shoulderPitch).setQ(0.3);
+            robot.getOneDegreeOfFreedomJoint(shoulderPitch).setQ(-0.2);
          if (elbowPitch != null)
-            robot.getOneDegreeOfFreedomJoint(elbowPitch).setQ(-1.0);
+            robot.getOneDegreeOfFreedomJoint(elbowPitch).setQ(robotSide.negateIfRightSide(-1.5));//inv
+         if (elbowRoll != null)
+            robot.getOneDegreeOfFreedomJoint(elbowRoll).setQ(1.3);
       }
-      
       robot.update();
    }
    

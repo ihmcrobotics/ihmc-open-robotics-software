@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/index_finger/mass_parameters">
+  
+  <xacro:property name="IndexFingerPitch1LinkMass" value="0.006" />
+  <xacro:property name="IndexFingerPitch1ComPosition" value="0 ${reflect*0.02} 0" />
+
+  <xacro:property name="IndexFingerPitch2LinkMass" value="0.018" />
+  <xacro:property name="IndexFingerPitch2ComPosition" value="0 ${reflect*0.013} 0" />
+
+  <xacro:property name="IndexFingerPitch3LinkMass" value="0.01" />
+  <xacro:property name="IndexFingerPitch3ComPosition" value="0 ${reflect*0.01} 0" />
+  
+</robot>

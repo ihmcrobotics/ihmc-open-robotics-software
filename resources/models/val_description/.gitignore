@@ -1,0 +1,5 @@
+*~
+*.md~
+valkyrie*.urdf
+valkyrie*.sdf
+*.bak

@@ -1,0 +1,220 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="leg">
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/sensors/ati_force_torque.xacro"/>
+
+  <xacro:property name="LJ1_Link_Width" value="0.149"/>
+  <xacro:property name="LJ1_Link_Height" value="0.185"/>
+  <xacro:property name="LJ1_Link_Length" value="0.229"/>
+  <xacro:property name="LJ1_Link_Origin_X" value="0.02176"/>
+  <xacro:property name="LJ1_Link_Origin_Y" value="0.0013"/>
+  <xacro:property name="LJ1_Link_Origin_Z" value="0.03867"/>
+  <!-- <xacro:property name="LJ1_Link_Origin_X" value="1.3078570e-03"/>
+  <xacro:property name="LJ1_Link_Origin_Y" value="2.1764163e-02"/>
+  <xacro:property name="LJ1_Link_Origin_Z" value="3.8670367e-02"/> -->
+
+  <xacro:property name="LJ2_Link_Width" value="0.131"/>
+  <xacro:property name="LJ2_Link_Height" value="0.185"/>
+  <xacro:property name="LJ2_Link_Length" value="0.123"/>
+
+  <xacro:property name="LJ3_Link_Width" value="0.55419965909040602714"/>
+  <xacro:property name="LJ3_Link_Height" value="0.24253719562602335524"/>
+  <xacro:property name="LJ3_Link_Length" value="0.18520578950459243295"/>
+
+  <xacro:property name="LJ4_Link_Box_Width" value="0.44528684954574881960"/>
+  <xacro:property name="LJ4_Link_Box_Height" value="0.20288766696230062236"/>
+  <xacro:property name="LJ4_Link_Box_Length" value="0.20551228016178813007"/>
+
+  <xacro:property name="LJ5_Link_Width" value="0.033"/>
+  <xacro:property name="LJ5_Link_Height" value="0.076"/>
+  <xacro:property name="LJ5_Link_Length" value="0.025"/>
+
+  <xacro:property name="LJ6_Link_Width" value="0.082"/>
+  <xacro:property name="LJ6_Link_Height" value="0.128"/>
+  <xacro:property name="LJ6_Link_Length" value="0.300"/>
+
+  <xacro:macro name="make_leg_links" params="prefix reflect leg_root_link">
+    <xacro:box_link name="${HipYawLinkName}"
+                    width="${LJ1_Link_Width}" height="${LJ1_Link_Height}" depth="${LJ1_Link_Length}" mass="${HipYawLinkMass}"
+                    origin_xyz="${HipYawLinkComPosition}" origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/legs/lj1_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/legs/lj1_${prefix}.stl"/>
+
+    <xacro:box_link name="${HipRollLinkName}"
+                    width="${LJ2_Link_Width}" height="${LJ2_Link_Height}" depth="${LJ2_Link_Length}" mass="${HipRollLinkMass}"
+                    origin_xyz="${HipRollLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/lj2_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/legs/lj2_${prefix}.stl"/>
+
+    <xacro:box_link name="${HipPitchLinkName}"
+                    width="${LJ3_Link_Width}" height="${LJ3_Link_Height}" depth="${LJ3_Link_Length}" mass="${HipPitchLinkMass}"
+                    origin_xyz="${HipPitchLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/lj3_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/legs/lj3_${prefix}.stl"/>
+
+    <xacro:box_link name="${KneePitchLinkName}"
+                    width="${LJ4_Link_Box_Width}" height="${LJ4_Link_Box_Height}" depth="${LJ4_Link_Box_Length}" mass="${KneePitchLinkMass}"
+                    origin_xyz="${KneePitchLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/lj4_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/legs/lj4_${prefix}.stl"/>
+
+    <xacro:box_link name="${AnklePitchLinkName}"
+                    width="${LJ5_Link_Width}" height="${LJ5_Link_Height}" depth="${LJ5_Link_Length}" mass="${AnklePitchLinkMass}"
+                    origin_xyz="${AnklePitchLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/lj5.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/legs/lj5.stl"/>
+
+    <xacro:box_link name="${AnkleRollLinkName}"
+                    width="${LJ6_Link_Width}" height="${LJ6_Link_Height}" depth="${LJ6_Link_Length}" mass="${FootMass}"
+                    origin_xyz="${FootComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/legs/foot_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/legs/foot_${prefix}.stl" />
+
+    
+    <gazebo reference="${AnkleRollLinkName}">
+      <kp>100000.0</kp>
+      <kd>1000.0</kd>
+      <mu1>1.5</mu1>
+      <mu2>1.5</mu2>
+      <fdir1>0 0 1</fdir1>
+      <maxVel>1.0</maxVel>
+      <minDepth>0.00</minDepth>
+    </gazebo>
+
+  </xacro:macro>
+
+  <xacro:macro name="make_leg_joints" params="prefix reflect leg_root_link">
+    <!-- LJ1 -->
+    <xacro:revolute_joint_ex jointName="${HipYawJointName}"
+                          parent="${HipYawParentLinkName}" child="${HipYawLinkName}"
+                          origin_xyz="${HipYawFrameOrigin_X} ${HipYawFrameOrigin_Y} ${HipYawFrameOrigin_Z}"
+                          origin_rpy="${HipYawFrameOrientation_Roll} ${HipYawFrameOrientation_Pitch} ${HipYawFrameOrientation_Yaw}" 
+                          axis="${HipYawRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${HipYawTorqueLimit}" lower="${-reflect * HipYawPositionLimit_Upper}" upper="${-reflect * HipYawPositionLimit_Lower}" velocity="${HipYawVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${HipYawTorqueLimit}" lower="${HipYawPositionLimit_Lower}" upper="${HipYawPositionLimit_Upper}" velocity="${HipYawVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="15000" Kd="500"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${HipRollJointName}"
+                          parent="${HipYawLinkName}" child="${HipRollLinkName}"
+                          origin_xyz="${HipRollFrameOrigin_X} ${HipRollFrameOrigin_Y} ${HipRollFrameOrigin_Z}"
+                          origin_rpy="${HipRollFrameOrientation_Roll} ${HipRollFrameOrientation_Pitch} ${HipRollFrameOrientation_Yaw}" 
+                          axis="${HipRollRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${HipRollTorqueLimit}" lower="${-reflect * HipRollPositionLimit_Upper}" upper="${-reflect * HipRollPositionLimit_Lower}" velocity="${HipRollVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${HipRollTorqueLimit}" lower="${HipRollPositionLimit_Lower}" upper="${HipRollPositionLimit_Upper}" velocity="${HipRollVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="15000" Kd="500"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${HipPitchJointName}"
+                          parent="${HipRollLinkName}" child="${HipPitchLinkName}"
+                          origin_xyz="${HipPitchFrameOrigin_X} ${HipPitchFrameOrigin_Y} ${HipPitchFrameOrigin_Z}"
+                          origin_rpy="${HipPitchFrameOrientation_Roll} ${HipPitchFrameOrientation_Pitch} ${HipPitchFrameOrientation_Yaw}" 
+                          axis="${HipPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${HipPitchTorqueLimit}" lower="${HipPitchPositionLimit_Lower}" upper="${HipPitchPositionLimit_Upper}" velocity="${HipPitchVelocityLimit}"/>
+        <controller_gains Kp="15000" Kd="500"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${KneePitchJointName}"
+                          parent="${HipPitchLinkName}" child="${KneePitchLinkName}"
+                          origin_xyz="${KneePitchFrameOrigin_X} ${KneePitchFrameOrigin_Y} ${KneePitchFrameOrigin_Z}"
+                          origin_rpy="${KneePitchFrameOrientation_Roll} ${KneePitchFrameOrientation_Pitch} ${KneePitchFrameOrientation_Yaw}" 
+                          axis="${KneePitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${KneePitchTorqueLimit}" lower="${KneePitchPositionLimit_Lower}" upper="${KneePitchPositionLimit_Upper}" velocity="${KneePitchVelocityLimit}"/>
+        <controller_gains Kp="15000" Kd="500"/>
+    </xacro:revolute_joint_ex>
+  </xacro:macro>
+
+  <xacro:macro name="make_ankle_joints" params="prefix reflect leg_root_link">
+
+    <xacro:revolute_joint_ex jointName="${AnklePitchJointName}"
+                          parent="${KneePitchLinkName}" child="${AnklePitchLinkName}"
+                          origin_xyz="${AnklePitchFrameOrigin_X} ${AnklePitchFrameOrigin_Y} ${AnklePitchFrameOrigin_Z}"
+                          origin_rpy="${AnklePitchFrameOrientation_Roll} ${AnklePitchFrameOrientation_Pitch} ${AnklePitchFrameOrientation_Yaw}" 
+                          axis="${AnklePitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${AnklePitchTorqueLimit}" lower="${AnklePitchPositionLimit_Lower}" upper="${AnklePitchPositionLimit_Upper}" velocity="${AnklePitchVelocityLimit}"/>
+        <controller_gains Kp="15000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+
+    <xacro:revolute_joint_ex jointName="${AnkleRollJointName}"
+                          parent="${AnklePitchLinkName}" child="${AnkleRollLinkName}"
+                          origin_xyz="${AnkleRollFrameOrigin_X} ${AnkleRollFrameOrigin_Y} ${AnkleRollFrameOrigin_Z}"
+                          origin_rpy="${AnkleRollFrameOrientation_Roll} ${AnkleRollFrameOrientation_Pitch} ${AnkleRollFrameOrientation_Yaw}" 
+                          axis="${HipRollRotationAxis}"
+                          damping="0.3" friction="0.0">
+        <limit effort="${AnkleRollTorqueLimit}" lower="${AnkleRollPositionLimit_Lower}" upper="${AnkleRollPositionLimit_Upper}" velocity="${AnkleRollVelocityLimit}"/>
+        <controller_gains Kp="15000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+  </xacro:macro>
+
+  <xacro:macro name="make_leg" params="prefix reflect leg_root_link">
+    <xacro:make_leg_links prefix="${prefix}" reflect="${reflect}" leg_root_link="${leg_root_link}" />
+    <xacro:make_leg_joints prefix="${prefix}" reflect="${reflect}" leg_root_link="${leg_root_link}" />
+    <xacro:make_ankle_joints prefix="${prefix}" reflect="${reflect}" leg_root_link="${leg_root_link}" />
+  </xacro:macro>
+
+
+  <!-- Sensors -->
+  <xacro:macro name="v1_leg_sensors" params="prefix reflect">
+
+    <xacro:virtual_fixed_frame_offset name="${prefix}COP"
+                       parentLink="${AnkleRollLinkName}"
+                       origin_xyz="0.0189 0.0 -0.0783"
+                       origin_rpy="0.0 0.13 0.0"/>
+
+    <xacro:ati_force_torque_sensor sensorName="${prefix}LegSixAxis"
+                        parentLink="${AnkleRollLinkName}"
+                        origin_xyz="0.022 0.0 -0.059"
+                        origin_rpy="3.14 0.0 -1.047"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_leg_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6">
+    <actuator name="${name1}" type="${type1}"/>
+    <actuator name="${name2}" type="${type2}"/>
+    <actuator name="${name3}" type="${type3}"/>
+    <actuator name="${name4}" type="${type4}"/>
+    <actuator name="${name5}" type="${type5}"/>
+    <actuator name="${name6}" type="${type6}"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_leg_actuators_no_ankle" params="name1 type1 name2 type2 name3 type3 name4 type4">
+    <actuator name="${name1}" type="${type1}"/>
+    <actuator name="${name2}" type="${type2}"/>
+    <actuator name="${name3}" type="${type3}"/>
+    <actuator name="${name4}" type="${type4}"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_ankle_actuators" params="name5 type5 name6 type6">
+    <actuator name="${name5}" type="${type5}"/>
+    <actuator name="${name6}" type="${type6}"/>
+  </xacro:macro>
+
+</robot>

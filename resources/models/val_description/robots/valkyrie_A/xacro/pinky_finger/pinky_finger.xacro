@@ -1,0 +1,84 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pinky_finger">
+
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/pinky_finger/mass_parameters.xacro"/>
+
+  <xacro:property name="LFJ1_Link_Width" value="0.010"/>
+  <xacro:property name="LFJ1_Link_Height" value="0.010"/>
+  <xacro:property name="LFJ1_Link_Length" value="0.010"/>
+
+  <xacro:property name="LFJ2_Link_Width" value="0.019"/>
+  <xacro:property name="LFJ2_Link_Height" value="0.054"/>
+  <xacro:property name="LFJ2_Link_Length" value="0.026"/>
+
+  <xacro:property name="LFJ3_Link_Width" value="0.034"/>
+  <xacro:property name="LFJ3_Link_Height" value="0.013"/>
+  <xacro:property name="LFJ3_Link_Length" value="0.022"/>
+
+  <xacro:macro name="make_pinky_finger" params="prefix reflect pinky_finger_root_link">
+
+    <xacro:box_link name="${PinkyPitch1LinkName}"
+                    width="${LFJ1_Link_Width}" height="${LFJ1_Link_Height}" depth="${LFJ1_Link_Length}" mass="${PinkyPitch1LinkMass}"
+                    origin_xyz="${PinkyFingerPitch1ComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.stl"/>
+
+    <xacro:box_link name="${PinkyPitch2LinkName}"
+                    width="${LFJ2_Link_Width}" height="${LFJ2_Link_Height}" depth="${LFJ2_Link_Length}" mass="${PinkyPitch2LinkMass}"
+                    origin_xyz="${PinkyFingerPitch2ComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.stl"/>
+
+    <xacro:box_link name="${PinkyPitch3LinkName}"
+                    width="${LFJ3_Link_Width}" height="${LFJ3_Link_Height}" depth="${LFJ3_Link_Length}" mass="${PinkyPitch3LinkMass}"
+                    origin_xyz="${PinkyFingerPitch3ComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.stl"/>
+
+    <xacro:revolute_joint jointName="${PinkyPitch1JointName}"
+                          parent="${PinkyPitch1ParentLinkName}" child="${PinkyPitch1LinkName}"
+                          origin_xyz="${PinkyPitch1FrameOrigin_X} ${PinkyPitch1FrameOrigin_Y} ${PinkyPitch1FrameOrigin_Z}"
+                          origin_rpy="${PinkyPitch1FrameOrientation_Roll} ${PinkyPitch1FrameOrientation_Pitch} ${PinkyPitch1FrameOrientation_Yaw}"
+                          axis="${PinkyFingerPitch1RotationAxis}">
+        <limit effort="${PinkyPitch1TorqueLimit}" lower="${PinkyPitch1PositionLimit_Lower}" upper="${PinkyPitch1PositionLimit_Upper}" velocity="${PinkyPitch1VelocityLimit}"/>
+    </xacro:revolute_joint>
+
+    <xacro:revolute_joint jointName="${PinkyPitch2JointName}"
+                          parent="${PinkyPitch1LinkName}" child="${PinkyPitch2LinkName}"
+                          origin_xyz="${PinkyPitch2FrameOrigin_X} ${PinkyPitch2FrameOrigin_Y} ${PinkyPitch2FrameOrigin_Z}"
+                          origin_rpy="${PinkyPitch2FrameOrientation_Roll} ${PinkyPitch2FrameOrientation_Pitch} ${PinkyPitch2FrameOrientation_Yaw}"
+                          axis="${PinkyFingerPitch2RotationAxis}">
+        <limit effort="${PinkyPitch2TorqueLimit}" lower="${PinkyPitch2PositionLimit_Lower}" upper="${PinkyPitch2PositionLimit_Upper}" velocity="${PinkyPitch2VelocityLimit}"/>
+    </xacro:revolute_joint>
+
+    <xacro:revolute_joint jointName="${PinkyPitch3JointName}"
+                          parent="${PinkyPitch2LinkName}" child="${PinkyPitch3LinkName}"
+                          origin_xyz="${PinkyPitch3FrameOrigin_X} ${PinkyPitch3FrameOrigin_Y} ${PinkyPitch3FrameOrigin_Z}"
+                          origin_rpy="${PinkyPitch3FrameOrientation_Roll} ${PinkyPitch3FrameOrientation_Pitch} ${PinkyPitch3FrameOrientation_Yaw}"
+                          axis="${PinkyFingerPitch3RotationAxis}">
+        <limit effort="${PinkyPitch3TorqueLimit}" lower="${PinkyPitch3PositionLimit_Lower}" upper="${PinkyPitch3PositionLimit_Upper}" velocity="${PinkyPitch3VelocityLimit}"/>
+    </xacro:revolute_joint>
+
+  </xacro:macro>
+
+  <xacro:macro name="v1_right_pinky_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${RLFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+
+  <xacro:macro name="v1_left_pinky_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${LLFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+  
+</robot>

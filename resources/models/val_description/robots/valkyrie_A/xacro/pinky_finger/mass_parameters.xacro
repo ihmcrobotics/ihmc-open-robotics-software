@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/pinky_finger/mass_parameters">
+  
+  <xacro:property name="PinkyPitch1LinkMass" value="0.047" />
+  <xacro:property name="PinkyFingerPitch1ComPosition" value="0 ${reflect*0.02} 0" />
+
+  <xacro:property name="PinkyPitch2LinkMass" value="0.02" />
+  <xacro:property name="PinkyFingerPitch2ComPosition" value="0 ${reflect*0.013} 0" />
+
+  <xacro:property name="PinkyPitch3LinkMass" value="0.011" />
+  <xacro:property name="PinkyFingerPitch3ComPosition" value="0 ${reflect*0.01} 0" />
+  
+</robot>

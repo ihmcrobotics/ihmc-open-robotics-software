@@ -21,17 +21,23 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
 {
 
    public static final String[] forceSensorNames;
+   private static final SideDependentList<String> feetForceSensorNames;
    static
    {
+      feetForceSensorNames = new SideDependentList<String>("LeftAnkleRoll", "RightAnkleRoll");
+      
       if (ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS)
-         forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle", "LeftForearmSupinator", "RightForearmSupinator" };
+      {
+         forceSensorNames = new String[] { "LeftAnkleRoll", "RightAnkleRoll", "LeftWristPitch", "RightWristPitch" };
+      }
       else
-         forceSensorNames = new String[]{ "LeftAnkle", "RightAnkle"};
+      {
+         forceSensorNames = new String[] { "LeftAnkleRoll", "RightAnkleRoll" };
+      }
    }
-   
+   private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftWristPitch", "RightWristPitch");
    private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
    private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("LeftFootContactSensor","RightFootContactSensor");
-   private static final SideDependentList<String> feetForceSensorNames = new SideDependentList<String>("LeftAnkle", "RightAnkle");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
    public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>> contactSensors = new SideDependentList<LinkedHashMap<String,LinkedHashMap<String,ContactSensorType>>>();
 
@@ -62,30 +68,19 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
    }
    
-   public static final SideDependentList<RigidBodyTransform> transformFromTekscanMeasurementToAnkleZUpFrames = new SideDependentList<>();
-   static
-   {
-      //Fortunately the Tekscan measurement frame is a z-up frame and is aligned with the foot, so only translation required.
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(-0.0289334,0,0.075159108);
-      
-      transformFromTekscanMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, transform);
-      transformFromTekscanMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(transform));
-   }
-   
    static
    {
       contactSensors.put(RobotSide.LEFT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
-      contactSensors.get(RobotSide.LEFT).put("LeftAnkle",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
+      
+      contactSensors.get(RobotSide.LEFT).put("LeftAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
+      contactSensors.get(RobotSide.LEFT).get("LeftAnkleRoll").put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
 //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftToeContactSensor", ContactSensorType.TOE);
 //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftHeelContactSensor", ContactSensorType.HEEL);
-      
       contactSensors.put(RobotSide.RIGHT, new LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>());
-      contactSensors.get(RobotSide.RIGHT).put("RightAnkle",new LinkedHashMap<String,ContactSensorType>());
-      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
+      contactSensors.get(RobotSide.RIGHT).put("RightAnkleRoll",new LinkedHashMap<String,ContactSensorType>());
+      contactSensors.get(RobotSide.RIGHT).get("RightAnkleRoll").put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
       
       //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.      
 //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightToeContactSensor", ContactSensorType.TOE);
@@ -101,17 +96,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String pointCloudSensorName = "/v1/Ibeo_sensor";
    private static final String pointCloudTopic = "/v1/Ensenso/Points_in_world";
    
-   private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftForearmSupinator", "RightForearmSupinator");
-   
-   private static int foreheadCameraId = 0;
+   private static int multisenseCameraId = 0;
    private static int leftHazardCameraId = 1;
    private static int rightHazardCameraId = 2;
-   private static int primaryCameraId = foreheadCameraId;
    
    private static final String headLinkName = "/v1/Head";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
-   private static final String foreheadCameraName = "/v1/HeadWebcam___default__";
+   private static final String multisenseCameraName = "multisense_left_camera";
    private static final String foreheadCameraInfo = "/head/camera_info";
    private static final String foreheadCameraTopic = "/head/image_color/compressed";
    
@@ -122,10 +114,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String rightCameraTopic = "/v1/rightHazardCamera/compressed";
    
    
-   private static final String rightTrunkIMUSensor = "v1Trunk_RightIMU";
-   private static final String leftTrunkIMUSensor = "v1Trunk_LeftIMU";
-   private static final String leftPelvisIMUSensor = "v1Pelvis_LeftIMU";
-   private static final String rightPelvisIMUSensor = "v1Pelvis_RightIMU";
+   private static final String rightTrunkIMUSensor = "Torso_RightIMU";
+   private static final String leftTrunkIMUSensor = "Torso_LeftIMU";
+   private static final String leftPelvisIMUSensor = "Pelvis_LeftPelvisIMU";
+   private static final String rightPelvisIMUSensor = "Pelvis_RightPelvisIMU";
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
    static
    {
@@ -149,7 +141,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    public ValkyrieSensorInformation()
    {
-      cameraParamaters[0] = new DRCRobotCameraParameters(null, foreheadCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,transformFromHeadToCamera, foreheadCameraId);
+      cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,transformFromHeadToCamera, multisenseCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
       cameraParamaters[2] = new DRCRobotCameraParameters(RobotSide.RIGHT, rightStereoCameraName,rightCameraTopic,headLinkName,rightHazardCameraId);
       if(pointCloudParamaters.length > 0)
@@ -203,11 +195,6 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       return leftPelvisIMUSensor;
    }
    
-   public RigidBodyTransform getTransformFromAnkleURDFFrameToZUpFrame(RobotSide robotSide)
-   {
-      return transformFromSixAxisMeasurementToAnkleZUpFrames.get(robotSide);
-   }
-
    @Override
    public DRCRobotCameraParameters[] getCameraParameters()
    {

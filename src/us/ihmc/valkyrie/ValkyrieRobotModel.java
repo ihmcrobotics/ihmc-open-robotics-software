@@ -87,12 +87,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return null;
    }
 
-   private final String[] resourceDirectories = {
-         "models/gazebo/",
-         "models/V1/",
-         "models/V1/sdf/",
-         "models/V1/meshes/",
-         "models/V1/meshes/2013_05_16/"};
+   private final String[] resourceDirectories;
+   {
+         resourceDirectories = new String[]{
+               "models/",
+               "models/gazebo/",
+               "models/val_description/",
+               "models/val_description/sdf/",
+            };
+   }
 
    private final JaxbSDFLoader loader;
 
