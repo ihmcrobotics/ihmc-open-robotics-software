@@ -31,8 +31,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    private final double upperNeckExtensorUpperLimit = 0.785398;
    private final double upperNeckExtensorLowerLimit = -0.0872665;
-   private final double lowerNeckExtensorUpperLimit = 0.0;
-   private final double lowerNeckExtensorLowerLimit = 1.162;
+   private final double LowerNeckPitchUpperLimit = 1.162;
+   private final double LowerNeckPitchLowerLimit = 0;
 
    private final DRCRobotJointMap jointMap;
 
@@ -241,13 +241,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getNeckPitchUpperLimit()
    {
-      return upperNeckExtensorUpperLimit + lowerNeckExtensorUpperLimit; // 1.14494;
+      return upperNeckExtensorUpperLimit + LowerNeckPitchUpperLimit; // 1.14494;
    }
 
    @Override
    public double getNeckPitchLowerLimit()
    {
-      return upperNeckExtensorLowerLimit + lowerNeckExtensorLowerLimit; // -0.602139;
+      return upperNeckExtensorLowerLimit + LowerNeckPitchLowerLimit; // -0.602139;
    }
 
    @Override
@@ -740,14 +740,14 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double getSpinePitchUpperLimit()
    {
-      return 0.0872665;
+      return -0.13;
    }
 
    /** @inheritDoc */
    @Override
    public double getSpinePitchLowerLimit()
    {
-      return -0.698132;
+      return 0.666;
    }
 
    /** @inheritDoc */
