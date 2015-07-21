@@ -6,8 +6,8 @@
                         width="0.28251052337959348115" height="0.34445341259705453130" depth="0.36811588436650161116" mass="6.986"
                         origin_xyz="0.000733954 -0.000895362 -0.0702552"
                         origin_rpy="0 0 0"
-                        visual_mesh="${mesh_root}/pelvis/pelvis.stl" material="White"
-                        collision_mesh="${mesh_root}/pelvis/pelvis.stl"/>
+                        visual_mesh="${mesh_root}/pelvis/pelvis.dae" material="White"
+                        collision_mesh="${mesh_root}/pelvis/pelvis.dae"/>
     </xacro:macro>
 
     <xacro:macro name="v1_pelvis_sensors">

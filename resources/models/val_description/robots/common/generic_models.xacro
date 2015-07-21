@@ -28,9 +28,9 @@
         <origin rpy="0 0 0" xyz="0 0 0"/>
       </collision>
     </link>
-    <gazebo reference="${name}">
+<!--    <gazebo reference="${name}">
       <material>Gazebo/${material}</material>
-    </gazebo>
+    </gazebo> -->
   </xacro:macro>
 
   <xacro:macro name="cylinder_link" params="name radius length mass origin_xyz origin_rpy visual_mesh material collision_mesh">
@@ -105,9 +105,9 @@
         <origin rpy="0 0 0" xyz="0 0 0"/>
       </collision>
     </link>
-    <gazebo reference="${name}">
+<!--    <gazebo reference="${name}">
       <material>Gazebo/${material}</material>
-    </gazebo>
+    </gazebo> -->
   </xacro:macro>
 
   <xacro:macro name="box_link_primitive_collision_origin_offset" params="name width height depth mass origin_xyz origin_rpy visual_mesh material origin_offset_xyz origin_offset_rpy">
@@ -274,9 +274,9 @@
         </geometry>
       </collision>
     </link>
-    <gazebo reference="${name}">
+<!--    <gazebo reference="${name}">
       <material>Gazebo/${material}</material>
-    </gazebo>
+    </gazebo> -->
   </xacro:macro>
 
   <xacro:macro name="virtual_link_sphere" params="name radius mass origin_xyz origin_rpy">

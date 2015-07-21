@@ -11,7 +11,7 @@
   <xacro:property name="HipPitchLinkComPosition" value="0.000057 ${reflect*0.050000} -0.220000" />
 
   <xacro:property name="KneePitchLinkMass" value="7.4" />
-  <xacro:property name="KneePitchLinkComPosition" value="-0.004670 ${reflect*0.045000} -0.184940" />
+  <xacro:property name="KneePitchLinkComPosition" value="-0.004670 ${reflect*0.0050000} -0.184940" />
 
   <xacro:property name="AnklePitchLinkMass" value="0.395" />
   <xacro:property name="AnklePitchLinkComPosition" value="-0.001270 ${reflect*0.000000} -0.006010" />

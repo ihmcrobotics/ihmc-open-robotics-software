@@ -6,7 +6,7 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/joint_limits.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/leg/mass_parameters.xacro"/>
-  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/sensors/ati_force_torque.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/common/sensors/ati_force_torque.xacro"/>
 
   <xacro:property name="LJ1_Link_Width" value="0.149"/>
   <xacro:property name="LJ1_Link_Height" value="0.185"/>
@@ -18,73 +18,73 @@
   <xacro:property name="LJ1_Link_Origin_Y" value="2.1764163e-02"/>
   <xacro:property name="LJ1_Link_Origin_Z" value="3.8670367e-02"/> -->
 
-  <xacro:property name="LJ2_Link_Width" value="0.131"/>
-  <xacro:property name="LJ2_Link_Height" value="0.185"/>
-  <xacro:property name="LJ2_Link_Length" value="0.123"/>
+  <xacro:property name="LJ2_Link_Width" value="0.123"/>
+  <xacro:property name="LJ2_Link_Height" value="0.131"/>
+  <xacro:property name="LJ2_Link_Length" value="0.185"/>
 
-  <xacro:property name="LJ3_Link_Width" value="0.55419965909040602714"/>
-  <xacro:property name="LJ3_Link_Height" value="0.24253719562602335524"/>
-  <xacro:property name="LJ3_Link_Length" value="0.18520578950459243295"/>
+  <xacro:property name="LJ3_Link_Width" value="0.24253719562602335524"/>
+  <xacro:property name="LJ3_Link_Height" value="0.18520578950459243295"/>
+  <xacro:property name="LJ3_Link_Length" value="0.55419965909040602714"/>
 
-  <xacro:property name="LJ4_Link_Box_Width" value="0.44528684954574881960"/>
-  <xacro:property name="LJ4_Link_Box_Height" value="0.20288766696230062236"/>
-  <xacro:property name="LJ4_Link_Box_Length" value="0.20551228016178813007"/>
+  <xacro:property name="LJ4_Link_Box_Width" value="0.20288766696230062236"/>
+  <xacro:property name="LJ4_Link_Box_Height" value="0.20551228016178813007"/>
+  <xacro:property name="LJ4_Link_Box_Length" value="0.44528684954574881960"/>
 
   <xacro:property name="LJ5_Link_Width" value="0.033"/>
   <xacro:property name="LJ5_Link_Height" value="0.076"/>
   <xacro:property name="LJ5_Link_Length" value="0.025"/>
 
-  <xacro:property name="LJ6_Link_Width" value="0.082"/>
+  <xacro:property name="LJ6_Link_Width" value="0.300"/>
   <xacro:property name="LJ6_Link_Height" value="0.128"/>
-  <xacro:property name="LJ6_Link_Length" value="0.300"/>
+  <xacro:property name="LJ6_Link_Length" value="0.082"/>
 
   <xacro:macro name="make_leg_links" params="prefix reflect leg_root_link">
     <xacro:box_link name="${HipYawLinkName}"
                     width="${LJ1_Link_Width}" height="${LJ1_Link_Height}" depth="${LJ1_Link_Length}" mass="${HipYawLinkMass}"
                     origin_xyz="${HipYawLinkComPosition}" origin_rpy="0 0 0" 
-                    visual_mesh="${mesh_root}/legs/lj1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/legs/lj1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/legs/lj1_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/legs/lj1_${prefix}.dae"/>
 
     <xacro:box_link name="${HipRollLinkName}"
                     width="${LJ2_Link_Width}" height="${LJ2_Link_Height}" depth="${LJ2_Link_Length}" mass="${HipRollLinkMass}"
                     origin_xyz="${HipRollLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/legs/lj2_${prefix}.stl"
+                    visual_mesh="${mesh_root}/legs/lj2_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/legs/lj2_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/legs/lj2_${prefix}.dae"/>
 
     <xacro:box_link name="${HipPitchLinkName}"
                     width="${LJ3_Link_Width}" height="${LJ3_Link_Height}" depth="${LJ3_Link_Length}" mass="${HipPitchLinkMass}"
                     origin_xyz="${HipPitchLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/legs/lj3_${prefix}.stl"
+                    visual_mesh="${mesh_root}/legs/lj3_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/legs/lj3_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/legs/lj3_${prefix}.dae"/>
 
     <xacro:box_link name="${KneePitchLinkName}"
                     width="${LJ4_Link_Box_Width}" height="${LJ4_Link_Box_Height}" depth="${LJ4_Link_Box_Length}" mass="${KneePitchLinkMass}"
                     origin_xyz="${KneePitchLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/legs/lj4_${prefix}.stl"
+                    visual_mesh="${mesh_root}/legs/lj4_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/legs/lj4_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/legs/lj4_${prefix}.dae"/>
 
     <xacro:box_link name="${AnklePitchLinkName}"
                     width="${LJ5_Link_Width}" height="${LJ5_Link_Height}" depth="${LJ5_Link_Length}" mass="${AnklePitchLinkMass}"
                     origin_xyz="${AnklePitchLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/legs/lj5.stl"
+                    visual_mesh="${mesh_root}/legs/lj5.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/legs/lj5.stl"/>
+                    collision_mesh="${mesh_root}/legs/lj5.dae"/>
 
     <xacro:box_link name="${AnkleRollLinkName}"
                     width="${LJ6_Link_Width}" height="${LJ6_Link_Height}" depth="${LJ6_Link_Length}" mass="${FootMass}"
                     origin_xyz="${FootComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/legs/foot_${prefix}.stl"
+                    visual_mesh="${mesh_root}/legs/foot_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/legs/foot_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/legs/foot_${prefix}.dae" />
 
     
     <gazebo reference="${AnkleRollLinkName}">
@@ -190,9 +190,9 @@
                        origin_xyz="0.0189 0.0 -0.0783"
                        origin_rpy="0.0 0.13 0.0"/>
 
-    <xacro:ati_force_torque_sensor sensorName="${prefix}LegSixAxis"
+    <xacro:ati_force_torque_sensor sensorName="${prefix}FootSixAxis"
                         parentLink="${AnkleRollLinkName}"
-                        origin_xyz="0.022 0.0 -0.059"
+                        origin_xyz="0.0215594 0.0 -0.0585488"
                         origin_rpy="3.14 0.0 -1.047"/>
   </xacro:macro>
 

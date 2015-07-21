@@ -7,27 +7,26 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/joint_limits.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/mass_parameters.xacro"/>
-  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/sensors/camboard.xacro"/>
 
-  <xacro:property name="AJ1_Link_Width" value="0.162"/>
-  <xacro:property name="AJ1_Link_Height" value="0.202"/>
+  <xacro:property name="AJ1_Link_Width" value="0.202"/>
+  <xacro:property name="AJ1_Link_Height" value="0.162"/>
   <xacro:property name="AJ1_Link_Length" value="0.146"/>
 
   <xacro:property name="AJ2_Link_Width" value="0.22179303376297454520"/>
   <xacro:property name="AJ2_Link_Height" value="0.16373203016010165478"/>
   <xacro:property name="AJ2_Link_Length" value="0.15560348965569942292"/>
 
-  <xacro:property name="AJ3_Link_Width" value="0.136"/>
-  <xacro:property name="AJ3_Link_Height" value="0.158"/>
-  <xacro:property name="AJ3_Link_Length" value="0.285"/>
+  <xacro:property name="AJ3_Link_Width" value="0.158"/>
+  <xacro:property name="AJ3_Link_Height" value="0.285"/>
+  <xacro:property name="AJ3_Link_Length" value="0.136"/>
 
   <xacro:property name="AJ4_Link_Width" value="0.11323257841518076516"/>
   <xacro:property name="AJ4_Link_Height" value="0.11855222975004402197"/>
   <xacro:property name="AJ4_Link_Length" value="0.10487312631734664603"/>
 
   <xacro:property name="AJ5_Link_Width" value="0.13557189311158912570"/>
-  <xacro:property name="AJ5_Link_Height" value="0.11439484172804967321"/>
-  <xacro:property name="AJ5_Link_Length" value="0.25365181285234167374"/>
+  <xacro:property name="AJ5_Link_Height" value="0.25365181285234167374"/>
+  <xacro:property name="AJ5_Link_Length" value="0.11439484172804967321"/>
 
   <xacro:property name="AJ6_Link_Width" value="0.03"/>
   <xacro:property name="AJ6_Link_Height" value="0.01"/>
@@ -43,31 +42,31 @@
     <xacro:box_link name="${ShoulderPitchLinkName}"
                     width="${AJ1_Link_Width}" height="${AJ1_Link_Height}" depth="${AJ1_Link_Length}" mass="${ShoulderPitchLinkMass}"
                     origin_xyz="${ShoulderPitchLinkComPosition}" origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/arms/aj1_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/arms/aj1_${prefix}.dae" />
 
     <xacro:box_link name="${ShoulderRollLinkName}"
                     width="${AJ2_Link_Width}" height="${AJ2_Link_Height}" depth="${AJ2_Link_Length}" mass="${ShoulderRollLinkMass}"
                     origin_xyz="${ShoulderRollLinkComPosition}" origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj2_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj2_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/arms/aj2_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/arms/aj2_${prefix}.dae" />
 
     <xacro:box_link name="${ShoulderYawLinkName}"
                     width="${AJ3_Link_Width}" height="${AJ3_Link_Height}" depth="${AJ3_Link_Length}" mass="${ShoulderYawLinkMass}"
                     origin_xyz="${ShoulderYawLinkComPosition}" origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj3_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj3_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/arms/aj3_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/arms/aj3_${prefix}.dae" />
 
     <xacro:box_link name="${ElbowPitchLinkName}"
                     width="${AJ4_Link_Width}" height="${AJ4_Link_Height}" depth="${AJ4_Link_Length}" mass="${ElbowPitchLinkMass}"
                     origin_xyz="${ElbowPitchLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj4_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj4_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/arms/aj4_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/arms/aj4_${prefix}.dae" />
 
     <!-- AJ1 -->
     <xacro:revolute_joint_ex jointName="${ShoulderPitchJointName}"
@@ -131,25 +130,25 @@
                     width="${AJ5_Link_Width}" height="${AJ5_Link_Height}" depth="${AJ5_Link_Length}" mass="${ForearmYawLinkMass}"
                     origin_xyz="${ForearmYawLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj5_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj5_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/arms/aj5_${prefix}.stl" />
+                    collision_mesh="${mesh_root}/arms/aj5_${prefix}.dae" />
 
     <xacro:box_link name="${WristRollLinkName}"
                     width="${AJ6_Link_Width}" height="${AJ6_Link_Height}" depth="${AJ6_Link_Length}" mass="${WristRollLinkMass}"
                     origin_xyz="${WristRollLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/aj6_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/aj6_${prefix}.dae"
                     material="White"
-                    collision_mesh="${mesh_root}/arms/aj6_${prefix}.stl" />/>
+                    collision_mesh="${mesh_root}/arms/aj6_${prefix}.dae" />
 
     <xacro:box_link name="${WristPitchLinkName}"
                     width="${AJ7_Link_Width}" height="${AJ7_Link_Height}" depth="${AJ7_Link_Length}" mass="${PalmMass}"
                     origin_xyz="${PalmComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/arms/palm_${prefix}.stl"
+                    visual_mesh="${mesh_root}/arms/palm_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/arms/palm_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/arms/palm_${prefix}.dae"/>
 
     <!-- AJ5 -->
     <xacro:revolute_joint_ex jointName="${ForearmYawJointName}"
@@ -198,26 +197,6 @@
   <xacro:macro name="make_arm" params="prefix reflect arm_root_link">
     <xacro:make_upper_arm prefix="${prefix}" reflect="${reflect}" upper_arm_root_link="${arm_root_link}" />
     <xacro:make_lower_arm prefix="${prefix}" reflect="${reflect}" lower_arm_root_link="${ElbowPitchLinkName}" />
-  </xacro:macro>
-
-  <!-- Sensors -->
-  <xacro:macro name="v1_right_arm_sensor">
-    <xacro:camboard_sensor sensorName="/v1/RightCamBoard"
-                           parentLink="/v1/RightForearm"
-                           origin_xyz="0.049237 0.006877 -0.250708"
-                           origin_rpy="3.14 1.57 3.14"/>
-  </xacro:macro>
-
-  <xacro:macro name="v1_left_arm_sensor">
-    <xacro:camboard_sensor sensorName="/v1/LeftCamBoard"
-                           parentLink="/v1/LeftForearm"
-                           origin_xyz="0.045536 -0.0085 0.250708"
-                           origin_rpy="3.14 -1.57 0"/>
-  </xacro:macro>
-
-  <xacro:macro name="v1_arm_sensors">
-    <xacro:v1_right_arm_sensor />
-    <xacro:v1_left_arm_sensor />
   </xacro:macro>
 
   <!-- Actuators -->
