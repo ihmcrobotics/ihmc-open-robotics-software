@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="flea">
+
+  <xacro:property name="FleaWidth" value="0.029"/>
+  <xacro:property name="FleaHeight" value="0.029"/>
+  <xacro:property name="FleaDepth" value="0.030"/>
+
+  <xacro:property name="FleaMass" value="0.034"/>
+
+  <xacro:property name="FleaImageWidth" value="1280"/>
+  <xacro:property name="FleaImageHeight" value="1024"/>
+  <xacro:property name="FleaFieldOfView" value="1.378"/>
+  <xacro:property name="FleaMinDistance" value="0.1"/>
+  <xacro:property name="FleaMaxDistance" value="100"/>
+
+  <xacro:macro name="flea3_camera" params="sensorName parentLink origin_xyz origin_rpy imageFormat frameRate">
+    <xacro:massless_virtual_link name="${sensorName}_Frame"
+                    origin_rpy="0 0 0" 
+                    origin_xyz="0 0 0"/>
+
+    <gazebo reference="${sensorName}_Frame">
+      <sensor name="${sensorName}" type="camera">
+        <camera>
+          <image>
+            <width>${FleaImageWidth}</width>
+            <height>${FleaImageHeight}</height>
+            <format>${imageFormat}</format>
+          </image>
+          <horizontal_fov>${FleaFieldOfView}</horizontal_fov> 
+          <clip>
+            <near>${FleaMinDistance}</near>
+            <far>${FleaMaxDistance}</far>
+          </clip>
+        </camera>
+        <update_rate>${frameRate}</update_rate>
+      </sensor>
+    </gazebo>
+
+    <xacro:fixed_joint jointName="${sensorName}_Offset"
+                       parent="${parentLink}" child="${sensorName}_Frame"
+                       origin_rpy="${origin_rpy}"
+                       origin_xyz="${origin_xyz}"/>
+  </xacro:macro>
+</robot>

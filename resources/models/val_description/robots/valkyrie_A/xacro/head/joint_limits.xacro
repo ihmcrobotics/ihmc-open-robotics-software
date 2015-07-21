@@ -9,7 +9,7 @@
   <xacro:property name="NeckYawPositionLimit_Lower" value="-1.57" />
   <xacro:property name="UpperNeckPitchPositionLimit_Lower" value="-0.087" />
 
-  <xacro:property name="LowerNeckPitchPositionLimit_Upper" value="1.57" />
+  <xacro:property name="LowerNeckPitchPositionLimit_Upper" value="1.162" />
   <xacro:property name="NeckYawPositionLimit_Upper" value="1.57" />
   <xacro:property name="UpperNeckPitchPositionLimit_Upper" value="0.785" />
 

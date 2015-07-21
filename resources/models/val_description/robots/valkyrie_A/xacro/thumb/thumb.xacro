@@ -30,33 +30,33 @@
                     width="${TJ1_Link_Width}" height="${TJ1_Link_Height}" depth="${TJ1_Link_Length}" mass="${ThumbRollLinkMass}"
                     origin_xyz="${ThumbRollLinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/thumbj1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/thumbj1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/thumbj1_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/thumbj1_${prefix}.dae"/>
 
     <xacro:box_link name="${ThumbPitch1LinkName}"
                     width="${TJ2_Link_Width}" height="${TJ2_Link_Height}" depth="${TJ2_Link_Length}" mass="${ThumbPitch1LinkMass}"
                     origin_xyz="${ThumbPitch1LinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/thumbj2_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/thumbj2_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/thumbj2_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/thumbj2_${prefix}.dae"/>
 
     <xacro:box_link name="${ThumbPitch2LinkName}"
                     width="${TJ3_Link_Width}" height="${TJ3_Link_Height}" depth="${TJ3_Link_Length}" mass="${ThumbPitch2LinkMass}"
                     origin_xyz="${ThumbPitch2LinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/thumbj3_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/thumbj3_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/thumbj3_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/thumbj3_${prefix}.dae"/>
 
     <xacro:box_link name="${ThumbPitch3LinkName}"
                     width="${TJ4_Link_Width}" height="${TJ4_Link_Height}" depth="${TJ4_Link_Length}" mass="${ThumbPitch3LinkMass}"
                     origin_xyz="${ThumbPitch3LinkComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/thumbj4_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/thumbj4_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/thumbj4_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/thumbj4_${prefix}.dae"/>
 
     <xacro:revolute_joint jointName="${ThumbRollJointName}"
                           parent="${ThumbRollParentLinkName}" child="${ThumbRollLinkName}"
@@ -96,33 +96,33 @@
                     width="${TJ1_Link_Width}" height="${TJ1_Link_Height}" depth="${TJ1_Link_Length}" mass="${ThumbRollLinkMass}"
                     origin_rpy="0 0 0"
                     origin_xyz="${TJ1_Link_Origin_X} ${TJ1_Link_Origin_Y} ${TJ1_Link_Origin_Z}"
-                    visual_mesh="${mesh_root}/fingers/tf1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/tf1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/tf1_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/tf1_${prefix}.dae"/>
 
     <xacro:box_link name="${ThumbPitch1LinkName}"
                     width="${TJ2_Link_Width}" height="${TJ2_Link_Height}" depth="${TJ2_Link_Length}" mass="${ThumbPitch1LinkMass}"
                     origin_rpy="0 0 0"
                     origin_xyz="${TJ2_Link_Origin_X} ${TJ2_Link_Origin_Y} ${TJ2_Link_Origin_Z}"
-                    visual_mesh="${mesh_root}/fingers/tf2.stl"
+                    visual_mesh="${mesh_root}/fingers/tf2.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/tf2.stl"/>
+                    collision_mesh="${mesh_root}/fingers/tf2.dae"/>
 
     <xacro:box_link name="${ThumbPitch2LinkName}"
                     width="${TJ3_Link_Width}" height="${TJ3_Link_Height}" depth="${TJ3_Link_Length}" mass="${ThumbPitch2LinkMass}"
                     origin_rpy="0 0 0"
                     origin_xyz="${TJ3_Link_Origin_X} ${TJ3_Link_Origin_Y} ${TJ3_Link_Origin_Z}"
-                    visual_mesh="${mesh_root}/fingers/tf3.stl"
+                    visual_mesh="${mesh_root}/fingers/tf3.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/tf3.stl"/>
+                    collision_mesh="${mesh_root}/fingers/tf3.dae"/>
 
     <xacro:box_link name="${ThumbPitch3LinkName}"
                     width="${TJ4_Link_Width}" height="${TJ4_Link_Height}" depth="${TJ4_Link_Length}" mass="${ThumbPitch3LinkMass}"
                     origin_rpy="0 0 0"
                     origin_xyz="${TJ4_Link_Origin_X} ${TJ4_Link_Origin_Y} ${TJ4_Link_Origin_Z}"
-                    visual_mesh="${mesh_root}/fingers/tf4.stl"
+                    visual_mesh="${mesh_root}/fingers/tf4.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/tf4.stl"/>
+                    collision_mesh="${mesh_root}/fingers/tf4.dae"/>
 
     <xacro:fixed_joint jointName="${ThumbRollJointName}"
                           parent="${ThumbRollParentLinkName}" child="${ThumbRollLinkName}"

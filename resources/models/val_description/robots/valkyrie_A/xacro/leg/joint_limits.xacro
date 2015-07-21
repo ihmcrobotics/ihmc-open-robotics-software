@@ -8,19 +8,19 @@
   <xacro:property name="AnklePitchTorqueLimit" value="205" />
   <xacro:property name="AnkleRollTorqueLimit" value="205" />
 
-  <xacro:property name="HipYawPositionLimit_Lower" value="-0.524" />
-  <xacro:property name="HipRollPositionLimit_Lower" value="-0.524" />
-  <xacro:property name="HipPitchPositionLimit_Lower" value="-2.356" />
-  <xacro:property name="KneePitchPositionLimit_Lower" value="-0.218" />
-  <xacro:property name="AnklePitchPositionLimit_Lower" value="-0.873" />
+  <xacro:property name="HipYawPositionLimit_Lower" value="-1.1" />
+  <xacro:property name="HipRollPositionLimit_Lower" value="-0.5515" />
+  <xacro:property name="HipPitchPositionLimit_Lower" value="-2.42" />
+  <xacro:property name="KneePitchPositionLimit_Lower" value="-0.083" />
+  <xacro:property name="AnklePitchPositionLimit_Lower" value="-0.8644" />
   <xacro:property name="AnkleRollPositionLimit_Lower" value="-0.349" />
 
-  <xacro:property name="HipYawPositionLimit_Upper" value="0.169" />
-  <xacro:property name="HipRollPositionLimit_Upper" value="0.262" />
-  <xacro:property name="HipPitchPositionLimit_Upper" value="1.710" />
-  <xacro:property name="KneePitchPositionLimit_Upper" value="1.902" />
-  <xacro:property name="AnklePitchPositionLimit_Upper" value="0.873" />
-  <xacro:property name="AnkleRollPositionLimit_Upper" value="0.349" />
+  <xacro:property name="HipYawPositionLimit_Upper" value="0.4141" />
+  <xacro:property name="HipRollPositionLimit_Upper" value="0.467" />
+  <xacro:property name="HipPitchPositionLimit_Upper" value="1.619" />
+  <xacro:property name="KneePitchPositionLimit_Upper" value="2.057" />
+  <xacro:property name="AnklePitchPositionLimit_Upper" value="0.875" />
+  <xacro:property name="AnkleRollPositionLimit_Upper" value="0.348" />
 
   <xacro:property name="HipYawVelocityLimit" value="5.89" />
   <xacro:property name="HipRollVelocityLimit" value="7" />

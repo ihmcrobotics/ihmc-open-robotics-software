@@ -27,25 +27,25 @@
                     width="${LFJ1_Link_Width}" height="${LFJ1_Link_Height}" depth="${LFJ1_Link_Length}" mass="${PinkyPitch1LinkMass}"
                     origin_xyz="${PinkyFingerPitch1ComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/pinkyj1_${prefix}.dae"/>
 
     <xacro:box_link name="${PinkyPitch2LinkName}"
                     width="${LFJ2_Link_Width}" height="${LFJ2_Link_Height}" depth="${LFJ2_Link_Length}" mass="${PinkyPitch2LinkMass}"
                     origin_xyz="${PinkyFingerPitch2ComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/pinkyj2_${prefix}.dae"/>
 
     <xacro:box_link name="${PinkyPitch3LinkName}"
                     width="${LFJ3_Link_Width}" height="${LFJ3_Link_Height}" depth="${LFJ3_Link_Length}" mass="${PinkyPitch3LinkMass}"
                     origin_xyz="${PinkyFingerPitch3ComPosition}"
                     origin_rpy="0 0 0"
-                    visual_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/pinkyj3_${prefix}.dae"/>
 
     <xacro:revolute_joint jointName="${PinkyPitch1JointName}"
                           parent="${PinkyPitch1ParentLinkName}" child="${PinkyPitch1LinkName}"

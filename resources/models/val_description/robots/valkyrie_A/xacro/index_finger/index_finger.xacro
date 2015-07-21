@@ -27,25 +27,25 @@
                     width="${PFJ1_Link_Width}" height="${PFJ1_Link_Height}" depth="${PFJ1_Link_Length}" mass="${IndexFingerPitch1LinkMass}" 
                     origin_xyz="${IndexFingerPitch1ComPosition}"
                     origin_rpy="0 0 0" 
-                    visual_mesh="${mesh_root}/fingers/indexj1_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/indexj1_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/indexj1_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/indexj1_${prefix}.dae"/>
 
     <xacro:box_link name="${IndexFingerPitch2LinkName}" 
                     width="${PFJ2_Link_Width}" height="${PFJ2_Link_Height}" depth="${PFJ2_Link_Length}" mass="${IndexFingerPitch2LinkMass}" 
                     origin_xyz="${IndexFingerPitch2ComPosition}"
                     origin_rpy="0 0 0" 
-                    visual_mesh="${mesh_root}/fingers/indexj2_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/indexj2_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/indexj2_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/indexj2_${prefix}.dae"/>
 
     <xacro:box_link name="${IndexFingerPitch3LinkName}" 
                     width="${PFJ3_Link_Width}" height="${PFJ3_Link_Height}" depth="${PFJ3_Link_Length}" mass="${IndexFingerPitch3LinkMass}" 
                     origin_xyz="${IndexFingerPitch3ComPosition}"
                     origin_rpy="0 0 0" 
-                    visual_mesh="${mesh_root}/fingers/indexj3_${prefix}.stl"
+                    visual_mesh="${mesh_root}/fingers/indexj3_${prefix}.dae"
                     material="Gold"
-                    collision_mesh="${mesh_root}/fingers/indexj3_${prefix}.stl"/>
+                    collision_mesh="${mesh_root}/fingers/indexj3_${prefix}.dae"/>
 
     <xacro:revolute_joint jointName="${IndexFingerPitch1JointName}" 
                           parent="${IndexFingerPitch1ParentLinkName}" child="${IndexFingerPitch1LinkName}"

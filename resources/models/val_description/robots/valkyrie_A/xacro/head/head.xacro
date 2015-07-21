@@ -6,7 +6,7 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/head/joint_limits.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/head/frame_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/head/mass_parameters.xacro"/>
-  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/sensors/multisense_sl.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/common/sensors/multisense_sl.xacro"/>
   
   <xacro:property name="NJ3_Link_Radius" value="0.139"/>
 
@@ -18,19 +18,19 @@
     <xacro:virtual_link_with_visual name="${LowerNeckPitchLinkName}"
                                     origin_xyz="${LowerNeckPitchLinkComPosition}"
                                     origin_rpy="0 0 0"
-                                    mesh_filename="${mesh_root}/head/neckj1.stl"/>
+                                    mesh_filename="${mesh_root}/head/neckj1.dae"/>
 
     <xacro:virtual_link_with_visual name="${NeckYawLinkName}"
                                     origin_xyz="${NeckYawLinkComPosition}"
                                     origin_rpy="0 0 0"
-                                    mesh_filename="${mesh_root}/head/neckj2.stl"/>
+                                    mesh_filename="${mesh_root}/head/neckj2.dae"/>
 
     <xacro:sphere_link name="${UpperNeckPitchLinkName}"
                        radius="${NJ3_Link_Radius}" mass="${UpperNeckPitchLinkMass}"
                        origin_xyz="${UpperNeckPitchLinkComPosition}" origin_rpy="0 0 0"
-                       visual_mesh="${mesh_root}/head/head_multisense_no_visor.stl"
+                       visual_mesh="${mesh_root}/head/head_multisense_no_visor.dae"
                        material="White"
-                       collision_mesh="${mesh_root}/head/head_multisense_no_visor.stl"/>
+                       collision_mesh="${mesh_root}/head/head_multisense_no_visor.dae"/>
 
     <xacro:revolute_joint_ex jointName="${LowerNeckPitchJointName}"
                           parent="${LowerNeckPitchParentLinkName}" child="${LowerNeckPitchLinkName}"
@@ -65,11 +65,6 @@
 
   <xacro:macro name="v1_head_sensors">
 
-<!-- <xacro:microstrain_sensor sensorName="HeadIMU"
-                              parentLink="${UpperNeckPitchLinkName}"
-                              origin_xyz="0.098 0.0 0.052"
-                              origin_rpy="-1.57 1.57 0.0" />
--->
     <xacro:multisense_sl parentLink="${UpperNeckPitchLinkName}" 
                   joint_axis="1 0 0"
                   joint_origin_xyz="${HokuyoFrameOrigin_X} ${HokuyoFrameOrigin_Y} ${HokuyoFrameOrigin_Z}"
@@ -77,9 +72,9 @@
                   com_origin_xyz="${HokuyoLinkComPosition}"
                   com_origin_rpy="0 0 0" 
                   mass="${HokuyoLinkMass}"
-                  visual_mesh="${mesh_root}/head/multisense_hokuyo.stl"
+                  visual_mesh="${mesh_root}/head/multisense_hokuyo.dae"
                   material="White"
-                  collision_mesh="${mesh_root}/head/multisense_hokuyo.stl" />
+                  collision_mesh="${mesh_root}/head/multisense_hokuyo.dae" />
   </xacro:macro>
 
   <xacro:macro name="v1_head_actuators" params="name1 type1 name2 type2 name3 type3">
