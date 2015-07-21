@@ -1,0 +1,28 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/index_finger/dh_parameters">
+
+  <xacro:property name="IndexFingerPitch1FrameOrigin_X" value="0.0022"/>
+  <xacro:property name="IndexFingerPitch1FrameOrigin_Y" value="${reflect * 0.0976}"/>
+  <xacro:property name="IndexFingerPitch1FrameOrigin_Z" value="0.0235"/>
+
+  <xacro:property name="IndexFingerPitch1FrameOrientation_Roll" value="${reflect * 0.1745}"/>
+  <xacro:property name="IndexFingerPitch1FrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="IndexFingerPitch1FrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="IndexFingerPitch2FrameOrigin_X" value="0.0"/>
+  <xacro:property name="IndexFingerPitch2FrameOrigin_Y" value="${reflect * 0.0381}"/>
+  <xacro:property name="IndexFingerPitch2FrameOrigin_Z" value="0.0"/>
+
+  <xacro:property name="IndexFingerPitch2FrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="IndexFingerPitch2FrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="IndexFingerPitch2FrameOrientation_Yaw" value="0.0"/>
+
+  <xacro:property name="IndexFingerPitch3FrameOrigin_X" value="0.0"/>
+  <xacro:property name="IndexFingerPitch3FrameOrigin_Y" value="${reflect * 0.0229}"/>
+  <xacro:property name="IndexFingerPitch3FrameOrigin_Z" value="0"/>
+
+  <xacro:property name="IndexFingerPitch3FrameOrientation_Roll" value="0.0"/>
+  <xacro:property name="IndexFingerPitch3FrameOrientation_Pitch" value="0.0"/>
+  <xacro:property name="IndexFingerPitch3FrameOrientation_Yaw" value="0.0"/>
+
+</robot>

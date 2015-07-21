@@ -32,8 +32,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    private final double upperNeckExtensorUpperLimit = 0.785398;
    private final double upperNeckExtensorLowerLimit = -0.0872665;
    private final double lowerNeckExtensorUpperLimit = 0.0;
-   private final double lowerNeckExtensorLowerLimit = -1.5708;
-   private final double neckYawLowerLimit = -Math.PI / 3 + 0.03;
+   private final double lowerNeckExtensorLowerLimit = 1.162;
 
    private final DRCRobotJointMap jointMap;
 
@@ -269,25 +268,10 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       return runningOnRealRobot;
    }
 
-   // USE THESE FOR Real Atlas Robot and sims when controlling pelvis height instead of CoM.
+   // USE THESE FOR Real Robot and sims when controlling pelvis height instead of CoM.
    private final double minimumHeightAboveGround = 0.595 + 0.23;
    private double nominalHeightAboveGround = 0.675 + 0.23 - 0.01;
    private final double maximumHeightAboveGround = 0.735 + 0.23;
-
-   // USE THESE FOR DRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   // private final double minimumHeightAboveGround = 0.785;
-   // private double nominalHeightAboveGround = 0.865;
-   // private final double maximumHeightAboveGround = 0.925;
-
-   //// USE THESE FOR VRC Atlas Model TASK 2 UNTIL WALKING WORKS BETTER WITH OTHERS.
-   // private double minimumHeightAboveGround = 0.68;
-   // private double nominalHeightAboveGround = 0.76;
-   // private double maximumHeightAboveGround = 0.82;
-
-   //// USE THESE FOR IMPROVING WALKING, BUT DONT CHECK THEM IN UNTIL IT IMPROVED WALKING THROUGH MUD.
-   // private double minimumHeightAboveGround = 0.68;
-   // private double nominalHeightAboveGround = 0.80;  // NOTE: used to be 0.76, jojo
-   // private double maximumHeightAboveGround = 0.84;  // NOTE: used to be 0.82, jojo
 
    @Override
    public double minimumHeightAboveAnkle()
@@ -871,7 +855,34 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public String[] getJointsToIgnoreInController()
    {
-      String[] jointsToIgnore = new String[] {};
+      String[] jointsToIgnore = new String[] {
+            "RightIndexFingerPitch1",
+            "RightIndexFingerPitch2",
+            "RightIndexFingerPitch3",
+            "RightMiddleFingerPitch1",
+            "RightMiddleFingerPitch2",
+            "RightMiddleFingerPitch3",
+            "RightPinkyPitch1",  
+            "RightPinkyPitch2",  
+            "RightPinkyPitch3",  
+            "RightThumbRoll",    
+            "RightThumbPitch1",  
+            "RightThumbPitch2",  
+            "RightThumbPitch3",
+            "LeftIndexFingerPitch1", 
+            "LeftIndexFingerPitch2", 
+            "LeftIndexFingerPitch3", 
+            "LeftMiddleFingerPitch1",
+            "LeftMiddleFingerPitch2",
+            "LeftMiddleFingerPitch3",
+            "LeftPinkyPitch1",       
+            "LeftPinkyPitch2",       
+            "LeftPinkyPitch3",       
+            "LeftThumbRoll",         
+            "LeftThumbPitch1",       
+            "LeftThumbPitch2",       
+            "LeftThumbPitch3",
+            "UpperNeckPitch"};    
 
       return jointsToIgnore;
    }

@@ -1,0 +1,241 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="arm">
+
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/arm/mass_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/sensors/camboard.xacro"/>
+
+  <xacro:property name="AJ1_Link_Width" value="0.162"/>
+  <xacro:property name="AJ1_Link_Height" value="0.202"/>
+  <xacro:property name="AJ1_Link_Length" value="0.146"/>
+
+  <xacro:property name="AJ2_Link_Width" value="0.22179303376297454520"/>
+  <xacro:property name="AJ2_Link_Height" value="0.16373203016010165478"/>
+  <xacro:property name="AJ2_Link_Length" value="0.15560348965569942292"/>
+
+  <xacro:property name="AJ3_Link_Width" value="0.136"/>
+  <xacro:property name="AJ3_Link_Height" value="0.158"/>
+  <xacro:property name="AJ3_Link_Length" value="0.285"/>
+
+  <xacro:property name="AJ4_Link_Width" value="0.11323257841518076516"/>
+  <xacro:property name="AJ4_Link_Height" value="0.11855222975004402197"/>
+  <xacro:property name="AJ4_Link_Length" value="0.10487312631734664603"/>
+
+  <xacro:property name="AJ5_Link_Width" value="0.13557189311158912570"/>
+  <xacro:property name="AJ5_Link_Height" value="0.11439484172804967321"/>
+  <xacro:property name="AJ5_Link_Length" value="0.25365181285234167374"/>
+
+  <xacro:property name="AJ6_Link_Width" value="0.03"/>
+  <xacro:property name="AJ6_Link_Height" value="0.01"/>
+  <xacro:property name="AJ6_Link_Length" value="0.051"/>
+
+  <xacro:property name="AJ7_Link_Width" value="0.085"/>
+  <xacro:property name="AJ7_Link_Height" value="0.1"/>
+  <xacro:property name="AJ7_Link_Length" value="0.038"/>
+
+
+  <xacro:macro name="make_upper_arm" params="prefix reflect upper_arm_root_link">
+    <!-- LINKS -->
+    <xacro:box_link name="${ShoulderPitchLinkName}"
+                    width="${AJ1_Link_Width}" height="${AJ1_Link_Height}" depth="${AJ1_Link_Length}" mass="${ShoulderPitchLinkMass}"
+                    origin_xyz="${ShoulderPitchLinkComPosition}" origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj1_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/arms/aj1_${prefix}.stl" />
+
+    <xacro:box_link name="${ShoulderRollLinkName}"
+                    width="${AJ2_Link_Width}" height="${AJ2_Link_Height}" depth="${AJ2_Link_Length}" mass="${ShoulderRollLinkMass}"
+                    origin_xyz="${ShoulderRollLinkComPosition}" origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj2_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/arms/aj2_${prefix}.stl" />
+
+    <xacro:box_link name="${ShoulderYawLinkName}"
+                    width="${AJ3_Link_Width}" height="${AJ3_Link_Height}" depth="${AJ3_Link_Length}" mass="${ShoulderYawLinkMass}"
+                    origin_xyz="${ShoulderYawLinkComPosition}" origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj3_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/arms/aj3_${prefix}.stl" />
+
+    <xacro:box_link name="${ElbowPitchLinkName}"
+                    width="${AJ4_Link_Width}" height="${AJ4_Link_Height}" depth="${AJ4_Link_Length}" mass="${ElbowPitchLinkMass}"
+                    origin_xyz="${ElbowPitchLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj4_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/arms/aj4_${prefix}.stl" />
+
+    <!-- AJ1 -->
+    <xacro:revolute_joint_ex jointName="${ShoulderPitchJointName}"
+                          parent="${upper_arm_root_link}" child="${ShoulderPitchLinkName}"
+                          origin_xyz="${ShoulderPitchFrameOrigin_X} ${ShoulderPitchFrameOrigin_Y} ${ShoulderPitchFrameOrigin_Z}"
+                          origin_rpy="${ShoulderPitchFrameOrientation_Roll} ${ShoulderPitchFrameOrientation_Pitch} ${ShoulderPitchFrameOrientation_Yaw}" 
+                          axis="${ShoulderPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${ShoulderPitchTorqueLimit}" lower="${ShoulderPitchPositionLimit_Lower}" upper="${ShoulderPitchPositionLimit_Upper}" velocity="${ShoulderPitchVelocityLimit}"/>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+
+    <!-- AJ2 -->
+    <xacro:revolute_joint_ex jointName="${ShoulderRollJointName}"
+                          parent="${ShoulderPitchLinkName}" child="${ShoulderRollLinkName}"
+                          origin_xyz="${ShoulderRollFrameOrigin_X} ${ShoulderRollFrameOrigin_Y} ${ShoulderRollFrameOrigin_Z}"
+                          origin_rpy="${ShoulderRollFrameOrientation_Roll} ${ShoulderRollFrameOrientation_Pitch} ${ShoulderRollFrameOrientation_Yaw}" 
+                          axis="${ShoulderRollRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${ShoulderRollTorqueLimit}" lower="${ShoulderRollPositionLimit_Lower}" upper="${ShoulderRollPositionLimit_Upper}" velocity="${ShoulderRollVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${ShoulderRollTorqueLimit}" lower="${reflect * ShoulderRollPositionLimit_Upper}" upper="${reflect * ShoulderRollPositionLimit_Lower}" velocity="${ShoulderRollVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+
+    <!-- AJ3 -->
+    <xacro:revolute_joint_ex jointName="${ShoulderYawJointName}"
+                          parent="${ShoulderRollLinkName}" child="${ShoulderYawLinkName}"
+                          origin_xyz="${ShoulderYawFrameOrigin_X} ${ShoulderYawFrameOrigin_Y} ${ShoulderYawFrameOrigin_Z}"
+                          origin_rpy="${ShoulderYawFrameOrientation_Roll} ${ShoulderYawFrameOrientation_Pitch} ${ShoulderYawFrameOrientation_Yaw}" 
+                          axis="${ShoulderYawRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${ShoulderYawTorqueLimit}" lower="${ShoulderYawPositionLimit_Lower}" upper="${ShoulderYawPositionLimit_Upper}" velocity="${ShoulderYawVelocityLimit}"/>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+
+    <!-- AJ4 -->
+    <xacro:revolute_joint_ex jointName="${ElbowPitchJointName}"
+                          parent="${ShoulderYawLinkName}" child="${ElbowPitchLinkName}"
+                          origin_xyz="${ElbowPitchFrameOrigin_X} ${ElbowPitchFrameOrigin_Y} ${ElbowPitchFrameOrigin_Z}"
+                          origin_rpy="${ElbowPitchFrameOrientation_Roll} ${ElbowPitchFrameOrientation_Pitch} ${ElbowPitchFrameOrientation_Yaw}" 
+                          axis="${ElbowPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${ElbowPitchTorqueLimit}" lower="${ElbowPitchPositionLimit_Lower}" upper="${ElbowPitchPositionLimit_Upper}" velocity="${ElbowPitchVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${ElbowPitchTorqueLimit}" lower="${reflect * ElbowPitchPositionLimit_Upper}" upper="${reflect * ElbowPitchPositionLimit_Lower}" velocity="${ElbowPitchVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+  </xacro:macro>
+
+
+  <xacro:macro name="make_lower_arm" params="prefix reflect lower_arm_root_link">
+    <!-- LINKS -->
+    <xacro:box_link name="${ForearmLinkName}"
+                    width="${AJ5_Link_Width}" height="${AJ5_Link_Height}" depth="${AJ5_Link_Length}" mass="${ForearmYawLinkMass}"
+                    origin_xyz="${ForearmYawLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj5_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/arms/aj5_${prefix}.stl" />
+
+    <xacro:box_link name="${WristRollLinkName}"
+                    width="${AJ6_Link_Width}" height="${AJ6_Link_Height}" depth="${AJ6_Link_Length}" mass="${WristRollLinkMass}"
+                    origin_xyz="${WristRollLinkComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/aj6_${prefix}.stl"
+                    material="White"
+                    collision_mesh="${mesh_root}/arms/aj6_${prefix}.stl" />/>
+
+    <xacro:box_link name="${WristPitchLinkName}"
+                    width="${AJ7_Link_Width}" height="${AJ7_Link_Height}" depth="${AJ7_Link_Length}" mass="${PalmMass}"
+                    origin_xyz="${PalmComPosition}"
+                    origin_rpy="0 0 0"
+                    visual_mesh="${mesh_root}/arms/palm_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/arms/palm_${prefix}.stl"/>
+
+    <!-- AJ5 -->
+    <xacro:revolute_joint_ex jointName="${ForearmYawJointName}"
+                          parent="${lower_arm_root_link}" child="${ForearmLinkName}"
+                          origin_xyz="${ForearmYawFrameOrigin_X} ${ForearmYawFrameOrigin_Y} ${ForearmYawFrameOrigin_Z}"
+                          origin_rpy="${ForearmYawFrameOrientation_Roll} ${ForearmYawFrameOrientation_Pitch} ${ForearmYawFrameOrientation_Yaw}" 
+                          axis="${ForearmYawRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <limit effort="${ForearmYawTorqueLimit}" lower="${ForearmYawPositionLimit_Lower}" upper="${ForearmYawPositionLimit_Upper}" velocity="${ForearmYawVelocityLimit}"/>
+        <controller_gains Kp="20000" Kd="0"/>
+    </xacro:revolute_joint_ex>
+
+    <!-- AJ6 -->
+    <xacro:revolute_joint_ex jointName="${WristRollJointName}"
+                          parent="${ForearmLinkName}" child="${WristRollLinkName}"
+                          origin_xyz="${WristRollFrameOrigin_X} ${WristRollFrameOrigin_Y} ${WristRollFrameOrigin_Z}"
+                          origin_rpy="${WristRollFrameOrientation_Roll} ${WristRollFrameOrientation_Pitch} ${WristRollFrameOrientation_Yaw}" 
+                          axis="${WristRollRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${WristRollTorqueLimit}" lower="${WristRollPositionLimit_Lower}" upper="${WristRollPositionLimit_Upper}" velocity="${WristRollVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${WristRollTorqueLimit}" lower="${reflect * WristRollPositionLimit_Upper}" upper="${reflect * WristRollPositionLimit_Lower}" velocity="${WristRollVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+
+    <!-- AJ7 -->
+    <xacro:revolute_joint_ex jointName="${WristPitchJointName}"
+                          parent="${WristRollLinkName}" child="${WristPitchLinkName}"
+                          origin_xyz="${WristPitchFrameOrigin_X} ${WristPitchFrameOrigin_Y} ${WristPitchFrameOrigin_Z}"
+                          origin_rpy="${WristPitchFrameOrientation_Roll} ${WristPitchFrameOrientation_Pitch} ${WristPitchFrameOrientation_Yaw}" 
+                          axis="${WristPitchRotationAxis}"
+                          damping="0.1" friction="0.0">
+        <xacro:if value="${(reflect+1)/2}">
+        <limit effort="${WristPitchTorqueLimit}" lower="${WristPitchPositionLimit_Lower}" upper="${WristPitchPositionLimit_Upper}" velocity="${WristPitchVelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+        <limit effort="${WristRollTorqueLimit}" lower="${reflect * WristPitchPositionLimit_Upper}" upper="${reflect * WristPitchPositionLimit_Lower}" velocity="${WristRollVelocityLimit}"/>
+        </xacro:if>
+        <controller_gains Kp="20000" Kd="400"/>
+    </xacro:revolute_joint_ex>
+  </xacro:macro>
+
+  <xacro:macro name="make_arm" params="prefix reflect arm_root_link">
+    <xacro:make_upper_arm prefix="${prefix}" reflect="${reflect}" upper_arm_root_link="${arm_root_link}" />
+    <xacro:make_lower_arm prefix="${prefix}" reflect="${reflect}" lower_arm_root_link="${ElbowPitchLinkName}" />
+  </xacro:macro>
+
+  <!-- Sensors -->
+  <xacro:macro name="v1_right_arm_sensor">
+    <xacro:camboard_sensor sensorName="/v1/RightCamBoard"
+                           parentLink="/v1/RightForearm"
+                           origin_xyz="0.049237 0.006877 -0.250708"
+                           origin_rpy="3.14 1.57 3.14"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_left_arm_sensor">
+    <xacro:camboard_sensor sensorName="/v1/LeftCamBoard"
+                           parentLink="/v1/LeftForearm"
+                           origin_xyz="0.045536 -0.0085 0.250708"
+                           origin_rpy="3.14 -1.57 0"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_arm_sensors">
+    <xacro:v1_right_arm_sensor />
+    <xacro:v1_left_arm_sensor />
+  </xacro:macro>
+
+  <!-- Actuators -->
+  <xacro:macro name="v1_upper_arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4">
+    <actuator name="${name1}" type="${type1}"/>
+    <actuator name="${name2}" type="${type2}"/>
+    <actuator name="${name3}" type="${type3}"/>
+    <actuator name="${name4}" type="${type4}"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_lower_arm_actuators" params="name1 type1 name2 type2 name3 type3">
+    <actuator name="${name1}" type="${type1}"/>
+    <actuator name="${name2}" type="${type2}"/>
+    <actuator name="${name3}" type="${type3}"/>
+  </xacro:macro>
+
+  <xacro:macro name="v1_arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6 name7 type7">
+    <xacro:v1_upper_arm_actuators name1="${name1}" type1="${type1}" name2="${name2}" type2="${type2}" name3="${name3}" type3="${type3}" name4="${name4}" type4="${type4}"/>
+    <xacro:v1_lower_arm_actuators name1="${name5}" type1="${type5}" name2="${name6}" type2="${type6}" name3="${name7}" type3="${type7}" />
+  </xacro:macro>
+</robot>

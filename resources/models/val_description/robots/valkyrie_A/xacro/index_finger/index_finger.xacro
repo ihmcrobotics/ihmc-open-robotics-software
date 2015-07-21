@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/index_finger">
+
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/joint_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/joint_axes.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/actuator_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/link_names.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/joint_limits.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/frame_parameters.xacro"/>
+  <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/index_finger/mass_parameters.xacro"/>
+  
+  <xacro:property name="PFJ1_Link_Width" value="0.029"/>
+  <xacro:property name="PFJ1_Link_Height" value="0.019"/>
+  <xacro:property name="PFJ1_Link_Length" value="0.022"/>
+
+  <xacro:property name="PFJ2_Link_Width" value="0.054"/>
+  <xacro:property name="PFJ2_Link_Height" value="0.019"/>
+  <xacro:property name="PFJ2_Link_Length" value="0.021"/>
+
+  <xacro:property name="PFJ3_Link_Width" value="0.034"/>
+  <xacro:property name="PFJ3_Link_Height" value="0.013"/>
+  <xacro:property name="PFJ3_Link_Length" value="0.017"/>
+
+  <xacro:macro name="make_index_finger" params="prefix reflect index_finger_root_link">
+    
+    <xacro:box_link name="${IndexFingerPitch1LinkName}" 
+                    width="${PFJ1_Link_Width}" height="${PFJ1_Link_Height}" depth="${PFJ1_Link_Length}" mass="${IndexFingerPitch1LinkMass}" 
+                    origin_xyz="${IndexFingerPitch1ComPosition}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/indexj1_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/indexj1_${prefix}.stl"/>
+
+    <xacro:box_link name="${IndexFingerPitch2LinkName}" 
+                    width="${PFJ2_Link_Width}" height="${PFJ2_Link_Height}" depth="${PFJ2_Link_Length}" mass="${IndexFingerPitch2LinkMass}" 
+                    origin_xyz="${IndexFingerPitch2ComPosition}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/indexj2_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/indexj2_${prefix}.stl"/>
+
+    <xacro:box_link name="${IndexFingerPitch3LinkName}" 
+                    width="${PFJ3_Link_Width}" height="${PFJ3_Link_Height}" depth="${PFJ3_Link_Length}" mass="${IndexFingerPitch3LinkMass}" 
+                    origin_xyz="${IndexFingerPitch3ComPosition}"
+                    origin_rpy="0 0 0" 
+                    visual_mesh="${mesh_root}/fingers/indexj3_${prefix}.stl"
+                    material="Gold"
+                    collision_mesh="${mesh_root}/fingers/indexj3_${prefix}.stl"/>
+
+    <xacro:revolute_joint jointName="${IndexFingerPitch1JointName}" 
+                          parent="${IndexFingerPitch1ParentLinkName}" child="${IndexFingerPitch1LinkName}"
+                          origin_xyz="${IndexFingerPitch1FrameOrigin_X} ${IndexFingerPitch1FrameOrigin_Y} ${IndexFingerPitch1FrameOrigin_Z}" 
+                          origin_rpy="${IndexFingerPitch1FrameOrientation_Roll} ${IndexFingerPitch1FrameOrientation_Pitch} ${IndexFingerPitch1FrameOrientation_Yaw}"
+                          axis="${IndexFingerPitch1RotationAxis}">
+        <limit effort="${IndexFingerPitch1TorqueLimit}" lower="${IndexFingerPitch1PositionLimit_Lower}" upper="${IndexFingerPitch1PositionLimit_Upper}" velocity="${IndexFingerPitch1VelocityLimit}"/>
+    </xacro:revolute_joint>
+    
+    <xacro:revolute_joint jointName="${IndexFingerPitch2JointName}" 
+                          parent="${IndexFingerPitch1LinkName}" child="${IndexFingerPitch2LinkName}"
+                          origin_xyz="${IndexFingerPitch2FrameOrigin_X} ${IndexFingerPitch2FrameOrigin_Y} ${IndexFingerPitch2FrameOrigin_Z}" 
+                          origin_rpy="${IndexFingerPitch2FrameOrientation_Roll} ${IndexFingerPitch2FrameOrientation_Pitch} ${IndexFingerPitch2FrameOrientation_Yaw}"
+                          axis="${IndexFingerPitch2RotationAxis}">
+        <limit effort="${IndexFingerPitch2TorqueLimit}" lower="${IndexFingerPitch2PositionLimit_Lower}" upper="${IndexFingerPitch2PositionLimit_Upper}" velocity="${IndexFingerPitch2VelocityLimit}"/>
+    </xacro:revolute_joint>
+
+    <xacro:revolute_joint jointName="${IndexFingerPitch3JointName}" 
+                          parent="${IndexFingerPitch2LinkName}" child="${IndexFingerPitch3LinkName}"
+                          origin_xyz="${IndexFingerPitch3FrameOrigin_X} ${IndexFingerPitch3FrameOrigin_Y} ${IndexFingerPitch3FrameOrigin_Z}" 
+                          origin_rpy="${IndexFingerPitch3FrameOrientation_Roll} ${IndexFingerPitch3FrameOrientation_Pitch} ${IndexFingerPitch3FrameOrientation_Yaw}"
+                          axis="${IndexFingerPitch3RotationAxis}">
+        <limit effort="${IndexFingerPitch3TorqueLimit}" lower="${IndexFingerPitch3PositionLimit_Lower}" upper="${IndexFingerPitch3PositionLimit_Upper}" velocity="${IndexFingerPitch3VelocityLimit}"/>
+    </xacro:revolute_joint>
+  </xacro:macro>
+
+  <xacro:macro name="v1_right_index_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${RPFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+
+  <xacro:macro name="v1_left_index_finger_actuators" params="prefix api">
+    <xacro:v1_actuator name="${LPFA_Actuator_Name}" api="${api}" />
+  </xacro:macro>
+
+</robot>

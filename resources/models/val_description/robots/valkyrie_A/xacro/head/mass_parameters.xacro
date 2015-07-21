@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/head/mass_parameters">
+  
+  <xacro:property name="LowerNeckPitchLinkMass" value="0.471" />
+  <xacro:property name="LowerNeckPitchLinkComPosition" value="0 0 0" />
+
+  <xacro:property name="NeckYawLinkMass" value="1.4" />
+  <xacro:property name="NeckYawLinkComPosition" value="0 0 0" />
+
+  <xacro:property name="UpperNeckPitchLinkMass" value="4.06" />
+  <xacro:property name="UpperNeckPitchLinkComPosition" value="0.091874 0.001012 -0.005277" />
+
+  <xacro:property name="HokuyoLinkMass" value="0.057664"/>
+  <xacro:property name="HokuyoLinkComPosition" value="0.14793 0.0 0.01"/>
+
+</robot>
