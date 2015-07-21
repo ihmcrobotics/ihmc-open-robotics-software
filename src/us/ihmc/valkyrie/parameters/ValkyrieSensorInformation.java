@@ -114,8 +114,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final String rightCameraTopic = "/v1/rightHazardCamera/compressed";
    
    
-   private static final String rightTrunkIMUSensor = "Torso_RightIMU";
-   private static final String leftTrunkIMUSensor = "Torso_LeftIMU";
+   private static final String rightTrunkIMUSensor = "Torso_RightTorsoIMU";
+   private static final String leftTrunkIMUSensor = "Torso_LeftTorsoIMU";
    private static final String leftPelvisIMUSensor = "Pelvis_LeftPelvisIMU";
    private static final String rightPelvisIMUSensor = "Pelvis_RightPelvisIMU";
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
