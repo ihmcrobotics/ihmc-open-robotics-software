@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import javax.vecmath.Quat4d;
+
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
@@ -100,10 +102,10 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static int leftHazardCameraId = 1;
    private static int rightHazardCameraId = 2;
    
-   private static final String headLinkName = "/v1/Head";
+   private static final String headLinkName = "Head";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
-   private static final String multisenseCameraName = "multisense_left_camera";
+   private static final String multisenseCameraName = "multisense_left_camera_left";
    private static final String foreheadCameraInfo = "/head/camera_info";
    private static final String foreheadCameraTopic = "/head/image_color/compressed";
    
@@ -121,8 +123,8 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final RigidBodyTransform transformFromHeadToCamera = new RigidBodyTransform();
    static
    {
-      transformFromHeadToCamera.setEuler(0.0, 0.0, 0.0);
-      transformFromHeadToCamera.setTranslation(0.0,-0.09,0.04);
+      transformFromHeadToCamera.setRotation(new Quat4d(0.99786, -5.2082e-05, -0.065403, -0.00079462));
+      transformFromHeadToCamera.setTranslation(0.18335, 0.035, 0.0774);
    }
    
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
