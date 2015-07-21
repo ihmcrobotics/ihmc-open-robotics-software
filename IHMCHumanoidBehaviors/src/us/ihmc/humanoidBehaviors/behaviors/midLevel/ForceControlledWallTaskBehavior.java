@@ -5,8 +5,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.xbill.DNS.NXTRecord;
-
+import us.ihmc.communication.packets.behaviors.WallTaskBehaviorData;
+import us.ihmc.communication.packets.behaviors.WallTaskBehaviorData.Commands;
 import us.ihmc.communication.packets.manipulation.HandPosePacket;
 import us.ihmc.communication.packets.manipulation.HandPosePacket.Frame;
 import us.ihmc.communication.packets.manipulation.HandPoseStatus;
@@ -37,6 +37,7 @@ import us.ihmc.yoUtilities.math.frames.YoFramePose;
 
 public class ForceControlledWallTaskBehavior extends BehaviorInterface
 {
+	private final ConcurrentListeningQueue<WallTaskBehaviorData> commandListeningQueue = new ConcurrentListeningQueue<WallTaskBehaviorData>();
 	private final ConcurrentListeningQueue<HandPoseStatus> handStatusListeningQueue = new ConcurrentListeningQueue<HandPoseStatus>();
 	protected Status status;
 	private BooleanYoVariable isDone;
@@ -74,7 +75,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 	private final static double EPSILON = 100.0; //5.0e-3;
 	private final DoubleYoVariable distanceToGoal;
 
-	private enum BehaviorStates {SET_STARTPOSITION, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
+	private enum BehaviorStates {SET_STARTPOSITION, READY, WAIT, INSERT_DRILL, SEND_CUT_COMMAND_TO_CONTROLLER, RETRACT_DRILL, GET_TO_DROP_POSITION, DONE};
 	private EnumYoVariable<BehaviorStates> behaviorState;
 	private BehaviorStates nextBehaviorState;
 
@@ -95,6 +96,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		this.visualizerYoGraphicsRegistry = yoGraphicsRegistry;
 		this.robotSide = RobotSide.RIGHT;
 		this.attachControllerListeningQueue(handStatusListeningQueue, HandPoseStatus.class);
+		this.attachNetworkProcessorListeningQueue(commandListeningQueue, WallTaskBehaviorData.class);
 
 		behaviorState = new EnumYoVariable<ForceControlledWallTaskBehavior.BehaviorStates>("ForceControlledWallTaskBehavior_State", registry, BehaviorStates.class, true);
 		behaviorState.set(null);
@@ -157,12 +159,25 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		{
 			consumeHandPoseStatus(handStatusListeningQueue.getNewestPacket());
 		}
+		
+		if (commandListeningQueue.isNewPacketAvailable())
+		{
+			WallTaskBehaviorData packet = commandListeningQueue.getNewestPacket();
+			if(packet.getCommand() == Commands.START)
+			{
+				behaviorState.set(BehaviorStates.SET_STARTPOSITION);
+			}
+			if(packet.getCommand() == Commands.CUT)
+			{
+				behaviorState.set(BehaviorStates.INSERT_DRILL);
+			}
+		}
 
 		switch(behaviorState.getEnumValue())
 		{
 		case SET_STARTPOSITION :
 			goToStartPosition();
-			nextBehaviorState = BehaviorStates.INSERT_DRILL;
+			nextBehaviorState = BehaviorStates.READY;
 			behaviorState.set(BehaviorStates.WAIT);
 			break;
 			
@@ -201,7 +216,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 		case SEND_CUT_COMMAND_TO_CONTROLLER :
 			sendCutCommand();
 			circlecounter ++;
-			if (circlecounter == 10)
+			if (circlecounter == 5)
 			{
 				nextBehaviorState = BehaviorStates.RETRACT_DRILL;
 			}
@@ -220,6 +235,10 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		case DONE :
 			isDone.set(true);
+			break;
+			
+		case READY :
+			// Wait for input.
 			break;
 
 		default :
@@ -305,7 +324,7 @@ public class ForceControlledWallTaskBehavior extends BehaviorInterface
 
 		rotationAxis.setToZero(chestFrame);
 		rotationAxis.set(1.0, 0.0, 0.0);
-		behaviorState.set(BehaviorStates.SET_STARTPOSITION);
+		behaviorState.set(BehaviorStates.READY);
 
 		status = null;
 		hasBeenInitialized.set(true);
