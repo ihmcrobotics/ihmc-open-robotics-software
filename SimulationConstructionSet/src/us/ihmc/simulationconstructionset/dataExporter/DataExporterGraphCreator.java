@@ -11,6 +11,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
+import us.ihmc.utilities.io.printing.PrintTools;
 
 //TODO: currently only does PinJoints
 public class DataExporterGraphCreator
@@ -83,7 +84,7 @@ public class DataExporterGraphCreator
       if (joint instanceof PinJoint)
          pinJoints.add((PinJoint) joint);
       else if (!(joint instanceof FloatingJoint))
-         System.err.println("Joint " + joint.getName() + " not currently handled by " + getClass().getSimpleName());
+         PrintTools.error("Joint " + joint.getName() + " not currently handled by " + getClass().getSimpleName());
 
       for (Joint child : joint.getChildrenJoints())
       {

@@ -30,6 +30,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.Direction;
 import us.ihmc.yoUtilities.math.frames.YoFramePoint;
@@ -473,7 +474,7 @@ public class DataExporterExcelWorkbookCreator
       if (joint instanceof PinJoint)
          pinJoints.add((PinJoint) joint);
       else if (!(joint instanceof FloatingJoint))
-         System.err.println("Joint " + joint.getName() + " not currently handled by " + DataExporterExcelWorkbookCreator.class.getSimpleName());
+         PrintTools.error("Joint " + joint.getName() + " not currently handled by " + DataExporterExcelWorkbookCreator.class.getSimpleName());
 
       for (Joint child : joint.getChildrenJoints())
       {
