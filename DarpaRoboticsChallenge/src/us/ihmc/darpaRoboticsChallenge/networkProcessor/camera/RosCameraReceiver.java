@@ -1,7 +1,5 @@
 package us.ihmc.darpaRoboticsChallenge.networkProcessor.camera;
 
-import geometry_msgs.Transform;
-
 import java.awt.image.BufferedImage;
 import java.net.URI;
 
@@ -10,6 +8,8 @@ import javax.vecmath.Vector3d;
 
 import org.ros.message.Time;
 
+import boofcv.struct.calib.IntrinsicParameters;
+import geometry_msgs.Transform;
 import transform_provider.TransformProvider;
 import transform_provider.TransformProviderRequest;
 import transform_provider.TransformProviderResponse;
@@ -26,7 +26,6 @@ import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
 import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public class RosCameraReceiver extends CameraDataReceiver
 {

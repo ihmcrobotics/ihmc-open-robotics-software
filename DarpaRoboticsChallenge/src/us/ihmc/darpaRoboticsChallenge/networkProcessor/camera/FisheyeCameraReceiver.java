@@ -29,7 +29,6 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(packetCommunicator),
             ppsTimestampOffsetProvider);
 
-
       if (!cameraParameters.useIntrinsicParametersFromRos())
       {
          throw new RuntimeException("You really want to use intrinisic parameters from ROS");

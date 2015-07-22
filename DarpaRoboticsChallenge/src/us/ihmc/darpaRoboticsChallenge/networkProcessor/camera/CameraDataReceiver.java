@@ -8,18 +8,18 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFFullRobotModelFactory;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
+import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
 import us.ihmc.utilities.VideoDataServer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
-import boofcv.struct.calib.IntrinsicParameters;
 
 public abstract class CameraDataReceiver extends Thread
 {
@@ -49,7 +49,6 @@ public abstract class CameraDataReceiver extends Thread
       this.cameraFrame = fullRobotModel.getCameraFrame(sensorNameInSdf);
 
       compressedVideoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(compressedVideoHandler);
-      
    }
 
    public void setCameraFrame(ReferenceFrame cameraFrame)
@@ -70,10 +69,11 @@ public abstract class CameraDataReceiver extends Thread
          try
          {
             CameraData data = dataQueue.take();
+            
             if (data != null)
             {
                readWriteLock.writeLock().lock();
-
+               
                if (DEBUG)
                {
                   System.out.println("Updating full robot model");
@@ -85,6 +85,7 @@ public abstract class CameraDataReceiver extends Thread
                }
                cameraFrame.update();
                cameraFrame.getTransformToWorldFrame().get(cameraOrientation, cameraPosition);
+               
                if (DEBUG)
                {
                   System.out.println(cameraFrame.getTransformToParent());
@@ -95,7 +96,7 @@ public abstract class CameraDataReceiver extends Thread
                {
                   stereoListeners.get(i).newImageAvailable(data, cameraFrame.getTransformToWorldFrame());
                }
-              
+               
                compressedVideoDataServer.updateImage(data.robotSide, data.image, robotTimestamp, cameraPosition, cameraOrientation, data.intrinsicParameters);
                readWriteLock.writeLock().unlock();
             }
@@ -105,9 +106,8 @@ public abstract class CameraDataReceiver extends Thread
             continue;
          }
       }
-
    }
-
+   
    protected void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, IntrinsicParameters intrinsicParameters)
    {
       dataQueue.offer(new CameraData(robotSide, bufferedImage, timeStamp, intrinsicParameters));
@@ -117,7 +117,4 @@ public abstract class CameraDataReceiver extends Thread
    {
       stereoListeners.add(drcStereoListener);
    }
-
-  
-
 }

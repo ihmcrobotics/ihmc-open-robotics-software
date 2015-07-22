@@ -11,12 +11,10 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 
 /**
- * 
  *  Generate simulated camera data and camera info packet from SCS, we use only left eye.
  */
 public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectConsumer<LocalVideoPacket>
 {
-   
    private final RobotSide robotSide;
    
    public SCSCameraDataReceiver(RobotSide robotSide, SDFFullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf, RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
@@ -29,7 +27,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       scsSensorsCommunicator.attachListener(LocalVideoPacket.class, this);
 
       CameraLogger logger = DRCConfigParameters.LOG_PRIMARY_CAMERA_IMAGES ? new CameraLogger("left") : null;
-
    }
 
    public void consumeObject(LocalVideoPacket object)

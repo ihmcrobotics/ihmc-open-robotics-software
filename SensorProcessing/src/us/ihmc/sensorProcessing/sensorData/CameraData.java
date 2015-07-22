@@ -19,5 +19,4 @@ public class CameraData
       this.timestamp = timestamp;
       this.intrinsicParameters = intrinsicParameters;
    }
-
 }
