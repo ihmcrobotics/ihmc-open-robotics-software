@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.movies.MovieFileFilter;
@@ -33,24 +34,37 @@ public class YoVariableLogVisualizerGUI extends JPanel
    private final MultiVideoDataPlayer multiPlayer;
    private final YoVariableLogPlaybackRobot robot;
    private final SimulationConstructionSet scs;
-   private YoVariableLogCropper yoVariableLogCropper;
+   private final YoVariableLogCropper yoVariableLogCropper;
 
    private final File directory;
 
    private final Object seekLock = new Object();
    private boolean isSeeking = false;
 
-   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableLogPlaybackRobot robot,
-         YoVariableLogCropper yoVariableLogCropper, SimulationConstructionSet scs)
+   private final YoVariableExporter exporter;
+   
+   public YoVariableLogVisualizerGUI(File directory, LogProperties properties, MultiVideoDataPlayer player, YoVariableHandshakeParser parser, YoVariableLogPlaybackRobot robot,
+         SimulationConstructionSet scs)
    {
       super();
 
       this.multiPlayer = player;
       this.robot = robot;
-      this.yoVariableLogCropper = yoVariableLogCropper;
       this.scs = scs;
       this.directory = directory;
 
+      
+      if(properties.getCompressed())
+      {
+         yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);         
+         exporter = new YoVariableExporter(scs, directory, properties, parser.getYoVariablesList());
+      }
+      else
+      {
+         yoVariableLogCropper = null;
+         exporter = null;
+      }
+      
       setLayout(new GridLayout(1, 2));
 
       addGUIElements(directory, properties);
@@ -134,6 +148,28 @@ public class YoVariableLogVisualizerGUI extends JPanel
                }.start();
             }
          }
+      }
+   }
+   
+
+   private void exportGraphs(int start, int end)
+   {
+      if (start == -1 || end == -1)
+      {
+         return;
+      }
+      if(exporter != null)
+      {
+         final long startTimestamp = robot.getTimestamp(start);
+         final long endTimestamp = robot.getTimestamp(end);
+         new Thread()
+         {
+            @Override
+            public void run()
+            {
+               exporter.exportGraphs(startTimestamp,endTimestamp);                  
+            }
+         }.start();
       }
    }
 
@@ -309,6 +345,20 @@ public class YoVariableLogVisualizerGUI extends JPanel
             crop(slider.getStart(), slider.getEnd());
          }
       });
+      
+      final JButton exportData = new JButton("Export graphed variables");
+      exportData.setToolTipText("Export variables that are graphed in the main window from the in point till the out point");
+      exportData.addActionListener(new ActionListener()
+      {
+         
+         @Override
+         public void actionPerformed(ActionEvent arg0)
+         {
+            exportGraphs(slider.getStart(), slider.getEnd());
+            
+         }
+
+      });
 
       timePanel.add(slider, BorderLayout.CENTER);
       timePanel.add(currentTime, BorderLayout.EAST);
@@ -332,6 +382,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       subPanel.add(clearMark);
       subPanel.add(exportVideo);
       subPanel.add(crop);
+      subPanel.add(exportData);
       add(subPanel);
    }
 }

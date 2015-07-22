@@ -1,53 +1,30 @@
 package us.ihmc.robotDataCommunication.logger;
 
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import us.ihmc.robotDataCommunication.LogIndex;
-import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
-import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.utilities.gui.CustomProgressMonitor;
 
 import com.google.common.io.Files;
 
-public class YoVariableLogCropper
+public class YoVariableLogCropper extends YoVariableLogReader
 {
-   private boolean initialized = false;
-
-   private final File logDirectory;
-   private final LogProperties logProperties;
    private final MultiVideoDataPlayer player;
 
-   private final File properties;
-   private final File handshake;
    private final File model;
    private final File resourceBundle;
+   
+   protected final File properties;
 
-   private FileChannel logChannel;
-
-   private LogIndex logIndex;
-
-   private ByteBuffer compressedData;
-   private FileInputStream logInputStream;
-
-   public YoVariableLogCropper(MultiVideoDataPlayer player, File logDirectory, LogProperties logProperties) throws IOException
+   public YoVariableLogCropper(MultiVideoDataPlayer player, File logDirectory, LogProperties logProperties)
    {
-      this.logDirectory = logDirectory;
-      this.logProperties = logProperties;
+      super(logDirectory, logProperties);
       this.player = player;
-
+      
       properties = new File(logDirectory, YoVariableLoggerListener.propertyFile);
-      handshake = new File(logDirectory, logProperties.getHandshakeFile());
-      if (!handshake.exists())
-      {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
-      }
 
       if (logProperties.getModelPath() != null)
       {
@@ -68,51 +45,13 @@ public class YoVariableLogCropper
       }
    }
 
-   private void initialize(File logDirectory, LogProperties logProperties) throws FileNotFoundException, IOException
-   {
-      DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
-      byte[] handshakeData = new byte[(int) handshake.length()];
-      handshakeStream.readFully(handshakeData);
-      handshakeStream.close();
-      int logLineLength = YoVariableHandshakeParser.getNumberOfVariables(handshakeData);
-
-      File logdata = new File(logDirectory, logProperties.getVariableDataFile());
-      if (!logdata.exists())
-      {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
-      }
-
-      File index = new File(logDirectory, logProperties.getVariablesIndexFile());
-      if (!index.exists())
-      {
-         throw new RuntimeException("Cannot find " + logProperties.getVariablesIndexFile());
-      }
-
-      
-      logInputStream = new FileInputStream(logdata);
-      logChannel = logInputStream.getChannel();
-
-      logIndex = new LogIndex(index, logChannel.size());
-      int bufferSize = logLineLength * 8;
-      compressedData = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
-
-      initialized = true;
-   }
-
    public synchronized void crop(File destination, long inStamp, long outStamp)
    {
       CustomProgressMonitor monitor = new CustomProgressMonitor("Cropping data file", "Initializing cropper", 0, 100);
-      if (!initialized)
+
+      if (!initialize())
       {
-         try
-         {
-            initialize(logDirectory, logProperties);
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-            return;
-         }
+         return;
       }
 
       try
@@ -160,48 +99,40 @@ public class YoVariableLogCropper
             Files.copy(resourceBundle, resourceDestination);
          }
 
-         logChannel.position(0);
-
          monitor.setNote("Seeking variable data");
          monitor.setProgress(10);
 
          File outputFile = new File(destination, logProperties.getVariableDataFile());
          FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
          FileChannel outputChannel = fileOutputStream.getChannel();
-         
+
          File indexFile = new File(destination, logProperties.getVariablesIndexFile());
          FileOutputStream indexStream = new FileOutputStream(indexFile);
          FileChannel indexChannel = indexStream.getChannel();
 
-         int startPosition = logIndex.seek(inStamp);
-         int endPosition = logIndex.seek(outStamp);
-
+         int startPosition = getPosition(inStamp);
+         int endPosition = getPosition(outStamp);
 
          monitor.setNote("Writing variable data");
-         long startOffset = logIndex.dataOffsets[startPosition];
-         logChannel.position(startOffset);
 
          ByteBuffer indexBuffer = ByteBuffer.allocateDirect(16);
-         for(int i = startPosition; i <= endPosition; i++)
+         for (int i = startPosition; i <= endPosition; i++)
          {
-            int size = logIndex.compressedSizes[i];
-            compressedData.clear();
-            compressedData.limit(size);
-            logChannel.read(compressedData);
-            compressedData.flip();
             
+            ByteBuffer compressedData = readCompressedData(i);
+
             indexBuffer.clear();
-            indexBuffer.putLong(logIndex.timestamps[i]);
+            indexBuffer.putLong(getTimestamp(i));
             indexBuffer.putLong(outputChannel.position());
             indexBuffer.flip();
             indexChannel.write(indexBuffer);
-            
+
             outputChannel.write(compressedData);
          }
 
          outputChannel.close();
          fileOutputStream.close();
-         
+
          indexChannel.close();
          indexStream.close();
 
@@ -217,16 +148,5 @@ public class YoVariableLogCropper
       }
    }
 
-   public void close()
-   {
-      try
-      {
-         logChannel.close();
-         logInputStream.close();
-      }
-      catch (IOException e)
-      {
-         // Nothing to do here
-      }
-   }
+
 }

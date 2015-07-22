@@ -160,18 +160,10 @@ public class LogVisualizer
          e.printStackTrace();
       }
 
-      YoVariableLogCropper yoVariableLogCropper;
-      if(logProperties.getCompressed())
-      {
-         yoVariableLogCropper = new YoVariableLogCropper(players, selectedFile, logProperties);         
-      }
-      else
-      {
-         yoVariableLogCropper = null;
-      }
+
 
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
-      YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, robot, yoVariableLogCropper, scs);
+      YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
 
       setupReadEveryNTicksTextField();
