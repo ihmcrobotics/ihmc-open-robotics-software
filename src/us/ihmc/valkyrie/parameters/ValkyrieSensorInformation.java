@@ -269,6 +269,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    {
       ArrayList<String> sensorFramesToTrack = new ArrayList<String>();
       sensorFramesToTrack(cameraParamaters,sensorFramesToTrack);
+      sensorFramesToTrack(lidarParamaters,sensorFramesToTrack);
       String[] sensorFramesToTrackAsPrimitive = new String[sensorFramesToTrack.size()];
       sensorFramesToTrack.toArray(sensorFramesToTrackAsPrimitive);
       return sensorFramesToTrackAsPrimitive;
