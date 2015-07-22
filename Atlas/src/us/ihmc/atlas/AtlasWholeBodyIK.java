@@ -146,10 +146,16 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       int back_bkz = jointNamesToIndex.get("back_bkz");
       int back_bky = jointNamesToIndex.get("back_bky");
       int back_bkx = jointNamesToIndex.get("back_bkx");
+      
+      int l_wrist2 = jointNamesToIndex.get("l_arm_wry2");
+      int r_wrist2 = jointNamesToIndex.get("r_arm_wry2");
+      
+      int l_shoulderx = jointNamesToIndex.get("l_arm_shx");
+      int r_shoulderx = jointNamesToIndex.get("r_arm_shx");
 
       String[] jointsToMinimize = new String[]{
-          //  "l_arm_shx", "r_arm_shx",
-            "l_arm_elx", "r_arm_elx",
+            "l_arm_shx", "r_arm_shx",
+           // "l_arm_elx", "r_arm_elx",
             "l_arm_wrx", "r_arm_wrx"  };
 
       taskEndEffectorPosition.get(RIGHT).setClampingValueForTaskSpaceError(0.2);
@@ -240,9 +246,9 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       coupledJointWeights.set(rleg_hpy, rleg_kny, -1);
 
       // back
-      weights_jointpose.set(back_bkz, 0.5);
-      weights_jointpose.set(back_bky, 1.5);
-      weights_jointpose.set(back_bkx, 1.5);
+      weights_jointpose.set(back_bkz, 0.1);
+      weights_jointpose.set(back_bky, 0.2);
+      weights_jointpose.set(back_bkx, 0.3);
 
       // try keep hpx mirrored 
       weights_jointpose.set(rleg_hpx, 1);
@@ -251,17 +257,22 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       coupledJointWeights.set(lleg_hpx, rleg_hpx, -1);
 
       // keep this to zero if you can
-      weights_jointpose.set(rleg_hpz, 0.2);
-      weights_jointpose.set(lleg_hpz, 0.2);
+      weights_jointpose.set(rleg_hpz, 0.05);
+      weights_jointpose.set(lleg_hpz, 0.05);
 
       // try to minimize the amount of motion of these joints (wrist pitches)
-      for(String jointName: jointsToMinimize)
+  /*    for(String jointName: jointsToMinimize)
       {
          int jointId = jointNamesToIndex.get(jointName);
-         weights_jointpose.set(jointId, 0.05);
+         weights_jointpose.set(jointId, 0.1);
          coupledJointWeights.set(jointId, jointId, 1);
-      }
+      }*/
       
+   // try to reduce wild motion of wrist2
+      weights_jointpose.set(l_wrist2, 0.02);
+      weights_jointpose.set(r_wrist2, 0.02);
+      weights_jointpose.set(l_shoulderx, 0.02);
+      weights_jointpose.set(r_shoulderx, 0.02);
       
       //-------------------------------------------------
       RobotModel model = this.getHierarchicalSolver().getRobotModel(); 
