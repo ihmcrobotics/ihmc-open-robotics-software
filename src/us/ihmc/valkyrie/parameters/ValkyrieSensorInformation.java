@@ -114,7 +114,24 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    
    private static final String rightStereoCameraName ="/v1/RightHazardCamera___default__";
    private static final String rightCameraTopic = "/v1/rightHazardCamera/compressed";
-   
+
+   /**
+    * LIDAR Parameters
+    */
+   private static final String multisense_namespace = "/multisense";
+   private final DRCRobotLidarParameters[] lidarParamaters = new DRCRobotLidarParameters[1];
+   private final int MULTISENSE_LIDAR_ID = 0;
+
+   private static final double lidar_spindle_velocity = 2.183;
+
+   private static final String lidarPoseLink = "hokuyo_link";
+   private static final String lidarJointName = "MultisenseSLSpinnyJointFrame";
+   private static final String lidarEndFrameInSdf = "/head_hokuyo_frame";
+
+   private static final String lidarSensorName = "head_hokuyo_sensor";
+   private static final String lidarJointTopic = multisense_namespace + "/joint_states";
+   private static final String multisense_laser_topic_string = multisense_namespace+"/lidar_scan";
+   private static final String multisenseHandoffFrame = "head";
    
    private static final String rightTrunkIMUSensor = "Torso_RightTorsoIMU";
    private static final String leftTrunkIMUSensor = "Torso_LeftTorsoIMU";
@@ -141,7 +158,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    public static final String[] imuSensorsToUse = {leftPelvisIMUSensor};
 //   public static final String[] imuSensorsToUse = {rightPelvisIMUSensor};
    
-   public ValkyrieSensorInformation()
+   public ValkyrieSensorInformation(boolean runningOnRealRobot)
    {
       cameraParamaters[0] = new DRCRobotCameraParameters(null, multisenseCameraName,foreheadCameraTopic,headLinkName,foreheadCameraInfo,transformFromHeadToCamera, multisenseCameraId);
       cameraParamaters[1] = new DRCRobotCameraParameters(RobotSide.LEFT, leftStereoCameraName,leftCameraTopic,headLinkName,leftHazardCameraId);
@@ -150,6 +167,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       {
          pointCloudParamaters[POINT_CLOUD_SENSOR_ID] = new DRCRobotPointCloudParameters(pointCloudSensorName,pointCloudTopic,headLinkName,POINT_CLOUD_SENSOR_ID);
       }
+
+      lidarParamaters[MULTISENSE_LIDAR_ID] = new DRCRobotLidarParameters(runningOnRealRobot, lidarSensorName, multisense_laser_topic_string, multisense_laser_topic_string,
+            lidarJointName, lidarJointTopic, lidarPoseLink, multisenseHandoffFrame, lidarEndFrameInSdf, lidar_spindle_velocity, MULTISENSE_LIDAR_ID);
    }
    
    public static String getUrdfFeetForceSensorName(RobotSide side)
@@ -212,13 +232,13 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    @Override
    public DRCRobotLidarParameters[] getLidarParameters()
    {
-      return new DRCRobotLidarParameters[0];
+      return lidarParamaters;
    }
    
    @Override
    public DRCRobotLidarParameters getLidarParameters(int sensorId)
    {
-      return null;
+      return lidarParamaters[sensorId];
    }
 
    @Override

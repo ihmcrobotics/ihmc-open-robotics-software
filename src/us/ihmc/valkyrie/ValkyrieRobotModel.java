@@ -106,7 +106,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.runningOnRealRobot = runningOnRealRobot;
       jointMap = new ValkyrieJointMap();
       physicalProperties = new ValkyriePhysicalProperties();
-      sensorInformation = new ValkyrieSensorInformation();
+      sensorInformation = new ValkyrieSensorInformation(runningOnRealRobot);
 
       if (headless)
       {
