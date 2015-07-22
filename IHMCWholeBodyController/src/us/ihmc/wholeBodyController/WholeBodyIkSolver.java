@@ -144,7 +144,7 @@ abstract public class WholeBodyIkSolver
       {
          private LockLevel lockLevel = LockLevel.LOCK_PELVIS_ORIENTATION;
          private final SideDependentList<ControlledDoF> controlledDoF;
-         private int maxNumberOfAutomaticReseeds = 3;
+         private int maxNumberOfAutomaticReseeds = 0;
          private final HashMap<String,Double> jointPreferedAngle;
          
          public WholeBodyConfiguration()
