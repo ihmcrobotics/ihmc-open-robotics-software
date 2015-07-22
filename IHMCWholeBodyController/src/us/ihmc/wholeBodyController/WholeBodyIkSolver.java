@@ -57,7 +57,7 @@ abstract public class WholeBodyIkSolver
       catch (UnsatisfiedLinkError e)
       {
          if (OperatingSystemTools.isWindows())
-            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2013!!");
+            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2015!!");
       }
    }
 
@@ -368,7 +368,7 @@ abstract public class WholeBodyIkSolver
       catch (UnsatisfiedLinkError e)
       {
          if (OperatingSystemTools.isWindows())
-            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2013!!");
+            PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2015!!");
       }
    }
 
