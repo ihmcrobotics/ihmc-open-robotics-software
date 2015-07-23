@@ -4,9 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -167,7 +171,44 @@ public class YoVariableLogVisualizerGUI extends JPanel
             @Override
             public void run()
             {
-               exporter.exportGraphs(startTimestamp,endTimestamp);                  
+               if(exporter != null)
+               {
+                  FileDialog fd = new FileDialog((Frame) null, "Select .mat file to save to", FileDialog.SAVE);
+                  fd.setFilenameFilter(new FilenameFilter()
+                  {
+                     
+                     @Override
+                     public boolean accept(File dir, String name)
+                     {
+                        String lower = name.toLowerCase();
+                        return lower.endsWith(".mat");
+                     }
+                  });
+                  fd.setFile("*.mat");
+                  fd.setVisible(true);
+                  String filename = fd.getFile();
+                  if(filename == null)
+                  {
+                     System.out.println("No file selected, not exporting data.");
+                  }
+                  else
+                  {
+                     File file = new File(fd.getDirectory(), filename);
+                     try
+                     {
+                        if(file.canWrite() || file.createNewFile())
+                        {
+                           exporter.exportGraphs(file, startTimestamp,endTimestamp);
+                           return;
+                        }
+                     }
+                     catch (IOException | SecurityException e)
+                     {
+                        e.printStackTrace();
+                     }
+                  }
+                  JOptionPane.showMessageDialog(null, "Cannot create file", "Failure to export", JOptionPane.ERROR_MESSAGE);
+               }
             }
          }.start();
       }
