@@ -1,6 +1,6 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.utilities.VideoStreamer;
+import us.ihmc.proprietaryUtilities.VideoStreamer;
 
 public class CompressedVideoDataFactory
 {

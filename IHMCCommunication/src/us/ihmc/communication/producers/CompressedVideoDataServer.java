@@ -1,6 +1,6 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.proprietaryUtilities.VideoDataServer;
 
 
 public interface CompressedVideoDataServer extends VideoDataServer

@@ -102,7 +102,7 @@ import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;

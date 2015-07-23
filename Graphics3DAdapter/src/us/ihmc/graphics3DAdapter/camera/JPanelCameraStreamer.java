@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.utilities.VideoStreamer;
+import us.ihmc.proprietaryUtilities.VideoStreamer;
 import boofcv.struct.calib.IntrinsicParameters;
 
 

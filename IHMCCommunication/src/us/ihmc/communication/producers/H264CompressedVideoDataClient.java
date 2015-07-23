@@ -9,7 +9,7 @@ import javax.vecmath.Quat4d;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.h264.OpenH264Decoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.utilities.VideoStreamer;
+import us.ihmc.proprietaryUtilities.VideoStreamer;
 import boofcv.struct.calib.IntrinsicParameters;
 
 public class H264CompressedVideoDataClient implements CompressedVideoDataClient
