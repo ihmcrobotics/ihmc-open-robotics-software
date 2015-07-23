@@ -16,7 +16,7 @@ import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;

@@ -15,7 +15,7 @@ import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.utilities.VideoStreamer;
+import us.ihmc.proprietaryUtilities.VideoStreamer;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;

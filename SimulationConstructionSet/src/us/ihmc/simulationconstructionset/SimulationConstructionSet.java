@@ -86,7 +86,7 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.utilities.VideoDataServer;
+import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;

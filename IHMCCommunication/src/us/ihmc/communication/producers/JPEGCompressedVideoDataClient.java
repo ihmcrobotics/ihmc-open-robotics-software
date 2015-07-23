@@ -11,7 +11,7 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.utilities.VideoStreamer;
+import us.ihmc.proprietaryUtilities.VideoStreamer;
 
 public class JPEGCompressedVideoDataClient implements CompressedVideoDataClient
 {
