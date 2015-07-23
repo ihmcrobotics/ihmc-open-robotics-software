@@ -161,13 +161,13 @@ public class YoVariableExporter extends YoVariableLogReader
       }
       else if (variable instanceof IntegerYoVariable)
       {
-         return new DataHolder<Integer>(offset, new MLInt32(name, dims))
+         return new DataHolder<Long>(offset, new MLInt64(name, dims))
          {
 
             @Override
             public void set(long entryAsLong)
             {
-               set((Integer) ((int) entryAsLong));
+               set((Long) entryAsLong);
             }
 
          };
