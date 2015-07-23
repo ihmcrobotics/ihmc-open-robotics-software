@@ -101,11 +101,14 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static int multisenseCameraId = 0;
    private static int leftHazardCameraId = 1;
    private static int rightHazardCameraId = 2;
-   
+
+   /**
+    * Multisense SL Parameters
+    */
    private static final String headLinkName = "Head";
    private final DRCRobotCameraParameters[] cameraParamaters = new DRCRobotCameraParameters[3];
    
-   private static final String multisenseCameraName = "multisense_left_camera_left";
+   private static final String multisenseCameraName = "stereo_camera_left";
    private static final String foreheadCameraInfo = "/head/camera_info";
    private static final String foreheadCameraTopic = "/head/image_color/compressed";
    
@@ -125,7 +128,7 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
    private static final double lidar_spindle_velocity = 2.183;
 
    private static final String lidarPoseLink = "hokuyo_link";
-   private static final String lidarJointName = "MultisenseSLSpinnyJointFrame";
+   private static final String lidarJointName = "hokuyo_joint";
    private static final String lidarEndFrameInSdf = "/head_hokuyo_frame";
 
    private static final String lidarSensorName = "head_hokuyo_sensor";

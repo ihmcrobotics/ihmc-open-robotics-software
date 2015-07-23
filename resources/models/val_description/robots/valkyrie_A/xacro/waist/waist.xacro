@@ -89,7 +89,7 @@
   </xacro:macro>
 
   <!-- Actuators -->
-  <xacro:macro name="v1_waist_actuators"  params="name1 type1 name2 type2 name3 type3">
+  <xacro:macro name="waist_actuators"  params="name1 type1 name2 type2 name3 type3">
     <actuator name="${name1}" type="${type1}"/>
     <actuator name="${name2}" type="${type2}"/>
     <actuator name="${name3}" type="${type3}"/>

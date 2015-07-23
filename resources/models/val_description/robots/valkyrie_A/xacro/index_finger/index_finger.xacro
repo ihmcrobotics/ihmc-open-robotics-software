@@ -52,7 +52,12 @@
                           origin_xyz="${IndexFingerPitch1FrameOrigin_X} ${IndexFingerPitch1FrameOrigin_Y} ${IndexFingerPitch1FrameOrigin_Z}" 
                           origin_rpy="${IndexFingerPitch1FrameOrientation_Roll} ${IndexFingerPitch1FrameOrientation_Pitch} ${IndexFingerPitch1FrameOrientation_Yaw}"
                           axis="${IndexFingerPitch1RotationAxis}">
-        <limit effort="${IndexFingerPitch1TorqueLimit}" lower="${IndexFingerPitch1PositionLimit_Lower}" upper="${IndexFingerPitch1PositionLimit_Upper}" velocity="${IndexFingerPitch1VelocityLimit}"/>
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${IndexFingerPitch1TorqueLimit}" lower="${-reflect * IndexFingerPitch1PositionLimit_Upper}" upper="${-reflect * IndexFingerPitch1PositionLimit_Lower}" velocity="${IndexFingerPitch1VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${IndexFingerPitch1TorqueLimit}" lower="${IndexFingerPitch1PositionLimit_Lower}" upper="${IndexFingerPitch1PositionLimit_Upper}" velocity="${IndexFingerPitch1VelocityLimit}"/>
+        </xacro:if>
     </xacro:revolute_joint>
     
     <xacro:revolute_joint jointName="${IndexFingerPitch2JointName}" 
@@ -60,7 +65,12 @@
                           origin_xyz="${IndexFingerPitch2FrameOrigin_X} ${IndexFingerPitch2FrameOrigin_Y} ${IndexFingerPitch2FrameOrigin_Z}" 
                           origin_rpy="${IndexFingerPitch2FrameOrientation_Roll} ${IndexFingerPitch2FrameOrientation_Pitch} ${IndexFingerPitch2FrameOrientation_Yaw}"
                           axis="${IndexFingerPitch2RotationAxis}">
-        <limit effort="${IndexFingerPitch2TorqueLimit}" lower="${IndexFingerPitch2PositionLimit_Lower}" upper="${IndexFingerPitch2PositionLimit_Upper}" velocity="${IndexFingerPitch2VelocityLimit}"/>
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${IndexFingerPitch2TorqueLimit}" lower="${-reflect * IndexFingerPitch2PositionLimit_Upper}" upper="${-reflect * IndexFingerPitch2PositionLimit_Lower}" velocity="${IndexFingerPitch2VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${IndexFingerPitch2TorqueLimit}" lower="${IndexFingerPitch2PositionLimit_Lower}" upper="${IndexFingerPitch2PositionLimit_Upper}" velocity="${IndexFingerPitch2VelocityLimit}"/>
+        </xacro:if>
     </xacro:revolute_joint>
 
     <xacro:revolute_joint jointName="${IndexFingerPitch3JointName}" 
@@ -68,7 +78,12 @@
                           origin_xyz="${IndexFingerPitch3FrameOrigin_X} ${IndexFingerPitch3FrameOrigin_Y} ${IndexFingerPitch3FrameOrigin_Z}" 
                           origin_rpy="${IndexFingerPitch3FrameOrientation_Roll} ${IndexFingerPitch3FrameOrientation_Pitch} ${IndexFingerPitch3FrameOrientation_Yaw}"
                           axis="${IndexFingerPitch3RotationAxis}">
-        <limit effort="${IndexFingerPitch3TorqueLimit}" lower="${IndexFingerPitch3PositionLimit_Lower}" upper="${IndexFingerPitch3PositionLimit_Upper}" velocity="${IndexFingerPitch3VelocityLimit}"/>
+        <xacro:if value="${(reflect+1)/2}">
+          <limit effort="${IndexFingerPitch3TorqueLimit}" lower="${-reflect * IndexFingerPitch3PositionLimit_Upper}" upper="${-reflect * IndexFingerPitch3PositionLimit_Lower}" velocity="${IndexFingerPitch3VelocityLimit}"/>
+        </xacro:if>
+        <xacro:if value="${(-reflect+1)/2}">
+          <limit effort="${IndexFingerPitch3TorqueLimit}" lower="${IndexFingerPitch3PositionLimit_Lower}" upper="${IndexFingerPitch3PositionLimit_Upper}" velocity="${IndexFingerPitch3VelocityLimit}"/>
+        </xacro:if>
     </xacro:revolute_joint>
   </xacro:macro>
 

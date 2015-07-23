@@ -4,6 +4,6 @@
   <xacro:property name="LowerNeckPitchParentLinkName" value="${head_root_link}" />
   <xacro:property name="LowerNeckPitchLinkName" value="LowerNeckPitchLink" />
   <xacro:property name="NeckYawLinkName" value="NeckYawLink" />
-  <xacro:property name="UpperNeckPitchLinkName" value="Head" />
+  <xacro:property name="UpperNeckPitchLinkName" value="UpperNeckPitchLinkName" />
 
 </robot>
