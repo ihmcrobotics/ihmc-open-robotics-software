@@ -38,9 +38,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       }
    }
    private static final SideDependentList<String> wristForceSensorNames = new SideDependentList<String>("LeftWristPitch", "RightWristPitch");
-   private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("/v1/LeftLegHermes_Offset", "/v1/RightLegHermes_Offset");
+   private static final SideDependentList<String> urdfTekscanSensorNames = new SideDependentList<String>("LeftCOP_Offset", "RightCOP_Offset");
    private static final SideDependentList<String> footContactSensorNames = new SideDependentList<String>("LeftFootContactSensor","RightFootContactSensor");
-   private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("/v1/LeftLeg6Axis_Offset", "/v1/RightLeg6Axis_Offset");
+   private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("LeftFootSixAxis_Offset", "RightFootSixAxis_Offset");
    public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String,ContactSensorType>>> contactSensors = new SideDependentList<LinkedHashMap<String,LinkedHashMap<String,ContactSensorType>>>();
 
    public static final boolean USE_JSC_FOOT_MASS_TARING = false;
