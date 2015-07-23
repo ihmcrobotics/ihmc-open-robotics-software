@@ -269,7 +269,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             JointAxisVisualizer jointAxisVisualizer = new JointAxisVisualizer(controllerModel.getElevator(), yoGraphicsListRegistry, 0.3);
             modularRobotController.addRobotController(jointAxisVisualizer);
-
          }
 
          CommonHumanoidReferenceFramesVisualizer referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFramesForController,
@@ -358,7 +357,6 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
                lastEstimatorStartTime.set(estimatorStartTime);
             }
          }
-
       }
       catch (Exception e)
       {
@@ -366,16 +364,14 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          {
             globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
          }
+         
          throw new RuntimeException(e);
-
       }
-
    }
 
    @Override
    public void run()
    {
-
       try
       {
          if (runController.getBooleanValue())
