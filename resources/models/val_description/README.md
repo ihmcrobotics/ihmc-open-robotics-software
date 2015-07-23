@@ -29,7 +29,7 @@ roslaunch ValkyrieInEmptyWorld.launch
 ```
 
 #Credits
-Johnson Space Center - ER4 - Valekryie Team
+Johnson Space Center - ER4 - Valkyrie Team
 
 #License
 NASA 1.3

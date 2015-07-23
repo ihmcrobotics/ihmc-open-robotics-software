@@ -200,21 +200,21 @@
   </xacro:macro>
 
   <!-- Actuators -->
-  <xacro:macro name="v1_upper_arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4">
+  <xacro:macro name="upper_arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4">
     <actuator name="${name1}" type="${type1}"/>
     <actuator name="${name2}" type="${type2}"/>
     <actuator name="${name3}" type="${type3}"/>
     <actuator name="${name4}" type="${type4}"/>
   </xacro:macro>
 
-  <xacro:macro name="v1_lower_arm_actuators" params="name1 type1 name2 type2 name3 type3">
+  <xacro:macro name="lower_arm_actuators" params="name1 type1 name2 type2 name3 type3">
     <actuator name="${name1}" type="${type1}"/>
     <actuator name="${name2}" type="${type2}"/>
     <actuator name="${name3}" type="${type3}"/>
   </xacro:macro>
 
-  <xacro:macro name="v1_arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6 name7 type7">
-    <xacro:v1_upper_arm_actuators name1="${name1}" type1="${type1}" name2="${name2}" type2="${type2}" name3="${name3}" type3="${type3}" name4="${name4}" type4="${type4}"/>
-    <xacro:v1_lower_arm_actuators name1="${name5}" type1="${type5}" name2="${name6}" type2="${type6}" name3="${name7}" type3="${type7}" />
+  <xacro:macro name="arm_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6 name7 type7">
+    <xacro:upper_arm_actuators name1="${name1}" type1="${type1}" name2="${name2}" type2="${type2}" name3="${name3}" type3="${type3}" name4="${name4}" type4="${type4}"/>
+    <xacro:lower_arm_actuators name1="${name5}" type1="${type5}" name2="${name6}" type2="${type6}" name3="${name7}" type3="${type7}" />
   </xacro:macro>
 </robot>

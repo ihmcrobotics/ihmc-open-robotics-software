@@ -14,9 +14,6 @@
   <xacro:property name="LJ1_Link_Origin_X" value="0.02176"/>
   <xacro:property name="LJ1_Link_Origin_Y" value="0.0013"/>
   <xacro:property name="LJ1_Link_Origin_Z" value="0.03867"/>
-  <!-- <xacro:property name="LJ1_Link_Origin_X" value="1.3078570e-03"/>
-  <xacro:property name="LJ1_Link_Origin_Y" value="2.1764163e-02"/>
-  <xacro:property name="LJ1_Link_Origin_Z" value="3.8670367e-02"/> -->
 
   <xacro:property name="LJ2_Link_Width" value="0.123"/>
   <xacro:property name="LJ2_Link_Height" value="0.131"/>
@@ -85,17 +82,6 @@
                     visual_mesh="${mesh_root}/legs/foot_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/legs/foot_${prefix}.dae" />
-
-    
-    <gazebo reference="${AnkleRollLinkName}">
-      <kp>100000.0</kp>
-      <kd>1000.0</kd>
-      <mu1>1.5</mu1>
-      <mu2>1.5</mu2>
-      <fdir1>0 0 1</fdir1>
-      <maxVel>1.0</maxVel>
-      <minDepth>0.00</minDepth>
-    </gazebo>
 
   </xacro:macro>
 
@@ -196,23 +182,11 @@
                         origin_rpy="3.14 0.0 -1.047"/>
   </xacro:macro>
 
-  <xacro:macro name="v1_leg_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6">
+  <xacro:macro name="leg_actuators" params="name1 type1 name2 type2 name3 type3 name4 type4 name5 type5 name6 type6">
     <actuator name="${name1}" type="${type1}"/>
     <actuator name="${name2}" type="${type2}"/>
     <actuator name="${name3}" type="${type3}"/>
     <actuator name="${name4}" type="${type4}"/>
-    <actuator name="${name5}" type="${type5}"/>
-    <actuator name="${name6}" type="${type6}"/>
-  </xacro:macro>
-
-  <xacro:macro name="v1_leg_actuators_no_ankle" params="name1 type1 name2 type2 name3 type3 name4 type4">
-    <actuator name="${name1}" type="${type1}"/>
-    <actuator name="${name2}" type="${type2}"/>
-    <actuator name="${name3}" type="${type3}"/>
-    <actuator name="${name4}" type="${type4}"/>
-  </xacro:macro>
-
-  <xacro:macro name="v1_ankle_actuators" params="name5 type5 name6 type6">
     <actuator name="${name5}" type="${type5}"/>
     <actuator name="${name6}" type="${type6}"/>
   </xacro:macro>
