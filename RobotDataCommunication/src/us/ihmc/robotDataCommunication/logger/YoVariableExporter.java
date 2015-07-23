@@ -39,7 +39,7 @@ public class YoVariableExporter extends YoVariableLogReader
       this.variables = variables;
    }
 
-   public void exportGraphs(long start, long end)
+   public void exportGraphs(File file, long start, long end)
    {
       CustomProgressMonitor monitor = new CustomProgressMonitor("Export data to Matlab", "Reading variable data", 0, 100);
 
@@ -118,7 +118,7 @@ public class YoVariableExporter extends YoVariableLogReader
             matlabData.add(dataHolders.get(dh).getData());
          }
          
-         new MatFileWriter(new File("/home/jesper/test.mat"), matlabData);
+         new MatFileWriter(file, matlabData);
          
          monitor.close();
 
