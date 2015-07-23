@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class AnnounceRequest
 {
-   enum AnnounceType
+   public enum AnnounceType
    {
       CAN_I_HAZ(0x5), ANNOUNCE(0x12);
 
