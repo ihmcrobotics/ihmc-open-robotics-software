@@ -1,0 +1,3813 @@
+<sdf version='1.5'>
+  <model name='valkyrie'>
+    <link name='Pelvis'>
+      <pose>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.000733955 -0.000895362 -0.0702552 0 -0 0</pose>
+        <mass>6.986</mass>
+        <inertia>
+          <ixx>0.147962</ixx>
+          <ixy>-9.0908e-12</ixy>
+          <ixz>-2.86881e-10</ixz>
+          <iyy>0.125353</iyy>
+          <iyz>-5.05973e-12</iyz>
+          <izz>0.115537</izz>
+        </inertia>
+      </inertial>
+      <collision name='Pelvis_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/pelvis/pelvis.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='Pelvis_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/pelvis/pelvis.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <sensor name='LeftPelvisIMU' type='imu'>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>0.0515 0.115 -0.042 1.57 -5.55112e-17 -1.274</pose>
+      </sensor>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='RightPelvisIMU' type='imu'>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>0.0515 -0.115 -0.042 -1.57 -5.55112e-17 1.274</pose>
+      </sensor>
+    </link>
+    <link name='LeftHipYawLink'>
+      <pose>0 0.1016 -0.1853 0 -0 0</pose>
+      <inertial>
+        <pose>0.02176 -0.00131 0.03867 0 -0 0</pose>
+        <mass>2.39</mass>
+        <inertia>
+          <ixx>0.017261</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0148662</iyy>
+          <iyz>0</iyz>
+          <izz>0.0112382</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftHipYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftHipYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftHipYaw' type='revolute'>
+      <child>LeftHipYawLink</child>
+      <parent>Pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.4141</lower>
+          <upper>1.1</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftHipRollLink'>
+      <pose>0 0.1016 -0.1853 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00185 0.02426 -0.01926 0 -0 0</pose>
+        <mass>5.95</mass>
+        <inertia>
+          <ixx>0.0254789</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0244714</iyy>
+          <iyz>0</iyz>
+          <izz>0.0160105</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftHipRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftHipRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftHipRoll' type='revolute'>
+      <child>LeftHipRollLink</child>
+      <parent>LeftHipYawLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.467</lower>
+          <upper>0.5515</upper>
+          <effort>350</effort>
+          <velocity>7</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftHipPitchLink'>
+      <pose>0 0.1016 -0.2462 0 -0 0</pose>
+      <inertial>
+        <pose>5.7e-05 0.05 -0.22 0 -0 0</pose>
+        <mass>10.3</mass>
+        <inertia>
+          <ixx>0.293068</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.314117</iyy>
+          <iyz>0</iyz>
+          <izz>0.0799327</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftHipPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftHipPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftHipPitch' type='revolute'>
+      <child>LeftHipPitchLink</child>
+      <parent>LeftHipRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.42</lower>
+          <upper>1.619</upper>
+          <effort>350</effort>
+          <velocity>6.11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftKneePitchLink'>
+      <pose>0.0001 0.1377 -0.6768 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00467 0.005 -0.18494 0 -0 0</pose>
+        <mass>7.4</mass>
+        <inertia>
+          <ixx>0.148318</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.147657</iyy>
+          <iyz>0</iyz>
+          <izz>0.0514292</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftKneePitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftKneePitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftKneePitch' type='revolute'>
+      <child>LeftKneePitchLink</child>
+      <parent>LeftHipPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.083</lower>
+          <upper>2.057</upper>
+          <effort>350</effort>
+          <velocity>6.11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftAnklePitchLink'>
+      <pose>-0.0102 0.1377 -1.0832 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00127 0 -0.00601 0 -0 0</pose>
+        <mass>0.395</mass>
+        <inertia>
+          <ixx>0.0002107</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.64192e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225973</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftAnklePitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj5.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftAnklePitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj5.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftAnklePitch' type='revolute'>
+      <child>LeftAnklePitchLink</child>
+      <parent>LeftKneePitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.8644</lower>
+          <upper>0.875</upper>
+          <effort>205</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftFoot'>
+      <pose>-0.0085 0.1377 -1.0958 0 -0.1309 0</pose>
+      <inertial>
+        <pose>0.0663469 -0.000270664 -0.0531615 0 -0 0</pose>
+        <mass>1.988</mass>
+        <inertia>
+          <ixx>0.00378624</ixx>
+          <ixy>1.35224e-06</ixy>
+          <ixz>-0.000120236</ixz>
+          <iyy>0.0156048</iyy>
+          <iyz>7.16448e-07</iyz>
+          <izz>0.0170991</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftFoot_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/foot_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftFoot_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/foot_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftAnkleRoll' type='revolute'>
+      <child>LeftFoot</child>
+      <parent>LeftAnklePitchLink</parent>
+      <axis>
+        <xyz>0.991445 0 0.130526</xyz>
+        <limit>
+          <lower>-0.349</lower>
+          <upper>0.348</upper>
+          <effort>205</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightHipYawLink'>
+      <pose>0 -0.1016 -0.1853 0 -0 0</pose>
+      <inertial>
+        <pose>0.02176 0.00131 0.03867 0 -0 0</pose>
+        <mass>2.39</mass>
+        <inertia>
+          <ixx>0.017261</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0148662</iyy>
+          <iyz>0</iyz>
+          <izz>0.0112382</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightHipYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightHipYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightHipYaw' type='revolute'>
+      <child>RightHipYawLink</child>
+      <parent>Pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.1</lower>
+          <upper>0.4141</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightHipRollLink'>
+      <pose>0 -0.1016 -0.1853 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00185 -0.02426 -0.01926 0 -0 0</pose>
+        <mass>5.95</mass>
+        <inertia>
+          <ixx>0.0254789</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0244714</iyy>
+          <iyz>0</iyz>
+          <izz>0.0160105</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightHipRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightHipRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightHipRoll' type='revolute'>
+      <child>RightHipRollLink</child>
+      <parent>RightHipYawLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.5515</lower>
+          <upper>0.467</upper>
+          <effort>350</effort>
+          <velocity>7</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightHipPitchLink'>
+      <pose>0 -0.1016 -0.2462 0 -0 0</pose>
+      <inertial>
+        <pose>5.7e-05 -0.05 -0.22 0 -0 0</pose>
+        <mass>10.3</mass>
+        <inertia>
+          <ixx>0.293068</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.314117</iyy>
+          <iyz>0</iyz>
+          <izz>0.0799327</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightHipPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightHipPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightHipPitch' type='revolute'>
+      <child>RightHipPitchLink</child>
+      <parent>RightHipRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.42</lower>
+          <upper>1.619</upper>
+          <effort>350</effort>
+          <velocity>6.11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightKneePitchLink'>
+      <pose>0.0001 -0.1377 -0.6768 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00467 -0.005 -0.18494 0 -0 0</pose>
+        <mass>7.4</mass>
+        <inertia>
+          <ixx>0.148318</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.147657</iyy>
+          <iyz>0</iyz>
+          <izz>0.0514292</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightKneePitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightKneePitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightKneePitch' type='revolute'>
+      <child>RightKneePitchLink</child>
+      <parent>RightHipPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.083</lower>
+          <upper>2.057</upper>
+          <effort>350</effort>
+          <velocity>6.11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightAnklePitchLink'>
+      <pose>-0.0102 -0.1377 -1.0832 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00127 -0 -0.00601 0 -0 0</pose>
+        <mass>0.395</mass>
+        <inertia>
+          <ixx>0.0002107</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.64192e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.000225973</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightAnklePitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj5.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightAnklePitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/lj5.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightAnklePitch' type='revolute'>
+      <child>RightAnklePitchLink</child>
+      <parent>RightKneePitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.8644</lower>
+          <upper>0.875</upper>
+          <effort>205</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightFoot'>
+      <pose>-0.0085 -0.1377 -1.0958 0 -0.1309 0</pose>
+      <inertial>
+        <pose>0.0663469 0.000270664 -0.0531615 0 -0 0</pose>
+        <mass>1.988</mass>
+        <inertia>
+          <ixx>0.00378624</ixx>
+          <ixy>-1.35224e-06</ixy>
+          <ixz>-0.000120236</ixz>
+          <iyy>0.0156048</iyy>
+          <iyz>-7.16448e-07</iyz>
+          <izz>0.0170991</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightFoot_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/foot_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightFoot_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/legs/foot_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightAnkleRoll' type='revolute'>
+      <child>RightFoot</child>
+      <parent>RightAnklePitchLink</parent>
+      <axis>
+        <xyz>0.991445 0 0.130526</xyz>
+        <limit>
+          <lower>-0.349</lower>
+          <upper>0.348</upper>
+          <effort>205</effort>
+          <velocity>11</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='TorsoYawLink'>
+      <pose>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>1e-05</mass>
+        <inertia>
+          <ixx>1.66667e-14</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.66667e-14</iyy>
+          <iyz>0</iyz>
+          <izz>1.66667e-14</izz>
+        </inertia>
+      </inertial>
+      <collision name='TorsoYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torsoyaw.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='TorsoYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torsoyaw.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='TorsoYaw' type='revolute'>
+      <child>TorsoYawLink</child>
+      <parent>Pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.329</lower>
+          <upper>1.181</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='TorsoPitchLink'>
+      <pose>0.04191 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>1e-05</mass>
+        <inertia>
+          <ixx>1.66667e-14</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.66667e-14</iyy>
+          <iyz>0</iyz>
+          <izz>1.66667e-14</izz>
+        </inertia>
+      </inertial>
+      <collision name='TorsoPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torsopitch.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='TorsoPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torsopitch.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='TorsoPitch' type='revolute'>
+      <child>TorsoPitchLink</child>
+      <parent>TorsoYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.13</lower>
+          <upper>0.666</upper>
+          <effort>150</effort>
+          <velocity>9</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='Torso'>
+      <pose>0.04191 0 0.0203 0 -0 0</pose>
+      <inertial>
+        <pose>-0.0981 -3.88348e-26 0.255 0 -0 0</pose>
+        <mass>42.6</mass>
+        <inertia>
+          <ixx>1.36738</ixx>
+          <ixy>4.72486e-25</ixy>
+          <ixz>2.64882e-09</ixz>
+          <iyy>1.43685</iyy>
+          <iyz>-4.21862e-25</iyz>
+          <izz>1.19515</izz>
+        </inertia>
+      </inertial>
+      <collision name='Torso_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torso.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='Torso_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/torso/torso.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <sensor name='LeftHazardCamera' type='camera'>
+        <camera name='__default__'>
+          <image>
+            <width>1280</width>
+            <height>1024</height>
+            <format>R8G8B8</format>
+          </image>
+          <horizontal_fov>1.378</horizontal_fov>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+        </camera>
+        <update_rate>60</update_rate>
+        <pose>0.0345 0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
+      </sensor>
+      <velocity_decay/>
+      <sensor name='LeftTorsoIMU' type='imu'>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>-0.047 0.134 0.363 1.57 4.33681e-19 3.14</pose>
+      </sensor>
+      <velocity_decay/>
+      <sensor name='RightHazardCamera' type='camera'>
+        <camera name='__default__'>
+          <image>
+            <width>1280</width>
+            <height>1024</height>
+            <format>R8G8B8</format>
+          </image>
+          <horizontal_fov>1.378</horizontal_fov>
+          <clip>
+            <near>0.1</near>
+            <far>100</far>
+          </clip>
+        </camera>
+        <update_rate>60</update_rate>
+        <pose>0.0345 -0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
+      </sensor>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='RightTorsoIMU' type='imu'>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>-0.047 -0.134 0.363 -1.57 -4.33681e-19 3.14</pose>
+      </sensor>
+    </link>
+    <joint name='TorsoRoll' type='revolute'>
+      <child>Torso</child>
+      <parent>TorsoPitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.23</lower>
+          <upper>0.255</upper>
+          <effort>150</effort>
+          <velocity>9</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftShoulderPitchLink'>
+      <pose>0.01031 0 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.012 0.251 0 0 -0 0</pose>
+        <mass>2.65</mass>
+        <inertia>
+          <ixx>0.0105028</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0137182</iyy>
+          <iyz>0</iyz>
+          <izz>0.0148064</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftShoulderPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftShoulderPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftShoulderPitch' type='revolute'>
+      <child>LeftShoulderPitchLink</child>
+      <parent>Torso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.85</lower>
+          <upper>2</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftShoulderRollLink'>
+      <pose>0.01031 0.2499 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.020086 0.04 -0.004999 0 -0 0</pose>
+        <mass>2.87</mass>
+        <inertia>
+          <ixx>0.0122024</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0175559</iyy>
+          <iyz>0</iyz>
+          <izz>0.0181767</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftShoulderRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftShoulderRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftShoulderRoll' type='revolute'>
+      <child>LeftShoulderRollLink</child>
+      <parent>LeftShoulderPitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.519</lower>
+          <upper>1.266</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftShoulderYawLink'>
+      <pose>0.01031 0.2499 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.004 0.273 -0.019953 0 -0 0</pose>
+        <mass>2.575</mass>
+        <inertia>
+          <ixx>0.0213985</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00932579</iyy>
+          <iyz>0</iyz>
+          <izz>0.0227864</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftShoulderYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftShoulderYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftShoulderYaw' type='revolute'>
+      <child>LeftShoulderYawLink</child>
+      <parent>LeftShoulderRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.1</lower>
+          <upper>2.18</upper>
+          <effort>65</effort>
+          <velocity>11.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftElbowPitchLink'>
+      <pose>0.03571 0.5799 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.027 0.0802 0 0 -0 0</pose>
+        <mass>2.367</mass>
+        <inertia>
+          <ixx>0.0049417</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00469849</iyy>
+          <iyz>0</iyz>
+          <izz>0.00530134</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftElbowPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftElbowPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftElbowPitch' type='revolute'>
+      <child>LeftElbowPitchLink</child>
+      <parent>LeftShoulderYawLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-2.174</lower>
+          <upper>0.12</upper>
+          <effort>65</effort>
+          <velocity>11.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftForearmLink'>
+      <pose>0.01031 0.5799 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.015 0.11 0.019564 0 -0 0</pose>
+        <mass>2.903</mass>
+        <inertia>
+          <ixx>0.0187305</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00761213</iyy>
+          <iyz>0</iyz>
+          <izz>0.0200111</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftForearmLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj5_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftForearmLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj5_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftForearmYaw' type='revolute'>
+      <child>LeftForearmLink</child>
+      <parent>LeftElbowPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.019</lower>
+          <upper>3.14</upper>
+          <effort>26</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftWristRollLink'>
+      <pose>0.01031 0.867 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>2.25083e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.9175e-05</iyy>
+          <iyz>0</iyz>
+          <izz>8.33333e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftWristRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj6_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftWristRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj6_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftWristRoll' type='revolute'>
+      <child>LeftWristRollLink</child>
+      <parent>LeftForearmLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.62</lower>
+          <upper>0.625</upper>
+          <effort>14</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftPalm'>
+      <pose>0.01031 0.867 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.002954 0.052034 -0.000236 0 -0 0</pose>
+        <mass>0.712</mass>
+        <inertia>
+          <ixx>0.000679011</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000514361</iyy>
+          <iyz>0</iyz>
+          <izz>0.00102202</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftPalm_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/palm_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftPalm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/palm_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftWristPitch' type='revolute'>
+      <child>LeftPalm</child>
+      <parent>LeftWristRollLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.36</lower>
+          <upper>0.49</upper>
+          <effort>14</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftIndexFingerPitch1Link'>
+      <pose>0.01251 0.9646 0.3422 0.1745 -0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>4.225e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>6.625e-07</iyy>
+          <iyz>0</iyz>
+          <izz>6.01e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftIndexFingerPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftIndexFingerPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftIndexFingerPitch1' type='revolute'>
+      <child>LeftIndexFingerPitch1Link</child>
+      <parent>LeftPalm</parent>
+      <axis>
+        <xyz>0 -0.173616 0.984813</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftIndexFingerPitch2Link'>
+      <pose>0.01251 1.00212 0.348815 0.1745 -0 0</pose>
+      <inertial>
+        <pose>0 0.013 0 0 -0 0</pose>
+        <mass>0.018</mass>
+        <inertia>
+          <ixx>1.203e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.0355e-06</iyy>
+          <iyz>0</iyz>
+          <izz>4.9155e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftIndexFingerPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftIndexFingerPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftIndexFingerPitch2' type='revolute'>
+      <child>LeftIndexFingerPitch2Link</child>
+      <parent>LeftIndexFingerPitch1Link</parent>
+      <axis>
+        <xyz>0 -0.173616 0.984813</xyz>
+        <limit>
+          <lower>-1.658</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftIndexFingerPitch3Link'>
+      <pose>0.01251 1.02467 0.352791 0.1745 -0 0</pose>
+      <inertial>
+        <pose>0 0.01 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>3.81667e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.20417e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.10417e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftIndexFingerPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftIndexFingerPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftIndexFingerPitch3' type='revolute'>
+      <child>LeftIndexFingerPitch3Link</child>
+      <parent>LeftIndexFingerPitch2Link</parent>
+      <axis>
+        <xyz>0 -0.173616 0.984813</xyz>
+        <limit>
+          <lower>-1.92</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftMiddleFingerPitch1Link'>
+      <pose>0.01251 0.964 0.3068 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>1.72833e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.98667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftMiddleFingerPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftMiddleFingerPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftMiddleFingerPitch1' type='revolute'>
+      <child>LeftMiddleFingerPitch1Link</child>
+      <parent>LeftPalm</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.658</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftMiddleFingerPitch2Link'>
+      <pose>0.01251 1.00182 0.302156 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.013 0 0 -0 0</pose>
+        <mass>0.011</mass>
+        <inertia>
+          <ixx>5.98583e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.50333e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21458e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftMiddleFingerPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftMiddleFingerPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftMiddleFingerPitch2' type='revolute'>
+      <child>LeftMiddleFingerPitch2Link</child>
+      <parent>LeftMiddleFingerPitch1Link</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.92</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftMiddleFingerPitch3Link'>
+      <pose>0.01251 1.02455 0.299364 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.01 0 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>2.525e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.45e-07</iyy>
+          <iyz>0</iyz>
+          <izz>4.365e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftMiddleFingerPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftMiddleFingerPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftMiddleFingerPitch3' type='revolute'>
+      <child>LeftMiddleFingerPitch3Link</child>
+      <parent>LeftMiddleFingerPitch2Link</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftPinkyPitch1Link'>
+      <pose>0.01251 0.9508 0.2777 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.02 0 0 -0 0</pose>
+        <mass>0.047</mass>
+        <inertia>
+          <ixx>7.83333e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>7.83333e-07</iyy>
+          <iyz>0</iyz>
+          <izz>7.83333e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftPinkyPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftPinkyPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftPinkyPitch1' type='revolute'>
+      <child>LeftPinkyPitch1Link</child>
+      <parent>LeftPalm</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftPinkyPitch2Link'>
+      <pose>0.01251 0.988616 0.273056 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.013 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>5.98667e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.72833e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftPinkyPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftPinkyPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftPinkyPitch2' type='revolute'>
+      <child>LeftPinkyPitch2Link</child>
+      <parent>LeftPinkyPitch1Link</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.658</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftPinkyPitch3Link'>
+      <pose>0.01251 1.01135 0.270264 -0.1222 0 0</pose>
+      <inertial>
+        <pose>0 0.01 0 0 -0 0</pose>
+        <mass>0.011</mass>
+        <inertia>
+          <ixx>5.98583e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.50333e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21458e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftPinkyPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftPinkyPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftPinkyPitch3' type='revolute'>
+      <child>LeftPinkyPitch3Link</child>
+      <parent>LeftPinkyPitch2Link</parent>
+      <axis>
+        <xyz>0 0.121896 0.992543</xyz>
+        <limit>
+          <lower>-1.92</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftThumbRollLink'>
+      <pose>0.01521 0.9021 0.3415 -0.3491 0 0</pose>
+      <inertial>
+        <pose>0 0 0.015 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.83333e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.83333e-07</iyy>
+          <iyz>0</iyz>
+          <izz>2.83333e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftThumbRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftThumbRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj1_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftThumbRoll' type='revolute'>
+      <child>LeftThumbRollLink</child>
+      <parent>LeftPalm</parent>
+      <axis>
+        <xyz>0 0.939681 -0.342052</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>2.356</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftThumbPitch1Link'>
+      <pose>0.01521 0.909933 0.363019 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.002 0.02 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>1.72833e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.98667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftThumbPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftThumbPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj2_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftThumbPitch1' type='revolute'>
+      <child>LeftThumbPitch1Link</child>
+      <parent>LeftThumbRollLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.658</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftThumbPitch2Link'>
+      <pose>0.01521 0.916533 0.400519 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.002 0.015 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>7.07417e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.77667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.43542e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftThumbPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftThumbPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj3_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftThumbPitch2' type='revolute'>
+      <child>LeftThumbPitch2Link</child>
+      <parent>LeftThumbPitch1Link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.92</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LeftThumbPitch3Link'>
+      <pose>0.01521 0.921433 0.428019 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0.01 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>2.525e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.45e-07</iyy>
+          <iyz>0</iyz>
+          <izz>4.365e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='LeftThumbPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LeftThumbPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj4_Left.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LeftThumbPitch3' type='revolute'>
+      <child>LeftThumbPitch3Link</child>
+      <parent>LeftThumbPitch2Link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>-0</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='LowerNeckPitchLink'>
+      <pose>0.06231 0 0.3588 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>8.33333e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.33333e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.000125</izz>
+        </inertia>
+      </inertial>
+      <collision name='LowerNeckPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/neckj1.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='LowerNeckPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/neckj1.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='LowerNeckPitch' type='revolute'>
+      <child>LowerNeckPitchLink</child>
+      <parent>Torso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.162</upper>
+          <effort>26</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='NeckYawLink'>
+      <pose>0.01041 0 0.3588 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>8.33333e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.33333e-05</iyy>
+          <iyz>0</iyz>
+          <izz>0.000125</izz>
+        </inertia>
+      </inertial>
+      <collision name='NeckYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/neckj2.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='NeckYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/neckj2.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='NeckYaw' type='revolute'>
+      <child>NeckYawLink</child>
+      <parent>LowerNeckPitchLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>26</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='UpperNeckPitchLinkName'>
+      <pose>-0.04959 0 0.5548 0 -0 0</pose>
+      <inertial>
+        <pose>0.091874 0.001012 -0.005277 0 -0 0</pose>
+        <mass>4.06</mass>
+        <inertia>
+          <ixx>0.0313773</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0313773</iyy>
+          <iyz>0</iyz>
+          <izz>0.0313773</izz>
+        </inertia>
+      </inertial>
+      <collision name='UpperNeckPitchLinkName_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/head_multisense_no_visor.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='UpperNeckPitchLinkName_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/head/head_multisense_no_visor.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='UpperNeckPitch' type='revolute'>
+      <child>UpperNeckPitchLinkName</child>
+      <parent>NeckYawLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.087</lower>
+          <upper>0.785</upper>
+          <effort>26</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightShoulderPitchLink'>
+      <pose>0.01031 0 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.012 -0.251 0 0 -0 0</pose>
+        <mass>2.65</mass>
+        <inertia>
+          <ixx>0.0105028</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0137182</iyy>
+          <iyz>0</iyz>
+          <izz>0.0148064</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightShoulderPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightShoulderPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightShoulderPitch' type='revolute'>
+      <child>RightShoulderPitchLink</child>
+      <parent>Torso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.85</lower>
+          <upper>2</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightShoulderRollLink'>
+      <pose>0.01031 -0.2499 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.020086 -0.04 -0.004999 0 -0 0</pose>
+        <mass>2.87</mass>
+        <inertia>
+          <ixx>0.0122024</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.0175559</iyy>
+          <iyz>0</iyz>
+          <izz>0.0181767</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightShoulderRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightShoulderRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightShoulderRoll' type='revolute'>
+      <child>RightShoulderRollLink</child>
+      <parent>RightShoulderPitchLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.266</lower>
+          <upper>1.519</upper>
+          <effort>190</effort>
+          <velocity>5.89</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightShoulderYawLink'>
+      <pose>0.01031 -0.2499 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.004 -0.273 -0.019953 0 -0 0</pose>
+        <mass>2.575</mass>
+        <inertia>
+          <ixx>0.0213985</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00932579</iyy>
+          <iyz>0</iyz>
+          <izz>0.0227864</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightShoulderYawLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightShoulderYawLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightShoulderYaw' type='revolute'>
+      <child>RightShoulderYawLink</child>
+      <parent>RightShoulderRollLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-3.1</lower>
+          <upper>2.18</upper>
+          <effort>65</effort>
+          <velocity>11.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightElbowPitchLink'>
+      <pose>0.03571 -0.5799 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>-0.027 -0.0802 0 0 -0 0</pose>
+        <mass>2.367</mass>
+        <inertia>
+          <ixx>0.0049417</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00469849</iyy>
+          <iyz>0</iyz>
+          <izz>0.00530134</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightElbowPitchLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightElbowPitchLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightElbowPitch' type='revolute'>
+      <child>RightElbowPitchLink</child>
+      <parent>RightShoulderYawLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.12</lower>
+          <upper>2.174</upper>
+          <effort>65</effort>
+          <velocity>11.5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightForearmLink'>
+      <pose>0.01031 -0.5799 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.015 -0.11 0.019564 0 -0 0</pose>
+        <mass>2.903</mass>
+        <inertia>
+          <ixx>0.0187305</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00761213</iyy>
+          <iyz>0</iyz>
+          <izz>0.0200111</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightForearmLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj5_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightForearmLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj5_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightForearmYaw' type='revolute'>
+      <child>RightForearmLink</child>
+      <parent>RightElbowPitchLink</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-2.019</lower>
+          <upper>3.14</upper>
+          <effort>26</effort>
+          <velocity>5</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightWristRollLink'>
+      <pose>0.01031 -0.867 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0 0 0 -0 0</pose>
+        <mass>0.1</mass>
+        <inertia>
+          <ixx>2.25083e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.9175e-05</iyy>
+          <iyz>0</iyz>
+          <izz>8.33333e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightWristRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj6_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightWristRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/aj6_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightWristRoll' type='revolute'>
+      <child>RightWristRollLink</child>
+      <parent>RightForearmLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.625</lower>
+          <upper>0.62</upper>
+          <effort>14</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightPalm'>
+      <pose>0.01031 -0.867 0.3187 0 -0 0</pose>
+      <inertial>
+        <pose>0.002954 -0.052034 -0.000236 0 -0 0</pose>
+        <mass>0.712</mass>
+        <inertia>
+          <ixx>0.000679011</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000514361</iyy>
+          <iyz>0</iyz>
+          <izz>0.00102202</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightPalm_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/palm_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightPalm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/arms/palm_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightWristPitch' type='revolute'>
+      <child>RightPalm</child>
+      <parent>RightWristRollLink</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.49</lower>
+          <upper>0.36</upper>
+          <effort>14</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightIndexFingerPitch1Link'>
+      <pose>0.01251 -0.9646 0.3422 -0.1745 0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>4.225e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>6.625e-07</iyy>
+          <iyz>0</iyz>
+          <izz>6.01e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightIndexFingerPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightIndexFingerPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightIndexFingerPitch1' type='revolute'>
+      <child>RightIndexFingerPitch1Link</child>
+      <parent>RightPalm</parent>
+      <axis>
+        <xyz>0 0.173616 0.984813</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightIndexFingerPitch2Link'>
+      <pose>0.01251 -1.00212 0.348815 -0.1745 0 0</pose>
+      <inertial>
+        <pose>0 -0.013 0 0 -0 0</pose>
+        <mass>0.018</mass>
+        <inertia>
+          <ixx>1.203e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.0355e-06</iyy>
+          <iyz>0</iyz>
+          <izz>4.9155e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightIndexFingerPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightIndexFingerPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightIndexFingerPitch2' type='revolute'>
+      <child>RightIndexFingerPitch2Link</child>
+      <parent>RightIndexFingerPitch1Link</parent>
+      <axis>
+        <xyz>0 0.173616 0.984813</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.658</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightIndexFingerPitch3Link'>
+      <pose>0.01251 -1.02467 0.352791 -0.1745 0 0</pose>
+      <inertial>
+        <pose>0 -0.01 0 0 -0 0</pose>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>3.81667e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.20417e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.10417e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightIndexFingerPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightIndexFingerPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/indexj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightIndexFingerPitch3' type='revolute'>
+      <child>RightIndexFingerPitch3Link</child>
+      <parent>RightIndexFingerPitch2Link</parent>
+      <axis>
+        <xyz>0 0.173616 0.984813</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.92</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightMiddleFingerPitch1Link'>
+      <pose>0.01251 -0.964 0.3068 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>1.72833e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.98667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightMiddleFingerPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightMiddleFingerPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightMiddleFingerPitch1' type='revolute'>
+      <child>RightMiddleFingerPitch1Link</child>
+      <parent>RightPalm</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.658</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightMiddleFingerPitch2Link'>
+      <pose>0.01251 -1.00182 0.302156 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.013 0 0 -0 0</pose>
+        <mass>0.011</mass>
+        <inertia>
+          <ixx>5.98583e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.50333e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21458e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightMiddleFingerPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightMiddleFingerPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightMiddleFingerPitch2' type='revolute'>
+      <child>RightMiddleFingerPitch2Link</child>
+      <parent>RightMiddleFingerPitch1Link</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.92</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightMiddleFingerPitch3Link'>
+      <pose>0.01251 -1.02455 0.299364 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.01 0 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>2.525e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.45e-07</iyy>
+          <iyz>0</iyz>
+          <izz>4.365e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightMiddleFingerPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightMiddleFingerPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/middlej3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightMiddleFingerPitch3' type='revolute'>
+      <child>RightMiddleFingerPitch3Link</child>
+      <parent>RightMiddleFingerPitch2Link</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightPinkyPitch1Link'>
+      <pose>0.01251 -0.9508 0.2777 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.02 0 0 -0 0</pose>
+        <mass>0.047</mass>
+        <inertia>
+          <ixx>7.83333e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>7.83333e-07</iyy>
+          <iyz>0</iyz>
+          <izz>7.83333e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightPinkyPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightPinkyPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightPinkyPitch1' type='revolute'>
+      <child>RightPinkyPitch1Link</child>
+      <parent>RightPalm</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightPinkyPitch2Link'>
+      <pose>0.01251 -0.988616 0.273056 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.013 0 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>5.98667e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.72833e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightPinkyPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightPinkyPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightPinkyPitch2' type='revolute'>
+      <child>RightPinkyPitch2Link</child>
+      <parent>RightPinkyPitch1Link</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.658</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightPinkyPitch3Link'>
+      <pose>0.01251 -1.01135 0.270264 0.1222 -0 0</pose>
+      <inertial>
+        <pose>0 -0.01 0 0 -0 0</pose>
+        <mass>0.011</mass>
+        <inertia>
+          <ixx>5.98583e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.50333e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.21458e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightPinkyPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightPinkyPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/pinkyj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightPinkyPitch3' type='revolute'>
+      <child>RightPinkyPitch3Link</child>
+      <parent>RightPinkyPitch2Link</parent>
+      <axis>
+        <xyz>0 -0.121896 0.992543</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.92</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightThumbRollLink'>
+      <pose>0.01521 -0.9021 0.3415 0.3491 -0 0</pose>
+      <inertial>
+        <pose>0 -0 0.015 0 -0 0</pose>
+        <mass>0.017</mass>
+        <inertia>
+          <ixx>2.83333e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>2.83333e-07</iyy>
+          <iyz>0</iyz>
+          <izz>2.83333e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightThumbRollLink_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightThumbRollLink_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj1_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightThumbRoll' type='revolute'>
+      <child>RightThumbRollLink</child>
+      <parent>RightPalm</parent>
+      <axis>
+        <xyz>0 0.939681 0.342052</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>2.356</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightThumbPitch1Link'>
+      <pose>0.01521 -0.909933 0.363019 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.002 0.02 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>1.72833e-06</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.98667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>5.46167e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightThumbPitch1Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightThumbPitch1Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj2_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightThumbPitch1' type='revolute'>
+      <child>RightThumbPitch1Link</child>
+      <parent>RightThumbRollLink</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.658</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightThumbPitch2Link'>
+      <pose>0.01521 -0.916533 0.400519 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.002 0.015 0 -0 0</pose>
+        <mass>0.013</mass>
+        <inertia>
+          <ixx>7.07417e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1.77667e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.43542e-06</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightThumbPitch2Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightThumbPitch2Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj3_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightThumbPitch2' type='revolute'>
+      <child>RightThumbPitch2Link</child>
+      <parent>RightThumbPitch1Link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.92</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='RightThumbPitch3Link'>
+      <pose>0.01521 -0.921433 0.428019 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0 0.01 0 -0 0</pose>
+        <mass>0.006</mass>
+        <inertia>
+          <ixx>2.525e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>5.45e-07</iyy>
+          <iyz>0</iyz>
+          <izz>4.365e-07</izz>
+        </inertia>
+      </inertial>
+      <collision name='RightThumbPitch3Link_collision'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='RightThumbPitch3Link_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://val_description/meshes/fingers/thumbj4_Right.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <joint name='RightThumbPitch3' type='revolute'>
+      <child>RightThumbPitch3Link</child>
+      <parent>RightThumbPitch2Link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>1.57</upper>
+          <effort>10</effort>
+          <velocity>1</velocity>
+        </limit>
+        <dynamics>
+          <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+  </model>
+</sdf>
