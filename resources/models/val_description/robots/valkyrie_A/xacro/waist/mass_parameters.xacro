@@ -2,7 +2,18 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/waist/mass_parameters">
 
 	<xacro:property name="TorsoYawLinkMass" value="2.858" />
+	<xacro:property name="TorsoYawLinkComPosition" value="0.0 0.0 0.0" />
+
 	<xacro:property name="TorsoPitchLinkMass" value="0.001"/>
-  <xacro:property name="TorsoRollLinkMass" value="42.6" />
+	<xacro:property name="TorsoPitchLinkComPosition" value="0.0 0.0 0.0" />
+
+  <xacro:property name="TorsoRollLinkMass" value="39.470000" />
+  <xacro:property name="TorsoRollLinkComPosition" value="-0.178048 0.012293 0.238350" />
+  <xacro:property name="TorsoRollLinkInertia_IXX" value="0.874514000" />
+  <xacro:property name="TorsoRollLinkInertia_IXY" value="0.039067696" />
+  <xacro:property name="TorsoRollLinkInertia_IXZ" value="0.088824164" />
+  <xacro:property name="TorsoRollLinkInertia_IYY" value="1.271005200" />
+  <xacro:property name="TorsoRollLinkInertia_IYZ" value="-0.004025467" />
+  <xacro:property name="TorsoRollLinkInertia_IZZ" value="1.056875300" />
 
 </robot>
