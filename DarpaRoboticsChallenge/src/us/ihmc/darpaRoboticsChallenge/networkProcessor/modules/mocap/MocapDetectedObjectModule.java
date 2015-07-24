@@ -2,9 +2,9 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 
 import java.util.ArrayList;
 
-import optitrack.MocapDataClient;
-import optitrack.MocapRigidBody;
-import optitrack.MocapRigidbodiesListener;
+import optiTrack.MocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.DetectedObjectPacket;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;

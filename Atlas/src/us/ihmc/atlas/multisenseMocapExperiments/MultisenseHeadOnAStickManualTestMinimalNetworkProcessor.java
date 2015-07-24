@@ -7,9 +7,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.vecmath.Point3d;
 
-import optitrack.IHMCMocapDataClient;
-import optitrack.MocapRigidBody;
-import optitrack.MocapRigidbodiesListener;
+import optiTrack.IHMCMocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModel.AtlasTarget;

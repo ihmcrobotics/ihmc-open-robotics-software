@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 import javax.vecmath.Quat4d;
 
-import optitrack.MocapDataClient;
-import optitrack.MocapRigidBody;
-import optitrack.MocapRigidbodiesListener;
+import optiTrack.MocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.utilities.math.geometry.Transform3d;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;

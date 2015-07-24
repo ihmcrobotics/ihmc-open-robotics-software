@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 
-import optitrack.IHMCMocapDataClient;
-import optitrack.MocapRigidBody;
-import optitrack.MocapRigidbodiesListener;
+import optiTrack.IHMCMocapDataClient;
+import optiTrack.MocapRigidBody;
+import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.communication.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
