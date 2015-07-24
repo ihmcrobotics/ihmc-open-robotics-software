@@ -259,8 +259,9 @@ public class StepprPDSliderboard extends SCSVisualizer implements IndexChangedLi
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprPDSliderboard(16384);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote", false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
 
    }

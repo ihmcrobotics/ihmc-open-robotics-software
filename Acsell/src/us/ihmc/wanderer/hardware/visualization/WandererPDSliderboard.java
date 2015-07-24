@@ -13,7 +13,6 @@ import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurat
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererDashboard;
 import us.ihmc.wanderer.hardware.WandererJoint;
-import us.ihmc.wanderer.hardware.controllers.WandererStandPrepSetpoints;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -260,8 +259,9 @@ public class WandererPDSliderboard extends SCSVisualizer implements IndexChanged
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new WandererPDSliderboard(16384);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote", false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
 
    }

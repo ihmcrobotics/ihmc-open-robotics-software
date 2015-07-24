@@ -71,7 +71,6 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
 
       StepprDashboard.createDashboard(scs, registry);
       scs.getDataBuffer().attachIndexChangedListener(this);
-
    }
 
    private class StandPrepVariables
@@ -91,9 +90,7 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
          selectedJoint_tau_d.set(tau_d.getDoubleValue());
          
          selectedJoint_damping.set(damping.getDoubleValue());
-         
       }
-
    }
 
    @Override
@@ -101,16 +98,14 @@ public class StepprDeflectionMeasurementSliderboardjava extends SCSVisualizer im
    {
       StepprStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();
-
    }
 
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprDeflectionMeasurementSliderboardjava(64000);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote",
-            false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
-
    }
 }

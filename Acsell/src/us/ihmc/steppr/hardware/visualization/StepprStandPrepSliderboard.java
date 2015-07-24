@@ -273,9 +273,9 @@ public class StepprStandPrepSliderboard extends SCSVisualizer implements IndexCh
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new StepprStandPrepSliderboard(64000);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote",
-            false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
 
    }

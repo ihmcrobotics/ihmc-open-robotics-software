@@ -11,7 +11,7 @@ public class RemoteStepprVisualizer extends SCSVisualizer
 {
    public RemoteStepprVisualizer(int bufferSize)
    {
-      super( bufferSize);
+      super(bufferSize);
    }
 
    @Override
@@ -23,12 +23,9 @@ public class RemoteStepprVisualizer extends SCSVisualizer
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new RemoteStepprVisualizer(16384);
-
-    
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
       
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote",
-            false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
-
    }
 }
