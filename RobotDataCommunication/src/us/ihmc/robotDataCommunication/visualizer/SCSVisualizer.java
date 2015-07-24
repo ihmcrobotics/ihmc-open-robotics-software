@@ -34,7 +34,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
-   private Robot robot;
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
@@ -107,20 +106,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       buttons.put(yoVariableName, newValue);
    }
 
-   public void receivedHandshake(LogHandshake handshake)
-   {
-      if (handshake.modelLoaderClass == null)
-      {
-         robot = new Robot("DummyRobot");
-      }
-      else
-      {
-         SDFModelLoader modelLoader = new SDFModelLoader();
-         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
-         robot = modelLoader.createRobot();
-      }
-   }
-
    public boolean changesVariables()
    {
       return true;
@@ -130,7 +115,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       System.out.println("Connection lost, closing client.");
       client.disconnected();
-
    }
 
    public boolean populateRegistry()
@@ -186,8 +170,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> jointStates, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
+   public final void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
+      Robot robot = new Robot("DummyRobot");
+      if (handshake.modelLoaderClass != null)
+      {
+         SDFModelLoader modelLoader = new SDFModelLoader();
+         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
+         robot = modelLoader.createRobot();
+      }
+
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(showGUI);
       parameters.setDataBufferSize(this.bufferSize);
@@ -223,15 +215,21 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          }
       });
 
+      YoVariableRegistry yoVariableRegistry = handshakeParser.getRootRegistry();
       this.registry.addChild(yoVariableRegistry);
+
+      List<JointState<? extends Joint>> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
+      YoGraphicsListRegistry yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-
       VisualizerUtils.createOverheadPlotter(scs, showOverheadView, yoGraphicsListRegistry);
 
-      for (SCSVisualizerStateListener stateListener : stateListeners)
+      for (int i = 0; i < stateListeners.size(); i++)
+      {
+         SCSVisualizerStateListener stateListener = stateListeners.get(i);
          stateListener.starting(scs, robot, this.registry);
+      }
 
       final JToggleButton record = new JToggleButton("Pause recording");
       scs.addButton(record);
@@ -270,7 +268,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          scs.addButton(button);
          button.addActionListener(new ActionListener()
          {
-
             @Override
             public void actionPerformed(ActionEvent e)
             {
@@ -280,7 +277,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
 
       new Thread(scs).start();
-
    }
 
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
