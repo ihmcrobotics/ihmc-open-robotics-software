@@ -11,7 +11,7 @@ import javax.swing.JToggleButton;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
@@ -34,6 +34,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
+   private Robot robot;
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
@@ -108,7 +109,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public void receivedHandshake(LogHandshake handshake)
    {
-      // Ignore
+      if (handshake.modelLoaderClass == null)
+      {
+         robot = new Robot("DummyRobot");
+      }
+      else
+      {
+         SDFModelLoader modelLoader = new SDFModelLoader();
+         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
+         robot = modelLoader.createRobot();
+      }
    }
 
    public boolean changesVariables()
@@ -176,26 +186,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> jointStates,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
+   public final void start(YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> jointStates, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
    {
-
-      Robot robot = null;
-      if (logModelLoader == null)
-      {
-         robot = new Robot("DummyRobot");
-      }
-      else
-      {
-         robot = logModelLoader.createRobot();
-      }
-
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(showGUI);
       parameters.setDataBufferSize(this.bufferSize);
+
       this.scs = new SimulationConstructionSet(robot, parameters);
-      if (hideViewport)
-         scs.hideViewport();
+      if (hideViewport) { scs.hideViewport(); }
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
