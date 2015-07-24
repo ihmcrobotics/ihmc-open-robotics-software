@@ -1,7 +1,5 @@
 package us.ihmc.robotDataCommunication.visualizer;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.nio.ByteBuffer;
@@ -11,10 +9,12 @@ import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotDataCommunication.VisualizerUtils;
 import us.ihmc.robotDataCommunication.YoVariableClient;
+import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
 import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -35,15 +35,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    protected YoVariableRegistry registry;
    protected SimulationConstructionSet scs;
 
-   private Robot robot;
-   private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<JointUpdater>();
+   private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private volatile boolean recording = true;
    private YoVariableClient client;
    private ArrayList<SCSVisualizerStateListener> stateListeners = new ArrayList<>();
 
    private int displayOneInNPackets = DISPLAY_ONE_IN_N_PACKETS;
 
-   private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<String>();
+   private final TObjectDoubleHashMap<String> buttons = new TObjectDoubleHashMap<>();
 
    private final JButton disconnectButton = new JButton("Disconnect");
    private final JButton clearLogButton = new JButton("Clear log");
@@ -51,6 +50,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    private int bufferSize;
    private boolean showGUI;
    private boolean hideViewport;
+   private boolean showOverheadView;
 
    public SCSVisualizer(int bufferSize)
    {
@@ -170,17 +170,24 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
+   public void setShowOverheadView(boolean showOverheadView)
+   {
+      this.showOverheadView = showOverheadView;
+   }
+
+   @Override
    public final void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> jointStates,
-         YoGraphicsListRegistry yoGraphicsListRegistry, int bufferSize, boolean showOverheadView)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
    {
 
+      Robot robot = null;
       if (logModelLoader == null)
       {
-         this.robot = new Robot("DummyRobot");
+         robot = new Robot("DummyRobot");
       }
       else
       {
-         this.robot = logModelLoader.createRobot();
+         robot = logModelLoader.createRobot();
       }
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
@@ -284,7 +291,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    public static void main(String[] args)
    {
-      YoVariableClient client = new YoVariableClient(new SCSVisualizer(32169, true), "remote", false);
+      SCSVisualizer visualizer = new SCSVisualizer(32169, true);
+      visualizer.setShowOverheadView(false);
+
+      YoVariableClient client = new YoVariableClient(visualizer, "remote");
       client.start();
    }
 

@@ -21,7 +21,6 @@ public class YoVariableClient
 
    private final LogControlClient logControlClient;
    private final YoVariableConsumer yoVariableConsumer;
-   private final boolean showOverheadView;
    private ClientState state = ClientState.WAITING;
 
    private final YoVariableHandshakeParser handshakeParser;
@@ -39,20 +38,18 @@ public class YoVariableClient
       }
    }
 
-   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix)
    {
-      this(getRequest(), listener, registryPrefix, showOverheadView);
+      this(getRequest(), listener, registryPrefix);
    }
 
-   public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix, boolean showOverheadView)
+   public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix)
    {
-
       this.logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), listener);
       this.handshakeParser = new YoVariableHandshakeParser(registryPrefix, listener.populateRegistry());
       this.yoVariableConsumer = new YoVariableConsumer(request.getDataIP(), request.getDataPort(), handshakeParser.getYoVariablesList(),
             handshakeParser.getJointStates(), listener);
       this.listener = listener;
-      this.showOverheadView = showOverheadView;
 
       listener.setYoVariableClient(this);
    }
@@ -90,17 +87,15 @@ public class YoVariableClient
 
       logControlClient.connect();
 
-      int numberOfVariables = handshakeParser.getNumberOfVariables();
-      int numberOfJointStateVariables = handshakeParser.getNumberOfJointStateVariables();
-      int bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
-
       listener.start(modelLoader, handshakeParser.getRootRegistry(), handshakeParser.getJointStates(),
-            handshakeParser.getDynamicGraphicObjectsListRegistry(), bufferSize, showOverheadView);
+            handshakeParser.getDynamicGraphicObjectsListRegistry(), handshakeParser);
 
       if (listener.changesVariables())
       {
          logControlClient.startVariableChangedProducers(handshakeParser.getYoVariablesList());
       }
+
+      int bufferSize = handshakeParser.getBufferSize();
       yoVariableConsumer.start(bufferSize);
 
       state = ClientState.RUNNING;

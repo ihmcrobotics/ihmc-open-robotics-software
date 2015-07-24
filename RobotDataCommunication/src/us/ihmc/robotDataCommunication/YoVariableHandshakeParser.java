@@ -38,7 +38,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public class YoVariableHandshakeParser
 {
-
    private final String registryPrefix;
    private final boolean registerYoVariables;
    private YoVariableRegistry registry;
@@ -48,9 +47,8 @@ public class YoVariableHandshakeParser
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<JointState<? extends Joint>> jointStates = new ArrayList<>();
    private final DynamicEnumCreator dynamicEnumCreator = new DynamicEnumCreator();
-   
-   private int numberOfVariables;
-   private int numberOfJointStateVariables;
+
+   private int bufferSize;
    
    public YoVariableHandshakeParser(String registryPrefix, boolean registerYoVariables)
    {
@@ -103,14 +101,11 @@ public class YoVariableHandshakeParser
          addVariables(yoProtoHandshake);
          addJointStates(yoProtoHandshake);
          addGraphicObjects(yoProtoHandshake);
-   
       }
-      
-      this.numberOfVariables = yoProtoHandshake.getVariableCount();
-      this.numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
-      
-      System.out.println("Receiving " + getNumberOfVariables() + " variables.");
-      System.out.println("Receiving " + getNumberOfJointStateVariables() + " joint state variables.");
+
+      int numberOfVariables = yoProtoHandshake.getVariableCount();
+      int numberOfJointStateVariables = getNumberOfJointStateVariables(yoProtoHandshake);
+      this.bufferSize = (1 + numberOfVariables + numberOfJointStateVariables) * 8;
    }
    
    private int getNumberOfJointStateVariables(YoProtoHandshake yoProtoHandshake)
@@ -272,14 +267,8 @@ public class YoVariableHandshakeParser
       return registry;
    }
 
-   public int getNumberOfVariables()
+   public int getBufferSize()
    {
-      return numberOfVariables;
+      return bufferSize;
    }
-
-   public int getNumberOfJointStateVariables()
-   {
-      return numberOfJointStateVariables;
-   }
-
 }
