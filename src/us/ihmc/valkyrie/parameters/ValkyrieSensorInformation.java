@@ -54,6 +54,12 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       RigidBodyTransform rotYBy7dot5 = new RigidBodyTransform();
       rotYBy7dot5.rotY(-Math.PI/24.0);
       
+      RigidBodyTransform rotXBy120 = new RigidBodyTransform();
+      rotXBy120.rotX(Math.toRadians(120.0));
+      
+      RigidBodyTransform rotYByPi = new RigidBodyTransform();
+      rotYByPi.rotY(Math.PI/2);
+      
       RigidBodyTransform rotXByPi = new RigidBodyTransform();
       rotXByPi.rotX(Math.PI);
       
@@ -62,9 +68,9 @@ public class ValkyrieSensorInformation implements DRCRobotSensorInformation
       
       RigidBodyTransform leftTransform = new RigidBodyTransform();
       leftTransform.multiply(translateForwardAndDownOnFoot);
-      leftTransform.multiply(rotYBy7dot5);
-      leftTransform.multiply(rotateZ60Degrees);
-      leftTransform.multiply(rotXByPi);
+      leftTransform.multiply(rotXBy120);
+      leftTransform.multiply(rotYByPi);
+      
 
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, leftTransform);
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(leftTransform));
