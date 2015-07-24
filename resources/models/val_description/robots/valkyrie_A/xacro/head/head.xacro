@@ -24,13 +24,15 @@
                                     origin_rpy="0 0 0"
                                     mesh_filename="${mesh_root}/head/neckj2.dae"/>
 
-    <xacro:sphere_link name="${UpperNeckPitchLinkName}"
-                       radius="${NJ3_Link_Radius}" mass="${UpperNeckPitchLinkMass}"
-                       origin_xyz="${UpperNeckPitchLinkComPosition}" origin_rpy="0 0 0"
+    <xacro:standard_link name="${UpperNeckPitchLinkName}"
+                       mass="${UpperNeckPitchLinkMass}"
+                       origin_xyz="${UpperNeckPitchLinkComPosition}"
+                       ixx="${UpperNeckPitchLinkInertia_IXX}" ixy="${UpperNeckPitchLinkInertia_IXY}" ixz="${UpperNeckPitchLinkInertia_IXZ}"
+                       iyy="${UpperNeckPitchLinkInertia_IYY}" iyz="${UpperNeckPitchLinkInertia_IYZ}" izz="${UpperNeckPitchLinkInertia_IZZ}"
+                       origin_rpy="0 0 0"
                        visual_mesh="${mesh_root}/head/head_multisense_no_visor.dae"
                        material="White"
                        collision_mesh="${mesh_root}/head/head_multisense_no_visor.dae"/>
-    
 
     <xacro:revolute_joint_ex jointName="${LowerNeckPitchJointName}"
                           parent="${LowerNeckPitchParentLinkName}" child="${LowerNeckPitchLinkName}"
@@ -61,11 +63,16 @@
       <limit effort="${UpperNeckPitchTorqueLimit}" lower="${UpperNeckPitchPositionLimit_Lower}" upper="${UpperNeckPitchPositionLimit_Upper}" velocity="${UpperNeckPitchVelocityLimit}"/>
       <controller_gains Kp="20000" Kd="0"/>
     </xacro:revolute_joint_ex>
+  </xacro:macro>
 
+
+    <xacro:macro name="include_multisense_sim">
+      <xacro:fixed_joint jointName="multisense_head_root_joint" parent="${UpperNeckPitchLinkName}" child="head" origin_xyz="0.183585961 0.0 0.075353826" origin_rpy="-3.14159 0.130899694 0.0" />
     </xacro:macro>
 
-    <xacro:macro name="include_multisense">
-      <xacro:fixed_joint jointName="multisense_head_root" parent="${UpperNeckPitchLinkName}" child="head" origin_xyz="0.183585961 0.0 0.075353826" origin_rpy="-3.14159 0.130899694 0.0" />
+    <xacro:macro name="include_multisense_hw">
+      <xacro:massless_virtual_link name="multisense_root_link" origin_xyz="0 0 0" origin_rpy="0 0 0"/>
+      <xacro:fixed_joint jointName="multisense_head_root_joint" parent="${UpperNeckPitchLinkName}" child="multisense_root_link" origin_xyz="0.183585961 0.0 0.075353826" origin_rpy="-3.14159 0.130899694 0.0" />
     </xacro:macro>
 
   <xacro:macro name="neck_actuators" params="name1 type1 name2 type2 name3 type3">

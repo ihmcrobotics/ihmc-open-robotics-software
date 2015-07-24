@@ -1,4 +1,4 @@
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="waist">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="v1/waist">
 
   <!-- Properties -->
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/waist/joint_names.xacro"/>
@@ -10,10 +10,6 @@
   <xacro:include filename="$(find val_description)/robots/valkyrie_A/xacro/waist/mass_parameters.xacro"/>
   <xacro:include filename="$(find val_description)/robots/common/sensors/microstrain.xacro"/>
   <xacro:include filename="$(find val_description)/robots/common/sensors/flea.xacro"/>
-
-  <xacro:property name="Trunk_Width" value="0.42203731228144558685"/>
-  <xacro:property name="Trunk_Height" value="0.39817895332782154982"/>
-  <xacro:property name="Trunk_Length" value="0.47605775481079287692"/>
 
   <xacro:macro name="make_waist_common" params="waist_root_link">
 
@@ -66,10 +62,12 @@
                     material="White"
                     collision_mesh="${mesh_root}/torso/torsopitch.dae" />
 
-    <xacro:box_link name="${TorsoRollLinkName}"
-                    width="${Trunk_Width}" height="${Trunk_Height}" depth="${Trunk_Length}" mass="${TorsoRollLinkMass}"
+    <xacro:standard_link name="${TorsoRollLinkName}"
+                    mass="${TorsoRollLinkMass}"
+                    ixx="${TorsoRollLinkInertia_IXX}" ixy="${TorsoRollLinkInertia_IXY}" ixz="${TorsoRollLinkInertia_IXZ}"
+                    iyy="${TorsoRollLinkInertia_IYY}" iyz="${TorsoRollLinkInertia_IYZ}" izz="${TorsoRollLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
-                    origin_xyz="-0.0981 0.0 0.255"
+                    origin_xyz="${TorsoRollLinkComPosition}"
                     visual_mesh="${mesh_root}/torso/torso.dae"
                     material="White"
                     collision_mesh="${mesh_root}/torso/torso.dae" />
@@ -88,7 +86,6 @@
                     collision_mesh="${mesh_root}/torso/wj3.dae" />
   </xacro:macro>
 
-  <!-- Actuators -->
   <xacro:macro name="waist_actuators"  params="name1 type1 name2 type2 name3 type3">
     <actuator name="${name1}" type="${type1}"/>
     <actuator name="${name2}" type="${type2}"/>

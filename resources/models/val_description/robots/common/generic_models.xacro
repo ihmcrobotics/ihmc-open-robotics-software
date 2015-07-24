@@ -45,10 +45,8 @@
       <visual>
         <geometry>
           <mesh filename="${visual_mesh}"/>
-          <!-- <cylinder radius="${radius}" length="${length}"/> -->
         </geometry>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-        <!-- <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/> -->
         <material name="${material}"/>
       </visual>
       <collision>
@@ -274,9 +272,6 @@
         </geometry>
       </collision>
     </link>
-<!--    <gazebo reference="${name}">
-      <material>Gazebo/${material}</material>
-    </gazebo> -->
   </xacro:macro>
 
   <xacro:macro name="virtual_link_sphere" params="name radius mass origin_xyz origin_rpy">
@@ -313,10 +308,6 @@
     </link>
   </xacro:macro>
 
-  <!-- May 2015: However zero mass/inertials links are still useful. (And removed with gz sdf)
-  This macro here was added to allow fixed links to have (almost) no effect on the output compound
-  sdf mass and inertia
-  -->
   <xacro:property name="massless_virtual_link_mass" value="0.0000001"/>
   <xacro:property name="massless_virtual_link_radius" value="0.0000001"/>
   <xacro:property name="massless_virtual_link_height" value="0.0000001"/>

@@ -15,26 +15,6 @@
   <xacro:property name="LJ1_Link_Origin_Y" value="0.0013"/>
   <xacro:property name="LJ1_Link_Origin_Z" value="0.03867"/>
 
-  <xacro:property name="LJ2_Link_Width" value="0.123"/>
-  <xacro:property name="LJ2_Link_Height" value="0.131"/>
-  <xacro:property name="LJ2_Link_Length" value="0.185"/>
-
-  <xacro:property name="LJ3_Link_Width" value="0.24253719562602335524"/>
-  <xacro:property name="LJ3_Link_Height" value="0.18520578950459243295"/>
-  <xacro:property name="LJ3_Link_Length" value="0.55419965909040602714"/>
-
-  <xacro:property name="LJ4_Link_Box_Width" value="0.20288766696230062236"/>
-  <xacro:property name="LJ4_Link_Box_Height" value="0.20551228016178813007"/>
-  <xacro:property name="LJ4_Link_Box_Length" value="0.44528684954574881960"/>
-
-  <xacro:property name="LJ5_Link_Width" value="0.033"/>
-  <xacro:property name="LJ5_Link_Height" value="0.076"/>
-  <xacro:property name="LJ5_Link_Length" value="0.025"/>
-
-  <xacro:property name="LJ6_Link_Width" value="0.300"/>
-  <xacro:property name="LJ6_Link_Height" value="0.128"/>
-  <xacro:property name="LJ6_Link_Length" value="0.082"/>
-
   <xacro:macro name="make_leg_links" params="prefix reflect leg_root_link">
     <xacro:box_link name="${HipYawLinkName}"
                     width="${LJ1_Link_Width}" height="${LJ1_Link_Height}" depth="${LJ1_Link_Length}" mass="${HipYawLinkMass}"
@@ -43,41 +23,51 @@
                     material="Gold"
                     collision_mesh="${mesh_root}/legs/lj1_${prefix}.dae"/>
 
-    <xacro:box_link name="${HipRollLinkName}"
-                    width="${LJ2_Link_Width}" height="${LJ2_Link_Height}" depth="${LJ2_Link_Length}" mass="${HipRollLinkMass}"
+    <xacro:standard_link name="${HipRollLinkName}"
+                    mass="${HipRollLinkMass}"
                     origin_xyz="${HipRollLinkComPosition}"
+                    ixx="${HipRollLinkInertia_IXX}" ixy="${HipRollLinkInertia_IXY}" ixz="${HipRollLinkInertia_IXZ}"
+                    iyy="${HipRollLinkInertia_IYY}" iyz="${HipRollLinkInertia_IYZ}" izz="${HipRollLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj2_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/legs/lj2_${prefix}.dae"/>
 
-    <xacro:box_link name="${HipPitchLinkName}"
-                    width="${LJ3_Link_Width}" height="${LJ3_Link_Height}" depth="${LJ3_Link_Length}" mass="${HipPitchLinkMass}"
+    <xacro:standard_link name="${HipPitchLinkName}"
+                    mass="${HipPitchLinkMass}"
                     origin_xyz="${HipPitchLinkComPosition}"
+                    ixx="${HipPitchLinkInertia_IXX}" ixy="${HipPitchLinkInertia_IXY}" ixz="${HipPitchLinkInertia_IXZ}"
+                    iyy="${HipPitchLinkInertia_IYY}" iyz="${HipPitchLinkInertia_IYZ}" izz="${HipPitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj3_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/legs/lj3_${prefix}.dae"/>
 
-    <xacro:box_link name="${KneePitchLinkName}"
-                    width="${LJ4_Link_Box_Width}" height="${LJ4_Link_Box_Height}" depth="${LJ4_Link_Box_Length}" mass="${KneePitchLinkMass}"
+    <xacro:standard_link name="${KneePitchLinkName}"
+                    mass="${KneePitchLinkMass}"
                     origin_xyz="${KneePitchLinkComPosition}"
+                    ixx="${KneePitchLinkInertia_IXX}" ixy="${KneePitchLinkInertia_IXY}" ixz="${KneePitchLinkInertia_IXZ}"
+                    iyy="${KneePitchLinkInertia_IYY}" iyz="${KneePitchLinkInertia_IYZ}" izz="${KneePitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj4_${prefix}.dae"
                     material="White"
                     collision_mesh="${mesh_root}/legs/lj4_${prefix}.dae"/>
 
-    <xacro:box_link name="${AnklePitchLinkName}"
-                    width="${LJ5_Link_Width}" height="${LJ5_Link_Height}" depth="${LJ5_Link_Length}" mass="${AnklePitchLinkMass}"
+    <xacro:standard_link name="${AnklePitchLinkName}"
+                    mass="${AnklePitchLinkMass}"
                     origin_xyz="${AnklePitchLinkComPosition}"
+                    ixx="${AnklePitchLinkInertia_IXX}" ixy="${AnklePitchLinkInertia_IXY}" ixz="${AnklePitchLinkInertia_IXZ}"
+                    iyy="${AnklePitchLinkInertia_IYY}" iyz="${AnklePitchLinkInertia_IYZ}" izz="${AnklePitchLinkInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/lj5.dae"
                     material="White"
                     collision_mesh="${mesh_root}/legs/lj5.dae"/>
 
-    <xacro:box_link name="${AnkleRollLinkName}"
-                    width="${LJ6_Link_Width}" height="${LJ6_Link_Height}" depth="${LJ6_Link_Length}" mass="${FootMass}"
-                    origin_xyz="${FootComPosition}"
+    <xacro:standard_link name="${AnkleRollLinkName}"
+                    mass="${FootMass}"
+                    origin_xyz="${FootComPosition}" 
+                    ixx="${FootInertia_IXX}" ixy="${FootInertia_IXY}" ixz="${FootInertia_IXZ}" 
+                    iyy="${FootInertia_IYY}" iyz="${FootInertia_IYZ}" izz="${FootInertia_IZZ}"
                     origin_rpy="0 0 0"
                     visual_mesh="${mesh_root}/legs/foot_${prefix}.dae"
                     material="White"
@@ -86,7 +76,6 @@
   </xacro:macro>
 
   <xacro:macro name="make_leg_joints" params="prefix reflect leg_root_link">
-    <!-- LJ1 -->
     <xacro:revolute_joint_ex jointName="${HipYawJointName}"
                           parent="${HipYawParentLinkName}" child="${HipYawLinkName}"
                           origin_xyz="${HipYawFrameOrigin_X} ${HipYawFrameOrigin_Y} ${HipYawFrameOrigin_Z}"
@@ -167,8 +156,6 @@
     <xacro:make_ankle_joints prefix="${prefix}" reflect="${reflect}" leg_root_link="${leg_root_link}" />
   </xacro:macro>
 
-
-  <!-- Sensors -->
   <xacro:macro name="v1_leg_sensors" params="prefix reflect">
 
     <xacro:virtual_fixed_frame_offset name="${prefix}COP"
