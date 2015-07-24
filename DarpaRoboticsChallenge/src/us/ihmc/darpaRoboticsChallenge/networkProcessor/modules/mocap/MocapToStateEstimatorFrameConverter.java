@@ -2,7 +2,7 @@ package us.ihmc.darpaRoboticsChallenge.networkProcessor.modules.mocap;
 
 import java.util.HashMap;
 
-import optitrack.MocapRigidBody;
+import optiTrack.MocapRigidBody;
 import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
