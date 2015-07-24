@@ -10,13 +10,12 @@ import com.martiansoftware.jsap.Switch;
 
 public class BehaviorVisualizer extends SCSVisualizer
 {
-   private final boolean showOverheadView = false;
-
    public BehaviorVisualizer(int bufferSize)
    {
       super(bufferSize, true, false);
+      setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(this, "behavior", showOverheadView);
+      YoVariableClient client = new YoVariableClient(this, "behavior");
       client.start();
    }
 

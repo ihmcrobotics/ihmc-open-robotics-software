@@ -19,23 +19,23 @@ import com.martiansoftware.jsap.Switch;
 
 public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
 {
-   private final boolean showOverheadView = true;
-   private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER; 
+   private static final AtlasSliderBoardType defaultSliderBoardType = AtlasSliderBoardType.WALK_CONTROLLER;
    
    public enum AtlasSliderBoardType {GAIN_CONTROLLER, JOINT_ANGLE_OFFSET, WALK_CONTROLLER}
-   
-   private DRCRobotModel drcRobotModel;
-   private SCSVisualizer scsVisualizer;
-   
+
+   private final DRCRobotModel drcRobotModel;
+
    public RemoteAtlasVisualizer(int bufferSize, DRCRobotModel drcRobotModel)
    {
       this.drcRobotModel = drcRobotModel;
-      scsVisualizer = new SCSVisualizer(bufferSize);
+
+      SCSVisualizer scsVisualizer = new SCSVisualizer(bufferSize);
       scsVisualizer.addSCSVisualizerStateListener(this);
       scsVisualizer.addButton("requestStop", 1.0);
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
+      scsVisualizer.setShowOverheadView(true);
       
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote");
       client.start();
    }
 

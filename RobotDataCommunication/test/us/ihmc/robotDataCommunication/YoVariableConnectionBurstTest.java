@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication;
 
-import static org.junit.Assert.assertEquals;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.robotDataCommunication.visualizer.SCSVisualizer;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -9,6 +8,8 @@ import us.ihmc.utilities.ThreadTools;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
+
+import static org.junit.Assert.assertEquals;
 
 public class YoVariableConnectionBurstTest
 {
@@ -41,7 +42,9 @@ public class YoVariableConnectionBurstTest
       int bufferSize=256;
       SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize, false);      
       scsYoVariablesUpdatedListener.setDisplayOneInNPackets(1);
-      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "", false);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
+
+      final YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "");
       client.start();
       
       

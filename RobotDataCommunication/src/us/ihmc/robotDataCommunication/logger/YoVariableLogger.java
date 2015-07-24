@@ -40,8 +40,8 @@ public class YoVariableLogger
       }
 
       YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
-      boolean showOverheadView = false;
-      client = new YoVariableClient(request, logger, "", showOverheadView);
+      client = new YoVariableClient(request, logger, "");
+
       try
       {
          client.start(timeout);

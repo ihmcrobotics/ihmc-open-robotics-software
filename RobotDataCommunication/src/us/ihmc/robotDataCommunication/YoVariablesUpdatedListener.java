@@ -12,28 +12,29 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public interface YoVariablesUpdatedListener
 {
-   public boolean populateRegistry();
+   boolean populateRegistry();
 
-   public boolean changesVariables();
+   boolean changesVariables();
 
-   public void receivedHandshake(LogHandshake handshake);
+   void receivedHandshake(LogHandshake handshake);
 
-   public void receivedUpdate(long timestamp, ByteBuffer buf);
+   void receivedUpdate(long timestamp, ByteBuffer buf);
 
-   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, int bufferSize, boolean showOverheadView);
+   void setShowOverheadView(boolean showOverheadView);
 
-   public void disconnected();
+   void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser);
 
-   public void setYoVariableClient(YoVariableClient client);
+   void disconnected();
 
-   public void receiveTimedOut();
+   void setYoVariableClient(YoVariableClient client);
 
-   public int getDisplayOneInNPackets();
+   void receiveTimedOut();
 
-   public void timestampReceived(long timestamp);
+   int getDisplayOneInNPackets();
 
-   public void clearLog();
+   void timestampReceived(long timestamp);
 
-   public boolean executeVariableChangedListeners();
+   void clearLog();
 
+   boolean executeVariableChangedListeners();
 }

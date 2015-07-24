@@ -17,15 +17,15 @@ public class SCSYoVariablesVisualizer
       System.out.println("Connecting to host " + host);
       
       SCSVisualizer scsYoVariablesUpdatedListener = new SCSVisualizer(bufferSize);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      boolean showOverheadView = false;
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote", showOverheadView);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
    }
 
    public static void main(String[] args) throws JSAPException
    {
-      int bufferSize=32768;
+      int bufferSize = 32768;
       JSAP jsap = new JSAP();
       
       FlaggedOption hostOption = new FlaggedOption("host").setStringParser(JSAP.STRING_PARSER).setRequired(false).setLongFlag("host").setShortFlag('L').setDefault(
@@ -53,8 +53,5 @@ public class SCSYoVariablesVisualizer
          System.err.println();
          System.exit(1);
       }
-      
-      
-      
    }
 }

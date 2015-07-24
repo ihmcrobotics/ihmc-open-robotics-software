@@ -86,7 +86,7 @@ public class LogCompressor extends SimpleFileVisitor<Path>
          System.out.println("Compressing " + directory);
 
          YoVariableHandshakeParser handshake = ConverterUtil.getHandshake(new File(directory, properties.getHandshakeFile()));
-         int bufferSize = (1 + handshake.getNumberOfVariables() + handshake.getNumberOfJointStateVariables()) * 8;
+         int bufferSize = handshake.getBufferSize();
 
          File logdata = new File(directory, properties.getVariableDataFile());
          if (!logdata.exists())
