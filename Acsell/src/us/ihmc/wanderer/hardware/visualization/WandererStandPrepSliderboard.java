@@ -259,7 +259,6 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
          selectedJoint_damping.set(damping.getDoubleValue());
          selectedJoint_positionerror.set(positionerror.getDoubleValue());
       }
-
    }
 
    @Override
@@ -267,16 +266,14 @@ public class WandererStandPrepSliderboard extends SCSVisualizer implements Index
    {
       WandererStandPrepSetpoints joint = selectedJointPair.getEnumValue();
       allSetpoints.get(joint).update();
-
    }
 
    public static void main(String[] args)
    {
       SCSVisualizer scsYoVariablesUpdatedListener = new WandererStandPrepSliderboard(64000);
+      scsYoVariablesUpdatedListener.setShowOverheadView(false);
 
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote",
-            false);
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
-
    }
 }
