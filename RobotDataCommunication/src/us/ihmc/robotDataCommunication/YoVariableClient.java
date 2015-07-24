@@ -74,12 +74,10 @@ public class YoVariableClient
       System.out.println("Requesting handshake");
       LogHandshake handshake = yoVariableConsumer.getHandshake();
 
-      handshakeParser.parseFrom(handshake.protoShake);
-      listener.receivedHandshake(handshake);
-
       logControlClient.connect();
+      handshakeParser.parseFrom(handshake.protoShake);
 
-      listener.start(handshakeParser.getRootRegistry(), handshakeParser.getJointStates(), handshakeParser.getDynamicGraphicObjectsListRegistry(), handshakeParser);
+      listener.start(handshake, handshakeParser);
 
       if (listener.changesVariables())
       {

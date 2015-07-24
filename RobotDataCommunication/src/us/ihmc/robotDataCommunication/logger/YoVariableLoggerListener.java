@@ -18,14 +18,10 @@ import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
-import us.ihmc.robotDataCommunication.jointState.JointState;
 import us.ihmc.robotDataCommunication.logger.util.CookieJar;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
-import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.utilities.io.printing.PrintTools;
-import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
-import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {
@@ -129,7 +125,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       return false;
    }
 
-   public void receivedHandshake(LogHandshake handshake)
+   private void logHandshake(LogHandshake handshake)
    {
       File handshakeFile = new File(tempDirectory, handshakeFilename);
       try
@@ -170,9 +166,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
          {
             throw new RuntimeException(e);
          }
-
       }
-
    }
 
    public void receivedUpdate(long timestamp, ByteBuffer buffer)
@@ -352,9 +346,11 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public void start(YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
+   public void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
-      int bufferSize = parser.getBufferSize();
+      logHandshake(handshake);
+
+      int bufferSize = handshakeParser.getBufferSize();
       this.compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
 
       File dataFile = new File(tempDirectory, dataFilename);
