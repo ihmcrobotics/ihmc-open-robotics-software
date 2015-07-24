@@ -7,8 +7,6 @@ import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 
 public class YoVariableClient
 {
@@ -78,17 +76,10 @@ public class YoVariableClient
 
       handshakeParser.parseFrom(handshake.protoShake);
       listener.receivedHandshake(handshake);
-      LogModelLoader modelLoader = null;
-      if (handshake.modelLoaderClass != null)
-      {
-         modelLoader = new SDFModelLoader();
-         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip);
-      }
 
       logControlClient.connect();
 
-      listener.start(modelLoader, handshakeParser.getRootRegistry(), handshakeParser.getJointStates(),
-            handshakeParser.getDynamicGraphicObjectsListRegistry(), handshakeParser);
+      listener.start(handshakeParser.getRootRegistry(), handshakeParser.getJointStates(), handshakeParser.getDynamicGraphicObjectsListRegistry(), handshakeParser);
 
       if (listener.changesVariables())
       {

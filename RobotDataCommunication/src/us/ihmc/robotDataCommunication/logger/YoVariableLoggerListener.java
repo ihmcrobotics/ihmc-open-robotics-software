@@ -15,7 +15,6 @@ import java.util.List;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelLoader;
 import us.ihmc.robotDataCommunication.YoVariableClient;
 import us.ihmc.robotDataCommunication.YoVariableHandshakeParser;
 import us.ihmc.robotDataCommunication.YoVariablesUpdatedListener;
@@ -353,8 +352,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public void start(LogModelLoader logModelLoader, YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
+   public void start(YoVariableRegistry yoVariableRegistry, List<JointState<? extends Joint>> list, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableHandshakeParser parser)
    {
       int bufferSize = parser.getBufferSize();
       this.compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
@@ -404,7 +402,6 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
             }
          }
       }
-      
       
       // Write data to file, force it to exist
       try
