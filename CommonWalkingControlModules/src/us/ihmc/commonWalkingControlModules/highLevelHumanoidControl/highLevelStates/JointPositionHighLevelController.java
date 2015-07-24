@@ -177,9 +177,9 @@ public class JointPositionHighLevelController extends HighLevelBehavior implemen
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
-         String joinName = joint.getName();
+         String jointName = joint.getName();
 
-         if (joinName.contains("finger"))
+         if (jointName.contains("finger"))
             continue;
 
          jointsBeingControlled.add(joint);
