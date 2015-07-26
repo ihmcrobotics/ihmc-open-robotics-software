@@ -19,90 +19,24 @@ import us.ihmc.utilities.compression.SnappyUtils;
 import us.ihmc.yoUtilities.dataStructure.listener.VariableChangedListener;
 import us.ihmc.yoUtilities.dataStructure.variable.YoVariable;
 
-public class YoVariableConsumer implements LogPacketHandler
+public class YoVariableConsumer extends YoVariableDataReceiver
 {
-   private final int RECEIVE_BUFFER_SIZE = 1024;
-
-   private final InetAddress dataIP;
-
    private final List<YoVariable<?>> variables;
    private final List<JointState<?>> jointStates;
    private final YoVariablesUpdatedListener listener;
 
-   private ByteBuffer decompressed;
-
-   private CRC32 crc32 = new CRC32();
-   private final StreamingDataTCPClient client;
-   private final ThreadedLogPacketHandler updateHandler;
-
    public YoVariableConsumer(byte[] dataIP, int port, List<YoVariable<?>> variables, List<JointState<?>> jointStates, YoVariablesUpdatedListener listener)
    {
-      try
-      {
-         this.dataIP = InetAddress.getByAddress(dataIP);
-      }
-      catch (UnknownHostException e)
-      {
-         throw new RuntimeException(e);
-      }
+      super(dataIP, port, listener.getDisplayOneInNPackets());
 
       this.variables = variables;
       this.jointStates = jointStates;
       this.listener = listener;
-
-      updateHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
-      client = new StreamingDataTCPClient(this.dataIP, port, updateHandler, listener.getDisplayOneInNPackets());
    }
-
-   public void start(int bufferSize)
-   {
-      decompressed = ByteBuffer.allocate(bufferSize);
-
-      updateHandler.start();
-
-      client.start();
-
-   }
-
-   private long previous;
 
    @Override
-   public void newDataAvailable(LogDataHeader header, ByteBuffer buf)
+   public void onNewData(ByteBuffer decompressed)
    {
-
-      if (header.getUid() > previous + listener.getDisplayOneInNPackets())
-      {
-         System.err.println("Skipped " + (header.getUid() - (previous + listener.getDisplayOneInNPackets())) + " packets");
-      }
-      else if (header.getUid() <= previous)
-      {
-         System.err.println("Packet skew detected " + header.getUid());
-      }
-      previous = header.getUid();
-
-      decompressed.clear();
-      buf.clear();
-      long checksum = header.getCrc32() & 0xFFFFFFFFL;
-      crc32.reset();
-      crc32.update(buf.array(), buf.position() + buf.arrayOffset(), buf.remaining());
-
-      if (crc32.getValue() != checksum)
-      {
-         System.err.println("[" + getClass().getSimpleName() + "] Checksum validation failure. Ignoring packet " + header.getUid() + ".");
-         return;
-      }
-
-      try
-      {
-         SnappyUtils.uncompress(buf, decompressed);
-         decompressed.flip();
-      }
-      catch (Exception e)
-      {
-         e.printStackTrace();
-         return;
-      }
-
       long timestamp = decompressed.getLong();
       LongBuffer data = decompressed.asLongBuffer();
 
@@ -134,40 +68,18 @@ public class YoVariableConsumer implements LogPacketHandler
          jointStates.get(i).update(data);
       }
 
-      listener.receivedUpdate(timestamp, decompressed);
-
-   }
-
-   public void requestStopS()
-   {
-      if (client.isRunning())
-      {
-         client.requestStop();
-      }
+      listener.receivedTimestampAndData(timestamp, decompressed);
    }
 
    @Override
-   public void timestampReceived(long timestamp)
+   public void onNewTimestamp(long timestamp)
    {
-      listener.timestampReceived(timestamp);
+      listener.receivedTimestampOnly(timestamp);
    }
 
    @Override
-   public void timeout()
+   public void onTimeout()
    {
       listener.receiveTimedOut();
-      updateHandler.shutdown();
-   }
-
-   public LogHandshake getHandshake()
-   {
-      try
-      {
-         return client.getHandshake();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
    }
 }

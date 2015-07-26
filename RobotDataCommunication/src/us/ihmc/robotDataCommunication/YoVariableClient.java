@@ -1,6 +1,5 @@
 package us.ihmc.robotDataCommunication;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
@@ -23,22 +22,9 @@ public class YoVariableClient
 
    private final YoVariableHandshakeParser handshakeParser;
 
-   private static AnnounceRequest getRequest()
-   {
-      try
-      {
-         AnnounceRequest request = LogSessionDisplay.selectLogSession();
-         return request;
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
    public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix)
    {
-      this(getRequest(), listener, registryPrefix);
+      this(LogSessionDisplay.getAnnounceRequest(), listener, registryPrefix);
    }
 
    public YoVariableClient(AnnounceRequest request, YoVariablesUpdatedListener listener, String registryPrefix)
@@ -92,7 +78,7 @@ public class YoVariableClient
 
    public void requestStop()
    {
-      yoVariableConsumer.requestStopS();      
+      yoVariableConsumer.stop();
    }
    
    public synchronized void disconnected()
