@@ -10,6 +10,7 @@ import us.ihmc.communication.packets.dataobjects.HandJointName;
 import us.ihmc.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
+import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -23,12 +24,16 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    private HandModel handModel;
 
    public HandJointAngleProvider(SDFFullRobotModel fullRobotModel, HandModel handModel)
-   {
+   {     
       this.handModel = handModel;
 
-      if (handModel != null)
+      if (handModel == null)
       {
-         for (RobotSide side : RobotSide.values())
+         PrintTools.warn("Hand model is null.");
+      }
+      else
+      {
+         for (RobotSide side : RobotSide.values)
          {
             final HashMap<HandJointName, OneDoFJoint> joints = new HashMap<HandJointName, OneDoFJoint>();
             packets.put(side, new AtomicReference<HandJointAnglePacket>());
@@ -85,6 +90,7 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
 
    public void receivedPacket(HandJointAnglePacket object)
    {
-      packets.get(object.robotSide).set(object);
+      if (handModel != null)
+         packets.get(object.robotSide).set(object);
    }
 }
