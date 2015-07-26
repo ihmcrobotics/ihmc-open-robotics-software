@@ -1,4 +1,4 @@
-<sdf version='1.4'>
+<sdf version='1.5'>
   <model name='valkyrie'>
     <link name='Pelvis'>
       <pose>0 0 0 0 -0 0</pose>
@@ -32,10 +32,7 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <sensor name='LeftPelvisIMU' type='imu'>
         <imu>
           <noise>
@@ -57,10 +54,7 @@
         <pose>0.0515 0.115 -0.042 1.57 -5.55112e-17 -1.274</pose>
       </sensor>
       <gravity>1</gravity>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <self_collide>0</self_collide>
       <sensor name='RightPelvisIMU' type='imu'>
         <imu>
@@ -115,10 +109,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftHipYaw' type='revolute'>
       <child>LeftHipYawLink</child>
@@ -133,7 +123,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -178,10 +172,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftHipRoll' type='revolute'>
       <child>LeftHipRollLink</child>
@@ -196,7 +186,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -241,10 +235,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftHipPitch' type='revolute'>
       <child>LeftHipPitchLink</child>
@@ -259,7 +249,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -304,10 +298,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftKneePitch' type='revolute'>
       <child>LeftKneePitchLink</child>
@@ -322,7 +312,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -367,10 +361,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftAnklePitch' type='revolute'>
       <child>LeftAnklePitchLink</child>
@@ -385,7 +375,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -430,10 +424,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftAnkleRoll' type='revolute'>
       <child>LeftFoot</child>
@@ -448,7 +438,11 @@
         </limit>
         <dynamics>
           <damping>0.3</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -493,10 +487,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightHipYaw' type='revolute'>
       <child>RightHipYawLink</child>
@@ -511,7 +501,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -556,10 +550,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightHipRoll' type='revolute'>
       <child>RightHipRollLink</child>
@@ -574,7 +564,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -619,10 +613,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightHipPitch' type='revolute'>
       <child>RightHipPitchLink</child>
@@ -637,7 +627,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -682,10 +676,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightKneePitch' type='revolute'>
       <child>RightKneePitchLink</child>
@@ -700,7 +690,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -745,10 +739,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightAnklePitch' type='revolute'>
       <child>RightAnklePitchLink</child>
@@ -763,7 +753,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -808,10 +802,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightAnkleRoll' type='revolute'>
       <child>RightFoot</child>
@@ -826,7 +816,11 @@
         </limit>
         <dynamics>
           <damping>0.3</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -871,10 +865,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='TorsoYaw' type='revolute'>
       <child>TorsoYawLink</child>
@@ -889,7 +879,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -934,10 +928,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='TorsoPitch' type='revolute'>
       <child>TorsoPitchLink</child>
@@ -952,7 +942,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -997,10 +991,7 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <sensor name='LeftHazardCamera' type='camera'>
         <camera name='__default__'>
           <image>
@@ -1017,10 +1008,7 @@
         <update_rate>60</update_rate>
         <pose>0.0345 0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
       </sensor>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <sensor name='LeftTorsoIMU' type='imu'>
         <imu>
           <noise>
@@ -1041,10 +1029,7 @@
         </imu>
         <pose>-0.047 0.134 0.363 1.57 4.33681e-19 3.14</pose>
       </sensor>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <sensor name='RightHazardCamera' type='camera'>
         <camera name='__default__'>
           <image>
@@ -1062,10 +1047,7 @@
         <pose>0.0345 -0.0406 0.1135 1.57 -5.55112e-17 1.57</pose>
       </sensor>
       <gravity>1</gravity>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
+      <velocity_decay/>
       <self_collide>0</self_collide>
       <sensor name='RightTorsoIMU' type='imu'>
         <imu>
@@ -1101,7 +1083,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1146,10 +1132,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftShoulderPitch' type='revolute'>
       <child>LeftShoulderPitchLink</child>
@@ -1164,7 +1146,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1209,10 +1195,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftShoulderRoll' type='revolute'>
       <child>LeftShoulderRollLink</child>
@@ -1227,7 +1209,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1272,10 +1258,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftShoulderYaw' type='revolute'>
       <child>LeftShoulderYawLink</child>
@@ -1290,7 +1272,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1335,10 +1321,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftElbowPitch' type='revolute'>
       <child>LeftElbowPitchLink</child>
@@ -1353,7 +1335,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1398,10 +1384,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftForearmYaw' type='revolute'>
       <child>LeftForearmLink</child>
@@ -1416,7 +1398,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1461,10 +1447,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftWristRoll' type='revolute'>
       <child>LeftWristRollLink</child>
@@ -1479,7 +1461,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1524,10 +1510,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftWristPitch' type='revolute'>
       <child>LeftPalm</child>
@@ -1542,7 +1524,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1587,10 +1573,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftIndexFingerPitch1' type='revolute'>
       <child>LeftIndexFingerPitch1Link</child>
@@ -1605,7 +1587,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1650,10 +1636,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftIndexFingerPitch2' type='revolute'>
       <child>LeftIndexFingerPitch2Link</child>
@@ -1668,7 +1650,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1713,10 +1699,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftIndexFingerPitch3' type='revolute'>
       <child>LeftIndexFingerPitch3Link</child>
@@ -1731,7 +1713,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1776,10 +1762,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftMiddleFingerPitch1' type='revolute'>
       <child>LeftMiddleFingerPitch1Link</child>
@@ -1794,7 +1776,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1839,10 +1825,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftMiddleFingerPitch2' type='revolute'>
       <child>LeftMiddleFingerPitch2Link</child>
@@ -1857,7 +1839,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1902,10 +1888,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftMiddleFingerPitch3' type='revolute'>
       <child>LeftMiddleFingerPitch3Link</child>
@@ -1920,7 +1902,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -1965,10 +1951,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftPinkyPitch1' type='revolute'>
       <child>LeftPinkyPitch1Link</child>
@@ -1983,7 +1965,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2028,10 +2014,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftPinkyPitch2' type='revolute'>
       <child>LeftPinkyPitch2Link</child>
@@ -2046,7 +2028,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2091,10 +2077,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftPinkyPitch3' type='revolute'>
       <child>LeftPinkyPitch3Link</child>
@@ -2109,7 +2091,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2154,10 +2140,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftThumbRoll' type='revolute'>
       <child>LeftThumbRollLink</child>
@@ -2172,7 +2154,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2217,10 +2203,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftThumbPitch1' type='revolute'>
       <child>LeftThumbPitch1Link</child>
@@ -2235,7 +2217,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2280,10 +2266,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftThumbPitch2' type='revolute'>
       <child>LeftThumbPitch2Link</child>
@@ -2298,7 +2280,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2343,10 +2329,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LeftThumbPitch3' type='revolute'>
       <child>LeftThumbPitch3Link</child>
@@ -2361,7 +2343,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2406,10 +2392,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='LowerNeckPitch' type='revolute'>
       <child>LowerNeckPitchLink</child>
@@ -2424,7 +2406,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2469,10 +2455,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='NeckYaw' type='revolute'>
       <child>NeckYawLink</child>
@@ -2487,7 +2469,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2500,7 +2486,7 @@
         </ode>
       </physics>
     </joint>
-    <link name='UpperNeckPitchLinkName'>
+    <link name='UpperNeckPitchLink'>
       <pose>-0.04959 0 0.5548 0 -0 0</pose>
       <inertial>
         <pose>0.091874 0.001012 -0.005277 0 -0 0</pose>
@@ -2514,7 +2500,7 @@
           <izz>0.0419619</izz>
         </inertia>
       </inertial>
-      <collision name='UpperNeckPitchLinkName_collision'>
+      <collision name='UpperNeckPitchLink_collision'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -2523,7 +2509,7 @@
           </mesh>
         </geometry>
       </collision>
-      <visual name='UpperNeckPitchLinkName_visual'>
+      <visual name='UpperNeckPitchLink_visual'>
         <pose>0 0 0 0 -0 0</pose>
         <geometry>
           <mesh>
@@ -2532,13 +2518,9 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='UpperNeckPitch' type='revolute'>
-      <child>UpperNeckPitchLinkName</child>
+      <child>UpperNeckPitchLink</child>
       <parent>NeckYawLink</parent>
       <axis>
         <xyz>0 1 0</xyz>
@@ -2550,7 +2532,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2595,10 +2581,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightShoulderPitch' type='revolute'>
       <child>RightShoulderPitchLink</child>
@@ -2613,7 +2595,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2658,10 +2644,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightShoulderRoll' type='revolute'>
       <child>RightShoulderRollLink</child>
@@ -2676,7 +2658,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2721,10 +2707,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightShoulderYaw' type='revolute'>
       <child>RightShoulderYawLink</child>
@@ -2739,7 +2721,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2784,10 +2770,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightElbowPitch' type='revolute'>
       <child>RightElbowPitchLink</child>
@@ -2802,7 +2784,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2847,10 +2833,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightForearmYaw' type='revolute'>
       <child>RightForearmLink</child>
@@ -2865,7 +2847,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2910,10 +2896,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightWristRoll' type='revolute'>
       <child>RightWristRollLink</child>
@@ -2928,7 +2910,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -2973,10 +2959,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightWristPitch' type='revolute'>
       <child>RightPalm</child>
@@ -2991,7 +2973,11 @@
         </limit>
         <dynamics>
           <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3036,10 +3022,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightIndexFingerPitch1' type='revolute'>
       <child>RightIndexFingerPitch1Link</child>
@@ -3054,7 +3036,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3099,10 +3085,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightIndexFingerPitch2' type='revolute'>
       <child>RightIndexFingerPitch2Link</child>
@@ -3117,7 +3099,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3162,10 +3148,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightIndexFingerPitch3' type='revolute'>
       <child>RightIndexFingerPitch3Link</child>
@@ -3180,7 +3162,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3225,10 +3211,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightMiddleFingerPitch1' type='revolute'>
       <child>RightMiddleFingerPitch1Link</child>
@@ -3243,7 +3225,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3288,10 +3274,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightMiddleFingerPitch2' type='revolute'>
       <child>RightMiddleFingerPitch2Link</child>
@@ -3306,7 +3288,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3351,10 +3337,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightMiddleFingerPitch3' type='revolute'>
       <child>RightMiddleFingerPitch3Link</child>
@@ -3369,7 +3351,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3414,10 +3400,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightPinkyPitch1' type='revolute'>
       <child>RightPinkyPitch1Link</child>
@@ -3432,7 +3414,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3477,10 +3463,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightPinkyPitch2' type='revolute'>
       <child>RightPinkyPitch2Link</child>
@@ -3495,7 +3477,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3540,10 +3526,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightPinkyPitch3' type='revolute'>
       <child>RightPinkyPitch3Link</child>
@@ -3558,7 +3540,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3603,10 +3589,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightThumbRoll' type='revolute'>
       <child>RightThumbRollLink</child>
@@ -3621,7 +3603,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3666,10 +3652,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightThumbPitch1' type='revolute'>
       <child>RightThumbPitch1Link</child>
@@ -3684,7 +3666,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3729,10 +3715,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightThumbPitch2' type='revolute'>
       <child>RightThumbPitch2Link</child>
@@ -3747,7 +3729,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
@@ -3792,10 +3778,6 @@
           </mesh>
         </geometry>
       </visual>
-      <velocity_decay>
-        <linear>0</linear>
-        <angular>0</angular>
-      </velocity_decay>
     </link>
     <joint name='RightThumbPitch3' type='revolute'>
       <child>RightThumbPitch3Link</child>
@@ -3810,7 +3792,11 @@
         </limit>
         <dynamics>
           <damping>1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
         </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
       </axis>
       <physics>
         <provide_feedback>1</provide_feedback>
