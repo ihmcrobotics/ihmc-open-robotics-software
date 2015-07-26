@@ -80,5 +80,4 @@ public class RobotiqHandModel implements HandModel
    {
       return RobotiqHandJointNameMinimal.values;
    }
-
 }

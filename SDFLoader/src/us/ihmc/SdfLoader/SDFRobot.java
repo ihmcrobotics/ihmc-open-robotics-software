@@ -91,6 +91,7 @@ public class SDFRobot extends Robot implements OneDegreeOfFreedomJointHolder
          boolean enableTorqueVelocityLimits, boolean enableDamping)
    {
       super(generalizedSDFRobotModel.getName());
+      
       this.resourceDirectories = generalizedSDFRobotModel.getResourceDirectories();
 
 //      System.out.println("Creating root joints for root links");
