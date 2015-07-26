@@ -10,8 +10,6 @@ public interface YoVariablesUpdatedListener
 
    boolean changesVariables();
 
-   void receivedUpdate(long timestamp, ByteBuffer buf);
-
    void setShowOverheadView(boolean showOverheadView);
 
    void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser);
@@ -24,7 +22,9 @@ public interface YoVariablesUpdatedListener
 
    int getDisplayOneInNPackets();
 
-   void timestampReceived(long timestamp);
+   void receivedTimestampOnly(long timestamp);
+
+   void receivedTimestampAndData(long timestamp, ByteBuffer buf);
 
    void clearLog();
 

@@ -98,7 +98,19 @@ public class LogSessionDisplay extends JFrame
       }
    }
 
-   public static AnnounceRequest selectLogSession() throws SocketException, IOException
+   public static AnnounceRequest getAnnounceRequest()
+   {
+      try
+      {
+         return selectLogSession();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   private static AnnounceRequest selectLogSession() throws IOException
    {
       final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();
       MouseAdapter adapter = new MouseAdapter()
@@ -131,15 +143,12 @@ public class LogSessionDisplay extends JFrame
       final LogSessionDisplay display = new LogSessionDisplay(adapter);
       SwingUtilities.invokeLater(new Runnable()
       {
-
          @Override
          public void run()
          {
-            // TODO Auto-generated method stub
             display.start();
             display.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             display.setVisible(true);
-
          }
       });
 
@@ -167,7 +176,6 @@ public class LogSessionDisplay extends JFrame
       {
          throw new RuntimeException(e);
       }
-
    }
 
    private class LogSessionCallback implements LogBroadcastListener
@@ -209,7 +217,6 @@ public class LogSessionDisplay extends JFrame
 
             }
          });
-
       }
 
       @Override
@@ -234,11 +241,10 @@ public class LogSessionDisplay extends JFrame
             }
          });
       }
-
    }
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args)
    {
-      System.out.println(selectLogSession());
+      System.out.println(getAnnounceRequest());
    }
 }

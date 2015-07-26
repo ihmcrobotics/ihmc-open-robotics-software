@@ -169,7 +169,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       }
    }
 
-   public void receivedUpdate(long timestamp, ByteBuffer buffer)
+   public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
       connected = true;
 
@@ -414,9 +414,9 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    }
 
    @Override
-   public void timestampReceived(long timestamp)
+   public void receivedTimestampOnly(long timestamp)
    {
-      for(int i = 0; i < videoDataLoggers.size(); i++)
+      for (int i = 0; i < videoDataLoggers.size(); i++)
       {
          videoDataLoggers.get(i).timestampChanged(timestamp);
       }
@@ -454,5 +454,4 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    {
       return false;
    }
-
 }

@@ -70,7 +70,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       addSCSVisualizerStateListener(this);
    }
 
-   public void receivedUpdate(long timestamp, ByteBuffer buffer)
+   public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
       if (recording)
       {
@@ -293,7 +293,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public void timestampReceived(long timestamp)
+   public void receivedTimestampOnly(long timestamp)
    {
    }
 
