@@ -16,7 +16,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
-import us.ihmc.valkyrie.fingers.ValkyrieFingerJointName;
+import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoUtilities.controllers.YoOrientationPIDGains;
 import us.ihmc.yoUtilities.controllers.YoPDGains;
@@ -65,7 +65,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       for(RobotSide side : RobotSide.values())
       {
          sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, Pair<Double,Double>>());
-         for(ValkyrieFingerJointName fingerJoint : ValkyrieFingerJointName.values())
+         for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
          {
             sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForMiddleOfExpression() + fingerJoint.toString(), 
                   new Pair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(fingerJoint)));

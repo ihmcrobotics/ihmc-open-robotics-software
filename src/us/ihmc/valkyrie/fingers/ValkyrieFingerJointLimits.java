@@ -2,15 +2,13 @@ package us.ihmc.valkyrie.fingers;
 
 public class ValkyrieFingerJointLimits
 {
-   public static double getFullyExtensonPositionLimit(ValkyrieFingerJointName joint)
+   public static double getFullyExtensonPositionLimit(ValkyrieRealRobotFingerJoint joint)
    {
       switch(joint)
       {
-         case Thumb1:
+         case ThumbRoll:
             return 0.0;
-         case Thumb2:
-            return 0.0;
-         case Thumb3:
+         case Thumb:
             return 0.0;
          case Index:
             return 0.0;
@@ -23,15 +21,13 @@ public class ValkyrieFingerJointLimits
       }
    }
    
-   public static double getFullyFlexedPositionLimit(ValkyrieFingerJointName joint)
+   public static double getFullyFlexedPositionLimit(ValkyrieRealRobotFingerJoint joint)
    {
       switch(joint)
       {
-         case Thumb1:
+         case ThumbRoll:
             return 1.75;
-         case Thumb2:
-            return -2.0;
-         case Thumb3:
+         case Thumb:
             return -4.0;
          case Index:
             return -4.0;
