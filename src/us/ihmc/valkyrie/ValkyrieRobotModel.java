@@ -1,10 +1,12 @@
 package us.ihmc.valkyrie;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.jme3.math.Quaternion;
+import com.jme3.math.Transform;
+import com.jme3.math.Vector3f;
 
 import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.SdfLoader.JaxbSDFLoader;
@@ -26,9 +28,9 @@ import us.ihmc.darpaRoboticsChallenge.networkProcessor.time.AlwaysZeroOffsetPPST
 import us.ihmc.darpaRoboticsChallenge.sensors.DRCSensorSuiteManager;
 import us.ihmc.graphics3DAdapter.jme.util.JMEGeometryUtils;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
+import us.ihmc.pathGeneration.footstepPlanner.FootstepPlanningParameterization;
 import us.ihmc.pathGeneration.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.robotDataCommunication.logger.LogSettings;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -44,6 +46,8 @@ import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
+import us.ihmc.valkyrie.fingers.ValkyrieFingerController;
+import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieArmControllerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -59,10 +63,6 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.WholeBodyIkSolver;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.wholeBodyController.parameters.DefaultArmConfigurations;
-
-import com.jme3.math.Quaternion;
-import com.jme3.math.Transform;
-import com.jme3.math.Vector3f;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -303,7 +303,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public HandModel getHandModel()
    {
-      return null;
+      return new ValkyrieHandModel();
    }
 
    @Override
@@ -400,13 +400,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
    {
-      return null;
+      return new ValkyrieFingerController(this, threadDataSynchronizer, globalDataProducer);
    }
 
    @Override
    public FootstepPlanningParameterization getFootstepParameters()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -438,7 +437,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DefaultArmConfigurations getDefaultArmConfigurations()
    {
-      // TODO Auto-generated method stub
       return null;
    }
 
@@ -452,8 +450,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public Class<?> getSpectatorInterfaceClass()
    {
-      
-      
       return null;
    }
 
@@ -468,7 +464,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return "Valkyrie";
    }
    
-
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
