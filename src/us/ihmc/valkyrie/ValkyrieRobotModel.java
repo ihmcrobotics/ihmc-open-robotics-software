@@ -120,11 +120,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       for (String forceSensorNames : ValkyrieSensorInformation.forceSensorNames)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         if (forceSensorNames.equals("LeftAnkle"))
+         if (forceSensorNames.equals("LeftAnkleRoll"))
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
          }
-         else if (forceSensorNames.equals("RightAnkle"))
+         else if (forceSensorNames.equals("RightAnkleRoll"))
          {
             transform.set(ValkyrieSensorInformation.transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
          }
