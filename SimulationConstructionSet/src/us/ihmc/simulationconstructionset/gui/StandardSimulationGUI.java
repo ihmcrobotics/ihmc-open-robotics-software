@@ -43,6 +43,7 @@ import javax.swing.SwingUtilities;
 import javax.vecmath.Color3f;
 
 import net.iharder.dnd.FileDrop;
+import us.ihmc.communication.producers.VideoDataServer;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
@@ -53,6 +54,7 @@ import us.ihmc.graphics3DAdapter.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
 import us.ihmc.graphics3DAdapter.camera.ClassicCameraController;
 import us.ihmc.graphics3DAdapter.camera.OffscreenBufferVideoServer;
+import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
 import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
 import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
@@ -102,7 +104,6 @@ import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
 import us.ihmc.yoUtilities.dataStructure.registry.NameSpace;
@@ -3081,7 +3082,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return graphicsRobots.get(robot);
    }
 
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, RenderedSceneHandler videoDataServer,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new CameraTrackAndDollyYoVariablesHolder(yoVariableHolder);

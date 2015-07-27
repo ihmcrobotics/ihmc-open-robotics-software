@@ -1,7 +1,5 @@
 package us.ihmc.communication.producers;
 
-import us.ihmc.proprietaryUtilities.VideoStreamer;
-
 public class CompressedVideoDataFactory
 {
    public enum Algorithm

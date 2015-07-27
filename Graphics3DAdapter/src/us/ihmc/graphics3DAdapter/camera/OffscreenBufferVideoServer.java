@@ -9,21 +9,20 @@ import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.graphics3DAdapter.CameraAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 
 public class OffscreenBufferVideoServer
 {
 
-   private final VideoDataServer videoDataServer;
+   private final RenderedSceneHandler videoDataServer;
 
    private final CameraAdapter camera;
 
    private final TimestampProvider timestampProvider;
 
    public OffscreenBufferVideoServer(Graphics3DAdapter adapter, CameraMountList mountList, CameraConfiguration cameraConfiguration,
-         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, VideoDataServer videoDataServer, 
+         CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder, int width, int height, RenderedSceneHandler videoDataServer, 
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       ViewportAdapter viewport = adapter.createNewViewport(null, false, true);
@@ -75,7 +74,7 @@ public class OffscreenBufferVideoServer
 
       public boolean isReadyForNewData()
       {
-         return videoDataServer.isConnected();
+         return videoDataServer.isReadyForNewData();
       }
 
       public long getTimeStamp()
