@@ -2,7 +2,7 @@ package us.ihmc.robotDataCommunication.logger;
 
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public abstract class LogProperties extends Properties
 {

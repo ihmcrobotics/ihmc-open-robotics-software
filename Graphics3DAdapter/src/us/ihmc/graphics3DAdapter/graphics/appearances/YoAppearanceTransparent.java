@@ -2,7 +2,7 @@ package us.ihmc.graphics3DAdapter.graphics.appearances;
 
 import javax.vecmath.Color3f;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class YoAppearanceTransparent extends YoAppearanceTransparency
 {
@@ -13,7 +13,7 @@ public class YoAppearanceTransparent extends YoAppearanceTransparency
 
    public Color3f getColor()
    {
-      throw new NotImplementedException();
+      throw new NotImplementedException("getColor() is not implemented");
    }
 
 }

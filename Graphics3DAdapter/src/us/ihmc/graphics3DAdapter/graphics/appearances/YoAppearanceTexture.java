@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 import javax.vecmath.Color3f;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class YoAppearanceTexture extends YoAppearanceTransparency
 {
@@ -37,7 +37,7 @@ public class YoAppearanceTexture extends YoAppearanceTransparency
 
    public Color3f getColor()
    {
-      throw new NotImplementedException();
+      throw new NotImplementedException("getColor() is not implemented");
    }
 
 }

@@ -8,12 +8,10 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import us.ihmc.utilities.operatingSystem.OperatingSystem;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
+import org.apache.commons.lang3.SystemUtils;
 
 public class ExternalProgramHelpers
 {
-   private static final OperatingSystem currentOS = OperatingSystemTools.getOperatingSystem();
 
    public static String extractExternalProgram(URL url)
    {
@@ -47,22 +45,29 @@ public class ExternalProgramHelpers
       }
    }
 
-   public static OperatingSystem getOS()
-   {
-      if (currentOS == null)
-         throw new RuntimeException("Unsupported OS " + OperatingSystemTools.getOperatingSystemName());
-      
-      return currentOS;
-   }
-
    public static String getOSNameAsString()
    {
-      return getOS().toString().toLowerCase();
+      if(SystemUtils.IS_OS_WINDOWS)
+      {
+         return "windows";
+      }
+      else if (SystemUtils.IS_OS_LINUX)
+      {
+         return "linux";
+      }
+      else if (SystemUtils.IS_OS_MAC)
+      {
+         return "mac";
+      }
+      else
+      {
+         throw new RuntimeException("Unsupported OS" + SystemUtils.OS_NAME);
+      }
    }
 
    public static String getExecutableExtension()
    {
-      if (currentOS != null && currentOS == OperatingSystem.WINDOWS)
+      if (SystemUtils.IS_OS_WINDOWS)
       {
          return ".exe";
       }

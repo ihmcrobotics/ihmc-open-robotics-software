@@ -17,7 +17,7 @@ import java.nio.channels.MembershipKey;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest.AnnounceType;

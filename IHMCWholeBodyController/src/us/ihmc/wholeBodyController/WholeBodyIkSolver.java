@@ -12,7 +12,8 @@ import java.util.Map.Entry;
 import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang.mutable.MutableBoolean;
+import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
@@ -22,7 +23,6 @@ import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_BodyPose;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_COM;
 import us.ihmc.utilities.hierarchicalKinematics.HierarchicalTask_JointsPose;
 import us.ihmc.utilities.hierarchicalKinematics.RobotModel;
-import us.ihmc.utilities.hierarchicalKinematics.VectorXd;
 import us.ihmc.utilities.humanoidRobot.frames.ReferenceFrames;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.Vector64F;
@@ -32,7 +32,6 @@ import us.ihmc.utilities.math.geometry.PoseReferenceFrame;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
@@ -56,7 +55,7 @@ abstract public class WholeBodyIkSolver
       }
       catch (UnsatisfiedLinkError e)
       {
-         if (OperatingSystemTools.isWindows())
+         if (SystemUtils.IS_OS_WINDOWS)
             PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2015!!");
       }
    }
@@ -367,7 +366,7 @@ abstract public class WholeBodyIkSolver
       }
       catch (UnsatisfiedLinkError e)
       {
-         if (OperatingSystemTools.isWindows())
+         if (SystemUtils.IS_OS_WINDOWS)
             PrintTools.error("Install Visual C++ Redistributable Packages for Visual Studio 2015!!");
       }
    }

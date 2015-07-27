@@ -8,7 +8,7 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.j3d', name: 'vecmath', version: '1.5.2' 
     ['experimental'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27-internal'}  
     ['core','complex','equation'].each{String id -> compile group: 'us.ihmc.thirdparty', name: 'ejml-' + id, version: '0.27.1-internal'}
-    compile group: 'commons-lang', name: 'commons-lang', version: '2.6' 
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4' 
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
 	compile group: 'us.ihmc.thirdparty', name: 'georegression', version: '0.8-internal'
     compile group: 'us.ihmc.thirdparty', name: 'boofcv-io', version: '0.19-internal' 
