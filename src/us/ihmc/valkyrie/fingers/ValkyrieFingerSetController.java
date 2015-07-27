@@ -33,6 +33,7 @@ public class ValkyrieFingerSetController implements RobotController
    private final boolean runningOnRealRobot;
    
    private final String name = getClass().getSimpleName();
+   private final YoVariableRegistry controllerRegistry;
    private final YoVariableRegistry registry;
 
    private final RobotSide robotSide;
@@ -53,9 +54,10 @@ public class ValkyrieFingerSetController implements RobotController
    private final EnumYoVariable<FingerState> desiredFingerState;
    private StateMachine<GraspState> stateMachine;
          
-   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry)
+   public ValkyrieFingerSetController(RobotSide robotSide, DoubleYoVariable yoTime, DoubleYoVariable trajectoryTime, SDFFullRobotModel fullRobotModel, boolean runningOnRealRobot, YoVariableRegistry parentRegistry,  YoVariableRegistry controllerRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+      this.controllerRegistry = controllerRegistry;
       registry = new YoVariableRegistry(sidePrefix + name);
       parentRegistry.addChild(registry);
       this.robotSide = robotSide;
@@ -115,7 +117,7 @@ public class ValkyrieFingerSetController implements RobotController
       {
          for (ValkyrieRealRobotFingerJoint realRobotFingerJointEnum : ValkyrieRealRobotFingerJoint.values)
          {
-            realRobotControlVariables.put(realRobotFingerJointEnum, realRobotFingerJointEnum.getRelatedControlVariable(robotSide, registry));
+            realRobotControlVariables.put(realRobotFingerJointEnum, realRobotFingerJointEnum.getRelatedControlVariable(robotSide, controllerRegistry));
          }
       }
    }

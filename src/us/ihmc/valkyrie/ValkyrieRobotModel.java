@@ -400,7 +400,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
    {
-      return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer);
+      return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer, null);
    }
 
    @Override
