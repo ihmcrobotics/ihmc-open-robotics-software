@@ -10,11 +10,10 @@ import javax.swing.JPanel;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import us.ihmc.proprietaryUtilities.VideoStreamer;
 import boofcv.struct.calib.IntrinsicParameters;
 
 
-public class JPanelCameraStreamer extends JPanel implements VideoStreamer, CameraStreamer
+public class JPanelCameraStreamer extends JPanel implements CameraStreamer
 {
    private static final long serialVersionUID = -6832977971630763132L;
    private BufferedImage bufferedImage;

@@ -12,9 +12,9 @@ import javax.vecmath.Quat4d;
 import us.ihmc.communication.packets.sensing.VideoPacket;
 import us.ihmc.communication.producers.CompressedVideoDataClient;
 import us.ihmc.communication.producers.CompressedVideoDataFactory;
+import us.ihmc.communication.producers.VideoStreamer;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.OutgoingCommunicationBridgeInterface;
-import us.ihmc.proprietaryUtilities.VideoStreamer;
 import us.ihmc.yoUtilities.dataStructure.variable.LongYoVariable;
 import boofcv.struct.calib.IntrinsicParameters;
 

@@ -30,11 +30,14 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.vecmath.Color3f;
 
+import com.jme3.renderer.Camera;
+
 import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
 import us.ihmc.graphics3DAdapter.Graphics3DBackgroundScaleMode;
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
 import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
+import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
 import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
@@ -86,7 +89,6 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.TimestampProvider;
-import us.ihmc.proprietaryUtilities.VideoDataServer;
 import us.ihmc.utilities.gui.GraphicsUpdatable;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.yoUtilities.dataStructure.YoVariableHolder;
@@ -101,8 +103,6 @@ import us.ihmc.yoUtilities.graphics.YoGraphicsList;
 import us.ihmc.yoUtilities.graphics.YoGraphicsListRegistry;
 import us.ihmc.yoUtilities.stateMachines.StateMachinesJPanel;
 import us.ihmc.yoUtilities.time.GlobalTimer;
-
-import com.jme3.renderer.Camera;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -4196,7 +4196,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return null;
    }
 
-   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, VideoDataServer videoDataServer,
+   public void startStreamingVideoData(CameraConfiguration cameraConfiguration, int width, int height, RenderedSceneHandler videoDataServer,
          TimestampProvider timestampProvider, int framesPerSecond)
    {
       if (myGUI != null)
