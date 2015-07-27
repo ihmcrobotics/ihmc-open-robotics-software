@@ -31,8 +31,8 @@ public class DesiredPelvisPoseProvider implements PelvisPoseProvider
 
    private final AtomicBoolean goToHomePosition = new AtomicBoolean(false);
    private final AtomicBoolean goToHomeOrientation = new AtomicBoolean(false);
-   private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(new FramePoint());
-   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(new FrameOrientation());
+   private final AtomicReference<FramePoint> desiredPelvisPosition = new AtomicReference<FramePoint>(null);
+   private final AtomicReference<FrameOrientation> desiredPelvisOrientation = new AtomicReference<FrameOrientation>(null);
    private final AtomicReference<WaypointPositionTrajectoryData> desiredPelvisPositionWithWaypoints = new AtomicReference<>(null);
    private final AtomicReference<WaypointOrientationTrajectoryData> desiredPelvisOrientationWithWaypoints = new AtomicReference<>(null);
    private final AtomicReference<StopMotionPacket> stopMotion = new  AtomicReference<>(null);
