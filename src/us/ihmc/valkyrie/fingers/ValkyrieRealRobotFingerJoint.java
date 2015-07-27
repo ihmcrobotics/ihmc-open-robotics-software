@@ -10,8 +10,8 @@ public enum ValkyrieRealRobotFingerJoint
    /**
     * Map enums to RoboNet names.
     */
-   ThumbRoll("ThumbMPYaw"), Thumb("ThumbPIPExtensor"), Index("PrimaryMPExtensor"), Middle("MiddleMPExtensor"), 
-   Pinky("LittleMPExtensor");
+   ThumbRoll("ThumbRoll"), Thumb("ThumbPitch1"), Index("IndexFingerPitch1"), Middle("MiddleFingerPitch1"), 
+   Pinky("PinkyPitch1");
 
    public static final ValkyrieRealRobotFingerJoint[] values = ValkyrieRealRobotFingerJoint.values();
    
