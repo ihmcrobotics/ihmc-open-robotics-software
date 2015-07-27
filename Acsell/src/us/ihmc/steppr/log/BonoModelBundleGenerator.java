@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.steppr.parameters.BonoRobotModel;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
