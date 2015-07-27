@@ -241,7 +241,7 @@ public class DRCSimulationFactory
       MultiThreadedRobotControlElement simulatedHandController = drcRobotModel.createSimulatedHandController(simulatedRobot, threadDataSynchronizer, globalDataProducer);
       if (simulatedHandController != null)
       {
-         multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, true);
+         multiThreadedRobotController.addController(simulatedHandController, controllerTicksPerSimulationTick, false);
       }
       DRCRobotJointMap jointMap = drcRobotModel.getJointMap();
       if(jointMap.getHeadName() != null)
