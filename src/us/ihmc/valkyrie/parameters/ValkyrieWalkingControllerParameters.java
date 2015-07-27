@@ -221,7 +221,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       if (!controlHeadAndHandsWithSliders())
       {
          String[] defaultHeadOrientationControlJointNames = new String[] { jointMap.getNeckJointName(NeckJointName.UPPER_NECK_PITCH),
-               jointMap.getNeckJointName(NeckJointName.NECK_YAW) };
+               jointMap.getNeckJointName(NeckJointName.LOWER_NECK_PITCH), jointMap.getNeckJointName(NeckJointName.NECK_YAW) };
          return defaultHeadOrientationControlJointNames;
       }
       else
@@ -516,7 +516,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    {
       YoSymmetricSE3PIDGains gains = new YoSymmetricSE3PIDGains("HeadOrientation", registry);
 
-      double kp = 40.0;
+      double kp = 6.5;//40.0;
       double zeta = runningOnRealRobot ? 0.4 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
@@ -543,7 +543,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    @Override
    public double[] getInitialHeadYawPitchRoll()
    {
-      return new double[] { 0.0, 0.67, 0.0 };
+      return new double[] { 0.0, 0.0, 0.0 };//{ 0.0, 0.67, 0.0 };
    }
 
    @Override
@@ -883,7 +883,9 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
             "LeftThumbPitch1",       
             "LeftThumbPitch2",       
             "LeftThumbPitch3",
-            "UpperNeckPitch"};    
+            "UpperNeckPitch",
+            "LowerNeckPitch",
+            "NeckYaw"};
 
       return jointsToIgnore;
    }
