@@ -29,7 +29,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final String chestName = "Torso";
    private final String pelvisName = "Pelvis";
    private final String fullPelvisNameInSdf = pelvisName;
-   private final String headName = "Head";
+   private final String headName = "UpperNeckPitchLink";
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
