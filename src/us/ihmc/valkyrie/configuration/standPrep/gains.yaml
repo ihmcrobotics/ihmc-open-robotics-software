@@ -1,128 +1,232 @@
-LeftHipRotator:
+LeftHipYaw:
     kp: 100.0
     kd: 6.2
     ki: 0.0
-LeftHipAdductor:
+LeftHipRoll:
     kp: 500.0
     kd: 25.0
     ki: 0.0    
-LeftHipExtensor:
+LeftHipPitch:
     kp: 550.0
     kd: 21.0
     ki: 0.0    
-LeftKneeExtensor:
+LeftKneePitch:
     kp: 259.0
     kd: 9.4
     ki: 0.0    
-LeftAnkleExtensor:
+LeftAnklePitch:
     kp: 68.0
     kd: 6.29
     ki: 0.0    
-LeftAnkle:
+LeftAnkleRoll:
     kp: 56.0
     kd: 3.14
     ki: 0.0    
-RightHipRotator:
+RightHipYaw:
     kp: 100.0
     kd: 6.2
     ki: 0.0
-RightHipAdductor:
+RightHipRoll:
     kp: 500.0
     kd: 25.0
     ki: 0.0   
-RightHipExtensor:
+RightHipPitch:
     kp: 550.0
     kd: 21.0
     ki: 0.0   
-RightKneeExtensor:
+RightKneePitch:
     kp: 259.0
     kd: 9.4
     ki: 0.0        
-RightAnkleExtensor:
+RightAnklePitch:
     kp: 68.0
     kd: 6.29
     ki: 0.0  
-RightAnkle:
+RightAnkleRoll:
     kp: 56.0
     kd: 3.14
     ki: 0.0       
-WaistRotator:
+TorsoYaw:
     kp: 100.0
     kd: 6.2
     ki: 0.0
-WaistExtensor:
+TorsoPitch:
     kp: 600.0
     kd: 40.0
     ki: 0.0    
-WaistLateralExtensor:
+TorsoRoll:
     kp: 600.0
     kd: 40.0
     ki: 0.0  
-LeftShoulderExtensor:
+LeftShoulderPitch: 
     kp: 50.0
     kd: 5.0
     ki: 0.0    
-LeftShoulderAdductor:
+LeftShoulderRoll:
     kp: 50.0
     kd: 5.0
     ki: 0.0    
-LeftShoulderSupinator:
+LeftShoulderYaw:
     kp: 40.0
     kd: 4.0
     ki: 0.0    
-LeftElbowExtensor:
+LeftElbowPitch:
     kp: 40.0
     kd: 10.0
     ki: 0.0    
-LeftForearmSupinator:
+LeftForearmYaw:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-LeftWristExtensor:
+LeftWristRoll:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-LeftWrist:
+LeftWristPitch:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0       
+LowerNeckPitch:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-LowerNeckExtensor:
+NeckYaw:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-NeckRotator:
+UpperNeckPitch:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-UpperNeckExtensor:
-    kp: 0.0
-    kd: 0.0
-    ki: 0.0    
-RightShoulderExtensor:
+RightShoulderPitch:
     kp: 50.0
     kd: 5.0
     ki: 0.0    
-RightShoulderAdductor:
+RightShoulderRoll:
     kp: 50.0
     kd: 5.0
     ki: 0.0    
-RightShoulderSupinator:
+RightShoulderYaw:
     kp: 40.0
     kd: 4.0
-    ki: 0.0    
-RightElbowExtensor:
+    ki: 0.0   
+RightElbowPitch:
     kp: 40.0
     kd: 4.0
-    ki: 0.0    
-RightForearmSupinator:
+    ki: 0.0      
+RightForearmYaw:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-RightWristExtensor:
+RightWristRoll:
     kp: 0.0
     kd: 0.0
     ki: 0.0    
-RightWrist:
+RightWristPitch:
     kp: 0.0
     kd: 0.0
     ki: 0.0
+LeftIndexFingerPitch1:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0         
+LeftIndexFingerPitch2:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftIndexFingerPitch3:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftMiddleFingerPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftMiddleFingerPitch2:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftMiddleFingerPitch3:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftPinkyPitch1:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftPinkyPitch2:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftPinkyPitch3:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftThumbRoll:         
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftThumbPitch1:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftThumbPitch2:          
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+LeftThumbPitch3:                   
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightIndexFingerPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightIndexFingerPitch2:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightIndexFingerPitch3:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightMiddleFingerPitch1:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightMiddleFingerPitch2:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightMiddleFingerPitch3:      
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightPinkyPitch1:        
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightPinkyPitch2:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightPinkyPitch3:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightThumbRoll:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightThumbPitch1:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightThumbPitch2:               
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0
+RightThumbPitch3:
+    kp: 0.0
+    kd: 0.0
+    ki: 0.0               
