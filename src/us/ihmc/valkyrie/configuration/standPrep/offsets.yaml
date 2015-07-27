@@ -1,64 +1,119 @@
 LeftHipRotator:
     tauOff: 0.0
-LeftHipAdductor:
+LeftHipYaw:
     tauOff: 0.0
-LeftHipExtensor:
-    tauOff: 0.0
-LeftKneeExtensor:
-    tauOff: 0.0 
-LeftAnkleExtensor:
-    tauOff: 0.0   
-LeftAnkle:
-    tauOff: 0.0   
-RightHipRotator:
-    tauOff: 0.0 
-RightHipAdductor:
-    tauOff: 0.0 
-RightHipExtensor:
-    tauOff: 0.0 
-RightKneeExtensor:
-    tauOff: 0.0   
-RightAnkleExtensor:
-    tauOff: 0.0 
-RightAnkle:
-    tauOff: 0.0     
-WaistRotator:
-    tauOff: 0.0 
-WaistExtensor:
-    tauOff: 0.0 
-WaistLateralExtensor:
-    tauOff: 0.0 
-LeftShoulderExtensor:
-    tauOff: 0.0 
-LeftShoulderAdductor:
-    tauOff: 0.0 
-LeftShoulderSupinator:
-    tauOff: 0.0  
-LeftElbowExtensor:
-    tauOff: 0.0 
-LeftForearmSupinator:
-    tauOff: 0.0 
-LeftWristExtensor:
-    tauOff: 0.0  
-LeftWrist:
+LeftHipRoll:
+   tauOff: 0.0    
+LeftHipPitch:
+   tauOff: 0.0    
+LeftKneePitch:
     tauOff: 0.0    
-LowerNeckExtensor:
+LeftAnklePitch:
     tauOff: 0.0    
-NeckRotator:
+LeftAnkleRoll:
     tauOff: 0.0    
-UpperNeckExtensor:
-    tauOff: 0.0  
-RightShoulderExtensor:
-    tauOff: 0.0 
-RightShoulderAdductor:
-    tauOff: 0.0 
-RightShoulderSupinator:
-    tauOff: 0.0 
-RightElbowExtensor:
-    tauOff: 0.0 
-RightForearmSupinator:
+RightHipYaw:
     tauOff: 0.0
-RightWristExtensor:
+RightHipRoll:
     tauOff: 0.0   
-RightWrist:
+RightHipPitch:
+    tauOff: 0.0   
+RightKneePitch:
+    tauOff: 0.0        
+RightAnklePitch:
+    tauOff: 0.0  
+RightAnkleRoll:
+    tauOff: 0.0       
+TorsoYaw:
     tauOff: 0.0
+TorsoPitch:
+    tauOff: 0.0    
+TorsoRoll:
+    tauOff: 0.0  
+LeftShoulderPitch: 
+    tauOff: 0.0    
+LeftShoulderRoll:
+    tauOff: 0.0    
+LeftShoulderYaw:
+    tauOff: 0.00    
+LeftElbowPitch:
+    tauOff: 0.0    
+LeftForearmYaw:
+    tauOff: 0.0    
+LeftWristRoll:
+    tauOff: 0.0    
+LeftWristPitch:
+    tauOff: 0.0       
+LowerNeckPitch:
+    tauOff: 0.0    
+NeckYaw:
+    tauOff: 0.0    
+UpperNeckPitch:
+    tauOff: 0.0    
+RightShoulderPitch:
+    tauOff: 0.0    
+RightShoulderRoll:
+    tauOff: 0.0   
+RightShoulderYaw:
+    tauOff: 0.0   
+RightElbowPitch:
+    tauOff: 0.0      
+RightForearmYaw:
+    tauOff: 0.0    
+RightWristRoll:
+    tauOff: 0.0    
+RightWristPitch:
+    tauOff: 0.0
+LeftIndexFingerPitch1:
+    tauOff: 0.0    
+LeftIndexFingerPitch2:         
+    tauOff: 0.0
+LeftIndexFingerPitch3:         
+    tauOff: 0.0
+LeftMiddleFingerPitch1:        
+    tauOff: 0.0
+LeftMiddleFingerPitch2:        
+    tauOff: 0.0
+LeftMiddleFingerPitch3:        
+    tauOff: 0.0
+LeftPinkyPitch1:          
+    tauOff: 0.0
+LeftPinkyPitch2:          
+    tauOff: 0.0
+LeftPinkyPitch3:          
+    tauOff: 0.0
+LeftThumbRoll:         
+    tauOff: 0.0
+LeftThumbPitch1:          
+    tauOff: 0.0
+LeftThumbPitch2:          
+    tauOff: 0.0
+LeftThumbPitch3:                   
+    tauOff: 0.0
+RightIndexFingerPitch1:        
+    tauOff: 0.0
+RightIndexFingerPitch2:        
+    tauOff: 0.0
+RightIndexFingerPitch3:        
+    tauOff: 0.0
+RightMiddleFingerPitch1:      
+    tauOff: 0.0
+RightMiddleFingerPitch2:      
+    tauOff: 0.0
+RightMiddleFingerPitch3:      
+    tauOff: 0.0
+RightPinkyPitch1:        
+    tauOff: 0.0
+RightPinkyPitch2:               
+    tauOff: 0.0
+RightPinkyPitch3:               
+    tauOff: 0.0
+RightThumbRoll:               
+    tauOff: 0.0
+RightThumbPitch1:               
+    tauOff: 0.0
+RightThumbPitch2:               
+    tauOff: 0.0
+RightThumbPitch3:
+    tauOff: 0.0
+  
