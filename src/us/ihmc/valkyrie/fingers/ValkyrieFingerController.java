@@ -57,8 +57,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param fullRobotModel null if running on real robot
     * @param threadDataSynchronizer
     * @param globalDataProducer
+    * @param yoVariableRegistry 
     */
-   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
+   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer, YoVariableRegistry controllerRegistry)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
@@ -123,7 +124,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          fingerStateProviders.put(robotSide, new FingerStateProvider(robotSide));
          if (globalDataProducer != null)
             globalDataProducer.attachListener(FingerStatePacket.class, fingerStateProviders.get(robotSide));
-         fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry));
+         fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry, controllerRegistry));
          
          jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer));
       }
