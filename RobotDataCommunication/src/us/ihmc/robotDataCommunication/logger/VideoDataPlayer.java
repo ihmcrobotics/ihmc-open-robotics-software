@@ -1,7 +1,5 @@
 package us.ihmc.robotDataCommunication.logger;
 
-import gnu.trove.list.array.TLongArrayList;
-
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -18,13 +16,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.SystemUtils;
+
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.robotDataCommunication.logger.util.ExternalProgramHelpers;
 import us.ihmc.robotDataCommunication.logger.util.FFMpeg;
 import us.ihmc.robotDataCommunication.logger.util.PipedCommandExecutor;
-import us.ihmc.utilities.operatingSystem.OperatingSystem;
 
 public class VideoDataPlayer
 {
@@ -298,7 +297,7 @@ public class VideoDataPlayer
 
       String filePathEncloser;
 
-      if (ExternalProgramHelpers.getOS() == OperatingSystem.WINDOWS)
+      if (SystemUtils.IS_OS_WINDOWS)
       {
          filePathEncloser = "\"";
       }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.vecmath.Color3f;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 
 public class SDFAppearance extends YoAppearanceTransparency
@@ -40,6 +40,6 @@ public class SDFAppearance extends YoAppearanceTransparency
 
    public Color3f getColor()
    {
-     throw new NotImplementedException();
+     throw new NotImplementedException("getColor() is not implemented");
    }
 }

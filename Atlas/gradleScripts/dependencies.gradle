@@ -23,7 +23,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty', name: 'ddogleg', version: '0.7-internal'
     compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'
     compile group: 'org.apache.ant', name: 'ant', version: '1.9.0'
-    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
     compile group: 'colt', name: 'colt', version: '1.2.0'
     compile group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.5'

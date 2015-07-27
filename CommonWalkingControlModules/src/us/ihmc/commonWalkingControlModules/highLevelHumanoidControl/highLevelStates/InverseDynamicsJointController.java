@@ -9,7 +9,7 @@ import java.util.Map;
 import javax.vecmath.Point3d;
 import javax.vecmath.Quat4d;
 
-import org.apache.commons.lang.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;

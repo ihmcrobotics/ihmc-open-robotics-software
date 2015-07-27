@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class GrowablePointCloud
 {

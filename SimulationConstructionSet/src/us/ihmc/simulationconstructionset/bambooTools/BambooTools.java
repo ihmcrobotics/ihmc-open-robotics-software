@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.tmatesoft.svn.core.SVNCommitInfo;
 import org.tmatesoft.svn.core.SVNDepth;
 import org.tmatesoft.svn.core.SVNException;
@@ -30,7 +31,6 @@ import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.net.youtube.YouTubeCredentials;
 import us.ihmc.utilities.net.youtube.YouTubeUploader;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 import us.ihmc.utilities.time.DateTools;
 
 public class BambooTools
@@ -173,7 +173,7 @@ public class BambooTools
       String rootDirectoryToTry = System.getProperty("create.movies.dir");
       if (rootDirectoryToTry == null)
       {
-         if (OperatingSystemTools.isWindows())
+         if (SystemUtils.IS_OS_WINDOWS)
          {
             rootDirectoryToTry = eraseableBambooDataAndVideosDirectoryWindows;
          } else

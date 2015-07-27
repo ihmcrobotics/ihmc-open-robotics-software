@@ -7,11 +7,12 @@ import java.nio.DoubleBuffer;
 import java.nio.LongBuffer;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import us.ihmc.darpaRoboticsChallenge.ros.messages.ClockMessage;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Float64Message;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.Int8Message;
 import us.ihmc.darpaRoboticsChallenge.ros.messages.PoseMessage;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
 import us.ihmc.utilities.ros.RosTools;
 
 public class ROSVehicleTeleopCheatNativeLibraryCommunicator
@@ -30,7 +31,7 @@ public class ROSVehicleTeleopCheatNativeLibraryCommunicator
       catch(UnsatisfiedLinkError e)
       {
          System.err.println("Cannot load native ROS library for the vehicle teleop. Falling back to ROSJava, expect poor performance.");
-         if (OperatingSystemTools.isLinux())
+         if (SystemUtils.IS_OS_LINUX)
          {
             System.err.println("Running on a Linux system; Library should be loadable.");
             e.printStackTrace();

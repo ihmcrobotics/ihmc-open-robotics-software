@@ -11,7 +11,7 @@ import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector2d;
 import javax.vecmath.Vector3d;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import us.ihmc.SdfLoader.xmlDescription.AbstractSDFMesh;
 import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;

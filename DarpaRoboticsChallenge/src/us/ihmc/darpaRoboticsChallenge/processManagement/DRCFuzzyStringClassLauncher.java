@@ -1,6 +1,7 @@
 package us.ihmc.darpaRoboticsChallenge.processManagement;
 
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
+import org.apache.commons.lang3.SystemUtils;
+
 import us.ihmc.utilities.processManagement.FuzzyStringClassLauncher;
 
 public class DRCFuzzyStringClassLauncher extends FuzzyStringClassLauncher
@@ -12,7 +13,7 @@ public class DRCFuzzyStringClassLauncher extends FuzzyStringClassLauncher
 
    public static void main(String[] args)
    {
-      if(OperatingSystemTools.isMac())
+      if(SystemUtils.IS_OS_MAC)
          System.setProperty("apple.awt.UIElement", "true");
       DRCFuzzyStringClassLauncher launcher = new DRCFuzzyStringClassLauncher("Class Launcher");      
       launcher.start();

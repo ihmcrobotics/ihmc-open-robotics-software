@@ -8,6 +8,18 @@ import java.util.ArrayList;
 
 import javax.vecmath.Color3f;
 
+import org.apache.commons.lang3.SystemUtils;
+
+import com.jme3.material.Material;
+import com.jme3.material.MaterialList;
+import com.jme3.material.RenderState.BlendMode;
+import com.jme3.material.RenderState.FaceCullMode;
+import com.jme3.texture.Image;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture.WrapMode;
+import com.jme3.texture.Texture2D;
+import com.jme3.texture.plugins.AWTLoader;
+
 import us.ihmc.graphics3DAdapter.HeightMap;
 import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
 import us.ihmc.graphics3DAdapter.graphics.appearances.HeightBasedTerrainBlend;
@@ -22,17 +34,6 @@ import us.ihmc.utilities.ClassLoaderTools;
 import us.ihmc.utilities.Pair;
 import us.ihmc.utilities.io.files.FileTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
-import us.ihmc.utilities.operatingSystem.OperatingSystemTools;
-
-import com.jme3.material.Material;
-import com.jme3.material.MaterialList;
-import com.jme3.material.RenderState.BlendMode;
-import com.jme3.material.RenderState.FaceCullMode;
-import com.jme3.texture.Image;
-import com.jme3.texture.Texture;
-import com.jme3.texture.Texture.WrapMode;
-import com.jme3.texture.Texture2D;
-import com.jme3.texture.plugins.AWTLoader;
 
 public class JMEAppearanceMaterial
 {
@@ -169,7 +170,7 @@ public class JMEAppearanceMaterial
       }
       if (isMaterialFile(file))
       {
-         if (OperatingSystemTools.isWindows())
+         if (SystemUtils.IS_OS_WINDOWS)
          {
             matPath = stripDiskRootFromPath(matPath);
          }
@@ -181,7 +182,7 @@ public class JMEAppearanceMaterial
          {
             if (isMaterialFile(subFile))
             {
-               if (OperatingSystemTools.isWindows())
+               if (SystemUtils.IS_OS_WINDOWS)
                {
                   matPath = stripDiskRootFromPath(matPath);
                }

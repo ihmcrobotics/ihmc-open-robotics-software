@@ -18,7 +18,7 @@ package org.ros.internal.message;
 
 import java.util.Set;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.ros.exception.RosRuntimeException;
 import org.ros.internal.message.context.MessageContext;
 import org.ros.internal.message.context.MessageContextProvider;
