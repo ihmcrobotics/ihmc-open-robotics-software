@@ -11,7 +11,7 @@ public class ValkyrieConfigurationRoot
    
    public static final String SCHEDULE_FILE = "main_ihmc.yaml";
    
-   public static final String URDF_FILE = "models/val_description/urdf/valkyrie_A_sim.urdf";
+   public static final String URDF_FILE = "models/val_description/urdf/valkyrie_A_hw.urdf";
    public static final String SDF_FILE = "models/val_description/sdf/valkyrie_A_sim.sdf";
 
    public static final String BENCH_SCHEDULE_FILE = "main_bench.yaml";
