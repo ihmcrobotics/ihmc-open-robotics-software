@@ -1,8 +1,10 @@
 package us.ihmc.valkyrie.fingers;
 
+import us.ihmc.utilities.robotSide.RobotSide;
+
 public class ValkyrieFingerJointLimits
 {
-   public static double getFullyExtensonPositionLimit(ValkyrieRealRobotFingerJoint joint)
+   public static double getFullyExtensonPositionLimit(RobotSide robotSide, ValkyrieRealRobotFingerJoint joint)
    {
       switch(joint)
       {
@@ -21,20 +23,20 @@ public class ValkyrieFingerJointLimits
       }
    }
    
-   public static double getFullyFlexedPositionLimit(ValkyrieRealRobotFingerJoint joint)
+   public static double getFullyFlexedPositionLimit(RobotSide robotSide, ValkyrieRealRobotFingerJoint joint)
    {
       switch(joint)
       {
          case ThumbRoll:
             return 1.75;
          case Thumb:
-            return -4.0;
+            return robotSide == RobotSide.LEFT ? -4.0 : 4.0;
          case Index:
-            return -4.0;
+            return robotSide == RobotSide.LEFT ? -4.0 : 4.0;
          case Middle:
-            return -4.0;
+            return robotSide == RobotSide.LEFT ? -4.0 : 4.0;
          case Pinky:
-            return -4.0;
+            return robotSide == RobotSide.LEFT ? -4.0 : 4.0;
          default:
             throw new RuntimeException("Invalid actuatable finger joint.");
       }

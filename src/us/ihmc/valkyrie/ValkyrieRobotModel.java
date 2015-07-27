@@ -352,7 +352,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public double getSimulateDT()
    {
-      return 0.0001;
+      return 0.00003875;
    }
 
    @Override
@@ -400,7 +400,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public MultiThreadedRobotControlElement createSimulatedHandController(SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
    {
-      return new ValkyrieFingerController(this, threadDataSynchronizer, globalDataProducer);
+      return new ValkyrieFingerController(this, simulatedRobot, threadDataSynchronizer, globalDataProducer);
    }
 
    @Override

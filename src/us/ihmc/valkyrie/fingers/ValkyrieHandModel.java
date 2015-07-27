@@ -37,28 +37,7 @@ public class ValkyrieHandModel implements HandModel
             @Override
             public FingerName getFinger(RobotSide robotSide)
             {
-               switch (ValkyrieSimulatedFingerJoint.values[finalIndex])
-               {
-               case ThumbRoll:
-               case ThumbPitch1:
-               case ThumbPitch2:
-               case ThumbPitch3:
-                  return FingerName.INDEX;
-               case IndexFingerPitch1:
-               case IndexFingerPitch2:
-               case IndexFingerPitch3:
-                  return FingerName.INDEX;
-               case MiddleFingerPitch1:
-               case MiddleFingerPitch2:
-               case MiddleFingerPitch3:
-                  return FingerName.INDEX;
-               case PinkyPitch1:
-               case PinkyPitch2:
-               case PinkyPitch3:
-                  return FingerName.INDEX;
-               default:
-                  return null;
-               }
+               return FingerName.INDEX;
             }
          };
       }

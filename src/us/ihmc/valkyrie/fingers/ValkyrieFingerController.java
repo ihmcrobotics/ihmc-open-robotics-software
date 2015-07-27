@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import java.util.LinkedHashMap;
 
 import us.ihmc.SdfLoader.SDFFullRobotModel;
+import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.commonWalkingControlModules.packetConsumers.FingerStateProvider;
 import us.ihmc.communication.packets.dataobjects.FingerState;
 import us.ihmc.communication.packets.manipulation.FingerStatePacket;
@@ -10,11 +11,13 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.darpaRoboticsChallenge.handControl.packetsAndConsumers.HandSensorData;
+import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.utilities.io.printing.PrintTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.robotSide.RobotSide;
 import us.ihmc.utilities.robotSide.SideDependentList;
+import us.ihmc.utilities.screwTheory.RevoluteJoint;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
 import us.ihmc.yoUtilities.dataStructure.variable.BooleanYoVariable;
@@ -55,9 +58,10 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
     * @param threadDataSynchronizer
     * @param globalDataProducer
     */
-   public ValkyrieFingerController(DRCRobotModel robotModel, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
+   public ValkyrieFingerController(DRCRobotModel robotModel, SDFRobot simulatedRobot, ThreadDataSynchronizerInterface threadDataSynchronizer, GlobalDataProducer globalDataProducer)
    {
       this.isRunningOnRealRobot = robotModel.getStateEstimatorParameters().isRunningOnRealRobot();
+      PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.fullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
@@ -80,22 +84,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
                double kpkp = 2.0;
                double kdkd = 0.1;
                
-               if (simulatedFingerJoint.name().endsWith("FingerPitch1"))
-               {
-                  kp.set(kpkp / 2.0);
-                  kd.set(kdkd / 2.0);
-               }
-               else if (simulatedFingerJoint.name().endsWith("FingerPitch2"))
-               {
-                  kp.set(kpkp / 4.0);
-                  kd.set(kdkd / 4.0);
-               }
-               else if (simulatedFingerJoint.name().endsWith("FingerPitch3"))
-               {
-                  kp.set(kpkp / 20.0);
-                  kd.set(kdkd / 10.0);
-               }
-               else if (simulatedFingerJoint.name().endsWith("ThumbPitch1") || simulatedFingerJoint.name().endsWith("ThumbRoll"))
+               if (simulatedFingerJoint.name().endsWith("ThumbPitch1") || simulatedFingerJoint.name().endsWith("ThumbRoll"))
                {
                   kp.set(kpkp);
                   kd.set(kdkd);
@@ -110,6 +99,21 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
                   kp.set(kpkp / 10.0);
                   kd.set(kdkd / 5.0);
                }
+               else if (simulatedFingerJoint.name().endsWith("Pitch1"))
+               {
+                  kp.set(kpkp / 2.0);
+                  kd.set(kdkd / 2.0);
+               }
+               else if (simulatedFingerJoint.name().endsWith("Pitch2"))
+               {
+                  kp.set(kpkp / 4.0);
+                  kd.set(kdkd / 4.0);
+               }
+               else if (simulatedFingerJoint.name().endsWith("Pitch3"))
+               {
+                  kp.set(kpkp / 20.0);
+                  kd.set(kdkd / 10.0);
+               }
                
                kpMap.get(robotSide).put(simulatedFingerJoint, kp);
                kdMap.get(robotSide).put(simulatedFingerJoint, kd);
@@ -122,23 +126,35 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          fingerSetControllers.put(robotSide, new ValkyrieFingerSetController(robotSide, fingerControllerTime, fingerTrajectoryTime, fullRobotModel, isRunningOnRealRobot, registry));
          
          jointAngleCommunicators.put(robotSide, new HandJointAngleCommunicator(robotSide, globalDataProducer));
-      }  
-   }
-   
-   @Override
-   public void initialize()
-   {
+      }
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          if (!isRunningOnRealRobot)
          {
             for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
             {               
-               simulatedFingerJoint.getRelatedOneDofJoint(robotSide, fullRobotModel).setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
-               simulatedFingerJoint.getRelatedOneDofJoint(robotSide, fullRobotModel).setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               PinJoint relatedPinJoint = simulatedFingerJoint.getRelatedPinJoint(robotSide, simulatedRobot);
+               RevoluteJoint relatedRevoluteJoint = (RevoluteJoint) simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel);
+               
+               relatedRevoluteJoint.setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               relatedRevoluteJoint.setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               
+               double fullyExtensonPositionLimit = ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+               double fullyFlexedPositionLimit = ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(robotSide, simulatedFingerJoint.getRelatedRealFingerJoint());
+               
+               if (fullyExtensonPositionLimit <= fullyFlexedPositionLimit)
+                  relatedPinJoint.setLimitStops(fullyExtensonPositionLimit - 0.1, fullyFlexedPositionLimit + 0.1, 10.0, 2.5);
+               else
+                  relatedPinJoint.setLimitStops(fullyFlexedPositionLimit - 0.1, fullyExtensonPositionLimit + 0.1, 10.0, 2.5);
             }
          }
       }
+   }
+   
+   @Override
+   public void initialize()
+   {
    }
 
    @Override
@@ -153,7 +169,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          
          for (int i = 0; i < ValkyrieSimulatedFingerJoint.values.length; i++)
          {
-            simulatedJointValues[i] = ValkyrieSimulatedFingerJoint.values[i].getRelatedOneDofJoint(robotSide, fullRobotModel).getQ();
+            simulatedJointValues[i] = ValkyrieSimulatedFingerJoint.values[i].getRelatedRevoluteJoint(robotSide, fullRobotModel).getQ();
          }
          
          jointAngleCommunicators.get(robotSide).updateHandAngles(new HandSensorData()
@@ -200,8 +216,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          {
             FingerState fingerState = fingerStateProviders.get(robotSide).pullPacket().getFingerState();
             
-            if (DEBUG)
-               PrintTools.debug(this, "Recieved new FingerState Packet: " + fingerState);
+            PrintTools.debug(DEBUG, this, "Recieved new FingerState Packet: " + fingerState);
             
             switch (fingerState)
             {
@@ -228,9 +243,9 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
          if (!isRunningOnRealRobot)
          {
             for (ValkyrieSimulatedFingerJoint simulatedFingerJoint : ValkyrieSimulatedFingerJoint.values)
-            {               
-               simulatedFingerJoint.getRelatedOneDofJoint(robotSide, fullRobotModel).setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
-               simulatedFingerJoint.getRelatedOneDofJoint(robotSide, fullRobotModel).setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+            {
+               simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel).setKp(kpMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
+               simulatedFingerJoint.getRelatedRevoluteJoint(robotSide, fullRobotModel).setKd(kdMap.get(robotSide).get(simulatedFingerJoint).getDoubleValue());
             }
          }
          

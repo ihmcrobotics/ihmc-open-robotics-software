@@ -273,27 +273,27 @@ public class ValkyrieFingerSetController implements RobotController
          switch (controllableJoint)
          {
          case ThumbRoll:
-            ValkyrieSimulatedFingerJoint.ThumbRoll.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue);
+            ValkyrieSimulatedFingerJoint.ThumbRoll.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue);
             break;
          case Thumb:
-            ValkyrieSimulatedFingerJoint.ThumbPitch1.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.ThumbPitch2.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.ThumbPitch3.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.ThumbPitch1.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.ThumbPitch2.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.ThumbPitch3.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
             break;
          case Index:
-            ValkyrieSimulatedFingerJoint.IndexFingerPitch1.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.IndexFingerPitch2.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.IndexFingerPitch3.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.IndexFingerPitch1.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.IndexFingerPitch2.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.IndexFingerPitch3.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
             break;
          case Middle:
-            ValkyrieSimulatedFingerJoint.MiddleFingerPitch1.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.MiddleFingerPitch2.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.MiddleFingerPitch3.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.MiddleFingerPitch1.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.MiddleFingerPitch2.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.MiddleFingerPitch3.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
             break;
          case Pinky:
-            ValkyrieSimulatedFingerJoint.PinkyPitch1.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.PinkyPitch2.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
-            ValkyrieSimulatedFingerJoint.PinkyPitch3.getRelatedOneDofJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.PinkyPitch1.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.PinkyPitch2.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
+            ValkyrieSimulatedFingerJoint.PinkyPitch3.getRelatedRevoluteJoint(robotSide, sdfRobot).setqDesired(desiredValue / 3.0);
             break;
          }
       }
