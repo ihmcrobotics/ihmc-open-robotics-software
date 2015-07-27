@@ -68,7 +68,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
          for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
          {
             sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForMiddleOfExpression() + fingerJoint.toString(), 
-                  new Pair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(fingerJoint)));
+                  new Pair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
          }
       }
       

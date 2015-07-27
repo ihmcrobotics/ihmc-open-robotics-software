@@ -281,8 +281,8 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public Set<String> getLastSimulatedJoints()
    {
       HashSet<String> lastSimulatedJoints = new HashSet<>();
-      for (RobotSide robotSide : RobotSide.values)
-         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
+//      for (RobotSide robotSide : RobotSide.values)
+//         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
       return lastSimulatedJoints;
    }
 
