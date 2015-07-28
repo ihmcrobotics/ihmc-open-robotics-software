@@ -51,11 +51,11 @@ import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.QuarantinedTest;
-import us.ihmc.utilities.compare.CompareTools;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -744,9 +744,9 @@ public abstract class PelvisPoseHistoryCorrectionTest implements MultiRobotTestI
          success &= xError <= translationFudgeFactor;
          success &= yError <= translationFudgeFactor;
          success &= zError <= translationFudgeFactor;
-         success &= CompareTools.withinTolerance(yawErrorBeforeCorrection, yawErrorAfterCorrection, rotationFudgeFactor);
-         success &= CompareTools.withinTolerance(pitchErrorBeforeCorrection, pitchErrorAfterCorrection, rotationFudgeFactor);
-         success &= CompareTools.withinTolerance(rollErrorBeforeCorrection, rollErrorAfterCorrection, rotationFudgeFactor);
+         success &= MathTools.epsilonEquals(yawErrorBeforeCorrection, yawErrorAfterCorrection, rotationFudgeFactor);
+         success &= MathTools.epsilonEquals(pitchErrorBeforeCorrection, pitchErrorAfterCorrection, rotationFudgeFactor);
+         success &= MathTools.epsilonEquals(rollErrorBeforeCorrection, rollErrorAfterCorrection, rotationFudgeFactor);
       }
       System.out.println(" max fudge factor: " + largestError);
       return success;
