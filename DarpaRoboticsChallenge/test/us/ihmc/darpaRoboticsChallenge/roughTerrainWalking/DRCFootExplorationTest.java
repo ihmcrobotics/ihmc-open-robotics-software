@@ -34,7 +34,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.ControllerFailureException;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.ThreadTools;
 
@@ -127,11 +127,11 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
 
       //         drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
-      Pair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks();
-      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.first();
+      ImmutablePair<CombinedTerrainObject3D, Double> combinedTerrainObjectAndRampEndX = createRandomBlocks();
+      CombinedTerrainObject3D combinedTerrainObject = combinedTerrainObjectAndRampEndX.getLeft();
       boolean drawGroundProfile = false;
 
-      double rampEndX = combinedTerrainObjectAndRampEndX.second();
+      double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       DRCRobotInitialSetup<SDFRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0001, 0); //slighly off ground
       robotInitialSetup.setOffset(new Vector3d(0, StartingYOffsetFromCenter, 0));
 
@@ -181,7 +181,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
       createMovie(scs);
    }
 
-   private Pair<CombinedTerrainObject3D, Double> createRandomBlocks()
+   private ImmutablePair<CombinedTerrainObject3D, Double> createRandomBlocks()
    {
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D("RandomBlocks");
 
@@ -222,7 +222,7 @@ public abstract class DRCFootExplorationTest implements MultiRobotTestInterface
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
 
-      return new Pair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
+      return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, xMax);
    }
 
    private void initiateMotion(double standingTimeDuration, BlockingSimulationRunner runner, BooleanYoVariable walk)

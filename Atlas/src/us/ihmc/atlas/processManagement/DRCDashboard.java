@@ -55,7 +55,7 @@ import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCPluginTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.DRCDashboardTypes.DRCROSTasks;
 import us.ihmc.darpaRoboticsChallenge.processManagement.GazeboRemoteSimulationAdapter;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.gui.SwingTools;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
@@ -115,7 +115,7 @@ public class DRCDashboard
    private JavaProcessSpawner scsSpawner = new JavaProcessSpawner(true);
    private GazeboRemoteSimulationAdapter sshSimLauncher = new GazeboRemoteSimulationAdapter();
 
-   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<>();
+   private HashMap<LocalCloudMachines, ImmutablePair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<>();
    JTree currentSelection = null;
 
    protected LocalCloudMachines userOwnedSim;
@@ -613,7 +613,7 @@ public class DRCDashboard
             c2.ipadx = 10;
             c2.weightx = 0.7;
             view.add(buttonPanel, c2);
-            cloudMachineTrees.put(machine, new Pair<>(tree, rootNode));
+            cloudMachineTrees.put(machine, new ImmutablePair<>(tree, rootNode));
             launchButtons.put(tree, launchButton);
 
             c2.gridy++;
@@ -637,7 +637,7 @@ public class DRCDashboard
       for (final LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!isMachineExcluded(machine))
-            cloudMachineTrees.get(machine).first().addMouseListener(new MouseListener()
+            cloudMachineTrees.get(machine).getLeft().addMouseListener(new MouseListener()
             {
                public void mouseReleased(MouseEvent e)
                {
@@ -734,7 +734,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!isMachineExcluded(machine))
-            cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
+            cloudMachineTrees.get(machine).getLeft().addTreeSelectionListener(customTreeSelectionListener);
       }
    }
 
@@ -743,7 +743,7 @@ public class DRCDashboard
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!isMachineExcluded(machine))
-            cloudMachineTrees.get(machine).first().setToggleClickCount(0);
+            cloudMachineTrees.get(machine).getLeft().setToggleClickCount(0);
       }
    }
 
@@ -1077,10 +1077,10 @@ public class DRCDashboard
       {
          if (!isMachineExcluded(machine))
          {
-            DefaultMutableTreeNode root = cloudMachineTrees.get(machine).second();
-            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root);
-            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root.getChildAt(0));
-            ((DefaultTreeModel) cloudMachineTrees.get(machine).first().getModel()).nodeChanged(root.getChildAt(1));
+            DefaultMutableTreeNode root = cloudMachineTrees.get(machine).getRight();
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).getLeft().getModel()).nodeChanged(root);
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).getLeft().getModel()).nodeChanged(root.getChildAt(0));
+            ((DefaultTreeModel) cloudMachineTrees.get(machine).getLeft().getModel()).nodeChanged(root.getChildAt(1));
          }
       }
    }
@@ -1091,7 +1091,7 @@ public class DRCDashboard
       {
          if (!isMachineExcluded(machine))
          {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(0);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).getRight().getChildAt(0);
 
             if (sshSimLauncher.isMachineRunningSim(machine))
             {
@@ -1100,13 +1100,13 @@ public class DRCDashboard
 
                if (userOwnedSim != machine)
                {
-                  launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(false);
+                  launchButtons.get(cloudMachineTrees.get(machine).getLeft()).setEnabled(false);
                }
             }
             else
             {
                node.setUserObject("<html><body>GZ Sim: <span style=\"color:green;font-style:italic;\">No</span></body></html>");
-               launchButtons.get(cloudMachineTrees.get(machine).first()).setEnabled(true);
+               launchButtons.get(cloudMachineTrees.get(machine).getLeft()).setEnabled(true);
             }
          }
       }
@@ -1118,7 +1118,7 @@ public class DRCDashboard
       {
          if (!isMachineExcluded(machine))
          {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).second().getChildAt(1);
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) cloudMachineTrees.get(machine).getRight().getChildAt(1);
 
             if (sshSimLauncher.isMachineRunningController(machine))
             {
@@ -1140,15 +1140,15 @@ public class DRCDashboard
          {
             if (sshSimLauncher.isMachineReachable(machine))
             {
-               setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), goodConnectionIcon);
-               cloudMachineTrees.get(machine).first().expandRow(0);
-               launchButtons.get(cloudMachineTrees.get(machine).first()).setVisible(true);
+               setCloudStatusItemIcon(cloudMachineTrees.get(machine).getLeft(), goodConnectionIcon);
+               cloudMachineTrees.get(machine).getLeft().expandRow(0);
+               launchButtons.get(cloudMachineTrees.get(machine).getLeft()).setVisible(true);
             }
             else
             {
-               setCloudStatusItemIcon(cloudMachineTrees.get(machine).first(), badConnectionIcon);
-               cloudMachineTrees.get(machine).first().collapseRow(0);
-               launchButtons.get(cloudMachineTrees.get(machine).first()).setVisible(false);
+               setCloudStatusItemIcon(cloudMachineTrees.get(machine).getLeft(), badConnectionIcon);
+               cloudMachineTrees.get(machine).getLeft().collapseRow(0);
+               launchButtons.get(cloudMachineTrees.get(machine).getLeft()).setVisible(false);
             }
          }
       }
@@ -1170,8 +1170,8 @@ public class DRCDashboard
       uiSpawner.shutdown();
       scsSpawner.shutdown();
 
-      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(startSimIcon);
-      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).getLeft()).setIcon(startSimIcon);
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).getLeft()).getParent().repaint();
    }
 
    private void startLaunchProcess(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)
@@ -1187,8 +1187,8 @@ public class DRCDashboard
 
       startSCS(gazeboMachine, task, pluginOption);
 
-      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).setIcon(killSimIcon);
-      launchButtons.get(cloudMachineTrees.get(gazeboMachine).first()).getParent().repaint();
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).getLeft()).setIcon(killSimIcon);
+      launchButtons.get(cloudMachineTrees.get(gazeboMachine).getLeft()).getParent().repaint();
    }
 
    private void startSCS(final LocalCloudMachines gazeboMachine, final String task, final String pluginOption)

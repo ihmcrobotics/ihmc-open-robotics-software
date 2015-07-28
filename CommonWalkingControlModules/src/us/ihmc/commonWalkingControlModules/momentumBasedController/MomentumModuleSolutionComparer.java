@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.D
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleDataObject;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.MomentumRateOfChangeData;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.SpatialForceVector;
@@ -30,8 +30,8 @@ public class MomentumModuleSolutionComparer
    
    
    private SpatialForceVector activeCentroidalMomentumRate, referenceCentroidalMomentumRate;
-   private ArrayList<Pair<String, Wrench>> activeExternalWrenches = new ArrayList<Pair<String,Wrench>>();
-   private ArrayList<Pair<String, Wrench>> referenceExternalWrenches = new ArrayList<Pair<String,Wrench>>();
+   private ArrayList<ImmutablePair<String, Wrench>> activeExternalWrenches = new ArrayList<ImmutablePair<String,Wrench>>();
+   private ArrayList<ImmutablePair<String, Wrench>> referenceExternalWrenches = new ArrayList<ImmutablePair<String,Wrench>>();
    
    
    public MomentumModuleSolutionComparer(ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)

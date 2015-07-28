@@ -8,7 +8,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 
 public class TypicalMotionConstraintsTestHelper
@@ -82,9 +82,9 @@ public class TypicalMotionConstraintsTestHelper
       CommonOps.extract(momentumDotEquationRightHandSideSelected, 0, momentumDotEquationRightHandSideSelected.getNumRows(), 0,
             momentumDotEquationRightHandSideSelected.getNumCols(), combinedRightHandSide, pPrimaryMotionConstraints.getNumRows(), 0);
       
-      Pair<DenseMatrix64F[], double[]> svd = computeSVD(combinedConstraintsAndDesiredMomentum);
-      DenseMatrix64F[] matrices = svd.first();
-      singularValuesOfCombinedConstraints = svd.second();
+      ImmutablePair<DenseMatrix64F[], double[]> svd = computeSVD(combinedConstraintsAndDesiredMomentum);
+      DenseMatrix64F[] matrices = svd.getLeft();
+      singularValuesOfCombinedConstraints = svd.getRight();
       
       combinedUMatrix = matrices[0];
       combinedWMatrix = matrices[1];
@@ -127,7 +127,7 @@ public class TypicalMotionConstraintsTestHelper
       return minimum;
    }
    
-   private Pair<DenseMatrix64F[], double[]> computeSVD(DenseMatrix64F matrix)
+   private ImmutablePair<DenseMatrix64F[], double[]> computeSVD(DenseMatrix64F matrix)
    {
       SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(matrix.getNumRows(), matrix.getNumCols(), true, true, false);
       svd.decompose(matrix);
@@ -143,6 +143,6 @@ public class TypicalMotionConstraintsTestHelper
       
       SingularOps.descendingOrder(matrixU, false, matrixW, matrixVTranspose, true);
 
-      return new Pair<DenseMatrix64F[], double[]>(new DenseMatrix64F[]{matrixU, matrixW, matrixVTranspose}, singularValues);
+      return new ImmutablePair<DenseMatrix64F[], double[]>(new DenseMatrix64F[]{matrixU, matrixW, matrixVTranspose}, singularValues);
    }
 }

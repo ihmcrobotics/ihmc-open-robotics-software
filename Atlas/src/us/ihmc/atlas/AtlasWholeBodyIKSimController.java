@@ -6,7 +6,7 @@ import us.ihmc.SdfLoader.SDFFullRobotModel;
 import us.ihmc.SdfLoader.SDFRobot;
 import us.ihmc.darpaRoboticsChallenge.drcRobot.DRCRobotModel;
 import us.ihmc.darpaRoboticsChallenge.wholeBodyInverseKinematicsSimulationController.WholeBodyIKSimController;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -15,7 +15,7 @@ import us.ihmc.utilities.robotSide.RobotSide;
 public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 {
 
-   protected final ArrayList<Pair<RobotSide, RigidBodyTransform>> queuedTargets =  new ArrayList<Pair<RobotSide, RigidBodyTransform>>();
+   protected final ArrayList<ImmutablePair<RobotSide, RigidBodyTransform>> queuedTargets =  new ArrayList<ImmutablePair<RobotSide, RigidBodyTransform>>();
 
    public AtlasWholeBodyIKSimController(SDFRobot robot, SDFFullRobotModel fullRobotModel, DRCRobotModel atlasRobotModel) throws Exception
    {
@@ -61,10 +61,10 @@ public class AtlasWholeBodyIKSimController extends WholeBodyIKSimController
 
 
    @Override
-   public ArrayList<Pair<RobotSide, RigidBodyTransform>> getTargetsQueue()
+   public ArrayList<ImmutablePair<RobotSide, RigidBodyTransform>> getTargetsQueue()
    {
       //Add RigidBodyTransforms that are from pelvis frame to desired end effector frame here.
-      queuedTargets.add(new Pair<RobotSide, RigidBodyTransform>(RobotSide.RIGHT, new RigidBodyTransform()));
+      queuedTargets.add(new ImmutablePair<RobotSide, RigidBodyTransform>(RobotSide.RIGHT, new RigidBodyTransform()));
       return queuedTargets;
    }
 

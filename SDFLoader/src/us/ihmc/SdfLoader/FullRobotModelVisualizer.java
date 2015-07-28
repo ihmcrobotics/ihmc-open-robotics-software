@@ -7,7 +7,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.model.FullRobotModel;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
@@ -33,7 +33,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private SimulationConstructionSet scs;
    private YoVariableRegistry robotRegistry;
    private SixDoFJoint rootJoint;
-   private final ArrayList<Pair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
   
    public FullRobotModelVisualizer(SimulationConstructionSet scs, FullRobotModel fullRobotModel, double updateDT)
    {   
@@ -79,7 +79,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
          String name = revoluteJoint.getName();
          OneDegreeOfFreedomJoint oneDoFJoint = robot.getOneDegreeOfFreedomJoint(name);
          
-         Pair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
+         ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDoFJoint, revoluteJoint);
          this.revoluteJoints.add(jointPair);
       }
       
@@ -115,10 +115,10 @@ public class FullRobotModelVisualizer implements RobotVisualizer
          robot.setPositionInWorld(tempPosition);
       }
       
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
 
          pinJoint.setQ(revoluteJoint.getQ());
          pinJoint.setQd(revoluteJoint.getQd());

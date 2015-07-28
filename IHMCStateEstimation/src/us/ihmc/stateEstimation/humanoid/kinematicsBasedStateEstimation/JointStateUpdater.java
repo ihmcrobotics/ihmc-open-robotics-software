@@ -62,10 +62,10 @@ public class JointStateUpdater
       for (int i = 0; i < sensorOutputMapReadOnly.getIMUProcessedOutputs().size(); i++)
       {
          IMUSensorReadOnly sensorReadOnly = sensorOutputMapReadOnly.getIMUProcessedOutputs().get(i);
-         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().first()))
+         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getLeft()))
             pelvisIMU = sensorReadOnly;
 
-         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().second()))
+         if (sensorReadOnly.getSensorName().equals(stateEstimatorParameters.getIMUsForSpineJointVelocityEstimation().getRight()))
             chestIMU = sensorReadOnly;
       }
 

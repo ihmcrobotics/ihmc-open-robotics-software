@@ -25,7 +25,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.ThreadTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePose;
@@ -150,9 +150,9 @@ public abstract class WholeBodyTrajectoryTest
             WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 5.0);    // 0.10);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
-            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+            ImmutablePair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
 
-            while (result.first().booleanValue() == false)
+            while (result.getLeft().booleanValue() == false)
             {
                HashMap<String, Double> angles = new HashMap<String, Double>();
                HashMap<String, Double> velocities = new HashMap<String, Double>();
@@ -161,8 +161,8 @@ public abstract class WholeBodyTrajectoryTest
                {
                   if (wbSolver.hasJoint(joint.getName()))
                   {
-                     angles.put(joint.getName(), result.second().position[index]);
-                     velocities.put(joint.getName(), result.second().velocity[index]);
+                     angles.put(joint.getName(), result.getRight().position[index]);
+                     velocities.put(joint.getName(), result.getRight().velocity[index]);
                      index++;
                   }
                }
@@ -269,9 +269,9 @@ public abstract class WholeBodyTrajectoryTest
             WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 0.10);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
-            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+            ImmutablePair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
 
-            while (result.first().booleanValue() == false)
+            while (result.getLeft().booleanValue() == false)
             {
                HashMap<String, Double> angles = new HashMap<String, Double>();
                HashMap<String, Double> velocities = new HashMap<String, Double>();
@@ -280,8 +280,8 @@ public abstract class WholeBodyTrajectoryTest
                {
                   if (wbSolver.hasJoint(joint.getName()))
                   {
-                     angles.put(joint.getName(), result.second().position[index]);
-                     velocities.put(joint.getName(), result.second().velocity[index]);
+                     angles.put(joint.getName(), result.getRight().position[index]);
+                     velocities.put(joint.getName(), result.getRight().velocity[index]);
                      index++;
                   }
                }
@@ -385,9 +385,9 @@ public abstract class WholeBodyTrajectoryTest
             WholeBodyTrajectory trajectoryGenerator = new WholeBodyTrajectory(actualRobotModel, maximumJointVelocity, maximumJointAcceleration, 0.1);
             TrajectoryND trajectory = trajectoryGenerator.createTaskSpaceTrajectory(wbSolver, actualRobotModel, desiredRobotModel);
 
-            Pair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
+            ImmutablePair<Boolean, WaypointND> result = trajectory.getNextInterpolatedPoints(0.01);
 
-            while (result.first().booleanValue() == false)
+            while (result.getLeft().booleanValue() == false)
             {
                HashMap<String, Double> angles = new HashMap<String, Double>();
                HashMap<String, Double> velocities = new HashMap<String, Double>();
@@ -396,8 +396,8 @@ public abstract class WholeBodyTrajectoryTest
                {
                   if (wbSolver.hasJoint(joint.getName()))
                   {
-                     angles.put(joint.getName(), result.second().position[index]);
-                     velocities.put(joint.getName(), result.second().velocity[index]);
+                     angles.put(joint.getName(), result.getRight().position[index]);
+                     velocities.put(joint.getName(), result.getRight().velocity[index]);
                      index++;
                   }
                }

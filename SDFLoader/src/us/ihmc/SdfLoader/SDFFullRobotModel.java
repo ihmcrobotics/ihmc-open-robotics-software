@@ -17,7 +17,7 @@ import us.ihmc.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.Camera;
 import us.ihmc.SdfLoader.xmlDescription.SDFSensor.IMU;
 import us.ihmc.utilities.IMUDefinition;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.containers.ContainerTools;
 import us.ihmc.utilities.humanoidRobot.model.ContactSensorDefinition;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDefinition;
@@ -278,11 +278,11 @@ public class SDFFullRobotModel implements FullRobotModel
          head = rigidBody;
       }
 
-      Pair<RobotSide, LimbName> limbSideAndName = sdfJointNameMap.getLimbName(childLink.getName());
+      ImmutablePair<RobotSide, LimbName> limbSideAndName = sdfJointNameMap.getLimbName(childLink.getName());
       if(limbSideAndName != null)
       {
-         RobotSide limbSide = limbSideAndName.first();
-         LimbName limbName = limbSideAndName.second();
+         RobotSide limbSide = limbSideAndName.getLeft();
+         LimbName limbName = limbSideAndName.getRight();
          switch (limbName)
          {
          case ARM:
@@ -301,14 +301,14 @@ public class SDFFullRobotModel implements FullRobotModel
          {
          //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
          case ARM:
-            Pair<RobotSide, ArmJointName> armJointName = sdfJointNameMap.getArmJointName(joint.getName());
-            armJointLists.get(armJointName.first()).put(armJointName.second(), inverseDynamicsJoint);
-            armJointIDsList.get(armJointName.first()).add( inverseDynamicsJoint );
+            ImmutablePair<RobotSide, ArmJointName> armJointName = sdfJointNameMap.getArmJointName(joint.getName());
+            armJointLists.get(armJointName.getLeft()).put(armJointName.getRight(), inverseDynamicsJoint);
+            armJointIDsList.get(armJointName.getLeft()).add( inverseDynamicsJoint );
             break;
          case LEG:
-            Pair<RobotSide, LegJointName> legJointName = sdfJointNameMap.getLegJointName(joint.getName());
-            legJointLists.get(legJointName.first()).put(legJointName.second(), inverseDynamicsJoint);
-            legJointIDsList.get(legJointName.first()).add( inverseDynamicsJoint );
+            ImmutablePair<RobotSide, LegJointName> legJointName = sdfJointNameMap.getLegJointName(joint.getName());
+            legJointLists.get(legJointName.getLeft()).put(legJointName.getRight(), inverseDynamicsJoint);
+            legJointIDsList.get(legJointName.getLeft()).add( inverseDynamicsJoint );
             break;
          case NECK:
             NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());

@@ -24,7 +24,7 @@ import javax.vecmath.Vector3d;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.graphics3DAdapter.jme.util.JMEDataTypeUtils;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
@@ -62,10 +62,10 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final NeckJointName[] neckJoints = { LOWER_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
-   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
 
-   private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
-   private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
 
@@ -87,25 +87,25 @@ public class AtlasJointMap implements DRCRobotJointMap
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = forcedSideDependentJointNames.get(robotSide);
-         legJointNames.put(forcedSideJointNames[l_leg_hpz], new Pair<RobotSide, LegJointName>(robotSide, HIP_YAW));
-         legJointNames.put(forcedSideJointNames[l_leg_hpx], new Pair<RobotSide, LegJointName>(robotSide, HIP_ROLL));
-         legJointNames.put(forcedSideJointNames[l_leg_hpy], new Pair<RobotSide, LegJointName>(robotSide, HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_kny], new Pair<RobotSide, LegJointName>(robotSide, KNEE));
-         legJointNames.put(forcedSideJointNames[l_leg_aky], new Pair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
-         legJointNames.put(forcedSideJointNames[l_leg_akx], new Pair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_hpz], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_YAW));
+         legJointNames.put(forcedSideJointNames[l_leg_hpx], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[l_leg_hpy], new ImmutablePair<RobotSide, LegJointName>(robotSide, HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_kny], new ImmutablePair<RobotSide, LegJointName>(robotSide, KNEE));
+         legJointNames.put(forcedSideJointNames[l_leg_aky], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_PITCH));
+         legJointNames.put(forcedSideJointNames[l_leg_akx], new ImmutablePair<RobotSide, LegJointName>(robotSide, ANKLE_ROLL));
 
-         armJointNames.put(forcedSideJointNames[l_arm_shz], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_YAW));
-         armJointNames.put(forcedSideJointNames[l_arm_shx], new Pair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
-         armJointNames.put(forcedSideJointNames[l_arm_ely], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
-         armJointNames.put(forcedSideJointNames[l_arm_elx], new Pair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
-         armJointNames.put(forcedSideJointNames[l_arm_wry], new Pair<RobotSide, ArmJointName>(robotSide, FIRST_WRIST_PITCH));
-         armJointNames.put(forcedSideJointNames[l_arm_wrx], new Pair<RobotSide, ArmJointName>(robotSide, WRIST_ROLL));
-         armJointNames.put(forcedSideJointNames[l_arm_wry2], new Pair<RobotSide, ArmJointName>(robotSide, SECOND_WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_shz], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_YAW));
+         armJointNames.put(forcedSideJointNames[l_arm_shx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SHOULDER_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_ely], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_elx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ELBOW_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_wry], new ImmutablePair<RobotSide, ArmJointName>(robotSide, FIRST_WRIST_PITCH));
+         armJointNames.put(forcedSideJointNames[l_arm_wrx], new ImmutablePair<RobotSide, ArmJointName>(robotSide, WRIST_ROLL));
+         armJointNames.put(forcedSideJointNames[l_arm_wry2], new ImmutablePair<RobotSide, ArmJointName>(robotSide, SECOND_WRIST_PITCH));
 
          String prefix = getRobotSidePrefix(robotSide);
 
-         limbNames.put(prefix + "hand", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
-         limbNames.put(prefix + "foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
+         limbNames.put(prefix + "hand", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+         limbNames.put(prefix + "foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
 
       spineJointNames.put(jointNames[back_bkz], SPINE_YAW);
@@ -115,16 +115,16 @@ public class AtlasJointMap implements DRCRobotJointMap
 
       for (String legJointString : legJointNames.keySet())
       {
-         RobotSide robotSide = legJointNames.get(legJointString).first();
-         LegJointName legJointName = legJointNames.get(legJointString).second();
+         RobotSide robotSide = legJointNames.get(legJointString).getLeft();
+         LegJointName legJointName = legJointNames.get(legJointString).getRight();
          legJointStrings.get(robotSide).put(legJointName, legJointString);
          jointRoles.put(legJointString, JointRole.LEG);
       }
 
       for (String armJointString : armJointNames.keySet())
       {
-         RobotSide robotSide = armJointNames.get(armJointString).first();
-         ArmJointName armJointName = armJointNames.get(armJointString).second();
+         RobotSide robotSide = armJointNames.get(armJointString).getLeft();
+         ArmJointName armJointName = armJointNames.get(armJointString).getRight();
          armJointStrings.get(robotSide).put(armJointName, armJointString);
          jointRoles.put(armJointString, JointRole.ARM);
       }
@@ -175,19 +175,19 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
+   public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
    }
 
    @Override
-   public Pair<RobotSide, ArmJointName> getArmJointName(String jointName)
+   public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
    }
 
    @Override
-   public Pair<RobotSide, LimbName> getLimbName(String limbName)
+   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName)
    {
       return limbNames.get(limbName);
    }
@@ -271,12 +271,12 @@ public class AtlasJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
-   @Override public List<Pair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
    {
       return null;
    }

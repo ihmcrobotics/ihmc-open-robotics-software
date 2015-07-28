@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorParameters;
-import us.ihmc.utilities.Triplet;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -24,7 +24,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    private static final String multisense_namespace = "/multisense";
    private static final String baseTfName = multisense_namespace + "/head";
    private static final String multisenseHandoffFrame = "head";
-   private final ArrayList<Triplet<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<Triplet<String,String,RigidBodyTransform>>();
+   private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<ImmutableTriple<String,String,RigidBodyTransform>>();
    
    /**
     * Force Sensor Parameters
@@ -168,7 +168,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
 
 	private void setupStaticTransformsForRos()
    {
-	   Triplet<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new Triplet<String, String, RigidBodyTransform>("head", "multisense/head_root", new RigidBodyTransform());
+	   ImmutableTriple<String, String, RigidBodyTransform> headToHeadRootStaticTransform = new ImmutableTriple<String, String, RigidBodyTransform>("head", "multisense/head_root", new RigidBodyTransform());
       staticTranformsForRos.add(headToHeadRootStaticTransform);
    }
 
@@ -329,7 +329,7 @@ public class AtlasSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public ArrayList<Triplet<String, String, RigidBodyTransform>> getStaticTransformsForRos()
+   public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos()
    {
       return staticTranformsForRos;
    }

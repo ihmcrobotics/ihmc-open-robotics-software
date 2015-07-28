@@ -21,7 +21,7 @@ import javax.vecmath.Point2d;
 import javax.vecmath.Point2i;
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.UnitConversions;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import boofcv.gui.image.ImagePanel;
@@ -97,12 +97,12 @@ public class LineModDetector
 
    ArrayList<Vector3d> generateTrainingCameraPoses(float maxLevel)
    {
-      PriorityQueue<Pair<Integer, int[]>> triangles = new PriorityQueue<Pair<Integer, int[]>>(1,new Comparator<Pair<Integer, int[]>>()
+      PriorityQueue<ImmutablePair<Integer, int[]>> triangles = new PriorityQueue<ImmutablePair<Integer, int[]>>(1,new Comparator<ImmutablePair<Integer, int[]>>()
       {
          @Override
-         public int compare(Pair<Integer, int[]> o1, Pair<Integer, int[]> o2)
+         public int compare(ImmutablePair<Integer, int[]> o1, ImmutablePair<Integer, int[]> o2)
          {
-            return o1.first().compareTo(o2.first());
+            return o1.getLeft().compareTo(o2.getLeft());
          }
       });
 
@@ -115,17 +115,17 @@ public class LineModDetector
       vertex.add(new Vector3d(-1, 0, 0));
       vertex.add(new Vector3d(0, -1, 0));
       //vertex.add(new Vector3d(0, 0, -1));
-      triangles.add(new Pair<Integer, int[]>(0, new int[] { 0, 1, 2 }));
-      triangles.add(new Pair<Integer, int[]>(0, new int[] { 1, 3, 2 }));
-      triangles.add(new Pair<Integer, int[]>(0, new int[] { 3, 4, 2 }));
-      triangles.add(new Pair<Integer, int[]>(0, new int[] { 0, 4, 2 }));
+      triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 0, 1, 2 }));
+      triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 1, 3, 2 }));
+      triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 3, 4, 2 }));
+      triangles.add(new ImmutablePair<Integer, int[]>(0, new int[] { 0, 4, 2 }));
 
       //start fragmentation
-      while (triangles.peek().first() < maxLevel)
+      while (triangles.peek().getLeft() < maxLevel)
       {
-         Pair<Integer, int[]> largestTriangle = triangles.remove();
-         int currentLevel = largestTriangle.first();
-         int[] oldVertex = largestTriangle.second();
+         ImmutablePair<Integer, int[]> largestTriangle = triangles.remove();
+         int currentLevel = largestTriangle.getLeft();
+         int[] oldVertex = largestTriangle.getRight();
          Vector3d p0 = new Vector3d();
          Vector3d p1 = new Vector3d();
          Vector3d p2 = new Vector3d();
@@ -141,10 +141,10 @@ public class LineModDetector
          vertex.add(p1);
          vertex.add(p2);
 
-         triangles.add(new Pair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[2], oldVertex[0] }));
-         triangles.add(new Pair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[1], oldVertex[1] }));
-         triangles.add(new Pair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[1], newVertex[2], oldVertex[2] }));
-         triangles.add(new Pair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[1], newVertex[2] }));
+         triangles.add(new ImmutablePair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[2], oldVertex[0] }));
+         triangles.add(new ImmutablePair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[1], oldVertex[1] }));
+         triangles.add(new ImmutablePair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[1], newVertex[2], oldVertex[2] }));
+         triangles.add(new ImmutablePair<Integer, int[]>(currentLevel + 1, new int[] { newVertex[0], newVertex[1], newVertex[2] }));
 
       }
 

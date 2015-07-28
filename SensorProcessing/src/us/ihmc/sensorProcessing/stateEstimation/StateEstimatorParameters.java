@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.robotSide.SideDependentList;
 
 
@@ -18,7 +18,7 @@ public interface StateEstimatorParameters extends SensorProcessingConfiguration
 
    public abstract double getAlphaIMUsForSpineJointVelocityEstimation();
 
-   public abstract Pair<String, String> getIMUsForSpineJointVelocityEstimation();
+   public abstract ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation();
 
    public abstract boolean requestWristForceSensorCalibrationAtStart();
 

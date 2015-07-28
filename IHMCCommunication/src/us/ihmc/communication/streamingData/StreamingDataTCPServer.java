@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.ThreadTools;
 
 public class StreamingDataTCPServer implements EstablishedAConnectionListener
@@ -15,7 +15,7 @@ public class StreamingDataTCPServer implements EstablishedAConnectionListener
    private boolean justSendMostRecentObject = false;
    
    private final ArrayList<StreamingDataProducer> producers = new ArrayList<StreamingDataProducer>();
-   private final ConcurrentLinkedQueue<Pair<Long, Object>> dataToSendToClients = new ConcurrentLinkedQueue<Pair<Long, Object>>();
+   private final ConcurrentLinkedQueue<ImmutablePair<Long, Object>> dataToSendToClients = new ConcurrentLinkedQueue<ImmutablePair<Long, Object>>();
 
    private final ConcurrentLinkedQueue<StreamingDataTCPConnectionToClient> clientConnections = new ConcurrentLinkedQueue<StreamingDataTCPConnectionToClient>();
    
@@ -53,7 +53,7 @@ public class StreamingDataTCPServer implements EstablishedAConnectionListener
       {
          synchronized(streamingDataTCPServerConnectionsDataSender)
          {
-            dataToSendToClients.offer(new Pair<Long, Object>(dataIdentifier, dataObject)); 
+            dataToSendToClients.offer(new ImmutablePair<Long, Object>(dataIdentifier, dataObject)); 
             streamingDataTCPServerConnectionsDataSender.notifyAll();
          }
       }
@@ -140,7 +140,7 @@ public class StreamingDataTCPServer implements EstablishedAConnectionListener
             
             if (!dataToSendToClients.isEmpty())
             {
-               Pair<Long, Object> identifierAndObject = null;
+               ImmutablePair<Long, Object> identifierAndObject = null;
 
                if (justSendMostRecentObject)
                {
@@ -154,8 +154,8 @@ public class StreamingDataTCPServer implements EstablishedAConnectionListener
                   identifierAndObject = dataToSendToClients.poll();
                }
                
-               long dataIdentifier = identifierAndObject.first();
-               Object dataObject = identifierAndObject.second();
+               long dataIdentifier = identifierAndObject.getLeft();
+               Object dataObject = identifierAndObject.getRight();
                
 //               System.out.println("Sending data object to " + clientConnections.size() + " clients.");
                deadClients.clear();

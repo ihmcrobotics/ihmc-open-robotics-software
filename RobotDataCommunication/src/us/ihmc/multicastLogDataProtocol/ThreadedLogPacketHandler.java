@@ -4,12 +4,12 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import us.ihmc.robotDataCommunication.LogDataHeader;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
 {
    private final LogPacketHandler handler;
-   private final ArrayBlockingQueue<Pair<LogDataHeader, ByteBuffer>> dataBuffer;
+   private final ArrayBlockingQueue<ImmutablePair<LogDataHeader, ByteBuffer>> dataBuffer;
    
    private volatile boolean stopped;
    
@@ -26,8 +26,8 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
       {
          try
          {
-            Pair<LogDataHeader, ByteBuffer> buffer = dataBuffer.take();
-            handler.newDataAvailable(buffer.first(), buffer.second());
+            ImmutablePair<LogDataHeader, ByteBuffer> buffer = dataBuffer.take();
+            handler.newDataAvailable(buffer.getLeft(), buffer.getRight());
          }
          catch (InterruptedException e)
          {
@@ -54,7 +54,7 @@ public class ThreadedLogPacketHandler extends Thread implements LogPacketHandler
    @Override
    public void newDataAvailable(LogDataHeader header, ByteBuffer buffer)
    {
-      dataBuffer.offer(new Pair<>(header, buffer));
+      dataBuffer.offer(new ImmutablePair<>(header, buffer));
    }
 
    @Override

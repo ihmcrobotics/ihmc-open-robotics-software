@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.math.geometry.Ray3d;
 
@@ -42,10 +42,10 @@ public class JMEMultiRayTracer
    {
       try
       {
-         Future<Pair<Long, Node>> futureRootNode = enqueueRootNodeExtracter(timestampProvider);
-         Pair<Long, Node> retVal = futureRootNode.get();
-         long timestamp = retVal.first();
-         Node rootNode = retVal.second();
+         Future<ImmutablePair<Long, Node>> futureRootNode = enqueueRootNodeExtracter(timestampProvider);
+         ImmutablePair<Long, Node> retVal = futureRootNode.get();
+         long timestamp = retVal.getLeft();
+         Node rootNode = retVal.getRight();
          
          if (childrenToIntersect != null)
          {
@@ -99,11 +99,11 @@ public class JMEMultiRayTracer
       time = System.nanoTime();
    }
 
-   public Future<Pair<Long, Node>> enqueueRootNodeExtracter(final TimestampProvider timestampProvider)
+   public Future<ImmutablePair<Long, Node>> enqueueRootNodeExtracter(final TimestampProvider timestampProvider)
    {
-      return application.enqueue(new Callable<Pair<Long, Node>>()
+      return application.enqueue(new Callable<ImmutablePair<Long, Node>>()
       {
-         public Pair<Long, Node> call() throws Exception
+         public ImmutablePair<Long, Node> call() throws Exception
          {
             long time = System.nanoTime();
             long timestamp = timestampProvider != null ? timestampProvider.getTimestamp() : 0;
@@ -112,7 +112,7 @@ public class JMEMultiRayTracer
             {
                System.out.println("JMEMultiRayTracer: elapsed time in RenderThread has been " + (System.nanoTime() - time) * 1.0e-9 + " seconds.");
             }
-            return new Pair<Long, Node>(timestamp, newRoot);
+            return new ImmutablePair<Long, Node>(timestamp, newRoot);
          }
       });
    }

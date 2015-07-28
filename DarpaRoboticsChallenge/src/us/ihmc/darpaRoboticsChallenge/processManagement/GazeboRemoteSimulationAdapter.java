@@ -15,7 +15,7 @@ import javax.swing.JOptionPane;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
@@ -201,7 +201,7 @@ public class GazeboRemoteSimulationAdapter extends Thread
       return shellPrintStreams.get(shellChannelForMachine(machine));
    }
 
-   private Pair<String, String> initCredentials(LocalCloudMachines machine)
+   private ImmutablePair<String, String> initCredentials(LocalCloudMachines machine)
    {
       String hostname = machine.getHost();
 
@@ -218,17 +218,17 @@ public class GazeboRemoteSimulationAdapter extends Thread
          password = "unknownpw";
       }
 
-      return new Pair<String, String>(username, password);
+      return new ImmutablePair<String, String>(username, password);
    }
 
-   private void setupSession(LocalCloudMachines machine, Pair<String, String> authPair) throws JSchException
+   private void setupSession(LocalCloudMachines machine, ImmutablePair<String, String> authPair) throws JSchException
    {
       Session session;
-      session = jsch.getSession(authPair.first(), machine.getIp(), 22);
+      session = jsch.getSession(authPair.getLeft(), machine.getIp(), 22);
 
       session.setConfig(config);
 
-      session.setPassword(authPair.second());
+      session.setPassword(authPair.getRight());
 
       session.connect(30000);
 

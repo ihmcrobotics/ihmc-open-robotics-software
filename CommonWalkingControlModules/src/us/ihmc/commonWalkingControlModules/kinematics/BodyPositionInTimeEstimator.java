@@ -4,7 +4,7 @@ import us.ihmc.CapturePointCalculator.LinearInvertedPendulumCapturePointCalculat
 import us.ihmc.commonWalkingControlModules.couplingRegistry.CouplingRegistry;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.sensorProcessing.ProcessedSensorsInterface;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.math.geometry.FramePoint;
 import us.ihmc.utilities.math.geometry.FramePoint2d;
@@ -58,7 +58,7 @@ public class BodyPositionInTimeEstimator
    }
    
    
-   public Pair<FramePose, FrameVector> getPelvisPoseAndVelocityInTime(double t, RobotSide swingFoot)
+   public ImmutablePair<FramePose, FrameVector> getPelvisPoseAndVelocityInTime(double t, RobotSide swingFoot)
    {
       FramePoint2d currentCoPPosition = couplingRegistry.getDesiredCoP();
       currentCoPPosition.changeFrame(desiredHeadingFrame);
@@ -104,7 +104,7 @@ public class BodyPositionInTimeEstimator
       pelvisVelocityInTime.changeFrame(pelvisFrame);
       
       
-      return new Pair<FramePose, FrameVector>(pelvisPoseInTime, pelvisVelocityInTime);
+      return new ImmutablePair<FramePose, FrameVector>(pelvisPoseInTime, pelvisVelocityInTime);
       
    }
 }

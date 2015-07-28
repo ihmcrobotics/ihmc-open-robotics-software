@@ -13,7 +13,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.robotController.RawSensorReader;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolder;
 import us.ihmc.utilities.humanoidRobot.model.ForceSensorDataHolderReadOnly;
@@ -38,7 +38,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final SixDoFJoint rootJoint;
    private final CommonHumanoidReferenceFrames referenceFrames;
 
-   private final ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<Pair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final LongYoVariable timestamp = new LongYoVariable("timestamp", registry);
@@ -80,7 +80,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
             String name = oneDoFJoint.getName();
             OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new Pair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint, oneDoFJoint);
+            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>(oneDegreeOfFreedomJoint, oneDoFJoint);
             revoluteJoints.add(jointPair);
          }
       }
@@ -178,10 +178,10 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()
    {
-      for (Pair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
+      for (ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint> jointPair : revoluteJoints)
       {
-         OneDegreeOfFreedomJoint pinJoint = jointPair.first();
-         OneDoFJoint revoluteJoint = jointPair.second();
+         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
+         OneDoFJoint revoluteJoint = jointPair.getRight();
 
          revoluteJoint.setQ(pinJoint.getQ().getDoubleValue());
          revoluteJoint.setQd(pinJoint.getQD().getDoubleValue());

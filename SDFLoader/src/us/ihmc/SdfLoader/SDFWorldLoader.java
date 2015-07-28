@@ -18,7 +18,7 @@ import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
 import us.ihmc.graphics3DAdapter.jme.JMEGeneratedHeightMap;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class SDFWorldLoader
 {
@@ -62,11 +62,11 @@ public class SDFWorldLoader
       return groundProfile;
    }
 
-   public Pair<SDFRobot, SDFFullRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
+   public ImmutablePair<SDFRobot, SDFFullRobotModel> createRobotAndRemoveFromWorld(SDFJointNameMap sdfJointNameMap, boolean useCollisionMeshes)
    {
       removeVisualFromWorld(sdfJointNameMap.getModelName());
 
-      Pair<SDFRobot, SDFFullRobotModel> ret = new Pair<SDFRobot, SDFFullRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
+      ImmutablePair<SDFRobot, SDFFullRobotModel> ret = new ImmutablePair<SDFRobot, SDFFullRobotModel>(jaxbSDFLoader.createRobot(sdfJointNameMap, useCollisionMeshes),
             jaxbSDFLoader.createFullRobotModel(sdfJointNameMap));
 
       return ret;

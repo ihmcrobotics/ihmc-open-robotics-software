@@ -14,7 +14,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.utilities.MemoryTools;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -129,9 +129,9 @@ public class CenterOfPressureResolverTest
          PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
          SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
 
-         Pair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame, spatialForceVector);
-         FramePoint centerOfPressure = centerOfPressureAndNormalTorque.first();
-         double normalTorqueResolvedAtCenterOfPressure = centerOfPressureAndNormalTorque.second();
+         ImmutablePair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame, spatialForceVector);
+         FramePoint centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
+         double normalTorqueResolvedAtCenterOfPressure = centerOfPressureAndNormalTorque.getRight();
          centerOfPressure.changeFrame(worldFrame);
          
          Point3d copPoint3d = new Point3d();
@@ -161,9 +161,9 @@ public class CenterOfPressureResolverTest
       PoseReferenceFrame centerOfMassFrame = createTranslatedZUpFrame("centerOfMassFrame", centerOfMassPoint);
       SpatialForceVector spatialForceVector = new SpatialForceVector(centerOfMassFrame, centerOfMassForce, centerOfMassTorque);
 
-      Pair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame, spatialForceVector);
-      FramePoint centerOfPressure = centerOfPressureAndNormalTorque.first();
-      double normalTorque = centerOfPressureAndNormalTorque.second();
+      ImmutablePair<FramePoint, Double> centerOfPressureAndNormalTorque = computeCenterOfPressureAndNormalTorque(groundPoint, groundNormal, centerOfMassFrame, spatialForceVector);
+      FramePoint centerOfPressure = centerOfPressureAndNormalTorque.getLeft();
+      double normalTorque = centerOfPressureAndNormalTorque.getRight();
       
       FramePoint expectedCenterOfPressureFramePoint = new FramePoint(worldFrame, expectedCenterOfPressure);
       
@@ -176,7 +176,7 @@ public class CenterOfPressureResolverTest
    }
 
 
-   private static Pair<FramePoint, Double> computeCenterOfPressureAndNormalTorque(Point3d groundPoint, Vector3d groundNormal, ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
+   private static ImmutablePair<FramePoint, Double> computeCenterOfPressureAndNormalTorque(Point3d groundPoint, Vector3d groundNormal, ReferenceFrame centerOfMassFrame, SpatialForceVector spatialForceVector)
    {
       CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
       
@@ -186,7 +186,7 @@ public class CenterOfPressureResolverTest
       double normalTorqueAtCenterOfPressure = centerOfPressureResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure2d, spatialForceVector, groundPlaneFrame);
       FramePoint centerOfPressure = centerOfPressure2d.toFramePoint();
       centerOfPressure.changeFrame(worldFrame);
-      return new Pair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
+      return new ImmutablePair<FramePoint, Double>(centerOfPressure, normalTorqueAtCenterOfPressure);
    }
 
 

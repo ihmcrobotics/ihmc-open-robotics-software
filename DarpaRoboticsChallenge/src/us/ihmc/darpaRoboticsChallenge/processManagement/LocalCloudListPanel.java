@@ -23,7 +23,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import us.ihmc.darpaRoboticsChallenge.configuration.LocalCloudMachines;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 public class LocalCloudListPanel extends JPanel
 {
@@ -33,8 +33,8 @@ public class LocalCloudListPanel extends JPanel
 
    private JScrollPane localCloudListScrollPane;
 
-   private HashMap<LocalCloudMachines, Pair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
-                                                                                                   Pair<JTree, DefaultMutableTreeNode>>();
+   private HashMap<LocalCloudMachines, ImmutablePair<JTree, DefaultMutableTreeNode>> cloudMachineTrees = new HashMap<LocalCloudMachines,
+                                                                                                   ImmutablePair<JTree, DefaultMutableTreeNode>>();
 
    private JTree currentSelection = null;
 
@@ -123,7 +123,7 @@ public class LocalCloudListPanel extends JPanel
             c2.weightx = 0.3;
             view.add(tree, c2);
 
-            cloudMachineTrees.put(machine, new Pair<JTree, DefaultMutableTreeNode>(tree, rootNode));
+            cloudMachineTrees.put(machine, new ImmutablePair<JTree, DefaultMutableTreeNode>(tree, rootNode));
 
             c2.gridy++;
          }
@@ -148,7 +148,7 @@ public class LocalCloudListPanel extends JPanel
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-            cloudMachineTrees.get(machine).first().setToggleClickCount(0);
+            cloudMachineTrees.get(machine).getLeft().setToggleClickCount(0);
       }
    }
 
@@ -180,7 +180,7 @@ public class LocalCloudListPanel extends JPanel
       for (LocalCloudMachines machine : LocalCloudMachines.values())
       {
          if (!machine.equals(LocalCloudMachines.LOCALHOST))
-            cloudMachineTrees.get(machine).first().addTreeSelectionListener(customTreeSelectionListener);
+            cloudMachineTrees.get(machine).getLeft().addTreeSelectionListener(customTreeSelectionListener);
       }
    }
 

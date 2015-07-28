@@ -29,7 +29,7 @@ import us.ihmc.graphics3DAdapter.input.SelectedListener;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNode;
 import us.ihmc.graphics3DAdapter.structure.Graphics3DNodeType;
 import us.ihmc.utilities.ThreadTools;
-import us.ihmc.utilities.Triplet;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.utilities.math.geometry.Sphere3d;
 import us.ihmc.utilities.math.geometry.Transform3d;
@@ -331,8 +331,8 @@ public class GraphicsDemoTools
          SimpleBounceTrajectory zRotTrajectory = new SimpleBounceTrajectory(0, 100, 0.01);
          SimpleBounceTrajectory scaleTrajectory = new SimpleBounceTrajectory(0.1, 2.0, 0.01);
          SimpleBounceTrajectory zeroTrajectory = new SimpleBounceTrajectory();
-         Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translation = new Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory>(xTrajectory,zeroTrajectory.copy(),zeroTrajectory.copy());
-         Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> rotation = new Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory>(zeroTrajectory.copy(),zeroTrajectory.copy(),zRotTrajectory);
+         ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translation = new ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory>(xTrajectory,zeroTrajectory.copy(),zeroTrajectory.copy());
+         ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> rotation = new ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory>(zeroTrajectory.copy(),zeroTrajectory.copy(),zRotTrajectory);
 
          return new RotateScaleParametersHolder(translation,rotation,scaleTrajectory);
       }
@@ -345,20 +345,20 @@ public class GraphicsDemoTools
          transform.setScale(parametersHolder.getScaleTrajectory().getNextValue());
          node.setTransform(transform);
       }
-      public static Vector3d nextVector3d(Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> trajectoryVector)
+      public static Vector3d nextVector3d(ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> trajectoryVector)
       {
-         return new Vector3d(trajectoryVector.first().getNextValue(),trajectoryVector.second().getNextValue(),trajectoryVector.third().getNextValue());
+         return new Vector3d(trajectoryVector.getLeft().getNextValue(),trajectoryVector.getMiddle().getNextValue(),trajectoryVector.getRight().getNextValue());
       }
    }
 
 
    public static class RotateScaleParametersHolder
    {
-      private final Triplet<SimpleBounceTrajectory,SimpleBounceTrajectory,SimpleBounceTrajectory> rotationTrajectory;
+      private final ImmutableTriple<SimpleBounceTrajectory,SimpleBounceTrajectory,SimpleBounceTrajectory> rotationTrajectory;
       private final SimpleBounceTrajectory scaleTrajectory;
-      private final Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translationTrajectory;
+      private final ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translationTrajectory;
 
-      public RotateScaleParametersHolder(Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translationTrajectory, Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> rotationTrajectory,
+      public RotateScaleParametersHolder(ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> translationTrajectory, ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> rotationTrajectory,
                                          SimpleBounceTrajectory scaleTrajectory)
       {
          this.translationTrajectory = translationTrajectory;
@@ -366,7 +366,7 @@ public class GraphicsDemoTools
          this.scaleTrajectory = scaleTrajectory;
       }
 
-      public Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> getRotationTrajectory()
+      public ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> getRotationTrajectory()
       {
          return rotationTrajectory;
       }
@@ -376,7 +376,7 @@ public class GraphicsDemoTools
          return scaleTrajectory;
       }
 
-      public Triplet<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> getTranslationTrajectory()
+      public ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> getTranslationTrajectory()
       {
          return translationTrajectory;
       }

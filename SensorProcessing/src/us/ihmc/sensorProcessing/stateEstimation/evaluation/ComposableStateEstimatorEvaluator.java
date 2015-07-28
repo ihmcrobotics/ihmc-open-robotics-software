@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorWithPorts;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.geometry.FrameOrientation;
 import us.ihmc.utilities.math.geometry.FrameVector;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -268,7 +268,7 @@ public class ComposableStateEstimatorEvaluator
          }
 
          @Override
-         public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+         public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
          {
             // TODO For Valkyrie. Probably have to make more generic.
             return null;
