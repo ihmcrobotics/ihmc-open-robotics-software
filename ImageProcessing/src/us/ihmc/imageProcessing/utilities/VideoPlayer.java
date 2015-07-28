@@ -11,8 +11,6 @@ import javax.swing.JFrame;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.utilities.camera.ImageViewer;
-import us.ihmc.utilities.camera.VideoListener;
 
 /**
  * User: Matt

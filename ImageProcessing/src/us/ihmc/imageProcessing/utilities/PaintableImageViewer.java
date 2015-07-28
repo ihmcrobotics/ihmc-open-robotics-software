@@ -3,8 +3,6 @@ package us.ihmc.imageProcessing.utilities;
 import java.awt.Graphics;
 import java.util.ArrayList;
 
-import us.ihmc.utilities.camera.ImageViewer;
-
 /**
  * User: Matt
  * Date: 3/5/13
