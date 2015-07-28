@@ -14,7 +14,7 @@ import javax.vecmath.Vector3d;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.math.geometry.RotationFunctions;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -42,7 +42,7 @@ public class WandererContactPointParameters extends DRCRobotContactPointParamete
    private final List<Point2d> chestBackContactPoints = new ArrayList<Point2d>();
    private final SideDependentList<RigidBodyTransform> thighContactPointTransforms = new SideDependentList<RigidBodyTransform>();
    private final SideDependentList<List<Point2d>> thighContactPoints = new SideDependentList<List<Point2d>>();
-   private final List<Pair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<Pair<String, Vector3d>>();
+   private final List<ImmutablePair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<ImmutablePair<String, Vector3d>>();
    private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<ArrayList<Point2d>>();
 
    public WandererContactPointParameters(DRCRobotJointMap jointMap)
@@ -113,24 +113,24 @@ public class WandererContactPointParameters extends DRCRobotContactPointParamete
          footGroundContactPoints.put(robotSide, new ArrayList<Point2d>());
          RigidBodyTransform ankleToSoleFrame = WandererPhysicalProperties.getAnkleToSoleFrameTransform(robotSide);
 
-         ArrayList<Pair<String, Point2d>> footGCs = new ArrayList<Pair<String, Point2d>>();
+         ArrayList<ImmutablePair<String, Point2d>> footGCs = new ArrayList<ImmutablePair<String, Point2d>>();
          String jointBeforeFootName = jointMap.getJointBeforeFootName(robotSide);
          double shrinkFootLength = footLength / 2.0 - 0.005;
          double shrinkToeWidth = toeWidth / 2.0 - 0.01;
          double shrinkHeelWdith = footWidth / 2.0 - 0.01;
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, -shrinkToeWidth)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, shrinkToeWidth)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, -shrinkHeelWdith)));
-         footGCs.add(new Pair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, shrinkHeelWdith)));
+         footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, -shrinkToeWidth)));
+         footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(shrinkFootLength, shrinkToeWidth)));
+         footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, -shrinkHeelWdith)));
+         footGCs.add(new ImmutablePair<String, Point2d>(jointBeforeFootName, new Point2d(-shrinkFootLength, shrinkHeelWdith)));
 
          //SCS contact points
-         for (Pair<String, Point2d> footGC : footGCs)
+         for (ImmutablePair<String, Point2d> footGC : footGCs)
          {
-            footGroundContactPoints.get(robotSide).add(footGC.second());
+            footGroundContactPoints.get(robotSide).add(footGC.getRight());
 
-            Point3d gcOffset = new Point3d(footGC.second().getX(), footGC.second().getY(), 0.0);
+            Point3d gcOffset = new Point3d(footGC.getRight().getX(), footGC.getRight().getY(), 0.0);
             ankleToSoleFrame.transform(gcOffset);
-            jointNameGroundContactPointMap.add(new Pair<String, Vector3d>(footGC.first(), new Vector3d(gcOffset)));
+            jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(footGC.getLeft(), new Vector3d(gcOffset)));
          }
       }
 
@@ -191,7 +191,7 @@ public class WandererContactPointParameters extends DRCRobotContactPointParamete
    }
 
    @Override
-   public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return jointNameGroundContactPointMap;
    }
