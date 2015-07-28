@@ -3,8 +3,8 @@ package us.ihmc.steppr.hardware.controllers;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.simulationconstructionset.util.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.steppr.hardware.StepprJoint;
-import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
+import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.yoUtilities.controllers.PDController;
 import us.ihmc.yoUtilities.dataStructure.variable.EnumYoVariable;
 
