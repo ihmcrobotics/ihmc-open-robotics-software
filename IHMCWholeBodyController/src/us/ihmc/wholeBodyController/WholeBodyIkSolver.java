@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Map.Entry;
 
 import javax.vecmath.Quat4d;
@@ -38,14 +39,16 @@ import us.ihmc.utilities.screwTheory.CenterOfMassCalculator;
 import us.ihmc.utilities.screwTheory.InverseDynamicsJointStateCopier;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 
-/*
- * This class is a front-end to the HierarchicalIKSolver.
+/**
+ * This class is a front-end to the HierarchicalIKSolver which assume a humanoid shape.
+ * <p>
  * It adds some customization and initialization and an higher level API on top of it.
- * A specific robot should implement the abstract classes, in particular configureTasks().
+ * A specific robot should implement several abstract methods, in particular configureTasks().
  * 
  */
 abstract public class WholeBodyIkSolver
 {
+   // Load (only once) the external libraries.
    static
    {
       try
@@ -68,9 +71,6 @@ abstract public class WholeBodyIkSolver
    };
 
    ///--------------- Constants -----------------------------------------
-   // just a number
-   static public final double IGNORE = -66666.66654321;
-
 
    static public enum ControlledDoF { 
       DOF_NONE,  // don't control this end effector.
@@ -91,7 +91,6 @@ abstract public class WholeBodyIkSolver
 
       ///--------------- Reference Frames and Transfoms --------------------------
       private final ReferenceFrames workingFrames;
-
       private final SideDependentList<ReferenceFrame> workingSoleFrames = new SideDependentList<ReferenceFrame>();
 
       //---------- robot models in different contexts and different formats ----------
@@ -851,10 +850,29 @@ abstract public class WholeBodyIkSolver
 
       public abstract HashMap<String,Double> getSuggestedAnglesForReseed();
 
+      // NOTE we use a fixed seed to make unit tests more repeatable
+      final Random randomGenerator = new Random(666);
+
+      
+      private Vector64F getRandomQ()
+      {
+         int N = getNumberOfJoints();
+         final Vector64F q_out = new Vector64F(N);     
+         RobotModel model = hierarchicalSolver.getRobotModel();
+
+         for (int i = 0; i < N; i++) {
+            double random_var = randomGenerator.nextDouble() * 2.0 - 1.0;
+            double delta = 0.49 * (model.q_max(i) - model.q_min(i))
+                  * random_var;
+
+            q_out.set(i, 0.5 * (model.q_max(i) + model.q_min(i)) + delta);
+         }
+         return q_out;
+      }
 
       private void reseedCachedModel()
       {
-         Vector64F newQ = getHierarchicalSolver().getRandomQ();
+         Vector64F newQ = getRandomQ();
 
          HashMap<String,Double> suggestedQ = getSuggestedAnglesForReseed();
 
