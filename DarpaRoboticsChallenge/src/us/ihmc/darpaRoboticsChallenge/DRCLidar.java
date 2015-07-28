@@ -14,8 +14,8 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.utilities.TimestampProvider;
 import us.ihmc.utilities.lidar.polarLidar.geometry.LidarScanParameters;
-import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
+import us.ihmc.utilities.time.TimeTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class DRCLidar

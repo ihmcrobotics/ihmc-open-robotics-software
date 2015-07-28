@@ -5,10 +5,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.ros.PPSTimestampOffsetProvider;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
+import us.ihmc.utilities.time.TimeTools;
 
 public class AtlasPPSTimestampOffsetProvider implements PPSTimestampOffsetProvider
 {
