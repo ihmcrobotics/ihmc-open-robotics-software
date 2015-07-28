@@ -31,8 +31,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.PelvisPos
 import us.ihmc.utilities.MemoryTools;
 import us.ihmc.utilities.RandomTools;
 import us.ihmc.utilities.code.agileTesting.BambooAnnotations.EstimatedDuration;
-import us.ihmc.utilities.compare.CompareTools;
 import us.ihmc.utilities.kinematics.TimeStampedTransform3D;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.TimeTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -470,7 +470,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= xError <= translationFudgeFactor;
          success &= yError <= translationFudgeFactor;
          success &= zError <= translationFudgeFactor;
-         success &= CompareTools.withinTolerance(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
+         success &= MathTools.epsilonEquals(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
          
          error.set(xError, yError, zError, yawError);
       }
@@ -604,7 +604,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= xError <= translationFudgeFactor;
          success &= yError <= translationFudgeFactor;
          success &= zError <= translationFudgeFactor;
-         success &= CompareTools.withinTolerance(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
+         success &= MathTools.epsilonEquals(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
          
          error.set(xError, yError, zError, yawError);
       }
@@ -740,7 +740,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          success &= xError <= translationFudgeFactor;
          success &= yError <= translationFudgeFactor;
          success &= zError <= translationFudgeFactor;
-         success &= CompareTools.withinTolerance(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
+         success &= MathTools.epsilonEquals(Math.abs(targetYaw), yawError, rotationFudgeFactor); // here, rotation error are not exectued, so the error should be the same as the target
          
          error.set(xError, yError, zError, yawError);
       }
