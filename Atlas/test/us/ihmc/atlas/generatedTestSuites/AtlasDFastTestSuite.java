@@ -9,7 +9,6 @@ import org.junit.runners.Suite;
 ({
    us.ihmc.atlas.initialSetup.AtlasDrivingInitialSetupTest.class,
    us.ihmc.atlas.momentumBasedControl.AtlasOptimizationMomentumControlModuleTest.class,
-   us.ihmc.atlas.networking.AtlasNetworkingCommandReaderTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasFinalsWorldStairsTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasHighSwingTest.class,
    us.ihmc.atlas.ObstacleCourseTests.AtlasObstacleCourseDoNothingTest.class,

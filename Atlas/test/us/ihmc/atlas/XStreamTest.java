@@ -9,12 +9,15 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.communication.serializers.Serializer;
-import us.ihmc.communication.util.SerializerFactory;
-import us.ihmc.communication.util.UplinkSerializerFactory;
-
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+
+import us.ihmc.communication.packets.BumStatePacket;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.manipulation.HandPosePacket;
+import us.ihmc.communication.packets.walking.FootPosePacket;
+import us.ihmc.communication.packets.walking.FootstepPlanRequestPacket;
+import us.ihmc.communication.packets.walking.HeadOrientationPacket;
 
 public class XStreamTest
 {
@@ -98,18 +101,21 @@ public class XStreamTest
       XStream xStream = new XStream();
       ObjectOutputStream out = xStream.createObjectOutputStream(writer);
       //XXX: fix hard-coded robot model
-      SerializerFactory serializerFactory = new UplinkSerializerFactory();
-      ArrayList<Serializer<?>> serializers = serializerFactory.getSerializers();
+      
+      Packet<?>[] packets = new Packet<?>[10];
+      
+      packets[0] = new FootstepPlanRequestPacket(random);
+      packets[1] = new HandPosePacket(random);
+      packets[2] = new FootPosePacket(random);
+      packets[3] = new BumStatePacket(random);
+      packets[4] = new HeadOrientationPacket(random);
+      
       
       ArrayList<Object> serializedObjects = new ArrayList<Object>();
-      for(int i = 0; i < 10; i++)
+      for(int i = 0; i < 5; i++)
       {
-         @SuppressWarnings("rawtypes")
-         Serializer serializer = serializers.get(random.nextInt(serializers.size()));
-         Object testPacket = serializer.createTestPacket(random);
-         
-         out.writeObject(testPacket);
-         serializedObjects.add(testPacket);
+         out.writeObject(packets[i]);
+         serializedObjects.add(packets[i]);
       }
       out.close();
       writer.close();
