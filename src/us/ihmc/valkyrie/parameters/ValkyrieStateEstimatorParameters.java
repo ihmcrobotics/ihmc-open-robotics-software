@@ -7,7 +7,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.robotSide.SideDependentList;
 import us.ihmc.utilities.screwTheory.OneDoFJoint;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -282,9 +282,9 @@ public class ValkyrieStateEstimatorParameters implements StateEstimatorParameter
     * @return {@code Pair<String, String>} the first element is the name of one pelvis IMU, the second is the name of one IMU of the trunk. 
     */
    @Override
-   public Pair<String, String> getIMUsForSpineJointVelocityEstimation()
+   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
    {
-      return new Pair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
+      return new ImmutablePair<String, String>(sensorInformation.getLeftPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
    
    @Override

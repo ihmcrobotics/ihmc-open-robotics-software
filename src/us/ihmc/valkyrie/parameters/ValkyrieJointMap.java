@@ -10,7 +10,7 @@ import java.util.Set;
 
 import javax.vecmath.Vector3d;
 
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.ArmJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LegJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.LimbName;
@@ -37,10 +37,10 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final NeckJointName[] neckJoints = { NeckJointName.LOWER_NECK_PITCH, NeckJointName.NECK_YAW, NeckJointName.UPPER_NECK_PITCH };
 
    private final LinkedHashMap<String, JointRole> jointRoles = new LinkedHashMap<String, JointRole>();
-   private final LinkedHashMap<String, Pair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, Pair<RobotSide, LimbName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>> limbNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LimbName>>();
 
-   private final LinkedHashMap<String, Pair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, Pair<RobotSide, LegJointName>>();
-   private final LinkedHashMap<String, Pair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, Pair<RobotSide, ArmJointName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>> legJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, LegJointName>>();
+   private final LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>> armJointNames = new LinkedHashMap<String, ImmutablePair<RobotSide, ArmJointName>>();
    private final LinkedHashMap<String, SpineJointName> spineJointNames = new LinkedHashMap<String, SpineJointName>();
    private final LinkedHashMap<String, NeckJointName> neckJointNames = new LinkedHashMap<String, NeckJointName>();
 
@@ -70,30 +70,30 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       for (RobotSide robotSide : RobotSide.values)
       {
          String[] forcedSideJointNames = ValkyrieOrderedJointMap.forcedSideDependentJointNames.get(robotSide);
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
-         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new Pair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipYaw], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_YAW));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_ROLL));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftHipPitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.HIP_PITCH));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftKneePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.KNEE));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnklePitch], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_PITCH));
+         legJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftAnkleRoll], new ImmutablePair<RobotSide, LegJointName>(robotSide, LegJointName.ANKLE_ROLL));
 
          if (selectedValkyrieVersionHasArms)
          {
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderPitch], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderRoll], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderYaw], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_YAW));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftElbowPitch], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
-            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch], new Pair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_PITCH));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_ROLL));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftShoulderYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.SHOULDER_YAW));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftElbowPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_PITCH));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftForearmYaw], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.ELBOW_ROLL));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristRoll], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.WRIST_ROLL));
+            armJointNames.put(forcedSideJointNames[ValkyrieOrderedJointMap.LeftWristPitch], new ImmutablePair<RobotSide, ArmJointName>(robotSide, ArmJointName.FIRST_WRIST_PITCH));
          }
          String prefix = getRobotSidePrefix(robotSide);
 
          if (selectedValkyrieVersionHasArms)
          {
-            limbNames.put(prefix + "Palm", new Pair<RobotSide, LimbName>(robotSide, LimbName.ARM));
+            limbNames.put(prefix + "Palm", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.ARM));
          }
-         limbNames.put(prefix + "Foot", new Pair<RobotSide, LimbName>(robotSide, LimbName.LEG));
+         limbNames.put(prefix + "Foot", new ImmutablePair<RobotSide, LimbName>(robotSide, LimbName.LEG));
       }
 
       spineJointNames.put(jointNames[ValkyrieOrderedJointMap.TorsoYaw], SpineJointName.SPINE_YAW);
@@ -106,16 +106,16 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
       for (String legJointString : legJointNames.keySet())
       {
-         RobotSide robotSide = legJointNames.get(legJointString).first();
-         LegJointName legJointName = legJointNames.get(legJointString).second();
+         RobotSide robotSide = legJointNames.get(legJointString).getLeft();
+         LegJointName legJointName = legJointNames.get(legJointString).getRight();
          legJointStrings.get(robotSide).put(legJointName, legJointString);
          jointRoles.put(legJointString, JointRole.LEG);
       }
 
       for (String armJointString : armJointNames.keySet())
       {
-         RobotSide robotSide = armJointNames.get(armJointString).first();
-         ArmJointName armJointName = armJointNames.get(armJointString).second();
+         RobotSide robotSide = armJointNames.get(armJointString).getLeft();
+         ArmJointName armJointName = armJointNames.get(armJointString).getRight();
          armJointStrings.get(robotSide).put(armJointName, armJointString);
          jointRoles.put(armJointString, JointRole.ARM);
       }
@@ -165,19 +165,19 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public Pair<RobotSide, LegJointName> getLegJointName(String jointName)
+   public ImmutablePair<RobotSide, LegJointName> getLegJointName(String jointName)
    {
       return legJointNames.get(jointName);
    }
 
    @Override
-   public Pair<RobotSide, ArmJointName> getArmJointName(String jointName)
+   public ImmutablePair<RobotSide, ArmJointName> getArmJointName(String jointName)
    {
       return armJointNames.get(jointName);
    }
 
    @Override
-   public Pair<RobotSide, LimbName> getLimbName(String limbName)
+   public ImmutablePair<RobotSide, LimbName> getLimbName(String limbName)
    {
       return limbNames.get(limbName);
    }
@@ -261,12 +261,12 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<Pair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
-   @Override public List<Pair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
+   @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
    {
       return null;
    }
