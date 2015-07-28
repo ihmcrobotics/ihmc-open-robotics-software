@@ -10,7 +10,8 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.compare.CheckTools;
+
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.screwTheory.CentroidalMomentumMatrix;
@@ -123,7 +124,7 @@ public class MomentumSolver2 implements MomentumSolverInterface
 
    public void setDesiredJointAcceleration(InverseDynamicsJoint joint, DenseMatrix64F jointAcceleration)
    {
-      CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
+      MathTools.checkIfEqual(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
       int[] columnsForJoint = this.columnsForJoints.get(joint);
       for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
       {

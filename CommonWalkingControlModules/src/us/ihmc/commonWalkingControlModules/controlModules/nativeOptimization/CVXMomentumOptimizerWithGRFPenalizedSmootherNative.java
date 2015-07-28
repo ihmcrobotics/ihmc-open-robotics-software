@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.compare.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 /**
@@ -145,8 +145,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNative(int nDoF, int rhoSize)
    {
-      CheckTools.checkRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
-      CheckTools.checkRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
+      MathTools.checkIfInRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
+      MathTools.checkIfInRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
       cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
    }
 

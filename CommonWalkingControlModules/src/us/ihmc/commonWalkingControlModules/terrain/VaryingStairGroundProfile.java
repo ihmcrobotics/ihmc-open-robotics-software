@@ -5,7 +5,7 @@ import java.util.Arrays;
 import javax.vecmath.Vector3d;
 
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
-import us.ihmc.utilities.compare.CheckTools;
+
 import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.geometry.BoundingBox3d;
 
@@ -84,7 +84,7 @@ public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
 
    public double computeStepStartX(int index)
    {
-      CheckTools.checkRange(index, 0, stepStartXValues.length);
+      MathTools.checkIfInRange(index, 0, stepStartXValues.length);
 
       if (index == stepStartXValues.length)
          return Double.POSITIVE_INFINITY;

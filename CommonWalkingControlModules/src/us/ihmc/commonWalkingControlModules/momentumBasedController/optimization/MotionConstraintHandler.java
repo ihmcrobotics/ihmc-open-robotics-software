@@ -18,7 +18,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.TaskspaceCons
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredPointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.dataObjects.DesiredSpatialAccelerationCommand;
-import us.ihmc.utilities.compare.CheckTools;
+
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.FramePoint;
@@ -476,7 +477,7 @@ public class MotionConstraintHandler
       DenseMatrix64F jointAcceleration = desiredJointAccelerationCommand.getDesiredAcceleration();
       double weight = desiredJointAccelerationCommand.getWeight();
       
-      CheckTools.checkEquals(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
+      MathTools.checkIfEqual(joint.getDegreesOfFreedom(), jointAcceleration.getNumRows());
       int[] columnsForJoint = this.columnsForJoints.get(joint);
 
       if (columnsForJoint != null)    // don't do anything for joints that are not in the list
@@ -570,7 +571,7 @@ public class MotionConstraintHandler
 
    private void assembleWeightMatrix(List<MutableDouble> weightList, List<DenseMatrix64F> jacobianList, int nConstraints, DenseMatrix64F weightMatrix)
    {
-      CheckTools.checkEquals(weightList.size(), jacobianList.size());
+      MathTools.checkIfEqual(weightList.size(), jacobianList.size());
 
       int size = 0;
       for (int i = 0; i < nConstraints; i++)

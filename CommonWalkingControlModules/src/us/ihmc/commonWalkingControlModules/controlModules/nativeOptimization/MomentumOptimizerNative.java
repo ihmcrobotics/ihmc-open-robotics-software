@@ -4,8 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.compare.CheckTools;
+
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class MomentumOptimizerNative
@@ -110,8 +111,8 @@ public class MomentumOptimizerNative
 
    public MomentumOptimizerNative(int nDoF, int rhoSize)
    {
-      CheckTools.checkRange(nDoF, 0, this.nDoF);
-      CheckTools.checkRange(rhoSize, 0, this.rhoSize);
+      MathTools.checkIfInRange(nDoF, 0, this.nDoF);
+      MathTools.checkIfInRange(rhoSize, 0, this.rhoSize);
       momentumOptimizerNativeOutput = new MomentumOptimizerNativeOutput(nDoF, rhoSize);
    }
 
