@@ -200,12 +200,12 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       joint_weights.set(back_bky, 1);
       joint_weights.set(back_bkx, 1);
 
-      taskComPosition.setWeightsJointSpace(joint_weights);
+      taskCoM.setWeightsJointSpace(joint_weights);
 
       // this value shall be overwritten later
       Vector64F target_com = new Vector64F(3, 0, 0, 0);    
-      taskComPosition.setErrorTolerance( 0.01);
-      taskComPosition.setTarget(target_com);
+      taskCoM.setErrorTolerance( 0.01);
+      taskCoM.setTarget(target_com);
       //--------------------------------------------------
       // control position and rotation (6 DoF) of the end effector
 
