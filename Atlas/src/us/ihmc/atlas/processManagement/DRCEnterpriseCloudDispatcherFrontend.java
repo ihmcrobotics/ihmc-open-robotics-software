@@ -27,11 +27,18 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
+
+import com.martiansoftware.jsap.FlaggedOption;
+import com.martiansoftware.jsap.JSAP;
+import com.martiansoftware.jsap.JSAPException;
+import com.martiansoftware.jsap.JSAPResult;
 
 import us.ihmc.atlas.AtlasOperatorUserInterface;
 import us.ihmc.atlas.AtlasRobotModelFactory;
@@ -41,14 +48,8 @@ import us.ihmc.communication.net.tcpServer.ReconnectingTCPClient;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.utilities.fixedPointRepresentation.UnsignedByteTools;
-import us.ihmc.utilities.gui.SwingTools;
 import us.ihmc.utilities.processManagement.ExitListener;
 import us.ihmc.utilities.processManagement.JavaProcessSpawner;
-
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
 
 public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 {
@@ -363,7 +364,14 @@ public class DRCEnterpriseCloudDispatcherFrontend implements Runnable
 
    private void initAndStartSwingGui()
    {
-      SwingTools.setNativeLookAndFeel();
+      try
+      {
+         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      }
+      catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1)
+      {
+         e1.printStackTrace();
+      }
 
       frame = new JFrame("DRC Networking Dispatcher");
       frame.setSize(1310, 345);

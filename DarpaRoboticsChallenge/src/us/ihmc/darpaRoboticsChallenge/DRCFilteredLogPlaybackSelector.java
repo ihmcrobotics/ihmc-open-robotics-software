@@ -14,8 +14,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
-import us.ihmc.utilities.gui.SwingTools;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.ChannelShell;
@@ -83,7 +83,14 @@ public class DRCFilteredLogPlaybackSelector
 
    private void initSwingGui()
    {
-      SwingTools.setNativeLookAndFeel();
+      try
+      {
+         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      }
+      catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1)
+      {
+         e1.printStackTrace();
+      }
 
       frame = new JFrame("Filtered Log Playback Selector");
       frame.setSize(350, 100);

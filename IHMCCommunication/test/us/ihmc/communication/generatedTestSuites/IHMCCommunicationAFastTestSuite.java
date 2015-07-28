@@ -35,7 +35,6 @@ import org.junit.runners.Suite;
    us.ihmc.communication.streamingData.PersistentTCPServerTest.class,
    us.ihmc.communication.streamingData.StreamingDataProducerConsumerTest.class,
    us.ihmc.communication.subscribers.TimeStampedTransformBufferTest.class,
-   us.ihmc.communication.annotationBasedSerializer.AnnotationSerializerTest.class
 })
 
 public class IHMCCommunicationAFastTestSuite

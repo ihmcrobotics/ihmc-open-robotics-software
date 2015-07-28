@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import us.ihmc.utilities.math.TimeTools;
+import us.ihmc.utilities.time.TimeTools;
 
 public class BenchmarkFieldOrArrayAccess
 {
