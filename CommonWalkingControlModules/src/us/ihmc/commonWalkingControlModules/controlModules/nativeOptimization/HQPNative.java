@@ -5,8 +5,9 @@ import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
-import us.ihmc.utilities.compare.CheckTools;
+
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 public class HQPNative
@@ -106,9 +107,9 @@ public class HQPNative
 
    public HQPNative(int vdSize, int rhoSize, int phiSize)
    {
-      CheckTools.checkRange(vdSize, 0, HQPNative.vdSize);
-      CheckTools.checkRange(rhoSize, 0, HQPNative.rhoSize);
-      CheckTools.checkRange(phiSize, 0, HQPNative.phiSize);
+      MathTools.checkIfInRange(vdSize, 0, HQPNative.vdSize);
+      MathTools.checkIfInRange(rhoSize, 0, HQPNative.rhoSize);
+      MathTools.checkIfInRange(phiSize, 0, HQPNative.phiSize);
       HQPNativeOutput = new HQPNativeOutput(vdSize, rhoSize, phiSize);
    }
 

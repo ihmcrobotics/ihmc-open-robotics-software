@@ -8,7 +8,8 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
 
-import us.ihmc.utilities.compare.CheckTools;
+
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.screwTheory.JacobianSolver;
 import us.ihmc.yoUtilities.dataStructure.registry.YoVariableRegistry;
@@ -43,9 +44,9 @@ public class SingularityRobustJacobianSolver implements JacobianSolver
 
    public SingularityRobustJacobianSolver(String namePrefix, int matrixSize, int indexToUseForSign, int sign, YoVariableRegistry parentRegistry)
    {
-      CheckTools.checkRange(matrixSize, 1, Integer.MAX_VALUE);
-      CheckTools.checkRange(indexToUseForSign, 0, matrixSize - 1);
-      CheckTools.checkRange(sign, -1, 1);
+      MathTools.checkIfInRange(matrixSize, 1, Integer.MAX_VALUE);
+      MathTools.checkIfInRange(indexToUseForSign, 0, matrixSize - 1);
+      MathTools.checkIfInRange(sign, -1, 1);
       if (sign == 0)
          throw new RuntimeException("sign == 0");
 

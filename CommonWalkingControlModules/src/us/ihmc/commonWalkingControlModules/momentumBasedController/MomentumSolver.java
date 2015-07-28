@@ -12,7 +12,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.utilities.compare.CheckTools;
+
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.math.MatrixTools;
 import us.ihmc.utilities.math.NullspaceCalculator;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
@@ -320,7 +321,7 @@ public class MomentumSolver implements MomentumSolverInterface
 
    private static void checkNullspaceDimensions(GeometricJacobian jacobian, DenseMatrix64F nullspaceMultipliers)
    {
-      CheckTools.checkEquals(nullspaceMultipliers.getNumCols(), 1);
+      MathTools.checkIfEqual(nullspaceMultipliers.getNumCols(), 1);
       if (nullspaceMultipliers.getNumRows() > jacobian.getNumberOfColumns())
          throw new RuntimeException("nullspaceMultipliers dimension too large");
    }

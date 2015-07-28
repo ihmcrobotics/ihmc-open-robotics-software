@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 
-import us.ihmc.utilities.compare.CheckTools;
 import us.ihmc.utilities.exeptions.NoConvergenceException;
+import us.ihmc.utilities.math.MathTools;
 import us.ihmc.utilities.nativelibraries.NativeLibraryLoader;
 
 /**
@@ -133,9 +133,9 @@ public class CVXWithCylinderNative
 
    public CVXWithCylinderNative(int nDoF, int rhoSize, int phiSize)
    {
-      CheckTools.checkRange(nDoF, 0, CVXWithCylinderNative.nDoF);
-      CheckTools.checkRange(rhoSize, 0, CVXWithCylinderNative.rhoSize);
-      CheckTools.checkRange(phiSize, 0, CVXWithCylinderNative.phiSize);
+      MathTools.checkIfInRange(nDoF, 0, CVXWithCylinderNative.nDoF);
+      MathTools.checkIfInRange(rhoSize, 0, CVXWithCylinderNative.rhoSize);
+      MathTools.checkIfInRange(phiSize, 0, CVXWithCylinderNative.phiSize);
       cvxWithCylinderNativeOutput = new CVXWithCylinderNativeOutput(nDoF, rhoSize, phiSize);
    }
 
