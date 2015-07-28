@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.utilities.Pair;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.utilities.humanoidRobot.partNames.NeckJointName;
 import us.ihmc.utilities.humanoidRobot.partNames.SpineJointName;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
@@ -37,8 +37,8 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
 
    private final DRCRobotJointMap jointMap;
 
-   private final LinkedHashMap<NeckJointName, Pair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, Pair<Double, Double>>();
-   private final SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, Pair<Double, Double>>>();
+   private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
+   private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -64,11 +64,11 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
       
       for(RobotSide side : RobotSide.values())
       {
-         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, Pair<Double,Double>>());
+         sliderBoardControlledFingerJointNamesWithLimits.put(side, new LinkedHashMap<String, ImmutablePair<Double,Double>>());
          for(ValkyrieRealRobotFingerJoint fingerJoint : ValkyrieRealRobotFingerJoint.values())
          {
             sliderBoardControlledFingerJointNamesWithLimits.get(side).put(side.getCamelCaseNameForMiddleOfExpression() + fingerJoint.toString(), 
-                  new Pair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
+                  new ImmutablePair<Double,Double>(ValkyrieFingerJointLimits.getFullyExtensonPositionLimit(side, fingerJoint), ValkyrieFingerJointLimits.getFullyFlexedPositionLimit(side, fingerJoint)));
          }
       }
       
@@ -80,7 +80,7 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
          
          sliderBoardControlledNeckJointNamesWithLimits.put(
                joint,
-               new Pair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
+               new ImmutablePair<Double, Double>(ValkyrieSliderBoardControlledNeckJoints.getFullyExtendedPositionLimit(joint), ValkyrieSliderBoardControlledNeckJoints
                      .getFullyFlexedPositionLimit(joint)));
       }
    }
@@ -204,13 +204,13 @@ public class ValkyrieWalkingControllerParameters implements WalkingControllerPar
    }
 
    @Override
-   public LinkedHashMap<NeckJointName, Pair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
+   public LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> getSliderBoardControlledNeckJointsWithLimits()
    {
       return sliderBoardControlledNeckJointNamesWithLimits;
    }
    
    @Override
-   public SideDependentList<LinkedHashMap<String, Pair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
+   public SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> getSliderBoardControlledFingerJointsWithLimits()
    {
       return sliderBoardControlledFingerJointNamesWithLimits;
    }
