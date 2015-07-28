@@ -6,7 +6,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.utilities.Triplet;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import us.ihmc.utilities.math.geometry.ReferenceFrame;
 import us.ihmc.utilities.math.geometry.RigidBodyTransform;
 import us.ihmc.utilities.robotSide.RobotSide;
@@ -137,7 +137,7 @@ public class WandererSensorInformation implements DRCRobotSensorInformation
    }
 
    @Override
-   public ArrayList<Triplet<String, String, RigidBodyTransform>> getStaticTransformsForRos()
+   public ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> getStaticTransformsForRos()
    {
       return null;
    }
