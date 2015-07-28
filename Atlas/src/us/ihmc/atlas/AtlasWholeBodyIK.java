@@ -248,7 +248,7 @@ public class AtlasWholeBodyIK extends WholeBodyIkSolver
       // back
       weights_jointpose.set(back_bkz, 0.1);
       weights_jointpose.set(back_bky, 0.2);
-      weights_jointpose.set(back_bkx, 0.3);
+      weights_jointpose.set(back_bkx, 0.8);
 
       // try keep hpx mirrored 
       weights_jointpose.set(rleg_hpx, 1);
